@@ -2,166 +2,110 @@
 
 @section('content')
 
-<div class="row justify-content-center">
-    <div class="col-lg-10">
+<div class="text-center mb-5">
+    {{-- Hero Section --}}
+    <h1 class="display-4 fw-bold text-primary">SEO Audit Tool 🚀</h1>
+    <p class="lead text-muted">Instantly analyze any website and get actionable SEO recommendations to boost rankings.</p>
+    <a href="{{ url('/seo-audit') }}" class="btn btn-lg btn-gradient mt-3">🔍 Start Your Free Audit</a>
+</div>
 
-        {{-- SEO Audit Form --}}
-        <div class="card shadow-lg mb-4 border-0">
-            <div class="card-body p-4">
-                <h2 class="mb-3 text-primary">SEO Audit Tool</h2>
-                <p class="text-muted">Enter a website URL to analyze its SEO performance.</p>
+{{-- Dark Mode Switch --}}
+<div class="text-center mb-5">
+    <button id="darkModeToggle" class="btn btn-outline-dark">🌙 Toggle Dark Mode</button>
+</div>
 
-                <form method="GET" action="{{ url('/seo-audit') }}">
-                    <div class="input-group input-group-lg">
-                        <input type="url" name="url" class="form-control" placeholder="https://example.com" value="{{ request('url') }}" required>
-                        <button type="submit" class="btn btn-gradient">Analyze</button>
-                    </div>
-                </form>
+{{-- Features Section --}}
+<div class="row text-center mt-5">
+    <div class="col-md-4 mb-4">
+        <div class="card p-4 h-100 shadow-sm border-0 feature-card">
+            <div class="mb-3">
+                <span class="fs-1">📊</span>
             </div>
+            <h5 class="fw-bold">Detailed SEO Analysis</h5>
+            <p class="text-muted">Check titles, meta descriptions, headings, and word count to ensure your content is optimized.</p>
         </div>
+    </div>
 
-        {{-- Results Section --}}
-        @if(isset($result['error']))
-            <div class="alert alert-danger shadow-sm">{{ $result['error'] }}</div>
-        @elseif(isset($result))
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-gradient text-white">
-                    <h4 class="mb-0">SEO Report for <a href="{{ $result['url'] }}" target="_blank" class="text-white">{{ $result['url'] }}</a></h4>
-                </div>
-
-                <div class="card-body p-4">
-
-                    {{-- SEO Score with Chart --}}
-                    <h5 class="fw-bold">Overall SEO Score</h5>
-                    <div class="d-flex align-items-center justify-content-center my-4">
-                        <canvas id="seoScoreChart" width="200" height="200"></canvas>
-                    </div>
-
-                    {{-- Accordion for Details --}}
-                    <div class="accordion" id="seoReportAccordion">
-                        
-                        {{-- Meta Info --}}
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingMeta">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMeta" aria-expanded="true">
-                                    Meta Information
-                                </button>
-                            </h2>
-                            <div id="collapseMeta" class="accordion-collapse collapse show" data-bs-parent="#seoReportAccordion">
-                                <div class="accordion-body">
-                                    <p><strong>Title:</strong> {{ $result['title'] ?? 'N/A' }}</p>
-                                    <p><strong>Description:</strong> {{ $result['description'] ?? 'N/A' }}</p>
-                                    <p><strong>Word Count:</strong> {{ $result['word_count'] }}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Headings --}}
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingHeadings">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHeadings">
-                                    Headings (H1 & H2)
-                                </button>
-                            </h2>
-                            <div id="collapseHeadings" class="accordion-collapse collapse" data-bs-parent="#seoReportAccordion">
-                                <div class="accordion-body">
-                                    <h6>H1 Tags</h6>
-                                    <ul>
-                                        @forelse($result['h1'] as $tag)
-                                            <li>{{ $tag }}</li>
-                                        @empty
-                                            <li>No H1 tags found</li>
-                                        @endforelse
-                                    </ul>
-                                    <h6>H2 Tags</h6>
-                                    <ul>
-                                        @forelse($result['h2'] as $tag)
-                                            <li>{{ $tag }}</li>
-                                        @empty
-                                            <li>No H2 tags found</li>
-                                        @endforelse
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Recommendations --}}
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingRecs">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecs">
-                                    Recommendations
-                                </button>
-                            </h2>
-                            <div id="collapseRecs" class="accordion-collapse collapse" data-bs-parent="#seoReportAccordion">
-                                <div class="accordion-body">
-                                    <ul class="list-group list-group-flush">
-                                        @foreach($result['recommendations'] as $rec)
-                                            <li class="list-group-item">{{ $rec }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    {{-- Action Buttons --}}
-                    <div class="mt-4">
-                        <a href="{{ url('/') }}" class="btn btn-secondary">⬅ Back to Home</a>
-                        <a href="{{ url('/seo-audit?url=' . urlencode($result['url']) . '&download=pdf') }}" class="btn btn-danger">📄 Download PDF Report</a>
-                    </div>
-
-                </div>
+    <div class="col-md-4 mb-4">
+        <div class="card p-4 h-100 shadow-sm border-0 feature-card">
+            <div class="mb-3">
+                <span class="fs-1">⚡</span>
             </div>
-        @endif
+            <h5 class="fw-bold">Instant Results</h5>
+            <p class="text-muted">Get your SEO score within seconds with easy-to-understand recommendations.</p>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card p-4 h-100 shadow-sm border-0 feature-card">
+            <div class="mb-3">
+                <span class="fs-1">📄</span>
+            </div>
+            <h5 class="fw-bold">Export Reports</h5>
+            <p class="text-muted">Download a professional PDF SEO report to share with clients or your team.</p>
+        </div>
     </div>
 </div>
 
-{{-- Chart.js for Dynamic Score --}}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{-- Call-to-Action --}}
+<div class="text-center mt-5">
+    <h2 class="fw-bold">Ready to Improve Your SEO?</h2>
+    <p class="text-muted">Start analyzing your website now and get actionable recommendations today.</p>
+    <a href="{{ url('/seo-audit') }}" class="btn btn-lg btn-gradient">🚀 Run SEO Audit Now</a>
+</div>
+
+{{-- Dark Mode Styles --}}
+<style>
+    body.dark-mode {
+        background: #121212;
+        color: #f1f1f1;
+    }
+    body.dark-mode .card {
+        background: #1e1e1e;
+        color: #f1f1f1;
+        border: 1px solid #333;
+    }
+    body.dark-mode .navbar {
+        background: linear-gradient(90deg, #222, #444);
+    }
+    body.dark-mode footer {
+        background: #1e1e1e;
+        border-top: 1px solid #333;
+        color: #aaa;
+    }
+    body.dark-mode .btn-outline-dark {
+        border-color: #ccc;
+        color: #ccc;
+    }
+    body.dark-mode .btn-outline-dark:hover {
+        background: #333;
+        color: #fff;
+    }
+</style>
+
+{{-- JavaScript Toggle --}}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        @if(isset($result))
-        const score = {{ $result['score'] }};
-        const remaining = 100 - score;
-        const ctx = document.getElementById('seoScoreChart').getContext('2d');
+        const toggleBtn = document.getElementById("darkModeToggle");
+        const body = document.body;
 
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['SEO Score', 'Remaining'],
-                datasets: [{
-                    data: [score, remaining],
-                    backgroundColor: [
-                        score >= 70 ? '#28a745' : (score >= 40 ? '#ffc107' : '#dc3545'),
-                        '#e1e1e1'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                cutout: '75%',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false },
-                    beforeDraw: (chart) => {
-                        const { width } = chart;
-                        const { height } = chart;
-                        const ctx = chart.ctx;
-                        ctx.restore();
-                        ctx.font = 'bold 20px sans-serif';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = score >= 70 ? '#28a745' : (score >= 40 ? '#ffc107' : '#dc3545');
-                        const text = score + '/100';
-                        const textX = Math.round((width - ctx.measureText(text).width) / 2);
-                        const textY = height / 2;
-                        ctx.fillText(text, textX, textY);
-                        ctx.save();
-                    }
-                }
+        // Load stored theme preference
+        if (localStorage.getItem("theme") === "dark") {
+            body.classList.add("dark-mode");
+            toggleBtn.textContent = "☀️ Toggle Light Mode";
+        }
+
+        toggleBtn.addEventListener("click", function () {
+            body.classList.toggle("dark-mode");
+
+            if (body.classList.contains("dark-mode")) {
+                localStorage.setItem("theme", "dark");
+                toggleBtn.textContent = "☀️ Toggle Light Mode";
+            } else {
+                localStorage.setItem("theme", "light");
+                toggleBtn.textContent = "🌙 Toggle Dark Mode";
             }
         });
-        @endif
     });
 </script>
 
