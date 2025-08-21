@@ -9,7 +9,8 @@
                     <h4 class="mb-0">🔑 Keyword Analyzer</h4>
                 </div>
                 <div class="card-body">
-                    {{-- Display Validation Errors --}}
+                    
+                    {{-- Show validation errors --}}
                     @if ($errors->any())
                         <div class="alert alert-danger">
                             <ul class="mb-0">
@@ -30,7 +31,7 @@
                                 id="content" 
                                 rows="8" 
                                 class="form-control @error('content') is-invalid @enderror"
-                                placeholder="Paste or type your content here..." 
+                                placeholder="Paste article or webpage content here..." 
                                 required>{{ old('content') }}</textarea>
                             @error('content')
                                 <small class="text-danger">{{ $message }}</small>
