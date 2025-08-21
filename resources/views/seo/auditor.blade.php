@@ -1,63 +1,127 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>SEO Auditor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="p-5">
+@extends('layouts.app')
 
-    <div class="container">
-        <h1 class="mb-4">SEO Auditor</h1>
+@section('content')
 
-        {{-- URL Input --}}
-        <form method="GET" action="{{ url('/seo-audit') }}" class="mb-4">
-            <div class="input-group">
-                <input type="url" name="url" class="form-control" placeholder="Enter a website URL..." value="{{ request('url') }}" required>
-                <button type="submit" class="btn btn-primary">Analyze</button>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+
+        {{-- SEO Audit Form --}}
+        <div class="card shadow-lg mb-4 border-0">
+            <div class="card-body p-4">
+                <h2 class="mb-3 text-primary">SEO Audit Tool</h2>
+                <p class="text-muted">Enter a website URL to analyze its SEO performance.</p>
+
+                <form method="GET" action="{{ url('/seo-audit') }}">
+                    <div class="input-group input-group-lg">
+                        <input type="url" name="url" class="form-control" placeholder="https://example.com" value="{{ request('url') }}" required>
+                        <button type="submit" class="btn btn-gradient">Analyze</button>
+                    </div>
+                </form>
             </div>
-        </form>
+        </div>
 
-        {{-- Results --}}
+        {{-- Results Section --}}
         @if(isset($result['error']))
-            <div class="alert alert-danger">{{ $result['error'] }}</div>
+            <div class="alert alert-danger shadow-sm">{{ $result['error'] }}</div>
         @elseif(isset($result))
-            <div class="card">
-                <div class="card-body">
-                    <h5>Analyzed URL: <a href="{{ $result['url'] }}" target="_blank">{{ $result['url'] }}</a></h5>
-
-                    <p><strong>Title:</strong> {{ $result['title'] ?? 'N/A' }}</p>
-                    <p><strong>Description:</strong> {{ $result['description'] ?? 'N/A' }}</p>
-                    <p><strong>Word Count:</strong> {{ $result['word_count'] }}</p>
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-gradient text-white">
+                    <h4 class="mb-0">SEO Report for <a href="{{ $result['url'] }}" target="_blank" class="text-white">{{ $result['url'] }}</a></h4>
+                </div>
+                <div class="card-body p-4">
                     
-                    <h6>H1 Tags</h6>
-                    <ul>
-                        @forelse($result['h1'] as $tag)
-                            <li>{{ $tag }}</li>
-                        @empty
-                            <li>None found</li>
-                        @endforelse
-                    </ul>
+                    {{-- SEO Score --}}
+                    <h5 class="fw-bold">Overall SEO Score</h5>
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div class="progress-bar 
+                            @if($result['score'] >= 70) bg-success 
+                            @elseif($result['score'] >= 40) bg-warning 
+                            @else bg-danger @endif" 
+                            role="progressbar" 
+                            style="width: {{ $result['score'] }}%;" 
+                            aria-valuenow="{{ $result['score'] }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ $result['score'] }}/100
+                        </div>
+                    </div>
 
-                    <h6>H2 Tags</h6>
-                    <ul>
-                        @forelse($result['h2'] as $tag)
-                            <li>{{ $tag }}</li>
-                        @empty
-                            <li>None found</li>
-                        @endforelse
-                    </ul>
+                    {{-- Accordion for Details --}}
+                    <div class="accordion" id="seoReportAccordion">
+                        
+                        {{-- Meta Info --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingMeta">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMeta" aria-expanded="true">
+                                    Meta Information
+                                </button>
+                            </h2>
+                            <div id="collapseMeta" class="accordion-collapse collapse show" data-bs-parent="#seoReportAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Title:</strong> {{ $result['title'] ?? 'N/A' }}</p>
+                                    <p><strong>Description:</strong> {{ $result['description'] ?? 'N/A' }}</p>
+                                    <p><strong>Word Count:</strong> {{ $result['word_count'] }}</p>
+                                </div>
+                            </div>
+                        </div>
 
-                    <h6>Recommendations</h6>
-                    <ul>
-                        @foreach($result['recommendations'] as $rec)
-                            <li>{{ $rec }}</li>
-                        @endforeach
-                    </ul>
+                        {{-- Headings --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingHeadings">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHeadings">
+                                    Headings (H1 & H2)
+                                </button>
+                            </h2>
+                            <div id="collapseHeadings" class="accordion-collapse collapse" data-bs-parent="#seoReportAccordion">
+                                <div class="accordion-body">
+                                    <h6>H1 Tags</h6>
+                                    <ul>
+                                        @forelse($result['h1'] as $tag)
+                                            <li>{{ $tag }}</li>
+                                        @empty
+                                            <li>No H1 tags found</li>
+                                        @endforelse
+                                    </ul>
+                                    <h6>H2 Tags</h6>
+                                    <ul>
+                                        @forelse($result['h2'] as $tag)
+                                            <li>{{ $tag }}</li>
+                                        @empty
+                                            <li>No H2 tags found</li>
+                                        @endforelse
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Recommendations --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingRecs">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecs">
+                                    Recommendations
+                                </button>
+                            </h2>
+                            <div id="collapseRecs" class="accordion-collapse collapse" data-bs-parent="#seoReportAccordion">
+                                <div class="accordion-body">
+                                    <ul class="list-group list-group-flush">
+                                        @foreach($result['recommendations'] as $rec)
+                                            <li class="list-group-item">{{ $rec }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {{-- Action Buttons --}}
+                    <div class="mt-4">
+                        <a href="{{ url('/') }}" class="btn btn-secondary">⬅ Back to Home</a>
+                        <a href="{{ url('/seo-audit?url=' . urlencode($result['url']) . '&download=pdf') }}" class="btn btn-danger">📄 Download PDF Report</a>
+                    </div>
 
                 </div>
             </div>
         @endif
     </div>
+</div>
 
-</body>
-</html>
+@endsection
