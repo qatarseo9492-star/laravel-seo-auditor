@@ -4,13 +4,56 @@
 
 @section('content')
 <style>
-    /* === Dark Theme Styles === */
+    /* ===== GENERAL DARK THEME ===== */
     body {
-        background-color: #121212;
+        background-color: #0d0d0d;
         color: #e0e0e0;
         font-family: 'Poppins', sans-serif;
+        overflow-x: hidden;
     }
 
+    /* ===== NAVBAR ===== */
+    .navbar {
+        background: rgba(20, 20, 20, 0.6);
+        backdrop-filter: blur(12px);
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+    .navbar.scrolled {
+        background: #111 !important;
+        box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.6);
+    }
+    .navbar-brand {
+        font-weight: 700;
+        font-size: 1.4rem;
+        color: #bb86fc !important;
+        letter-spacing: 1px;
+    }
+    .nav-link {
+        color: #e0e0e0 !important;
+        margin: 0 10px;
+        position: relative;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+    .nav-link::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 2px;
+        background: #bb86fc;
+        transition: width 0.3s ease;
+    }
+    .nav-link:hover::after {
+        width: 100%;
+    }
+    .nav-link:hover {
+        color: #bb86fc !important;
+    }
+
+    /* ===== HERO SECTION ===== */
     .hero {
         min-height: 100vh;
         display: flex;
@@ -18,151 +61,160 @@
         justify-content: center;
         flex-direction: column;
         text-align: center;
-        background: linear-gradient(135deg, #1f1f1f 0%, #0d0d0d 100%);
-        overflow: hidden;
+        background: radial-gradient(circle at 20% 20%, rgba(98,0,234,0.2), transparent 60%),
+                    radial-gradient(circle at 80% 10%, rgba(187,134,252,0.15), transparent 50%),
+                    linear-gradient(135deg, #0f0f0f, #1b1b1b);
         position: relative;
+        overflow: hidden;
     }
-
     .hero h1 {
-        font-size: 3rem;
+        font-size: 3.5rem;
         font-weight: 700;
-        color: #ffffff;
-        animation: fadeInDown 1s ease;
+        background: linear-gradient(45deg, #bb86fc, #6200ea);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        animation: fadeDown 1.2s ease;
     }
-
     .hero p {
         font-size: 1.2rem;
-        margin-top: 15px;
-        color: #bbbbbb;
-        animation: fadeInUp 1.2s ease;
+        color: #aaa;
+        max-width: 600px;
+        animation: fadeUp 1.5s ease;
     }
-
     .btn-custom {
-        margin-top: 30px;
-        padding: 12px 30px;
-        background-color: #6200ea;
-        color: #fff;
+        margin-top: 35px;
+        padding: 14px 36px;
+        font-size: 1rem;
+        font-weight: 600;
         border-radius: 30px;
-        font-weight: bold;
-        transition: all 0.3s ease;
+        background: linear-gradient(90deg, #6200ea, #bb86fc);
+        color: #fff;
+        transition: all 0.35s ease;
         text-decoration: none;
+        box-shadow: 0px 6px 15px rgba(98,0,234,0.5);
     }
-
     .btn-custom:hover {
-        background-color: #3700b3;
-        transform: scale(1.08);
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0px 8px 20px rgba(98,0,234,0.7);
     }
 
-    /* === Floating Circles Background Animations === */
-    .circle {
-        position: absolute;
-        border-radius: 50%;
-        background: rgba(98, 0, 234, 0.2);
-        animation: move 20s linear infinite;
-        z-index: 0;
-    }
-
-    .circle:nth-child(1) {
-        width: 200px;
-        height: 200px;
-        left: 10%;
-        top: 15%;
-    }
-
-    .circle:nth-child(2) {
-        width: 150px;
-        height: 150px;
-        right: 20%;
-        bottom: 20%;
-        background: rgba(255, 255, 255, 0.15);
-    }
-
-    @keyframes fadeInDown {
+    @keyframes fadeDown {
         from { opacity: 0; transform: translateY(-50px); }
         to { opacity: 1; transform: translateY(0); }
     }
-
-    @keyframes fadeInUp {
+    @keyframes fadeUp {
         from { opacity: 0; transform: translateY(50px); }
         to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes move {
-        0% { transform: translateY(0) translateX(0); }
-        50% { transform: translateY(-50px) translateX(20px); }
-        100% { transform: translateY(0) translateX(0); }
-    }
-
-    /* === Features Section === */
+    /* ===== FEATURES SECTION ===== */
     .features {
-        background-color: #1e1e1e;
-        padding: 80px 0;
-        z-index: 2;
-        position: relative;
+        background-color: #121212;
+        padding: 100px 0;
     }
-
     .feature-box {
-        background: #2a2a2a;
-        border-radius: 15px;
-        padding: 30px;
-        transition: transform 0.3s, background 0.3s;
-        height: 100%;
+        background: rgba(40, 40, 40, 0.75);
+        border-radius: 20px;
+        padding: 40px 25px;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
     }
-
     .feature-box:hover {
-        transform: translateY(-10px);
-        background: #333;
+        transform: translateY(-12px);
+        background: rgba(50, 50, 50, 0.85);
+        box-shadow: 0px 8px 20px rgba(0,0,0,0.6);
+    }
+    .feature-icon {
+        font-size: 3rem;
+        color: #bb86fc;
+        margin-bottom: 20px;
+    }
+    .feature-box h4 {
+        color: #fff;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+    .feature-box p {
+        color: #aaa;
+        font-size: 0.95rem;
+    }
+    .btn-outline-light {
+        border-radius: 20px;
+        padding: 6px 18px;
     }
 
-    .feature-icon {
-        font-size: 2.5rem;
+    /* ===== FOOTER ===== */
+    footer {
+        background: #0b0b0b;
+        padding: 25px 0;
+        text-align: center;
+        font-size: 0.9rem;
+        color: #777;
+    }
+    footer a {
         color: #bb86fc;
-        margin-bottom: 15px;
+        text-decoration: none;
     }
 </style>
 
-{{-- === Hero Section === --}}
-<div class="hero">
-    <div class="circle"></div>
-    <div class="circle"></div>
 
-    <h1>Welcome to Semantic SEO Checker 🚀</h1>
-    <p>Modern SEO Tools to Analyze, Optimize & Dominate Search Engines</p>
+{{-- ===== HERO SECTION ===== --}}
+<div class="hero d-flex flex-column justify-content-center align-items-center text-center">
+    <h1>Semantic SEO Checker 🚀</h1>
+    <p>Advanced Tools to Audit, Analyze & Optimize your website for peak search performance.</p>
     <a href="#tools" class="btn-custom">Explore Tools</a>
 </div>
 
-{{-- === Features Section === --}}
+
+{{-- ===== FEATURES SECTION ===== --}}
 <div id="tools" class="features container text-center">
-    <div class="row">
+    <div class="row g-4">
         <!-- SEO Audit -->
-        <div class="col-md-4 mb-4">
-            <div class="feature-box shadow-lg">
+        <div class="col-md-4">
+            <div class="feature-box shadow-lg h-100">
                 <div class="feature-icon">📝</div>
                 <h4>SEO Audit</h4>
-                <p>Check your site’s technical SEO health and uncover critical issues.</p>
-                <a href="{{ route('seo.audit.index') }}" class="btn btn-outline-light btn-sm mt-2">Try Now</a>
+                <p>Comprehensive technical & on‑page SEO audits to uncover critical issues.</p>
+                <a href="{{ route('seo.audit.index') }}" class="btn btn-outline-light btn-sm mt-3">Try Now</a>
             </div>
         </div>
 
         <!-- Keyword Analyzer -->
-        <div class="col-md-4 mb-4">
-            <div class="feature-box shadow-lg">
+        <div class="col-md-4">
+            <div class="feature-box shadow-lg h-100">
                 <div class="feature-icon">🔑</div>
                 <h4>Keyword Analysis</h4>
-                <p>Find the best keywords and measure density with semantic analysis.</p>
-                <a href="{{ route('seo.keyword.index') }}" class="btn btn-outline-light btn-sm mt-2">Analyze</a>
+                <p>Analyze keyword density & discover optimization opportunities.</p>
+                <a href="{{ route('seo.keyword.index') }}" class="btn btn-outline-light btn-sm mt-3">Analyze</a>
             </div>
         </div>
 
         <!-- Content Optimizer -->
-        <div class="col-md-4 mb-4">
-            <div class="feature-box shadow-lg">
+        <div class="col-md-4">
+            <div class="feature-box shadow-lg h-100">
                 <div class="feature-icon">⚡</div>
                 <h4>Content Optimizer</h4>
-                <p>Optimize your content with recommendations for better rankings.</p>
-                <a href="{{ route('seo.optimizer.index') }}" class="btn btn-outline-light btn-sm mt-2">Optimize</a>
+                <p>Get AI‑driven recommendations to enhance your content and dominate rankings.</p>
+                <a href="{{ route('seo.optimizer.index') }}" class="btn btn-outline-light btn-sm mt-3">Optimize</a>
             </div>
         </div>
     </div>
 </div>
+
+
+{{-- ===== FOOTER ===== --}}
+<footer>
+    <p>© {{ date('Y') }} Semantic SEO Checker. All rights reserved. | <a href="#">Privacy Policy</a></p>
+</footer>
+
+
+{{-- ===== JS FOR NAVBAR SCROLL EFFECT ===== --}}
+<script>
+    window.addEventListener('scroll', function () {
+        const navbar = document.querySelector('.navbar');
+        navbar.classList.toggle('scrolled', window.scrollY > 30);
+    });
+</script>
 @endsection
