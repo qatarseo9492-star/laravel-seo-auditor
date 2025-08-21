@@ -27,13 +27,15 @@ class SeoAuditService
         $h2 = $crawler->filter('h2')->each(fn ($node) => $node->text());
         $wordCount = str_word_count(strip_tags($html));
 
-        return [
-            'url' => $url,
-            'title' => $title,
-            'description' => $description,
-            'h1' => $h1,
-            'h2' => $h2,
-            'word_count' => $wordCount,
-        ];
+return [
+    'url'            => $url,
+    'title'          => $title,
+    'description'    => $description,
+    'h1'             => $h1,
+    'h2'             => $h2,
+    'word_count'     => $wordCount,
+    'recommendations'=> $this->generateRecommendations($title, $description, $h1, $wordCount), // new
+    'score'          => $this->calculateScore($title, $description, $h1, $wordCount),         // optional: score
+];
     }
 }
