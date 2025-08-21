@@ -4,150 +4,126 @@
 
 @section('content')
 <style>
-/* ===== BASE ===== */
+/* ===== Base ===== */
 body {
-  background: #0b0b10;
-  color: #eee;
-  font-family: 'Inter', 'Poppins', sans-serif;
-  overflow-x: hidden;
+  background:#0b0b10;
+  color:#eee;
+  font-family:'Inter','Poppins',sans-serif;
+  overflow-x:hidden;
   position: relative;
 }
+:root {
+  --purple:#bb86fc;
+  --blue:#2196f3;
+  --teal:#03dac6;
+  --dark:#111119;
+}
 
-/* ===== SMOKE EFFECT ===== */
+/* ===== SMOKE Layer ===== */
 .smoke {
   position: fixed;
-  top: 0; left: 0;
+  bottom: 0; left: 0;
   width: 100%; height: 100%;
   overflow: hidden;
-  z-index: 0; /* behind content */
   pointer-events: none;
+  z-index: 0;
 }
-
 .smoke span {
   position: absolute;
-  width: 800px;
-  height: 800px;
-  background: radial-gradient(circle,
-      rgba(187,134,252,0.15),
-      rgba(33,150,243,0.12),
-      rgba(3,218,198,0.1),
-      transparent 70%);
+  bottom: -300px; left: -200px;
+  width: 600px; height: 600px;
   border-radius: 50%;
-  filter: blur(120px);
-  animation: drift 60s infinite linear;
-  mix-blend-mode: screen;
-  opacity: 0.45;
+  background: radial-gradient(circle, rgba(187,134,252,0.25), transparent 70%);
+  filter: blur(100px);
+  animation: rise 60s linear infinite;
+  opacity: 0.4;
 }
-
-/* Multiple smoke layers with different colors & positions */
-.smoke span:nth-child(1) {
-  top: 100%; left: -20%;
-  animation-delay: 0s;
-  background: radial-gradient(circle,
-      rgba(155,89,182,0.2),
-      transparent 70%);
-}
+/* Different colors + delays for variation */
 .smoke span:nth-child(2) {
-  top: 120%; left: 30%;
-  animation-delay: 5s;
-  background: radial-gradient(circle,
-      rgba(33,150,243,0.2),
-      transparent 70%);
+  background: radial-gradient(circle, rgba(33,150,243,0.25), transparent 70%);
+  animation-delay: 10s;
+  left: -100px;
 }
 .smoke span:nth-child(3) {
-  top: 140%; left: 70%;
-  animation-delay: 10s;
-  background: radial-gradient(circle,
-      rgba(3,218,198,0.2),
-      transparent 70%);
+  background: radial-gradient(circle, rgba(3,218,198,0.25), transparent 70%);
+  animation-delay: 20s;
+  left: -150px;
 }
 .smoke span:nth-child(4) {
-  top: 130%; left: 50%;
-  animation-delay: 20s;
-  background: radial-gradient(circle,
-      rgba(255,97,246,0.25),
-      transparent 70%);
+  background: radial-gradient(circle, rgba(255,97,246,0.25), transparent 70%);
+  animation-delay: 30s;
+  left: -50px;
 }
 
-/* Smoke Movement */
-@keyframes drift {
-  0%   { transform: translateY(0) scale(1); opacity: 0.3; }
-  25%  { opacity: 0.6; }
-  50%  { transform: translateY(-100%) scale(1.2); opacity: 0.4; }
-  75%  { opacity: 0.65; }
-  100% { transform: translateY(-200%) scale(1.5); opacity: 0; }
+/* The smoke drifts upward and spreads */
+@keyframes rise {
+  0%   { transform: translate(0,0) scale(1); opacity: .5; }
+  50%  { transform: translate(300px,-400px) scale(1.3); opacity: .35; }
+  100% { transform: translate(600px,-900px) scale(1.6); opacity: 0; }
 }
 
-/* ===== HERO ===== */
+/* ===== Hero (example) ===== */
 .hero {
-  min-height: 90vh;
-  display: flex; flex-direction: column; justify-content: center;
-  align-items: center; text-align: center;
+  min-height:90vh;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;
   position: relative; z-index: 1;
 }
 .hero h1 {
-  font-size: 3.8rem;
-  font-weight: 800;
-  background: linear-gradient(90deg, #bb86fc, #2196f3, #03dac6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  font-size:3.5rem;font-weight:800;
+  background:linear-gradient(90deg,var(--purple),var(--blue),var(--teal));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
-.hero p { max-width: 650px; margin-top: 15px; color: #aaa; font-size: 1.2rem; }
+.hero p {
+  margin-top:20px;
+  color:#aaa;
+  max-width:640px;
+}
 .btn-hero {
-  margin-top: 30px; padding: 14px 38px;
-  border: none; border-radius: 40px;
-  font-weight: 600; font-size: 1rem;
-  color: #fff;
-  background: linear-gradient(90deg, #bb86fc, #03dac6);
-  box-shadow: 0 8px 20px rgba(155,89,182,.5);
-  transition: all .3s ease;
+  margin-top:30px;padding:14px 36px;border-radius:40px;
+  font-weight:600;font-size:1rem;color:#fff;
+  background:linear-gradient(90deg,var(--purple),var(--teal));
+  border:none;
+  box-shadow:0px 6px 18px rgba(123,97,255,.5);
+  transition:.3s;
 }
-.btn-hero:hover {
-  transform: scale(1.05) translateY(-3px);
-  box-shadow: 0 10px 25px rgba(33,150,243,.6);
-}
+.btn-hero:hover{transform:scale(1.05) translateY(-3px);box-shadow:0 10px 25px rgba(3,218,198,.6);}
 
-/* ===== SEO TOOL BOXES (keep previous "fire border" or gradient inner colors) ===== */
-.features { padding: 100px 0; background: #111119; position: relative; z-index: 1; }
+/* ===== Features Section (simplified) ===== */
+.features {
+  background:var(--dark);
+  padding:100px 0;
+  position: relative; z-index: 1;
+}
 .features h2 {
-  text-align: center; font-size: 2.3rem; font-weight: 700; margin-bottom: 60px;
-  background: linear-gradient(90deg,#bb86fc,#03dac6);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  text-align:center;margin-bottom:60px;font-size:2.4rem;font-weight:700;
+  background:linear-gradient(90deg, var(--purple), var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .feature-box {
-  border-radius: 18px; padding: 40px 25px; text-align: center;
-  color: #fff; position: relative; overflow: hidden;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:18px;
+  text-align:center;padding:40px 25px;color:#fff;
+  transition:.3s;
 }
-.feature-box.audit { background: linear-gradient(165deg,#2e1437,#4a1f63); }
-.feature-box.keyword { background: linear-gradient(165deg,#0f2e45,#205a8d); }
-.feature-box.optimizer { background: linear-gradient(165deg,#0b3b33,#118472); }
-
-.feature-icon { font-size: 2.8rem; margin-bottom: 20px; }
-.feature-title { font-size: 1.3rem; font-weight: 600; margin-bottom: 12px; }
-.feature-text { font-size: .95rem; color: #ddd; }
-
-/* Themed Buttons */
-.btn-tool { border: none; padding: 10px 24px; border-radius: 28px; font-weight: 600; }
-.btn-audit { background: linear-gradient(90deg,#9b59b6,#e0aaff); color: #fff; }
-.btn-keyword { background: linear-gradient(90deg,#2196f3,#64b5f6); color: #fff; }
-.btn-optimizer { background: linear-gradient(90deg,#03dac6,#1de9b6); color: #0b0b0b; }
+.feature-box:hover { transform:translateY(-10px); box-shadow:0 10px 25px rgba(0,0,0,0.6); }
 
 /* ===== CTA ===== */
 .cta {
-  max-width: 950px; margin: 80px auto; padding: 70px 20px;
-  border-radius: 20px; background: linear-gradient(120deg,#bb86fc,#2196f3,#03dac6);
-  text-align: center; color: #fff;
+  max-width:900px;margin:80px auto;padding:70px 20px;
+  border-radius:20px;text-align:center;color:#fff;
+  background:linear-gradient(120deg,var(--purple),var(--blue),var(--teal));
 }
-.cta h3 { font-size: 2rem; font-weight: 700; }
-.cta p { max-width: 600px; margin: 15px auto 25px; }
-.cta .btn-light { border-radius: 30px; padding: 12px 28px; font-weight: 600; }
+.cta .btn-light{border-radius:30px;padding:12px 32px;font-weight:600;}
 
-/* Footer */
-footer { background:#0a0a0f;padding:25px 0;text-align:center;font-size:.9rem;color:#888;}
-footer a {color:#bb86fc;text-decoration:none;}
+/* ===== Footer ===== */
+footer { background:#0a0a0f; padding:20px 0;text-align:center;font-size:.9rem;color:#888;}
+footer a{color:var(--purple);}
 </style>
 
-{{-- SMOKE Overlay --}}
+{{-- SMOKE EFFECT --}}
 <div class="smoke">
   <span></span>
   <span></span>
@@ -167,27 +143,24 @@ footer a {color:#bb86fc;text-decoration:none;}
   <h2>⚡ Our SEO Tools</h2>
   <div class="row g-4">
     <div class="col-md-4">
-      <div class="feature-box audit h-100">
+      <div class="feature-box">
         <div class="feature-icon">📝</div>
         <h4 class="feature-title">SEO Audit</h4>
-        <p class="feature-text">Find technical SEO issues, broken links & performance gaps quickly.</p>
-        <a href="{{ route('seo.audit.index') }}" class="btn-tool btn-audit">Run Audit</a>
+        <p>Fix technical issues, speed problems, and optimize site health.</p>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="feature-box keyword h-100">
+      <div class="feature-box">
         <div class="feature-icon">🔑</div>
         <h4 class="feature-title">Keyword Analyzer</h4>
-        <p class="feature-text">Analyze density, discover semantic variations & gain ranking advantage.</p>
-        <a href="{{ route('seo.keyword.index') }}" class="btn-tool btn-keyword">Analyze</a>
+        <p>Discover hidden keyword opportunities & semantic coverage gaps.</p>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="feature-box optimizer h-100">
+      <div class="feature-box">
         <div class="feature-icon">⚡</div>
         <h4 class="feature-title">Content Optimizer</h4>
-        <p class="feature-text">AI suggestions for headlines, metadata & flow to boost search visibility.</p>
-        <a href="{{ route('seo.optimizer.index') }}" class="btn-tool btn-optimizer">Optimize</a>
+        <p>AI suggests titles, metadata & structure improvements.</p>
       </div>
     </div>
   </div>
@@ -195,13 +168,13 @@ footer a {color:#bb86fc;text-decoration:none;}
 
 {{-- CTA --}}
 <div class="cta">
-  <h3>Ready to Dominate SEO Rankings?</h3>
-  <p>Supercharge your SEO workflow with powerful semantic analysis & optimization tools.</p>
+  <h3>Supercharge Your SEO Today</h3>
+  <p>Unlock AI‑powered analysis & optimization designed for growth.</p>
   <a href="#features" class="btn btn-light">Get Started</a>
 </div>
 
 {{-- FOOTER --}}
 <footer>
-  <p>© {{ date('Y') }} Semantic SEO Checker · All Rights Reserved · <a href="#">Privacy</a></p>
+  <p>© {{ date('Y') }} Semantic SEO Checker · All Rights Reserved · <a href="#">Privacy Policy</a></p>
 </footer>
 @endsection
