@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Semantic SEO Checker - Home')
+@section('title', 'Jagoowala - Home')
 
 @section('content')
 <style>
@@ -16,11 +16,10 @@ body {
   --purple:#6a0dad;
   --orange:#ff8500;
   --blue:#2196f3;
-  --teal:#03dac6;
   --dark:#111119;
 }
 
-/* ===== Smoke Effect (Pure CSS) ===== */
+/* ===== Smoke Effect ===== */
 .smoke {
   position:fixed;
   top:0; left:0; width:100%; height:100%;
@@ -97,20 +96,21 @@ body {
 }
 .features h2 {
   text-align:center; margin-bottom:60px; font-size:2.6rem; font-weight:800;
+  letter-spacing:1px;
   background:linear-gradient(90deg,var(--orange),var(--purple),var(--orange));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
 .features h2::after {
   content:""; display:block; width:60px; height:4px; margin:15px auto 0;
   border-radius:2px; background:linear-gradient(90deg,var(--orange),var(--purple));
 }
-
-/* Feature Boxes */
 .feature-box {
   background:linear-gradient(145deg,#1b0a28,#0e0512);
   border-radius:20px;
   padding:45px 28px; text-align:center; color:#fff;
-  box-shadow:0 0 18px rgba(0,0,0,.5); position:relative;
+  box-shadow:0 0 18px rgba(0,0,0,.5);
+  position:relative;
   transition:.4s; border:2px solid transparent;
 }
 .feature-box::before {
@@ -156,19 +156,40 @@ body {
   background:var(--orange);color:#fff;
   box-shadow:0 0 18px rgba(255,133,0,.6);
 }
+
+/* ===== Footer ===== */
+.site-footer {
+  background:#0d0017;
+  border-top:2px solid var(--purple);
+  text-align:center;
+  padding:18px;
+  margin-top:60px;
+  color:#ccc;
+  font-family:'Poppins',sans-serif;
+  z-index:5;
+}
+.site-footer .footer-name {
+  font-size:1.2rem;
+  font-weight:700;
+  background:linear-gradient(90deg, var(--orange), var(--purple), var(--blue));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.site-footer .footer-first {
+  color:#ffb347;
+  text-shadow: 0 0 6px rgba(255,133,0,0.8),
+               0 0 12px rgba(106,13,173,0.5);
+}
 </style>
 
 {{-- SMOKE EFFECT LAYER --}}
 <div class="smoke">
-  <span></span>
-  <span></span>
-  <span></span>
-  <span></span>
+  <span></span><span></span><span></span><span></span>
 </div>
 
 {{-- HERO --}}
 <div class="hero">
-  <h1>⚡ Semantic SEO Checker</h1>
+  <h1>⚡ Jagoowala</h1>
   <p>AI‑powered tools to audit, analyze & optimize your site with semantic precision.</p>
   <a href="#features" class="btn-hero">Explore Tools</a>
 </div>
@@ -210,5 +231,14 @@ body {
   <p>Supercharge your SEO workflow with smart semantic analysis & optimization tools.</p>
   <a href="#features" class="btn btn-light">Get Started</a>
 </div>
+
+{{-- FOOTER --}}
+<footer class="site-footer">
+  <p>
+    <span class="footer-name">
+      ⭐ <span class="footer-first">Ja</span>goowala ⭐⭐
+    </span>
+  </p>
+</footer>
 
 @endsection
