@@ -18,36 +18,47 @@ body {
   --dark:#111119;
 }
 
-/* ===== Cloud Effect Background ===== */
-.cloud-scene {
+/* ===== Pure CSS Cloud Effect ===== */
+.clouds {
   position: fixed;
-  top:0; left:0; width:100%; height:100vh;
-  background: radial-gradient(ellipse at bottom left,
-     rgba(123, 31, 162, 0.55) 0%,    /* Deep purple start */
-     rgba(179, 136, 255, 0.35) 35%,  /* Light violet spreading */
-     rgba(33, 0, 60, 0.3) 70%,       /* Dark indigo blend */
-     rgba(10, 10, 15, 1) 100%        /* Dark edges */
-  );
-  background-repeat:no-repeat;
-  background-size:cover;
+  top:0; left:0; width:100%; height:100%;
+  overflow:hidden; pointer-events:none;
   z-index:0;
-  overflow:hidden;
 }
-.cloud-scene::before, .cloud-scene::after {
-  content:"";
-  position:absolute; inset:0;
-  background:url('https://i.ibb.co/vz2wTZF/fog-texture.png'); /* Transparent fog texture */
-  background-size:cover;
-  opacity:0.15;
+.clouds span {
+  position:absolute;
+  width:600px;height:600px;
+  border-radius:50%;
+  filter: blur(150px);
+  opacity:0.35;
   animation: drift 120s linear infinite;
 }
-.cloud-scene::after {
-  opacity:0.25;
-  animation-duration:180s;
+/* Purplish layers rising from one side */
+.clouds span:nth-child(1) {
+  background:rgba(123,31,162,0.5);
+  bottom:-200px; left:-200px;
+  animation-delay:0s;
 }
+.clouds span:nth-child(2) {
+  background:rgba(179,136,255,0.4);
+  bottom:-250px; left:100px;
+  animation-delay:20s;
+}
+.clouds span:nth-child(3) {
+  background:rgba(90,24,154,0.35);
+  bottom:-200px; left:400px;
+  animation-delay:40s;
+}
+.clouds span:nth-child(4) {
+  background:rgba(255,133,0,0.25);
+  bottom:-300px; left:200px;
+  animation-delay:60s;
+}
+
 @keyframes drift {
-  0% { background-position: 0 0; }
-  100% { background-position: 1000px -1000px; }
+  0%   {transform: translate(0,0) scale(1); opacity:.35;}
+  50%  {transform: translate(300px,-400px) scale(1.3); opacity:.25;}
+  100% {transform: translate(600px,-800px) scale(1.6); opacity:0;}
 }
 
 /* ===== Navbar ===== */
@@ -70,7 +81,7 @@ body {
 /* ===== Hero ===== */
 .hero {
   min-height:90vh;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
   text-align:center;position:relative;z-index:2;padding:0 20px;
 }
 .hero h1 {
@@ -129,8 +140,13 @@ body {
 .cta .btn-light{padding:12px 28px;border-radius:28px;font-weight:600;}
 </style>
 
-{{-- CLOUD BACKGROUND --}}
-<div class="cloud-scene"></div>
+{{-- CLOUDS (Pure CSS) --}}
+<div class="clouds">
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+</div>
 
 {{-- HERO --}}
 <div class="hero">
