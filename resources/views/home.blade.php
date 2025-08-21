@@ -11,11 +11,12 @@ body {
     font-family: 'Poppins', sans-serif;
 }
 
-/* ===== NAVBAR Customization ===== */
+/* ===== NAVBAR ===== */
 .navbar {
-    background: rgba(20,20,25,0.5);
+    background: rgba(20,20,25,0.55);
     backdrop-filter: blur(12px);
     transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(255,255,255,0.08);  /* outline */
 }
 .navbar.scrolled {
     background: rgba(15,15,20,0.95);
@@ -53,7 +54,7 @@ body {
     width: 100%;
 }
 
-/* ===== HERO Section ===== */
+/* ===== HERO ===== */
 .hero {
     min-height: 100vh;
     background: radial-gradient(circle at 20% 20%, rgba(98,0,234,0.15), transparent 60%),
@@ -97,20 +98,14 @@ body {
 }
 .btn-primary-custom:hover {
     transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 10px 22px rgba(98, 0, 234, 0.65);
+    box-shadow: 0 10px 22px rgba(98,0,234,0.65);
 }
 
-/* Hero Animations */
-@keyframes fadeDown {
-    from { opacity:0; transform:translateY(-50px);}
-    to {opacity:1;transform:translateY(0);}
-}
-@keyframes fadeUp {
-    from { opacity:0; transform:translateY(50px);}
-    to {opacity:1;transform:translateY(0);}
-}
+/* Animations */
+@keyframes fadeDown { from {opacity:0;transform:translateY(-50px);} to {opacity:1;transform:translateY(0);} }
+@keyframes fadeUp { from {opacity:0;transform:translateY(50px);} to {opacity:1;transform:translateY(0);} }
 
-/* ===== FEATURES ===== */
+/* ===== FEATURES Section ===== */
 .features {
     background:#12121a;
     padding:100px 0;
@@ -120,36 +115,61 @@ body {
     margin-bottom:60px;
     font-weight:600;
     font-size:2rem;
+    color:#fff;
 }
+
+/* Refined Feature Boxes */
 .feature-box {
-    background:rgba(255,255,255,0.05);
-    border-radius:20px;
-    padding:40px 25px;
-    transition:all .4s ease;
+    background: linear-gradient(145deg, rgba(40,40,50,0.9), rgba(25,25,35,0.9));
+    border-radius: 20px;
+    padding: 40px 25px;
+    transition: all 0.4s ease;
     backdrop-filter: blur(12px);
-    border:1px solid rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+    overflow: hidden;
+}
+.feature-box::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(187,134,252,0.15), transparent 60%);
+    transform: rotate(25deg);
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+.feature-box:hover::before {
+    opacity: 1;
 }
 .feature-box:hover {
-    transform: translateY(-12px);
-    background:rgba(255,255,255,0.08);
-    box-shadow: 0 10px 22px rgba(0,0,0,0.7);
+    transform: translateY(-12px) scale(1.03);
+    border: 1px solid rgba(187,134,252,0.35);
+    box-shadow: 0 12px 30px rgba(98,0,234,0.4);
 }
 .feature-icon {
-    font-size:3rem;
-    color:#bb86fc;
-    margin-bottom:20px;
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #bb86fc;
+    transition: transform 0.4s ease;
 }
-.feature-box h4 {
+.feature-box:hover .feature-icon {
+    transform: scale(1.15) rotate(8deg);
+    color: #d6a8ff;
+}
+.feature-title {
     color:#fff;
     font-weight:600;
     margin-bottom:15px;
 }
-.feature-box p {
-    color:#aaa;
+.feature-text {
+    color:#bbb;
     font-size:0.95rem;
 }
 
-/* ===== CTA Section ===== */
+/* ===== CTA ===== */
 .cta-section {
     padding: 100px 20px;
     background: linear-gradient(90deg,#6200ea,#bb86fc);
@@ -160,14 +180,8 @@ body {
     max-width: 1000px;
     box-shadow: 0px 10px 25px rgba(98,0,234,.5);
 }
-.cta-section h3 {
-    font-weight: 700;
-    font-size: 2rem;
-}
-.cta-section p {
-    margin: 15px 0 25px;
-    font-size: 1.1rem;
-}
+.cta-section h3 { font-weight: 700; font-size: 2rem; }
+.cta-section p { margin: 15px 0 25px; font-size: 1.1rem; }
 .cta-section .btn-light {
     border-radius: 30px;
     padding: 10px 28px;
@@ -197,28 +211,28 @@ footer a {color:#bb86fc; text-decoration:none;}
     <div class="row g-4">
         <!-- SEO Audit -->
         <div class="col-md-4">
-            <div class="feature-box h-100">
+            <div class="feature-box h-100 text-center p-4">
                 <div class="feature-icon">📝</div>
-                <h4>SEO Audit</h4>
-                <p>Complete site audits to detect technical SEO issues, broken links, and performance improvement areas.</p>
+                <h4 class="feature-title">SEO Audit</h4>
+                <p class="feature-text">AI‑driven audits to detect technical SEO issues, broken links, and performance gaps.</p>
                 <a href="{{ route('seo.audit.index') }}" class="btn btn-outline-light btn-sm mt-3">Run Audit</a>
             </div>
         </div>
         <!-- Keyword Analyzer -->
         <div class="col-md-4">
-            <div class="feature-box h-100">
+            <div class="feature-box h-100 text-center p-4">
                 <div class="feature-icon">🔑</div>
-                <h4>Keyword Analyzer</h4>
-                <p>Measure keyword density, analyze competitiveness, and discover new opportunities for ranking higher.</p>
+                <h4 class="feature-title">Keyword Analyzer</h4>
+                <p class="feature-text">Discover opportunities and analyze keyword density, relevance, and semantic variations.</p>
                 <a href="{{ route('seo.keyword.index') }}" class="btn btn-outline-light btn-sm mt-3">Analyze</a>
             </div>
         </div>
         <!-- Optimizer -->
         <div class="col-md-4">
-            <div class="feature-box h-100">
+            <div class="feature-box h-100 text-center p-4">
                 <div class="feature-icon">⚡</div>
-                <h4>Content Optimizer</h4>
-                <p>AI‑driven, actionable recommendations to optimize headlines, metadata, and body for maximum SEO impact.</p>
+                <h4 class="feature-title">Content Optimizer</h4>
+                <p class="feature-text">Get semantic optimization tips for headings, metadata, and content flow for better rankings.</p>
                 <a href="{{ route('seo.optimizer.index') }}" class="btn btn-outline-light btn-sm mt-3">Optimize</a>
             </div>
         </div>
@@ -237,10 +251,10 @@ footer a {color:#bb86fc; text-decoration:none;}
     <p>© {{ date('Y') }} Semantic SEO Checker · All Rights Reserved · <a href="#">Privacy Policy</a></p>
 </footer>
 
-{{-- JS Navbar scroll effect --}}
+{{-- JS Navbar scroll --}}
 <script>
-window.addEventListener('scroll', function () {
-    document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 20);
+window.addEventListener('scroll', () => {
+  document.querySelector('.navbar').classList.toggle('scrolled', window.scrollY > 20);
 });
 </script>
 @endsection
