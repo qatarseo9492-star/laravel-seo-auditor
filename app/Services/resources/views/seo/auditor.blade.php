@@ -1,42 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SEO Auditor</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <title>SEO Audit Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light">
+<body class="p-5">
 
-<div class="container mt-5">
-    <h1 class="mb-4">SEO Auditor</h1>
+    <div class="container">
+        <h1 class="mb-4">SEO Audit Tool</h1>
 
-    <form method="GET" action="{{ route('seo.audit') }}" class="mb-4">
-        <input type="url" name="url" class="form-control mb-2" placeholder="https://example.com" required>
-        <button class="btn btn-primary">Audit</button>
-    </form>
+        {{-- Form to enter URL --}}
+        <form method="GET" action="{{ url('/seo-audit') }}" class="mb-4">
+            <div class="input-group">
+                <input type="url" name="url" class="form-control" placeholder="Enter a website URL..." required>
+                <button type="submit" class="btn btn-primary">Analyze</button>
+            </div>
+        </form>
 
-    @if($result)
-        <div class="card p-3">
-            <h3>Results for {{ $result['url'] }}</h3>
-            <p><b>Title:</b> {{ $result['title'] ?? 'N/A' }}</p>
-            <p><b>Description:</b> {{ $result['description'] ?? 'N/A' }}</p>
-            <p><b>Word Count:</b> {{ $result['word_count'] }}</p>
-            
-            <h5>H1:</h5>
-            <ul>
-                @foreach($result['h1'] as $h)
-                    <li>{{ $h }}</li>
-                @endforeach
-            </ul>
+        @if(isset($result['error']))
+            <div class="alert alert-danger">{{ $result['error'] }}</div>
+        @elseif(isset($result))
+            <div class="card">
+                <div class="card-body">
+                    <h5>Analyzed URL: <a href="{{ $result['url'] }}" target="_blank">{{ $result['url'] }}</a></h5>
+                    <p><strong>Title:</strong> {{ $result['title'] ?? 'N/A' }}</p>
+                    <p><strong>Description:</strong> {{ $result['description'] ?? 'N/A' }}</p>
+                    <p><strong>Word Count:</strong> {{ $result['word_count'] }}</p>
+                    <p><strong>SEO Score:</strong> {{ $result['score'] }}/100</p>
 
-            <h5>H2:</h5>
-            <ul>
-                @foreach($result['h2'] as $h)
-                    <li>{{ $h }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-</div>
+                    <h6>H1 Tags</h6>
+                    <ul>
+                        @forelse($result['h1'] as $tag)
+                            <li>{{ $tag }}</li>
+                        @empty
+                            <li>None found</li>
+                        @endforelse
+                    </ul>
 
+                    <h6>H2 Tags</h6>
+                    <ul>
+                        @forelse($result['h2'] as $tag)
+                            <li>{{ $tag }}</li>
+                        @empty
+                            <li>None found</li>
+                        @endforelse
+                    </ul>
+
+                    <h6>Recommendations</h6>
+                    <ul>
+                        @foreach($result['recommendations'] as $rec)
+                            <li>{{ $rec }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+    </div>
 </body>
 </html>
