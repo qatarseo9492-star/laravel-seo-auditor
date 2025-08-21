@@ -6,7 +6,7 @@
 <style>
 /* ===== Base ===== */
 body {
-  background:#0b0b10;
+  background:#0a0a0f;
   color:#eee;
   font-family:'Inter','Poppins',sans-serif;
   overflow-x:hidden;
@@ -15,138 +15,114 @@ body {
 :root {
   --purple:#5a189a;
   --orange:#ff8500;
+  --teal:#03dac6;
+  --blue:#2196f3;
   --dark:#111119;
 }
 
-/* ===== Pure CSS Cloud Effect ===== */
-.clouds {
-  position: fixed;
-  top:0; left:0; width:100%; height:100%;
-  overflow:hidden; pointer-events:none;
-  z-index:0;
-}
-.clouds span {
-  position:absolute;
-  width:600px;height:600px;
-  border-radius:50%;
-  filter: blur(150px);
-  opacity:0.35;
-  animation: drift 120s linear infinite;
-}
-/* Purplish layers rising from one side */
-.clouds span:nth-child(1) {
-  background:rgba(123,31,162,0.5);
-  bottom:-200px; left:-200px;
-  animation-delay:0s;
-}
-.clouds span:nth-child(2) {
-  background:rgba(179,136,255,0.4);
-  bottom:-250px; left:100px;
-  animation-delay:20s;
-}
-.clouds span:nth-child(3) {
-  background:rgba(90,24,154,0.35);
-  bottom:-200px; left:400px;
-  animation-delay:40s;
-}
-.clouds span:nth-child(4) {
-  background:rgba(255,133,0,0.25);
-  bottom:-300px; left:200px;
-  animation-delay:60s;
-}
-
-@keyframes drift {
-  0%   {transform: translate(0,0) scale(1); opacity:.35;}
-  50%  {transform: translate(300px,-400px) scale(1.3); opacity:.25;}
-  100% {transform: translate(600px,-800px) scale(1.6); opacity:0;}
-}
-
-/* ===== Navbar ===== */
+/* ===== Navbar Dark + Accents ===== */
 .navbar {
-  background: var(--purple) !important;
+  background:#050508 !important;
   border-bottom:2px solid var(--orange);
-  box-shadow:0 2px 10px rgba(0,0,0,.6);
-  position:relative; z-index:3;
+  box-shadow:0 2px 12px rgba(0,0,0,.7);
+  position:relative; z-index:5;
 }
 .navbar-brand {
-  font-weight:800;font-size:1.6rem;
+  font-weight:800; font-size:1.6rem;
   color:var(--orange) !important;
 }
 .nav-link {
-  font-weight:500;color:#f0e6ff !important;margin:0 12px;
-  transition:color .3s;
+  font-weight:500; color:#d9cfff !important; margin:0 12px;
+  transition:color .3s, text-shadow .3s;
 }
-.nav-link:hover { color:var(--orange)!important; }
+.nav-link:hover, .nav-link.active {
+  color:var(--purple)!important;
+  text-shadow:0 0 8px var(--orange);
+}
 
 /* ===== Hero ===== */
 .hero {
   min-height:90vh;
-  display:flex;align-items:center;justify-content:center;flex-direction:column;
-  text-align:center;position:relative;z-index:2;padding:0 20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;position:relative;z-index:1;padding:0 20px;
 }
 .hero h1 {
   font-size:3.5rem;font-weight:800;
-  background:linear-gradient(90deg,var(--orange),#ffb347);
+  background:linear-gradient(90deg,var(--orange),#ffb347,var(--purple));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-.hero p {margin-top:20px;color:#ccc;max-width:640px;}
+.hero p {margin-top:20px;color:#aaa;max-width:640px;}
 .btn-hero {
   margin-top:30px;padding:14px 36px;border-radius:40px;
   font-weight:600;font-size:1rem;color:#fff;border:none;
-  background:linear-gradient(90deg,var(--orange),#ffba66);
+  background:linear-gradient(90deg,var(--purple),var(--orange));
   box-shadow:0 6px 18px rgba(255,133,0,.5);
   transition:.3s;
 }
-.btn-hero:hover {
-  transform:scale(1.05) translateY(-3px);
-  box-shadow:0 10px 24px rgba(255,179,71,.6);
-}
+.btn-hero:hover { transform:scale(1.05) translateY(-3px);
+  box-shadow:0 10px 30px rgba(255,133,0,.6); }
 
 /* ===== Features ===== */
 .features {
-  background:var(--dark);padding:100px 0;position:relative;z-index:2;
+  background:var(--dark);padding:100px 0;position:relative;z-index:1;
 }
 .features h2 {
   text-align:center;margin-bottom:60px;font-size:2.4rem;font-weight:700;
   background:linear-gradient(90deg,var(--orange),var(--purple));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
+
 .feature-box {
-  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-  border-radius:20px;padding:40px 25px;text-align:center;color:#fff;
-  transition:.3s;
+  background:linear-gradient(160deg,#141016,#1a0d20);
+  border:2px solid rgba(255,133,0,.4);
+  border-radius:18px;
+  padding:40px 25px; text-align:center; color:#fff;
+  transition:.4s;box-shadow:0 0 15px rgba(0,0,0,.5);
+  position:relative;
 }
-.feature-box:hover { transform:translateY(-8px); box-shadow:0 10px 20px rgba(0,0,0,0.6);}
+.feature-box:hover {
+  transform:translateY(-10px);
+  box-shadow:0 0 30px rgba(255,133,0,.8),0 0 20px rgba(91,24,154,.8) inset;
+}
 .feature-icon {font-size:2.6rem;margin-bottom:15px;}
 .feature-title {font-size:1.3rem;font-weight:600;margin-bottom:12px;}
-.feature-text {font-size:.95rem;color:#ddd;}
+.feature-text {font-size:.95rem;color:#ccc;}
+
+.feature-box.audit { border-color:var(--purple);}
+.feature-box.keyword { border-color:var(--blue);}
+.feature-box.optimizer {border-color:var(--orange);}
 
 .btn-tool {
   margin-top:20px;padding:10px 26px;border:none;
   border-radius:24px;font-weight:600;
   background:linear-gradient(90deg,var(--purple),var(--orange));
-  color:#fff;transition:.3s;
+  color:#fff;transition:.35s;
 }
-.btn-tool:hover {transform:scale(1.05);box-shadow:0 0 18px rgba(255,133,0,.6);}
+.btn-tool:hover {
+  transform:scale(1.07);
+  box-shadow:0 0 22px rgba(255,133,0,.65);
+}
 
 /* ===== CTA ===== */
 .cta {
   max-width:950px;margin:80px auto;padding:70px 20px;
   border-radius:20px;text-align:center;color:#fff;
   background:linear-gradient(120deg,var(--purple),var(--orange));
+  box-shadow:0 0 40px rgba(255,133,0,0.4);
 }
 .cta h3{font-size:2rem;font-weight:700;}
 .cta p{max-width:600px;margin:15px auto 25px;}
-.cta .btn-light{padding:12px 28px;border-radius:28px;font-weight:600;}
+.cta .btn-light{
+  padding:12px 28px;border-radius:28px;font-weight:600;
+  background:#fff;color:#333;border:none;
+  transition:.3s;
+}
+.cta .btn-light:hover{
+  background:var(--orange);
+  color:#fff;
+  box-shadow:0 0 20px rgba(255,133,0,.6);
+}
 </style>
-
-{{-- CLOUDS (Pure CSS) --}}
-<div class="clouds">
-  <span></span>
-  <span></span>
-  <span></span>
-  <span></span>
-</div>
 
 {{-- HERO --}}
 <div class="hero">
@@ -160,26 +136,26 @@ body {
   <h2>⚡ Our SEO Tools</h2>
   <div class="row g-4">
     <div class="col-md-4">
-      <div class="feature-box">
+      <div class="feature-box audit h-100">
         <div class="feature-icon">📝</div>
         <h4 class="feature-title">SEO Audit</h4>
-        <p class="feature-text">Find technical SEO issues, broken links & site errors.</p>
+        <p class="feature-text">Find technical SEO issues, broken links & site errors automatically.</p>
         <a href="{{ route('seo.audit.index') }}" class="btn-tool">Run Audit</a>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="feature-box">
+      <div class="feature-box keyword h-100">
         <div class="feature-icon">🔑</div>
         <h4 class="feature-title">Keyword Analyzer</h4>
-        <p class="feature-text">Discover semantic variations & keyword opportunities.</p>
+        <p class="feature-text">Analyze density, discover semantic opportunities & competitor gaps.</p>
         <a href="{{ route('seo.keyword.index') }}" class="btn-tool">Analyze</a>
       </div>
     </div>
     <div class="col-md-4">
-      <div class="feature-box">
+      <div class="feature-box optimizer h-100">
         <div class="feature-icon">⚡</div>
         <h4 class="feature-title">Content Optimizer</h4>
-        <p class="feature-text">AI improvements for headings, metadata & flow.</p>
+        <p class="feature-text">Get AI recommendations for headings, metadata & flow to boost SEO.</p>
         <a href="{{ route('seo.optimizer.index') }}" class="btn-tool">Optimize</a>
       </div>
     </div>
