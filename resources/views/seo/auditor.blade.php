@@ -36,7 +36,9 @@
             <div class="card shadow-lg border-0">
                 <div class="card-header bg-gradient text-white">
                     <h4 class="mb-0">SEO Report for 
-                        <a href="{{ $result['url'] }}" target="_blank" class="text-white">{{ $result['url'] }}</a>
+                        <a href="{{ $result['url'] ?? '#' }}" target="_blank" class="text-white">
+                            {{ $result['url'] ?? 'N/A' }}
+                        </a>
                     </h4>
                 </div>
 
@@ -64,7 +66,7 @@
                                 <div class="accordion-body">
                                     <p><strong>Title:</strong> {{ $result['title'] ?? 'N/A' }}</p>
                                     <p><strong>Description:</strong> {{ $result['description'] ?? 'N/A' }}</p>
-                                    <p><strong>Word Count:</strong> {{ $result['word_count'] }}</p>
+                                    <p><strong>Word Count:</strong> {{ $result['word_count'] ?? 0 }}</p>
                                 </div>
                             </div>
                         </div>
@@ -82,19 +84,23 @@
                                 <div class="accordion-body">
                                     <h6>H1 Tags</h6>
                                     <ul>
-                                        @forelse($result['h1'] as $tag)
-                                            <li>{{ $tag }}</li>
-                                        @empty
+                                        @if(!empty($result['h1']))
+                                            @foreach($result['h1'] as $tag)
+                                                <li>{{ $tag }}</li>
+                                            @endforeach
+                                        @else
                                             <li>No H1 tags found</li>
-                                        @endforelse
+                                        @endif
                                     </ul>
                                     <h6>H2 Tags</h6>
                                     <ul>
-                                        @forelse($result['h2'] as $tag)
-                                            <li>{{ $tag }}</li>
-                                        @empty
+                                        @if(!empty($result['h2']))
+                                            @foreach($result['h2'] as $tag)
+                                                <li>{{ $tag }}</li>
+                                            @endforeach
+                                        @else
                                             <li>No H2 tags found</li>
-                                        @endforelse
+                                        @endif
                                     </ul>
                                 </div>
                             </div>
@@ -112,9 +118,13 @@
                                  data-bs-parent="#seoReportAccordion">
                                 <div class="accordion-body">
                                     <ul class="list-group list-group-flush">
-                                        @foreach($result['recommendations'] as $rec)
-                                            <li class="list-group-item">{{ $rec }}</li>
-                                        @endforeach
+                                        @if(!empty($result['recommendations']))
+                                            @foreach($result['recommendations'] as $rec)
+                                                <li class="list-group-item">{{ $rec }}</li>
+                                            @endforeach
+                                        @else
+                                            <li class="list-group-item">No recommendations found.</li>
+                                        @endif
                                     </ul>
                                 </div>
                             </div>
@@ -137,40 +147,54 @@
 
                                     <h6>Related Topics & Entities</h6>
                                     <ul>
-                                        @forelse($result['related_topics'] as $topic)
-                                            <li>{{ $topic }}</li>
-                                        @empty
+                                        @if(!empty($result['related_topics']))
+                                            @foreach($result['related_topics'] as $topic)
+                                                <li>{{ $topic }}</li>
+                                            @endforeach
+                                        @else
                                             <li>No related topics found.</li>
-                                        @endforelse
+                                        @endif
                                     </ul>
 
                                     <h6>Competitor Content Gaps</h6>
                                     <ul>
-                                        @forelse($result['competitor_gaps'] as $gap)
-                                            <li>{{ $gap }}</li>
-                                        @empty
+                                        @if(!empty($result['competitor_gaps']))
+                                            @foreach($result['competitor_gaps'] as $gap)
+                                                <li>{{ $gap }}</li>
+                                            @endforeach
+                                        @else
                                             <li>No competitor gaps identified.</li>
-                                        @endforelse
+                                        @endif
                                     </ul>
 
                                     <h6>Suggested Content Outline</h6>
                                     <p><strong>H1:</strong> {{ $result['content_outline']['h1'] ?? 'N/A' }}</p>
-                                    <ul>
-                                        @foreach(($result['content_outline']['h2'] ?? []) as $h2)
-                                            <li><strong>H2:</strong> {{ $h2 }}</li>
-                                            <ul>
-                                                @foreach(($result['content_outline']['h3'] ?? []) as $h3)
-                                                    <li><em>H3:</em> {{ $h3 }}</li>
-                                                @endforeach
-                                            </ul>
-                                        @endforeach
-                                    </ul>
+                                    @if(!empty($result['content_outline']['h2']))
+                                        <ul>
+                                            @foreach(($result['content_outline']['h2'] ?? []) as $h2)
+                                                <li><strong>H2:</strong> {{ $h2 }}</li>
+                                                @if(!empty($result['content_outline']['h3']))
+                                                    <ul>
+                                                        @foreach(($result['content_outline']['h3'] ?? []) as $h3)
+                                                            <li><em>H3:</em> {{ $h3 }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        <p>No suggested content outline available.</p>
+                                    @endif
 
                                     <h6>SEO Action Checklist</h6>
                                     <ul class="list-group list-group-flush">
-                                        @foreach($result['seo_actions'] as $action)
-                                            <li class="list-group-item">✅ {{ $action }}</li>
-                                        @endforeach
+                                        @if(!empty($result['seo_actions']))
+                                            @foreach($result['seo_actions'] as $action)
+                                                <li class="list-group-item">✅ {{ $action }}</li>
+                                            @endforeach
+                                        @else
+                                            <li class="list-group-item">No checklist generated.</li>
+                                        @endif
                                     </ul>
                                 </div>
                             </div>
@@ -181,7 +205,7 @@
                     {{-- Action Buttons --}}
                     <div class="mt-4">
                         <a href="{{ url('/') }}" class="btn btn-secondary">⬅ Back to Home</a>
-                        <a href="{{ url('/seo-audit?url=' . urlencode($result['url']) . '&download=pdf') }}" 
+                        <a href="{{ url('/seo-audit?url=' . urlencode($result['url'] ?? '') . '&download=pdf') }}" 
                            class="btn btn-danger">📄 Download PDF Report</a>
                     </div>
 
@@ -223,8 +247,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    {{-- Chart.js with slim donut and center number --}}
-    @if(isset($result) && !isset($result['error']))
+    // Chart.js with slim donut and center number
+    @if(isset($result) && isset($result['score']))
     const score = {{ $result['score'] }};
     const remaining = 100 - score;
     const ctx = document.getElementById('seoScoreChart').getContext('2d');
@@ -245,10 +269,7 @@ document.addEventListener("DOMContentLoaded", function () {
             responsive: false,
             maintainAspectRatio: false,
             cutout: '85%',
-            plugins: {
-                legend: { display: false },
-                tooltip: { enabled: false }
-            }
+            plugins: { legend: { display: false }, tooltip: { enabled: false } }
         },
         plugins: [{
             id: 'centerText',
@@ -259,7 +280,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ctx.fillStyle = score >= 70 ? '#28a745' : (score >= 40 ? '#ffc107' : '#dc3545');
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(score + '/100', width / 2, height / 2);
+                ctx.fillText(score + '/100', width/2, height/2);
             }
         }]
     });
