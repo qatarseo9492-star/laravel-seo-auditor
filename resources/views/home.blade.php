@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Jagoowala - Home')
+@section('title', 'Jagoowala - SEO Audit Tool')
 
 @section('content')
 <style>
@@ -16,7 +16,7 @@ body {
   --purple:#6a0dad;
   --orange:#ff8500;
   --blue:#2196f3;
-  --dark:#111119;
+  --dark:#0d0017;
 }
 
 /* ===== Smoke Effect ===== */
@@ -30,7 +30,7 @@ body {
   position:absolute;
   width:800px; height:800px;
   border-radius:50%;
-  background:radial-gradient(circle, rgba(106,13,173,0.4) 0%, rgba(0,0,0,0) 70%);
+  background:radial-gradient(circle, rgba(106,13,173,0.35) 0%, rgba(0,0,0,0) 70%);
   filter:blur(120px);
   animation: drift 100s linear infinite;
 }
@@ -89,17 +89,15 @@ body {
   box-shadow:0 10px 28px rgba(255,133,0,.6);
 }
 
-/* ===== Features Section ===== */
+/* ===== Features ===== */
 .features {
   padding:100px 0;
   position:relative; z-index:2;
 }
 .features h2 {
   text-align:center; margin-bottom:60px; font-size:2.6rem; font-weight:800;
-  letter-spacing:1px;
   background:linear-gradient(90deg,var(--orange),var(--purple),var(--orange));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .features h2::after {
   content:""; display:block; width:60px; height:4px; margin:15px auto 0;
@@ -159,30 +157,31 @@ body {
 
 /* ===== Footer ===== */
 .site-footer {
-  background:#0d0017;
+  background:#080010; /* darker than main background */
   border-top:2px solid var(--purple);
   text-align:center;
-  padding:18px;
+  padding:20px;
   margin-top:60px;
-  color:#ccc;
   font-family:'Poppins',sans-serif;
-  z-index:5;
 }
-.site-footer .footer-name {
-  font-size:1.2rem;
+.site-footer .footer-text {
+  font-size:0.95rem;
+  color:#d3c9e6;
+  line-height:1.6;
+}
+.footer-brand {
   font-weight:700;
-  background:linear-gradient(90deg, var(--orange), var(--purple), var(--blue));
+  background:linear-gradient(90deg, #ff8500, #ffb347, #9b4dff);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
-.site-footer .footer-first {
+.footer-highlight {
   color:#ffb347;
-  text-shadow: 0 0 6px rgba(255,133,0,0.8),
-               0 0 12px rgba(106,13,173,0.5);
+  font-weight:600;
 }
 </style>
 
-{{-- SMOKE EFFECT LAYER --}}
+{{-- SMOKE EFFECT --}}
 <div class="smoke">
   <span></span><span></span><span></span><span></span>
 </div>
@@ -234,10 +233,10 @@ body {
 
 {{-- FOOTER --}}
 <footer class="site-footer">
-  <p>
-    <span class="footer-name">
-      ⭐ <span class="footer-first">Ja</span>goowala ⭐⭐
-    </span>
+  <p class="footer-text">
+    ♥️♥️ Crafted by <span class="footer-brand">Jagoowala</span> ♥️♥️ 
+    © 2025 <span class="footer-highlight">SEO Audit Tool</span> • Crafted with ❤️ in Laravel + Bootstrap. 
+    ♥️♥️ Crafted by <span class="footer-brand">Jagoowala</span> ♥️♥️
   </p>
 </footer>
 
