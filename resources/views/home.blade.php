@@ -6,7 +6,7 @@
 <style>
 /* ===== Base ===== */
 body {
-  background:#0a0a0f;
+  background: linear-gradient(160deg, #14021f, #1c0530, #0d0017); /* Dark purple gradient background */
   color:#eee;
   font-family:'Inter','Poppins',sans-serif;
   overflow-x:hidden;
@@ -15,43 +15,44 @@ body {
 :root {
   --purple:#5a189a;
   --orange:#ff8500;
-  --teal:#03dac6;
   --blue:#2196f3;
+  --teal:#03dac6;
   --dark:#111119;
 }
 
-/* ===== Navbar Dark + Accents ===== */
+/* ===== Navbar ===== */
 .navbar {
-  background:#050508 !important;
+  background:#1a092f !important; /* dark purple */
   border-bottom:2px solid var(--orange);
-  box-shadow:0 2px 12px rgba(0,0,0,.7);
-  position:relative; z-index:5;
+  box-shadow:0 3px 12px rgba(0,0,0,.6);
+  position:relative; z-index:10;
 }
 .navbar-brand {
-  font-weight:800; font-size:1.6rem;
+  font-weight:800;font-size:1.6rem;
   color:var(--orange) !important;
 }
 .nav-link {
-  font-weight:500; color:#d9cfff !important; margin:0 12px;
+  font-weight:500;color:#e0d7f5 !important;margin:0 12px;
   transition:color .3s, text-shadow .3s;
 }
 .nav-link:hover, .nav-link.active {
-  color:var(--purple)!important;
-  text-shadow:0 0 8px var(--orange);
+  color:var(--orange)!important;
+  text-shadow:0 0 8px var(--purple);
 }
 
 /* ===== Hero ===== */
 .hero {
-  min-height:90vh;
+  min-height:92vh;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;position:relative;z-index:1;padding:0 20px;
+  text-align:center;position:relative;z-index:2;padding:0 20px;
 }
 .hero h1 {
-  font-size:3.5rem;font-weight:800;
+  font-size:3.6rem;font-weight:800;
   background:linear-gradient(90deg,var(--orange),#ffb347,var(--purple));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
-.hero p {margin-top:20px;color:#aaa;max-width:640px;}
+.hero p {margin-top:20px;color:#ccc;max-width:640px;}
 .btn-hero {
   margin-top:30px;padding:14px 36px;border-radius:40px;
   font-weight:600;font-size:1rem;color:#fff;border:none;
@@ -59,38 +60,35 @@ body {
   box-shadow:0 6px 18px rgba(255,133,0,.5);
   transition:.3s;
 }
-.btn-hero:hover { transform:scale(1.05) translateY(-3px);
-  box-shadow:0 10px 30px rgba(255,133,0,.6); }
+.btn-hero:hover {
+  transform:scale(1.05) translateY(-3px);
+  box-shadow:0 10px 30px rgba(255,133,0,.6);
+}
 
-/* ===== Features ===== */
+/* ===== Features Section ===== */
 .features {
-  background:var(--dark);padding:100px 0;position:relative;z-index:1;
+  padding:100px 0;position:relative;z-index:2;
 }
 .features h2 {
   text-align:center;margin-bottom:60px;font-size:2.4rem;font-weight:700;
   background:linear-gradient(90deg,var(--orange),var(--purple));
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-
 .feature-box {
-  background:linear-gradient(160deg,#141016,#1a0d20);
-  border:2px solid rgba(255,133,0,.4);
-  border-radius:18px;
-  padding:40px 25px; text-align:center; color:#fff;
-  transition:.4s;box-shadow:0 0 15px rgba(0,0,0,.5);
-  position:relative;
+  background:linear-gradient(160deg,#220a33,#12051d);
+  border:2px solid rgba(255,133,0,.5);
+  border-radius:20px;
+  padding:40px 25px;text-align:center;color:#fff;
+  transition:.3s;box-shadow:0 0 15px rgba(0,0,0,.4);
 }
-.feature-box:hover {
-  transform:translateY(-10px);
-  box-shadow:0 0 30px rgba(255,133,0,.8),0 0 20px rgba(91,24,154,.8) inset;
-}
+.feature-box:hover { transform:translateY(-8px); box-shadow:0 0 28px rgba(255,133,0,.6);}
 .feature-icon {font-size:2.6rem;margin-bottom:15px;}
 .feature-title {font-size:1.3rem;font-weight:600;margin-bottom:12px;}
 .feature-text {font-size:.95rem;color:#ccc;}
 
 .feature-box.audit { border-color:var(--purple);}
 .feature-box.keyword { border-color:var(--blue);}
-.feature-box.optimizer {border-color:var(--orange);}
+.feature-box.optimizer { border-color:var(--orange);}
 
 .btn-tool {
   margin-top:20px;padding:10px 26px;border:none;
@@ -139,7 +137,7 @@ body {
       <div class="feature-box audit h-100">
         <div class="feature-icon">📝</div>
         <h4 class="feature-title">SEO Audit</h4>
-        <p class="feature-text">Find technical SEO issues, broken links & site errors automatically.</p>
+        <p class="feature-text">Find technical SEO issues, broken links & errors quickly.</p>
         <a href="{{ route('seo.audit.index') }}" class="btn-tool">Run Audit</a>
       </div>
     </div>
@@ -147,7 +145,7 @@ body {
       <div class="feature-box keyword h-100">
         <div class="feature-icon">🔑</div>
         <h4 class="feature-title">Keyword Analyzer</h4>
-        <p class="feature-text">Analyze density, discover semantic opportunities & competitor gaps.</p>
+        <p class="feature-text">Analyze density, discover semantic gaps & competitor strengths.</p>
         <a href="{{ route('seo.keyword.index') }}" class="btn-tool">Analyze</a>
       </div>
     </div>
@@ -155,7 +153,7 @@ body {
       <div class="feature-box optimizer h-100">
         <div class="feature-icon">⚡</div>
         <h4 class="feature-title">Content Optimizer</h4>
-        <p class="feature-text">Get AI recommendations for headings, metadata & flow to boost SEO.</p>
+        <p class="feature-text">AI suggestions for headings, metadata & content flow boosts.</p>
         <a href="{{ route('seo.optimizer.index') }}" class="btn-tool">Optimize</a>
       </div>
     </div>
