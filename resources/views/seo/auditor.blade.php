@@ -2,6 +2,11 @@
 
 @section('content')
 
+{{-- Dark Mode Toggle (moved to top to be consistent) --}}
+<div class="text-center mb-4">
+    <button id="darkModeToggle" class="btn btn-outline-dark">🌙 Toggle Dark Mode</button>
+</div>
+
 <div class="row justify-content-center">
     <div class="col-lg-10">
 
@@ -40,17 +45,16 @@
                     {{-- SEO Score with Chart --}}
                     <h5 class="fw-bold">Overall SEO Score</h5>
                     <div class="d-flex align-items-center justify-content-center my-4">
-                        {{-- Keep fixed size to stop over-scaling --}}
                         <canvas id="seoScoreChart" width="200" height="200"></canvas>
                     </div>
 
-                    {{-- Accordion with details --}}
+                    {{-- Accordion --}}
                     <div class="accordion" id="seoReportAccordion">
-                        
+
                         {{-- Meta Info --}}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingMeta">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" 
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                         data-bs-target="#collapseMeta" aria-expanded="true">
                                     Meta Information
                                 </button>
@@ -68,12 +72,12 @@
                         {{-- Headings --}}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingHeadings">
-                                <button class="accordion-button collapsed" type="button" 
+                                <button class="accordion-button collapsed" type="button"
                                         data-bs-toggle="collapse" data-bs-target="#collapseHeadings">
                                     Headings (H1 & H2)
                                 </button>
                             </h2>
-                            <div id="collapseHeadings" class="accordion-collapse collapse" 
+                            <div id="collapseHeadings" class="accordion-collapse collapse"
                                  data-bs-parent="#seoReportAccordion">
                                 <div class="accordion-body">
                                     <h6>H1 Tags</h6>
@@ -104,7 +108,7 @@
                                     Recommendations
                                 </button>
                             </h2>
-                            <div id="collapseRecs" class="accordion-collapse collapse" 
+                            <div id="collapseRecs" class="accordion-collapse collapse"
                                  data-bs-parent="#seoReportAccordion">
                                 <div class="accordion-body">
                                     <ul class="list-group list-group-flush">
@@ -115,31 +119,75 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
                     {{-- Action Buttons --}}
                     <div class="mt-4">
                         <a href="{{ url('/') }}" class="btn btn-secondary">⬅ Back to Home</a>
-                        <a href="{{ url('/seo-audit?url=' . urlencode($result['url']) . '&download=pdf') }}" 
+                        <a href="{{ url('/seo-audit?url=' . urlencode($result['url']) . '&download=pdf') }}"
                            class="btn btn-danger">📄 Download PDF Report</a>
                     </div>
-
                 </div>
             </div>
         @endif
     </div>
 </div>
 
-{{-- Chart.js --}}
+{{-- Dark Mode Styles --}}
+<style>
+    body.dark-mode {
+        background: #121212;
+        color: #f1f1f1;
+    }
+    body.dark-mode .card {
+        background: #1e1e1e;
+        color: #f1f1f1;
+    }
+    body.dark-mode .navbar {
+        background: linear-gradient(90deg, #222, #444);
+    }
+    body.dark-mode footer {
+        background: #1e1e1e;
+        border-top: 1px solid #333;
+        color: #aaa;
+    }
+    body.dark-mode .btn-outline-dark {
+        border-color: #ccc;
+        color: #ccc;
+    }
+    body.dark-mode .btn-outline-dark:hover {
+        background: #333;
+        color: #fff;
+    }
+</style>
+
+{{-- Scripts --}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // Dark Mode Toggle
+    const toggleBtn = document.getElementById("darkModeToggle");
+    const body = document.body;
+    if (localStorage.getItem("theme") === "dark") {
+        body.classList.add("dark-mode");
+        toggleBtn.textContent = "☀️ Toggle Light Mode";
+    }
+    toggleBtn.addEventListener("click", () => {
+        body.classList.toggle("dark-mode");
+        if (body.classList.contains("dark-mode")) {
+            localStorage.setItem("theme", "dark");
+            toggleBtn.textContent = "☀️ Toggle Light Mode";
+        } else {
+            localStorage.setItem("theme", "light");
+            toggleBtn.textContent = "🌙 Toggle Dark Mode";
+        }
+    });
+
+    {{-- Chart.js with slim donut and center number --}}
     @if(isset($result) && !isset($result['error']))
     const score = {{ $result['score'] }};
     const remaining = 100 - score;
-
-    const ctx = document.getElementById('seoScoreChart').getContext('2d'); 
+    const ctx = document.getElementById('seoScoreChart').getContext('2d');
 
     new Chart(ctx, {
         type: 'doughnut',
@@ -154,9 +202,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }]
         },
         options: {
-            responsive: false,            // stop over-scaling
-            maintainAspectRatio: false,   // keep fixed
-            cutout: '85%',                // makes donut slimmer
+            responsive: false,
+            maintainAspectRatio: false,
+            cutout: '85%',
             plugins: {
                 legend: { display: false },
                 tooltip: { enabled: false }
