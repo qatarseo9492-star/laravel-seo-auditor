@@ -4,37 +4,38 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class KeywordAnalysisController extends Controller
+class SeoOptimizerController extends Controller
 {
     /**
-     * Show the keyword analysis input form.
+     * Show the SEO Content Optimizer form.
      */
     public function index()
     {
-        return view('seo.keyword-analysis');
+        return view('seo.optimizer'); // Blade file: resources/views/seo/optimizer.blade.php
     }
 
     /**
-     * Process the keyword analysis.
+     * Analyze given URL + keyword and provide optimization suggestions.
      */
     public function analyze(Request $request)
     {
         $request->validate([
-            'content' => 'required|string',
+            'url' => 'required|url',
             'keyword' => 'required|string'
         ]);
 
-        $content = $request->input('content');
+        $url = $request->input('url');
         $keyword = strtolower($request->input('keyword'));
 
-        $count = substr_count(strtolower($content), $keyword);
-
-        $results = [
-            'keyword' => $keyword,
-            'count'   => $count,
-            'density' => round(($count / str_word_count($content)) * 100, 2)
+        // ⚡ Starter placeholder suggestions
+        $suggestions = [
+            "Include '{$keyword}' in the <title> tag of $url if missing.",
+            "Use '{$keyword}' at least once within an <h2> heading.",
+            "Add the keyword '{$keyword}' 2-3 more times in the body while keeping it natural.",
+            "Add an image with alt text containing '{$keyword}'.",
+            "Ensure meta description contains '{$keyword}' naturally."
         ];
 
-        return view('seo.keyword-results', compact('results', 'content'));
+        return view('seo.optimizer-results', compact('url', 'keyword', 'suggestions'));
     }
 }
