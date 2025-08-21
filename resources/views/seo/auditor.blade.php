@@ -2,7 +2,7 @@
 
 @section('content')
 
-{{-- Dark Mode Toggle (moved to top to be consistent) --}}
+{{-- Dark Mode Toggle --}}
 <div class="text-center mb-4">
     <button id="darkModeToggle" class="btn btn-outline-dark">🌙 Toggle Dark Mode</button>
 </div>
@@ -54,7 +54,7 @@
                         {{-- Meta Info --}}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingMeta">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" 
                                         data-bs-target="#collapseMeta" aria-expanded="true">
                                     Meta Information
                                 </button>
@@ -72,12 +72,12 @@
                         {{-- Headings --}}
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="headingHeadings">
-                                <button class="accordion-button collapsed" type="button"
+                                <button class="accordion-button collapsed" type="button" 
                                         data-bs-toggle="collapse" data-bs-target="#collapseHeadings">
                                     Headings (H1 & H2)
                                 </button>
                             </h2>
-                            <div id="collapseHeadings" class="accordion-collapse collapse"
+                            <div id="collapseHeadings" class="accordion-collapse collapse" 
                                  data-bs-parent="#seoReportAccordion">
                                 <div class="accordion-body">
                                     <h6>H1 Tags</h6>
@@ -108,7 +108,7 @@
                                     Recommendations
                                 </button>
                             </h2>
-                            <div id="collapseRecs" class="accordion-collapse collapse"
+                            <div id="collapseRecs" class="accordion-collapse collapse" 
                                  data-bs-parent="#seoReportAccordion">
                                 <div class="accordion-body">
                                     <ul class="list-group list-group-flush">
@@ -119,14 +119,72 @@
                                 </div>
                             </div>
                         </div>
+
+                        {{-- Advanced SEO Strategy --}}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingAdvanced">
+                                <button class="accordion-button collapsed" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#collapseAdvanced">
+                                    Advanced SEO Strategy
+                                </button>
+                            </h2>
+                            <div id="collapseAdvanced" class="accordion-collapse collapse"
+                                 data-bs-parent="#seoReportAccordion">
+                                <div class="accordion-body">
+
+                                    <p><strong>Primary Keyword:</strong> {{ $result['primary_keyword'] ?? 'Not detected' }}</p>
+                                    <p><strong>Search Intent:</strong> {{ $result['search_intent'] ?? 'N/A' }}</p>
+
+                                    <h6>Related Topics & Entities</h6>
+                                    <ul>
+                                        @forelse($result['related_topics'] as $topic)
+                                            <li>{{ $topic }}</li>
+                                        @empty
+                                            <li>No related topics found.</li>
+                                        @endforelse
+                                    </ul>
+
+                                    <h6>Competitor Content Gaps</h6>
+                                    <ul>
+                                        @forelse($result['competitor_gaps'] as $gap)
+                                            <li>{{ $gap }}</li>
+                                        @empty
+                                            <li>No competitor gaps identified.</li>
+                                        @endforelse
+                                    </ul>
+
+                                    <h6>Suggested Content Outline</h6>
+                                    <p><strong>H1:</strong> {{ $result['content_outline']['h1'] ?? 'N/A' }}</p>
+                                    <ul>
+                                        @foreach(($result['content_outline']['h2'] ?? []) as $h2)
+                                            <li><strong>H2:</strong> {{ $h2 }}</li>
+                                            <ul>
+                                                @foreach(($result['content_outline']['h3'] ?? []) as $h3)
+                                                    <li><em>H3:</em> {{ $h3 }}</li>
+                                                @endforeach
+                                            </ul>
+                                        @endforeach
+                                    </ul>
+
+                                    <h6>SEO Action Checklist</h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach($result['seo_actions'] as $action)
+                                            <li class="list-group-item">✅ {{ $action }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     {{-- Action Buttons --}}
                     <div class="mt-4">
                         <a href="{{ url('/') }}" class="btn btn-secondary">⬅ Back to Home</a>
-                        <a href="{{ url('/seo-audit?url=' . urlencode($result['url']) . '&download=pdf') }}"
+                        <a href="{{ url('/seo-audit?url=' . urlencode($result['url']) . '&download=pdf') }}" 
                            class="btn btn-danger">📄 Download PDF Report</a>
                     </div>
+
                 </div>
             </div>
         @endif
@@ -135,30 +193,12 @@
 
 {{-- Dark Mode Styles --}}
 <style>
-    body.dark-mode {
-        background: #121212;
-        color: #f1f1f1;
-    }
-    body.dark-mode .card {
-        background: #1e1e1e;
-        color: #f1f1f1;
-    }
-    body.dark-mode .navbar {
-        background: linear-gradient(90deg, #222, #444);
-    }
-    body.dark-mode footer {
-        background: #1e1e1e;
-        border-top: 1px solid #333;
-        color: #aaa;
-    }
-    body.dark-mode .btn-outline-dark {
-        border-color: #ccc;
-        color: #ccc;
-    }
-    body.dark-mode .btn-outline-dark:hover {
-        background: #333;
-        color: #fff;
-    }
+    body.dark-mode { background:#121212; color:#f1f1f1; }
+    body.dark-mode .card { background:#1e1e1e; color:#f1f1f1; }
+    body.dark-mode .navbar { background: linear-gradient(90deg,#222,#444); }
+    body.dark-mode footer { background:#1e1e1e; border-top:1px solid #333; color:#aaa; }
+    body.dark-mode .btn-outline-dark { border-color:#ccc; color:#ccc; }
+    body.dark-mode .btn-outline-dark:hover { background:#333; color:#fff; }
 </style>
 
 {{-- Scripts --}}
