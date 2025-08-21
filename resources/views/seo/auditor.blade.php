@@ -40,6 +40,7 @@
                     {{-- SEO Score with Chart --}}
                     <h5 class="fw-bold">Overall SEO Score</h5>
                     <div class="d-flex align-items-center justify-content-center my-4">
+                        {{-- Keep fixed size to stop over-scaling --}}
                         <canvas id="seoScoreChart" width="200" height="200"></canvas>
                     </div>
 
@@ -137,7 +138,8 @@ document.addEventListener("DOMContentLoaded", function () {
     @if(isset($result) && !isset($result['error']))
     const score = {{ $result['score'] }};
     const remaining = 100 - score;
-    const ctx = document.getElementById('seoScoreChart').getContext('2d');
+
+    const ctx = document.getElementById('seoScoreChart').getContext('2d'); 
 
     new Chart(ctx, {
         type: 'doughnut',
@@ -148,11 +150,13 @@ document.addEventListener("DOMContentLoaded", function () {
                     score >= 70 ? '#28a745' : (score >= 40 ? '#ffc107' : '#dc3545'),
                     '#e1e1e1'
                 ],
-                borderWidth: 0
+                borderWidth: 2
             }]
         },
         options: {
-            cutout: '70%',
+            responsive: false,            // stop over-scaling
+            maintainAspectRatio: false,   // keep fixed
+            cutout: '85%',                // makes donut slimmer
             plugins: {
                 legend: { display: false },
                 tooltip: { enabled: false }
