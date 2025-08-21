@@ -28,20 +28,13 @@
                 <div class="card-header bg-gradient text-white">
                     <h4 class="mb-0">SEO Report for <a href="{{ $result['url'] }}" target="_blank" class="text-white">{{ $result['url'] }}</a></h4>
                 </div>
+
                 <div class="card-body p-4">
-                    
-                    {{-- SEO Score --}}
+
+                    {{-- SEO Score with Chart --}}
                     <h5 class="fw-bold">Overall SEO Score</h5>
-                    <div class="progress mb-3" style="height: 25px;">
-                        <div class="progress-bar 
-                            @if($result['score'] >= 70) bg-success 
-                            @elseif($result['score'] >= 40) bg-warning 
-                            @else bg-danger @endif" 
-                            role="progressbar" 
-                            style="width: {{ $result['score'] }}%;" 
-                            aria-valuenow="{{ $result['score'] }}" aria-valuemin="0" aria-valuemax="100">
-                            {{ $result['score'] }}/100
-                        </div>
+                    <div class="d-flex align-items-center justify-content-center my-4">
+                        <canvas id="seoScoreChart" width="200" height="200"></canvas>
                     </div>
 
                     {{-- Accordion for Details --}}
@@ -123,5 +116,53 @@
         @endif
     </div>
 </div>
+
+{{-- Chart.js for Dynamic Score --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        @if(isset($result))
+        const score = {{ $result['score'] }};
+        const remaining = 100 - score;
+        const ctx = document.getElementById('seoScoreChart').getContext('2d');
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['SEO Score', 'Remaining'],
+                datasets: [{
+                    data: [score, remaining],
+                    backgroundColor: [
+                        score >= 70 ? '#28a745' : (score >= 40 ? '#ffc107' : '#dc3545'),
+                        '#e1e1e1'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '75%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false },
+                    beforeDraw: (chart) => {
+                        const { width } = chart;
+                        const { height } = chart;
+                        const ctx = chart.ctx;
+                        ctx.restore();
+                        ctx.font = 'bold 20px sans-serif';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = score >= 70 ? '#28a745' : (score >= 40 ? '#ffc107' : '#dc3545');
+                        const text = score + '/100';
+                        const textX = Math.round((width - ctx.measureText(text).width) / 2);
+                        const textY = height / 2;
+                        ctx.fillText(text, textX, textY);
+                        ctx.save();
+                    }
+                }
+            }
+        });
+        @endif
+    });
+</script>
 
 @endsection
