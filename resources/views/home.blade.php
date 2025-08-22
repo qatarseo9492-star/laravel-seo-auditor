@@ -12,6 +12,7 @@
             --primary-dark: #6a0dad;
             --secondary: #03dac6;
             --accent: #ff8500;
+            --purple-light: #b892ff;
             --dark: #0f0b1d;
             --darker: #0a0715;
             --darkest: #050310;
@@ -37,19 +38,118 @@
             overflow-x: hidden;
             line-height: 1.6;
             min-height: 100vh;
+            position: relative;
         }
         
-        /* ===== Particle Background ===== */
+        /* Animated gradient background */
+        .gradient-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            opacity: 0.5;
+            background: linear-gradient(125deg, var(--primary-dark), var(--secondary), var(--accent), var(--purple-light));
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Particle Background */
         #particles-js {
             position: fixed;
             width: 100%;
             height: 100%;
             top: 0;
             left: 0;
-            z-index: 0;
+            z-index: -1;
         }
         
-        /* ===== Glassmorphism Effect ===== */
+        /* Floating elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+            filter: blur(40px);
+            animation: float 20s infinite linear;
+        }
+        
+        .float-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 25s;
+        }
+        
+        .float-2 {
+            width: 400px;
+            height: 400px;
+            background: var(--secondary);
+            top: 60%;
+            right: 10%;
+            animation-delay: 5s;
+            animation-duration: 30s;
+        }
+        
+        .float-3 {
+            width: 250px;
+            height: 250px;
+            background: var(--accent);
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 10s;
+            animation-duration: 20s;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            25% {
+                transform: translate(100px, 150px) rotate(90deg);
+            }
+            50% {
+                transform: translate(200px, 0px) rotate(180deg);
+            }
+            75% {
+                transform: translate(100px, -150px) rotate(270deg);
+            }
+            100% {
+                transform: translate(0, 0) rotate(360deg);
+            }
+        }
+        
+        /* Neural network animation */
+        .neural-network {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        /* Glassmorphism Effect */
         .glass {
             background: var(--glass);
             backdrop-filter: blur(12px);
@@ -59,7 +159,7 @@
             box-shadow: var(--shadow);
         }
         
-        /* ===== Navigation ===== */
+        /* Navigation */
         .navbar {
             position: fixed;
             top: 0;
@@ -198,7 +298,7 @@
             background-position: 100% 0;
         }
         
-        /* ===== Hero Section ===== */
+        /* Hero Section */
         .hero {
             min-height: 100vh;
             display: flex;
@@ -225,6 +325,16 @@
             -webkit-text-fill-color: transparent;
             line-height: 1.2;
             text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from {
+                text-shadow: 0 0 10px rgba(3, 218, 198, 0.5), 0 0 20px rgba(3, 218, 198, 0.3);
+            }
+            to {
+                text-shadow: 0 0 15px rgba(138, 43, 226, 0.5), 0 0 30px rgba(138, 43, 226, 0.3), 0 0 40px rgba(255, 133, 0, 0.2);
+            }
         }
         
         .hero-subtitle {
@@ -285,7 +395,90 @@
             font-size: 0.95rem;
         }
         
-        /* ===== Features Section ===== */
+        /* Semantic Visualization */
+        .semantic-visualization {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin: 5rem auto;
+            max-width: 900px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: rgba(15, 11, 29, 0.7);
+            border: 1px solid rgba(138, 43, 226, 0.2);
+        }
+        
+        .visualization-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .central-topic {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            z-index: 3;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(138, 43, 226, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(138, 43, 226, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(138, 43, 226, 0); }
+        }
+        
+        .related-topic {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--purple-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            z-index: 2;
+            animation: floatAround 15s infinite linear;
+        }
+        
+        .topic-1 { top: 20%; left: 20%; animation-delay: 0s; }
+        .topic-2 { top: 20%; right: 20%; animation-delay: 3s; }
+        .topic-3 { bottom: 20%; left: 20%; animation-delay: 6s; }
+        .topic-4 { bottom: 20%; right: 20%; animation-delay: 9s; }
+        .topic-5 { top: 40%; left: 10%; animation-delay: 12s; }
+        
+        @keyframes floatAround {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(10px, 15px); }
+            50% { transform: translate(20px, 0px); }
+            75% { transform: translate(10px, -15px); }
+            100% { transform: translate(0, 0); }
+        }
+        
+        .connection {
+            position: absolute;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            height: 2px;
+            transform-origin: 0 0;
+            z-index: 1;
+            opacity: 0.7;
+        }
+        
+        /* Features Section */
         .features {
             padding: 8rem 5%;
             position: relative;
@@ -399,7 +592,7 @@
             transform: translateX(5px);
         }
         
-        /* ===== Semantic SEO Section ===== */
+        /* Semantic SEO Section */
         .semantic-features {
             padding: 8rem 5%;
             background: rgba(10, 7, 21, 0.7);
@@ -470,87 +663,7 @@
             line-height: 1.7;
         }
         
-        /* ===== Tools Showcase ===== */
-        .tools {
-            padding: 8rem 5%;
-            position: relative;
-        }
-        
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2.5rem;
-            margin-top: 5rem;
-        }
-        
-        .tool-card {
-            padding: 2.5rem;
-            border-radius: var(--radius);
-            transition: var(--transition);
-            background: rgba(15, 11, 29, 0.7);
-            border: 1px solid rgba(138, 43, 226, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .tool-card:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(to right, var(--secondary), var(--primary));
-            transition: var(--transition);
-        }
-        
-        .tool-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        }
-        
-        .tool-card:hover:after {
-            height: 8px;
-        }
-        
-        .tool-icon {
-            font-size: 2.8rem;
-            margin-bottom: 1.5rem;
-            color: var(--secondary);
-        }
-        
-        .tool-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-        
-        .tool-desc {
-            color: var(--text-secondary);
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
-            line-height: 1.7;
-        }
-        
-        .tool-features {
-            list-style: none;
-            margin-bottom: 2rem;
-        }
-        
-        .tool-features li {
-            padding: 0.5rem 0;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-        }
-        
-        .tool-features li i {
-            color: var(--secondary);
-            margin-right: 0.8rem;
-            font-size: 0.9rem;
-        }
-        
-        /* ===== CTA Section ===== */
+        /* CTA Section */
         .cta {
             padding: 8rem 5%;
             text-align: center;
@@ -624,7 +737,7 @@
             color: var(--primary);
         }
         
-        /* ===== Footer ===== */
+        /* Footer */
         footer {
             padding: 6rem 5% 3rem;
             background: var(--darker);
@@ -720,7 +833,7 @@
             font-size: 0.95rem;
         }
         
-        /* ===== Responsive Design ===== */
+        /* Responsive Design */
         @media (max-width: 1200px) {
             .hero-title {
                 font-size: 3.5rem;
@@ -789,6 +902,10 @@
             .footer-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .semantic-visualization {
+                height: 200px;
+            }
         }
         
         /* Mobile menu button */
@@ -826,8 +943,14 @@
     </style>
 </head>
 <body>
-    <!-- Particles Background -->
+    <!-- Background Elements -->
+    <div class="gradient-bg"></div>
     <div id="particles-js"></div>
+    <div class="floating-elements">
+        <div class="floating-element float-1"></div>
+        <div class="floating-element float-2"></div>
+        <div class="floating-element float-3"></div>
+    </div>
 
     <!-- Navigation -->
     <nav class="navbar">
@@ -884,6 +1007,18 @@
             </div>
         </div>
     </section>
+
+    <!-- Semantic Visualization -->
+    <div class="semantic-visualization glass">
+        <div class="visualization-container">
+            <div class="central-topic">SEO</div>
+            <div class="related-topic topic-1">Content</div>
+            <div class="related-topic topic-2">Keywords</div>
+            <div class="related-topic topic-3">Entities</div>
+            <div class="related-topic topic-4">Links</div>
+            <div class="related-topic topic-5">Topics</div>
+        </div>
+    </div>
 
     <!-- Features Section -->
     <section class="features" id="features">
@@ -980,61 +1115,6 @@
         </div>
     </section>
 
-    <!-- Tools Showcase Section -->
-    <section class="tools">
-        <div class="section-header">
-            <h2 class="section-title">Complete SEO Toolkit</h2>
-            <p class="section-subtitle">Everything you need to improve your search engine visibility and drive more organic traffic to your website.</p>
-        </div>
-        
-        <div class="tools-grid">
-            <div class="tool-card">
-                <div class="tool-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3 class="tool-title">Rank Tracker</h3>
-                <p class="tool-desc">Monitor your keyword rankings across search engines and track your SEO progress over time with semantic insights.</p>
-                <ul class="tool-features">
-                    <li><i class="fas fa-check"></i> Semantic ranking factors</li>
-                    <li><i class="fas fa-check"></i> Competitor comparison</li>
-                    <li><i class="fas fa-check"></i> Historical data analysis</li>
-                    <li><i class="fas fa-check"></i> SERP feature tracking</li>
-                </ul>
-                <a href="#" class="btn btn-outline">Learn More</a>
-            </div>
-            
-            <div class="tool-card">
-                <div class="tool-icon">
-                    <i class="fas fa-link"></i>
-                </div>
-                <h3 class="tool-title">Semantic Backlink Analysis</h3>
-                <p class="tool-desc">Analyze your backlink profile with semantic understanding to identify quality links and topical relevance.</p>
-                <ul class="tool-features">
-                    <li><i class="fas fa-check"></i> Topical relevance scoring</li>
-                    <li><i class="fas fa-check"></i> Toxic link detection</li>
-                    <li><i class="fas fa-check"></i> Competitor backlink analysis</li>
-                    <li><i class="fas fa-check"></i> Link context analysis</li>
-                </ul>
-                <a href="#" class="btn btn-outline">Learn More</a>
-            </div>
-            
-            <div class="tool-card">
-                <div class="tool-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3 class="tool-title">Semantic Competitor Analysis</h3>
-                <p class="tool-desc">Spy on your competitors' SEO strategies with semantic understanding to discover opportunities to outrank them.</p>
-                <ul class="tool-features">
-                    <li><i class="fas fa-check"></i> Semantic keyword gap analysis</li>
-                    <li><i class="fas fa-check"></i> Content strategy insights</li>
-                    <li><i class="fas fa-check"></i> Backlink profile comparison</li>
-                    <li><i class="fas fa-check"></i> Topical authority mapping</li>
-                </ul>
-                <a href="#" class="btn btn-outline">Learn More</a>
-            </div>
-        </div>
-    </section>
-
     <!-- CTA Section -->
     <section class="cta">
         <div class="cta-content">
@@ -1103,7 +1183,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             particlesJS('particles-js', {
                 particles: {
-                    number: { value: 100, density: { enable: true, value_area: 800 } },
+                    number: { value: 120, density: { enable: true, value_area: 800 } },
                     color: { value: "#8a2be2" },
                     shape: { type: "circle" },
                     opacity: { value: 0.5, random: true },
@@ -1170,10 +1250,37 @@
             }, options);
             
             observer.observe(statsSection);
+            
+            // Create connections in semantic visualization
+            const visualization = document.querySelector('.visualization-container');
+            const centralTopic = document.querySelector('.central-topic');
+            const relatedTopics = document.querySelectorAll('.related-topic');
+            
+            relatedTopics.forEach(topic => {
+                const centralRect = centralTopic.getBoundingClientRect();
+                const topicRect = topic.getBoundingClientRect();
+                
+                const centralX = centralRect.left + centralRect.width/2;
+                const centralY = centralRect.top + centralRect.height/2;
+                const topicX = topicRect.left + topicRect.width/2;
+                const topicY = topicRect.top + topicRect.height/2;
+                
+                const length = Math.sqrt(Math.pow(topicX - centralX, 2) + Math.pow(topicY - centralY, 2));
+                const angle = Math.atan2(topicY - centralY, topicX - centralX) * 180 / Math.PI;
+                
+                const connection = document.createElement('div');
+                connection.classList.add('connection');
+                connection.style.width = `${length}px`;
+                connection.style.top = `${centralY}px`;
+                connection.style.left = `${centralX}px`;
+                connection.style.transform = `rotate(${angle}deg)`;
+                
+                visualization.appendChild(connection);
+            });
         });
         
         // Add floating animation to elements
-        document.querySelectorAll('.feature-card, .semantic-card, .tool-card').forEach(el => {
+        document.querySelectorAll('.feature-card, .semantic-card').forEach(el => {
             el.style.animationDelay = `${Math.random() * 0.5}s`;
             el.classList.add('floating');
         });
