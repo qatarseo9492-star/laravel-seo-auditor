@@ -217,7 +217,7 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
             if (count($aiSnippets) >= 30) break;
         }
 
-        // Suggestions builder
+        // Suggestions
         $suggest = function($id) use ($S,$titleText,$metaDesc,$h1Text,$qHeads,$hasFAQ,$imgs,$imgsWithAlt,$altRatio,
             $internalLinks,$keywordyAnchors,$slugOk,$slug,$hasBreadcrumb,$hasBreadcrumbUI,$viewport,$responsiveImgs,$imgsLazy,
             $deferred,$asyncd,$blockingScripts,$hasPreload,$ctaFound,$externalTrusted,$externalYears,$validTypes,$wikiLinks,$properH2s,$wc,$lists,$tables,$pres,$eSim,$sim,$h2s,$h3s){
