@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semantic SEO Master Checklist</title>
+    <title>Semantic SEO Analyzer | Content Optimization Tool</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -12,7 +12,6 @@
             --primary-dark: #4f46e5;
             --secondary: #10b981;
             --accent: #f59e0b;
-            --warning: #ef4444;
             --dark: #111827;
             --darker: #0f172a;
             --light: #f9fafb;
@@ -34,6 +33,7 @@
             background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
             color: var(--text);
             font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
             line-height: 1.6;
             min-height: 100vh;
         }
@@ -41,29 +41,49 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 0 20px;
         }
         
         /* Header */
         header {
-            text-align: center;
-            margin-bottom: 3rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 0;
         }
         
         .logo {
             display: flex;
             align-items: center;
-            justify-content: center;
             text-decoration: none;
             font-weight: 800;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             color: var(--primary);
-            margin-bottom: 1rem;
         }
         
         .logo i {
             margin-right: 0.5rem;
-            font-size: 2rem;
+            font-size: 1.8rem;
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding: 3rem 0;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
         }
         
         .page-title {
@@ -77,145 +97,75 @@
             color: var(--text-light);
             font-size: 1.1rem;
             max-width: 700px;
-            margin: 0 auto 2rem;
+            margin: 0 auto;
         }
         
-        .progress-container {
+        /* Analyzer Tool */
+        .analyzer-tool {
             background: white;
             border-radius: var(--radius);
-            padding: 1.5rem;
             box-shadow: var(--shadow);
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .tool-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
             margin-bottom: 2rem;
         }
         
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
+        .tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: var(--transition);
         }
         
-        .progress-title {
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
             font-weight: 600;
             color: var(--dark);
         }
         
-        .progress-percentage {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: 1.2rem;
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background: #e5e7eb;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: var(--primary);
-            border-radius: 5px;
-            width: 0%;
-            transition: width 1s ease;
-        }
-        
-        /* Checklist Sections */
-        .checklist-sections {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .section-card {
-            background: white;
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 1.5rem;
+            font-size: 1rem;
             transition: var(--transition);
         }
         
-        .section-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
         
-        .section-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .section-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(99, 102, 241, 0.1);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-right: 1rem;
-        }
-        
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--dark);
-        }
-        
-        .checklist {
-            list-style: none;
-        }
-        
-        .checklist-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-            padding: 0.8rem;
-            border-radius: var(--radius);
-            background: #f9fafb;
-            transition: var(--transition);
-        }
-        
-        .checklist-item:hover {
-            background: #f3f4f6;
-        }
-        
-        .checklist-item input[type="checkbox"] {
-            margin-right: 1rem;
-            margin-top: 0.2rem;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-        
-        .checklist-label {
-            flex: 1;
-        }
-        
-        .checklist-text {
-            font-weight: 500;
-            margin-bottom: 0.3rem;
-            color: var(--dark);
-        }
-        
-        .checklist-desc {
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
-        
-        /* Actions */
-        .actions {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 2rem;
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
         }
         
         .btn {
@@ -244,6 +194,137 @@
             box-shadow: 0 10px 15px rgba(79, 70, 229, 0.3);
         }
         
+        .btn i {
+            margin-right: 0.5rem;
+        }
+        
+        /* Results Section */
+        .results {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2.5rem;
+            margin-bottom: 3rem;
+            display: none;
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+        
+        .score-display {
+            text-align: center;
+            padding: 2rem;
+            background: #f9fafb;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+        }
+        
+        .score-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .score-label {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .result-card {
+            background: #f9fafb;
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .result-card.good {
+            border-left-color: var(--secondary);
+        }
+        
+        .result-card.warning {
+            border-left-color: var(--accent);
+        }
+        
+        .result-card.error {
+            border-left-color: #ef4444;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .result-title i {
+            margin-right: 0.5rem;
+        }
+        
+        .result-desc {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        
+        .keyword-list {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .keyword-header {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .keyword-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .keyword-tag {
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .keyword-tag.primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
         .btn-outline {
             background: transparent;
             border: 2px solid var(--primary);
@@ -255,31 +336,163 @@
             color: white;
         }
         
-        .btn i {
-            margin-right: 0.5rem;
+        /* Features Section */
+        .features {
+            padding: 4rem 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .section-subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-top: 4px solid var(--primary);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: inline-flex;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .feature-desc {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
         }
         
         /* Footer */
         footer {
+            background: var(--darker);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-brand {
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-desc {
+            opacity: 0.8;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-heading {
+            font-size: 1.1rem;
+            margin-bottom: 1.2rem;
+            color: white;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-link {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-link a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-link a:hover {
+            color: white;
+        }
+        
+        .footer-bottom {
             text-align: center;
-            margin-top: 3rem;
             padding-top: 2rem;
-            border-top: 1px solid #e5e7eb;
-            color: var(--text-light);
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
             font-size: 0.9rem;
         }
         
         /* Responsive Design */
         @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
-            }
-            
             .page-title {
                 font-size: 2rem;
             }
             
-            .checklist-sections {
+            .analyzer-tool, .results {
+                padding: 1.5rem;
+            }
+            
+            .tool-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .score-value {
+                font-size: 2.5rem;
+            }
+            
+            .results-grid {
                 grid-template-columns: 1fr;
             }
             
@@ -290,391 +503,354 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <div class="logo">
-                <i class="fas fa-search"></i>SemanticSEO
-            </div>
-            <h1 class="page-title">Semantic SEO Master Checklist</h1>
-            <p class="page-subtitle">A comprehensive checklist to ensure your content is fully optimized for semantic search and achieves maximum visibility</p>
-            
-            <div class="progress-container">
-                <div class="progress-header">
-                    <div class="progress-title">Checklist Completion</div>
-                    <div class="progress-percentage" id="progress-percentage">0%</div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-            </div>
-        </header>
-        
-        <div class="checklist-sections">
-            <!-- Content & Keywords Section -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <h2 class="section-title">Content & Keywords</h2>
-                </div>
-                
-                <ul class="checklist">
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-1" class="checklist-checkbox">
-                        <label for="item-1" class="checklist-label">
-                            <div class="checklist-text">Main Topic</div>
-                            <div class="checklist-desc">A single, well-defined core topic is established for the page</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-2" class="checklist-checkbox">
-                        <label for="item-2" class="checklist-label">
-                            <div class="checklist-text">Semantic Keywords</div>
-                            <div class="checklist-desc">5-10 conceptually related keywords (not just synonyms) identified and used</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-3" class="checklist-checkbox">
-                        <label for="item-3" class="checklist-label">
-                            <div class="checklist-text">LSI Keywords & Synonyms</div>
-                            <div class="checklist-desc">Keywords from "People Also Ask" and "Related Searches" naturally integrated</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-4" class="checklist-checkbox">
-                        <label for="item-4" class="checklist-label">
-                            <div class="checklist-text">Related Entities & Concepts</div>
-                            <div class="checklist-desc">Key people, places, organizations, products, and ideas mentioned and explained</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-5" class="checklist-checkbox">
-                        <label for="item-5" class="checklist-label">
-                            <div class="checklist-text">Long-Tail Variations</div>
-                            <div class="checklist-desc">Specific, longer keyword phrases (question-based and conversational) included</div>
-                        </label>
-                    </li>
-                </ul>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <i class="fas fa-search"></i>SemanticSEO
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Semantic SEO Analyzer</h1>
+                <p class="page-subtitle">Analyze your content URL and keywords to optimize for semantic SEO and improve search engine rankings</p>
             </div>
             
-            <!-- Technical Elements Section -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-cogs"></i>
-                    </div>
-                    <h2 class="section-title">Technical Elements</h2>
+            <!-- Analyzer Tool -->
+            <div class="analyzer-tool">
+                <div class="tool-tabs">
+                    <div class="tab active" data-tab="url">URL Analysis</div>
+                    <div class="tab" data-tab="keyword">Keyword Analysis</div>
+                    <div class="tab" data-tab="content">Content Analysis</div>
                 </div>
                 
-                <ul class="checklist">
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-6" class="checklist-checkbox">
-                        <label for="item-6" class="checklist-label">
-                            <div class="checklist-text">Schema Markup</div>
-                            <div class="checklist-desc">Relevant structured data (Article, FAQPage, HowTo) implemented via JSON-LD</div>
-                        </label>
-                    </li>
+                <div class="tab-content active" id="url-tab">
+                    <div class="form-group">
+                        <label for="url">Enter URL to Analyze</label>
+                        <input type="url" id="url" class="form-control" placeholder="https://example.com/blog/post-title">
+                    </div>
                     
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-7" class="checklist-checkbox">
-                        <label for="item-7" class="checklist-label">
-                            <div class="checklist-text">Heading Structure (H1-H6)</div>
-                            <div class="checklist-desc">One unique H1 tag, H2s for major sections, logical hierarchy with H3s-H6s</div>
-                        </label>
-                    </li>
+                    <div class="form-group">
+                        <label for="focus-keyword">Primary Keyword (Optional)</label>
+                        <input type="text" id="focus-keyword" class="form-control" placeholder="Enter primary keyword">
+                    </div>
                     
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-8" class="checklist-checkbox">
-                        <label for="item-8" class="checklist-label">
-                            <div class="checklist-text">Meta Title & Description</div>
-                            <div class="checklist-desc">Title under 60 chars with primary keyword, meta description under 160 chars with CTA</div>
-                        </label>
-                    </li>
+                    <button class="btn btn-primary" id="analyze-url">
+                        <i class="fas fa-chart-line"></i> Analyze URL
+                    </button>
+                </div>
+                
+                <div class="tab-content" id="keyword-tab">
+                    <div class="form-group">
+                        <label for="keywords">Enter Keywords (comma separated)</label>
+                        <input type="text" id="keywords" class="form-control" placeholder="seo tips, search optimization, semantic seo">
+                    </div>
                     
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-9" class="checklist-checkbox">
-                        <label for="item-9" class="checklist-label">
-                            <div class="checklist-text">URL Optimization</div>
-                            <div class="checklist-desc">URL is short, readable, includes primary keyword, uses hyphens to separate words</div>
-                        </label>
-                    </li>
-                </ul>
+                    <div class="form-group">
+                        <label for="content-type">Content Type</label>
+                        <select id="content-type" class="form-control">
+                            <option value="blog">Blog Post</option>
+                            <option value="product">Product Page</option>
+                            <option value="landing">Landing Page</option>
+                            <option value="article">Article</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="analyze-keywords">
+                        <i class="fas fa-key"></i> Analyze Keywords
+                    </button>
+                </div>
+                
+                <div class="tab-content" id="content-tab">
+                    <div class="form-group">
+                        <label for="content">Paste Your Content</label>
+                        <textarea id="content" class="form-control" placeholder="Paste your article content here..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="content-keyword">Primary Keyword</label>
+                        <input type="text" id="content-keyword" class="form-control" placeholder="Enter primary keyword">
+                    </div>
+                    
+                    <button class="btn btn-primary" id="analyze-content">
+                        <i class="fas fa-file-alt"></i> Analyze Content
+                    </button>
+                </div>
             </div>
             
-            <!-- Content Quality Section -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h2 class="section-title">Content Quality</h2>
+            <!-- Results Section -->
+            <div class="results" id="results">
+                <div class="results-header">
+                    <h2 class="results-title">Analysis Results</h2>
+                    <div class="result-meta">Analyzed: <span id="analysis-time"></span></div>
                 </div>
                 
-                <ul class="checklist">
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-10" class="checklist-checkbox">
-                        <label for="item-10" class="checklist-label">
-                            <div class="checklist-text">Search Intent Alignment</div>
-                            <div class="checklist-desc">Content type matches user's goal (to learn, to buy, to find)</div>
-                        </label>
-                    </li>
+                <div class="score-display">
+                    <div class="score-value" id="score-value">82</div>
+                    <div class="score-label">Semantic SEO Score</div>
+                </div>
+                
+                <div class="results-grid">
+                    <div class="result-card good">
+                        <h3 class="result-title"><i class="fas fa-check-circle"></i> Keyword Usage</h3>
+                        <p class="result-desc">Your primary keyword appears 12 times with good distribution throughout the content.</p>
+                    </div>
                     
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-11" class="checklist-checkbox">
-                        <label for="item-11" class="checklist-label">
-                            <div class="checklist-text">Comprehensive Coverage</div>
-                            <div class="checklist-desc">Content is a definitive resource covering all common questions and subtopics</div>
-                        </label>
-                    </li>
+                    <div class="result-card good">
+                        <h3 class="result-title"><i class="fas fa-check-circle"></i> Semantic Relevance</h3>
+                        <p class="result-desc">Your content shows strong semantic relationships with related terms and concepts.</p>
+                    </div>
                     
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-12" class="checklist-checkbox">
-                        <label for="item-12" class="checklist-label">
-                            <div class="checklist-text">Natural Language Flow</div>
-                            <div class="checklist-desc">Written conversationally for humans, avoiding awkward keyword stuffing</div>
-                        </label>
-                    </li>
+                    <div class="result-card warning">
+                        <h3 class="result-title"><i class="fas fa-exclamation-triangle"></i> Content Length</h3>
+                        <p class="result-desc">Your content could be more comprehensive. Consider adding 200-300 more words.</p>
+                    </div>
                     
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-13" class="checklist-checkbox">
-                        <label for="item-13" class="checklist-label">
-                            <div class="checklist-text">Question-Answer Format</div>
-                            <div class="checklist-desc">FAQ section or content that answers "who, what, when, where, why, how" questions</div>
-                        </label>
-                    </li>
-                </ul>
+                    <div class="result-card">
+                        <h3 class="result-title"><i class="fas fa-info-circle"></i> Readability</h3>
+                        <p class="result-desc">Content is fairly easy to read with a Flesch-Kincaid grade level of 8.2.</p>
+                    </div>
+                    
+                    <div class="result-card error">
+                        <h3 class="result-title"><i class="fas fa-times-circle"></i> Headings Structure</h3>
+                        <p class="result-desc">Your H2 and H3 headings need better keyword integration and semantic structure.</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3 class="result-title"><i class="fas fa-info-circle"></i> Entity Coverage</h3>
+                        <p class="result-desc">You've covered 7 out of 10 important entities related to your topic.</p>
+                    </div>
+                </div>
+                
+                <div class="keyword-list">
+                    <h3 class="keyword-header">Recommended Related Keywords</h3>
+                    <div class="keyword-tags">
+                        <span class="keyword-tag primary">semantic search</span>
+                        <span class="keyword-tag">entity seo</span>
+                        <span class="keyword-tag">topic clusters</span>
+                        <span class="keyword-tag">latent semantic indexing</span>
+                        <span class="keyword-tag">natural language processing</span>
+                        <span class="keyword-tag">search intent</span>
+                        <span class="keyword-tag">knowledge graph</span>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn btn-outline" id="export-pdf">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="btn btn-primary" id="new-analysis">
+                        <i class="fas fa-redo"></i> New Analysis
+                    </button>
+                </div>
             </div>
             
-            <!-- Structure & Architecture Section -->
-            <div class="section-card">
+            <!-- Features Section -->
+            <div class="features">
                 <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-sitemap"></i>
-                    </div>
-                    <h2 class="section-title">Structure & Architecture</h2>
+                    <h2 class="section-title">How Semantic SEO Analysis Works</h2>
+                    <p class="section-subtitle">Our advanced algorithms analyze multiple factors to provide comprehensive SEO recommendations</p>
                 </div>
                 
-                <ul class="checklist">
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-14" class="checklist-checkbox">
-                        <label for="item-14" class="checklist-label">
-                            <div class="checklist-text">Topic Clusters</div>
-                            <div class="checklist-desc">Page is part of a hub-and-spoke model (pillar page with cluster content)</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-15" class="checklist-checkbox">
-                        <label for="item-15" class="checklist-label">
-                            <div class="checklist-text">Internal Linking</div>
-                            <div class="checklist-desc">Contextual anchors with descriptive text, links to cornerstone content</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-16" class="checklist-checkbox">
-                        <label for="item-16" class="checklist-label">
-                            <div class="checklist-text">Content Hierarchy</div>
-                            <div class="checklist-desc">Information organized from broad to specific, easy to scan and understand</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-17" class="checklist-checkbox">
-                        <label for="item-17" class="checklist-label">
-                            <div class="checklist-text">Related Content Connections</div>
-                            <div class="checklist-desc">"Further Reading" or "You Might Also Like" sections suggest relevant content</div>
-                        </label>
-                    </li>
-                </ul>
-            </div>
-            
-            <!-- User Signals & Experience Section -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-user-check"></i>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3 class="feature-title">Semantic Analysis</h3>
+                        <p class="feature-desc">Understands content meaning and context beyond simple keyword matching.</p>
                     </div>
-                    <h2 class="section-title">User Signals & Experience</h2>
-                </div>
-                
-                <ul class="checklist">
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-18" class="checklist-checkbox">
-                        <label for="item-18" class="checklist-label">
-                            <div class="checklist-text">Readability Score</div>
-                            <div class="checklist-desc">Content scores well on readability tools (aim for Grade 6-8)</div>
-                        </label>
-                    </li>
                     
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-19" class="checklist-checkbox">
-                        <label for="item-19" class="checklist-label">
-                            <div class="checklist-text">Mobile Optimization</div>
-                            <div class="checklist-desc">Page is fully responsive and displays correctly on all mobile devices</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-20" class="checklist-checkbox">
-                        <label for="item-20" class="checklist-label">
-                            <div class="checklist-text">Page Load Speed</div>
-                            <div class="checklist-desc">Page loads quickly (aim for under 3 seconds)</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-21" class="checklist-checkbox">
-                        <label for="item-21" class="checklist-label">
-                            <div class="checklist-text">Multimedia & Alt Text</div>
-                            <div class="checklist-desc">Images, videos, infographics used with descriptive alt text</div>
-                        </label>
-                    </li>
-                </ul>
-            </div>
-            
-            <!-- Entities & Context Section -->
-            <div class="section-card">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-project-diagram"></i>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <h3 class="feature-title">Topic Modeling</h3>
+                        <p class="feature-desc">Identifies related topics and concepts to improve content comprehensiveness.</p>
                     </div>
-                    <h2 class="section-title">Entities & Context</h2>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="feature-title">Keyword Optimization</h3>
+                        <p class="feature-desc">Analyzes keyword usage, density, and distribution for optimal SEO value.</p>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h3 class="feature-title">Content Recommendations</h3>
+                        <p class="feature-desc">Provides actionable suggestions to improve your content for both users and search engines.</p>
+                    </div>
                 </div>
-                
-                <ul class="checklist">
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-22" class="checklist-checkbox">
-                        <label for="item-22" class="checklist-label">
-                            <div class="checklist-text">People, Places, Organizations</div>
-                            <div class="checklist-desc">Relevant proper nouns identified and contextually defined</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-23" class="checklist-checkbox">
-                        <label for="item-23" class="checklist-label">
-                            <div class="checklist-text">Industry Terminology</div>
-                            <div class="checklist-desc">Key jargon used appropriately and often defined for broader audience</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-24" class="checklist-checkbox">
-                        <label for="item-24" class="checklist-label">
-                            <div class="checklist-text">Co-occurring Terms</div>
-                            <div class="checklist-desc">Terms that statistically appear together around this topic are naturally present</div>
-                        </label>
-                    </li>
-                    
-                    <li class="checklist-item">
-                        <input type="checkbox" id="item-25" class="checklist-checkbox">
-                        <label for="item-25" class="checklist-label">
-                            <div class="checklist-text">Topical Authority Signals</div>
-                            <div class="checklist-desc">Content demonstrates E-E-A-T by citing sources, using data, showing experience</div>
-                        </label>
-                    </li>
-                </ul>
             </div>
         </div>
-        
-        <div class="actions">
-            <button class="btn btn-primary" id="save-btn">
-                <i class="fas fa-save"></i> Save Progress
-            </button>
-            <button class="btn btn-outline" id="reset-btn">
-                <i class="fas fa-redo"></i> Reset Checklist
-            </button>
-            <button class="btn btn-outline" id="print-btn">
-                <i class="fas fa-print"></i> Print Checklist
-            </button>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <div class="footer-brand">
+                        <a href="#" class="footer-logo">
+                            <i class="fas fa-search"></i>SemanticSEO
+                        </a>
+                        <p class="footer-desc">Advanced semantic SEO analysis tools to help you improve your search engine rankings and drive more organic traffic.</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="footer-heading">Product</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="#">Features</a></li>
+                        <li class="footer-link"><a href="#">Pricing</a></li>
+                        <li class="footer-link"><a href="#">Use Cases</a></li>
+                        <li class="footer-link"><a href="#">Testimonials</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="footer-heading">Resources</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="#">Blog</a></li>
+                        <li class="footer-link"><a href="#">Guides</a></li>
+                        <li class="footer-link"><a href="#">Webinars</a></li>
+                        <li class="footer-link"><a href="#">API Documentation</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="footer-heading">Company</h3>
+                    <ul class="footer-links">
+                        <li class="footer-link"><a href="#">About Us</a></li>
+                        <li class="footer-link"><a href="#">Careers</a></li>
+                        <li class="footer-link"><a href="#">Privacy Policy</a></li>
+                        <li class="footer-link"><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 SemanticSEO. All rights reserved.</p>
+            </div>
         </div>
-        
-        <footer>
-            <p>Semantic SEO Master Checklist | Designed for content creators and SEO professionals</p>
-        </footer>
-    </div>
+    </footer>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('.checklist-checkbox');
-            const progressFill = document.getElementById('progress-fill');
-            const progressPercentage = document.getElementById('progress-percentage');
-            const saveBtn = document.getElementById('save-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const printBtn = document.getElementById('print-btn');
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
             
-            // Total number of checklist items
-            const totalItems = checkboxes.length;
-            
-            // Load saved progress from localStorage
-            function loadProgress() {
-                checkboxes.forEach(checkbox => {
-                    const isChecked = localStorage.getItem(checkbox.id) === 'true';
-                    checkbox.checked = isChecked;
-                });
-                updateProgress();
-            }
-            
-            // Save progress to localStorage
-            function saveProgress() {
-                checkboxes.forEach(checkbox => {
-                    localStorage.setItem(checkbox.id, checkbox.checked);
-                });
-                
-                // Show save confirmation
-                const originalText = saveBtn.innerHTML;
-                saveBtn.innerHTML = '<i class="fas fa-check"></i> Progress Saved!';
-                
-                setTimeout(() => {
-                    saveBtn.innerHTML = originalText;
-                }, 2000);
-            }
-            
-            // Update progress bar and percentage
-            function updateProgress() {
-                const checkedCount = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
-                const percentage = Math.round((checkedCount / totalItems) * 100);
-                
-                progressFill.style.width = `${percentage}%`;
-                progressPercentage.textContent = `${percentage}%`;
-            }
-            
-            // Reset all checkboxes
-            function resetChecklist() {
-                if (confirm('Are you sure you want to reset the checklist? This will clear all your progress.')) {
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = false;
-                        localStorage.removeItem(checkbox.id);
-                    });
-                    updateProgress();
-                }
-            }
-            
-            // Print the checklist
-            function printChecklist() {
-                window.print();
-            }
-            
-            // Add event listeners
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', () => {
-                    updateProgress();
-                    saveProgress();
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
                 });
             });
             
-            saveBtn.addEventListener('click', saveProgress);
-            resetBtn.addEventListener('click', resetChecklist);
-            printBtn.addEventListener('click', printChecklist);
+            // Analyze buttons functionality
+            const analyzeUrlBtn = document.getElementById('analyze-url');
+            const analyzeKeywordsBtn = document.getElementById('analyze-keywords');
+            const analyzeContentBtn = document.getElementById('analyze-content');
+            const resultsSection = document.getElementById('results');
+            const analysisTime = document.getElementById('analysis-time');
+            const scoreValue = document.getElementById('score-value');
+            const newAnalysisBtn = document.getElementById('new-analysis');
             
-            // Initialize
-            loadProgress();
+            // Set current date and time
+            const now = new Date();
+            analysisTime.textContent = now.toLocaleString();
+            
+            // Analyze URL
+            analyzeUrlBtn.addEventListener('click', () => {
+                const url = document.getElementById('url').value;
+                if (!url) {
+                    alert('Please enter a URL to analyze');
+                    return;
+                }
+                
+                // Simulate analysis
+                simulateAnalysis();
+            });
+            
+            // Analyze Keywords
+            analyzeKeywordsBtn.addEventListener('click', () => {
+                const keywords = document.getElementById('keywords').value;
+                if (!keywords) {
+                    alert('Please enter keywords to analyze');
+                    return;
+                }
+                
+                // Simulate analysis
+                simulateAnalysis();
+            });
+            
+            // Analyze Content
+            analyzeContentBtn.addEventListener('click', () => {
+                const content = document.getElementById('content').value;
+                if (!content) {
+                    alert('Please enter content to analyze');
+                    return;
+                }
+                
+                // Simulate analysis
+                simulateAnalysis();
+            });
+            
+            // New Analysis
+            newAnalysisBtn.addEventListener('click', () => {
+                resultsSection.style.display = 'none';
+                
+                // Clear form fields
+                document.getElementById('url').value = '';
+                document.getElementById('focus-keyword').value = '';
+                document.getElementById('keywords').value = '';
+                document.getElementById('content').value = '';
+                document.getElementById('content-keyword').value = '';
+            });
+            
+            // Simulate analysis process
+            function simulateAnalysis() {
+                analyzeUrlBtn.disabled = true;
+                analyzeKeywordsBtn.disabled = true;
+                analyzeContentBtn.disabled = true;
+                
+                analyzeUrlBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+                
+                // Random score between 65-95
+                const randomScore = Math.floor(Math.random() * 30) + 65;
+                
+                setTimeout(() => {
+                    resultsSection.style.display = 'block';
+                    scoreValue.textContent = randomScore;
+                    
+                    // Scroll to results
+                    resultsSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Reset buttons
+                    analyzeUrlBtn.disabled = false;
+                    analyzeKeywordsBtn.disabled = false;
+                    analyzeContentBtn.disabled = false;
+                    analyzeUrlBtn.innerHTML = '<i class="fas fa-chart-line"></i> Analyze URL';
+                }, 2000);
+            }
         });
     </script>
 </body>
