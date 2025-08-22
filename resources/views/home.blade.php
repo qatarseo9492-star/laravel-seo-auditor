@@ -1,198 +1,214 @@
 @extends('layouts.app')
 
+@section('title', 'Semantic SEO Checker - Home')
+
 @section('content')
-<!-- AOS Animation Library -->
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
 <style>
-    /* Hero Section */
-    .hero {
-        background: linear-gradient(135deg, #6f42c1, #007bff, #00b894);
-        background-size: 300% 300%;
-        animation: gradientBG 12s ease infinite;
-        color: white;
-        text-align: center;
-        padding: 100px 20px;
-        border-radius: 15px;
-        margin-bottom: 60px;
-        position: relative;
-        overflow: hidden;
-    }
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    .hero h1 {
-        font-size: 3rem;
-        font-weight: 800;
-        letter-spacing: -1px;
-    }
-    .hero p {
-        font-size: 1.3rem;
-        margin-top: 15px;
-        opacity: 0.9;
-    }
-    .cta-btn {
-        margin-top: 25px;
-        font-size: 1.2rem;
-        padding: 12px 30px;
-        border-radius: 30px;
-        background: linear-gradient(135deg, #ff416c, #ff4b2b);
-        border: none;
-        color: white;
-        transition: 0.4s;
-    }
-    .cta-btn:hover {
-        background: linear-gradient(135deg, #ff4b2b, #ff416c);
-        transform: scale(1.06);
-    }
+/* ===== Base Dark Purple Background ===== */
+body {
+  background: radial-gradient(circle at top, #200030 0%, #12021c 40%, #0a0012 100%);
+  color:#eee;
+  font-family:'Inter','Poppins',sans-serif;
+  overflow-x:hidden;
+  margin:0;
+}
+:root {
+  --purple:#6a0dad;
+  --orange:#ff8500;
+  --blue:#2196f3;
+  --teal:#03dac6;
+  --dark:#111119;
+}
 
-    /* Floating keyword cloud */
-    .keywords-cloud {
-        margin-top: 30px;
-        font-size: 1.1rem;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 15px;
-    }
-    .keywords-cloud span {
-        background: rgba(255,255,255,0.2);
-        padding: 8px 15px;
-        border-radius: 20px;
-        animation: float 6s ease-in-out infinite;
-    }
-    @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-12px); }
-    }
+/* ===== Smoke Effect (Pure CSS) ===== */
+.smoke {
+  position:fixed;
+  top:0; left:0; width:100%; height:100%;
+  pointer-events:none; overflow:hidden;
+  z-index:0;
+}
+.smoke span {
+  position:absolute;
+  width:800px; height:800px;
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(106,13,173,0.4) 0%, rgba(0,0,0,0) 70%);
+  filter:blur(120px);
+  animation: drift 100s linear infinite;
+}
+.smoke span:nth-child(1){ bottom:-300px; left:-200px; animation-delay:0s;}
+.smoke span:nth-child(2){ bottom:-250px; left:300px; background:radial-gradient(circle, rgba(255,133,0,0.25) 0%, rgba(0,0,0,0) 70%); animation-delay:20s;}
+.smoke span:nth-child(3){ top:-200px; left:500px; background:radial-gradient(circle, rgba(33,150,243,0.25) 0%, rgba(0,0,0,0) 70%); animation-delay:40s;}
+.smoke span:nth-child(4){ top:100px; right:-250px; background:radial-gradient(circle, rgba(187,134,252,0.3) 0%, rgba(0,0,0,0) 70%); animation-delay:60s;}
 
-    /* Tool Cards Section */
-    .tool-card {
-        background: white;
-        border-radius: 18px;
-        padding: 40px 25px;
-        transition: all 0.4s ease;
-        height: 100%;
-        position: relative;
-    }
-    .tool-card:hover {
-        transform: translateY(-10px) scale(1.03);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    }
-    .tool-icon {
-        font-size: 3rem;
-        margin-bottom: 20px;
-        animation: bounce 2s infinite;
-    }
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-    .btn-tool {
-        margin-top: 20px;
-        padding: 10px 24px;
-        border-radius: 25px;
-        font-weight: 600;
-        background: linear-gradient(135deg, #007bff, #6f42c1);
-        border: none;
-        color: white;
-        transition: 0.3s;
-    }
-    .btn-tool:hover {
-        opacity: 0.85;
-        transform: translateY(-2px);
-    }
+@keyframes drift {
+  0% { transform: translate(0,0) scale(1); opacity:.4;}
+  50%{ transform: translate(400px,-400px) scale(1.3); opacity:.25;}
+  100%{ transform: translate(800px,-900px) scale(1.6); opacity:0;}
+}
 
-    /* About section */
-    .about-section {
-        background: #f8f9fa;
-        padding: 60px 20px;
-        text-align: center;
-        border-radius: 15px;
-        margin-top: 80px;
-    }
-    .about-section h2 {
-        font-weight: 700;
-        margin-bottom: 20px;
-    }
-    .about-section p {
-        max-width: 800px;
-        margin: 0 auto;
-        font-size: 1.1rem;
-        opacity: 0.9;
-    }
+/* ===== Navbar ===== */
+.navbar {
+  background:#1a092f !important;
+  border-bottom:2px solid var(--orange);
+  box-shadow:0 3px 12px rgba(0,0,0,.6);
+  z-index:5;
+}
+.navbar-brand {
+  font-weight:800; font-size:1.6rem;
+  color:var(--orange) !important;
+}
+.nav-link {
+  font-weight:500; color:#e0d7f5 !important; margin:0 12px;
+  transition:color .3s, text-shadow .3s;
+}
+.nav-link:hover, .nav-link.active {
+  color:var(--orange)!important;
+  text-shadow:0 0 8px var(--purple);
+}
+
+/* ===== Hero ===== */
+.hero {
+  min-height:90vh; display:flex;align-items:center;justify-content:center;
+  flex-direction:column; text-align:center; z-index:2; position:relative;
+  padding:0 20px;
+}
+.hero h1 {
+  font-size:3.6rem; font-weight:800;
+  background:linear-gradient(90deg,var(--orange),#ffb347,var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero p {margin-top:20px;color:#ccc;max-width:640px;}
+.btn-hero {
+  margin-top:30px;padding:14px 38px;border-radius:40px;
+  font-weight:600;font-size:1rem;color:#fff;border:none;
+  background:linear-gradient(90deg,var(--purple),var(--orange));
+  box-shadow:0 6px 18px rgba(255,133,0,.5);
+  transition:.3s;
+}
+.btn-hero:hover {
+  transform:scale(1.07) translateY(-3px);
+  box-shadow:0 10px 28px rgba(255,133,0,.6);
+}
+
+/* ===== Features Section ===== */
+.features {
+  padding:100px 0;
+  position:relative; z-index:2;
+}
+.features h2 {
+  text-align:center; margin-bottom:60px; font-size:2.6rem; font-weight:800;
+  background:linear-gradient(90deg,var(--orange),var(--purple),var(--orange));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.features h2::after {
+  content:""; display:block; width:60px; height:4px; margin:15px auto 0;
+  border-radius:2px; background:linear-gradient(90deg,var(--orange),var(--purple));
+}
+
+/* Feature Boxes */
+.feature-box {
+  background:linear-gradient(145deg,#1b0a28,#0e0512);
+  border-radius:20px;
+  padding:45px 28px; text-align:center; color:#fff;
+  box-shadow:0 0 18px rgba(0,0,0,.5); position:relative;
+  transition:.4s; border:2px solid transparent;
+}
+.feature-box::before {
+  content:""; position:absolute; inset:-2px;
+  border-radius:22px;
+  background:linear-gradient(120deg,var(--purple),var(--orange),var(--blue));
+  z-index:-1; opacity:.4;
+}
+.feature-box:hover {
+  transform: translateY(-12px) scale(1.03);
+  box-shadow:0 0 30px rgba(255,133,0,.6), inset 0 0 18px rgba(106,13,173,.5);
+}
+.feature-icon { font-size:3rem; margin-bottom:18px; }
+.feature-title { font-size:1.4rem; font-weight:700; margin-bottom:14px; }
+.feature-text { font-size:.95rem; color:#ccc; margin-bottom:20px; }
+
+/* Buttons */
+.btn-tool {
+  padding:12px 30px; border-radius:30px; font-weight:600;
+  background:linear-gradient(90deg,var(--purple),var(--orange));
+  border:none; color:#fff; transition:.3s;
+  box-shadow:0 0 15px rgba(90,24,154,0.4);
+}
+.btn-tool:hover {
+  transform:scale(1.08);
+  box-shadow:0 0 25px rgba(255,133,0,.65), inset 0 0 18px rgba(106,13,173,.5);
+}
+
+/* ===== CTA ===== */
+.cta {
+  max-width:950px;margin:90px auto;padding:70px 20px;
+  border-radius:20px;text-align:center;color:#fff;
+  background:linear-gradient(120deg,var(--purple),var(--orange));
+  box-shadow:0 0 35px rgba(255,133,0,0.4);
+}
+.cta h3{font-size:2rem;font-weight:700;}
+.cta p{max-width:600px;margin:15px auto 25px;}
+.cta .btn-light{
+  padding:12px 30px;border-radius:28px;font-weight:600;
+  background:#fff;color:#333;border:none;transition:.3s;
+}
+.cta .btn-light:hover{
+  background:var(--orange);color:#fff;
+  box-shadow:0 0 18px rgba(255,133,0,.6);
+}
 </style>
 
-<div class="container">
-
-    {{-- Hero Section --}}
-    <div class="hero shadow-lg" data-aos="zoom-in" data-aos-duration="1200">
-        <h1>🚀 Boost Your Rankings Like Never Before</h1>
-        <p>Our SEO Tools Suite gives you <strong>clarity, speed, and results</strong>.  
-        Say goodbye to clutter — focus on insights that matter.</p>
-        <a href="#tools" class="btn cta-btn">Explore Tools</a>
-
-        <div class="keywords-cloud mt-4">
-            <span>#SEO</span>
-            <span>#Rank1</span>
-            <span>#Traffic</span>
-            <span>#Backlinks</span>
-            <span>#Keywords</span>
-            <span>#Growth</span>
-            <span>#Optimization</span>
-        </div>
-    </div>
-
-    {{-- Tools Section --}}
-    <div id="tools" class="row text-center mt-5">
-        {{-- SEO Auditor --}}
-        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="tool-card">
-                <div class="tool-icon">📊</div>
-                <h4 class="fw-bold">SEO Auditor</h4>
-                <p>Audit full web pages with technical SEO checks, headings, titles, meta tags, and structure analysis.</p>
-                <a href="{{ url('/seo-audit') }}" class="btn btn-tool">Try Auditor</a>
-            </div>
-        </div>
-
-        {{-- Keyword Analyzer --}}
-        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
-            <div class="tool-card">
-                <div class="tool-icon">🔑</div>
-                <h4 class="fw-bold">Keyword Analyzer</h4>
-                <p>Examine how well optimized your content is for target keywords and find keyword gaps instantly.</p>
-                <a href="{{ url('/seo-keyword-analysis') }}" class="btn btn-tool">Try Analyzer</a>
-            </div>
-        </div>
-
-        {{-- Content Optimizer --}}
-        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="500">
-            <div class="tool-card">
-                <div class="tool-icon">📈</div>
-                <h4 class="fw-bold">Content Optimizer</h4>
-                <p>Input a URL & keyword → receive powerful optimization suggestions to improve rankings and relevance.</p>
-                <a href="{{ url('/seo-optimizer') }}" class="btn btn-tool">Optimize Now</a>
-            </div>
-        </div>
-    </div>
-
-    {{-- About Section --}}
-    <div class="about-section mt-5" data-aos="fade-up" data-aos-duration="1000">
-        <h2>Why Choose Us Over SEMrush & Ahrefs?</h2>
-        <p>Unlike heavy, overwhelming SEO platforms, our toolkit is simple, elegant,  
-           and built for action. 💡 Get laser‑focused insights — no fluff, no distractions —  
-           so you can rank faster and grow smarter.</p>
-    </div>
+{{-- SMOKE EFFECT LAYER --}}
+<div class="smoke">
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
 </div>
 
-<!-- AOS JS -->
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>
-  AOS.init({
-      once: true,
-      duration: 1000,
-  });
-</script>
+{{-- HERO --}}
+<div class="hero">
+  <h1>⚡ Semantic SEO Checker</h1>
+  <p>AI‑powered tools to audit, analyze & optimize your site with semantic precision.</p>
+  <a href="#features" class="btn-hero">Explore Tools</a>
+</div>
+
+{{-- FEATURES --}}
+<div id="features" class="features container">
+  <h2>⚡ Our SEO Tools</h2>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="feature-box">
+        <div class="feature-icon">📝</div>
+        <h4 class="feature-title">SEO Audit</h4>
+        <p class="feature-text">Identify technical SEO issues, broken links, and performance gaps.</p>
+        <a href="{{ route('seo.audit.index') }}" class="btn-tool">Run Audit</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-box">
+        <div class="feature-icon">🔑</div>
+        <h4 class="feature-title">Keyword Analyzer</h4>
+        <p class="feature-text">Analyze density, semantic matches & competitor keyword strengths.</p>
+        <a href="{{ route('seo.keyword.index') }}" class="btn-tool">Analyze</a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="feature-box">
+        <div class="feature-icon">⚡</div>
+        <h4 class="feature-title">Content Optimizer</h4>
+        <p class="feature-text">AI-powered improvement suggestions for headings, metadata & flow.</p>
+        <a href="{{ route('seo.optimizer.index') }}" class="btn-tool">Optimize</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- CTA --}}
+<div class="cta">
+  <h3>Ready to Dominate SEO Rankings?</h3>
+  <p>Supercharge your SEO workflow with smart semantic analysis & optimization tools.</p>
+  <a href="#features" class="btn btn-light">Get Started</a>
+</div>
+
 @endsection
