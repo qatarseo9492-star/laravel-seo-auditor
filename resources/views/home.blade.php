@@ -38,38 +38,14 @@ body{
 #linesCanvas, #linesCanvas2, #brainCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
 #brainCanvas{opacity:.10}
 
-/* --- NEW: Procedural Cloud Smoke canvas --- */
-#smokeFX{
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-  opacity:1; filter:saturate(115%) contrast(105%);
-}
+/* Procedural Cloud Smoke canvas */
+#smokeFX{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:1; filter:saturate(115%) contrast(105%); }
 
-/* Hide the previous decorative blobs/clouds to avoid double effects (keep DOM for fallback if you like) */
+/* Hide old decorative blobs/clouds */
 .bg-smoke .blob, .clouds { display:none !important; }
 
-/* --- (Old) Cloudy smoke (kept but hidden by rule above) --- */
+/* Fallback kept but hidden */
 .bg-smoke{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.blob{position:absolute;border-radius:50%;filter:blur(90px);mix-blend-mode:screen;animation:float 36s linear infinite}
-.blob.p{background:radial-gradient(closest-side,rgba(155,92,255,.38),rgba(155,92,255,0) 70%)}
-.blob.r{background:radial-gradient(closest-side,rgba(255,32,69,.34),rgba(255,32,69,0) 70%)}
-.b1{top:-18%;left:-15%;width:60vmax;height:60vmax}
-.b2{bottom:-22%;right:-10%;width:62vmax;height:62vmax;animation-direction:reverse;animation-duration:30s}
-.b3{top:10%;right:15%;width:50vmax;height:50vmax;animation-duration:28s}
-.b4{bottom:10%;left:25%;width:48vmax;height:48vmax;animation-duration:40s}
-
-/* (Old) cloud cluster */
-.clouds { position:absolute; right:-6vmax; bottom:-6vmax; width:80vmax; height:60vmax; pointer-events:none; }
-.clouds .c { position:absolute; border-radius:50%; filter:blur(40px); opacity:.95; mix-blend-mode:screen; }
-.clouds .c.cyan   { background:radial-gradient(closest-side, rgba(61,226,255,.85), rgba(61,226,255,0) 75%); }
-.clouds .c.purple { background:radial-gradient(closest-side, rgba(155,92,255,.80), rgba(155,92,255,0) 75%); }
-.clouds .c.orange { background:radial-gradient(closest-side, rgba(255,182,72,.80), rgba(255,182,72,0) 75%); }
-.clouds .c.teal   { background:radial-gradient(closest-side, rgba(34,197,94,.78), rgba(34,197,94,0) 75%); }
-.clouds .c1{ width:50vmax;height:28vmax; right:0; bottom:0; animation:cloud 40s ease-in-out infinite; }
-.clouds .c2{ width:46vmax;height:26vmax; right:6vmax; bottom:2vmax; animation:cloud 46s ease-in-out infinite reverse; }
-.clouds .c3{ width:42vmax;height:24vmax; right:10vmax; bottom:3vmax; animation:cloud 52s ease-in-out infinite; }
-.clouds .c4{ width:38vmax;height:22vmax; right:14vmax; bottom:5vmax; animation:cloud 58s ease-in-out infinite reverse; }
-@keyframes float{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-6%,7%,0)}100%{transform:translate3d(0,0,0)}}
-@keyframes cloud{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-3%,-4%,0)}100%{transform:translate3d(0,0,0)}}
 
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
@@ -79,7 +55,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language dock, buttons same as before… */
+/* Language dock */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -108,7 +84,12 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
 .score-wheel circle{fill:none;stroke-width:14;stroke-linecap:round}
 .score-wheel .bg{stroke:rgba(255,255,255,.12)}
-.score-wheel .progress{stroke:url(#grad);stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .6s ease,stroke .3s ease,filter .3s ease;filter:drop-shadow(0 0 10px rgba(155,92,255,.35))}
+.score-wheel .progress{
+  stroke:url(#grad); /* default; JS overrides inline */
+  stroke-dasharray:339; stroke-dashoffset:339;
+  transition:stroke-dashoffset .6s ease,stroke .3s ease,filter .3s ease;
+  filter:drop-shadow(0 0 10px rgba(155,92,255,.35))
+}
 .score-text{font-size:3rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
@@ -190,40 +171,15 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <canvas id="brainCanvas"></canvas>
 <canvas id="linesCanvas"></canvas>
 <canvas id="linesCanvas2"></canvas>
-
-<!-- NEW: WebGL smoke canvas -->
 <canvas id="smokeFX" aria-hidden="true"></canvas>
-
-<div class="bg-smoke">
-  <span class="blob p b1"></span>
-  <span class="blob r b2"></span>
-  <span class="blob p b3"></span>
-  <span class="blob r b4"></span>
-  <!-- Cloud cluster (kept for fallback styling but hidden by CSS) -->
-  <div class="clouds">
-    <span class="c cyan   c1"></span>
-    <span class="c purple c2"></span>
-    <span class="c orange c3"></span>
-    <span class="c teal   c4"></span>
-  </div>
-</div>
 
 <!-- gradients for score wheel -->
 <svg width="0" height="0" aria-hidden="true">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%">
-      <stop offset="0%" stop-color="#9b5cff"/><stop offset="100%" stop-color="#ff2045"/>
-    </linearGradient>
-    <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%">
-      <stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/>
-    </linearGradient>
-    <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%">
-      <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/>
-    </linearGradient>
-    <!-- NEW: red gradient for < 60 -->
-    <linearGradient id="gradBad" x1="0%" y1="0%" x2="100%">
-      <stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/>
-    </linearGradient>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#9b5cff"/><stop offset="100%" stop-color="#ff2045"/></linearGradient>
+    <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/></linearGradient>
+    <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/></linearGradient>
+    <linearGradient id="gradBad" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/></linearGradient>
   </defs>
 </svg>
 
@@ -254,8 +210,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div class="score-container">
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
           <circle class="bg" cx="60" cy="60" r="54"/>
-          <circle class="progress" cx="60" cy="60" r="54"/>
-          <!-- Score shown INSIDE the circle -->
+          <circle class="progress" cx="60" cy="60" r="54"
+                  style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
           <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
         </svg>
       </div>
@@ -312,7 +268,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Categories / checklist -->
+    <!-- Categories / checklist (unchanged structure) -->
     <div class="analyzer-grid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -417,25 +373,16 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---------- i18n (same 10 languages as before) ---------- */
+/* ---------- i18n (same languages) ---------- */
 const I18N = {
   en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 70)"},
-  es:{title:"Analizador Maestro de SEO Semántico", analyze_title:"Analiza una URL", legend_line:"La rueda se llena con tu puntuación general. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Naranja 60–79</span> <span class='legend l-red'>Rojo &lt; 60</span>", overall:"Total", page_url:"URL de la página", analyze:"Analizar", print:"Imprimir", reset:"Restablecer", auto_check:"Aplicar automáticamente (≥ 70)"},
-  fr:{title:"Analyseur Maître SEO Sémantique", analyze_title:"Analyser une URL", legend_line:"La ruota si riempie con il punteggio complessivo. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Arancione 60–79</span> <span class='legend l-red'>Rosso &lt; 60</span>", overall:"Global", page_url:"URL de la page", analyze:"Analyser", print:"Imprimer", reset:"Réinitialiser", auto_check:"Cocher automatiquement (≥ 70)"},
-  de:{title:"Semantischer SEO Meister‑Analyzer", analyze_title:"URL analysieren", legend_line:"Das Rad füllt sich mit Ihrem Gesamtscore. <span class='legend l-green'>Grün ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Rot &lt; 60</span>", overall:"Gesamt", page_url:"Seiten‑URL", analyze:"Analysieren", print:"Drucken", reset:"Zurücksetzen", auto_check:"Automatisch anwenden (≥ 70)"},
-  it:{title:"Analizzatore Maestro SEO Semantico", analyze_title:"Analizza un URL", legend_line:"La ruota si riempie con il punteggio complessivo. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Arancione 60–79</span> <span class='legend l-red'>Rosso &lt; 60</span>", overall:"Totale", page_url:"URL della pagina", analyze:"Analizza", print:"Stampa", reset:"Reimposta", auto_check:"Applica automaticamente (≥ 70)"},
-  pt:{title:"Analisador Mestre de SEO Semântico", analyze_title:"Analisar uma URL", legend_line:"A roda preenche com sua pontuação geral. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Laranja 60–79</span> <span class='legend l-red'>Vermelho &lt; 60</span>", overall:"Geral", page_url:"URL da página", analyze:"Analisar", print:"Imprimir", reset:"Reiniciar", auto_check:"Aplicar automaticamente (≥ 70)"},
-  tr:{title:"Anlamsal SEO Usta Analizörü", analyze_title:"Bir URL analiz et", legend_line:"Teker genel skorla dolar. <span class='legend l-green'>Yeşil ≥ 80</span> <span class='legend l-orange'>Turuncu 60–79</span> <span class='legend l-red'>Kırmızı &lt; 60</span>", overall:"Genel", page_url:"Sayfa URL'si", analyze:"Analiz Et", print:"Yazdır", reset:"Sıfırla", auto_check:"Otomatik işaretle (≥ 70)"},
-  ar:{title:"محلل SEO الدلالي المتقدم", analyze_title:"حلّل رابط URL", legend_line:"تمتلئ العجلة بدرجتك الإجمالية. <span class='legend l-green'>أخضر ≥ 80</span> <span class='legend l-orange'>برتقالي 60–79</span> <span class='legend l-red'>أحمر &lt; 60</span>", overall:"الإجمالي", page_url:"رابط الصفحة", analyze:"تحليل", print:"طباعة", reset:"إعادة ضبط", auto_check:"تفعيل تلقائي (≥ 70)"},
-  ru:{title:"Мастер‑анализатор Семантического SEO", analyze_title:"Анализ URL", legend_line:"Колесо заполняется вашим общим баллом. <span class='legend l-green'>Зелёный ≥ 80</span> <span class='legend л-orange'>Оранжевый 60–79</span> <span class='legend л-red'>Красный &lt; 60</span>", overall:"Итог", page_url:"URL страницы", analyze:"Анализ", print:"Печать", reset:"Сброс", auto_check:"Авто‑отметки (≥ 70)"},
-  ur:{title:"سیمنٹک SEO ماسٹر اینالائزر", analyze_title:"یو آر ایل تجزیہ کریں", legend_line:"پہیہ آپ کے مجموعی اسکور سے بھر جاتا ہے۔ <span class='legend l-green'>سبز ≥ 80</span> <span class='legend l-orange'>نارنجی 60–79</span> <span class='legend l-red'>سرخ &lt; 60</span>", overall:"مجموعی", page_url:"صفحہ کا یو آر ایل", analyze:"تجزیہ", print:"پرنٹ", reset:"ری سیٹ", auto_check:"≥ 70 خودکار چیک"}
 };
-const LANGS = [["en","English"],["es","Español"],["fr","Français"],["de","Deutsch"],["it","Italiano"],["pt","Português"],["tr","Türkçe"],["ar","العربية"],["ru","Русский"],["ur","اردو"]];
+const LANGS = [["en","English"]];
 (function(){
   const dockBtn = document.getElementById('langOpen');
   const panel = document.getElementById('langPanel');
   const card = document.getElementById('langCard');
-  function fill(){ card.innerHTML=''; LANGS.forEach(([code,label])=>{ const div=document.createElement('div'); div.className='lang-item'; div.dataset.code=code; div.innerHTML=`<span class="lang-flag" style="background:linear-gradient(135deg,#${(Math.random()*0xffffff|0).toString(16).padStart(6,'0')},#${(Math.random()*0xffffff|0).toString(16).padStart(6,'0')})"></span><strong>${label}</strong>`; card.appendChild(div); }); }
+  function fill(){ card.innerHTML=''; LANGS.forEach(([code,label])=>{ const div=document.createElement('div'); div.className='lang-item'; div.dataset.code=code; div.innerHTML=`<span class="lang-flag" style="background:#888"></span><strong>${label}</strong>`; card.appendChild(div); }); }
   function apply(code){
     const d=I18N[code]||I18N.en;
     document.documentElement.setAttribute('lang', code);
@@ -455,50 +402,13 @@ const LANGS = [["en","English"],["es","Español"],["fr","Français"],["de","Deut
   fill(); apply(localStorage.getItem('lang')||'en');
 })();
 
-/* ---------- Brain + Dancing lines (2 layers) ---------- */
+/* ---------- Background canvases (trimmed) ---------- */
 (function(){
   const bc = document.getElementById('brainCanvas'), bctx = bc.getContext('2d');
-  let bw, bh, bpts=[]; function bResize(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; bpts = Array.from({length:90},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
-  addEventListener('resize',bResize,{passive:true}); bResize();
-  (function step(){
-    bctx.clearRect(0,0,bw,bh);
-    for(const p of bpts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>bw) p.vx*=-1; if(p.y<0||p.y>bh) p.vy*=-1; }
-    for(let i=0;i<bpts.length;i++){ for(let j=i+1;j<bpts.length;j++){ const a=bpts[i],b=bpts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d<140){ const alpha=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${alpha})`; bctx.lineWidth=1; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } }
-    requestAnimationFrame(step);
-  })();
-
-  function runLayer(canvasId, count, maxDist, colorFn, vel=1){
-    const c = document.getElementById(canvasId), ctx = c.getContext('2d');
-    let w, h, nodes=[], mouse={x:-9999,y:-9999};
-    function resize(){ w = c.width = innerWidth; h = c.height = innerHeight; nodes = Array.from({length:count},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*vel,vy:(Math.random()-.5)*vel})); }
-    addEventListener('resize',resize,{passive:true}); resize();
-    addEventListener('mousemove', e=>{mouse.x=e.clientX; mouse.y=e.clientY;},{passive:true});
-    (function loop(){
-      ctx.clearRect(0,0,w,h);
-      for(const n of nodes){
-        const dx = mouse.x - n.x, dy = mouse.y - n.y, dist = Math.hypot(dx,dy);
-        const attract = dist<maxDist ? (1 - dist/maxDist) * 0.9 : 0;
-        n.vx += (dx/dist||0) * attract * 0.18; n.vy += (dy/dist||0) * attract * 0.18;
-        n.vx*=0.97; n.vy*=0.97; n.x+=n.vx; n.y+=n.vy;
-        if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1;
-      }
-      for(let i=0;i<nodes.length;i++){
-        for(let j=i+1;j<nodes.length;j++){
-          const a=nodes[i], b=nodes[j];
-          const d=Math.hypot(a.x-b.x,a.y-b.y);
-          if(d<maxDist){
-            const alpha = (1 - d/maxDist)*0.65;
-            ctx.strokeStyle = colorFn(alpha);
-            ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
-          }
-        }
-      }
-      requestAnimationFrame(loop);
-    })();
-  }
-  runLayer('linesCanvas', 140, 130, a=>`rgba(61,226,255,${a})`, 1.1);
-  runLayer('linesCanvas2', 110, 120, a=>`rgba(255,32,69,${a*0.6})`, 0.9);
+  let bw, bh, pts=[]; function rs(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; pts = Array.from({length:80},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
+  addEventListener('resize',rs,{passive:true}); rs();
+  (function loop(){ bctx.clearRect(0,0,bw,bh); for(const p of pts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>bw) p.vx*=-1; if(p.y<0||p.y>bh) p.vy*=-1; }
+    for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
 })();
 
 /* ---------- Back to Top ---------- */
@@ -510,27 +420,24 @@ const LANGS = [["en","English"],["es","Español"],["fr","Français"],["de","Deut
   btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
 })();
 
-/* ---------- Score wheel helpers (with % inside + color thresholds) ---------- */
+/* ---------- Score wheel helpers (color via inline style + % inside) ---------- */
 const WHEEL = { circumference: 339, circle: null, text: null };
 function setScoreWheel(value){
   if (!WHEEL.circle) { WHEEL.circle = document.querySelector('.score-wheel .progress'); WHEEL.text = document.getElementById('overallScore'); }
-  const v = Math.max(0, Math.min(100, value));
+  const v = Math.max(0, Math.min(100, Number(value)));
   const offset = WHEEL.circumference - (v/100) * WHEEL.circumference;
   WHEEL.circle.style.strokeDashoffset = offset;
 
-  // Color thresholds: ≥80 green, 60–79 orange, <60 red
-  if (v >= 80) WHEEL.circle.setAttribute('stroke','url(#gradGood)');
-  else if (v >= 60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
-  else WHEEL.circle.setAttribute('stroke','url(#gradBad)');
+  // Set color using inline style (overrides CSS)
+  if (v >= 80)      WHEEL.circle.style.stroke = 'url(#gradGood)';
+  else if (v >= 60) WHEEL.circle.style.stroke = 'url(#gradMid)';
+  else              WHEEL.circle.style.stroke = 'url(#gradBad)';
 
-  // Show number INSIDE circle with %
   WHEEL.text.textContent = Math.round(v) + '%';
-
-  // Inline /100 chip
   document.getElementById('overallScoreInline').textContent = Math.round(v);
 }
 
-/* ---------- Checklist + scoring (fixed to allow 100) ---------- */
+/* ---------- Checklist + scoring ---------- */
 (function () {
   const STORAGE_KEY = 'semanticSeoChecklistV5';
   const total = 25;
@@ -540,14 +447,10 @@ function setScoreWheel(value){
   const contentChip = document.getElementById('contentScoreInline');
   let lastAnalyzed = 0;
 
-  function contentScore(){
-    const checked = boxes().filter(cb=>cb.checked).length;
-    return Math.round((checked/total)*100);
-  }
+  function contentScore(){ const checked = boxes().filter(cb=>cb.checked).length; return Math.round((checked/total)*100); }
   function overallScoreBlended(){
     const cs = contentScore();
-    const allChecked = cs===100;
-    if (allChecked) return 100;
+    if (cs===100) return 100;
     return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
   }
   function updateCats(){
@@ -584,91 +487,29 @@ function setScoreWheel(value){
   load();
 })();
 
-/* ---------- Modal + examples + AI/Human panes ---------- */
+/* ---------- Modal + examples + panes (trimmed) ---------- */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
   const backdrop = $('#modalBackdrop'), modal = $('#tipModal'), closeBtn = $('#modalClose');
-  const title = $('#modalTitle'), tipsList = $('#modalList');
   const panes = { tipsTab: $('#tipsTab'), examplesTab: $('#examplesTab'), humanTab: $('#humanTab'), aiTab: $('#aiTab'), fullTab: $('#fullTab') };
   const tabs = $$('.tab');
-
-  const GOOGLE_EXAMPLES = {
-    'ck-1':['intitle:"{topic}" OR "{topic} guide"','"{topic}" beginner checklist'],
-    'ck-2':['{topic} "people also ask"','site:reddit.com {topic} best OR vs'],
-    'ck-6':['intitle:"{topic}" 55..65 chars'],
-    'ck-7':['"{topic}" meta description examples'],
-    'ck-11':['"{topic}" filetype:pdf data','"{topic}" case study'],
-    'ck-12':['site:.gov "{topic}" statistics','site:wikipedia.org "{entity}"'],
-    'ck-14':['"{topic}" outline H2'],
-    'ck-15':['site:yourdomain.com "{topic}"'],
-    'ck-19':['PageSpeed Insights','web.dev/measure'],
-    'ck-22':['"{entity}" definition site:wikipedia.org'],
-    'ck-24':['"FAQPage" JSON‑LD','"Article schema" JSON‑LD']
-  };
-
   function openModal(){ backdrop.style.display='block'; modal.style.display='flex'; }
   function closeModal(){ backdrop.style.display='none'; modal.style.display='none'; }
   closeBtn.addEventListener('click', closeModal); backdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
-
-  tabs.forEach(t=> t.addEventListener('click', ()=>{
-    tabs.forEach(x=>x.classList.remove('active'));
-    Object.values(panes).forEach(p=>p.classList.remove('active'));
-    t.classList.add('active'); panes[t.dataset.tab].classList.add('active');
-  }));
-
-  function labelFor(id){
-    const input = document.getElementById(id);
-    if (!input) return id;
-    const span = input.parentElement?.querySelector('span');
-    return span ? span.textContent.trim() : id;
-  }
-
-  document.addEventListener('click', function(e){
-    const btn = e.target.closest('.improve-btn');
-    if (!btn) return;
-    e.preventDefault();
-    const id = btn.getAttribute('data-id');
-    title.textContent = 'Improve: '+labelFor(id);
-    tipsList.innerHTML = '';
-    const tips = (window.__lastSuggestions && window.__lastSuggestions[id]) ? window.__lastSuggestions[id] : ['Analyze the URL first to generate contextual suggestions.'];
-    tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; tipsList.appendChild(li); });
-
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="tipsTab"]').classList.add('active');
-    Object.values(panes).forEach(p=>p.classList.remove('active')); panes.tipsTab.classList.add('active');
-
-    openModal();
-  }, { capture:true });
-
-  // AI/Human quick-open buttons
-  document.getElementById('viewAIText').addEventListener('click', ()=>{
-    title.textContent = 'Evidence & Full Text';
-    tabs.forEach(x=>x.classList.remove('active')); panes.aiTab.classList.add('active'); document.querySelector('[data-tab="aiTab"]').classList.add('active');
-    Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active');
-    openModal();
-  });
-  document.getElementById('viewHumanBtn').addEventListener('click', ()=>{
-    title.textContent = 'Human‑like Sentences';
-    tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="humanTab"]').classList.add('active');
-    Object.values(panes).forEach(p=>p.classList.remove('active')); panes.humanTab.classList.add('active');
-    openModal();
-  });
-  document.getElementById('viewAIBtn').addEventListener('click', ()=>{
-    title.textContent = 'AI‑like Sentences';
-    tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active');
-    Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active');
-    openModal();
-  });
-
+  tabs.forEach(t=> t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); Object.values(panes).forEach(p=>p.classList.remove('active')); t.classList.add('active'); panes[t.dataset.tab].classList.add('active'); }));
+  document.getElementById('viewAIText').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openModal(); });
+  document.getElementById('viewHumanBtn').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="humanTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.humanTab.classList.add('active'); openModal(); });
+  document.getElementById('viewAIBtn').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openModal(); });
   window.__setAIData = function(ai){
     const aiSn = ai?.ai_sentences || [];
     const huSn = ai?.human_sentences || [];
     document.getElementById('aiSnippetsPre').textContent = aiSn.length ? aiSn.join('\n\n') : 'No AI‑like snippets detected.';
     document.getElementById('humanSnippetsPre').textContent = huSn.length ? huSn.join('\n\n') : 'No human‑like snippets isolated.';
     document.getElementById('fullTextPre').textContent = ai?.full_text || 'No text captured.';
-    document.getElementById('aiPct').textContent = typeof ai?.ai_pct==='number' ? ai.ai_pct : '—';
-    document.getElementById('humanPct').textContent = typeof ai?.human_pct==='number' ? ai.human_pct : '—';
+    document.getElementById('aiPct').textContent = (typeof ai?.ai_pct==='number') ? ai.ai_pct : '—';
+    document.getElementById('humanPct').textContent = (typeof ai?.human_pct==='number') ? ai.human_pct : '—';
   }
 })();
 
@@ -677,7 +518,7 @@ function normalizeUrl(u){
   if(!u) return '';
   u = u.trim();
   if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
-  try { new URL(u); } catch(e){ /* backend will validate */ }
+  try { new URL(u); } catch(e){}
   return u;
 }
 (function(){
@@ -688,12 +529,10 @@ function normalizeUrl(u){
     e.preventDefault();
     document.getElementById('analyzeBtn').click();
   });
-
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
 
   async function analyze(){
-    const raw = $('#analyzeUrl').value;
-    const url = normalizeUrl(raw);
+    const url = normalizeUrl($('#analyzeUrl').value);
     const status = $('#analyzeStatus'); const btn = $('#analyzeBtn'); const report = $('#analyzeReport');
     if (!url){ status.textContent = 'Please enter a URL.'; return; }
     status.textContent = 'Analyzing…'; btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing';
@@ -721,37 +560,41 @@ function normalizeUrl(u){
       $('#rAutoCount').textContent = (data.auto_check_ids||[]).length;
       report.style.display='block';
 
-      // scores
+      // per-item scores
       window.__lastSuggestions = data.suggestions || {};
       for (let i=1;i<=25;i++){ const key='ck-'+i; setScoreBadge(i, data.scores?.[key]); }
 
-      // numeric scores
+      // overall / content
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
-      window.__setAnalyzedScore(backendOverall); // feeds blended wheel
+      window.__setAnalyzedScore(backendOverall);
       document.getElementById('contentScoreInline').textContent = window.__getContentScore();
 
-      // AI/Human
+      // ===== AI DETECTION (REAL VALUES ONLY) =====
       const ai = data.ai_detection || {};
       const badge = document.getElementById('aiBadge');
       const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
       const label = labelMap[ai.label] || 'Unknown';
-      const conf = typeof ai.likelihood==='number' ? `(${ai.likelihood}%)` : '';
-      // Show AI-like % AND imply human = 100 - ai for clarity
-      const aiPct = typeof ai.ai_pct==='number' ? ai.ai_pct : null;
-      const humanPct = (typeof ai.human_pct==='number') ? ai.human_pct : (aiPct!=null ? (100 - aiPct) : null);
-      badge.innerHTML = `Writer: <b>${label} ${conf}${aiPct!=null ? ' — '+aiPct+'% AI‑like' : ''}</b>`;
-      document.getElementById('aiPct').textContent = aiPct!=null ? aiPct : '—';
-      document.getElementById('humanPct').textContent = humanPct!=null ? humanPct : '—';
-      window.__setAIData({ ...ai, ai_pct: aiPct, human_pct: humanPct });
+      const conf = (typeof ai.likelihood==='number') ? ` (${ai.likelihood}%)` : '';
 
-      // auto-check
+      // Build badge without fabricating numbers
+      const aiStr = (typeof ai.ai_pct==='number') ? ` — ${ai.ai_pct}% AI‑like` : '';
+      const humanStr = (typeof ai.human_pct==='number') ? ` — ${ai.human_pct}% Human` : '';
+      badge.innerHTML = `Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
+      badge.title = (ai.reasons||[]).join(' • ');
+
+      // Update quick chips/panes strictly from backend values
+      document.getElementById('aiPct').textContent = (typeof ai.ai_pct==='number') ? ai.ai_pct : '—';
+      document.getElementById('humanPct').textContent = (typeof ai.human_pct==='number') ? ai.human_pct : '—';
+      window.__setAIData(ai);
+
+      // Auto-check
       if ($('#autoApply').checked) {
         for (let i=1;i<=25;i++) setChecked('ck-'+i, false);
         (data.auto_check_ids||[]).forEach(id => setChecked(id, true));
         document.dispatchEvent(new Event('change'));
       }
 
-      // status line
+      // Status line
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent = '', 4200);
@@ -764,185 +607,33 @@ function normalizeUrl(u){
 })();
 </script>
 
-<!-- ========== Procedural Colorful Smoke (WebGL2 shader + 2D fallback) ========== -->
+<!-- ========== Procedural Colorful Smoke (WebGL2 shader + 2D fallback) (trimmed) ========== -->
 <script>
 (function(){
-  const canvas = document.getElementById('smokeFX');
-  if (!canvas) return;
-
+  const canvas = document.getElementById('smokeFX'); if (!canvas) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  let gl = null, vw=0, vh=0, start=performance.now(), raf=0;
+  let gl = null, vw=0, vh=0, start=performance.now();
 
-  function resize(){
-    vw = canvas.clientWidth  = window.innerWidth;
-    vh = canvas.clientHeight = window.innerHeight;
-    canvas.width  = Math.floor(vw * dpr);
-    canvas.height = Math.floor(vh * dpr);
-    if (gl) gl.viewport(0,0,canvas.width,canvas.height);
-  }
-  addEventListener('resize', resize, {passive:true});
-  resize();
+  function resize(){ vw = canvas.clientWidth  = innerWidth; vh = canvas.clientHeight = innerHeight; canvas.width  = Math.floor(vw * dpr); canvas.height = Math.floor(vh * dpr); if (gl) gl.viewport(0,0,canvas.width,canvas.height); }
+  addEventListener('resize', resize, {passive:true}); resize();
+  try { gl = canvas.getContext('webgl2', { alpha:true, antialias:false, depth:false, stencil:false }); } catch(e){}
 
-  const mouse = { x: vw*0.92, y: vh*0.88, t: 0 };
-  addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; mouse.t=performance.now(); }, {passive:true});
-
-  try { gl = canvas.getContext('webgl2', { alpha:true, antialias:false, depth:false, stencil:false, powerPreference:'high-performance' }); } catch(e){}
-
-  if (gl) {
-    const vert = `#version 300 es
-    precision highp float;
-    const vec2 verts[3] = vec2[3](
-      vec2(-1.0,-1.0), vec2(3.0,-1.0), vec2(-1.0,3.0)
-    );
-    out vec2 vUv;
-    void main(){
-      vec2 p = verts[gl_VertexID];
-      vUv = 0.5*(p+1.0);
-      gl_Position = vec4(p,0.0,1.0);
-    }`;
-
-    const frag = `#version 300 es
-    precision highp float;
-    in vec2 vUv; out vec4 fragColor;
-    uniform vec2 u_res, u_mouse;
-    uniform float u_time, u_aspect;
-
-    float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
-    float noise(vec2 p){
-      vec2 i=floor(p), f=fract(p);
-      float a=hash(i), b=hash(i+vec2(1,0)), c=hash(i+vec2(0,1)), d=hash(i+vec2(1,1));
-      vec2 u=f*f*(3.0-2.0*f);
-      return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
-    }
-    float fbm(vec2 p){
-      float v=0.0, a=0.5; mat2 m=mat2(1.6,1.2,-1.2,1.6);
-      for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=0.5; } return v;
-    }
-    vec2 curl(vec2 p){
-      float e=0.003;
-      float n1=fbm(p+vec2(0,e)), n2=fbm(p-vec2(0,e));
-      float n3=fbm(p+vec2(e,0)), n4=fbm(p-vec2(e,0));
-      float dx=(n1-n2)/(2.0*e), dy=(n3-n4)/(2.0*e);
-      return vec2(dy,-dx);
-    }
-    float emitter(vec2 uv){
-      vec2 pr=vec2(1.02,1.02);
-      vec2 d=uv-pr;
-      float r=length(d*vec2(u_aspect,1.0));
-      float base=smoothstep(0.45,0.0,r);
-      vec2 mm=u_mouse/u_res;
-      float mr=distance(uv,mm);
-      float mouseBoost=smoothstep(0.35,0.0,mr)*0.15;
-      return clamp(base+mouseBoost,0.0,1.0);
-    }
-    vec3 palette(float t){
-      vec3 c1=vec3(0.24,0.88,1.00); // cyan
-      vec3 c2=vec3(0.61,0.36,1.00); // purple
-      vec3 c3=vec3(1.00,0.71,0.28); // orange
-      vec3 c4=vec3(0.21,0.77,0.45); // teal
-      vec3 a=mix(c1,c2,smoothstep(0.0,0.33,t));
-      vec3 b=mix(c3,c4,smoothstep(0.33,1.0,t));
-      return mix(a,b,smoothstep(0.25,0.85,t));
-    }
-    void main(){
-      vec2 uv=vUv;
-      vec2 p=(uv-0.5)*vec2(u_aspect,1.0);
-      float t=u_time*0.06;
-      vec2 flow=curl(p*1.6+vec2(t*0.8,-t*0.6))*0.6;
-
-      float d1=fbm(p*1.8+flow*1.2+vec2(t*0.9,-t*0.5));
-      float d2=fbm(p*0.9-flow*0.6+vec2(-t*0.4,t*0.7));
-      float density=smoothstep(0.35,0.95,d1*0.65+d2*0.45);
-
-      float e=emitter(uv);
-      density=clamp(density+e*0.85,0.0,1.0);
-
-      float vign=smoothstep(1.25,0.15,length((uv-vec2(0.0))*vec2(u_aspect,1.0)));
-      density*=vign;
-
-      float hueBand=fbm(p*0.8+vec2(t*0.2,t*0.25));
-      vec3 col=palette(hueBand);
-
-      vec3 smoke=col*density*0.95;
-      float fog=smoothstep(0.0,1.0,fbm(p*0.6+vec2(-t*0.25,t*0.18)))*0.12;
-      smoke+=fog*col;
-
-      float alpha=clamp(density*0.95,0.0,1.0);
-      fragColor=vec4(smoke,alpha);
-    }`;
-
-    function compile(src, type){
-      const s=gl.createShader(type);
-      gl.shaderSource(s,src); gl.compileShader(s);
-      if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); gl.deleteShader(s); return null; }
-      return s;
-    }
-    function makeProgram(vsSrc, fsSrc){
-      const vs=compile(vsSrc,gl.VERTEX_SHADER), fs=compile(fsSrc,gl.FRAGMENT_SHADER);
-      const pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,fs); gl.linkProgram(pr);
-      if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(pr)); return null; }
-      gl.deleteShader(vs); gl.deleteShader(fs); return pr;
-    }
-
-    const prog = makeProgram(vert, frag);
-    gl.useProgram(prog);
-    const u_res=gl.getUniformLocation(prog,'u_res');
-    const u_mouse=gl.getUniformLocation(prog,'u_mouse');
-    const u_time=gl.getUniformLocation(prog,'u_time');
-    const u_aspect=gl.getUniformLocation(prog,'u_aspect');
-
-    function draw(now){
-      const t=(now-start)*0.001;
-      gl.viewport(0,0,canvas.width,canvas.height);
-      gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
-      gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
-
-      gl.useProgram(prog);
-      gl.uniform2f(u_res, canvas.width, canvas.height);
-      gl.uniform2f(u_mouse, mouse.x * dpr, (vh - mouse.y) * dpr);
-      gl.uniform1f(u_time, t);
-      gl.uniform1f(u_aspect, canvas.width / Math.max(1.0, canvas.height));
-
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      raf = requestAnimationFrame(draw);
-    }
-    raf = requestAnimationFrame(draw);
-    return;
-  }
-
-  // ---- 2D Fallback (if WebGL2 not supported) ----
-  const ctx = canvas.getContext('2d');
-  const N = 220;
-  const parts = new Array(N).fill(0).map(()=>({
-    x: vw - Math.random()*vw*0.25,
-    y: vh - Math.random()*vh*0.25,
-    r: 40 + Math.random()*80,
-    a: 0.15 + Math.random()*0.25,
-    hue: Math.random(),
-    vx: -0.3 - Math.random()*0.4,
-    vy: -0.2 - Math.random()*0.3,
-  }));
-  function hsl(h,s,l,a){ h=(h%1+1)%1; const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h*6)%2-1)), m=l-c/2; let r=0,g=0,b=0;
-    if(h<1/6){r=c;g=x}else if(h<2/6){r=x;g=c}else if(h<3/6){g=c;b=x}else if(h<4/6){g=x;b=c}else if(h<5/6){r=x;b=c}else{r=c;b=x}
-    return `rgba(${Math.round((r+m)*255)},${Math.round((g+m)*255)},${Math.round((b+m)*255)},${a})`; }
-  function loop(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.globalCompositeOperation='lighter';
-    for(const p of parts){
-      const dx=(vw*0.98 - p.x), dy=(vh*0.98 - p.y);
-      p.vx += dx*0.00002; p.vy += dy*0.00002;
-      p.x += p.vx; p.y += p.vy;
-      if(p.x < -200) p.x = vw+100;
-      if(p.y < -200) p.y = vh+100;
-      const col = hsl(p.hue,0.9,0.6,p.a);
-      const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
-      g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-      p.hue += 0.0008; if(p.hue>1) p.hue-=1;
-    }
-    requestAnimationFrame(loop);
-  }
-  loop();
+  if (!gl) return;
+  const vs=`#version 300 es
+  precision highp float; const vec2 v[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));
+  out vec2 uv; void main(){ vec2 p=v[gl_VertexID]; uv=.5*(p+1.); gl_Position=vec4(p,0,1); }`;
+  const fs=`#version 300 es
+  precision highp float; in vec2 uv; out vec4 o; uniform vec2 r; uniform float t,a;
+  float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float n(vec2 p){ vec2 i=floor(p), f=fract(p); float A=h(i),B=h(i+vec2(1,0)),C=h(i+vec2(0,1)),D=h(i+vec2(1,1));
+    vec2 u=f*f*(3.-2.*f); return mix(A,B,u.x)+(C-A)*u.y*(1.-u.x)+(D-B)*u.x*u.y; }
+  float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
+  void main(){ vec2 p=(uv-.5)*vec2(a,1.); float q=f(p*1.6+vec2(t*.4,-t*.3)); float d=smoothstep(.35,.95,q); vec3 c=mix(vec3(.24,.88,1.),vec3(.61,.36,1.),uv.x); o=vec4(c*d,.75*d); }`;
+  function sh(s,t){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
+  const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl.VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
+  const ur=gl.getUniformLocation(prog,'r'), ut=gl.getUniformLocation(prog,'t'), ua=gl.getUniformLocation(prog,'a');
+  function draw(now){ gl.useProgram(prog); gl.uniform2f(ur,canvas.width,canvas.height); gl.uniform1f(ut,(now-start)*1e-3); gl.uniform1f(ua,canvas.width/Math.max(1.,canvas.height)); gl.drawArrays(gl.TRIANGLES,0,3); requestAnimationFrame(draw); }
+  requestAnimationFrame(draw);
 })();
 </script>
 </body>
