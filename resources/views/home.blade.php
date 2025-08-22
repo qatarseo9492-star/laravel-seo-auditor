@@ -30,15 +30,20 @@ body{
 
 /* Mouse-reactive dancing lines + brain canvas */
 #linesCanvas, #brainCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
-#brainCanvas{opacity:.10}
+#brainCanvas{opacity:.12}
 
-/* Purple + red smoke blobs */
+/* Smoke blobs (extra visible at bottom-right) */
 .bg-smoke{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .blob{position:absolute;width:60vmax;height:60vmax;border-radius:50%;filter:blur(80px);mix-blend-mode:screen;animation:float 36s linear infinite}
-.blob.p{background:radial-gradient(closest-side,rgba(155,92,255,.35),rgba(155,92,255,0) 70%)}
-.blob.r{background:radial-gradient(closest-side,rgba(255,32,69,.28),rgba(255,32,69,0) 70%)}
-.b1{top:-18%;left:-15%}.b2{bottom:-22%;right:-10%;animation-direction:reverse;animation-duration:30s}
-.b3{top:10%;right:15%;animation-duration:28s}.b4{bottom:10%;left:25%;animation-duration:40s}
+.blob.p{background:radial-gradient(closest-side,rgba(155,92,255,.45),rgba(155,92,255,0) 70%)}   /* purple stronger */
+.blob.r{background:radial-gradient(closest-side,rgba(255,32,69,.42),rgba(255,32,69,0) 70%)}     /* red stronger */
+.blob.c{background:radial-gradient(closest-side,rgba(61,226,255,.38),rgba(61,226,255,0) 70%)}   /* cyan */
+.blob.g{background:radial-gradient(closest-side,rgba(255,214,82,.36),rgba(255,214,82,0) 70%)}   /* gold */
+.b1{top:-18%;left:-15%}
+.b2{top:6%;right:12%;animation-duration:28s}
+.b3{bottom:-6%;right:-12%;animation-direction:reverse;animation-duration:32s}  /* bottom-right purple/red base */
+.b4{bottom:-12%;right:-6%;animation-duration:40s}                               /* bottom-right cyan */
+.b5{bottom:-22%;right:-14%;animation-duration:44s}                              /* bottom-right gold */
 @keyframes float{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-6%,7%,0)}100%{transform:translate3d(0,0,0)}}
 
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
@@ -49,7 +54,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Left dock language switcher */
+/* Language dock */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -84,7 +89,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)} .l-orange{background:rgba(245,158,11,.18)} .l-green{background:rgba(34,197,94,.18)}
 
-/* URL input with glow (fixed) */
+/* URL input */
 .analyze-form input[type="url"]{
   position:relative; z-index:5;
   width:100%; padding:1rem 1.2rem; border-radius:14px;
@@ -104,8 +109,10 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 
 /* Category grid */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
-.category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden}
-.category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite}
+.category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden; isolation:isolate;}
+/* glow border stays under content & doesn’t capture clicks */
+.category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite; pointer-events:none; z-index:0;}
+.category-card > *{position:relative; z-index:1;}
 @keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
 .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
 .category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
@@ -115,12 +122,13 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.65rem .7rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02))}
 .checklist-item + .checklist-item{margin-top:.28rem}
 .checklist-item:hover{transform:translateY(-2px);background:rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.25)}
-.checklist-item input[type="checkbox"]{width:18px;height:18px;margin:.1rem .55rem 0 0;accent-color:var(--primary)}
+.checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.55rem}
+.checklist-item input[type="checkbox"]{width:18px;height:18px;margin:.1rem .55rem 0 0;accent-color:var(--primary); position:relative; z-index:2;}
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22); border-color:rgba(22,193,114,.45)}
 .score-mid{ background:rgba(245,158,11,.22); border-color:rgba(245,158,11,.45)}
 .score-bad{ background:rgba(239,68,68,.24); border-color:rgba(239,68,68,.5)}
-.improve-btn{padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer}
+.improve-btn{padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer; position:relative; z-index:2;}
 .improve-btn:hover{background:rgba(255,255,255,.1)}
 
 /* Modal */
@@ -163,7 +171,15 @@ footer.site{
 <body>
 <canvas id="brainCanvas"></canvas>
 <canvas id="linesCanvas"></canvas>
-<div class="bg-smoke"><span class="blob p b1"></span><span class="blob r b2"></span><span class="blob p b3"></span><span class="blob r b4"></span></div>
+
+<!-- Smoke: now with bottom-right colorful plumes -->
+<div class="bg-smoke">
+  <span class="blob p b1"></span>
+  <span class="blob r b2"></span>
+  <span class="blob p b3"></span>  <!-- base bottom-right -->
+  <span class="blob c b4"></span>  <!-- cyan bottom-right -->
+  <span class="blob g b5"></span>  <!-- gold bottom-right -->
+</div>
 
 <!-- gradients for score wheel -->
 <svg width="0" height="0" aria-hidden="true">
@@ -201,7 +217,6 @@ footer.site{
       <div class="score-container">
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
           <circle class="bg" cx="60" cy="60" r="54"/>
-          <!-- FIXED: proper SVG attribute -->
           <circle class="progress" cx="60" cy="60" r="54"/>
           <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0</text>
         </svg>
@@ -218,7 +233,6 @@ footer.site{
     <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
       <form id="analyzeForm" class="analyze-form" onsubmit="return false;">
         <label for="analyzeUrl" style="display:block;font-weight:800;margin-bottom:.35rem" data-i="page_url">Page URL</label>
-        <!-- FIXED: friendlier url input -->
         <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" />
         <div class="analyze-row">
           <div style="display:flex;align-items:center;gap:.6rem">
@@ -369,7 +383,7 @@ const I18N = {
   pt:{title:"Analisador Mestre de SEO Semântico", analyze_title:"Analisar uma URL", legend_line:"A roda preenche com sua pontuação geral. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Laranja 60–79</span> <span class='legend l-red'>Vermelho &lt; 60</span>", overall:"Geral", page_url:"URL da página", analyze:"Analisar", print:"Imprimir", reset:"Reiniciar", auto_check:"Aplicar automaticamente (≥ 70)"},
   tr:{title:"Anlamsal SEO Usta Analizörü", analyze_title:"Bir URL analiz et", legend_line:"Teker genel skorla dolar. <span class='legend l-green'>Yeşil ≥ 80</span> <span class='legend l-orange'>Turuncu 60–79</span> <span class='legend l-red'>Kırmızı &lt; 60</span>", overall:"Genel", page_url:"Sayfa URL'si", analyze:"Analiz Et", print:"Yazdır", reset:"Sıfırla", auto_check:"Otomatik işaretle (≥ 70)"},
   ar:{title:"محلل SEO الدلالي المتقدم", analyze_title:"حلّل رابط URL", legend_line:"تمتلئ العجلة بدرجتك الإجمالية. <span class='legend l-green'>أخضر ≥ 80</span> <span class='legend l-orange'>برتقالي 60–79</span> <span class='legend l-red'>أحمر &lt; 60</span>", overall:"الإجمالي", page_url:"رابط الصفحة", analyze:"تحليل", print:"طباعة", reset:"إعادة ضبط", auto_check:"تفعيل تلقائي (≥ 70)"},
-  ru:{title:"Мастер‑анализатор Семантического SEO", analyze_title:"Анализ URL", legend_line:"Колесо заполняется вашим общим баллом. <span class='legend l-green'>Зелёный ≥ 80</span> <span class='legend l-orange'>Оранжевый 60–79</span> <span class='legend l-red'>Красный &lt; 60</span>", overall:"Итог", page_url:"URL страницы", analyze:"Анализ", print:"Печать", reset:"Сброс", auto_check:"Авто‑отметки (≥ 70)"},
+  ru:{title:"Мастер‑анализатор Семантического SEO", analyze_title:"Анализ URL", legend_line:"Колесо заполняется вашим общим баллом. <span class='legend l-green'>Зелёный ≥ 80</span> <span class='legend л-orange'>Оранжевый 60–79</span> <span class='legend л-red'>Красный &lt; 60</span>", overall:"Итог", page_url:"URL страницы", analyze:"Анализ", print:"Печать", reset:"Сброс", auto_check:"Авто‑отметки (≥ 70)"},
   ur:{title:"سیمنٹک SEO ماسٹر اینالائزر", analyze_title:"یو آر ایل تجزیہ کریں", legend_line:"پہیہ آپ کے مجموعی اسکور سے بھر جاتا ہے۔ <span class='legend l-green'>سبز ≥ 80</span> <span class='legend l-orange'>نارنجی 60–79</span> <span class='legend l-red'>سرخ &lt; 60</span>", overall:"مجموعی", page_url:"صفحہ کا یو آر ایل", analyze:"تجزیہ", print:"پرنٹ", reset:"ری سیٹ", auto_check:"≥ 70 خودکار چیک"}
 };
 const LANGS = [
@@ -410,38 +424,49 @@ const LANGS = [
   fill(); apply(localStorage.getItem('lang')||'en');
 })();
 
-/* ---------- Dancing Lines + Brain ---------- */
+/* ---------- More “dancing lines” + dual-layer network ---------- */
 (function(){
-  // brain
+  // brain backdrop (purple mesh)
   const bc = document.getElementById('brainCanvas'), bctx = bc.getContext('2d');
-  let bw, bh, bpts=[]; function bResize(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; bpts = Array.from({length:70},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
+  let bw, bh, bpts=[]; function bResize(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; bpts = Array.from({length:90},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.45,vy:(Math.random()-.5)*.45}))}
   addEventListener('resize',bResize,{passive:true}); bResize();
   (function step(){
     bctx.clearRect(0,0,bw,bh);
     for(const p of bpts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>bw) p.vx*=-1; if(p.y<0||p.y>bh) p.vy*=-1; }
-    for(let i=0;i<bpts.length;i++){ for(let j=i+1;j<bpts.length;j++){ const a=bpts[i],b=bpts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d<130){ const alpha=(1-d/130)*0.5; bctx.strokeStyle=`rgba(157,92,255,${alpha})`; bctx.lineWidth=1; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } }
+    for(let i=0;i<bpts.length;i++){
+      for(let j=i+1;j<bpts.length;j++){
+        const a=bpts[i],b=bpts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y);
+        if(d<150){ const alpha=(1-d/150)*0.55; bctx.strokeStyle=`rgba(157,92,255,${alpha})`; bctx.lineWidth=1; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); }
+      }
+    }
     requestAnimationFrame(step);
   })();
 
-  // dancing lines follow mouse
+  // dancing lines follow mouse (denser + two colors)
   const lc = document.getElementById('linesCanvas'), lctx = lc.getContext('2d');
   let lw, lh, nodes=[], mouse={x:-9999,y:-9999};
-  function lResize(){lw= lc.width = innerWidth; lh= lc.height = innerHeight; nodes = Array.from({length:90},()=>({x:Math.random()*lw,y:Math.random()*lh,vx:(Math.random()-.5),vy:(Math.random()-.5)}));}
+  function lResize(){lw= lc.width = innerWidth; lh= lc.height = innerHeight; nodes = Array.from({length:160},()=>({x:Math.random()*lw,y:Math.random()*lh,vx:(Math.random()-.5),vy:(Math.random()-.5)}));}
   addEventListener('resize',lResize,{passive:true}); lResize();
   addEventListener('mousemove', e=>{mouse.x=e.clientX; mouse.y=e.clientY;},{passive:true});
   (function loop(){
     lctx.clearRect(0,0,lw,lh);
     for(const n of nodes){
       const dx = mouse.x - n.x, dy = mouse.y - n.y, dist = Math.hypot(dx,dy);
-      const attract = dist<180 ? (1 - dist/180) * 0.8 : 0;
-      n.vx += (dx/dist||0) * attract * 0.2; n.vy += (dy/dist||0) * attract * 0.2;
+      const attract = dist<200 ? (1 - dist/200) * 0.9 : 0;
+      n.vx += (dx/dist||0) * attract * 0.18; n.vy += (dy/dist||0) * attract * 0.18;
       n.vx*=0.97; n.vy*=0.97; n.x+=n.vx; n.y+=n.vy;
       if(n.x<0||n.x>lw) n.vx*=-1; if(n.y<0||n.y>lh) n.vy*=-1;
     }
     for(let i=0;i<nodes.length;i++){
       for(let j=i+1;j<nodes.length;j++){
-        const a=nodes[i], b=nodes[j]; const dx=a.x-b.x, dy=a.y-b.y; const d=Math.hypot(dx,dy);
-        if(d<120){ const alpha = (1 - d/120)*0.5; lctx.strokeStyle=`rgba(61,226,255,${alpha})`; lctx.lineWidth=1; lctx.beginPath(); lctx.moveTo(a.x,a.y); lctx.lineTo(b.x,b.y); lctx.stroke(); }
+        const a=nodes[i], b=nodes[j]; const d=Math.hypot(a.x-b.x,a.y-b.y);
+        if(d<130){
+          const alpha = (1 - d/130)*0.6;
+          // cyan layer
+          lctx.strokeStyle=`rgba(61,226,255,${alpha})`; lctx.lineWidth=1; lctx.beginPath(); lctx.moveTo(a.x,a.y); lctx.lineTo(b.x,b.y); lctx.stroke();
+          // pinkish layer
+          lctx.strokeStyle=`rgba(255,100,180,${alpha*0.7})`; lctx.lineWidth=0.8; lctx.beginPath(); lctx.moveTo(a.x+0.5,a.y+0.5); lctx.lineTo(b.x+0.5,b.y+0.5); lctx.stroke();
+        }
       }
     }
     requestAnimationFrame(loop);
@@ -518,7 +543,7 @@ setScoreWheel(0);
   load();
 })();
 
-/* ---------- Modal + Google Examples + AI panes ---------- */
+/* ---------- Modal + Google Examples + AI panes + robust open ---------- */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
@@ -559,24 +584,24 @@ setScoreWheel(0);
     return span ? span.textContent.trim() : id;
   }
 
+  // robust improve opener (capture phase ensures it always fires)
   document.addEventListener('click', (e)=>{
     const btn = e.target.closest('.improve-btn');
     if (!btn) return;
+    e.preventDefault();
     const id = btn.getAttribute('data-id');
     title.textContent = 'Improve: '+labelFor(id);
     tipsList.innerHTML = '';
     const tips = (window.__lastSuggestions && window.__lastSuggestions[id]) ? window.__lastSuggestions[id] : ['Analyze the URL first to generate suggestions.'];
     tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; tipsList.appendChild(li); });
 
-    // examples
     const ex = GOOGLE_EXAMPLES[id] || ['Use "site:", "intitle:", quotes "" and year ranges 2020..2025.'];
     document.getElementById('examplesPre').textContent = ex.map(s=> s.replaceAll('{topic}','<your topic>').replaceAll('{entity}','<your entity>')).join('\n\n');
 
-    // default tab
     tabs.forEach(x=>x.classList.remove('active')); tabs[0].classList.add('active');
     Object.values(panes).forEach(p=>p.classList.remove('active')); panes.tipsTab.classList.add('active');
     openModal();
-  });
+  }, {capture:true});
 
   document.getElementById('viewAIText').addEventListener('click', ()=>{
     title.textContent = 'AI‑like Content Detection';
@@ -604,7 +629,6 @@ function normalizeUrl(u){
   const $ = s => document.querySelector(s);
   const setChecked = (id, on) => { const el = document.getElementById(id); if (el) el.checked = !!on; };
 
-  // allow Enter to trigger analyze
   document.getElementById('analyzeForm').addEventListener('submit', (e)=>{
     e.preventDefault();
     document.getElementById('analyzeBtn').click();
