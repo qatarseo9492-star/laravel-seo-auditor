@@ -13,7 +13,7 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
 
     try {
         $resp = Http::withHeaders([
-            'User-Agent' => 'SemanticSEO-MasterAnalyzer/2.1 (+https://yourdomain.com)'
+            'User-Agent' => 'SemanticSEO-MasterAnalyzer/2.2 (+https://yourdomain.com)'
         ])->timeout(12)->connectTimeout(5)->get($url);
 
         $status = $resp->status();
@@ -26,9 +26,7 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         // PHP 8.0 polyfill for array_is_list
         if (!function_exists('array_is_list')) {
             function array_is_list(array $array): bool {
-                $i = 0;
-                foreach ($array as $k => $_) { if ($k !== $i++) return false; }
-                return true;
+                $i = 0; foreach ($array as $k => $_) { if ($k !== $i++) return false; } return true;
             }
         }
 
@@ -189,7 +187,30 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         if($footer){ foreach($footer->getElementsByTagName('a') as $a){ $h=strtolower($a->getAttribute('href')); if(preg_match('#(facebook|twitter|x\.com|instagram|linkedin|youtube|tiktok)\.com#',$h)) $footerSocial++; } }
         $S['ck-25']= $clamp( min(100, ($orgSameAs?100:0) + (!$orgSameAs && $hasOrganization ? 60:0) + min(40,$footerSocial*10)) );
 
-        // Suggestions (safe counts; include $h2s/$h3s)
+        // ========== Human vs AI content heuristic ==========
+        $reasons = [];
+        $aiScore = 30; // base neutral
+        if ($ttr < 0.28) { $aiScore += 20; $reasons[]='Low lexical variety (TTR < 0.28)'; }
+        if ($sentences >= 12 && $avgSentLen >= 16 && $avgSentLen <= 22) { $aiScore += 10; $reasons[]='Uniform sentence length (16–22 words)'; }
+        $genericPhrases = [
+            'in this article','we will explore','comprehensive guide','delve into','furthermore',
+            'moreover','in conclusion','additionally','this section will','as mentioned earlier',
+            'on the other hand','it is important to note','plays a crucial role','key takeaways'
+        ];
+        $matches=0; foreach($genericPhrases as $g){ if (stripos($bodyText,$g)!==false) $matches++; }
+        if ($matches>0) { $aiScore += min(30, $matches*6); $reasons[]="Contains {$matches} generic filler phrase(s)"; }
+
+        // Human signals reduce AI likelihood
+        $humanSignals=0;
+        if (count($authorMeta)) { $aiScore -= 8; $humanSignals++; $reasons[]='Has author attribution'; }
+        if (count($timeTags))   { $aiScore -= 5; $humanSignals++; $reasons[]='Has publish/update date'; }
+        if ($uvWords)           { $aiScore -= 8; $humanSignals++; $reasons[]='Has unique value (examples/templat es/data/tool)'; }
+        if ($externalTrusted>=2){ $aiScore -= 6; $humanSignals++; $reasons[]='Cites trustworthy sources'; }
+
+        $aiScore = $clamp($aiScore);
+        $aiLabel = $aiScore >= 65 ? 'likely_ai' : ($aiScore >= 45 ? 'mixed' : 'likely_human');
+
+        // Suggestions (with safe counts; include $h2s/$h3s)
         $suggest = function($id) use (
             $S,$titleText,$metaDesc,$h1Text,$qHeads,$hasFAQ,$imgs,$imgsWithAlt,$altRatio,
             $internalLinks,$keywordyAnchors,$slugOk,$slug,$hasBreadcrumb,$hasBreadcrumbUI,
@@ -198,7 +219,6 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
             $hasOrganization,$wikiLinks,$properH2s,$wc,$lists,$tables,$pres,$eSim,$sim,$h2s,$h3s
         ){
             $tips=[]; $SC = fn($v)=> (is_countable($v)?count($v):0);
-
             switch($id){
                 case 'ck-1':
                     if ($sim<0.4) $tips[]='Align H1 with Title (same primary keyword).';
@@ -248,12 +268,12 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
                     if ($externalYears<1)  $tips[]='Update stats to 2024/2025 and cite them.';
                     break;
                 case 'ck-13':
-                    if ($SC($imgs)<2) $tips[]='Add 2–4 relevant images/diagrams with captions.';
+                    if (count($imgs)<2) $tips[]='Add 2–4 relevant images/diagrams with captions.';
                     if ($altRatio<0.8)    $tips[]='Provide descriptive alt text for images.';
                     break;
                 case 'ck-14':
-                    if ($SC($h2s)<3) $tips[]='Add ≥3 H2 sections for key subtopics.';
-                    if ($SC($h3s)<2) $tips[]='Nest H3s for deeper subsections.';
+                    if (count($h2s)<3) $tips[]='Add ≥3 H2 sections for key subtopics.';
+                    if (count($h3s)<2) $tips[]='Nest H3s for deeper subsections.';
                     break;
                 case 'ck-15':
                     if ($internalLinks<3) $tips[]='Insert 3–6 internal links to hubs/related pages.';
@@ -270,7 +290,7 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
                     if (!$responsiveImgs) $tips[]='Serve responsive images (srcset/sizes).';
                     break;
                 case 'ck-19':
-                    if ($SC($imgsLazy)<2) $tips[]='Lazy‑load below‑the‑fold images (loading="lazy").';
+                    if (count($imgsLazy)<2) $tips[]='Lazy‑load below‑the‑fold images (loading="lazy").';
                     if ($blockingScripts>2) $tips[]='Defer/async non‑critical JS; reduce blocking scripts.';
                     if (!$hasPreload) $tips[]='Preload critical fonts/assets; preconnect to CDNs.';
                     break;
@@ -296,12 +316,14 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
                     if (!$orgSameAs) $tips[]='Add Organization schema with sameAs links to official profiles.';
                     break;
             }
+            // Add anti‑AI improvement block for quality items
+            if (in_array($id,['ck-10','ck-11','ck-12','ck-22'])) {
+                $tips[] = 'Increase “human signals”: author bio, first‑hand experience (photos/screens), original data, and concrete examples.';
+            }
             return $tips ?: ['Looks good—minor polishing only.'];
         };
 
-        $tipsOut=[];
-        foreach(array_keys($S) as $id){ $tipsOut[$id] = $suggest($id); }
-
+        $tipsOut=[]; foreach(array_keys($S) as $id){ $tipsOut[$id] = $suggest($id); }
         $autoIds=[]; foreach($S as $id=>$score) if($score>=70) $autoIds[]=$id;
         $overall = array_sum($S)/max(1,count($S));
 
@@ -328,6 +350,13 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
             'suggestions'=>$tipsOut,
             'auto_check_ids'=>$autoIds,
             'overall_score'=>round($overall,1),
+
+            // Human vs AI signal
+            'ai_detection'=>[
+                'likelihood'=>$aiScore,  // 0..100 (higher = more AI‑like)
+                'label'=>$aiLabel,       // likely_human | mixed | likely_ai
+                'reasons'=>$reasons
+            ],
         ]);
     } catch (\Throwable $e) {
         return response()->json(['ok'=>false,'error'=>'Analyze error: '.$e->getMessage()], 500);
