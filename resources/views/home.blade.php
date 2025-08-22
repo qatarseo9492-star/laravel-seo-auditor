@@ -32,32 +32,30 @@ body{
 #linesCanvas, #linesCanvas2, #brainCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
 #brainCanvas{opacity:.10}
 
-/* --- NEW: Procedural Cloud Smoke canvas --- */
-#smokeFX{
-  position:fixed; inset:0; z-index:0; pointer-events:none;
-  opacity:1; filter:saturate(115%) contrast(105%);
+/* --- WebGL Smoke (bottom-right) --- */
+#smokeGL{
+  position:fixed; right:-6vmax; bottom:-6vmax;
+  width:74vmax; height:50vmax; z-index:0; pointer-events:none; opacity:.92;
+  filter:saturate(1.2) blur(0.2px);
 }
 
-/* Hide the previous decorative blobs/clouds to avoid double effects (keep DOM for fallback if you like) */
-.bg-smoke .blob, .clouds { display:none !important; }
-
-/* --- (Old) Cloudy smoke (kept but hidden by rule above) --- */
+/* --- CSS Cloudy fallback (visible if WebGL disabled) --- */
 .bg-smoke{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .blob{position:absolute;border-radius:50%;filter:blur(90px);mix-blend-mode:screen;animation:float 36s linear infinite}
-.blob.p{background:radial-gradient(closest-side,rgba(155,92,255,.38),rgba(155,92,255,0) 70%)}
-.blob.r{background:radial-gradient(closest-side,rgba(255,32,69,.34),rgba(255,32,69,0) 70%)}
+.blob.p{background:radial-gradient(closest-side,rgba(155,92,255,.32),rgba(155,92,255,0) 70%)}
+.blob.r{background:radial-gradient(closest-side,rgba(255,32,69,.28),rgba(255,32,69,0) 70%)}
 .b1{top:-18%;left:-15%;width:60vmax;height:60vmax}
 .b2{bottom:-22%;right:-10%;width:62vmax;height:62vmax;animation-direction:reverse;animation-duration:30s}
 .b3{top:10%;right:15%;width:50vmax;height:50vmax;animation-duration:28s}
 .b4{bottom:10%;left:25%;width:48vmax;height:48vmax;animation-duration:40s}
 
-/* (Old) cloud cluster */
+/* Cloud cluster bottom-right */
 .clouds { position:absolute; right:-6vmax; bottom:-6vmax; width:80vmax; height:60vmax; pointer-events:none; }
-.clouds .c { position:absolute; border-radius:50%; filter:blur(40px); opacity:.95; mix-blend-mode:screen; }
-.clouds .c.cyan   { background:radial-gradient(closest-side, rgba(61,226,255,.85), rgba(61,226,255,0) 75%); }
-.clouds .c.purple { background:radial-gradient(closest-side, rgba(155,92,255,.80), rgba(155,92,255,0) 75%); }
-.clouds .c.orange { background:radial-gradient(closest-side, rgba(255,182,72,.80), rgba(255,182,72,0) 75%); }
-.clouds .c.teal   { background:radial-gradient(closest-side, rgba(34,197,94,.78), rgba(34,197,94,0) 75%); }
+.clouds .c { position:absolute; border-radius:50%; filter:blur(40px); opacity:.90; mix-blend-mode:screen; }
+.clouds .c.cyan   { background:radial-gradient(closest-side, rgba(61,226,255,.82), rgba(61,226,255,0) 75%); }
+.clouds .c.purple { background:radial-gradient(closest-side, rgba(155,92,255,.78), rgba(155,92,255,0) 75%); }
+.clouds .c.orange { background:radial-gradient(closest-side, rgba(255,182,72,.78), rgba(255,182,72,0) 75%); }
+.clouds .c.teal   { background:radial-gradient(closest-side, rgba(34,197,94,.76), rgba(34,197,94,0) 75%); }
 .clouds .c1{ width:50vmax;height:28vmax; right:0; bottom:0; animation:cloud 40s ease-in-out infinite; }
 .clouds .c2{ width:46vmax;height:26vmax; right:6vmax; bottom:2vmax; animation:cloud 46s ease-in-out infinite reverse; }
 .clouds .c3{ width:42vmax;height:24vmax; right:10vmax; bottom:3vmax; animation:cloud 52s ease-in-out infinite; }
@@ -73,7 +71,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language dock, buttons same as before… */
+/* Language dock */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -97,25 +95,25 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
 /* Wheel row + Content score chip */
-.score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
-.score-container{width:220px}
+.score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap; position:relative}
+.score-container{width:240px}
 .score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
 .score-wheel circle{fill:none;stroke-width:14;stroke-linecap:round}
 .score-wheel .bg{stroke:rgba(255,255,255,.12)}
 .score-wheel .progress{stroke:url(#grad);stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .6s ease,stroke .3s ease,filter .3s ease;filter:drop-shadow(0 0 10px rgba(155,92,255,.35))}
-.score-text{font-size:3rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
-.chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
+.score-text{font-size:3.2rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
+.chip{padding:.32rem .7rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)} .l-orange{background:rgba(245,158,11,.18)} .l-green{background:rgba(34,197,94,.18)}
 
 /* URL input */
-.analyze-form input[type="url"]{
+.analyze-form input[type="url"], .analyze-form[type="url"]{
   position:relative; z-index:5; width:100%; padding:1rem 1.2rem; border-radius:14px;
   border:1px solid #1b1b35; background:#0b0d21; color:var(--text);
   box-shadow:0 0 0 0 rgba(155,92,255,.0); transition:.25s;
 }
 .analyze-form input[type="url"]:focus{ outline:none; border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15); }
-.analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
+.analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
 /* Progress */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
@@ -171,13 +169,22 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
 #backTop:hover{background:rgba(255,255,255,.12)}
 
+.petal{position:fixed; font-size:26px; pointer-events:none; animation:petalFall 2.8s ease-in forwards}
+@keyframes petalFall{
+  0%{transform:translate3d(var(--sx,0),var(--sy,0),0) rotate(0deg); opacity:0}
+  10%{opacity:1}
+  100%{transform:translate3d(var(--ex,0),calc(var(--ey,300px)),0) rotate(520deg); opacity:0}
+}
+.sad-bubble{position:absolute; right:-8px; top:-8px; font-size:30px; animation:sadWobble 1.2s ease-in-out 3}
+@keyframes sadWobble{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+
 @media (max-width:992px){
   .category-card{grid-column:span 12}
   .hero-heading{font-size:2.7rem}
-  .score-container{width:190px}
+  .score-container{width:200px}
   footer.site{flex-direction:column;align-items:flex-start}
 }
-@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.bg-smoke,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
+@media print{#smokeGL,#linesCanvas,#linesCanvas2,#brainCanvas,.bg-smoke,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
 </style>
 </head>
 <body>
@@ -185,15 +192,15 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <canvas id="linesCanvas"></canvas>
 <canvas id="linesCanvas2"></canvas>
 
-<!-- NEW: WebGL smoke canvas -->
-<canvas id="smokeFX" aria-hidden="true"></canvas>
+<!-- WebGL Smoke Canvas -->
+<canvas id="smokeGL"></canvas>
 
-<div class="bg-smoke">
+<!-- CSS fallback clouds (shown if WebGL fails) -->
+<div class="bg-smoke" id="cssSmoke" style="display:none">
   <span class="blob p b1"></span>
   <span class="blob r b2"></span>
   <span class="blob p b3"></span>
   <span class="blob r b4"></span>
-  <!-- Cloud cluster (kept for fallback styling but hidden by CSS) -->
   <div class="clouds">
     <span class="c cyan   c1"></span>
     <span class="c purple c2"></span>
@@ -225,6 +232,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     </div>
     <div style="display:flex;gap:.5rem">
       <button class="btn btn-ghost" id="printTop"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+      <button class="btn btn-neon" id="downloadPdf"><i class="fa-solid fa-file-pdf"></i> PDF Report</button>
     </div>
   </header>
 
@@ -234,7 +242,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       The wheel fills with your overall score. <span class="legend l-green">Green ≥ 80</span> <span class="legend l-orange">Orange 60–79</span> <span class="legend l-red">Red &lt; 60</span>
     </p>
 
-    <div class="score-area">
+    <div class="score-area" id="scoreArea">
       <div class="score-container">
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
           <circle class="bg" cx="60" cy="60" r="54"/>
@@ -269,6 +277,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <button id="analyzeBtn" class="btn btn-danger"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
           <button class="btn btn-neon" id="printChecklist"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
           <button class="btn btn-ghost" id="resetChecklist"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
+          <button class="btn btn-ghost" id="shareReportTop"><i class="fa-solid fa-share-nodes"></i> Share</button>
         </div>
         <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)"></div>
       </form>
@@ -295,7 +304,57 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Categories / checklist (unchanged structure) -->
+    <!-- Advanced Tools -->
+    <div style="margin-top:16px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:14px">
+      <h3 style="margin:0 0 .6rem">Advanced Tools</h3>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit,minmax(260px,1fr)); gap:.6rem">
+        <div>
+          <input id="cmp1" class="analyze-form" style="width:100%" type="url" placeholder="Competitor URL 1">
+          <input id="cmp2" class="analyze-form" style="width:100%; margin-top:.4rem" type="url" placeholder="Competitor URL 2">
+          <button class="btn btn-ghost" id="runCompare" style="margin-top:.4rem"><i class="fa-solid fa-code-compare"></i> Compare</button>
+        </div>
+        <div>
+          <input id="siteMapUrl" class="analyze-form" style="width:100%" type="url" placeholder="Site (https://example.com)">
+          <button class="btn btn-ghost" id="runCrawl" style="margin-top:.4rem"><i class="fa-solid fa-spider"></i> Crawl Sitemap</button>
+        </div>
+        <div>
+          <input id="psiUrl" class="analyze-form" style="width:100%" type="url" placeholder="URL for Core Web Vitals">
+          <button class="btn btn-ghost" id="runPSI" style="margin-top:.4rem"><i class="fa-solid fa-gauge-high"></i> PageSpeed</button>
+        </div>
+        <div>
+          <input id="schemaUrl" class="analyze-form" style="width:100%" type="url" placeholder="URL for Schema Template">
+          <select id="schemaType" class="analyze-form" style="width:100%; margin-top:.4rem">
+            <option>Article</option><option>FAQPage</option><option>Product</option><option>HowTo</option>
+          </select>
+          <button class="btn btn-ghost" id="genSchema" style="margin-top:.4rem"><i class="fa-solid fa-code"></i> Generate Schema</button>
+        </div>
+        <div>
+          <input id="socialUrl" class="analyze-form" style="width:100%" type="url" placeholder="URL for Social Preview">
+          <button class="btn btn-ghost" id="runSocial" style="margin-top:.4rem"><i class="fa-brands fa-twitter"></i> Social Preview</button>
+        </div>
+        <div>
+          <input id="entUrl" class="analyze-form" style="width:100%" type="url" placeholder="Your URL (Entities)">
+          <input id="entComp1" class="analyze-form" style="width:100%; margin-top:.4rem" type="url" placeholder="Competitor 1 (optional)">
+          <input id="entComp2" class="analyze-form" style="width:100%; margin-top:.4rem" type="url" placeholder="Competitor 2 (optional)">
+          <button class="btn btn-ghost" id="runEntities" style="margin-top:.4rem"><i class="fa-solid fa-brain"></i> Entities Gap</button>
+        </div>
+        <div>
+          <input id="readUrl" class="analyze-form" style="width:100%" type="url" placeholder="URL for Readability">
+          <button class="btn btn-ghost" id="runRead" style="margin-top:.4rem"><i class="fa-solid fa-book-open-reader"></i> Readability</button>
+        </div>
+        <div>
+          <input id="hrefUrl" class="analyze-form" style="width:100%" type="url" placeholder="URL for Hreflang Audit">
+          <button class="btn btn-ghost" id="runHref" style="margin-top:.4rem"><i class="fa-solid fa-language"></i> Hreflang Audit</button>
+        </div>
+        <div>
+          <button class="btn btn-danger" id="shareReport" style="margin-top:2rem"><i class="fa-solid fa-share-nodes"></i> Shareable Report</button>
+          <button class="btn btn-neon" id="exportCsv" style="margin-top:.4rem"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        </div>
+      </div>
+      <div id="toolsOut" style="margin-top:.8rem" class="pre">Results will appear here…</div>
+    </div>
+
+    <!-- Categories / checklist -->
     <div class="analyzer-grid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -400,18 +459,18 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---------- i18n (same 10 languages as before) ---------- */
+/* ---------- i18n (10 languages) ---------- */
 const I18N = {
   en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 70)"},
   es:{title:"Analizador Maestro de SEO Semántico", analyze_title:"Analiza una URL", legend_line:"La rueda se llena con tu puntuación general. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Naranja 60–79</span> <span class='legend l-red'>Rojo &lt; 60</span>", overall:"Total", page_url:"URL de la página", analyze:"Analizar", print:"Imprimir", reset:"Restablecer", auto_check:"Aplicar automáticamente (≥ 70)"},
-  fr:{title:"Analyseur Maître SEO Sémantique", analyze_title:"Analyser une URL", legend_line:"La ruota si riempie con il punteggio complessivo. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Arancione 60–79</span> <span class='legend l-red'>Rosso &lt; 60</span>", overall:"Global", page_url:"URL de la page", analyze:"Analyser", print:"Imprimer", reset:"Réinitialiser", auto_check:"Cocher automatiquement (≥ 70)"},
+  fr:{title:"Analyseur Maître SEO Sémantique", analyze_title:"Analyser une URL", legend_line:"La roue se remplit avec votre score global. <span class='legend l-green'>Vert ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Rouge &lt; 60</span>", overall:"Global", page_url:"URL de la page", analyze:"Analyser", print:"Imprimer", reset:"Réinitialiser", auto_check:"Cocher automatiquement (≥ 70)"},
   de:{title:"Semantischer SEO Meister‑Analyzer", analyze_title:"URL analysieren", legend_line:"Das Rad füllt sich mit Ihrem Gesamtscore. <span class='legend l-green'>Grün ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Rot &lt; 60</span>", overall:"Gesamt", page_url:"Seiten‑URL", analyze:"Analysieren", print:"Drucken", reset:"Zurücksetzen", auto_check:"Automatisch anwenden (≥ 70)"},
   it:{title:"Analizzatore Maestro SEO Semantico", analyze_title:"Analizza un URL", legend_line:"La ruota si riempie con il punteggio complessivo. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Arancione 60–79</span> <span class='legend l-red'>Rosso &lt; 60</span>", overall:"Totale", page_url:"URL della pagina", analyze:"Analizza", print:"Stampa", reset:"Reimposta", auto_check:"Applica automaticamente (≥ 70)"},
   pt:{title:"Analisador Mestre de SEO Semântico", analyze_title:"Analisar uma URL", legend_line:"A roda preenche com sua pontuação geral. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Laranja 60–79</span> <span class='legend l-red'>Vermelho &lt; 60</span>", overall:"Geral", page_url:"URL da página", analyze:"Analisar", print:"Imprimir", reset:"Reiniciar", auto_check:"Aplicar automaticamente (≥ 70)"},
   tr:{title:"Anlamsal SEO Usta Analizörü", analyze_title:"Bir URL analiz et", legend_line:"Teker genel skorla dolar. <span class='legend l-green'>Yeşil ≥ 80</span> <span class='legend l-orange'>Turuncu 60–79</span> <span class='legend l-red'>Kırmızı &lt; 60</span>", overall:"Genel", page_url:"Sayfa URL'si", analyze:"Analiz Et", print:"Yazdır", reset:"Sıfırla", auto_check:"Otomatik işaretle (≥ 70)"},
   ar:{title:"محلل SEO الدلالي المتقدم", analyze_title:"حلّل رابط URL", legend_line:"تمتلئ العجلة بدرجتك الإجمالية. <span class='legend l-green'>أخضر ≥ 80</span> <span class='legend l-orange'>برتقالي 60–79</span> <span class='legend l-red'>أحمر &lt; 60</span>", overall:"الإجمالي", page_url:"رابط الصفحة", analyze:"تحليل", print:"طباعة", reset:"إعادة ضبط", auto_check:"تفعيل تلقائي (≥ 70)"},
   ru:{title:"Мастер‑анализатор Семантического SEO", analyze_title:"Анализ URL", legend_line:"Колесо заполняется вашим общим баллом. <span class='legend l-green'>Зелёный ≥ 80</span> <span class='legend л-orange'>Оранжевый 60–79</span> <span class='legend л-red'>Красный &lt; 60</span>", overall:"Итог", page_url:"URL страницы", analyze:"Анализ", print:"Печать", reset:"Сброс", auto_check:"Авто‑отметки (≥ 70)"},
-  ur:{title:"سیمنٹک SEO ماسٹر اینالائزر", analyze_title:"یو آر ایل تجزیہ کریں", legend_line:"پہیہ آپ کے مجموعی اسکور سے بھر جاتا ہے۔ <span class='legend l-green'>سبز ≥ 80</span> <span class='legend l-orange'>نارنجی 60–79</span> <span class='legend l-red'>سرخ &lt; 60</span>", overall:"مجموعی", page_url:"صفحہ کا یو آر ایل", analyze:"تجزیہ", print:"پرنٹ", reset:"ری سیٹ", auto_check:"≥ 70 خودکار چیک"}
+  ur:{title:"سیمنٹک SEO ماسٹر اینالائزر", analyze_title:"یو آر ایل تجزیہ کریں", legend_line:"پہیے میں آپ کا مجموعی اسکور بھر جاتا ہے۔ <span class='legend l-green'>سبز ≥ 80</span> <span class='legend l-orange'>نارنجی 60–79</span> <span class='legend l-red'>سرخ &lt; 60</span>", overall:"مجموعی", page_url:"صفحہ کا یو آر ایل", analyze:"تجزیہ", print:"پرنٹ", reset:"ری سیٹ", auto_check:"≥ 70 خودکار چیک"}
 };
 const LANGS = [["en","English"],["es","Español"],["fr","Français"],["de","Deutsch"],["it","Italiano"],["pt","Português"],["tr","Türkçe"],["ar","العربية"],["ru","Русский"],["ur","اردو"]];
 (function(){
@@ -507,7 +566,37 @@ function setScoreWheel(value){
   document.getElementById('overallScoreInline').textContent = Math.round(v);
 }
 
-/* ---------- Checklist + scoring (fixed to allow 100) ---------- */
+/* ---------- Flowers / Sad reactions ---------- */
+function bloomFlowers(){
+  const area = document.getElementById('scoreArea');
+  const rect = area.getBoundingClientRect();
+  const emojis = ['🌸','🌺','🌷','💐','🌻','🌼'];
+  for(let i=0;i<26;i++){
+    const e = document.createElement('div');
+    e.className='petal';
+    e.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    const sx = rect.left + rect.width/2;
+    const sy = rect.top + rect.height/2;
+    const ex = (Math.random()*window.innerWidth - sx);
+    const ey = 250 + Math.random()*220;
+    e.style.left = sx+'px'; e.style.top = sy+'px';
+    e.style.setProperty('--sx','0px'); e.style.setProperty('--sy','0px');
+    e.style.setProperty('--ex', ex+'px'); e.style.setProperty('--ey', ey+'px');
+    document.body.appendChild(e);
+    setTimeout(()=> e.remove(), 3000);
+  }
+}
+function sadFace(){
+  const area = document.getElementById('scoreArea');
+  const b = document.createElement('div');
+  b.className='sad-bubble';
+  b.textContent='😞';
+  area.style.position='relative';
+  area.appendChild(b);
+  setTimeout(()=> b.remove(), 2200);
+}
+
+/* ---------- Checklist + scoring (allows 100) ---------- */
 (function () {
   const STORAGE_KEY = 'semanticSeoChecklistV5';
   const total = 25;
@@ -523,8 +612,7 @@ function setScoreWheel(value){
   }
   function overallScoreBlended(){
     const cs = contentScore();
-    const allChecked = cs===100;
-    if (allChecked) return 100; // ✅ requested behavior
+    if (cs===100) return 100; // ✅ full marks when all checklist passed
     return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
   }
   function updateCats(){
@@ -541,7 +629,11 @@ function setScoreWheel(value){
     caption.textContent = `${checked} of ${total} items completed`;
     updateCats();
     const cs = contentScore(); contentChip.textContent = cs;
-    setScoreWheel( overallScoreBlended() );
+    const prev = +document.getElementById('overallScoreInline').textContent || 0;
+    const next = overallScoreBlended();
+    setScoreWheel(next);
+    if (prev<80 && next>=80) bloomFlowers();
+    if (next<60) sadFace();
   }
   function load(){
     try{const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); boxes().forEach(cb=>cb.checked = saved.includes(cb.id));}catch(e){}
@@ -552,7 +644,7 @@ function setScoreWheel(value){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
   }
   document.addEventListener('change', (e)=>{ if(e.target.matches('#analyzer input[type="checkbox"]')){ update(); save(); }});
-  document.getElementById('resetChecklist').addEventListener('click', ()=>{ if(!confirm('Reset the checklist?')) return; localStorage.removeItem(STORAGE_KEY); boxes().forEach(cb=>cb.checked=false); for(let i=1;i<=25;i++){ setScoreBadge(i,null);} lastAnalyzed=0; setScoreWheel(0); update(); });
+  document.getElementById('resetChecklist').addEventListener('click', ()=>{ if(!confirm('Reset the checklist?')) return; localStorage.removeItem(STORAGE_KEY); boxes().forEach(cb=>cb.checked=false); for(let i=1;i<=25;i++){ setScoreBadge(i,null);} window.__setAnalyzedScore(0); setScoreWheel(0); update(); });
   document.getElementById('printChecklist').addEventListener('click', ()=> window.print());
   document.getElementById('printTop').addEventListener('click', ()=> window.print());
   window.setScoreBadge = (num,score)=>{ const el=document.getElementById('sc-'+num); if(!el) return; el.className='score-badge'; if(score==null){el.textContent='—';return;} el.textContent=score; if(score>=80) el.classList.add('score-good'); else if(score>=60) el.classList.add('score-mid'); else el.classList.add('score-bad'); };
@@ -609,7 +701,7 @@ function setScoreWheel(value){
     const id = btn.getAttribute('data-id');
     title.textContent = 'Improve: '+labelFor(id);
     tipsList.innerHTML = '';
-    const tips = (window.__lastSuggestions && window.__lastSuggestions[id]) ? window.__lastSuggestions[id] : ['Analyze the URL first to generate contextual suggestions.'];
+    const tips = (window.__lastSuggestions && window.__lastSuggestions[id]) ? window.__lastSuggestions[id] : ['Analyze the URL first to generate contextual suggestions.', 'Compare top 3 SERP pages for gaps.', 'Add concrete examples, data, and citations.'];
     tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; tipsList.appendChild(li); });
 
     document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="tipsTab"]').classList.add('active');
@@ -621,7 +713,7 @@ function setScoreWheel(value){
   // AI/Human quick-open buttons
   document.getElementById('viewAIText').addEventListener('click', ()=>{
     title.textContent = 'Evidence & Full Text';
-    tabs.forEach(x=>x.classList.remove('active')); panes.aiTab.classList.add('active'); document.querySelector('[data-tab="aiTab"]').classList.add('active');
+    tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active');
     Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active');
     openModal();
   });
@@ -709,6 +801,7 @@ function normalizeUrl(u){
 
       // AI/Human
       const ai = data.ai_detection || {};
+      window.__lastAI = ai;
       const badge = document.getElementById('aiBadge');
       const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
       const label = labelMap[ai.label] || 'Unknown';
@@ -718,16 +811,17 @@ function normalizeUrl(u){
       badge.title = (ai.reasons||[]).join(' • ');
       window.__setAIData(ai);
 
-      // auto-check
+      // auto-check (apply server’s selected items)
       if ($('#autoApply').checked) {
         for (let i=1;i<=25;i++) setChecked('ck-'+i, false);
         (data.auto_check_ids||[]).forEach(id => setChecked(id, true));
         document.dispatchEvent(new Event('change'));
       }
 
-      // status line
+      // status line + reactions
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
+      if (wheel>=80) bloomFlowers(); else if (wheel<60) sadFace();
       setTimeout(()=> status.textContent = '', 4200);
     } catch(e){
       status.textContent = 'Error: '+e.message;
@@ -738,185 +832,213 @@ function normalizeUrl(u){
 })();
 </script>
 
-<!-- ========== Procedural Colorful Smoke (WebGL2 shader + 2D fallback) ========== -->
+<!-- Advanced Tools JS + PDF + Share + CSV -->
+<script>
+const out = document.getElementById('toolsOut');
+const show = (j)=> out.textContent = JSON.stringify(j, null, 2);
+
+// PDF
+document.getElementById('downloadPdf').addEventListener('click', async ()=>{
+  const url = document.getElementById('analyzeUrl').value || '';
+  const overall = +document.getElementById('overallScoreInline').textContent || 0;
+  const content = +document.getElementById('contentScoreInline').textContent || 0;
+
+  const scores = {};
+  for (let i=1;i<=25;i++){
+    const el = document.getElementById('sc-'+i);
+    scores['ck-'+i] = /^\d+/.test(el?.textContent||'')? +el.textContent : 0;
+  }
+
+  const ai = window.__lastAI || {};
+  const report = {
+    status: document.getElementById('rStatus').textContent,
+    title_len: document.getElementById('rTitleLen').textContent,
+    meta_len: document.getElementById('rMetaLen').textContent,
+    canonical: document.getElementById('rCanonical').textContent,
+    headings: document.getElementById('rHeadings').textContent,
+    schema: document.getElementById('rSchema').textContent
+  };
+
+  const res = await fetch('{{ route('report.pdf') }}', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},
+    body: JSON.stringify({ url, overall, content, scores, ai, report })
+  });
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'SEO-Report.pdf';
+  a.click();
+});
+
+// Tool actions (routes must exist in Laravel)
+document.getElementById('runCompare').addEventListener('click', async ()=>{
+  const urls=[cmp1.value, cmp2.value].filter(Boolean);
+  if (urls.length<2) return alert('Add at least two URLs.');
+  const r=await fetch('{{ route('compare.run') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({urls})});
+  show(await r.json());
+});
+document.getElementById('runCrawl').addEventListener('click', async ()=>{
+  const site=siteMapUrl.value; if(!site) return;
+  const r=await fetch('{{ route('crawl.sitemap') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({site})});
+  show(await r.json());
+});
+document.getElementById('runPSI').addEventListener('click', async ()=>{
+  const url=psiUrl.value; if(!url) return;
+  const r=await fetch('{{ route('psi.run') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({url})});
+  show(await r.json());
+});
+document.getElementById('genSchema').addEventListener('click', async ()=>{
+  const url=schemaUrl.value; if(!url) return;
+  const type=schemaType.value;
+  const r=await fetch('{{ route('schema.generate') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({url,type})});
+  show(await r.json());
+});
+document.getElementById('runSocial').addEventListener('click', async ()=>{
+  const url=socialUrl.value; if(!url) return;
+  const r=await fetch('{{ route('social.preview') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({url})});
+  show(await r.json());
+});
+document.getElementById('runEntities').addEventListener('click', async ()=>{
+  const url=entUrl.value; if(!url) return;
+  const competitors=[entComp1.value, entComp2.value].filter(Boolean);
+  const r=await fetch('{{ route('entities.gap') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({url,competitors})});
+  show(await r.json());
+});
+document.getElementById('runRead').addEventListener('click', async ()=>{
+  const url=readUrl.value; if(!url) return;
+  const r=await fetch('{{ route('readability.run') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({url})});
+  show(await r.json());
+});
+document.getElementById('runHref').addEventListener('click', async ()=>{
+  const url=hrefUrl.value; if(!url) return;
+  const r=await fetch('{{ route('hreflang.audit') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({url})});
+  show(await r.json());
+});
+
+// Shareable & CSV
+document.getElementById('shareReport').addEventListener('click', saveShare);
+document.getElementById('shareReportTop').addEventListener('click', (e)=>{ e.preventDefault(); saveShare(); });
+
+async function saveShare(){
+  const payload = {
+    overall: +document.getElementById('overallScoreInline').textContent || 0,
+    content: +document.getElementById('contentScoreInline').textContent || 0,
+    scores: (()=>{ const s={}; for (let i=1;i<=25;i++){ const el = document.getElementById('sc-'+i); s['ck-'+i] = /^\d+/.test(el?.textContent||'')? +el.textContent : 0; } return s; })()
+  };
+  const r=await fetch('{{ route('share.save') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({report:payload})});
+  const j=await r.json(); show(j);
+}
+
+document.getElementById('exportCsv').addEventListener('click', async ()=>{
+  const rows = [];
+  for (let i=1;i<=25;i++){
+    const id = 'ck-'+i; const sc = document.getElementById('sc-'+i)?.textContent || '0';
+    rows.push({item:id, score: sc});
+  }
+  const r=await fetch('{{ route('export.csv') }}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content},body:JSON.stringify({rows})});
+  const blob=await r.blob(); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='seo-export.csv'; a.click();
+});
+</script>
+
+<!-- WebGL Smoke Shader (with graceful fallback) -->
 <script>
 (function(){
-  const canvas = document.getElementById('smokeFX');
-  if (!canvas) return;
-
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  let gl = null, vw=0, vh=0, start=performance.now(), raf=0;
+  const canvas = document.getElementById('smokeGL');
+  let gl = canvas.getContext('webgl',{premultipliedAlpha:false, alpha:true});
+  if(!gl){ document.getElementById('cssSmoke').style.display='block'; return; }
 
   function resize(){
-    vw = canvas.clientWidth  = window.innerWidth;
-    vh = canvas.clientHeight = window.innerHeight;
-    canvas.width  = Math.floor(vw * dpr);
-    canvas.height = Math.floor(vh * dpr);
-    if (gl) gl.viewport(0,0,canvas.width,canvas.height);
+    const dpr = Math.min(2, window.devicePixelRatio||1);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = Math.floor(w*dpr);
+    canvas.height = Math.floor(h*dpr);
+    gl.viewport(0,0,canvas.width,canvas.height);
   }
-  addEventListener('resize', resize, {passive:true});
-  resize();
-
-  const mouse = { x: vw*0.92, y: vh*0.88, t: 0 };
-  addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; mouse.t=performance.now(); }, {passive:true});
-
-  try { gl = canvas.getContext('webgl2', { alpha:true, antialias:false, depth:false, stencil:false, powerPreference:'high-performance' }); } catch(e){}
-
-  if (gl) {
-    const vert = `#version 300 es
+  const vs = `
+    attribute vec2 p; varying vec2 v;
+    void main(){ v=p; gl_Position=vec4(p,0.0,1.0); }
+  `;
+  // Fragment shader: fbm noise + hue shifts for colorful smoke
+  const fs = `
     precision highp float;
-    const vec2 verts[3] = vec2[3](
-      vec2(-1.0,-1.0), vec2(3.0,-1.0), vec2(-1.0,3.0)
-    );
-    out vec2 vUv;
-    void main(){
-      vec2 p = verts[gl_VertexID];
-      vUv = 0.5*(p+1.0);
-      gl_Position = vec4(p,0.0,1.0);
-    }`;
-
-    const frag = `#version 300 es
-    precision highp float;
-    in vec2 vUv; out vec4 fragColor;
-    uniform vec2 u_res, u_mouse;
-    uniform float u_time, u_aspect;
-
-    float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+    varying vec2 v;
+    uniform vec2 uR; uniform float uT;
+    // hash & noise
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
     float noise(vec2 p){
       vec2 i=floor(p), f=fract(p);
-      float a=hash(i), b=hash(i+vec2(1,0)), c=hash(i+vec2(0,1)), d=hash(i+vec2(1,1));
-      vec2 u=f*f*(3.0-2.0*f);
-      return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+      float a=hash(i), b=hash(i+vec2(1.,0.)), c=hash(i+vec2(0.,1.)), d=hash(i+vec2(1.,1.));
+      vec2 u=f*f*(3.-2.*f);
+      return mix(a,b,u.x)+ (c-a)*u.y*(1.-u.x)+ (d-b)*u.x*u.y;
     }
     float fbm(vec2 p){
-      float v=0.0, a=0.5; mat2 m=mat2(1.6,1.2,-1.2,1.6);
-      for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=0.5; } return v;
-    }
-    vec2 curl(vec2 p){
-      float e=0.003;
-      float n1=fbm(p+vec2(0,e)), n2=fbm(p-vec2(0,e));
-      float n3=fbm(p+vec2(e,0)), n4=fbm(p-vec2(e,0));
-      float dx=(n1-n2)/(2.0*e), dy=(n3-n4)/(2.0*e);
-      return vec2(dy,-dx);
-    }
-    float emitter(vec2 uv){
-      vec2 pr=vec2(1.02,1.02);
-      vec2 d=uv-pr;
-      float r=length(d*vec2(u_aspect,1.0));
-      float base=smoothstep(0.45,0.0,r);
-      vec2 mm=u_mouse/u_res;
-      float mr=distance(uv,mm);
-      float mouseBoost=smoothstep(0.35,0.0,mr)*0.15;
-      return clamp(base+mouseBoost,0.0,1.0);
+      float v=0.0, a=.5;
+      for(int i=0;i<6;i++){ v+=a*noise(p); p*=2.03; a*=.52; }
+      return v;
     }
     vec3 palette(float t){
-      vec3 c1=vec3(0.24,0.88,1.00); // cyan
-      vec3 c2=vec3(0.61,0.36,1.00); // purple
-      vec3 c3=vec3(1.00,0.71,0.28); // orange
-      vec3 c4=vec3(0.21,0.77,0.45); // teal
-      vec3 a=mix(c1,c2,smoothstep(0.0,0.33,t));
-      vec3 b=mix(c3,c4,smoothstep(0.33,1.0,t));
-      return mix(a,b,smoothstep(0.25,0.85,t));
+      // purple -> cyan -> orange blend
+      vec3 a=vec3(0.56,0.36,0.96);
+      vec3 b=vec3(0.16,0.92,1.00);
+      vec3 c=vec3(1.00,0.42,0.30);
+      return mix( mix(a,b,smoothstep(0.0,0.5,t)), c, smoothstep(0.5,1.0,t) );
     }
     void main(){
-      vec2 uv=vUv;
-      vec2 p=(uv-0.5)*vec2(u_aspect,1.0);
-      float t=u_time*0.06;
-      vec2 flow=curl(p*1.6+vec2(t*0.8,-t*0.6))*0.6;
+      vec2 uv = v*0.5 + 0.5; // -1..1 to 0..1
+      // stretch to canvas aspect
+      uv.x *= uR.x/uR.y;
+      // push smoke to bottom-right (fade elsewhere)
+      vec2 center = vec2(1.15, 1.15);
+      float dist = length((uv-center)*vec2(1.2,1.0));
+      float m = smoothstep(1.2, .25, dist);
 
-      float d1=fbm(p*1.8+flow*1.2+vec2(t*0.9,-t*0.5));
-      float d2=fbm(p*0.9-flow*0.6+vec2(-t*0.4,t*0.7));
-      float density=smoothstep(0.35,0.95,d1*0.65+d2*0.45);
+      // flow field
+      float t = uT*0.055;
+      float f = fbm(uv*3.0 + vec2(t, -t*0.7));
+      float f2= fbm((uv+f)*2.1 - vec2(t*0.3, t*0.2));
+      float val = clamp(f*0.6 + f2*0.55, 0.0, 1.0);
 
-      float e=emitter(uv);
-      density=clamp(density+e*0.85,0.0,1.0);
-
-      float vign=smoothstep(1.25,0.15,length((uv-vec2(0.0))*vec2(u_aspect,1.0)));
-      density*=vign;
-
-      float hueBand=fbm(p*0.8+vec2(t*0.2,t*0.25));
-      vec3 col=palette(hueBand);
-
-      vec3 smoke=col*density*0.95;
-      float fog=smoothstep(0.0,1.0,fbm(p*0.6+vec2(-t*0.25,t*0.18)))*0.12;
-      smoke+=fog*col;
-
-      float alpha=clamp(density*0.95,0.0,1.0);
-      fragColor=vec4(smoke,alpha);
-    }`;
-
-    function compile(src, type){
-      const s=gl.createShader(type);
-      gl.shaderSource(s,src); gl.compileShader(s);
-      if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); gl.deleteShader(s); return null; }
-      return s;
+      vec3 col = palette(val);
+      // add glow & alpha
+      float alpha = m * smoothstep(0.2, 0.95, val);
+      gl_FragColor = vec4(col, alpha*0.95);
     }
-    function makeProgram(vsSrc, fsSrc){
-      const vs=compile(vsSrc,gl.VERTEX_SHADER), fs=compile(fsSrc,gl.FRAGMENT_SHADER);
-      const pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,fs); gl.linkProgram(pr);
-      if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(pr)); return null; }
-      gl.deleteShader(vs); gl.deleteShader(fs); return pr;
-    }
-
-    const prog = makeProgram(vert, frag);
-    gl.useProgram(prog);
-    const u_res=gl.getUniformLocation(prog,'u_res');
-    const u_mouse=gl.getUniformLocation(prog,'u_mouse');
-    const u_time=gl.getUniformLocation(prog,'u_time');
-    const u_aspect=gl.getUniformLocation(prog,'u_aspect');
-
-    function draw(now){
-      const t=(now-start)*0.001;
-      gl.viewport(0,0,canvas.width,canvas.height);
-      gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
-      gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
-
-      gl.useProgram(prog);
-      gl.uniform2f(u_res, canvas.width, canvas.height);
-      gl.uniform2f(u_mouse, mouse.x * dpr, (vh - mouse.y) * dpr);
-      gl.uniform1f(u_time, t);
-      gl.uniform1f(u_aspect, canvas.width / Math.max(1.0, canvas.height));
-
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      raf = requestAnimationFrame(draw);
-    }
-    raf = requestAnimationFrame(draw);
-    return;
+  `;
+  function compile(type,src){
+    const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); return null; }
+    return s;
   }
+  const prog = gl.createProgram();
+  const sv = compile(gl.VERTEX_SHADER, vs);
+  const sf = compile(gl.FRAGMENT_SHADER, fs);
+  if(!sv || !sf){ document.getElementById('cssSmoke').style.display='block'; return; }
+  gl.attachShader(prog, sv); gl.attachShader(prog, sf); gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(prog)); document.getElementById('cssSmoke').style.display='block'; return; }
+  gl.useProgram(prog);
 
-  // ---- 2D Fallback (if WebGL2 not supported) ----
-  const ctx = canvas.getContext('2d');
-  const N = 220;
-  const parts = new Array(N).fill(0).map(()=>({
-    x: vw - Math.random()*vw*0.25,
-    y: vh - Math.random()*vh*0.25,
-    r: 40 + Math.random()*80,
-    a: 0.15 + Math.random()*0.25,
-    hue: Math.random(),
-    vx: -0.3 - Math.random()*0.4,
-    vy: -0.2 - Math.random()*0.3,
-  }));
-  function hsl(h,s,l,a){ h=(h%1+1)%1; const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h*6)%2-1)), m=l-c/2; let r=0,g=0,b=0;
-    if(h<1/6){r=c;g=x}else if(h<2/6){r=x;g=c}else if(h<3/6){g=c;b=x}else if(h<4/6){g=x;b=c}else if(h<5/6){r=x;b=c}else{r=c;b=x}
-    return `rgba(${Math.round((r+m)*255)},${Math.round((g+m)*255)},${Math.round((b+m)*255)},${a})`; }
-  function loop(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.globalCompositeOperation='lighter';
-    for(const p of parts){
-      const dx=(vw*0.98 - p.x), dy=(vh*0.98 - p.y);
-      p.vx += dx*0.00002; p.vy += dy*0.00002;
-      p.x += p.vx; p.y += p.vy;
-      if(p.x < -200) p.x = vw+100;
-      if(p.y < -200) p.y = vh+100;
-      const col = hsl(p.hue,0.9,0.6,p.a);
-      const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
-      g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
-      p.hue += 0.0008; if(p.hue>1) p.hue-=1;
-    }
+  const pos = gl.getAttribLocation(prog,'p');
+  const uR = gl.getUniformLocation(prog,'uR');
+  const uT = gl.getUniformLocation(prog,'uT');
+
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  // fullscreen triangle
+  const verts = new Float32Array([-1,-1,  3,-1,  -1,3]);
+  gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(pos);
+  gl.vertexAttribPointer(pos, 2, gl.FLOAT, false, 0, 0);
+
+  function loop(t){
+    resize();
+    gl.uniform2f(uR, canvas.width, canvas.height);
+    gl.uniform1f(uT, t*0.001);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
     requestAnimationFrame(loop);
   }
-  loop();
+  addEventListener('resize', resize, {passive:true});
+  resize(); requestAnimationFrame(loop);
 })();
 </script>
 </body>
