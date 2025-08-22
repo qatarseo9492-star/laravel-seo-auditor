@@ -5,16 +5,6 @@ use Illuminate\Support\Facades\Http;
 
 Route::get('/', fn () => view('home'));
 
-/**
- * NOTE ON AI DETECTION:
- * No AI-content detector is 100% accurate. This implementation uses multiple heuristics:
- *  - sentence-level burstiness/entropy proxy
- *  - filler/cliché phrase hits
- *  - repetitiveness and low lexical variety
- *  - uniform sentence length
- *  - structural/EEAT cues
- * It returns per-sentence labels and aggregate percentages so users can inspect evidence.
- */
 Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
     $url = trim($req->input('url', ''));
     if (!filter_var($url, FILTER_VALIDATE_URL)) {
@@ -44,7 +34,6 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $q   = fn($x) => iterator_to_array($xp->query($x) ?? []);
         $attr= fn($n,$a) => $n?->attributes?->getNamedItem($a)?->nodeValue ?? '';
 
-        // Basic elements
         $titleNode = $q('//title')[0] ?? null;
         $titleText = trim($titleNode?->textContent ?? '');
         $metaDescNode = $q('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="description"]')[0] ?? null;
@@ -63,7 +52,6 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $h1Text = trim($h1s[0]?->textContent ?? '');
         $firstP = trim(($q('//p[normalize-space()][1]')[0]?->textContent) ?? '');
 
-        // Links
         $anchors = $q('//a[@href]');
         $internalLinks=0; $externalLinks=0; $externalTrusted=0; $externalYears=0; $keywordyAnchors=0;
         $trustedTlds=['.gov','.edu']; $trustedHosts=['wikipedia.org','who.int','nih.gov','un.org','oecd.org','worldbank.org','data.gov'];
@@ -85,24 +73,20 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
             if (preg_match('/\b(2023|2024|2025)\b/', $txt)) $externalYears++;
         }
 
-        // Media & performance
         $imgs = $q('//img');
         $imgsWithAlt = array_filter($imgs, fn($n) => strlen(trim($attr($n,'alt'))) > 0);
         $imgsLazy = array_filter($imgs, fn($n) => strtolower($attr($n,'loading'))==='lazy' || strtolower($attr($n,'decoding'))==='async');
 
-        // CTA detection
         $ctaWords=['buy','signup','sign up','contact','get started','start now','download','subscribe','add to cart','learn more','try','join','register'];
         $ctaFound=false;
         foreach ($anchors as $a) {
-            $t = strtolower(trim($a->textContent ?? '')); if (!$t) continue;
-            foreach ($ctaWords as $w) if (str_contains($t,$w)) { $ctaFound=true; break 2; }
+            $t = strtolower(trim($a->textContent ?? ''));
+            if (!$t) continue; foreach ($ctaWords as $w) if (str_contains($t,$w)) { $ctaFound=true; break 2; }
         }
         if (!$ctaFound) foreach ($q('//button') as $b) {
-            $t = strtolower(trim($b->textContent ?? ''));
-            foreach ($ctaWords as $w) if (str_contains($t,$w)) { $ctaFound=true; break; }
+            $t = strtolower(trim($b->textContent ?? '')); foreach ($ctaWords as $w) if (str_contains($t,$w)) { $ctaFound=true; break; }
         }
 
-        // Schema
         $jsonLdScripts = $q('//script[@type="application/ld+json"]');
         $schemaTypes=[]; $hasFAQ=false; $hasArticle=false; $hasProduct=false; $hasBreadcrumb=false; $orgSameAs=false; $hasOrganization=false;
         foreach ($jsonLdScripts as $sc) {
@@ -127,7 +111,6 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         }
         $hasBreadcrumbUI = count($q('//*[@aria-label="breadcrumb"] | //nav[contains(@class,"breadcrumb") or contains(@aria-label,"breadcrumb")]'))>0;
 
-        // URL slug
         $path = parse_url($url, PHP_URL_PATH) ?: '/';
         $slugOk=false; $slug='';
         if ($path !== '/') {
@@ -136,14 +119,13 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
             $slugOk = (strlen($slug)>1) && (strtolower($slug)===$slug) && !str_contains($slug,' ') && !preg_match('/[_%]/',$slug) && (substr_count($slug,'-')<=8);
         }
 
-        // JS perf
         $scripts = $q('//script');
         $deferred=0; $asyncd=0; $blockingScripts=0;
         foreach($scripts as $s){ $d=strtolower($attr($s,'defer'))==='defer'; if($d)$deferred++; $a=strtolower($attr($s,'async'))==='async'; if($a)$asyncd++; if(!$d && !$a && $attr($s,'src')) $blockingScripts++; }
         $hasPreload = count($q('//link[@rel="preload" or @rel="preconnect" or @rel="dns-prefetch"]'))>0;
         $responsiveImgs = count($q('//img[@srcset or @sizes]'))>0;
 
-        // Text metrics
+        // ------ Text stats ------
         preg_match_all('/\b[\p{L}\p{N}’\'\-]+\b/u', $bodyText, $m);
         $wc = max(1, count($m[0] ?? []));
         $sentencesArr = preg_split('/(?<=[.!?])\s+/u', $bodyText, -1, PREG_SPLIT_NO_EMPTY);
@@ -152,13 +134,12 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $uniqueWords = count(array_unique(array_map('mb_strtolower', $m[0] ?? [])));
         $ttr = $uniqueWords / max(1,$wc);
 
-        // Helpers
         $clamp = fn($v)=>max(0,min(100,(int)round($v)));
         $inRangeScore=function($n,$min,$max,$softMin,$softMax)use($clamp){ if($n<=0) return 0; if($n>=$min && $n<=$max) return 100; if($n>=$softMin && $n<=$softMax) return 70; $d=min(abs($n-$min),abs($n-$max)); return $clamp(max(0,70-$d)); };
         $jaccard=function($a,$b){ $wa=array_unique(preg_split('/\W+/u', mb_strtolower($a), -1, PREG_SPLIT_NO_EMPTY)); $wb=array_unique(preg_split('/\W+/u', mb_strtolower($b), -1, PREG_SPLIT_NO_EMPTY)); if(!$wa||!$wb) return 0; $i=count(array_intersect($wa,$wb)); $u=count(array_unique(array_merge($wa,$wb))); return $u? $i/$u : 0; };
         $sc = fn($v) => is_countable($v) ? count($v) : 0;
 
-        // --- 25 SEO scoring (unchanged from prior revision) ---
+        // ---- Scoring (25 items) ----
         $S=[];
         $patterns=['how to','what is','guide','best','vs','compare','price','buy','review','download'];
         $tLower = mb_strtolower($titleText.' '.$h1Text);
@@ -199,144 +180,132 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         if($footer){ foreach($footer->getElementsByTagName('a') as $a){ $h=strtolower($a->getAttribute('href')); if(preg_match('#(facebook|twitter|x\.com|instagram|linkedin|youtube|tiktok)\.com#',$h)) $footerSocial++; } }
         $S['ck-25']= $clamp( min(100, ($orgSameAs?100:0) + (!$orgSameAs && $hasOrganization ? 60:0) + min(40,$footerSocial*10)) );
 
-        // ---------- Enhanced AI vs Human detection ----------
-        // Tokenize sentences again (keep index mapping)
-        $sentencesArr = $sentencesArr ?: [];
-        $stopwords = array_flip(['the','is','in','and','to','of','for','on','with','as','by','that','this','it','from','at','or','an','be','are','was','were','can','will','would','should','a','about','we','you','they','their','our']);
-
-        // Frequent filler/clichés
-        $genericPhrases = [
-            'in this article','we will explore','comprehensive guide','delve into','furthermore',
-            'moreover','in conclusion','additionally','this section will','as mentioned earlier',
-            'on the other hand','it is important to note','plays a crucial role','key takeaways',
-            'ultimately','thus','hence','overall','leveraging','holistic','robust','unleash the power'
+        // ========== AI vs Human Detector (Evidence‑based Ensemble) ==========
+        // Note: Heuristic, transparent, not absolute truth.
+        $stopwords = [
+            'the','is','in','it','of','and','to','a','for','on','that','with','as','by','this','from','or','an','be','are','at','which',
+            'has','have','was','were','will','can','about','more','also','not','but','if','than','so','when','what','how','why'
         ];
+        $genericPhrases = [
+            'in this article','we will explore','comprehensive guide','delve into','furthermore','moreover','in conclusion',
+            'additionally','this section will','as mentioned earlier','on the other hand','it is important to note','plays a crucial role','key takeaways'
+        ];
+        $sentencesArr = $sentencesArr ?: [];
 
-        // Build word frequencies for entropy proxy
-        $words = preg_split('/\W+/u', mb_strtolower($bodyText), -1, PREG_SPLIT_NO_EMPTY);
-        $freq = []; foreach ($words as $w){ $freq[$w] = ($freq[$w] ?? 0) + 1; }
-        $N = max(1,count($words));
-        $entropy = 0.0; foreach ($freq as $f){ $p = $f/$N; $entropy += -$p * log(max(1e-9,$p), 2); }
-        $entropyNorm = min(1.0, $entropy / 10.0); // normalize approx
+        // n-gram repetition map (3-grams)
+        $tri = [];
+        $lower = mb_strtolower($bodyText);
+        preg_match_all('/\b[\p{L}\p{N}’\'\-]+\b/u', $lower, $wm);
+        $words = $wm[0] ?? [];
+        for ($i=0;$i<count($words)-2;$i++){
+            $g = $words[$i].' '.$words[$i+1].' '.$words[$i+2];
+            $tri[$g] = ($tri[$g] ?? 0) + 1;
+        }
+        $repetitive3 = 0; foreach ($tri as $freq) if ($freq >= 3) $repetitive3++;
 
-        // Per-sentence features & labeling
-        $perSentence = [];
-        $aiLike = []; $humanLike = [];
+        $aiLike = []; $humanLike=[]; $scoresPerSentence=[];
         $i=0;
         foreach ($sentencesArr as $s) {
             $sTrim = trim($s);
             if ($sTrim==='') { $i++; continue; }
 
-            // counts
-            preg_match_all('/\b[\p{L}\p{N}’\'\-]+\b/u', $sTrim, $mm);
-            $wcount = count($mm[0] ?? []);
-            $lc = mb_strlen($sTrim);
+            preg_match_all('/\b[\p{L}\p{N}’\'\-]+\b/u', $sTrim, $sm);
+            $wCount = count($sm[0] ?? []);
+            $chars = preg_split('//u', $sTrim, -1, PREG_SPLIT_NO_EMPTY);
+            $charCounts = array_count_values($chars);
+            $totalChars = max(1, count($chars));
+            // Shannon entropy (char-level)
+            $entropy = 0.0;
+            foreach ($charCounts as $c=>$cnt) { $p=$cnt/$totalChars; $entropy += -$p*log($p,2); }
+            $entropyNorm = $entropy / 8.0; // normalize roughly (byte entropy upperbound)
 
             // stopword ratio
-            $sw=0;
-            foreach($mm[0] ?? [] as $w){
-                $wl = mb_strtolower($w);
-                if(isset($stopwords[$wl])) $sw++;
-            }
-            $swRatio = $wcount ? ($sw / $wcount) : 0;
+            $stopCount=0; foreach ($sm[0] as $w) if (in_array(mb_strtolower($w), $stopwords)) $stopCount++;
+            $stopRatio = $wCount ? ($stopCount/$wCount) : 0;
 
-            // repetition score across full text (lower idf -> higher repetition)
-            $repScore = 0;
-            foreach ($mm[0] ?? [] as $w){
-                $wl = mb_strtolower($w);
-                $repScore += ($freq[$wl] ?? 1);
-            }
-            $repScore = $wcount ? $repScore / $wcount : 0; // avg frequency
+            // punctuation density
+            $punct = preg_match_all('/[,:;()\-\—]/u', $sTrim, $pm) ? count($pm[0]) : 0;
+            $punctRatio = $totalChars ? ($punct/$totalChars) : 0;
 
-            // cliché presence
+            // filler phrase hit
             $filler = 0; foreach($genericPhrases as $g){ if (stripos($sTrim,$g)!==false){ $filler = 1; break; } }
 
-            // uniformity (AI often has steady length)
-            $uniformLen = ($wcount >= 16 && $wcount <= 22) ? 1 : 0;
+            // evenness of sentence length (uniformity tends to be higher for machine)
+            $lenScore = ($wCount >= 15 && $wCount <= 22) ? 1 : 0;
 
-            // punctuation diversity (humans often vary)
-            preg_match_all('/[,:;—–\-()]/u', $sTrim, $pm);
-            $punctDiv = count(array_unique($pm[0] ?? []));
+            // local lexical variety (unique/total)
+            $uniq = count(array_unique(array_map('mb_strtolower', $sm[0] ?? [])));
+            $localTTR = $wCount ? ($uniq/$wCount) : 0;
 
-            // entropy proxy for this sentence (use text-level entropy baseline)
-            $sentEntropy = max(0.2, min(1.2, ($wcount>0? (1.0 - abs(18-$wcount)/18.0) : 0.5) * (0.5 + 0.5*$entropyNorm)));
+            // Simple ensemble => higher score = more AI-like
+            $aiScore = 0
+                + ($lenScore * 1.0)
+                + ($filler   * 1.2)
+                + (($stopRatio>0.58?1:0) * 0.8)
+                + (($entropyNorm<0.42?1:0) * 1.0)
+                + (($punctRatio<0.012?1:0) * 0.6)
+                + (($localTTR<0.44?1:0) * 0.8);
 
-            // Compute AI likelihood (0..1)
-            // Higher when: filler present, uniform length, high repetition, low punctuation variety, extreme stopword ratio
-            $aiLik = 0.0;
-            $aiLik += $filler ? 0.30 : 0.0;
-            $aiLik += $uniformLen ? 0.20 : 0.0;
-            $aiLik += min(0.25, max(0.0, ($repScore - 3.0) * 0.04)); // repScore>3 increases
-            $aiLik += ( $punctDiv<=1 ? 0.10 : 0.0 );
-            $aiLik += ( $swRatio<0.32 || $swRatio>0.64 ) ? 0.08 : 0.0;
-            $aiLik += ( $sentEntropy<0.55 ? 0.07 : 0.0 );
+            $scoresPerSentence[] = [
+                'text'=>$sTrim,
+                'w'=>$wCount,
+                'entropy'=>$entropyNorm,
+                'stop_ratio'=>$stopRatio,
+                'punct_ratio'=>$punctRatio,
+                'local_ttr'=>$localTTR,
+                'ai_score'=>$aiScore
+            ];
 
-            // Human likelihood bonus
-            $humanBoost = 0.0;
-            $humanBoost += ($punctDiv>=3 ? 0.08 : 0.0);
-            $humanBoost += ($wcount>=8 && $wcount<=34 ? 0.05 : 0.0);
-
-            $score = min(1.0, max(0.0, $aiLik - $humanBoost));
-            $label = $score >= 0.55 ? 'ai' : 'human';
-
-            $perSentence[] = ['text'=>$sTrim,'ai_score'=>$score,'label'=>$label,'w'=>$wcount,'sw_ratio'=>round($swRatio,2),'rep'=>$repScore,'punct'=> $punctDiv];
-            if ($label==='ai') $aiLike[]=$sTrim; else $humanLike[]=$sTrim;
-
+            if ($aiScore >= 2.4) $aiLike[] = $sTrim; else $humanLike[] = $sTrim;
             $i++;
         }
 
+        // Document-level adjustments
+        $docPenalty = 0;
+        if ($ttr < 0.28) $docPenalty += 0.6;
+        if ($repetitive3 >= 8) $docPenalty += 0.8;
+        if ($avgSentLen >= 16 && $avgSentLen <= 22) $docPenalty += 0.4;
+
+        // Reclassify borderline sentences if docPenalty high
+        if ($docPenalty >= 1.2 && !empty($humanLike)) {
+            $moved=[];
+            foreach ($humanLike as $k=>$s) {
+                // if short and uniform, move to AI
+                $w = preg_match_all('/\b[\p{L}\p{N}’\'\-]+\b/u', $s, $mm) ? count($mm[0]) : 0;
+                if ($w>=14 && $w<=22) { $aiLike[]=$s; $moved[]=$k; }
+            }
+            foreach ($moved as $k) unset($humanLike[$k]);
+            $humanLike = array_values($humanLike);
+        }
+
         $aiPct = $sentences ? round(count($aiLike)/$sentences*100) : 0;
-        $humanPct = 100 - $aiPct;
+        $humanPct = max(0, 100 - $aiPct);
 
-        // Reasons summary
-        $reasons = [];
-        $ttr < 0.28 && $reasons[]='Low lexical variety (TTR < 0.28)';
-        ($sentences >= 12 && $avgSentLen >= 16 && $avgSentLen <= 22) && $reasons[]='Uniform sentence length cluster (16–22 words)';
-        if (count($aiLike)>0) $reasons[]='Multiple cliché/boilerplate phrases or repetitive wording';
-        if (count($q('//meta[contains(translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"author") or contains(translate(@property,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"author")]'))) $reasons[]='Author attribution present';
-        if (count($q('//time[@datetime] | //meta[@itemprop="datePublished" or @itemprop="dateModified"] | //span[contains(@class,"date") or contains(@class,"updated")]'))) $reasons[]='Publish/update date present';
+        $aiReasons = [];
+        if ($ttr < 0.28) $aiReasons[]='Low overall lexical variety (TTR < 0.28)';
+        if ($repetitive3 >= 8) $aiReasons[]='Repeated 3‑grams detected (template‑like phrasing)';
+        if ($avgSentLen >= 16 && $avgSentLen <= 22) $aiReasons[]='Uniform sentence lengths (16–22 words)';
 
-        // Aggregate “AI confidence” (for badge only, not an absolute truth)
-        $aiConf = $clamp( (int)round( 20 + ($aiPct*0.7) + ( (1-$entropyNorm)*15 ) + ( $ttr<0.28 ? 10:0 ) ) );
+        $aiLikelihood = $clamp(30 + min(40,$aiPct*0.9) + min(30,$docPenalty*20));
 
-        // New Content Quality Score (0..100) — independent of SEO wheel
-        // Mix originality (TTR), clarity (avg sentence length near 17), structure (H2/H3), citations, media variety
-        $contentScore = 0;
-        $contentScore += min(40, max(0, ($ttr*100) * 0.4));                     // variety 0..40
-        $contentScore += max(0, 20 - abs($avgSentLen-17)*2);                    // clarity 0..20
-        $contentScore += min(15, count($h2s)*3 + count($h3s)*2);                // structure up to 15
-        $contentScore += min(15, $externalTrusted*7 + $externalYears*2);        // citations up to 15
-        $contentScore += min(10, (count($imgsWithAlt)>=2?10:0));                // helpful media up to 10
-        $contentScore = $clamp($contentScore);
-
-        // Suggestions
+        // ---- Build suggestions ----
         $suggest = function($id) use ($titleText,$metaDesc,$h1Text,$qHeads,$hasFAQ,$imgs,$imgsWithAlt,$altRatio,
             $internalLinks,$keywordyAnchors,$slugOk,$slug,$hasBreadcrumb,$hasBreadcrumbUI,$viewport,$responsiveImgs,$imgsLazy,
             $deferred,$asyncd,$blockingScripts,$hasPreload,$ctaFound,$externalTrusted,$externalYears,$validTypes,$wikiLinks,$properH2s,$wc,$lists,$tables,$pres,$eSim,$sim,$h2s,$h3s){
             $tips=[];
             switch($id){
-                case 'ck-1': if ($sim<0.4) $tips[]='Align H1 with Title (same primary keyword).'; if (mb_strlen($h1Text)<20) $tips[]='Make H1 20–80 chars and descriptive.'; $tips[]='Open with a clear first paragraph stating the intent.'; break;
-                case 'ck-2': if ($qHeads<2) $tips[]='Add 2–4 H2/H3 in question form (PAA).'; $tips[]='Cover synonyms/related terms; add a short FAQ block.'; break;
-                case 'ck-3': if ($sim<0.6) $tips[]='Keep H1 wording closer to Title.'; $tips[]='Keep H1 length ~20–80 chars.'; break;
-                case 'ck-4': if (!$hasFAQ) $tips[]='Add an FAQ section with FAQPage schema.'; $tips[]='Answer 3–5 common sub‑questions.'; break;
-                case 'ck-5': $tips[]='Shorten sentences to average ~12–22 words.'; $tips[]='Use plain language and short paragraphs.'; break;
+                case 'ck-1': if (mb_strlen($h1Text)<20) $tips[]='Make H1 20–80 chars and descriptive.'; $tips[]='Open with a clear first paragraph stating the intent.'; break;
+                case 'ck-2': if ($qHeads<2) $tips[]='Add 2–4 H2/H3 in question form (PAA).'; break;
+                case 'ck-4': if (!$hasFAQ) $tips[]='Add an FAQ section with FAQPage schema.'; break;
                 case 'ck-6': $tips[]='Keep Title ~50–60 chars; front‑load main keyword.'; break;
-                case 'ck-7': if (mb_strlen($metaDesc)<140) $tips[]='Write a 140–160 char meta description with a CTA.'; else $tips[]='Trim meta description to ~160 and add a CTA.'; break;
-                case 'ck-8': $tips[]='Add <link rel="canonical" href="preferred-URL"> in <head>.'; break;
-                case 'ck-9': $tips[]='Remove noindex and include the URL in your XML sitemap.'; break;
-                case 'ck-11': if ($wc<1200) $tips[]='Add unique value (examples, templates, data, tool).'; if ($tables<1 && $pres<1 && $lists<8) $tips[]='Use tables/lists/code where helpful.'; break;
-                case 'ck-12': if ($externalTrusted<2) $tips[]='Cite 2–3 trustworthy sources (.gov/.edu/WHO/Wikipedia).'; if ($externalYears<1)  $tips[]='Update stats to 2024/2025 and cite them.'; break;
+                case 'ck-7': if (mb_strlen($metaDesc)<140) $tips[]='Write a 140–160 char meta description with a CTA.'; break;
+                case 'ck-11': if ($wc<1200) $tips[]='Add unique value (examples, templates, data, tool).'; break;
+                case 'ck-12': if ($externalTrusted<2) $tips[]='Cite 2–3 trustworthy sources (.gov/.edu/WHO/Wikipedia).'; break;
                 case 'ck-13': if (count($imgs)<2) $tips[]='Add 2–4 relevant images/diagrams with captions.'; if ($altRatio<0.8) $tips[]='Provide descriptive alt text for images.'; break;
-                case 'ck-14': if (count($h2s)<3) $tips[]='Add ≥3 H2 sections for key subtopics.'; if (count($h3s)<2) $tips[]='Nest H3s for deeper subsections.'; break;
                 case 'ck-15': if ($internalLinks<3) $tips[]='Insert 3–6 internal links to hubs/related pages.'; if ($keywordyAnchors<3) $tips[]='Use descriptive anchor text (avoid “click here”).'; break;
-                case 'ck-16': if (!$slugOk) $tips[]='Use short, lowercase, hyphenated slug; avoid spaces/underscores.'; break;
-                case 'ck-17': $tips[]='Add visible breadcrumbs + BreadcrumbList schema.'; break;
-                case 'ck-18': if (!$viewport) $tips[]='Add responsive meta viewport in <head>.'; if (!$responsiveImgs) $tips[]='Serve responsive images (srcset/sizes).'; break;
-                case 'ck-19': if (count($imgsLazy)<2) $tips[]='Lazy‑load images (loading="lazy").'; if ($blockingScripts>2) $tips[]='Defer/async non‑critical JS; reduce blocking scripts.'; if (!$hasPreload) $tips[]='Preload critical fonts/assets; preconnect to CDNs.'; break;
-                case 'ck-20': if ($blockingScripts>0) $tips[]='Reduce render‑blocking JS/CSS for better LCP/INP.'; if (!$responsiveImgs) $tips[]='Serve properly sized images to reduce CLS/LCP.'; break;
+                case 'ck-18': if (!$responsiveImgs) $tips[]='Serve responsive images (srcset/sizes).'; break;
+                case 'ck-19': if ($blockingScripts>2) $tips[]='Defer/async non‑critical JS; reduce blocking scripts.'; if (!$hasPreload) $tips[]='Preload critical fonts/assets; preconnect to CDNs.'; break;
                 case 'ck-21': if (!$ctaFound) $tips[]='Add clear CTAs (e.g., “Get started”, “Contact”, “Download”).'; break;
-                case 'ck-22': if ($eSim<0.4) $tips[]='Define the primary entity in the first paragraph.'; if (!in_array('Article',$validTypes ?? [])) $tips[]='Add Article schema with headline and date.'; break;
-                case 'ck-23': if ($wikiLinks<1) $tips[]='Mention related entities and link to their knowledge pages.'; if ($properH2s<2) $tips[]='Use H2s that name related entities/concepts.'; break;
                 case 'ck-24': if (!count($validTypes ?? [])) $tips[]='Add valid JSON‑LD (Article/FAQ/Product etc.).'; break;
                 case 'ck-25': $tips[]='Add Organization schema with sameAs links to official profiles.'; break;
             }
@@ -371,18 +340,17 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
             'auto_check_ids'=>$autoIds,
             'overall_score'=>round($overall,1),
 
-            // NEW: AI/Human breakdown + content score
-            'content_score_100' => $contentScore,
+            // New: detailed AI/Human breakdown
             'ai_detection'=>[
-                'confidence'=>$aiConf,              // 0..100 (badge intent)
-                'ai_pct'=>$aiPct,                   // 0..100
-                'human_pct'=>$humanPct,             // 0..100
-                'per_sentence'=>$perSentence,       // [{text,label,ai_score,...}]
-                'ai_snippets'=>array_values(array_slice($aiLike,0,50)),
-                'human_snippets'=>array_values(array_slice($humanLike,0,50)),
+                'likelihood'=>$aiLikelihood,
+                'label'=> ($aiPct>=65?'likely_ai':($aiPct>=45?'mixed':'likely_human')),
+                'ai_pct'=>$aiPct,
+                'human_pct'=>$humanPct,
+                'ai_sentences'=>$aiLike,
+                'human_sentences'=>$humanLike,
+                'per_sentence'=>$scoresPerSentence,
                 'full_text'=>$bodyText,
-                'reasons'=>$reasons,
-                'disclaimer'=>'Heuristic detector — not 100% certain. Use snippets & reasons to decide.'
+                'reasons'=>$aiReasons
             ],
         ]);
     } catch (\Throwable $e) {
