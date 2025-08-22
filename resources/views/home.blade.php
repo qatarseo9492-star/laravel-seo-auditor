@@ -1,181 +1,92 @@
 @extends('layouts.app')
 
 @section('content')
-<!-- AOS Animation Library -->
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
 <style>
-    /* Hero Section */
-    .hero {
-        background: linear-gradient(135deg, #6f42c1, #007bff, #00b894);
-        background-size: 300% 300%;
-        animation: gradientBG 12s ease infinite;
+    .hero-section {
+        background: linear-gradient(135deg, #007bff, #6f42c1);
         color: white;
+        padding: 80px 20px;
+        border-radius: 10px;
         text-align: center;
-        padding: 100px 20px;
-        border-radius: 15px;
-        margin-bottom: 60px;
-        position: relative;
-        overflow: hidden;
+        margin-bottom: 50px;
     }
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    .hero-section h1 {
+        font-weight: 700;
+        font-size: 2.8rem;
     }
-    .hero h1 {
-        font-size: 3rem;
-        font-weight: 800;
-    }
-    .hero p {
-        font-size: 1.3rem;
-        margin-top: 15px;
+    .hero-section p {
+        font-size: 1.2rem;
         opacity: 0.9;
     }
-    .cta-btn {
-        margin-top: 25px;
-        font-size: 1.2rem;
-        padding: 12px 30px;
-        border-radius: 30px;
-        background: linear-gradient(135deg, #ff416c, #ff4b2b);
-        border: none;
-        color: white;
-        transition: 0.4s;
-    }
-    .cta-btn:hover {
-        transform: scale(1.05);
-    }
-
-    /* Floating keyword cloud */
-    .keywords-cloud {
-        margin-top: 30px;
-        font-size: 1.1rem;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 15px;
-    }
-    .keywords-cloud span {
-        background: rgba(255,255,255,0.2);
-        padding: 8px 15px;
-        border-radius: 20px;
-        animation: float 6s ease-in-out infinite;
-    }
-    @keyframes float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-
-    /* Tool Cards Section */
     .tool-card {
-        background: white;
-        border-radius: 18px;
-        padding: 40px 25px;
-        transition: all 0.4s ease;
-        height: 100%;
-        position: relative;
+        border: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        box-shadow: 0px 5px 20px rgba(0,0,0,0.1);
+        background: #ffffff;
     }
     .tool-card:hover {
-        transform: translateY(-10px) scale(1.03);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0px 8px 25px rgba(0,0,0,0.15);
     }
     .tool-icon {
-        font-size: 3rem;
+        font-size: 50px;
         margin-bottom: 20px;
-        animation: bounce 2s infinite;
+        color: #007bff;
     }
-    @keyframes bounce {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-12px); }
-    }
-    .btn-tool {
-        margin-top: 20px;
-        padding: 10px 24px;
-        border-radius: 25px;
-        font-weight: 600;
+    .btn-gradient {
         background: linear-gradient(135deg, #007bff, #6f42c1);
         border: none;
         color: white;
+        font-weight: 600;
+        border-radius: 25px;
+        padding: 10px 24px;
         transition: 0.3s;
     }
-    .btn-tool:hover {
-        opacity: 0.85;
-        transform: translateY(-2px);
-    }
-
-    /* About section */
-    .about-section {
-        background: #f8f9fa;
-        padding: 60px 20px;
-        text-align: center;
-        border-radius: 15px;
-        margin-top: 80px;
+    .btn-gradient:hover {
+        opacity: 0.9;
+        color: white;
     }
 </style>
 
 <div class="container">
-
     {{-- Hero Section --}}
-    <div class="hero shadow-lg" data-aos="zoom-in" data-aos-duration="1200">
-        <h1>🚀 Boost Your Rankings Like Never Before</h1>
-        <p>Our SEO Tools Suite is crafted to give you the **clarity, performance, and ranking power** your site deserves.</p>
-        <a href="#tools" class="btn cta-btn">Explore Tools</a>
-        <div class="keywords-cloud mt-4">
-            <span>#SEO</span>
-            <span>#Rank1</span>
-            <span>#Traffic</span>
-            <span>#Backlinks</span>
-            <span>#Keywords</span>
-            <span>#Growth</span>
-            <span>#Optimization</span>
-        </div>
+    <div class="hero-section">
+        <h1>Welcome to SEO Tools Suite 🚀</h1>
+        <p>Analyze, optimize, and improve your website’s SEO with our simple but powerful tools.</p>
     </div>
 
-    {{-- Tools Section with Animations --}}
-    <div id="tools" class="row text-center mt-5">
+    {{-- Tools Section --}}
+    <div class="row text-center">
         {{-- SEO Auditor --}}
-        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="tool-card">
+        <div class="col-md-4 mb-4">
+            <div class="card tool-card p-4 h-100">
                 <div class="tool-icon">📊</div>
-                <h4 class="fw-bold">SEO Auditor</h4>
-                <p>Complete on‑page SEO audit with technical checks and scoring system.</p>
-                <a href="{{ url('/seo-audit') }}" class="btn btn-tool">Try Auditor</a>
+                <h4 class="fw-bold mb-3">SEO Auditor</h4>
+                <p class="text-muted">Run a full-page audit and get detailed insights into your website’s SEO health.</p>
+                <a href="{{ url('/seo-audit') }}" class="btn btn-gradient mt-3">Use Tool</a>
             </div>
         </div>
 
         {{-- Keyword Analyzer --}}
-        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
-            <div class="tool-card">
+        <div class="col-md-4 mb-4">
+            <div class="card tool-card p-4 h-100">
                 <div class="tool-icon">🔑</div>
-                <h4 class="fw-bold">Keyword Analyzer</h4>
-                <p>Analyze keyword density and find missing keyword opportunities.</p>
-                <a href="{{ url('/seo-keyword-analysis') }}" class="btn btn-tool">Try Analyzer</a>
+                <h4 class="fw-bold mb-3">Keyword Analyzer</h4>
+                <p class="text-muted">Analyze how well your content is optimized for specific keywords and discover usage gaps.</p>
+                <a href="{{ url('/seo-keyword-analysis') }}" class="btn btn-gradient mt-3">Use Tool</a>
             </div>
         </div>
 
         {{-- Content Optimizer --}}
-        <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="500">
-            <div class="tool-card">
-                <div class="tool-icon">📈</div>
-                <h4 class="fw-bold">Content Optimizer</h4>
-                <p>Get recommendations to outrank competitors with keyword‑focused optimization.</p>
-                <a href="{{ url('/seo-optimizer') }}" class="btn btn-tool">Optimize Now</a>
+        <div class="col-md-4 mb-4">
+            <div class="card tool-card p-4 h-100">
+                <div class="tool-icon">🚀</div>
+                <h4 class="fw-bold mb-3">Content Optimizer</h4>
+                <p class="text-muted">Input a URL and keyword to get actionable suggestions to better optimize your content for rankings.</p>
+                <a href="{{ url('/seo-optimizer') }}" class="btn btn-gradient mt-3">Use Tool</a>
             </div>
         </div>
     </div>
-
-    {{-- About Section --}}
-    <div class="about-section mt-5" data-aos="fade-up" data-aos-duration="1000">
-        <h2>Why Choose Us Over SEMrush & Ahrefs?</h2>
-        <p>While traditional SEO giants overload you with data, we cut through the noise.  
-        Our focus? 🔍 **Actionable, visual, and elegant insights** that help you RANK, FAST.  
-        Less confusion, more growth.</p>
-    </div>
 </div>
-
-<!-- AOS JS -->
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>
-  AOS.init();
-</script>
 @endsection
