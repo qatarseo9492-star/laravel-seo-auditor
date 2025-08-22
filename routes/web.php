@@ -141,15 +141,13 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $jaccard=function($a,$b){ $wa=array_unique(preg_split('/\W+/u', mb_strtolower($a), -1, PREG_SPLIT_NO_EMPTY)); $wb=array_unique(preg_split('/\W+/u', mb_strtolower($b), -1, PREG_SPLIT_NO_EMPTY)); if(!$wa||!$wb) return 0; $i=count(array_intersect($wa,$wb)); $u=count(array_unique(array_merge($wa,$wb))); return $u? $i/$u : 0; };
         $sc = fn($v) => is_countable($v) ? count($v) : 0;
 
-        // ==== Scoring (same as earlier) ====
+        // Scoring (same)
         $S=[];
         $patterns=['how to','what is','guide','best','vs','compare','price','buy','review','download'];
         $tLower = mb_strtolower($titleText.' '.$h1Text);
         $intentHints=0; foreach($patterns as $p) if(str_contains($tLower,$p)) $intentHints+=10;
         $sim = $jaccard($titleText, $h1Text);
-
         $qHeads=0; foreach(array_merge($h2s,$h3s) as $h){ if(str_contains(mb_strtolower($h->textContent),'?')) $qHeads++; }
-
         $S['ck-1'] = $clamp( min(100, 40*$sim + min(40,$intentHints) + (mb_strlen($firstP)>40?20:0)) );
         $S['ck-2'] = $clamp( min(100, ($qHeads*12) + ($ttr*100*0.25) + ($hasFAQ?30:0)) );
         $S['ck-3'] = $clamp( min(100, ($sim*100*0.6) + ($inRangeScore(mb_strlen($h1Text),20,80,10,100)*0.4)) );
@@ -184,21 +182,22 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         if($footer){ foreach($footer->getElementsByTagName('a') as $a){ $h=strtolower($a->getAttribute('href')); if(preg_match('#(facebook|twitter|x\.com|instagram|linkedin|youtube|tiktok)\.com#',$h)) $footerSocial++; } }
         $S['ck-25']= $clamp( min(100, ($orgSameAs?100:0) + (!$orgSameAs && $hasOrganization ? 60:0) + min(40,$footerSocial*10)) );
 
-        // ===== Human vs AI heuristic with sentence-level flags =====
+        // AI detection with snippets
         $genericPhrases = [
             'in this article','we will explore','comprehensive guide','delve into','furthermore',
             'moreover','in conclusion','additionally','this section will','as mentioned earlier',
             'on the other hand','it is important to note','plays a crucial role','key takeaways'
         ];
+        $sentencesArr = preg_split('/(?<=[.!?])\s+/u', $bodyText, -1, PREG_SPLIT_NO_EMPTY);
         $aiLikeIndices = [];
-        $lens = []; $i=0;
+        $i=0;
         foreach ($sentencesArr as $s) {
             $w = preg_match_all('/\b[\p{L}\p{N}’\'\-]+\b/u', $s, $mm) ? count($mm[0]) : 0;
             $lenOk = ($w >= 16 && $w <= 22) ? 1 : 0;
             $filler = 0; foreach($genericPhrases as $g){ if (stripos($s,$g)!==false){ $filler = 1; break; } }
-            $score = $lenOk + $filler; // simple per-sentence signal
+            $score = $lenOk + $filler;
             if ($score >= 1) $aiLikeIndices[] = $i;
-            $lens[] = $w; $i++;
+            $i++;
         }
         $aiPct = $sentences ? round(count($aiLikeIndices)/$sentences*100) : 0;
 
@@ -207,16 +206,12 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $ttr < 0.28 && ($aiScore+=20) && $reasons[]='Low lexical variety (TTR < 0.28)';
         ($sentences >= 12 && $avgSentLen >= 16 && $avgSentLen <= 22) && ($aiScore+=10) && $reasons[]='Uniform sentence length (16–22 words)';
         if (count($aiLikeIndices)>0) { $aiScore += min(30, count($aiLikeIndices)*2); $reasons[]='Multiple generic / uniform sentences'; }
-
         if (count($q('//meta[contains(translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"author") or contains(translate(@property,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"author")]'))) { $aiScore -= 8; $reasons[]='Author attribution present'; }
         if (count($q('//time[@datetime] | //meta[@itemprop="datePublished" or @itemprop="dateModified"] | //span[contains(@class,"date") or contains(@class,"updated")]'))) { $aiScore -= 5; $reasons[]='Publish/update date present'; }
-        if ($uvWords) { $aiScore -= 8; $reasons[]='Original value (examples/data/tool)'; }
-        if ($externalTrusted>=2) { $aiScore -= 6; $reasons[]='Cites trustworthy sources'; }
 
-        $aiScore = $clamp($aiScore);
+        $aiScore = max(0,min(100,(int)round($aiScore)));
         $aiLabel = $aiScore >= 65 ? 'likely_ai' : ($aiScore >= 45 ? 'mixed' : 'likely_human');
 
-        // Build AI-like snippets (limit 30, keep order)
         $aiSnippets = [];
         foreach ($aiLikeIndices as $idx) {
             $s = trim($sentencesArr[$idx] ?? '');
@@ -224,19 +219,19 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
             if (count($aiSnippets) >= 30) break;
         }
 
-        // ===== Suggestions (same as previous version; omitted here for brevity) =====
+        // Suggestions (as before)
         $suggest = function($id) use (
-            $S,$titleText,$metaDesc,$h1Text,$qHeads,$hasFAQ,$imgs,$imgsWithAlt,$altRatio,
+            $S,$titleText,$metaDesc,$h1Text,$qHeads,$imgs,$imgsWithAlt,$altRatio,
             $internalLinks,$keywordyAnchors,$slugOk,$slug,$hasBreadcrumb,$hasBreadcrumbUI,
             $viewport,$responsiveImgs,$imgsLazy,$deferred,$asyncd,$blockingScripts,$hasPreload,
-            $ctaFound,$externalTrusted,$externalYears,$validTypes,$wikiLinks,$properH2s,$wc,$lists,$tables,$pres,$eSim,$sim,$h2s,$h3s
+            $ctaFound,$externalTrusted,$externalYears,$validTypes,$wc,$lists,$tables,$pres,$eSim,$sim,$h2s,$h3s
         ){
             $tips=[];
             switch($id){
                 case 'ck-1': if ($sim<0.4) $tips[]='Align H1 with Title (same primary keyword).'; if (mb_strlen($h1Text)<20) $tips[]='Make H1 20–80 chars and descriptive.'; $tips[]='Open with a clear first paragraph stating the intent.'; break;
                 case 'ck-2': if ($qHeads<2) $tips[]='Add 2–4 H2/H3 in question form (PAA).'; $tips[]='Cover synonyms/related terms; add a short FAQ block.'; break;
                 case 'ck-3': if ($sim<0.6) $tips[]='Keep H1 wording closer to Title.'; $tips[]='Keep H1 length ~20–80 chars.'; break;
-                case 'ck-4': if (!$hasFAQ) $tips[]='Add an FAQ section with FAQPage schema.'; $tips[]='Answer 3–5 common sub‑questions.'; break;
+                case 'ck-4': if (!$hasBreadcrumbUI){} $tips[]='Add an FAQ section and answer 3–5 common sub‑questions.'; break;
                 case 'ck-5': $tips[]='Shorten sentences to average ~12–22 words.'; $tips[]='Use plain language and short paragraphs.'; break;
                 case 'ck-6': $tips[]='Keep Title ~50–60 chars; front‑load main keyword.'; break;
                 case 'ck-7': if (mb_strlen($metaDesc)<140) $tips[]='Write a 140–160 char meta description with a CTA.'; else $tips[]='Trim meta description to ~160 and add a CTA.'; break;
@@ -250,11 +245,11 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
                 case 'ck-16': if (!$slugOk) $tips[]='Use short, lowercase, hyphenated slug; avoid spaces/underscores.'; break;
                 case 'ck-17': $tips[]='Add visible breadcrumbs + BreadcrumbList schema.'; break;
                 case 'ck-18': if (!$viewport) $tips[]='Add responsive meta viewport in <head>.'; if (!$responsiveImgs) $tips[]='Serve responsive images (srcset/sizes).'; break;
-                case 'ck-19': if (count($imgsLazy)<2) $tips[]='Lazy‑load below‑the‑fold images (loading="lazy").'; if ($blockingScripts>2) $tips[]='Defer/async non‑critical JS; reduce blocking scripts.'; if (!$hasPreload) $tips[]='Preload critical fonts/assets; preconnect to CDNs.'; break;
+                case 'ck-19': if (count($imgsLazy)<2) $tips[]='Lazy‑load below‑the‑fold images.'; if ($blockingScripts>2) $tips[]='Defer/async non‑critical JS; reduce blocking scripts.'; if (!$hasPreload) $tips[]='Preload critical fonts/assets; preconnect to CDNs.'; break;
                 case 'ck-20': if ($blockingScripts>0) $tips[]='Reduce render‑blocking JS/CSS for better LCP/INP.'; if (!$responsiveImgs) $tips[]='Serve properly sized images to reduce CLS/LCP.'; break;
                 case 'ck-21': if (!$ctaFound) $tips[]='Add clear CTAs (e.g., “Get started”, “Contact”, “Download”).'; break;
-                case 'ck-22': if ($eSim<0.4) $tips[]='Define the primary entity in the first paragraph.'; if (!in_array('Article',$validTypes ?? [])) $tips[]='Add Article schema with headline and date.'; break;
-                case 'ck-23': if ($wikiLinks<1) $tips[]='Mention related entities and link to their knowledge pages.'; if ($properH2s<2) $tips[]='Use H2s that name related entities/concepts.'; break;
+                case 'ck-22': if ($eSim<0.4) $tips[]='Define the primary entity in the first paragraph.'; break;
+                case 'ck-23': $tips[]='Mention related entities and link to their knowledge pages.'; break;
                 case 'ck-24': if (!count($validTypes ?? [])) $tips[]='Add valid JSON‑LD (Article/FAQ/Product etc.).'; break;
                 case 'ck-25': $tips[]='Add Organization schema with sameAs links to official profiles.'; break;
             }
@@ -289,13 +284,12 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
             'auto_check_ids'=>$autoIds,
             'overall_score'=>round($overall,1),
 
-            // AI/Human
             'ai_detection'=>[
-                'likelihood'=>$aiScore,           // 0..100
-                'label'=>$aiLabel,                // likely_human | mixed | likely_ai
-                'ai_pct'=>$aiPct,                 // % of sentences flagged as AI-like
-                'ai_snippets'=>$aiSnippets,       // array of AI-like sentences
-                'full_text'=>$bodyText,           // full page text (sanitized)
+                'likelihood'=>$aiScore,
+                'label'=>$aiLabel,
+                'ai_pct'=>$aiPct,
+                'ai_snippets'=>$aiSnippets,
+                'full_text'=>$bodyText,
                 'reasons'=>$reasons
             ],
         ]);
