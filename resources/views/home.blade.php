@@ -6,6 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Semantic SEO Master • Ultra Tech Global</title>
+
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
@@ -205,9 +211,19 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <!-- gradients for score wheel -->
 <svg width="0" height="0" aria-hidden="true">
   <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#9b5cff"/><stop offset="100%" stop-color="#ff2045"/></linearGradient>
-    <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/></linearGradient>
-    <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/></linearGradient>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%">
+      <stop offset="0%" stop-color="#9b5cff"/><stop offset="100%" stop-color="#ff2045"/>
+    </linearGradient>
+    <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%">
+      <stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+    <!-- NEW: red gradient for < 60 -->
+    <linearGradient id="gradBad" x1="0%" y1="0%" x2="100%">
+      <stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
   </defs>
 </svg>
 
@@ -239,7 +255,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
           <circle class="bg" cx="60" cy="60" r="54"/>
           <circle class="progress" cx="60" cy="60" r="54"/>
-          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0</text>
+          <!-- Score shown INSIDE the circle -->
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
         </svg>
       </div>
       <div style="display:flex;flex-direction:column;gap:.5rem">
@@ -295,7 +312,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Categories / checklist (unchanged structure) -->
+    <!-- Categories / checklist -->
     <div class="analyzer-grid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -493,17 +510,23 @@ const LANGS = [["en","English"],["es","Español"],["fr","Français"],["de","Deut
   btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
 })();
 
-/* ---------- Score wheel helpers ---------- */
+/* ---------- Score wheel helpers (with % inside + color thresholds) ---------- */
 const WHEEL = { circumference: 339, circle: null, text: null };
 function setScoreWheel(value){
   if (!WHEEL.circle) { WHEEL.circle = document.querySelector('.score-wheel .progress'); WHEEL.text = document.getElementById('overallScore'); }
   const v = Math.max(0, Math.min(100, value));
   const offset = WHEEL.circumference - (v/100) * WHEEL.circumference;
   WHEEL.circle.style.strokeDashoffset = offset;
+
+  // Color thresholds: ≥80 green, 60–79 orange, <60 red
   if (v >= 80) WHEEL.circle.setAttribute('stroke','url(#gradGood)');
   else if (v >= 60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
-  else WHEEL.circle.setAttribute('stroke','url(#grad)');
-  WHEEL.text.textContent = Math.round(v);
+  else WHEEL.circle.setAttribute('stroke','url(#gradBad)');
+
+  // Show number INSIDE circle with %
+  WHEEL.text.textContent = Math.round(v) + '%';
+
+  // Inline /100 chip
   document.getElementById('overallScoreInline').textContent = Math.round(v);
 }
 
@@ -524,7 +547,7 @@ function setScoreWheel(value){
   function overallScoreBlended(){
     const cs = contentScore();
     const allChecked = cs===100;
-    if (allChecked) return 100; // ✅ requested behavior
+    if (allChecked) return 100;
     return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
   }
   function updateCats(){
@@ -713,10 +736,13 @@ function normalizeUrl(u){
       const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
       const label = labelMap[ai.label] || 'Unknown';
       const conf = typeof ai.likelihood==='number' ? `(${ai.likelihood}%)` : '';
-      const pct = typeof ai.ai_pct==='number' ? ` — ${ai.ai_pct}% AI‑like` : '';
-      badge.innerHTML = `Writer: <b>${label} ${conf}${pct}</b>`;
-      badge.title = (ai.reasons||[]).join(' • ');
-      window.__setAIData(ai);
+      // Show AI-like % AND imply human = 100 - ai for clarity
+      const aiPct = typeof ai.ai_pct==='number' ? ai.ai_pct : null;
+      const humanPct = (typeof ai.human_pct==='number') ? ai.human_pct : (aiPct!=null ? (100 - aiPct) : null);
+      badge.innerHTML = `Writer: <b>${label} ${conf}${aiPct!=null ? ' — '+aiPct+'% AI‑like' : ''}</b>`;
+      document.getElementById('aiPct').textContent = aiPct!=null ? aiPct : '—';
+      document.getElementById('humanPct').textContent = humanPct!=null ? humanPct : '—';
+      window.__setAIData({ ...ai, ai_pct: aiPct, human_pct: humanPct });
 
       // auto-check
       if ($('#autoApply').checked) {
