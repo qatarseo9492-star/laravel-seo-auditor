@@ -32,7 +32,16 @@ body{
 #linesCanvas, #linesCanvas2, #brainCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
 #brainCanvas{opacity:.10}
 
-/* --- Cloudy smoke (bottom-right clearly visible) --- */
+/* --- NEW: Procedural Cloud Smoke canvas --- */
+#smokeFX{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  opacity:1; filter:saturate(115%) contrast(105%);
+}
+
+/* Hide the previous decorative blobs/clouds to avoid double effects (keep DOM for fallback if you like) */
+.bg-smoke .blob, .clouds { display:none !important; }
+
+/* --- (Old) Cloudy smoke (kept but hidden by rule above) --- */
 .bg-smoke{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
 .blob{position:absolute;border-radius:50%;filter:blur(90px);mix-blend-mode:screen;animation:float 36s linear infinite}
 .blob.p{background:radial-gradient(closest-side,rgba(155,92,255,.38),rgba(155,92,255,0) 70%)}
@@ -42,7 +51,7 @@ body{
 .b3{top:10%;right:15%;width:50vmax;height:50vmax;animation-duration:28s}
 .b4{bottom:10%;left:25%;width:48vmax;height:48vmax;animation-duration:40s}
 
-/* NEW: cloud cluster (stacked ovals = clouds) */
+/* (Old) cloud cluster */
 .clouds { position:absolute; right:-6vmax; bottom:-6vmax; width:80vmax; height:60vmax; pointer-events:none; }
 .clouds .c { position:absolute; border-radius:50%; filter:blur(40px); opacity:.95; mix-blend-mode:screen; }
 .clouds .c.cyan   { background:radial-gradient(closest-side, rgba(61,226,255,.85), rgba(61,226,255,0) 75%); }
@@ -168,7 +177,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .score-container{width:190px}
   footer.site{flex-direction:column;align-items:flex-start}
 }
-@media print{#linesCanvas,#linesCanvas2,#brainCanvas,.bg-smoke,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
+@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.bg-smoke,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
 </style>
 </head>
 <body>
@@ -176,12 +185,15 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <canvas id="linesCanvas"></canvas>
 <canvas id="linesCanvas2"></canvas>
 
+<!-- NEW: WebGL smoke canvas -->
+<canvas id="smokeFX" aria-hidden="true"></canvas>
+
 <div class="bg-smoke">
   <span class="blob p b1"></span>
   <span class="blob r b2"></span>
   <span class="blob p b3"></span>
   <span class="blob r b4"></span>
-  <!-- Cloud cluster (clearly visible) -->
+  <!-- Cloud cluster (kept for fallback styling but hidden by CSS) -->
   <div class="clouds">
     <span class="c cyan   c1"></span>
     <span class="c purple c2"></span>
@@ -392,7 +404,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 const I18N = {
   en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 70)"},
   es:{title:"Analizador Maestro de SEO Semántico", analyze_title:"Analiza una URL", legend_line:"La rueda se llena con tu puntuación general. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Naranja 60–79</span> <span class='legend l-red'>Rojo &lt; 60</span>", overall:"Total", page_url:"URL de la página", analyze:"Analizar", print:"Imprimir", reset:"Restablecer", auto_check:"Aplicar automáticamente (≥ 70)"},
-  fr:{title:"Analyseur Maître SEO Sémantique", analyze_title:"Analyser une URL", legend_line:"La roue se remplit avec votre score global. <span class='legend l-green'>Vert ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Rouge &lt; 60</span>", overall:"Global", page_url:"URL de la page", analyze:"Analyser", print:"Imprimer", reset:"Réinitialiser", auto_check:"Cocher automatiquement (≥ 70)"},
+  fr:{title:"Analyseur Maître SEO Sémantique", analyze_title:"Analyser une URL", legend_line:"La ruota si riempie con il punteggio complessivo. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Arancione 60–79</span> <span class='legend l-red'>Rosso &lt; 60</span>", overall:"Global", page_url:"URL de la page", analyze:"Analyser", print:"Imprimer", reset:"Réinitialiser", auto_check:"Cocher automatiquement (≥ 70)"},
   de:{title:"Semantischer SEO Meister‑Analyzer", analyze_title:"URL analysieren", legend_line:"Das Rad füllt sich mit Ihrem Gesamtscore. <span class='legend l-green'>Grün ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Rot &lt; 60</span>", overall:"Gesamt", page_url:"Seiten‑URL", analyze:"Analysieren", print:"Drucken", reset:"Zurücksetzen", auto_check:"Automatisch anwenden (≥ 70)"},
   it:{title:"Analizzatore Maestro SEO Semantico", analyze_title:"Analizza un URL", legend_line:"La ruota si riempie con il punteggio complessivo. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Arancione 60–79</span> <span class='legend l-red'>Rosso &lt; 60</span>", overall:"Totale", page_url:"URL della pagina", analyze:"Analizza", print:"Stampa", reset:"Reimposta", auto_check:"Applica automaticamente (≥ 70)"},
   pt:{title:"Analisador Mestre de SEO Semântico", analyze_title:"Analisar uma URL", legend_line:"A roda preenche com sua pontuação geral. <span class='legend l-green'>Verde ≥ 80</span> <span class='legend l-orange'>Laranja 60–79</span> <span class='legend l-red'>Vermelho &lt; 60</span>", overall:"Geral", page_url:"URL da página", analyze:"Analisar", print:"Imprimir", reset:"Reiniciar", auto_check:"Aplicar automaticamente (≥ 70)"},
@@ -513,7 +525,6 @@ function setScoreWheel(value){
     const cs = contentScore();
     const allChecked = cs===100;
     if (allChecked) return 100; // ✅ requested behavior
-    // blend but allow high content score to pull up the wheel
     return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
   }
   function updateCats(){
@@ -724,6 +735,188 @@ function normalizeUrl(u){
       btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Analyze';
     }
   }
+})();
+</script>
+
+<!-- ========== Procedural Colorful Smoke (WebGL2 shader + 2D fallback) ========== -->
+<script>
+(function(){
+  const canvas = document.getElementById('smokeFX');
+  if (!canvas) return;
+
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  let gl = null, vw=0, vh=0, start=performance.now(), raf=0;
+
+  function resize(){
+    vw = canvas.clientWidth  = window.innerWidth;
+    vh = canvas.clientHeight = window.innerHeight;
+    canvas.width  = Math.floor(vw * dpr);
+    canvas.height = Math.floor(vh * dpr);
+    if (gl) gl.viewport(0,0,canvas.width,canvas.height);
+  }
+  addEventListener('resize', resize, {passive:true});
+  resize();
+
+  const mouse = { x: vw*0.92, y: vh*0.88, t: 0 };
+  addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; mouse.t=performance.now(); }, {passive:true});
+
+  try { gl = canvas.getContext('webgl2', { alpha:true, antialias:false, depth:false, stencil:false, powerPreference:'high-performance' }); } catch(e){}
+
+  if (gl) {
+    const vert = `#version 300 es
+    precision highp float;
+    const vec2 verts[3] = vec2[3](
+      vec2(-1.0,-1.0), vec2(3.0,-1.0), vec2(-1.0,3.0)
+    );
+    out vec2 vUv;
+    void main(){
+      vec2 p = verts[gl_VertexID];
+      vUv = 0.5*(p+1.0);
+      gl_Position = vec4(p,0.0,1.0);
+    }`;
+
+    const frag = `#version 300 es
+    precision highp float;
+    in vec2 vUv; out vec4 fragColor;
+    uniform vec2 u_res, u_mouse;
+    uniform float u_time, u_aspect;
+
+    float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+    float noise(vec2 p){
+      vec2 i=floor(p), f=fract(p);
+      float a=hash(i), b=hash(i+vec2(1,0)), c=hash(i+vec2(0,1)), d=hash(i+vec2(1,1));
+      vec2 u=f*f*(3.0-2.0*f);
+      return mix(a,b,u.x)+(c-a)*u.y*(1.0-u.x)+(d-b)*u.x*u.y;
+    }
+    float fbm(vec2 p){
+      float v=0.0, a=0.5; mat2 m=mat2(1.6,1.2,-1.2,1.6);
+      for(int i=0;i<5;i++){ v+=a*noise(p); p=m*p; a*=0.5; } return v;
+    }
+    vec2 curl(vec2 p){
+      float e=0.003;
+      float n1=fbm(p+vec2(0,e)), n2=fbm(p-vec2(0,e));
+      float n3=fbm(p+vec2(e,0)), n4=fbm(p-vec2(e,0));
+      float dx=(n1-n2)/(2.0*e), dy=(n3-n4)/(2.0*e);
+      return vec2(dy,-dx);
+    }
+    float emitter(vec2 uv){
+      vec2 pr=vec2(1.02,1.02);
+      vec2 d=uv-pr;
+      float r=length(d*vec2(u_aspect,1.0));
+      float base=smoothstep(0.45,0.0,r);
+      vec2 mm=u_mouse/u_res;
+      float mr=distance(uv,mm);
+      float mouseBoost=smoothstep(0.35,0.0,mr)*0.15;
+      return clamp(base+mouseBoost,0.0,1.0);
+    }
+    vec3 palette(float t){
+      vec3 c1=vec3(0.24,0.88,1.00); // cyan
+      vec3 c2=vec3(0.61,0.36,1.00); // purple
+      vec3 c3=vec3(1.00,0.71,0.28); // orange
+      vec3 c4=vec3(0.21,0.77,0.45); // teal
+      vec3 a=mix(c1,c2,smoothstep(0.0,0.33,t));
+      vec3 b=mix(c3,c4,smoothstep(0.33,1.0,t));
+      return mix(a,b,smoothstep(0.25,0.85,t));
+    }
+    void main(){
+      vec2 uv=vUv;
+      vec2 p=(uv-0.5)*vec2(u_aspect,1.0);
+      float t=u_time*0.06;
+      vec2 flow=curl(p*1.6+vec2(t*0.8,-t*0.6))*0.6;
+
+      float d1=fbm(p*1.8+flow*1.2+vec2(t*0.9,-t*0.5));
+      float d2=fbm(p*0.9-flow*0.6+vec2(-t*0.4,t*0.7));
+      float density=smoothstep(0.35,0.95,d1*0.65+d2*0.45);
+
+      float e=emitter(uv);
+      density=clamp(density+e*0.85,0.0,1.0);
+
+      float vign=smoothstep(1.25,0.15,length((uv-vec2(0.0))*vec2(u_aspect,1.0)));
+      density*=vign;
+
+      float hueBand=fbm(p*0.8+vec2(t*0.2,t*0.25));
+      vec3 col=palette(hueBand);
+
+      vec3 smoke=col*density*0.95;
+      float fog=smoothstep(0.0,1.0,fbm(p*0.6+vec2(-t*0.25,t*0.18)))*0.12;
+      smoke+=fog*col;
+
+      float alpha=clamp(density*0.95,0.0,1.0);
+      fragColor=vec4(smoke,alpha);
+    }`;
+
+    function compile(src, type){
+      const s=gl.createShader(type);
+      gl.shaderSource(s,src); gl.compileShader(s);
+      if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){ console.warn(gl.getShaderInfoLog(s)); gl.deleteShader(s); return null; }
+      return s;
+    }
+    function makeProgram(vsSrc, fsSrc){
+      const vs=compile(vsSrc,gl.VERTEX_SHADER), fs=compile(fsSrc,gl.FRAGMENT_SHADER);
+      const pr=gl.createProgram(); gl.attachShader(pr,vs); gl.attachShader(pr,fs); gl.linkProgram(pr);
+      if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){ console.warn(gl.getProgramInfoLog(pr)); return null; }
+      gl.deleteShader(vs); gl.deleteShader(fs); return pr;
+    }
+
+    const prog = makeProgram(vert, frag);
+    gl.useProgram(prog);
+    const u_res=gl.getUniformLocation(prog,'u_res');
+    const u_mouse=gl.getUniformLocation(prog,'u_mouse');
+    const u_time=gl.getUniformLocation(prog,'u_time');
+    const u_aspect=gl.getUniformLocation(prog,'u_aspect');
+
+    function draw(now){
+      const t=(now-start)*0.001;
+      gl.viewport(0,0,canvas.width,canvas.height);
+      gl.disable(gl.DEPTH_TEST); gl.disable(gl.BLEND);
+      gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT);
+
+      gl.useProgram(prog);
+      gl.uniform2f(u_res, canvas.width, canvas.height);
+      gl.uniform2f(u_mouse, mouse.x * dpr, (vh - mouse.y) * dpr);
+      gl.uniform1f(u_time, t);
+      gl.uniform1f(u_aspect, canvas.width / Math.max(1.0, canvas.height));
+
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      raf = requestAnimationFrame(draw);
+    }
+    raf = requestAnimationFrame(draw);
+    return;
+  }
+
+  // ---- 2D Fallback (if WebGL2 not supported) ----
+  const ctx = canvas.getContext('2d');
+  const N = 220;
+  const parts = new Array(N).fill(0).map(()=>({
+    x: vw - Math.random()*vw*0.25,
+    y: vh - Math.random()*vh*0.25,
+    r: 40 + Math.random()*80,
+    a: 0.15 + Math.random()*0.25,
+    hue: Math.random(),
+    vx: -0.3 - Math.random()*0.4,
+    vy: -0.2 - Math.random()*0.3,
+  }));
+  function hsl(h,s,l,a){ h=(h%1+1)%1; const c=(1-Math.abs(2*l-1))*s, x=c*(1-Math.abs((h*6)%2-1)), m=l-c/2; let r=0,g=0,b=0;
+    if(h<1/6){r=c;g=x}else if(h<2/6){r=x;g=c}else if(h<3/6){g=c;b=x}else if(h<4/6){g=x;b=c}else if(h<5/6){r=x;b=c}else{r=c;b=x}
+    return `rgba(${Math.round((r+m)*255)},${Math.round((g+m)*255)},${Math.round((b+m)*255)},${a})`; }
+  function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation='lighter';
+    for(const p of parts){
+      const dx=(vw*0.98 - p.x), dy=(vh*0.98 - p.y);
+      p.vx += dx*0.00002; p.vy += dy*0.00002;
+      p.x += p.vx; p.y += p.vy;
+      if(p.x < -200) p.x = vw+100;
+      if(p.y < -200) p.y = vh+100;
+      const col = hsl(p.hue,0.9,0.6,p.a);
+      const g = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+      g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+      p.hue += 0.0008; if(p.hue>1) p.hue-=1;
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
 })();
 </script>
 </body>
