@@ -45,54 +45,43 @@
 
     .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
     header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 0 24px;border-bottom:1px solid var(--line);backdrop-filter:saturate(140%) blur(10px);background:rgba(15,15,27,.35)}
-    .brand{display:flex;align-items:center;gap:.75rem}
-    .brand-badge{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(139,92,246,.2), rgba(239,68,68,.18));border:1px solid rgba(255,255,255,.06); color:#fca5a5}
-    .brand small{display:block;color:var(--text-dim)}
-    .btn{border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);padding:.6rem .9rem;font-weight:600;cursor:pointer;transition:var(--transition)}
-    .btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.06)}
-    .btn-primary{background:linear-gradient(135deg,var(--primary),#6d28d9);border-color:transparent}
-    .btn-danger{background:linear-gradient(135deg,#b91c1c,#ef4444);border-color:transparent}
+    .brand{display:flex;align-items:center;gap:.85rem}
+    .brand-badge{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg, rgba(139,92,246,.25), rgba(239,68,68,.2));border:1px solid rgba(255,255,255,.08); color:#fca5a5}
 
-    /* Beautiful hero heading */
+    /* Bigger, more stylish heading */
     .hero-heading{
-      font-size:3rem; font-weight:900; text-align:center; line-height:1.05; margin:.2rem 0 .35rem;
-      letter-spacing:.5px;
-      background: linear-gradient(90deg, #c445ff, #ff0044 60%, #ff7a59 100%);
+      font-size:3.8rem; font-weight:1000; line-height:1.02; margin:.1rem 0 .2rem;
+      letter-spacing:.6px; text-transform: none; text-align:left;
+      background: linear-gradient(90deg, #a78bfa, #ff0044 55%, #ff7a59 100%);
       -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      text-shadow: 0 0 22px rgba(196,69,255,.18);
+      text-shadow: 0 0 28px rgba(196,69,255,.25);
     }
-    .hero-heading span{ filter:drop-shadow(0 10px 20px rgba(196,69,255,.15)); }
-    .hero-sub{ text-align:center; color:var(--text-dim); margin:0 0 1.2rem }
+    .subline{ color:var(--text-dim); margin:0; font-size:1rem }
 
-    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:1.5rem;align-items:center;margin:12px 0 18px}
-    .hero-card{background:linear-gradient(180deg, rgba(139,92,246,.10), rgba(239,68,68,.07));border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
-    .side{background:var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:24px;box-shadow:var(--shadow)}
+    .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:22px;box-shadow:var(--shadow);padding:28px}
+    .section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
-    .analyzer{margin-top:22px;background:var(--panel);border:1px solid rgba(255,255,255,.06);border-radius:20px;box-shadow:var(--shadow);padding:28px}
-    .section-title{font-size:1.5rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
-
-    .analyze-form input[type="url"]{width:100%;padding:.7rem .9rem;border-radius:12px;border:1px solid var(--line);background:#0b0d1d;color:var(--text)}
+    .analyze-form input[type="url"]{width:100%;padding:.8rem 1rem;border-radius:14px;border:1px solid var(--line);background:#0b0d1d;color:var(--text)}
     .analyze-form input[type="url"]::placeholder{color:#70738f}
 
-    /* Score wheel */
-    .score-area{display:flex;gap:1rem;align-items:center;justify-content:center;margin:1rem 0 0}
-    .score-container { width: 180px; }
+    /* Wheel */
+    .score-area{display:flex;gap:1.2rem;align-items:center;justify-content:flex-start;margin:.6rem 0 0}
+    .score-container { width: 200px; }
     .score-wheel { width: 100%; height: auto; transform: rotate(-90deg); }
-    .score-wheel circle { fill: none; stroke-width: 12; stroke-linecap: round; }
-    .score-wheel .bg { stroke: rgba(255,255,255,.1); }
+    .score-wheel circle { fill: none; stroke-width: 14; stroke-linecap: round; }
+    .score-wheel .bg { stroke: rgba(255,255,255,.12); }
     .score-wheel .progress {
-      stroke: url(#grad);
-      stroke-dasharray: 339; /* 2πr where r=54 */
-      stroke-dashoffset: 339;
-      transition: stroke-dashoffset .6s ease;
-      filter: drop-shadow(0 0 8px rgba(196,69,255,.35));
+      stroke: url(#grad); stroke-dasharray: 339; stroke-dashoffset: 339;
+      transition: stroke-dashoffset .6s ease, stroke .3s ease, filter .3s ease;
+      filter: drop-shadow(0 0 10px rgba(196,69,255,.35));
     }
     .score-text {
-      font-size: 2.2rem; font-weight: 900; fill: #fff; transform: rotate(90deg);
-      text-shadow: 0 0 14px rgba(255,0,68,.25);
+      font-size: 2.6rem; font-weight: 1000; fill: #fff; transform: rotate(90deg);
+      text-shadow: 0 0 18px rgba(255,0,68,.25);
     }
+    .score-note { margin:.2rem 0 0; color:var(--text-dim) }
 
-    /* Progress bar under wheel */
+    /* Progress panel */
     .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px;position:relative}
     .progress-meta{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:.5rem}
     .progress-percent{font-weight:900;color:#c4b5fd}
@@ -102,44 +91,55 @@
     .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
     .save-toast{position:absolute;right:10px;top:-12px;transform:translateY(-100%);background:rgba(16,185,129,.18);color:#a7f3d0;border:1px solid rgba(134,239,172,.4);padding:.35rem .6rem;border-radius:999px;font-weight:700;box-shadow:var(--shadow)}
 
-    /* Category cards + Beautiful checklist items */
+    /* Cards + checklist */
     .analyzer-grid{margin-top:1.2rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
-    .category-card{grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.06);border-top:3px solid var(--primary);border-radius:16px;padding:14px;transition:var(--transition);box-shadow:var(--shadow)}
+    .category-card{grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.06);border-top:3px solid var(--primary);border-radius:16px;padding:16px;transition:var(--transition);box-shadow:var(--shadow)}
     .category-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover)}
     .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
-    .category-icon{width:42px;height:42px;border-radius:50%;background:rgba(139,92,246,.18);color:#c4b5fd;display:inline-flex;align-items:center;justify-content:center}
-    .category-title{margin:0;font-size:1.08rem} .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.95rem}
-    .chip{padding:.2rem .55rem;border-radius:999px;font-weight:800;font-size:.85rem;background:rgba(139,92,246,.12);color:#c7d2fe;border:1px solid rgba(139,92,246,.25)}
+    .category-icon{width:44px;height:44px;border-radius:50%;background:rgba(139,92,246,.18);color:#c4b5fd;display:inline-flex;align-items:center;justify-content:center}
+    .category-title{margin:0;font-size:1.1rem} .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
+    .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;font-size:.85rem;background:rgba(139,92,246,.12);color:#c7d2fe;border:1px solid rgba(139,92,246,.25)}
 
     .checklist{list-style:none;margin:10px 0 0;padding:0}
     .checklist-item{
-      display:grid;grid-template-columns:1fr auto auto;gap:.5rem;align-items:center;
-      padding:.6rem .6rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);
+      display:grid;grid-template-columns:1fr auto auto;gap:.6rem;align-items:center;
+      padding:.65rem .7rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);
       background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
       transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
     }
-    .checklist-item + .checklist-item{margin-top:.25rem}
+    .checklist-item + .checklist-item{margin-top:.28rem}
     .checklist-item:hover{transform:translateY(-2px);background:rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.25)}
     .checklist-item label{display:flex;align-items:flex-start;gap:.65rem;cursor:pointer}
     .checklist-item input[type="checkbox"]{width:18px;height:18px;margin:.1rem .55rem 0 0;accent-color:var(--primary)}
-    .score-badge{font-weight:800;font-size:.9rem;padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;min-width:44px;text-align:center}
-    .score-good{background:rgba(16,185,129,.2); border-color:rgba(16,185,129,.4)}
-    .score-mid{ background:rgba(245,158,11,.2); border-color:rgba(245,158,11,.4)}
-    .score-bad{ background:rgba(239,68,68,.22); border-color:rgba(239,68,68,.45)}
+    .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#fff;min-width:50px;text-align:center}
+    .score-good{background:rgba(16,185,129,.22); border-color:rgba(16,185,129,.45)}
+    .score-mid{ background:rgba(245,158,11,.22); border-color:rgba(245,158,11,.45)}
+    .score-bad{ background:rgba(239,68,68,.24); border-color:rgba(239,68,68,.5)}
 
-    .info{background:transparent;border:none;color:var(--text-dim);cursor:help;padding:.2rem .35rem;border-radius:8px}
-    .info:hover{color:#fca5a5;background:rgba(239,68,68,.12)}
+    .improve-btn{border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#fff;padding:.35rem .6rem;font-weight:800;cursor:pointer}
+    .improve-btn:hover{background:rgba(255,255,255,.08)}
 
-    /* Tips (How to reach 100) */
-    .tip summary{cursor:pointer;color:#c7d2fe}
-    .tip[open] summary{color:#fca5a5}
-    .tip ul{margin:.35rem 0 0 .5rem;padding-left:1rem;color:var(--text-muted)}
-    .tip ul li{margin:.2rem 0}
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;z-index:50}
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:60}
+    .modal-card{width:min(760px,92vw);background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:18px;box-shadow:var(--shadow-hover);padding:20px}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+    .modal-title{margin:0;font-size:1.3rem}
+    .modal-close{background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:10px;color:#fff;padding:.35rem .6rem;cursor:pointer}
+    .modal-body p{color:var(--text-dim);margin:.35rem 0}
+    .modal-body ul{margin:.5rem 0 0 1rem;color:var(--text-muted)}
+    .modal-body li{margin:.25rem 0}
 
     footer{margin:28px 0 10px;color:var(--text-dim);text-align:center}
-    @media (max-width:992px){ .hero{grid-template-columns:1fr} .category-card{grid-column:span 12} .score-container{width:160px} .hero-heading{font-size:2.3rem} }
+
+    @media (max-width:992px){
+      .brand-badge{width:48px;height:48px}
+      .hero-heading{font-size:2.7rem}
+      .score-container{width:180px}
+      .category-card{grid-column:span 12}
+    }
     @media (prefers-reduced-motion: reduce){ .blob{animation:none} }
-    @media print{header.site,.hero,footer,.bg-smoke,.veil{display:none!important} .analyzer{background:#fff;border:none;box-shadow:none;margin:0;padding:0} .category-card{border:1px solid #ddd}}
+    @media print{header.site,.bg-smoke,.veil,.modal,.modal-backdrop{display:none!important}}
   </style>
 </head>
 <body>
@@ -147,8 +147,16 @@
   <svg width="0" height="0" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#c445ff"/>
+        <stop offset="0%" stop-color="#a78bfa"/>
         <stop offset="100%" stop-color="#ff0044"/>
+      </linearGradient>
+      <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#22c55e"/>
+        <stop offset="100%" stop-color="#16a34a"/>
+      </linearGradient>
+      <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#f59e0b"/>
+        <stop offset="100%" stop-color="#fb923c"/>
       </linearGradient>
     </defs>
   </svg>
@@ -162,49 +170,39 @@
   <div class="wrap">
     <header class="site">
       <div class="brand">
-        <div class="brand-badge"><i class="fa-solid fa-share-nodes"></i></div>
+        <div class="brand-badge"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
         <div>
-          <div class="hero-heading"><span>Semantic SEO</span> Master Analyzer</div>
-          <small>Dark • Purple + Red Smoke • Laravel</small>
+          <div class="hero-heading">Semantic SEO Master Analyzer</div>
+          <p class="subline">Dark • Purple + Red Smoke • Laravel</p>
         </div>
       </div>
       <button class="btn btn-primary" id="printTop"><i class="fa-solid fa-print"></i>&nbsp;Print</button>
     </header>
 
-    <section class="hero">
-      <div class="hero-card">
-        <p class="hero-sub">Analyze any URL, auto-check 25 SEO factors, and see your score rise in real time.</p>
-        <div class="score-area">
-          <div class="score-container">
-            <svg class="score-wheel" viewBox="0 0 120 120" role="img" aria-label="Overall score">
-              <circle class="bg" cx="60" cy="60" r="54"/>
-              <circle class="progress" cx="60" cy="60" r="54"/>
-              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0</text>
-            </svg>
-          </div>
-          <div>
-            <p style="margin:.25rem 0 .5rem;color:#c7d2fe;font-weight:800">Overall Score</p>
-            <p style="margin:0;color:var(--text-dim);max-width:26ch">This wheel fills as your page passes checks and after URL analysis.</p>
-          </div>
-        </div>
-      </div>
-      <aside class="side">
-        <h3 style="margin-top:0">What’s inside</h3>
-        <ul style="padding-left:1.2rem;margin:0;color:var(--text-dim)">
-          <li>Per‑item scores + “How to reach 100” tips</li>
-          <li>Animated circular score wheel</li>
-          <li>Auto‑check (≥ 70) & Progress saving</li>
-          <li>Responsive dark UI (purple + red smoke)</li>
-        </ul>
-      </aside>
-    </section>
+    <!-- No "What's inside" section by request -->
 
     <section class="analyzer" id="analyzer">
       <h2 class="section-title">Semantic SEO Master Analyzer</h2>
-      <p class="section-subtitle">Paste a URL, get scores and concrete steps to reach 100 for every item.</p>
+      <p class="section-subtitle">Paste a URL, get auto-scores + full suggestions. Click “Improve” to open detailed guidance.</p>
+
+      <!-- Score wheel row -->
+      <div class="score-area">
+        <div class="score-container">
+          <svg class="score-wheel" viewBox="0 0 120 120" role="img" aria-label="Overall score">
+            <circle class="bg" cx="60" cy="60" r="54"/>
+            <circle class="progress" cx="60" cy="60" r="54"/>
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0</text>
+          </svg>
+        </div>
+        <div>
+          <p class="score-note">This wheel fills with your overall score. Green ≥ 80, Orange 60–79, Red &lt; 60.</p>
+          <div class="chip">Overall: <b id="overallScoreInline">0</b>/100</div>
+          <div class="chip" id="aiBadge">Writer: <b>—</b></div>
+        </div>
+      </div>
 
       <!-- URL Analyzer -->
-      <div class="analyze-box" style="margin-top:18px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px">
+      <div class="analyze-box" style="margin-top:16px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px">
         <form id="analyzeForm" class="analyze-form" onsubmit="return false;">
           <label for="analyzeUrl" style="display:block;font-weight:700;margin-bottom:.35rem">Analyze a URL</label>
           <div style="display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:center">
@@ -239,7 +237,7 @@
       <div class="progress-wrap" aria-label="Checklist progress">
         <div class="progress-meta">
           <span class="progress-percent" id="progressPercent">0%</span>
-          <span class="overall-chip">Overall Score: <span id="overallScoreInline">0</span></span>
+          <span class="overall-chip">Overall Score: <span id="overallScoreChip">0</span></span>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
         <div class="progress-caption" id="progressCaption">0 of 25 items completed</div>
@@ -250,7 +248,7 @@
         </div>
       </div>
 
-      <!-- Categories / 25 items with improved checklist styling -->
+      <!-- Categories / 25 items (Improve button opens modal) -->
       <div class="analyzer-grid">
         <!-- Content & Keywords (5) -->
         <article class="category-card" data-category="contentKeywords">
@@ -278,7 +276,7 @@
                 </span>
               </label>
               <span class="score-badge" id="sc-{{ $i }}">—</span>
-              <details class="tip" id="tip-{{ $i }}" hidden><summary>How to reach 100</summary><ul></ul></details>
+              <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
             </li>
             @endfor
           </ul>
@@ -309,7 +307,7 @@
                 </span>
               </label>
               <span class="score-badge" id="sc-{{ $i }}">—</span>
-              <details class="tip" id="tip-{{ $i }}" hidden><summary>How to reach 100</summary><ul></ul></details>
+              <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
             </li>
             @endfor
           </ul>
@@ -340,7 +338,7 @@
                 </span>
               </label>
               <span class="score-badge" id="sc-{{ $i }}">—</span>
-              <details class="tip" id="tip-{{ $i }}" hidden><summary>How to reach 100</summary><ul></ul></details>
+              <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
             </li>
             @endfor
           </ul>
@@ -371,7 +369,7 @@
                 </span>
               </label>
               <span class="score-badge" id="sc-{{ $i }}">—</span>
-              <details class="tip" id="tip-{{ $i }}" hidden><summary>How to reach 100</summary><ul></ul></details>
+              <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
             </li>
             @endfor
           </ul>
@@ -402,7 +400,7 @@
                 </span>
               </label>
               <span class="score-badge" id="sc-{{ $i }}">—</span>
-              <details class="tip" id="tip-{{ $i }}" hidden><summary>How to reach 100</summary><ul></ul></details>
+              <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
             </li>
             @endfor
           </ul>
@@ -433,7 +431,7 @@
                 </span>
               </label>
               <span class="score-badge" id="sc-{{ $i }}">—</span>
-              <details class="tip" id="tip-{{ $i }}" hidden><summary>How to reach 100</summary><ul></ul></details>
+              <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
             </li>
             @endfor
           </ul>
@@ -444,19 +442,42 @@
     <footer>© {{ date('Y') }} Semantic SEO Master • Dark Purple + Red Smoke</footer>
   </div>
 
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Improve</h3>
+        <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p id="modalIntro">Follow these steps to raise this item’s score. Re‑Analyze after applying.</p>
+        <ul id="modalList"></ul>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Print
     document.getElementById('printTop').addEventListener('click', () => window.print());
 
     /* ===== Score wheel control ===== */
-    const wheelCircumference = 339; // 2πr for r=54
+    const WHEEL = { circumference: 339, circle: null, text: null };
     function setScoreWheel(value){ // 0..100
-      const circle = document.querySelector('.score-wheel .progress');
-      const text   = document.getElementById('overallScore');
-      const offset = wheelCircumference - (Math.max(0, Math.min(100, value))/100) * wheelCircumference;
-      circle.style.strokeDashoffset = offset;
-      text.textContent = Math.round(value);
-      document.getElementById('overallScoreInline').textContent = Math.round(value);
+      if (!WHEEL.circle) {
+        WHEEL.circle = document.querySelector('.score-wheel .progress');
+        WHEEL.text   = document.getElementById('overallScore');
+      }
+      const v = Math.max(0, Math.min(100, value));
+      const offset = WHEEL.circumference - (v/100) * WHEEL.circumference;
+      WHEEL.circle.style.strokeDashoffset = offset;
+      // Color by thresholds
+      if (v >= 80) WHEEL.circle.setAttribute('stroke','url(#gradGood)');
+      else if (v >= 60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
+      else WHEEL.circle.setAttribute('stroke','url(#grad)');
+      WHEEL.text.textContent = Math.round(v);
+      document.getElementById('overallScoreInline').textContent = Math.round(v);
+      document.getElementById('overallScoreChip').textContent = Math.round(v);
     }
     setScoreWheel(0);
 
@@ -483,11 +504,9 @@
       };
 
       function blendedScore() {
-        // Wheel rises with checks too: blend analyzed overall with completion %
         const checked = checkboxes().filter(cb => cb.checked).length;
         const pct = (checked / totalItems) * 100;
-        // Blend 65% analyzer score + 35% completion progress (tweakable)
-        return (lastAnalyzedScore * 0.65) + (pct * 0.35);
+        return (lastAnalyzedScore * 0.7) + (pct * 0.3);
       }
 
       const updateProgress = () => {
@@ -520,7 +539,7 @@
         if (!confirm('Reset the checklist? This will clear all progress.')) return;
         localStorage.removeItem(STORAGE_KEY);
         checkboxes().forEach(cb => cb.checked = false);
-        for (let i=1;i<=25;i++){ setScoreBadge(i, null); clearTips(i); }
+        for (let i=1;i<=25;i++){ setScoreBadge(i, null); }
         lastAnalyzedScore = 0;
         setScoreWheel(0);
         updateProgress();
@@ -544,34 +563,68 @@
         else if (score >= 60) el.classList.add('score-mid');
         else el.classList.add('score-bad');
       };
-      window.clearTips = (num) => {
-        const box = document.getElementById('tip-'+num); if (!box) return;
-        const ul = box.querySelector('ul'); if (ul) ul.innerHTML = '';
-        box.hidden = true;
-      };
 
       // Expose setter for analyzer to update the base score
       window.__setAnalyzedScore = function (v) {
         lastAnalyzedScore = Math.max(0, Math.min(100, parseFloat(v) || 0));
         setScoreWheel(blendedScore());
-        document.getElementById('overallScoreInline').textContent = Math.round(lastAnalyzedScore);
       }
 
       loadState();
     })();
 
-    /* ===== URL Analyzer: scores + tips + auto-check + wheel update ===== */
+    /* ===== Modal logic (Improve buttons) ===== */
+    (function(){
+      const backdrop = document.getElementById('modalBackdrop');
+      const modal = document.getElementById('tipModal');
+      const title = document.getElementById('modalTitle');
+      const list = document.getElementById('modalList');
+      const closeBtn = document.getElementById('modalClose');
+
+      function openModal(id, tips){
+        title.textContent = 'Improve: ' + labelFor(id);
+        list.innerHTML = '';
+        (tips || ['Looks good—minor polishing only.']).forEach(t => {
+          const li = document.createElement('li'); li.textContent = t; list.appendChild(li);
+        });
+        backdrop.style.display = 'block';
+        modal.style.display = 'flex';
+      }
+      function closeModal(){
+        backdrop.style.display = 'none';
+        modal.style.display = 'none';
+      }
+      closeBtn.addEventListener('click', closeModal);
+      backdrop.addEventListener('click', closeModal);
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+
+      function labelFor(id){
+        const el = document.querySelector('label[for="'+id+'"]');
+        if (el) return el.textContent.trim();
+        // fallback: try to read sibling label text
+        const input = document.getElementById(id);
+        if (input) {
+          const span = input.parentElement?.querySelector('span');
+          if (span) return span.textContent.trim();
+        }
+        return id;
+      }
+
+      document.addEventListener('click', (e)=>{
+        const btn = e.target.closest('.improve-btn');
+        if (!btn) return;
+        const id = btn.getAttribute('data-id');
+        // collect tips already rendered under each item? We fill tips from last Analyze call cache.
+        // We'll store suggestions in window.__lastSuggestions
+        const tips = (window.__lastSuggestions && window.__lastSuggestions[id]) ? window.__lastSuggestions[id] : ['Analyze the URL first to generate suggestions.'];
+        openModal(id, tips);
+      });
+    })();
+
+    /* ===== URL Analyzer: scores + tips + auto-check + wheel update + AI badge ===== */
     (function(){
       const $ = s => document.querySelector(s);
       const setChecked = (id, on) => { const el = document.getElementById(id); if (el) el.checked = !!on; };
-      const fillTips = (num, tips) => {
-        const box = document.getElementById('tip-'+num);
-        if (!box) return;
-        const ul = box.querySelector('ul'); ul.innerHTML = '';
-        (tips||[]).forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
-        const scText = document.getElementById('sc-'+num)?.textContent || '—';
-        if ((tips||[]).length && scText !== '100') box.hidden = false; else box.hidden = true;
-      };
 
       async function analyze() {
         const url = $('#analyzeUrl').value.trim();
@@ -606,16 +659,28 @@
           $('#rAutoCount').textContent = (data.auto_check_ids||[]).length;
           report.style.display = 'block';
 
-          // paint scores + tips
+          // paint scores + capture tips
+          window.__lastSuggestions = data.suggestions || {};
           for (let i=1;i<=25;i++){
             const key = 'ck-'+i;
             setScoreBadge(i, data.scores?.[key]);
-            fillTips(i, data.suggestions?.[key]);
           }
 
           // base overall score from analyzer
           const overall = typeof data.overall_score === 'number' ? data.overall_score : 0;
           window.__setAnalyzedScore(overall);
+
+          // AI/Human badge
+          const ai = data.ai_detection || {};
+          const badge = document.getElementById('aiBadge');
+          const labelMap = { likely_human: 'Likely Human', mixed: 'Mixed', likely_ai: 'Likely AI' };
+          const label = labelMap[ai.label] || 'Unknown';
+          const conf = (typeof ai.likelihood==='number') ? `(${ai.likelihood}%)` : '';
+          badge.innerHTML = `Writer: <b>${label} ${conf}</b>`;
+          if (ai.label === 'likely_ai') badge.style.background='rgba(239,68,68,.18)';
+          else if (ai.label === 'mixed') badge.style.background='rgba(245,158,11,.18)';
+          else badge.style.background='rgba(16,185,129,.18)';
+          badge.title = (ai.reasons||[]).join(' • ');
 
           // auto-check by threshold
           if ($('#autoApply').checked) {
@@ -624,8 +689,8 @@
             document.dispatchEvent(new Event('change')); // progress + save + wheel blend
           }
 
-          status.textContent = 'Done — apply the tips and Analyze again to reach 100.';
-          setTimeout(()=> status.textContent = '', 3000);
+          status.textContent = 'Done — click “Improve” on any item for detailed steps, then re‑Analyze.';
+          setTimeout(()=> status.textContent = '', 3200);
         } catch (e) {
           status.textContent = 'Error: ' + e.message;
         } finally {
