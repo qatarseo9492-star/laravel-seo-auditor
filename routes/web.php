@@ -23,7 +23,7 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $host  = parse_url($url, PHP_URL_HOST) ?: '';
         $scheme= preg_match('#^https://#',$url)?'https://':'http://';
 
-        // PHP 8.0 polyfill for array_is_list (Laravel on 8.0 sometimes)
+        // PHP 8.0 polyfill for array_is_list
         if (!function_exists('array_is_list')) {
             function array_is_list(array $array): bool {
                 $i = 0;
@@ -144,7 +144,7 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $clamp = fn($v)=>max(0,min(100,(int)round($v)));
         $inRangeScore=function($n,$min,$max,$softMin,$softMax)use($clamp){ if($n<=0) return 0; if($n>=$min && $n<=$max) return 100; if($n>=$softMin && $n<=$softMax) return 70; $d=min(abs($n-$min),abs($n-$max)); return $clamp(max(0,70-$d)); };
         $jaccard=function($a,$b){ $wa=array_unique(preg_split('/\W+/u', mb_strtolower($a), -1, PREG_SPLIT_NO_EMPTY)); $wb=array_unique(preg_split('/\W+/u', mb_strtolower($b), -1, PREG_SPLIT_NO_EMPTY)); if(!$wa||!$wb) return 0; $i=count(array_intersect($wa,$wb)); $u=count(array_unique(array_merge($wa,$wb))); return $u? $i/$u : 0; };
-        $sc = fn($v) => is_countable($v) ? count($v) : 0; // safe count
+        $sc = fn($v) => is_countable($v) ? count($v) : 0;
 
         // ==== Scoring ====
         $S=[];
@@ -189,15 +189,15 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         if($footer){ foreach($footer->getElementsByTagName('a') as $a){ $h=strtolower($a->getAttribute('href')); if(preg_match('#(facebook|twitter|x\.com|instagram|linkedin|youtube|tiktok)\.com#',$h)) $footerSocial++; } }
         $S['ck-25']= $clamp( min(100, ($orgSameAs?100:0) + (!$orgSameAs && $hasOrganization ? 60:0) + min(40,$footerSocial*10)) );
 
-        // Suggestions — FIX: include $h2s and $h3s in use(), use sc() for safe counts
+        // Suggestions (safe counts; include $h2s/$h3s)
         $suggest = function($id) use (
             $S,$titleText,$metaDesc,$h1Text,$qHeads,$hasFAQ,$imgs,$imgsWithAlt,$altRatio,
             $internalLinks,$keywordyAnchors,$slugOk,$slug,$hasBreadcrumb,$hasBreadcrumbUI,
             $viewport,$responsiveImgs,$imgsLazy,$deferred,$asyncd,$blockingScripts,$hasPreload,
             $ctaFound,$authorMeta,$timeTags,$externalTrusted,$externalYears,$validTypes,$orgSameAs,
-            $hasOrganization,$wikiLinks,$properH2s,$wc,$lists,$tables,$pres,$eSim,$sim,$h2s,$h3s // <— added here
+            $hasOrganization,$wikiLinks,$properH2s,$wc,$lists,$tables,$pres,$eSim,$sim,$h2s,$h3s
         ){
-            $tips=[]; $SC = fn($v)=> (is_countable($v)?count($v):0); // local safe count
+            $tips=[]; $SC = fn($v)=> (is_countable($v)?count($v):0);
 
             switch($id){
                 case 'ck-1':
