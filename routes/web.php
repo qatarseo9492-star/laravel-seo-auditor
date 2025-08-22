@@ -23,6 +23,15 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $host  = parse_url($url, PHP_URL_HOST) ?: '';
         $scheme= preg_match('#^https://#',$url)?'https://':'http://';
 
+        // PHP 8.0 polyfill for array_is_list (Laravel on 8.0 sometimes)
+        if (!function_exists('array_is_list')) {
+            function array_is_list(array $array): bool {
+                $i = 0;
+                foreach ($array as $k => $_) { if ($k !== $i++) return false; }
+                return true;
+            }
+        }
+
         libxml_use_internal_errors(true);
         $dom = new DOMDocument();
         $dom->loadHTML($html, LIBXML_NOERROR | LIBXML_NOWARNING);
@@ -125,7 +134,6 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $hasPreload = count($q('//link[@rel="preload" or @rel="preconnect" or @rel="dns-prefetch"]'))>0;
         $responsiveImgs = count($q('//img[@srcset or @sizes]'))>0;
 
-        // light text metrics
         preg_match_all('/\b[\p{L}\p{N}’\'\-]+\b/u', $bodyText, $m);
         $wc = max(1, count($m[0] ?? []));
         $sentences = max(1, count(preg_split('/[.!?]+[\s]+/u', $bodyText, -1, PREG_SPLIT_NO_EMPTY)));
@@ -136,6 +144,7 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $clamp = fn($v)=>max(0,min(100,(int)round($v)));
         $inRangeScore=function($n,$min,$max,$softMin,$softMax)use($clamp){ if($n<=0) return 0; if($n>=$min && $n<=$max) return 100; if($n>=$softMin && $n<=$softMax) return 70; $d=min(abs($n-$min),abs($n-$max)); return $clamp(max(0,70-$d)); };
         $jaccard=function($a,$b){ $wa=array_unique(preg_split('/\W+/u', mb_strtolower($a), -1, PREG_SPLIT_NO_EMPTY)); $wb=array_unique(preg_split('/\W+/u', mb_strtolower($b), -1, PREG_SPLIT_NO_EMPTY)); if(!$wa||!$wb) return 0; $i=count(array_intersect($wa,$wb)); $u=count(array_unique(array_merge($wa,$wb))); return $u? $i/$u : 0; };
+        $sc = fn($v) => is_countable($v) ? count($v) : 0; // safe count
 
         // ==== Scoring ====
         $S=[];
@@ -155,21 +164,18 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         $S['ck-7'] = $clamp( $inRangeScore(mb_strlen($metaDesc),140,160,110,180) );
         $S['ck-8'] = $canonicalHref ? 100 : 0;
         $S['ck-9'] = (!str_contains($robots,'noindex')) ? 100 : 0;
-        $S['ck-10']= $clamp( min(100, (count($authorMeta)?40:0) + (count($timeTags)?30:0) + min(30, array_reduce($anchors, function($acc,$a){
-            $t=mb_strtolower(trim($a->textContent??'')); return $acc + (in_array($t,['about','about us','contact','editorial policy','privacy','team','reviewed'])?10:0);
-        },0))) );
-        $tables=count($q('//table')); $pres=count($q('//pre | //code')); $lists=count($q('//ol/li'))+count($q('//ul/li'));
+        $tables=$sc($q('//table')); $pres=$sc($q('//pre | //code')); $lists=$sc($q('//ol/li'))+$sc($q('//ul/li'));
         $uvWords=preg_match('/\b(example|template|case study|dataset|calculator|tool)\b/i',$bodyText)?1:0;
         $S['ck-11']= $clamp( min(100, min(40,(int)floor($wc/600)*10) + min(20,$tables*10) + min(15,$pres*7) + min(15,(int)floor($lists/8)*5) + ($uvWords?20:0)) );
         $S['ck-12']= $clamp( min(100, min(60,$externalTrusted*20) + min(40,$externalYears*10)) );
-        $altRatio = (count($imgs)? (count($imgsWithAlt)/max(1,count($imgs))) : 0);
-        $S['ck-13']= $clamp( min(100, min(60,count($imgs)*10) + (int)round($altRatio*40)) );
-        $S['ck-14']= $clamp( min(100, min(60,count($h2s)*15) + min(40,count($h3s)*10)) );
+        $altRatio = ($sc($imgs)? ($sc($imgsWithAlt)/max(1,$sc($imgs))) : 0);
+        $S['ck-13']= $clamp( min(100, min(60,$sc($imgs)*10) + (int)round($altRatio*40)) );
+        $S['ck-14']= $clamp( min(100, min(60,$sc($h2s)*15) + min(40,$sc($h3s)*10)) );
         $S['ck-15']= $clamp( min(100, min(70,$internalLinks*10) + min(30,$keywordyAnchors*3)) );
         $S['ck-16']= $clamp( ($slugOk?100:(strlen($slug)?50:30)) );
         $S['ck-17']= $clamp( ($hasBreadcrumb || $hasBreadcrumbUI)?100:0 );
         $S['ck-18']= $clamp( min(100, ($viewport && str_contains($viewport,'width=device-width')?70:0) + ($responsiveImgs?30:0)) );
-        $S['ck-19']= $clamp( min(100, min(40,count($imgsLazy)*8) + min(30,$deferred*5 + $asyncd*5) + ($hasPreload?20:0) - min(30,max(0,$blockingScripts-2)*10)) );
+        $S['ck-19']= $clamp( min(100, min(40,$sc($imgsLazy)*8) + min(30,$deferred*5 + $asyncd*5) + ($hasPreload?20:0) - min(30,max(0,$blockingScripts-2)*10)) );
         $S['ck-20']= $clamp( min(100, 50 + ($responsiveImgs?15:0) + ($viewport?15:0) - min(30,$blockingScripts*7)) );
         $S['ck-21']= $clamp( $ctaFound?100:20 );
         $eSim = $jaccard($h1Text,$firstP);
@@ -183,81 +189,88 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
         if($footer){ foreach($footer->getElementsByTagName('a') as $a){ $h=strtolower($a->getAttribute('href')); if(preg_match('#(facebook|twitter|x\.com|instagram|linkedin|youtube|tiktok)\.com#',$h)) $footerSocial++; } }
         $S['ck-25']= $clamp( min(100, ($orgSameAs?100:0) + (!$orgSameAs && $hasOrganization ? 60:0) + min(40,$footerSocial*10)) );
 
-        // ==== Suggestions ====
-        $suggest = function($id) use ($S,$titleText,$metaDesc,$h1Text,$qHeads,$hasFAQ,$imgs,$imgsWithAlt,$altRatio,$internalLinks,$keywordyAnchors,$slugOk,$slug,$hasBreadcrumb,$hasBreadcrumbUI,$viewport,$responsiveImgs,$imgsLazy,$deferred,$asyncd,$blockingScripts,$hasPreload,$ctaFound,$authorMeta,$timeTags,$externalTrusted,$externalYears,$validTypes,$orgSameAs,$hasOrganization,$wikiLinks,$properH2s,$wc,$lists,$tables,$pres,$eSim,$sim,$firstP){
-            $tips=[];
+        // Suggestions — FIX: include $h2s and $h3s in use(), use sc() for safe counts
+        $suggest = function($id) use (
+            $S,$titleText,$metaDesc,$h1Text,$qHeads,$hasFAQ,$imgs,$imgsWithAlt,$altRatio,
+            $internalLinks,$keywordyAnchors,$slugOk,$slug,$hasBreadcrumb,$hasBreadcrumbUI,
+            $viewport,$responsiveImgs,$imgsLazy,$deferred,$asyncd,$blockingScripts,$hasPreload,
+            $ctaFound,$authorMeta,$timeTags,$externalTrusted,$externalYears,$validTypes,$orgSameAs,
+            $hasOrganization,$wikiLinks,$properH2s,$wc,$lists,$tables,$pres,$eSim,$sim,$h2s,$h3s // <— added here
+        ){
+            $tips=[]; $SC = fn($v)=> (is_countable($v)?count($v):0); // local safe count
+
             switch($id){
                 case 'ck-1':
-                    if ($sim<0.4) $tips[]='Make H1 closely match page title (same main keyword).';
-                    if (mb_strlen($h1Text)<20) $tips[]='Expand H1 to ~20–80 chars, descriptive.';
-                    if (mb_strlen($firstP)<40) $tips[]='Add a clear first paragraph that states user intent.';
+                    if ($sim<0.4) $tips[]='Align H1 with Title (same primary keyword).';
+                    if (mb_strlen($h1Text)<20) $tips[]='Make H1 20–80 chars and descriptive.';
+                    $tips[]='Open with a clear first paragraph stating the intent.';
                     break;
                 case 'ck-2':
-                    if ($qHeads<2) $tips[]='Add 2–4 question‑style H2/H3 (PAA).';
-                    $tips[]='Cover synonyms/related terms and add a short FAQ block.';
+                    if ($qHeads<2) $tips[]='Add 2–4 H2/H3 in question form (PAA).';
+                    $tips[]='Cover synonyms/related terms; add a short FAQ block.';
                     break;
                 case 'ck-3':
-                    if ($sim<0.6) $tips[]='Align H1 wording with the title; keep primary keyword.';
-                    $tips[]='Keep H1 length ≈20–80 chars.';
+                    if ($sim<0.6) $tips[]='Keep H1 wording closer to Title.';
+                    $tips[]='Keep H1 length ~20–80 chars.';
                     break;
                 case 'ck-4':
-                    if (!$hasFAQ) $tips[]='Add an FAQ section with FAQPage JSON‑LD.';
-                    $tips[]='Answer 3–5 sub‑questions directly under FAQ.';
+                    if (!$hasFAQ) $tips[]='Add an FAQ section with FAQPage schema.';
+                    $tips[]='Answer 3–5 common sub‑questions.';
                     break;
                 case 'ck-5':
-                    $tips[]='Shorten long sentences; aim average 12–22 words.';
-                    $tips[]='Use simple words and shorter paragraphs.';
+                    $tips[]='Shorten sentences to average ~12–22 words.';
+                    $tips[]='Use plain language and short paragraphs.';
                     break;
                 case 'ck-6':
-                    $tips[]='Keep title around 50–60 characters; front‑load the keyword.';
+                    $tips[]='Keep Title ~50–60 chars; front‑load main keyword.';
                     break;
                 case 'ck-7':
                     if (mb_strlen($metaDesc)<140) $tips[]='Write a 140–160 char meta description with a CTA.';
-                    else $tips[]='Trim meta description to ~160 chars and include a CTA.';
+                    else $tips[]='Trim meta description to ~160 and add a CTA.';
                     break;
                 case 'ck-8':
                     $tips[]='Add <link rel="canonical" href="preferred-URL"> in <head>.';
                     break;
                 case 'ck-9':
-                    $tips[]='Remove unintended noindex and list the page in the XML sitemap.';
+                    $tips[]='Remove noindex and include the URL in your XML sitemap.';
                     break;
                 case 'ck-10':
-                    if (!count($authorMeta)) $tips[]='Add visible author name and meta author.';
-                    if (!count($timeTags))  $tips[]='Show published/updated date (time tag or meta).';
-                    $tips[]='Link to About/Contact/Editorial Policy pages.';
+                    if (!count($authorMeta)) $tips[]='Add author name (visible + meta).';
+                    if (!count($timeTags))  $tips[]='Show published/updated date.';
+                    $tips[]='Link to About/Contact/Editorial policy.';
                     break;
                 case 'ck-11':
-                    if ($wc<1200) $tips[]='Add unique value: examples, templates, data, or a small tool.';
-                    if ($tables<1 && $pres<1 && $lists<8) $tips[]='Use tables/lists/code blocks where helpful.';
+                    if ($wc<1200) $tips[]='Add unique value (examples, templates, data, tool).';
+                    if ($tables<1 && $pres<1 && $lists<8) $tips[]='Use tables/lists/code where helpful.';
                     break;
                 case 'ck-12':
-                    if ($externalTrusted<2) $tips[]='Cite 2–3 trustworthy sources (.gov, .edu, WHO, Wikipedia).';
+                    if ($externalTrusted<2) $tips[]='Cite 2–3 trustworthy sources (.gov/.edu/WHO/Wikipedia).';
                     if ($externalYears<1)  $tips[]='Update stats to 2024/2025 and cite them.';
                     break;
                 case 'ck-13':
-                    if (count($imgs)<2) $tips[]='Add 2–4 relevant images/diagrams with captions.';
+                    if ($SC($imgs)<2) $tips[]='Add 2–4 relevant images/diagrams with captions.';
                     if ($altRatio<0.8)    $tips[]='Provide descriptive alt text for images.';
                     break;
                 case 'ck-14':
-                    if (count($h2s)<3) $tips[]='Add at least 3 H2 sections for key subtopics.';
-                    if (count($h3s)<2)   $tips[]='Nest H3s for deeper sub‑sections.';
+                    if ($SC($h2s)<3) $tips[]='Add ≥3 H2 sections for key subtopics.';
+                    if ($SC($h3s)<2) $tips[]='Nest H3s for deeper subsections.';
                     break;
                 case 'ck-15':
-                    if ($internalLinks<3) $tips[]='Insert 3–6 internal links to hubs/siblings with descriptive anchors.';
-                    if ($keywordyAnchors<3) $tips[]='Avoid “click here”; use keyword‑rich anchors.';
+                    if ($internalLinks<3) $tips[]='Insert 3–6 internal links to hubs/related pages.';
+                    if ($keywordyAnchors<3) $tips[]='Use descriptive anchor text (avoid “click here”).';
                     break;
                 case 'ck-16':
-                    if (!$slugOk) $tips[]='Use a short, lowercase, hyphenated slug (no spaces/underscores).';
+                    if (!$slugOk) $tips[]='Use short, lowercase, hyphenated slug; avoid spaces/underscores.';
                     break;
                 case 'ck-17':
-                    if (!$hasBreadcrumb && !$hasBreadcrumbUI) $tips[]='Add visible breadcrumbs and BreadcrumbList schema.';
+                    if (!$hasBreadcrumb && !$hasBreadcrumbUI) $tips[]='Add visible breadcrumbs + BreadcrumbList schema.';
                     break;
                 case 'ck-18':
                     if (!$viewport) $tips[]='Add responsive meta viewport in <head>.';
                     if (!$responsiveImgs) $tips[]='Serve responsive images (srcset/sizes).';
                     break;
                 case 'ck-19':
-                    if (count($imgsLazy)<2) $tips[]='Lazy‑load below‑the‑fold images (loading="lazy").';
+                    if ($SC($imgsLazy)<2) $tips[]='Lazy‑load below‑the‑fold images (loading="lazy").';
                     if ($blockingScripts>2) $tips[]='Defer/async non‑critical JS; reduce blocking scripts.';
                     if (!$hasPreload) $tips[]='Preload critical fonts/assets; preconnect to CDNs.';
                     break;
@@ -269,15 +282,15 @@ Route::post('/analyze-json', function (\Illuminate\Http\Request $req) {
                     if (!$ctaFound) $tips[]='Add clear CTAs (e.g., “Get started”, “Contact”, “Download”).';
                     break;
                 case 'ck-22':
-                    if ($eSim<0.4) $tips[]='Define the primary entity clearly in the first paragraph.';
-                    if (!in_array('Article', $validTypes)) $tips[]='Add Article schema with headline/date.';
+                    if ($eSim<0.4) $tips[]='Define the primary entity in the first paragraph.';
+                    if (!in_array('Article',$validTypes ?? [])) $tips[]='Add Article schema with headline and date.';
                     break;
                 case 'ck-23':
-                    if ($wikiLinks<1) $tips[]='Mention related entities and link to knowledge pages (Wikipedia).';
-                    if ($properH2s<2) $tips[]='Use H2s that name related entities/concepts explicitly.';
+                    if ($wikiLinks<1) $tips[]='Mention related entities and link to their knowledge pages.';
+                    if ($properH2s<2) $tips[]='Use H2s that name related entities/concepts.';
                     break;
                 case 'ck-24':
-                    if (!count($validTypes)) $tips[]='Add valid JSON‑LD (Article/FAQ/Product as applicable).';
+                    if (!count($validTypes ?? [])) $tips[]='Add valid JSON‑LD (Article/FAQ/Product etc.).';
                     break;
                 case 'ck-25':
                     if (!$orgSameAs) $tips[]='Add Organization schema with sameAs links to official profiles.';
