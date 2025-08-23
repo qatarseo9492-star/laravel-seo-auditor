@@ -6,12 +6,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Semantic SEO Master • Ultra Tech Global</title>
-
-<!-- Favicon -->
-<link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
-<link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
@@ -34,18 +28,30 @@ body{
   overflow-x:hidden;
 }
 
-/* --- Canvas layers --- */
-#linesCanvas, #linesCanvas2, #brainCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
-#brainCanvas{opacity:.10}
-
-/* Procedural Cloud Smoke canvas */
-#smokeFX{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:1; filter:saturate(115%) contrast(105%); }
-
-/* Hide old decorative blobs/clouds */
-.bg-smoke .blob, .clouds { display:none !important; }
-
-/* Fallback kept but hidden */
+/* --- Canvas‑like dancing lines & cloud smoke --- */
+#linesCanvas, #linesCanvas2 { position:fixed; inset:0; z-index:0; pointer-events:none; }
 .bg-smoke{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);mix-blend-mode:screen;animation:float 36s linear infinite}
+.blob.p{background:radial-gradient(closest-side,rgba(155,92,255,.38),rgba(155,92,255,0) 70%)}
+.blob.r{background:radial-gradient(closest-side,rgba(255,32,69,.34),rgba(255,32,69,0) 70%)}
+.b1{top:-18%;left:-15%;width:60vmax;height:60vmax}
+.b2{bottom:-22%;right:-10%;width:62vmax;height:62vmax;animation-direction:reverse;animation-duration:30s}
+.b3{top:10%;right:15%;width:50vmax;height:50vmax;animation-duration:28s}
+.b4{bottom:10%;left:25%;width:48vmax;height:48vmax;animation-duration:40s}
+
+/* Cloud cluster (clearly visible bottom-right) */
+.clouds { position:absolute; right:-6vmax; bottom:-6vmax; width:80vmax; height:60vmax; pointer-events:none; }
+.clouds .c { position:absolute; border-radius:50%; filter:blur(40px); opacity:.95; mix-blend-mode:screen; }
+.clouds .c.cyan   { background:radial-gradient(closest-side, rgba(61,226,255,.85), rgba(61,226,255,0) 75%); }
+.clouds .c.purple { background:radial-gradient(closest-side, rgba(155,92,255,.80), rgba(155,92,255,0) 75%); }
+.clouds .c.orange { background:radial-gradient(closest-side, rgba(255,182,72,.80), rgba(255,182,72,0) 75%); }
+.clouds .c.teal   { background:radial-gradient(closest-side, rgba(34,197,94,.78), rgba(34,197,94,0) 75%); }
+.clouds .c1{ width:50vmax;height:28vmax; right:0; bottom:0; animation:cloud 40s ease-in-out infinite; }
+.clouds .c2{ width:46vmax;height:26vmax; right:6vmax; bottom:2vmax; animation:cloud 46s ease-in-out infinite reverse; }
+.clouds .c3{ width:42vmax;height:24vmax; right:10vmax; bottom:3vmax; animation:cloud 52s ease-in-out infinite; }
+.clouds .c4{ width:38vmax;height:22vmax; right:14vmax; bottom:5vmax; animation:cloud 58s ease-in-out infinite reverse; }
+@keyframes float{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-6%,7%,0)}100%{transform:translate3d(0,0,0)}}
+@keyframes cloud{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-3%,-4%,0)}100%{transform:translate3d(0,0,0)}}
 
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
@@ -53,17 +59,7 @@ body{
 header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 0 22px;border-bottom:1px solid var(--line);backdrop-filter:saturate(140%) blur(10px);background:rgba(15,16,34,.35)}
 .brand{display:flex;align-items:center;gap:1rem}
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
-.hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
-
-/* Language dock */
-.lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
-.lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
-.lang-btn:hover{background:rgba(255,255,255,.1)}
-.lang-panel{position:fixed;left:74px;top:50%;transform:translateY(-50%);z-index:70;display:none}
-.lang-card{background:var(--panel-2);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow);padding:10px 12px;min-width:240px}
-.lang-item{padding:.45rem .55rem;border-radius:10px;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-.lang-item:hover{background:rgba(255,255,255,.06)}
-.lang-flag{width:18px;height:14px;border-radius:2px;background:#888}
+.hero-heading{font-size:3.4rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
 /* Buttons */
 .btn{--pad:.75rem 1.05rem;display:inline-flex;align-items:center;gap:.5rem;padding:var(--pad);border-radius:14px;border:1px solid transparent;cursor:pointer;font-weight:800;letter-spacing:.2px;transition:.2s}
@@ -78,22 +74,15 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* Wheel row + Content score chip */
+/* Wheel row */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
 .score-wheel circle{fill:none;stroke-width:14;stroke-linecap:round}
 .score-wheel .bg{stroke:rgba(255,255,255,.12)}
-.score-wheel .progress{
-  stroke:url(#grad); /* default; JS overrides inline */
-  stroke-dasharray:339; stroke-dashoffset:339;
-  transition:stroke-dashoffset .6s ease,stroke .3s ease,filter .3s ease;
-  filter:drop-shadow(0 0 10px rgba(155,92,255,.35))
-}
+.score-wheel .progress{stroke:url(#grad);stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .6s ease,stroke .3s ease,filter .3s ease;filter:drop-shadow(0 0 10px rgba(155,92,255,.35))}
 .score-text{font-size:3rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
-.legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
-.l-red{background:rgba(239,68,68,.18)} .l-orange{background:rgba(245,158,11,.18)} .l-green{background:rgba(34,197,94,.18)}
 
 /* URL input */
 .analyze-form input[type="url"]{
@@ -110,34 +99,35 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
 
-/* Category grid */
+/* Category grid (upgraded style) */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
-.category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden; isolation:isolate;}
+.category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite; pointer-events:none; z-index:0;}
-.category-card > *{position:relative; z-index:1;}
-.checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
-.checklist-item input[type="checkbox"], .improve-btn { pointer-events:auto; position:relative; z-index:2; }
-
 @keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
 .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
-.category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
+.category-icon{width:46px;height:46px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
+
+/* Checklist items (beautified) */
 .checklist{list-style:none;margin:10px 0 0;padding:0}
-.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.65rem .7rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02))}
+.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.65rem .7rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02)); position:relative; overflow:hidden;}
 .checklist-item + .checklist-item{margin-top:.28rem}
+.checklist-item::after{content:""; position:absolute; left:-20%; top:-120%; width:40%; height:300%; background:radial-gradient(closest-side, rgba(61,226,255,.12), transparent 70%); transform:rotate(25deg); transition: .4s; z-index:0;}
+.checklist-item:hover::after{ left:-5%; }
 .checklist-item:hover{transform:translateY(-2px);background:rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; position:relative; z-index:1; }
 .checklist-item input[type="checkbox"]{width:18px;height:18px;margin:.1rem .55rem 0 0;accent-color:var(--primary)}
-.score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
+.score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center; position:relative; z-index:1;}
 .score-good{background:rgba(22,193,114,.22); border-color:rgba(22,193,114,.45)}
 .score-mid{ background:rgba(245,158,11,.22); border-color:rgba(245,158,11,.45)}
 .score-bad{ background:rgba(239,68,68,.24); border-color:rgba(239,68,68,.5)}
-.improve-btn{padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer}
+.improve-btn{padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer; position:relative; z-index:1;}
 .improve-btn:hover{background:rgba(255,255,255,.1)}
 
 /* Modal */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;z-index:70}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:80}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;z-index:9000}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9010}
 .modal-card{width:min(1000px,96vw);background:var(--panel-2);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow);padding:16px}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
 .modal-title{margin:0;font-size:1.2rem}
@@ -164,14 +154,25 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .score-container{width:190px}
   footer.site{flex-direction:column;align-items:flex-start}
 }
-@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.bg-smoke,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
+@media print{#linesCanvas,#linesCanvas2,.bg-smoke,.modal-backdrop,.modal,header.site,#backTop{display:none!important}}
 </style>
 </head>
 <body>
-<canvas id="brainCanvas"></canvas>
 <canvas id="linesCanvas"></canvas>
 <canvas id="linesCanvas2"></canvas>
-<canvas id="smokeFX" aria-hidden="true"></canvas>
+
+<div class="bg-smoke">
+  <span class="blob p b1"></span>
+  <span class="blob r b2"></span>
+  <span class="blob p b3"></span>
+  <span class="blob r b4"></span>
+  <div class="clouds">
+    <span class="c cyan   c1"></span>
+    <span class="c purple c2"></span>
+    <span class="c orange c3"></span>
+    <span class="c teal   c4"></span>
+  </div>
+</div>
 
 <!-- gradients for score wheel -->
 <svg width="0" height="0" aria-hidden="true">
@@ -183,65 +184,56 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   </defs>
 </svg>
 
-<!-- Language Dock -->
-<div class="lang-dock">
-  <button class="lang-btn" id="langOpen" title="Language"><i class="fa-solid fa-globe"></i></button>
-</div>
-<div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
-
 <div class="wrap">
   <header class="site">
     <div class="brand">
       <div class="brand-badge"><i class="fa-solid fa-brain"></i></div>
-      <div><div class="hero-heading" data-i="title">Semantic SEO Master Analyzer</div></div>
+      <div><div class="hero-heading">Semantic SEO Master Analyzer</div></div>
     </div>
     <div style="display:flex;gap:.5rem">
-      <button class="btn btn-ghost" id="printTop"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+      <button class="btn btn-ghost" id="printTop"><i class="fa-solid fa-print"></i> Print</button>
     </div>
   </header>
 
   <section class="analyzer" id="analyzer">
-    <h2 class="section-title" data-i="analyze_title">Analyze a URL</h2>
-    <p class="section-subtitle" data-i="legend_line">
-      The wheel fills with your overall score. <span class="legend l-green">Green ≥ 80</span> <span class="legend l-orange">Orange 60–79</span> <span class="legend l-red">Red &lt; 60</span>
+    <h2 class="section-title">Analyze a URL</h2>
+    <p class="section-subtitle">
+      The wheel fills with your overall score. <span class="chip" style="background:rgba(34,197,94,.18)">Green ≥ 80</span> <span class="chip" style="background:rgba(245,158,11,.18)">Orange 60–79</span> <span class="chip" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
     </p>
 
     <div class="score-area">
       <div class="score-container">
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
           <circle class="bg" cx="60" cy="60" r="54"/>
-          <circle class="progress" cx="60" cy="60" r="54"
-                  style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
-          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
+          <circle class="progress" cx="60" cy="60" r="54"/>
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0</text>
         </svg>
       </div>
       <div style="display:flex;flex-direction:column;gap:.5rem">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <span class="chip"><span data-i="overall">Overall</span>: <b id="overallScoreInline">0</b>/100</span>
-          <span class="chip" id="contentScoreChip">Content: <b id="contentScoreInline">0</b>/100</span>
+          <span class="chip">Overall: <b id="overallScoreInline">0</b>/100</span>
           <span class="chip" id="aiBadge">Writer: <b>—</b></span>
-          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem"><i class="fa-solid fa-robot"></i> Evidence</button>
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</button>
-          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</button>
+          <span class="chip">Human <b id="humanPct">—</b>%</span>
+          <span class="chip">AI <b id="aiPct">—</b>%</span>
         </div>
       </div>
     </div>
 
     <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
       <form id="analyzeForm" class="analyze-form" onsubmit="return false;">
-        <label for="analyzeUrl" style="display:block;font-weight:800;margin-bottom:.35rem" data-i="page_url">Page URL</label>
+        <label for="analyzeUrl" style="display:block;font-weight:800;margin-bottom:.35rem">Page URL</label>
         <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" />
         <div class="analyze-row">
           <div style="display:flex;align-items:center;gap:.6rem">
             <label style="display:inline-flex;align-items:center;gap:.45rem;cursor:pointer">
-              <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)"> <span data-i="auto_check">Auto‑apply checkmarks (≥ 70)</span>
+              <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)"> Auto‑apply checkmarks (≥ 80)
             </label>
           </div>
-          <button id="analyzeBtn" class="btn btn-danger"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
-          <button class="btn btn-neon" id="printChecklist"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
-          <button class="btn btn-ghost" id="resetChecklist"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
+          <button id="analyzeBtn" class="btn btn-danger" type="button"><i class="fa-solid fa-magnifying-glass"></i> Analyze</button>
+          <button class="btn btn-neon" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> Print</button>
+          <button class="btn btn-ghost" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
         </div>
         <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)"></div>
       </form>
@@ -268,7 +260,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Categories / checklist (unchanged structure) -->
+    <!-- Categories / checklist -->
     <div class="analyzer-grid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -299,14 +291,14 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       ]; @endphp
 
       @foreach ([
-        ['Content & Keywords',1,5,'fa-pen-nib','linear-gradient(135deg,#22d3ee33,#a78bfa33)'],
-        ['Technical Elements',6,9,'fa-code','linear-gradient(135deg,#a7f3d033,#60a5fa33)'],
-        ['Content Quality',10,13,'fa-star','linear-gradient(135deg,#fcd34d33,#fb718533)'],
-        ['Structure & Architecture',14,17,'fa-sitemap','linear-gradient(135deg,#86efac33,#f0abfc33)'],
-        ['User Signals & Experience',18,21,'fa-user-check','linear-gradient(135deg,#fca5a533,#fde68a33)'],
-        ['Entities & Context',22,25,'fa-database','linear-gradient(135deg,#f472b633,#60a5fa33)'],
+        ['Content & Keywords',1,5,'fa-pen-nib'],
+        ['Technical Elements',6,9,'fa-code'],
+        ['Content Quality',10,13,'fa-star'],
+        ['Structure & Architecture',14,17,'fa-sitemap'],
+        ['User Signals & Experience',18,21,'fa-user-check'],
+        ['Entities & Context',22,25,'fa-database'],
       ] as $c)
-        <article class="category-card" style="background-image:{{ $c[4] }}; background-blend-mode: lighten;">
+        <article class="category-card">
           <header class="category-head">
             <span class="category-icon"><i class="fas {{ $c[3] }}"></i></span>
             <div>
@@ -323,7 +315,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                   <span>{{ $labels[$i] }}</span>
                 </label>
                 <span class="score-badge" id="sc-{{ $i }}">—</span>
-                <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
+                <button class="improve-btn" type="button" data-id="ck-{{ $i }}">Improve</button>
               </li>
             @endfor
           </ul>
@@ -357,7 +349,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     </div>
     <div class="tabs">
       <button class="tab active" data-tab="tipsTab"><i class="fa-solid fa-lightbulb"></i> Tips</button>
-      <button class="tab" data-tab="examplesTab"><i class="fa-brands fa-google"></i> Examples (Google)</button>
+      <button class="tab" data-tab="examplesTab"><i class="fa-brands fa-google"></i> Examples</button>
       <button class="tab" data-tab="humanTab"><i class="fa-solid fa-user"></i> Human‑like</button>
       <button class="tab" data-tab="aiTab"><i class="fa-solid fa-microchip"></i> AI‑like</button>
       <button class="tab" data-tab="fullTab"><i class="fa-solid fa-file-lines"></i> Full Text</button>
@@ -373,86 +365,68 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---------- i18n (same languages) ---------- */
-const I18N = {
-  en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 70)"},
-};
-const LANGS = [["en","English"]];
+/* ---------- Dancing lines background ---------- */
 (function(){
-  const dockBtn = document.getElementById('langOpen');
-  const panel = document.getElementById('langPanel');
-  const card = document.getElementById('langCard');
-  function fill(){ card.innerHTML=''; LANGS.forEach(([code,label])=>{ const div=document.createElement('div'); div.className='lang-item'; div.dataset.code=code; div.innerHTML=`<span class="lang-flag" style="background:#888"></span><strong>${label}</strong>`; card.appendChild(div); }); }
-  function apply(code){
-    const d=I18N[code]||I18N.en;
-    document.documentElement.setAttribute('lang', code);
-    document.querySelector('[data-i="title"]').textContent=d.title;
-    document.querySelector('[data-i="analyze_title"]').textContent=d.analyze_title;
-    document.querySelector('[data-i="legend_line"]').innerHTML=d.legend_line;
-    document.querySelectorAll('[data-i="overall"]').forEach(n=> n.textContent=d.overall);
-    document.querySelector('[data-i="page_url"]').textContent=d.page_url;
-    document.querySelectorAll('[data-i="analyze"]').forEach(n=> n.textContent=d.analyze);
-    document.querySelectorAll('[data-i="print"]').forEach(n=> n.textContent=d.print);
-    document.querySelectorAll('[data-i="reset"]').forEach(n=> n.textContent=d.reset);
-    document.querySelectorAll('[data-i="auto_check"]').forEach(n=> n.textContent=d.auto_check);
-    localStorage.setItem('lang', code);
+  function runLayer(id, count, maxDist, color, vel=1){
+    const c = document.getElementById(id), ctx = c.getContext('2d');
+    let w,h,nodes=[],mouse={x:-9999,y:-9999};
+    function resize(){ w=c.width=innerWidth; h=c.height=innerHeight; nodes=Array.from({length:count},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*vel,vy:(Math.random()-.5)*vel}))}
+    addEventListener('resize',resize,{passive:true}); resize();
+    addEventListener('mousemove',e=>{mouse.x=e.clientX; mouse.y=e.clientY},{passive:true});
+    (function loop(){
+      ctx.clearRect(0,0,w,h);
+      for(const n of nodes){
+        const dx=mouse.x-n.x, dy=mouse.y-n.y, d=Math.hypot(dx,dy);
+        const attract=d<maxDist?(1-d/maxDist)*.9:0;
+        n.vx+=(dx/d||0)*attract*.18; n.vy+=(dy/d||0)*attract*.18;
+        n.vx*=.97; n.vy*=.97; n.x+=n.vx; n.y+=n.vy;
+        if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1;
+      }
+      for(let i=0;i<nodes.length;i++){
+        for(let j=i+1;j<nodes.length;j++){
+          const a=nodes[i], b=nodes[j], d=Math.hypot(a.x-b.x,a.y-b.y);
+          if(d<maxDist){ const alpha=(1-d/maxDist)*.65; ctx.strokeStyle=color(alpha); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();}
+        }
+      }
+      requestAnimationFrame(loop);
+    })();
   }
-  dockBtn.addEventListener('click', ()=> panel.style.display = panel.style.display==='block' ? 'none' : 'block');
-  panel.addEventListener('click', (e)=>{ const it=e.target.closest('.lang-item'); if(!it) return; apply(it.dataset.code); panel.style.display='none'; });
-  fill(); apply(localStorage.getItem('lang')||'en');
-})();
-
-/* ---------- Background canvases (trimmed) ---------- */
-(function(){
-  const bc = document.getElementById('brainCanvas'), bctx = bc.getContext('2d');
-  let bw, bh, pts=[]; function rs(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; pts = Array.from({length:80},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
-  addEventListener('resize',rs,{passive:true}); rs();
-  (function loop(){ bctx.clearRect(0,0,bw,bh); for(const p of pts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>bw) p.vx*=-1; if(p.y<0||p.y>bh) p.vy*=-1; }
-    for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
+  runLayer('linesCanvas', 140, 130, a=>`rgba(61,226,255,${a})`, 1.1);
+  runLayer('linesCanvas2', 110, 120, a=>`rgba(255,32,69,${a*0.6})`, 0.9);
 })();
 
 /* ---------- Back to Top ---------- */
 (function(){
-  const btn = document.getElementById('backTop'); const link = document.getElementById('toTopLink');
+  const btn=document.getElementById('backTop'), link=document.getElementById('toTopLink');
   function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
   addEventListener('scroll', onScroll, {passive:true}); onScroll();
   const goTop = e => { e && e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); };
-  btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
+  btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
 })();
 
-/* ---------- Score wheel helpers (color via inline style + % inside) ---------- */
+/* ---------- Score wheel helpers (threshold colors + number inside) ---------- */
 const WHEEL = { circumference: 339, circle: null, text: null };
 function setScoreWheel(value){
   if (!WHEEL.circle) { WHEEL.circle = document.querySelector('.score-wheel .progress'); WHEEL.text = document.getElementById('overallScore'); }
-  const v = Math.max(0, Math.min(100, Number(value)));
+  const v = Math.max(0, Math.min(100, value));
   const offset = WHEEL.circumference - (v/100) * WHEEL.circumference;
   WHEEL.circle.style.strokeDashoffset = offset;
-
-  // Set color using inline style (overrides CSS)
-  if (v >= 80)      WHEEL.circle.style.stroke = 'url(#gradGood)';
-  else if (v >= 60) WHEEL.circle.style.stroke = 'url(#gradMid)';
-  else              WHEEL.circle.style.stroke = 'url(#gradBad)';
-
-  WHEEL.text.textContent = Math.round(v) + '%';
-  document.getElementById('overallScoreInline').textContent = Math.round(v);
+  if (v >= 80) WHEEL.circle.setAttribute('stroke','url(#gradGood)');
+  else if (v >= 60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
+  else WHEEL.circle.setAttribute('stroke','url(#gradBad)');
+  const n = Math.round(v);
+  WHEEL.text.textContent = n;
+  document.getElementById('overallScoreInline').textContent = n;
 }
 
-/* ---------- Checklist + scoring ---------- */
+/* ---------- Checklist + progress ---------- */
 (function () {
-  const STORAGE_KEY = 'semanticSeoChecklistV5';
+  const STORAGE_KEY = 'semanticSeoChecklistV6';
   const total = 25;
   const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar = document.getElementById('progressBar');
   const caption = document.getElementById('progressCaption');
-  const contentChip = document.getElementById('contentScoreInline');
-  let lastAnalyzed = 0;
 
-  function contentScore(){ const checked = boxes().filter(cb=>cb.checked).length; return Math.round((checked/total)*100); }
-  function overallScoreBlended(){
-    const cs = contentScore();
-    if (cs===100) return 100;
-    return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
-  }
   function updateCats(){
     document.querySelectorAll('.category-card').forEach(card=>{
       const all = card.querySelectorAll('input[type="checkbox"]');
@@ -466,8 +440,6 @@ function setScoreWheel(value){
     bar.style.width = ((checked/total)*100)+'%';
     caption.textContent = `${checked} of ${total} items completed`;
     updateCats();
-    const cs = contentScore(); contentChip.textContent = cs;
-    setScoreWheel( overallScoreBlended() );
   }
   function load(){
     try{const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); boxes().forEach(cb=>cb.checked = saved.includes(cb.id));}catch(e){}
@@ -478,39 +450,55 @@ function setScoreWheel(value){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
   }
   document.addEventListener('change', (e)=>{ if(e.target.matches('#analyzer input[type="checkbox"]')){ update(); save(); }});
-  document.getElementById('resetChecklist').addEventListener('click', ()=>{ if(!confirm('Reset the checklist?')) return; localStorage.removeItem(STORAGE_KEY); boxes().forEach(cb=>cb.checked=false); for(let i=1;i<=25;i++){ setScoreBadge(i,null);} lastAnalyzed=0; setScoreWheel(0); update(); });
+  document.getElementById('resetChecklist').addEventListener('click', ()=>{ if(!confirm('Reset the checklist?')) return; localStorage.removeItem(STORAGE_KEY); boxes().forEach(cb=>cb.checked=false); for(let i=1;i<=25;i++){ setScoreBadge(i,null);} setScoreWheel(0); update(); });
   document.getElementById('printChecklist').addEventListener('click', ()=> window.print());
   document.getElementById('printTop').addEventListener('click', ()=> window.print());
   window.setScoreBadge = (num,score)=>{ const el=document.getElementById('sc-'+num); if(!el) return; el.className='score-badge'; if(score==null){el.textContent='—';return;} el.textContent=score; if(score>=80) el.classList.add('score-good'); else if(score>=60) el.classList.add('score-mid'); else el.classList.add('score-bad'); };
-  window.__setAnalyzedScore = function(v){ lastAnalyzed = Math.max(0, Math.min(100, +v||0)); setScoreWheel( overallScoreBlended() ); }
-  window.__getContentScore = contentScore;
   load();
 })();
 
-/* ---------- Modal + examples + panes (trimmed) ---------- */
+/* ---------- Modal (robust; Improve button works) ---------- */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
   const backdrop = $('#modalBackdrop'), modal = $('#tipModal'), closeBtn = $('#modalClose');
+  const title = $('#modalTitle'), tipsList = $('#modalList');
   const panes = { tipsTab: $('#tipsTab'), examplesTab: $('#examplesTab'), humanTab: $('#humanTab'), aiTab: $('#aiTab'), fullTab: $('#fullTab') };
   const tabs = $$('.tab');
+
   function openModal(){ backdrop.style.display='block'; modal.style.display='flex'; }
   function closeModal(){ backdrop.style.display='none'; modal.style.display='none'; }
   closeBtn.addEventListener('click', closeModal); backdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
-  tabs.forEach(t=> t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); Object.values(panes).forEach(p=>p.classList.remove('active')); t.classList.add('active'); panes[t.dataset.tab].classList.add('active'); }));
-  document.getElementById('viewAIText').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openModal(); });
-  document.getElementById('viewHumanBtn').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="humanTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.humanTab.classList.add('active'); openModal(); });
-  document.getElementById('viewAIBtn').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openModal(); });
-  window.__setAIData = function(ai){
-    const aiSn = ai?.ai_sentences || [];
-    const huSn = ai?.human_sentences || [];
-    document.getElementById('aiSnippetsPre').textContent = aiSn.length ? aiSn.join('\n\n') : 'No AI‑like snippets detected.';
-    document.getElementById('humanSnippetsPre').textContent = huSn.length ? huSn.join('\n\n') : 'No human‑like snippets isolated.';
-    document.getElementById('fullTextPre').textContent = ai?.full_text || 'No text captured.';
-    document.getElementById('aiPct').textContent = (typeof ai?.ai_pct==='number') ? ai.ai_pct : '—';
-    document.getElementById('humanPct').textContent = (typeof ai?.human_pct==='number') ? ai.human_pct : '—';
+
+  tabs.forEach(t=> t.addEventListener('click', ()=>{
+    tabs.forEach(x=>x.classList.remove('active'));
+    Object.values(panes).forEach(p=>p.classList.remove('active'));
+    t.classList.add('active'); panes[t.dataset.tab].classList.add('active');
+  }));
+
+  function labelFor(id){
+    const input = document.getElementById(id);
+    if (!input) return id;
+    const span = input.parentElement?.querySelector('span');
+    return span ? span.textContent.trim() : id;
   }
+
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('.improve-btn');
+    if (!btn) return;
+    e.preventDefault();
+    const id = btn.getAttribute('data-id');
+    title.textContent = 'Improve: ' + labelFor(id);
+    const all = (window.__lastSuggestions && typeof window.__lastSuggestions==='object') ? window.__lastSuggestions : {};
+    const tips = (id && Array.isArray(all[id]) && all[id].length) ? all[id] : ['Run Analyze first to generate contextual suggestions.'];
+    tipsList.innerHTML = ''; tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; tipsList.appendChild(li); });
+
+    tabs.forEach(x=>x.classList.remove('active')); panes.tipsTab.classList.add('active'); document.querySelector('[data-tab="tipsTab"]').classList.add('active');
+    Object.values(panes).forEach(p=>p.classList.remove('active')); panes.tipsTab.classList.add('active');
+
+    openModal();
+  });
 })();
 
 /* ---------- URL normalization + Analyze ---------- */
@@ -518,12 +506,13 @@ function normalizeUrl(u){
   if(!u) return '';
   u = u.trim();
   if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
-  try { new URL(u); } catch(e){}
+  try { new URL(u); } catch(e){ /* allow; backend validates */ }
   return u;
 }
+
 (function(){
   const $ = s => document.querySelector(s);
-  const setChecked = (id, on) => { const el = document.getElementById(id); if (el) el.checked = !!on; };
+  const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
 
   document.getElementById('analyzeForm').addEventListener('submit', (e)=>{
     e.preventDefault();
@@ -546,6 +535,9 @@ function normalizeUrl(u){
       const data = await resp.json();
       if (!data.ok) throw new Error(data.error || 'Failed');
 
+      // Store suggestions defensively
+      window.__lastSuggestions = (data && typeof data.suggestions==='object' && data.suggestions) ? data.suggestions : {};
+
       // chips
       $('#rStatus').textContent = data.status;
       $('#rTitleLen').textContent = (data.title || '').length;
@@ -557,83 +549,62 @@ function normalizeUrl(u){
       $('#rInternal').textContent = data.counts.internal_links;
       const types = (data.schema.found_types || []).slice(0,6).join(', ') || '—';
       $('#rSchema').textContent = types;
-      $('#rAutoCount').textContent = (data.auto_check_ids||[]).length;
       report.style.display='block';
 
-      // per-item scores
-      window.__lastSuggestions = data.suggestions || {};
-      for (let i=1;i<=25;i++){ const key='ck-'+i; setScoreBadge(i, data.scores?.[key]); }
+      // Per‑item scores + auto‑select when score ≥ 80
+      let autoCount=0;
+      for (let i=1;i<=25;i++){
+        const key='ck-'+i;
+        const score = (data.scores && typeof data.scores[key]==='number') ? data.scores[key] : null;
+        setScoreBadge(i, score);
+        const cb = document.getElementById(key);
+        if (cb){
+          // Only auto‑apply when checkbox present AND user opted in
+          if ($('#autoApply').checked && typeof score==='number' && score>=80){
+            cb.checked = true; autoCount++;
+          }
+        }
+      }
+      document.getElementById('rAutoCount').textContent = autoCount.toString();
+      document.dispatchEvent(new Event('change')); // refresh progress
 
-      // overall / content
-      const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
-      window.__setAnalyzedScore(backendOverall);
-      document.getElementById('contentScoreInline').textContent = window.__getContentScore();
+      // Overall wheel
+      const overall = typeof data.overall_score === 'number' ? data.overall_score : 0;
+      setScoreWheel(overall);
 
-      // ===== AI DETECTION (REAL VALUES ONLY) =====
-      const ai = data.ai_detection || {};
-      const badge = document.getElementById('aiBadge');
-      const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
-      const label = labelMap[ai.label] || 'Unknown';
-      const conf = (typeof ai.likelihood==='number') ? ` (${ai.likelihood}%)` : '';
+      // AI/Human badge (both percents, no duplicates)
+      {
+        const ai = data.ai_detection || {};
+        const badge = document.getElementById('aiBadge');
+        const labelMap = { likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI', unknown:'Unknown' };
+        const label = labelMap[ai.label] || 'Unknown';
+        const humanPct = (typeof ai.human_pct==='number') ? ai.human_pct : null;
+        const aiPct    = (typeof ai.ai_pct==='number') ? ai.ai_pct : null;
+        let parts = [`<b>${label}</b>`];
+        if (humanPct!==null) parts.push(`Human ${humanPct}%`);
+        if (aiPct!==null)    parts.push(`AI ${aiPct}%`);
+        badge.innerHTML = `Writer: ${parts.join(' • ')}`;
+        badge.title = (ai.reasons || []).join(' • ');
+        if(document.getElementById('humanPct')) document.getElementById('humanPct').textContent = humanPct!==null?humanPct:'—';
+        if(document.getElementById('aiPct')) document.getElementById('aiPct').textContent = aiPct!==null?aiPct:'—';
 
-      // Build badge without fabricating numbers
-      const aiStr = (typeof ai.ai_pct==='number') ? ` — ${ai.ai_pct}% AI‑like` : '';
-      const humanStr = (typeof ai.human_pct==='number') ? ` — ${ai.human_pct}% Human` : '';
-      badge.innerHTML = `Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
-      badge.title = (ai.reasons||[]).join(' • ');
-
-      // Update quick chips/panes strictly from backend values
-      document.getElementById('aiPct').textContent = (typeof ai.ai_pct==='number') ? ai.ai_pct : '—';
-      document.getElementById('humanPct').textContent = (typeof ai.human_pct==='number') ? ai.human_pct : '—';
-      window.__setAIData(ai);
-
-      // Auto-check
-      if ($('#autoApply').checked) {
-        for (let i=1;i<=25;i++) setChecked('ck-'+i, false);
-        (data.auto_check_ids||[]).forEach(id => setChecked(id, true));
-        document.dispatchEvent(new Event('change'));
+        // Fill AI/Human panes
+        document.getElementById('aiSnippetsPre').textContent = (ai.ai_sentences||[]).slice(0,20).join('\n\n') || 'No AI‑like snippets detected.';
+        document.getElementById('humanSnippetsPre').textContent = (ai.human_sentences||[]).slice(0,20).join('\n\n') || 'No human‑like snippets isolated.';
+        document.getElementById('fullTextPre').textContent = ai.full_text || 'No text captured.';
       }
 
       // Status line
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent = '', 4200);
+
     } catch(e){
       status.textContent = 'Error: '+e.message;
     } finally {
       btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Analyze';
     }
   }
-})();
-</script>
-
-<!-- ========== Procedural Colorful Smoke (WebGL2 shader + 2D fallback) (trimmed) ========== -->
-<script>
-(function(){
-  const canvas = document.getElementById('smokeFX'); if (!canvas) return;
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  let gl = null, vw=0, vh=0, start=performance.now();
-
-  function resize(){ vw = canvas.clientWidth  = innerWidth; vh = canvas.clientHeight = innerHeight; canvas.width  = Math.floor(vw * dpr); canvas.height = Math.floor(vh * dpr); if (gl) gl.viewport(0,0,canvas.width,canvas.height); }
-  addEventListener('resize', resize, {passive:true}); resize();
-  try { gl = canvas.getContext('webgl2', { alpha:true, antialias:false, depth:false, stencil:false }); } catch(e){}
-
-  if (!gl) return;
-  const vs=`#version 300 es
-  precision highp float; const vec2 v[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));
-  out vec2 uv; void main(){ vec2 p=v[gl_VertexID]; uv=.5*(p+1.); gl_Position=vec4(p,0,1); }`;
-  const fs=`#version 300 es
-  precision highp float; in vec2 uv; out vec4 o; uniform vec2 r; uniform float t,a;
-  float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
-  float n(vec2 p){ vec2 i=floor(p), f=fract(p); float A=h(i),B=h(i+vec2(1,0)),C=h(i+vec2(0,1)),D=h(i+vec2(1,1));
-    vec2 u=f*f*(3.-2.*f); return mix(A,B,u.x)+(C-A)*u.y*(1.-u.x)+(D-B)*u.x*u.y; }
-  float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
-  void main(){ vec2 p=(uv-.5)*vec2(a,1.); float q=f(p*1.6+vec2(t*.4,-t*.3)); float d=smoothstep(.35,.95,q); vec3 c=mix(vec3(.24,.88,1.),vec3(.61,.36,1.),uv.x); o=vec4(c*d,.75*d); }`;
-  function sh(s,t){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
-  const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl.VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
-  const ur=gl.getUniformLocation(prog,'r'), ut=gl.getUniformLocation(prog,'t'), ua=gl.getUniformLocation(prog,'a');
-  function draw(now){ gl.useProgram(prog); gl.uniform2f(ur,canvas.width,canvas.height); gl.uniform1f(ut,(now-start)*1e-3); gl.uniform1f(ua,canvas.width/Math.max(1.,canvas.height)); gl.drawArrays(gl.TRIANGLES,0,3); requestAnimationFrame(draw); }
-  requestAnimationFrame(draw);
 })();
 </script>
 </body>
