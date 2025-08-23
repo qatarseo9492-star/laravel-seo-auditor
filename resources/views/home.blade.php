@@ -20,6 +20,8 @@
   --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
   --radius:18px; --shadow:0 10px 40px rgba(0,0,0,.55);
   --container:1200px;
+  /* live hue for ultra-fast multi-color water */
+  --hue: 0deg;
 }
 *{box-sizing:border-box} html,body{height:100%}
 html{scroll-behavior:smooth}
@@ -68,7 +70,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .section-title{font-size:1.6rem;margin:0 0 .3rem}
 .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* ======= SCORE GAUGE: circular water fill ======= */
+/* ======= SCORE GAUGE: circular water fill + gradient borders ======= */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}
@@ -78,6 +80,8 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .score-wave2{animation:scoreWave 11s linear infinite reverse}
 @keyframes scoreWave{from{transform:translateX(0)}to{transform:translateX(-210px)}}
 .score-text{font-size:clamp(2.2rem, 4.2vw, 3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
+/* live hue cycler for “every millisecond” feel */
+.multiHueFast{ filter:hue-rotate(var(--hue)) saturate(140%); will-change:filter; }
 
 /* Chips + legends */
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
@@ -134,8 +138,8 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .wave1{animation:waveX 7s linear infinite}
 .wave2{animation:waveX 10s linear infinite reverse; opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
-.multiHue{animation: hueShift 8s linear infinite; filter: hue-rotate(0deg) saturate(120%);}
-@keyframes hueShift { to { filter: hue-rotate(360deg) saturate(120%); } }
+/* Replace old slow hue shift with fast continuous variant */
+.multiHue{filter:hue-rotate(var(--hue)) saturate(140%); will-change:filter;}
 #waterSmoke{ position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:screen; }
 
 /* Progress (checklist completion) */
@@ -144,22 +148,33 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
 
-/* Category grid (unchanged) */
+/* Category grid */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden; isolation:isolate;}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite; pointer-events:none; z-index:0;}
 .category-card > *{position:relative; z-index:1;}
-.checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
-.checklist-item input[type="checkbox"], .improve-btn { pointer-events:auto; position:relative; z-index:2; }
 @keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
+
+/* Heading row */
 .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
 .category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
+
+/* NEW: Water-fill heading bar inside each category header */
+.cat-water{grid-column:1/-1; margin-top:.55rem; position:relative; height:22px;}
+.cat-svg{display:block; width:100%; height:22px;}
+.cat-wave1{animation:catWave 7s linear infinite}
+.cat-wave2{animation:catWave 10s linear infinite reverse}
+@keyframes catWave{from{transform:translateX(0)}to{transform:translateX(-640px)}}
+.cat-water-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.8rem; color:rgba(255,255,255,.9); text-shadow:0 1px 0 rgba(0,0,0,.55); pointer-events:none}
+
+/* Items */
 .checklist{list-style:none;margin:10px 0 0;padding:0}
 .checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.65rem .7rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02))}
 .checklist-item + .checklist-item{margin-top:.28rem}
 .checklist-item:hover{transform:translateY(-2px);background:rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
 .checklist-item input[type="checkbox"]{width:18px;height:18px;margin:.1rem .55rem 0 0;accent-color:var(--primary)}
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22); border-color:rgba(22,193,114,.45)}
@@ -241,7 +256,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
     <div class="score-area">
       <div class="score-container">
-        <!-- ======= New circular water-fill score gauge ======= -->
+        <!-- ======= Circular water-fill score gauge with gradient borders ======= -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
@@ -255,21 +270,34 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                 <stop id="scoreStop1" offset="0%" stop-color="#22c55e"/>
                 <stop id="scoreStop2" offset="100%" stop-color="#16a34a"/>
               </linearGradient>
+              <!-- Border ring gradient + soft glow -->
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop id="ringStop1" offset="0%" stop-color="#22c55e"/>
+                <stop id="ringStop2" offset="100%" stop-color="#16a34a"/>
+              </linearGradient>
+              <filter id="ringGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2.4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
               <path id="scoreWavePath" d="M0 110 Q 15 90 30 110 T 60 110 T 90 110 T 120 110 T 150 110 T 180 110 T 210 110 V 220 H 0 Z"/>
             </defs>
 
-            <!-- Outer dish -->
+            <!-- Back plate -->
             <circle cx="100" cy="100" r="96" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+            <!-- Outer gradient ring (threshold colored) -->
+            <circle cx="100" cy="100" r="95" fill="none" stroke="url(#ringGrad)" stroke-width="3.5" filter="url(#ringGlow)" opacity=".9"/>
+            <!-- Inner subtle ring -->
+            <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/>
 
             <!-- Water area -->
             <g clip-path="url(#scoreCircleClip)">
               <rect x="0" y="0" width="200" height="200" fill="#0b0d21"/>
               <g clip-path="url(#scoreFillClip)">
-                <g class="score-wave1">
+                <g class="score-wave1 multiHueFast">
                   <use href="#scoreWavePath" x="0" fill="url(#scoreGrad)"/>
                   <use href="#scoreWavePath" x="210" fill="url(#scoreGrad)"/>
                 </g>
-                <g class="score-wave2" opacity=".85">
+                <g class="score-wave2 multiHueFast" opacity=".85">
                   <use href="#scoreWavePath" x="0" y="6" fill="url(#scoreGrad)"/>
                   <use href="#scoreWavePath" x="210" y="6" fill="url(#scoreGrad)"/>
                 </g>
@@ -323,7 +351,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
-        <!-- Water progress with multi-hue waves + smoke -->
+        <!-- Water progress with ultra-fast multi-hue waves + smoke -->
         <div class="water-wrap" id="waterWrap" aria-hidden="true">
           <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -341,11 +369,11 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
               <g clip-path="url(#roundClip)">
                 <rect x="0" y="0" width="600" height="200" fill="#0b0d21"/>
                 <g clip-path="url(#fillClip)">
-                  <g class="wave1 multiHue" fill="url(#waterGrad)" opacity=".95">
-                    <use href="#wave" x="0"/><use href="#wave" x="600"/>
+                  <g class="wave1 multiHue">
+                    <use href="#wave" x="0" fill="url(#waterGrad)"/><use href="#wave" x="600" fill="url(#waterGrad)"/>
                   </g>
-                  <g class="wave2 multiHue" fill="url(#waterGrad)" opacity=".65">
-                    <use href="#wave" x="0" y="8"/><use href="#wave" x="600" y="8"/>
+                  <g class="wave2 multiHue" opacity=".65">
+                    <use href="#wave" x="0" y="8" fill="url(#waterGrad)"/><use href="#wave" x="600" y="8" fill="url(#waterGrad)"/>
                   </g>
                 </g>
                 <rect x="0" y="0" width="600" height="200" fill="transparent"/>
@@ -421,12 +449,40 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
         ['User Signals & Experience',18,21,'fa-user-check','linear-gradient(135deg,#fca5a533,#fde68a33)'],
         ['Entities & Context',22,25,'fa-database','linear-gradient(135deg,#f472b633,#60a5fa33)'],
       ] as $c)
-        <article class="category-card" style="background-image:{{ $c[4] }}; background-blend-mode: lighten;">
+        <article class="category-card" data-cat-i="{{ $loop->index }}" style="background-image:{{ $c[4] }}; background-blend-mode: lighten;">
           <header class="category-head">
             <span class="category-icon" aria-hidden="true"><i class="fas {{ $c[3] }}"></i></span>
             <div>
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
+              <!-- Animated water-fill heading bar with count + % -->
+              <div class="cat-water" id="catWater-{{ $loop->index }}">
+                <svg class="cat-svg" viewBox="0 0 600 24" preserveAspectRatio="none">
+                  <defs>
+                    <clipPath id="catClip-{{ $loop->index }}"><rect x="0" y="0" width="600" height="24" rx="10" ry="10"/></clipPath>
+                    <clipPath id="catFillClip-{{ $loop->index }}"><rect id="catFillRect-{{ $loop->index }}" x="0" y="0" width="0" height="24"/></clipPath>
+                    <linearGradient id="catGrad-{{ $loop->index }}" x1="0" y1="0" x2="1" y2="1">
+                      <stop id="catStop1-{{ $loop->index }}" offset="0%" stop-color="#ef4444"/>
+                      <stop id="catStop2-{{ $loop->index }}" offset="100%" stop-color="#b91c1c"/>
+                    </linearGradient>
+                    <path id="catWave-{{ $loop->index }}" d="M0 12 Q 40 6 80 12 T 160 12 T 240 12 T 320 12 T 400 12 T 480 12 T 560 12 T 640 12 V 30 H 0 Z"/>
+                  </defs>
+                  <g clip-path="url(#catClip-{{ $loop->index }})">
+                    <rect x="0" y="0" width="600" height="24" fill="#0b0d21"/>
+                    <g clip-path="url(#catFillClip-{{ $loop->index }})">
+                      <g class="cat-wave1">
+                        <use href="#catWave-{{ $loop->index }}" x="0" fill="url(#catGrad-{{ $loop->index }})"/>
+                        <use href="#catWave-{{ $loop->index }}" x="640" fill="url(#catGrad-{{ $loop->index }})"/>
+                      </g>
+                      <g class="cat-wave2" opacity=".85">
+                        <use href="#catWave-{{ $loop->index }}" x="0" y="3" fill="url(#catGrad-{{ $loop->index }})"/>
+                        <use href="#catWave-{{ $loop->index }}" x="640" y="3" fill="url(#catGrad-{{ $loop->index }})"/>
+                      </g>
+                    </g>
+                  </g>
+                </svg>
+                <div class="cat-water-pct" id="catPct-{{ $loop->index }}">0/0 • 0%</div>
+              </div>
             </div>
             <span class="chip"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
           </header>
@@ -551,26 +607,35 @@ function setChipTone(el, value, {mode='overall'} = {}){
 }
 function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 
-/* ---------- NEW: Score Gauge controller (water fill in circle) ---------- */
-const GAUGE = { rect:null, stop1:null, stop2:null, text:null, H:200 };
+/* ---------- Score Gauge controller (water fill in circle + ring colors) ---------- */
+const GAUGE = { rect:null, stop1:null, stop2:null, r1:null, r2:null, text:null, H:200 };
 function setScoreWheel(value){
   if (!GAUGE.rect){
     GAUGE.rect  = document.getElementById('scoreClipRect');
     GAUGE.stop1 = document.getElementById('scoreStop1');
     GAUGE.stop2 = document.getElementById('scoreStop2');
+    GAUGE.r1    = document.getElementById('ringStop1');
+    GAUGE.r2    = document.getElementById('ringStop2');
     GAUGE.text  = document.getElementById('overallScore');
   }
   const v = Math.max(0, Math.min(100, Number(value)||0));
   const y = GAUGE.H - (GAUGE.H * (v/100));              // top of water
   GAUGE.rect.setAttribute('y', String(y));
   GAUGE.text.textContent = Math.round(v) + '%';
-  // color thresholds
+
+  // threshold base colors
   let c1, c2;
   if (v >= 80){ c1='#22c55e'; c2='#16a34a'; }           // green
   else if (v >= 60){ c1='#f59e0b'; c2='#fb923c'; }      // orange
   else { c1='#ef4444'; c2='#b91c1c'; }                  // red
+
+  // Set water gradient base (we also hue-cycle on top)
   GAUGE.stop1.setAttribute('stop-color', c1);
   GAUGE.stop2.setAttribute('stop-color', c2);
+
+  // Set border ring gradient (no hue-cycle — stays threshold-colored)
+  GAUGE.r1.setAttribute('stop-color', c1);
+  GAUGE.r2.setAttribute('stop-color', c2);
 
   // Inline score + chip tone
   setText('overallScoreInline', Math.round(v));
@@ -581,6 +646,7 @@ function setScoreWheel(value){
 (function () {
   const STORAGE_KEY = 'semanticSeoChecklistV6';
   const total = 25;
+  const cards = () => Array.from(document.querySelectorAll('.category-card'));
   const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar = document.getElementById('progressBar');
   const caption = document.getElementById('progressCaption');
@@ -593,25 +659,52 @@ function setScoreWheel(value){
     if (cs===100) return 100;
     return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
   }
-  function updateCats(){
-    document.querySelectorAll('.category-card').forEach(card=>{
+
+  /* Per-category water heading bars (with count + %) */
+  function updateCatHeadingBars(){
+    cards().forEach((card, idx)=>{
       const all = card.querySelectorAll('input[type="checkbox"]');
       const done = card.querySelectorAll('input[type="checkbox"]:checked');
+      const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
+
+      // Update counts
       card.querySelector('.checked-count').textContent = done.length;
       card.querySelector('.total-count').textContent = all.length;
+
+      // Water fill width
+      const rect = document.getElementById(`catFillRect-${idx}`);
+      const pctEl = document.getElementById(`catPct-${idx}`);
+      const stop1 = document.getElementById(`catStop1-${idx}`);
+      const stop2 = document.getElementById(`catStop2-${idx}`);
+      if (rect) {
+        const width = Math.round(600 * pct / 100); // viewBox width = 600
+        rect.setAttribute('width', String(width));
+      }
+      if (pctEl) pctEl.textContent = `${done.length}/${all.length} • ${pct}%`;
+
+      // Threshold colors (kept stable for readability)
+      let c1, c2;
+      if (pct >= 80){ c1='#22c55e'; c2='#16a34a'; }
+      else if (pct >= 60){ c1='#f59e0b'; c2='#fb923c'; }
+      else { c1='#ef4444'; c2='#b91c1c'; }
+      if (stop1 && stop2){ stop1.setAttribute('stop-color', c1); stop2.setAttribute('stop-color', c2); }
     });
   }
+
   function update(){
     const checked = boxes().filter(cb=>cb.checked).length;
     bar.style.width = ((checked/total)*100)+'%';
     caption.textContent = `${checked} of ${total} items completed`;
-    updateCats();
+
+    updateCatHeadingBars();
+
     const cs = contentScore(); contentScoreInline.textContent = cs;
     setChipTone(document.getElementById('contentScoreChip'), cs, {mode:'content'});
     setScoreWheel( overallScoreBlended() );
   }
   function load(){ try{const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); boxes().forEach(cb=>cb.checked = saved.includes(cb.id));}catch(e){} update(); }
   function save(){ const ids = boxes().filter(cb=>cb.checked).map(cb=>cb.id); localStorage.setItem(STORAGE_KEY, JSON.stringify(ids)); }
+
   document.addEventListener('change', (e)=>{ if(e.target.matches('#analyzer input[type="checkbox"]')){ update(); save(); }});
   document.getElementById('resetChecklist').addEventListener('click', ()=>{ if(!confirm('Reset the checklist?')) return; localStorage.removeItem(STORAGE_KEY); boxes().forEach(cb=>cb.checked=false); for(let i=1;i<=25;i++){ setScoreBadge(i,null);} lastAnalyzed=0; setScoreWheel(0); update(); });
   document.getElementById('printChecklist').addEventListener('click', ()=> window.print());
@@ -792,6 +885,20 @@ const Water = (function(){
   return { start, finish, reset, set, show, hide };
 })();
 
+/* ---------- Ultra-fast hue cycler (updates every frame ~1–16ms) ---------- */
+(function(){
+  // Continuously rotate hue; browsers clamp timers, so using rAF is smooth & fast.
+  const root = document.documentElement;
+  let start = performance.now();
+  function frame(now){
+    const elapsed = now - start;                                   // ms
+    const angle = (elapsed / 4) % 360;                             // ~0.25 deg per ms
+    root.style.setProperty('--hue', angle + 'deg');
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
 /* ---------- Analyze flow ---------- */
 (function(){
   const $ = s => document.querySelector(s);
@@ -924,7 +1031,7 @@ const Water = (function(){
   float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
   void main(){ vec2 p=(uv-.5)*vec2(a,1.); float q=f(p*1.6+vec2(t*.4,-t*.3)); float d=smoothstep(.35,.95,q); vec3 c=mix(vec3(.24,.88,1.),vec3(.61,.36,1.),uv.x); o=vec4(c*d,.75*d); }`;
   function sh(s,t){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
-  const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl.VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
+  const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl_VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
   const ur=gl.getUniformLocation(prog,'r'), ut=gl.getUniformLocation(prog,'t'), ua=gl.getUniformLocation(prog,'a');
   function draw(now){ gl.useProgram(prog); gl.uniform2f(ur,canvas.width,canvas.height); gl.uniform1f(ut,(now-start)*1e-3); gl.uniform1f(ua,canvas.width/Math.max(1.,canvas.height)); gl.drawArrays(gl.TRIANGLES,0,3); requestAnimationFrame(draw); }
   requestAnimationFrame(draw);
