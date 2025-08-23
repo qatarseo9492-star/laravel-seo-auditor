@@ -50,46 +50,6 @@
 <meta name="twitter:description" content="{{ $metaDescription }}">
 <meta name="twitter:image" content="{{ $metaImage }}">
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "{{ $siteName }}",
-  "url": "{{ url('/') }}",
-  "publisher": {
-    "@type": "Organization",
-    "name": "Ultra Tech Global",
-    "logo": { "@type": "ImageObject", "url": "{{ asset('logo.png') }}" }
-  },
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "{{ url('/') }}?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"WebPage",
-  "name":"{{ $metaTitle }}",
-  "description":"{{ $metaDescription }}",
-  "url":"{{ $canonical }}",
-  "isPartOf":{"@type":"WebSite","name":"{{ $siteName }}","url":"{{ url('/') }}"},
-  "inLanguage":"en-US"
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context":"https://schema.org",
-  "@type":"BreadcrumbList",
-  "itemListElement":[
-    {"@type":"ListItem","position":1,"name":"Home","item":"{{ url('/') }}"},
-    {"@type":"ListItem","position":2,"name":"Analyzer","item":"{{ $canonical }}"}
-  ]
-}
-</script>
-
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
@@ -116,14 +76,13 @@ body{
   overflow-x:hidden;
 }
 
-/* BG canvases */
-#linesCanvas, #linesCanvas2, #brainCanvas, #smokeFX { position:fixed; inset:0; z-index:0; pointer-events:none; }
-#brainCanvas{opacity:.10}
+/* Remove cloudy background smoke (kept clean) */
+#linesCanvas, #brainCanvas { display:none; }
 
 /* Layout */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
-/* Header (restored simple) */
+/* Header (simple + stable) */
 header.site{
   display:flex; align-items:center; justify-content:space-between;
   gap:1rem; padding:14px 0 22px; border-bottom:1px solid rgba(255,255,255,.08);
@@ -140,24 +99,40 @@ header.site{
 .hero-sub{ color:var(--text-dim); font-size:.95rem }
 .header-actions{ display:flex; gap:.5rem; align-items:center }
 
-/* Buttons */
+/* Buttons — special effects, full-color icons */
 .btn{
-  display:inline-flex; align-items:center; gap:.5rem; cursor:pointer;
-  padding:.55rem .9rem; border-radius:12px; border:1px solid rgba(255,255,255,.16);
-  color:#fff; background:rgba(255,255,255,.06); font-weight:800; letter-spacing:.2px;
+  display:inline-flex; align-items:center; gap:.55rem; cursor:pointer;
+  padding:.6rem .95rem; border-radius:14px; border:1px solid rgba(255,255,255,.16);
+  color:#fff; font-weight:900; letter-spacing:.2px; position:relative; overflow:hidden;
+  box-shadow:0 10px 28px rgba(0,0,0,.25);
 }
-.btn:hover{ background:rgba(255,255,255,.12) }
+.btn::after{ /* animated sheeny sweep */
+  content:""; position:absolute; inset:-2px; border-radius:inherit; opacity:.0;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,.22), transparent 60%);
+  transform:translateX(-120%); transition:opacity .2s ease;
+}
+.btn:hover::after{ opacity:1; animation:btnSweep 2.6s linear infinite; }
+@keyframes btnSweep{ 0%{transform:translateX(-120%)} 100%{transform:translateX(120%)} }
+
+.btn-analyze{ background:linear-gradient(135deg, #10b981, #22c55e); border-color:#20d391; }
+.btn-print  { background:linear-gradient(135deg, #3b82f6, #6366f1); border-color:#5b77ef; }
+.btn-reset  { background:linear-gradient(135deg, #f59e0b, #f97316); border-color:#f59e0b; }
+.btn-export { background:linear-gradient(135deg, #a855f7, #ec4899); border-color:#c26cf2; }
+.btn-ghost  { background:rgba(255,255,255,.06); }
 .btn:disabled{ opacity:.6; cursor:not-allowed }
-.btn-ghost{ background:transparent }
-.btn-neon{ background:linear-gradient(135deg, #3de2ff33, #9b5cff33) }
-.btn-danger{ background:linear-gradient(135deg, #ff204533, #ff8a5b33) }
+
+/* Icon colors (full color) */
+.btn-analyze i{ color:#03291a }
+.btn-print i{ color:#051735 }
+.btn-reset i{ color:#2a1403 }
+.btn-export i{ color:#2a0730 }
 
 /* Analyzer shell */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem}
 .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* SCORE GAUGE */
+/* SCORE GAUGE (water fill circle) */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}
@@ -179,7 +154,7 @@ header.site{
 .ico{width:1.1em;text-align:center}
 .ico-green{color:var(--good)} .ico-orange{color:var(--warn)} .ico-red{color:var(--bad)} .ico-cyan{color:var(--accent)} .ico-purple{color:#9b5cff}
 
-/* ===== URL input: upgraded unique style ===== */
+/* URL input: glass + mini buttons */
 .url-field{
   position:relative; border-radius:16px; background:#0b0d21; border:1px solid #1b1b35;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), 0 12px 32px rgba(0,0,0,.32);
@@ -243,7 +218,7 @@ header.site{
 .comp-wave2{animation:waveX 12s linear infinite reverse}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.55rem}
 
-/* Category grid & cards (unchanged major) */
+/* Category grid & cards */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden; isolation:isolate;}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite; pointer-events:none; z-index:0;}
@@ -281,24 +256,9 @@ header.site{
 .checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
 
 /* Severity tints */
-.sev-good{
-  background:
-    linear-gradient(180deg, rgba(34,197,94,.14), rgba(34,197,94,.08)),
-    radial-gradient(100% 120% at 0% 0%, rgba(61,226,255,.06), transparent 30%);
-  border-color: rgba(34,197,94,.45);
-}
-.sev-mid{
-  background:
-    linear-gradient(180deg, rgba(245,158,11,.16), rgba(245,158,11,.08)),
-    radial-gradient(100% 120% at 0% 0%, rgba(61,226,255,.06), transparent 30%);
-  border-color: rgba(245,158,11,.45);
-}
-.sev-bad{
-  background:
-    linear-gradient(180deg, rgba(239,68,68,.16), rgba(239,68,68,.10)),
-    radial-gradient(100% 120% at 0% 0%, rgba(61,226,255,.06), transparent 30%);
-  border-color: rgba(239,68,68,.55);
-}
+.sev-good{ background:linear-gradient(180deg, rgba(34,197,94,.14), rgba(34,197,94,.08)); border-color: rgba(34,197,94,.45); }
+.sev-mid { background:linear-gradient(180deg, rgba(245,158,11,.16), rgba(245,158,11,.08)); border-color: rgba(245,158,11,.45); }
+.sev-bad { background:linear-gradient(180deg, rgba(239,68,68,.16), rgba(239,68,68,.10)); border-color: rgba(239,68,68,.55); }
 
 /* Custom checkbox (tick) */
 .checklist-item input[type="checkbox"]{
@@ -355,19 +315,24 @@ header.site{
         radial-gradient(120% 100% at 100% 0%, rgba(155,92,255,.05), transparent 35%); }
 }
 
-/* Floating Share Dock (unchanged) */
+/* Floating Share Dock — brand colors locked */
 .share-dock{
   position:fixed; right:16px; top:50%; transform:translateY(-50%);
   display:flex; flex-direction:column; gap:.5rem; z-index:85;
   background:rgba(10,12,28,.35); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:.5rem;
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px)
 }
 .share-btn{
   width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);
-  display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.06); cursor:pointer; text-decoration:none;
-  position:relative; overflow:hidden; transition:transform .15s ease, box-shadow .15s ease;
+  display:grid;place-items:center;color:#fff; cursor:pointer; text-decoration:none; position:relative; overflow:hidden;
+  transition:transform .15s ease, box-shadow .15s ease;
 }
 .share-btn:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.35) }
+.share-fb{ background:linear-gradient(135deg,#1877F2,#1e90ff) }
+.share-x { background:linear-gradient(135deg,#111,#333) }
+.share-ln{ background:linear-gradient(135deg,#0a66c2,#1a8cd8) }
+.share-wa{ background:linear-gradient(135deg,#25D366,#128C7E) }
+.share-em{ background:linear-gradient(135deg,#ef4444,#b91c1c) }
 
 /* Footer */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
@@ -378,7 +343,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
 #backTop:hover{background:rgba(255,255,255,.12)}
 
-/* ===== Language panel (left) ===== */
+/* Language panel */
 .lang-dock{ position:fixed; left:18px; top:50%; transform:translateY(-50%); z-index:80; display:flex; flex-direction:column; gap:.6rem }
 .lang-panel{ position:fixed; left:18px; top:50%; transform:translate(-6px,-50%); z-index:78; display:none; }
 .lang-card{
@@ -405,11 +370,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .score-container{width:170px}
   .analyze-row{ grid-template-columns:1fr; }
   .analyze-row .btn{ width:100%; justify-content:center; }
-  .share-dock{
-    top:auto; bottom:10px; right:50%; transform:translateX(50%);
-    flex-direction:row; padding:.35rem .45rem; border-radius:999px;
-    gap:.4rem; background:rgba(10,12,28,.55);
-  }
+  .share-dock{ top:auto; bottom:10px; right:50%; transform:translateX(50%); flex-direction:row; padding:.35rem .45rem; border-radius:999px; gap:.4rem; background:rgba(10,12,28,.55); }
   .share-btn{ width:44px;height:44px;border-radius:999px }
   .share-native{ display:grid; }
   .checklist-item{ grid-template-columns:1fr auto auto; }
@@ -426,28 +387,12 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{ animation:none !important }
   .multiHue,.multiHueFast{ filter:none !important }
 }
-@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site #backTop,.lang-dock,.lang-panel,.share-dock{display:none!important}}
-
-/* Modal (unchanged) */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:95}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
-.modal-card{width:min(980px,95vw);max-height:85vh;overflow:auto;background:var(--panel-2);border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:var(--shadow);padding:16px}
-.modal-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:8px;margin-bottom:8px}
-.modal-title{margin:0;font-weight:900}
-.modal-close{background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;padding:.35rem .6rem;cursor:pointer}
-.tabs{display:flex;gap:.5rem;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:.3rem;margin-bottom:.5rem}
-.tab{padding:.4rem .7rem;border:1px solid rgba(255,255,255,.14);border-bottom:none;border-radius:12px 12px 0 0;background:rgba(255,255,255,.05);cursor:pointer;font-weight:900}
-.tab.active{background:linear-gradient(135deg,#3de2ff33,#9b5cff33)}
-.tabpanes > div{display:none;padding:.6rem .2rem}
-.tabpanes > div.active{display:block}
-.pre{white-space:pre-wrap;background:#0b0d21;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px}
+@media print{.modal-backdrop,.modal,.lang-dock,.lang-panel,.share-dock,#backTop{display:none!important}}
 </style>
 </head>
 <body>
-<canvas id="brainCanvas" aria-hidden="true"></canvas>
-<canvas id="linesCanvas" aria-hidden="true"></canvas>
-<canvas id="linesCanvas2" aria-hidden="true"></canvas>
-<canvas id="smokeFX" aria-hidden="true"></canvas>
+
+<!-- (Removed cloudy background smoke canvases) -->
 
 <!-- SVG defs -->
 <svg width="0" height="0" aria-hidden="true">
@@ -461,7 +406,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <!-- Language Dock + Panel -->
 <div class="lang-dock">
-  <button class="btn" id="langOpen" title="Language" style="width:48px;height:48px;border-radius:12px;"><i class="fa-solid fa-globe"></i></button>
+  <button class="btn btn-ghost" id="langOpen" title="Language" style="width:48px;height:48px;border-radius:12px;"><i class="fa-solid fa-globe"></i></button>
 </div>
 <div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
 
@@ -485,7 +430,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn btn-ghost" id="printTop"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+      <button class="btn btn-print" id="printTop"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
     </div>
   </header>
 
@@ -546,7 +491,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <button id="viewHumanBtn" class="btn btn-ghost"><i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%</button>
           <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
-          <button id="viewAIText" class="btn btn-neon"><i class="fa-solid fa-robot"></i> Evidence</button>
+          <button id="viewAIText" class="btn btn-ghost"><i class="fa-solid fa-robot"></i> Evidence</button>
         </div>
       </div>
     </div>
@@ -554,7 +499,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
       <form id="analyzeForm" class="analyze-form" onsubmit="return false;" aria-label="Analyze form">
         <label id="pageUrlLabel" for="analyzeUrl" class="url-label" data-i="page_url" style="display:inline-block;font-weight:900;margin-bottom:.35rem">Page URL</label>
-        <!-- Upgraded URL field -->
+
         <div class="url-field" id="urlField">
           <i class="fa-solid fa-globe url-icon"></i>
           <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" aria-describedby="analyzeStatus"/>
@@ -570,11 +515,11 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
               <span data-i="auto_check">Auto-apply checkmarks (≥ 80)</span>
             </label>
           </div>
-          <button id="analyzeBtn" class="btn btn-danger"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
-          <button class="btn btn-neon" id="printChecklist"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
-          <button class="btn btn-ghost" id="resetChecklist"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
-          <button class="btn btn-ghost" id="exportChecklist" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
-          <button class="btn btn-ghost" id="importChecklist" title="Import checklist JSON"><i class="fa-solid fa-file-import"></i> Import</button>
+          <button id="analyzeBtn" class="btn btn-analyze"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
+          <button class="btn btn-print" id="printChecklist"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+          <button class="btn btn-reset" id="resetChecklist"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
+          <button class="btn btn-export" id="exportChecklist" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
+          <button class="btn btn-export" id="importChecklist" title="Import checklist JSON"><i class="fa-solid fa-file-import"></i> Import</button>
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
@@ -600,7 +545,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                     <use href="#wave" x="0" y="8" fill="url(#waterGrad)"/><use href="#wave" x="600" y="8" fill="url(#waterGrad)"/>
                   </g>
                 </g>
-                <rect x="0" y="0" width="600" height="200" fill="transparent"/>
               </g>
             </svg>
             <canvas id="waterSmoke"></canvas>
@@ -792,7 +736,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---------- i18n with 10 languages + auto-detect ---------- */
+/* ------------------------ Language (10) + auto-detect ------------------------ */
 const I18N = {
   en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto-apply checkmarks (≥ 80)"},
   ur:{title:"سیمینٹک SEO ماسٹر اینالائزر", analyze_title:"ایک URL کا تجزیہ کریں", legend_line:"پہیّہ آپ کے مجموعی اسکور سے بھرے گا۔ <span class='legend l-green'>سبز ≥ 80</span> <span class='legend l-orange'>نارنجی 60–79</span> <span class='legend l-red'>سرخ &lt; 60</span>", overall:"مجموعی", page_url:"صفحہ URL", analyze:"تجزیہ کریں", print:"پرنٹ", reset:"ری سیٹ", auto_check:"خودکار چیک (≥ 80)"},
@@ -823,7 +767,6 @@ const LANGS = [
       const base = p.split('-')[0];
       for (const c of supported){ if (c === base || c.startsWith(base)) return c; }
       if (base==='zh') return 'zh-CN';
-      if (base==='pt') return 'en'; // fallback
     }
     return 'en';
   }
@@ -856,7 +799,6 @@ const LANGS = [
     fillList(code);
   }
 
-  // Open/close behaviors
   dockBtn.addEventListener('click', ()=>{
     panel.style.display = panel.style.display==='block' ? 'none' : 'block';
   });
@@ -865,38 +807,16 @@ const LANGS = [
   });
   panel.addEventListener('click', (e)=>{
     const it = e.target.closest('.lang-item'); if(!it) return;
-    apply(it.dataset.code);
-    panel.style.display='none';
+    apply(it.dataset.code); panel.style.display='none';
   });
 
-  // Init with storage or UA best match
   const initial = localStorage.getItem('lang') || bestMatch();
-  fillList(initial);
-  apply(initial);
+  fillList(initial); apply(initial);
 })();
 
-/* ---------- Backdrop visuals, share dock, gauge, checklist, modal, water, etc. ---------- */
-/* (All existing scripts below remain the same as in your last working version — trimmed for brevity in this section) */
-
-/* Wireframe bg */
-(function(){
-  const bc = document.getElementById('brainCanvas'), bctx = bc.getContext('2d');
-  let bw, bh, pts=[]; function rs(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; pts = Array.from({length:80},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
-  addEventListener('resize',rs,{passive:true}); rs();
-  (function loop(){ bctx.clearRect(0,0,bw,bh); for(const p of pts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>bw) p.vx*=-1; if(p.y<0||p.y>bh) p.vy*=-1; }
-    for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x, a.y-b.y); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
-})();
-
-/* Back to top */
-(function(){
-  const btn = document.getElementById('backTop'); const link = document.getElementById('toTopLink');
-  function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
-  addEventListener('scroll', onScroll, {passive:true}); onScroll();
-  const goTop = e => { e && e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); };
-  btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
-})();
-
-/* Helpers */
+/* ------------------------ Helpers & visual routines ------------------------ */
+function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
+function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 function setChipTone(el, value){
   if (!el) return;
   el.classList.remove('chip-good','chip-mid','chip-bad');
@@ -906,9 +826,8 @@ function setChipTone(el, value){
   else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
   else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
 }
-function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 
-/* Score Gauge */
+/* Gauge control */
 const GAUGE = { rect:null, stop1:null, stop2:null, r1:null, r2:null, arc:null, text:null, H:200, CIRC: 2*Math.PI*95 };
 function setScoreWheel(value){
   if (!GAUGE.rect){
@@ -947,55 +866,14 @@ function setScoreWheel(value){
   setChipTone(document.getElementById('overallChip'), v);
 }
 
-/* Share dock FX + links */
+/* Global hue drift for multi-color water */
 (function(){
-  const dock = document.getElementById('shareDock');
-  function fxBurstFrom(el, count=14, hueOffset=0){
-    const rect = el.getBoundingClientRect();
-    const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
-    const wrap = document.createElement('div'); wrap.className='fx-burst'; document.body.appendChild(wrap);
-    for(let i=0;i<count;i++){
-      const sp = document.createElement('div'); sp.className='fx-spark';
-      const ang = (Math.PI*2) * (i/count) + Math.random()*0.6, dist = 30 + Math.random()*70;
-      sp.style.left = cx + 'px'; sp.style.top  = cy + 'px';
-      sp.style.setProperty('--dx', (Math.cos(ang)*dist)+'px');
-      sp.style.setProperty('--dy', (Math.sin(ang)*dist)+'px');
-      const hue = (hueOffset + i*30) % 360;
-      sp.style.background = `radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.2) 40%, hsla(${hue}, 90%, 60%, 0) 70%)`;
-      wrap.appendChild(sp);
-    }
-    setTimeout(()=> wrap.remove(), 820);
-  }
-  function ripple(e, el){
-    const r = document.createElement('span');
-    r.style.cssText = 'position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);background:radial-gradient(circle, rgba(255,255,255,.45) 0%, rgba(255,255,255,.15) 40%, rgba(255,255,255,0) 70%);width:10px;height:10px;animation:r .7s ease-out forwards;z-index:2';
-    const rect = el.getBoundingClientRect();
-    r.style.left = (e.clientX - rect.left) + 'px'; r.style.top  = (e.clientY - rect.top)  + 'px';
-    el.appendChild(r);
-    r.addEventListener('animationend', ()=> r.remove());
-  }
-  const style = document.createElement('style'); style.textContent='@keyframes r{to{width:220px;height:220px;opacity:0}}'; document.head.appendChild(style);
-  dock.addEventListener('click', e=>{
-    const btn = e.target.closest('.share-btn'); if (!btn) return;
-    ripple(e, btn);
-    const hue = btn.classList.contains('share-fb') ? 220 :
-                btn.classList.contains('share-x')  ? 0   :
-                btn.classList.contains('share-ln') ? 200 :
-                btn.classList.contains('share-wa') ? 140 : 10;
-    fxBurstFrom(btn, 16, hue);
-  });
-  const url = encodeURIComponent(location.href);
-  const title = encodeURIComponent(document.title);
-  document.getElementById('shareFb').href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-  document.getElementById('shareX').href  = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
-  document.getElementById('shareLn').href = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`;
-  document.getElementById('shareWa').href = `https://api.whatsapp.com/send?text=${title}%20${url}`;
-  document.getElementById('shareEm').href = `mailto:?subject=${title}&body=${url}`;
-  const nat = document.getElementById('shareNative');
-  if(nat){ nat.addEventListener('click', async ()=>{ try{ if(navigator.share){ await navigator.share({ title: document.title, url: location.href }); } else { window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`,'_blank'); } }catch(e){} }); }
+  const root=document.documentElement; let start=performance.now();
+  function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame); }
+  requestAnimationFrame(frame);
 })();
 
-/* Category smoke + completion smoke (unchanged logic) */
+/* Smoky water overlays for bars */
 const CatSmoke = (function(){
   const canvases = [];
   function attachAll(){
@@ -1069,8 +947,7 @@ const CompSmoke = (function(){
   return { setPct(p){ ratio=Math.max(0,Math.min(1,p/100)); } };
 })();
 
-/* URL helpers & Water smoke */
-function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
+/* Water progress controller */
 const WaterSmoke = (function(){
   const canvas = document.getElementById('waterSmoke');
   const ctx = canvas ? canvas.getContext('2d') : null;
@@ -1106,8 +983,6 @@ const WaterSmoke = (function(){
   window.addEventListener('resize', ()=> running && resize(), {passive:true});
   return { start, stop, setLevel };
 })();
-
-/* Analyze progress controller */
 const Water = (function(){
   const wrap = document.getElementById('waterWrap');
   const bar  = document.getElementById('waterBar');
@@ -1153,13 +1028,162 @@ const Water = (function(){
   return { start, finish, reset, set, show, hide };
 })();
 
-/* Global hue animation */
-(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+/* ------------------------ Share links + back to top ------------------------ */
+(function(){
+  const url = encodeURIComponent(location.href);
+  const title = encodeURIComponent(document.title);
+  const s = id => document.getElementById(id);
+  s('shareFb').href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+  s('shareX').href  = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+  s('shareLn').href = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`;
+  s('shareWa').href = `https://api.whatsapp.com/send?text=${title}%20${url}`;
+  s('shareEm').href = `mailto:?subject=${title}&body=${url}`;
+  const nat = s('shareNative');
+  if(nat){ nat.addEventListener('click', async ()=>{ try{ if(navigator.share){ await navigator.share({ title: document.title, url: location.href }); } else { window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`,'_blank'); } }catch(e){} }); }
+})();
+(function(){
+  const btn = document.getElementById('backTop'); const link = document.getElementById('toTopLink');
+  function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
+  addEventListener('scroll', onScroll, {passive:true}); onScroll();
+  const goTop = e => { e && e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); };
+  btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
+})();
 
-/* Checklist + scoring + modal etc. (unchanged logic from your working version) */
-/* ... — To keep this message manageable, the rest of the JS (auto-ticking, analyze() fetch, badges, modal content, etc.) stays identical to the last working full file I sent. If you need me to paste the entire JS block again, I can do that, but your current copy already includes it and it doesn’t change for this feature. ... */
+/* ------------------------ Analyze + Checklist glue ------------------------ */
+const ANALYZE_URL = "{{ url('/analyze') }}"; // your Laravel route
+const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-/* Paste & Clear controls for URL field */
+const CAT_RANGES = [
+  [1,5], [6,9], [10,13], [14,17], [18,21], [22,25]
+];
+
+function badgeTone(el, score){
+  el.classList.remove('score-good','score-mid','score-bad');
+  if (score>=80) el.classList.add('score-good');
+  else if (score>=60) el.classList.add('score-mid');
+  else el.classList.add('score-bad');
+}
+function upsert(obj, key, def){ return (obj && obj[key]!=null)? obj[key] : def; }
+
+function updateCategoryBars(){
+  document.querySelectorAll('.category-card').forEach((card, idx)=>{
+    const total = parseInt(card.querySelector('.total-count').textContent,10)||0;
+    const checked = card.querySelectorAll('input[type="checkbox"]:checked').length;
+    const pct = total ? Math.round(checked/total*100) : 0;
+    card.querySelector('.checked-count').textContent = checked;
+    const fillRect = document.getElementById(`catFillRect-${idx}`); if (fillRect) fillRect.setAttribute('width', String(6*pct));
+    const pctEl = document.getElementById(`catPct-${idx}`); if (pctEl) pctEl.textContent = `${checked}/${total} • ${pct}%`;
+    if (typeof CatSmoke?.setPct === 'function') CatSmoke.setPct(idx, pct);
+  });
+
+  // Completion bar
+  const totalAll = 25;
+  const checkedAll = document.querySelectorAll('.checklist input[type="checkbox"]:checked').length;
+  const pctAll = Math.round(checkedAll/totalAll*100);
+  const compRect = document.getElementById('compClipRect'); if (compRect) compRect.setAttribute('width', String(6*pctAll));
+  document.getElementById('compPct').textContent = pctAll + '%';
+  document.getElementById('progressCaption').textContent = `${checkedAll} of ${totalAll} items completed`;
+  if (typeof CompSmoke?.setPct === 'function') CompSmoke.setPct(pctAll);
+}
+
+function autoTickByScores(scoresMap){
+  // scoresMap: { '1': 90, '2': 50, ... }
+  let autoCount = 0;
+  for (let i=1;i<=25;i++){
+    const score = Number(scoresMap?.[i] ?? scoresMap?.[String(i)] ?? scoresMap?.[`item${i}`] ?? -1);
+    const cb = document.getElementById(`ck-${i}`);
+    const badge = document.getElementById(`sc-${i}`);
+    if (badge && !Number.isNaN(score) && score>=0){
+      badge.textContent = Math.round(score);
+      badgeTone(badge, score);
+    }
+    if (!cb) continue;
+    const should = score>=80 && document.getElementById('autoApply').checked;
+    const prev = cb.checked;
+    cb.checked = should ? true : cb.checked;
+    if (cb.checked && !prev && should){
+      cb.closest('.checklist-item')?.classList.add('flash-row');
+      setTimeout(()=> cb.closest('.checklist-item')?.classList.remove('flash-row'), 700);
+      autoCount++;
+    }
+  }
+  setText('rAutoCount', autoCount);
+  updateCategoryBars();
+}
+
+async function analyze(){
+  const input = document.getElementById('analyzeUrl');
+  let url = normalizeUrl(input.value);
+  if (!url) { input.focus(); return; }
+
+  // visual start
+  Water.start();
+  document.getElementById('analyzeStatus').textContent = 'Fetching & analyzing…';
+  document.getElementById('analyzeReport').style.display = 'none';
+
+  try{
+    const res = await fetch(ANALYZE_URL, {
+      method:'POST',
+      headers: {
+        'Content-Type':'application/json',
+        'Accept':'application/json',
+        'X-CSRF-TOKEN': CSRF
+      },
+      body: JSON.stringify({ url })
+    });
+
+    const data = await res.json().catch(()=> ({}));
+
+    // Apply values resiliently (handles various backend shapes)
+    const overall = Number(
+      upsert(data,'overall', upsert(data,'overallScore', upsert(data,'score', 0)))
+    );
+    const contentScore = Number(
+      upsert(data,'contentScore', upsert(data,'content', upsert(data,'content_score', 0)))
+    );
+    const humanPct = Number(upsert(data,'humanPct', upsert(data,'human', 0)));
+    const aiPct    = Number(upsert(data,'aiPct', upsert(data,'ai', 0)));
+    const writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
+
+    // Update gauge + chips
+    setScoreWheel(overall||0);
+    setText('contentScoreInline', Math.round(contentScore||0));
+    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
+
+    const badge = document.getElementById('aiBadge');
+    if (badge){ badge.querySelector('b').textContent = writer; }
+
+    setText('humanPct', Math.round(humanPct||0));
+    setText('aiPct', Math.round(aiPct||0));
+
+    // Report chips (if present)
+    setText('rStatus', upsert(data,'httpStatus', '—'));
+    setText('rTitleLen', upsert(data,'titleLen', '—'));
+    setText('rMetaLen', upsert(data,'metaLen', '—'));
+    setText('rCanonical', upsert(data,'canonical', '—'));
+    setText('rRobots', upsert(data,'robots', '—'));
+    setText('rViewport', upsert(data,'viewport', '—'));
+    setText('rHeadings', upsert(data,'headings', '—'));
+    setText('rInternal', upsert(data,'internalLinks', '—'));
+    setText('rSchema', upsert(data,'schema', '—'));
+
+    // Checklist scores map can be: data.itemScores / data.scores / data.checks
+    const scoresMap = data.itemScores || data.scores || data.checks || {};
+    autoTickByScores(scoresMap);
+
+    // Finish visuals
+    Water.finish();
+    document.getElementById('analyzeStatus').textContent = 'Analysis complete';
+    document.getElementById('analyzeReport').style.display = 'block';
+
+  }catch(e){
+    console.error(e);
+    Water.finish();
+    document.getElementById('analyzeStatus').textContent = 'Could not analyze this URL. Make sure the /analyze route is active.';
+  }
+}
+
+/* Wire controls */
 (function(){
   const input = document.getElementById('analyzeUrl');
   const pasteBtn = document.getElementById('pasteUrl');
@@ -1169,13 +1193,78 @@ const Water = (function(){
     try{
       const txt = await navigator.clipboard.readText();
       if (txt){ input.value = txt.trim(); input.dispatchEvent(new Event('input')); }
-    }catch(e){ /* ignore */ }
+    }catch(e){}
   });
   clearBtn.addEventListener('click', ()=>{ input.value=''; input.focus(); input.dispatchEvent(new Event('input')); });
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); analyze(); }});
 
-  // Enter submits
-  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('analyzeBtn').click(); }});
+  document.getElementById('analyzeBtn').addEventListener('click', analyze);
+  document.getElementById('resetChecklist').addEventListener('click', ()=>{
+    document.querySelectorAll('.checklist input[type="checkbox"]').forEach(cb=> cb.checked=false);
+    document.querySelectorAll('.score-badge').forEach(b=>{ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
+    updateCategoryBars();
+    setScoreWheel(0);
+    setText('contentScoreInline', 0); setChipTone(document.getElementById('contentScoreChip'), 0);
+    setText('humanPct','—'); setText('aiPct','—');
+    document.getElementById('aiBadge')?.querySelector('b')?.textContent = '—';
+    Water.reset();
+  });
+  document.getElementById('printTop').addEventListener('click', ()=> window.print());
+  document.getElementById('printChecklist').addEventListener('click', ()=> window.print());
+
+  // Export / Import
+  const exportBtn = document.getElementById('exportChecklist');
+  const importBtn = document.getElementById('importChecklist');
+  const importFile= document.getElementById('importFile');
+
+  exportBtn.addEventListener('click', ()=>{
+    const payload = { checked:[], scores:{} };
+    for(let i=1;i<=25;i++){
+      const cb = document.getElementById(`ck-${i}`);
+      const sc = document.getElementById(`sc-${i}`);
+      if (cb?.checked) payload.checked.push(i);
+      const s = parseInt(sc?.textContent||'NaN',10);
+      if (!Number.isNaN(s)) payload.scores[i]=s;
+    }
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'checklist.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  importBtn.addEventListener('click', ()=> importFile.click());
+  importFile.addEventListener('change', async ()=>{
+    const file = importFile.files[0]; if (!file) return;
+    try{
+      const txt = await file.text();
+      const data = JSON.parse(txt);
+      for(let i=1;i<=25;i++){
+        const cb = document.getElementById(`ck-${i}`); if (cb) cb.checked = (data.checked||[]).includes(i);
+        const sc = document.getElementById(`sc-${i}`); const val = data.scores?.[i];
+        if (sc && typeof val==='number'){ sc.textContent = val; badgeTone(sc, val); }
+      }
+      updateCategoryBars();
+    }catch(e){ alert('Invalid JSON'); }
+  });
+
+  // Improve modal basics
+  const modal = document.getElementById('tipModal');
+  const backdrop = document.getElementById('modalBackdrop');
+  function openModal(){ backdrop.style.display='block'; modal.style.display='flex'; }
+  function closeModal(){ backdrop.style.display='none'; modal.style.display='none'; }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', closeModal);
+  document.querySelectorAll('.improve-btn').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
+  });
+
+  // Initial state
+  updateCategoryBars();
 })();
+
+/* Keep the water hue moving */
+(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
 </script>
 </body>
 </html>
