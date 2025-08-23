@@ -48,7 +48,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:3.7rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language (minimal) */
+/* Language (kept minimal) */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -97,7 +97,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 /* Category grid */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 
-/* Stylish checklist cards */
+/* === Stylish checklist cards === */
 .category-card{
   position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
   border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow);
@@ -429,46 +429,35 @@ const LANGS = [["en","English"]];
   layer('linesCanvas2',110,120,a=>`rgba(255,32,69,${a*0.6})`,0.9);
 })();
 
-/* ---- Procedural multi‑color smoke (WebGL2) — FIXED & GUARDED ---- */
+/* ---- Procedural multi‑color smoke (WebGL2) ---- */
 (function(){
-  try {
-    const canvas=document.getElementById('smokeFX'); if(!canvas) return;
-    let gl; try{ gl=canvas.getContext('webgl2',{alpha:true,antialias:false,depth:false,stencil:false}); }catch(e){}
-    const dpr=Math.min(2,devicePixelRatio||1);
-    function resize(){ canvas.width=innerWidth*dpr; canvas.height=innerHeight*dpr; canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; if(gl) gl.viewport(0,0,canvas.width,canvas.height); }
-    addEventListener('resize',resize,{passive:true}); resize();
-    if(!gl) return;
-
-    const vs=`#version 300 es
-    precision highp float; const vec2 V[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));
-    out vec2 uv; void main(){ vec2 p=V[gl_VertexID]; uv=.5*(p+1.); gl_Position=vec4(p,0,1); }`;
-    const fs=`#version 300 es
-    precision highp float; in vec2 uv; out vec4 o; uniform float t;
-    float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
-    float n(vec2 p){ vec2 i=floor(p), f=fract(p); float a=h(i), b=h(i+vec2(1,0)), c=h(i+vec2(0,1)), d=h(i+vec2(1,1));
-      vec2 u=f*f*(3.-2.*f); return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y; }
-    float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
-    void main(){
-      vec2 p=(uv-vec2(1.,1.)) * vec2(2.2, 2.0);
-      p.x += t*.15; p.y += t*.10;
-      float q=f(p*1.6);
-      float d=smoothstep(.30,.95,q);
-      vec3 base=mix(vec3(.24,.88,1.),vec3(.96,.31,.41),uv.x);
-      vec3 c=mix(base, vec3(1.,.72,.28), 0.35*uv.y);
-      o=vec4(c*d, .72*d);
-    }`;
-
-    function sh(src,type){const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s;}
-    const prog=gl.createProgram();
-    gl.attachShader(prog, sh(vs, gl.VERTEX_SHADER));
-    gl.attachShader(prog, sh(fs, gl.FRAGMENT_SHADER)); // ✅ fixed
-    gl.linkProgram(prog);
-
-    const ut=gl.getUniformLocation(prog,'t');
-    (function loop(t){ requestAnimationFrame(loop); gl.useProgram(prog); gl.uniform1f(ut,t*1e-3); gl.drawArrays(gl.TRIANGLES,0,3); })(performance.now());
-  } catch(err){
-    console.warn('SmokeFX disabled:', err);
-  }
+  const canvas=document.getElementById('smokeFX'); if(!canvas) return;
+  let gl; try{ gl=canvas.getContext('webgl2',{alpha:true,antialias:false,depth:false,stencil:false}); }catch(e){}
+  const dpr=Math.min(2,devicePixelRatio||1); function resize(){ canvas.width=innerWidth*dpr; canvas.height=innerHeight*dpr; canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; if(gl) gl.viewport(0,0,canvas.width,canvas.height); } addEventListener('resize',resize,{passive:true}); resize();
+  if(!gl) return;
+  const vs=`#version 300 es
+  precision highp float; const vec2 V[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));
+  out vec2 uv; void main(){ vec2 p=V[gl_VertexID]; uv=.5*(p+1.); gl_Position=vec4(p,0,1); }`;
+  const fs=`#version 300 es
+  precision highp float; in vec2 uv; out vec4 o; uniform vec2 r; uniform float t;
+  float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+  float n(vec2 p){ vec2 i=floor(p), f=fract(p); float a=h(i), b=h(i+vec2(1,0)), c=h(i+vec2(0,1)), d=h(i+vec2(1,1));
+    vec2 u=f*f*(3.-2.*f); return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y; }
+  float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
+  void main(){
+    vec2 p=(uv-vec2(1.,1.)) * vec2(2.2, 2.0); // emit from bottom-right
+    p.x += t*.15; p.y += t*.10;
+    float q=f(p*1.6);
+    float d=smoothstep(.30,.95,q);
+    // rainbow-ish through x, brighter near emitter
+    vec3 base=mix(vec3(.24,.88,1.),vec3(.96,.31,.41),uv.x);
+    vec3 c=mix(base, vec3(1.,.72,.28), 0.35*uv.y);
+    o=vec4(c*d, .72*d);
+  }`;
+  function sh(src,type){const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s;}
+  const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl.VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
+  const ut=gl.getUniformLocation(prog,'t');
+  (function loop(t){ requestAnimationFrame(loop); gl.useProgram(prog); gl.uniform1f(ut,t*1e-3); gl.drawArrays(gl.TRIANGLES,0,3); })(performance.now());
 })();
 
 /* ---- Back to Top ---- */
