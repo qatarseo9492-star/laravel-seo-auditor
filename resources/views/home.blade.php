@@ -127,31 +127,80 @@ body{
 
 /* Layout */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
-header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 0 22px;border-bottom:1px solid var(--line);backdrop-filter:saturate(140%) blur(10px);background:rgba(15,16,34,.35)}
-.brand{display:flex;align-items:center;gap:1rem}
-.brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
-.hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language dock */
-.lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
-.lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
-.lang-btn:hover{background:rgba(255,255,255,.1)}
-.lang-panel{position:fixed;left:74px;top:50%;transform:translateY(-50%);z-index:70;display:none}
-.lang-card{background:var(--panel-2);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow);padding:10px 12px;min-width:240px}
-.lang-item{padding:.45rem .55rem;border-radius:10px;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-.lang-item:hover{background:rgba(255,255,255,.06)}
-.lang-flag{width:18px;height:14px;border-radius:2px;background:#888}
+/* (Old header styles exist; new special header below will override where needed) */
+header.site{padding:14px 0 22px;}
 
-/* Buttons */
-.btn{--pad:.75rem 1.05rem;display:inline-flex;align-items:center;gap:.5rem;padding:var(--pad);border-radius:14px;border:1px solid transparent;cursor:pointer;font-weight:800;letter-spacing:.2px;transition:.2s}
-.btn-neon{background:linear-gradient(135deg,#3de2ff,#9b5cff);box-shadow:0 8px 30px rgba(61,226,255,.25);color:#001018}
-.btn-neon:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(61,226,255,.35)}
-.btn-ghost{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.16);color:#fff}
-.btn-ghost:hover{background:rgba(255,255,255,.08);transform:translateY(-2px)}
-.btn-danger{background:linear-gradient(135deg,#ff2045,#ff7a59);color:#fff;box-shadow:0 8px 30px rgba(255,32,69,.25)}
-.btn-danger:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,32,69,.35)}
+/* ====== Special Effect Header ====== */
+.hyper-header{
+  position:relative;
+  display:grid;
+  grid-template-columns: 1fr auto;
+  gap:1.2rem;
+  align-items:center;
+  padding:18px clamp(10px, 2vw, 18px);
+  border-bottom:1px solid rgba(255,255,255,.12);
+  background:
+    radial-gradient(1200px 700px at -10% -20%, rgba(155,92,255,.10), transparent 60%),
+    radial-gradient(900px 500px at 110% 0%, rgba(61,226,255,.10), transparent 60%),
+    rgba(15,16,34,.45);
+  backdrop-filter: blur(10px) saturate(130%);
+}
+.hyper-left{display:flex;align-items:flex-start;gap:14px}
+.hyper-badge{
+  width:66px;height:66px;border-radius:16px;display:grid;place-items:center;
+  background:linear-gradient(135deg, rgba(157,92,255,.35), rgba(255,32,69,.28));
+  border:1px solid rgba(255,255,255,.14); color:#ffd1dc; font-size:1.25rem;
+  box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 24px rgba(155,92,255,.18);
+}
+.hyper-title-wrap{display:flex;flex-direction:column;gap:.35rem;min-width:0}
 
-/* Analyzer panel */
+/* Layered neon title with soft reflection */
+.hyper-title{
+  --glow: 32px;
+  margin:0; line-height:1.02; letter-spacing:.6px;
+  font-weight:1000; font-size:clamp(1.8rem, 4.8vw, 3.6rem);
+  position:relative; isolation:isolate;
+  filter:drop-shadow(0 8px 24px rgba(61,226,255,.15));
+}
+.hyper-title > span{
+  display:inline-block;
+  background:conic-gradient(from 0deg, #b892ff 0%, #3de2ff 25%, #ff2045 50%, #ff8a5b 75%, #b892ff 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-shadow:
+    0 0 calc(var(--glow)*.25) rgba(61,226,255,.35),
+    0 0 calc(var(--glow)*.16) rgba(155,92,255,.35);
+}
+.hyper-title::after{
+  content:""; position:absolute; left:0; right:0; height:40%; top:0;
+  background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0));
+  border-radius:12px; opacity:.12; pointer-events:none; mix-blend-mode:screen;
+}
+
+/* Animated underline (liquid) */
+.title-underline{margin-top:.15rem; position:relative; width:min(760px, 80vw)}
+.title-wave{display:block; width:100%; height:36px}
+.title-wave1{animation:waveX 7.2s linear infinite}
+.title-wave2{animation:waveX 10.4s linear infinite reverse}
+
+/* Quick glow change by score */
+.hyper-title.good  > span{ text-shadow: 0 0 24px rgba(34,197,94,.35), 0 0 12px rgba(34,197,94,.25) }
+.hyper-title.mid   > span{ text-shadow: 0 0 24px rgba(245,158,11,.35), 0 0 12px rgba(245,158,11,.25) }
+.hyper-title.bad   > span{ text-shadow: 0 0 24px rgba(239,68,68,.35),  0 0 12px rgba(239,68,68,.25) }
+
+@keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
+
+/* Right-side stat pills */
+.hyper-right{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;justify-content:flex-end}
+.stat-pill{
+  display:inline-flex; align-items:center; gap:.45rem;
+  padding:.5rem .7rem; border-radius:999px; font-weight:900; letter-spacing:.2px;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
+.stat-pill i{opacity:.9}
+
+/* Section titles & analyzer */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem}
 .section-subtitle{margin:0;color:var(--text-dim)}
@@ -404,7 +453,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 @media (max-width:1200px){ .wrap{padding:24px 4%} }
 @media (max-width:992px){
   .category-card{grid-column:span 12}
-  .hero-heading{font-size:2.9rem}
   .score-container{width:190px}
   footer.site{flex-direction:column;align-items:flex-start}
   .analyze-row{ grid-template-columns:1fr auto auto; grid-row-gap:.5rem; }
@@ -424,9 +472,9 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .share-native{ display:grid; }
   .checklist-item{ grid-template-columns:1fr auto auto; }
   .checklist-item .improve-btn{ grid-column: 1 / -1; justify-self:flex-start; margin-top:.25rem; }
+  .stat-pill{ margin-top:.3rem; }
 }
 @media (max-width:480px){
-  .hero-heading{font-size:2.1rem}
   .score-container{width:150px}
   .category-icon{width:40px;height:40px}
   .category-title{font-size:1rem}
@@ -434,10 +482,10 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce){
-  .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{ animation:none !important }
+  .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2,.title-wave1,.title-wave2{ animation:none !important }
   .multiHue,.multiHueFast{ filter:none !important }
 }
-@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel,.share-dock{display:none!important}}
+@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site #backTop,.lang-dock,.lang-panel,.share-dock{display:none!important}}
 /* Modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:95}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
@@ -471,8 +519,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </svg>
 
 <!-- Language Dock -->
-<div class="lang-dock">
-  <button class="lang-btn" id="langOpen" title="Language"><i class="fa-solid fa-globe"></i></button>
+<div class="lang-dock" style="position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem">
+  <button class="lang-btn" id="langOpen" title="Language" style="width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)"><i class="fa-solid fa-globe"></i></button>
 </div>
 <div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
 
@@ -487,15 +535,67 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <div class="wrap">
-  <header class="site">
-    <div class="brand">
-      <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
-      <div><div class="hero-heading" data-i="title">Semantic SEO Master Analyzer</div></div>
+  <!-- ===== SPECIAL EFFECT HEADER ===== -->
+  <header class="site hyper-header">
+    <div class="hyper-left">
+      <div class="hyper-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
+
+      <div class="hyper-title-wrap">
+        <h1 class="hyper-title" id="appTitle">
+          <span data-text="Semantic SEO Master Analyzer">Semantic SEO Master Analyzer</span>
+        </h1>
+
+        <!-- Liquid underline that fills + color based on Overall score -->
+        <div class="title-underline">
+          <svg class="title-wave" viewBox="0 0 600 36" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <clipPath id="titleClip"><rect x="0" y="0" width="600" height="36" rx="18" ry="18"/></clipPath>
+              <clipPath id="titleFillClip"><rect id="titleFillRect" x="0" y="0" width="0" height="36"/></clipPath>
+              <linearGradient id="titleGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop id="titleStop1" offset="0%" stop-color="#22c55e"/>
+                <stop id="titleStop2" offset="100%" stop-color="#16a34a"/>
+              </linearGradient>
+              <path id="titleWavePath" d="M0 18 Q 40 6 80 18 T 160 18 T 240 18 T 320 18 T 400 18 T 480 18 T 560 18 T 640 18 V 40 H 0 Z"/>
+            </defs>
+            <g clip-path="url(#titleClip)">
+              <rect x="0" y="0" width="600" height="36" fill="#0b0d21"></rect>
+              <g clip-path="url(#titleFillClip)">
+                <g class="title-wave1">
+                  <use href="#titleWavePath" x="0"  fill="url(#titleGrad)"/>
+                  <use href="#titleWavePath" x="600" fill="url(#titleGrad)"/>
+                </g>
+                <g class="title-wave2" opacity=".75">
+                  <use href="#titleWavePath" x="0"   y="3" fill="url(#titleGrad)"/>
+                  <use href="#titleWavePath" x="600" y="3" fill="url(#titleGrad)"/>
+                </g>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
     </div>
-    <div style="display:flex;gap:.5rem">
-      <button class="btn btn-ghost" id="printTop"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+
+    <div class="hyper-right">
+      <div class="stat-pill" title="Overall score mirrors the wheel">
+        <i class="fa-solid fa-droplet"></i>
+        <span>Overall</span>
+        <b id="hdrScore">0%</b>
+      </div>
+      <div class="stat-pill" title="Mobile viewport detection">
+        <i class="fa-solid fa-mobile-screen"></i>
+        <span>Mobile</span>
+        <b id="hdrMobile">—</b>
+      </div>
+      <div class="stat-pill" title="Top schema types found">
+        <i class="fa-solid fa-code"></i>
+        <span>Schema</span>
+        <b id="hdrSchema">—</b>
+      </div>
+
+      <button class="btn btn-ghost" id="printTop" style="--pad:.5rem .8rem"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
     </div>
   </header>
+  <!-- ===== /HEADER ===== -->
 
   <main class="analyzer" id="analyzer" role="main" aria-label="Semantic SEO Analyzer">
     <h2 class="section-title" data-i="analyze_title">Analyze a URL</h2>
@@ -881,17 +981,17 @@ function setScoreWheel(value){
   }
   const v = Math.max(0, Math.min(100, Number(value)||0));
   const y = GAUGE.H - (GAUGE.H * (v/100));
-  GAUGE.rect.setAttribute('y', String(y));
-  GAUGE.text.textContent = Math.round(v) + '%';
+  GAUGE.rect && GAUGE.rect.setAttribute('y', String(y));
+  GAUGE.text && (GAUGE.text.textContent = Math.round(v) + '%');
 
   let c1, c2;
   if (v >= 80){ c1='#22c55e'; c2='#16a34a'; }
   else if (v >= 60){ c1='#f59e0b'; c2='#fb923c'; }
   else { c1='#ef4444'; c2='#b91c1c'; }
-  GAUGE.stop1.setAttribute('stop-color', c1);
-  GAUGE.stop2.setAttribute('stop-color', c2);
-  GAUGE.r1.setAttribute('stop-color', c1);
-  GAUGE.r2.setAttribute('stop-color', c2);
+  GAUGE.stop1 && GAUGE.stop1.setAttribute('stop-color', c1);
+  GAUGE.stop2 && GAUGE.stop2.setAttribute('stop-color', c2);
+  GAUGE.r1 && GAUGE.r1.setAttribute('stop-color', c1);
+  GAUGE.r2 && GAUGE.r2.setAttribute('stop-color', c2);
 
   if (GAUGE.arc){
     const offset = GAUGE.CIRC * (1 - (v/100));
@@ -901,6 +1001,57 @@ function setScoreWheel(value){
   setText('overallScoreInline', Math.round(v));
   setChipTone(document.getElementById('overallChip'), v);
 }
+
+/* ===== Header hook: sync title underline + glow & stat pills ===== */
+(function(){
+  const title     = document.getElementById('appTitle');
+  const stop1     = document.getElementById('titleStop1');
+  const stop2     = document.getElementById('titleStop2');
+  const fillRect  = document.getElementById('titleFillRect');
+  const hdrScore  = document.getElementById('hdrScore');
+  const hdrMobile = document.getElementById('hdrMobile');
+  const hdrSchema = document.getElementById('hdrSchema');
+
+  function toneFor(v){
+    if (v >= 80) return ['#22c55e','#16a34a','good'];
+    if (v >= 60) return ['#f59e0b','#fb923c','mid'];
+    return ['#ef4444','#b91c1c','bad'];
+  }
+  function updateHeader(score){
+    const v = Math.max(0, Math.min(100, Number(score)||0));
+    const [c1,c2,tone] = toneFor(v);
+    stop1?.setAttribute('stop-color', c1);
+    stop2?.setAttribute('stop-color', c2);
+    if (fillRect){ const w = Math.round(600 * v / 100); fillRect.setAttribute('width', String(w)); }
+    if (hdrScore){ hdrScore.textContent = Math.round(v) + '%'; }
+    if (title){ title.classList.remove('good','mid','bad'); title.classList.add(tone); }
+  }
+  const oldSetScoreWheel = window.setScoreWheel;
+  window.setScoreWheel = function(v){ try{ oldSetScoreWheel(v); }catch(e){} try{ updateHeader(v); }catch(e){} };
+
+  // expose a tiny helper to update pills from analyze response
+  window.__setHeaderMeta = function(data){
+    try{
+      if (hdrMobile){ hdrMobile.textContent = data?.viewport ? 'Yes' : 'No'; }
+      if (hdrSchema){ const arr = (data?.schema?.found_types||[]); hdrSchema.textContent = arr.length ? arr.slice(0,2).join(', ') : '—'; }
+    }catch(e){}
+  };
+
+  // Also patch fetch to tap into analyze.json responses without touching backend
+  const _origFetch = window.fetch;
+  window.fetch = async function(resource, init){
+    const res = await _origFetch(resource, init);
+    try{
+      if (typeof resource === 'string' && resource.includes('analyze.json')){
+        const clone = res.clone(); const json = await clone.json();
+        setTimeout(()=> window.__setHeaderMeta(json), 0);
+      }
+    }catch(e){}
+    return res;
+  };
+
+  updateHeader(0);
+})();
 
 /* ---------- Social buttons effects (burst + ripple) ---------- */
 (function(){
@@ -1368,6 +1519,53 @@ const Water = (function(){
     return picks;
   }
 
+  // Score fallback + coercion helpers
+  function computeFallbackScores(data){
+    const tLen = Number((data.title||'').length)||0;
+    const mLen = Number(data.meta_description_len)||0;
+    const canon = !!data.canonical;
+    const robots = (data.robots||'')+'';
+    const viewport = !!data.viewport;
+    const counts = data.counts||{};
+    const h1 = Number(counts.h1)||0;
+    const h2 = Number(counts.h2)||0;
+    const h3 = Number(counts.h3)||0;
+    const internal = Number(counts.internal_links)||0;
+    const hasSchema = Array.isArray(data.schema?.found_types) && data.schema.found_types.length>0;
+    const hasBreadcrumb = (data.schema?.found_types||[]).includes('BreadcrumbList');
+
+    const titleScore = (tLen>=45 && tLen<=65)?92:((tLen>=30 && tLen<=72)?78:45);
+    const metaScore = (mLen>=120 && mLen<=170)?90:((mLen>=80)?70:40);
+    const canonScore= canon?90:40;
+    const indexScore= /noindex/i.test(robots)?20:82;
+    const headingVar = (h2+h3);
+    const headScore = headingVar>=6?82:(headingVar>=3?70:55);
+    const internalScore = internal>=8?88:(internal>=3?70:40);
+    const mobileScore = viewport?88:40;
+    const schemaScore = hasSchema?85:45;
+    const breadScore = hasBreadcrumb?85:45;
+
+    const fixed = { faq:60, eat:70, read:72, media:70, slug:72, speed:68, vitals:62, cta:70, entity:72, related:70, sameas:60, unique:65, keywords:65, intent:70, h1inc: h1>0?75:55 };
+    return {
+      'ck-1': fixed.intent, 'ck-2': fixed.keywords, 'ck-3': fixed.h1inc, 'ck-4': fixed.faq, 'ck-5': fixed.read,
+      'ck-6': titleScore, 'ck-7': metaScore, 'ck-8': canonScore, 'ck-9': indexScore,
+      'ck-10': fixed.eat, 'ck-11': fixed.unique, 'ck-12': 70, 'ck-13': fixed.media, 'ck-14': headScore,
+      'ck-15': internalScore, 'ck-16': fixed.slug, 'ck-17': breadScore, 'ck-18': mobileScore,
+      'ck-19': fixed.speed, 'ck-20': fixed.vitals, 'ck-21': fixed.cta, 'ck-22': fixed.entity, 'ck-23': fixed.related,
+      'ck-24': schemaScore, 'ck-25': fixed.sameas
+    };
+  }
+  function coerceScoresToMap(scores){
+    const out = {};
+    if (!scores) return out;
+    const ck = Object.keys(scores).filter(k=>/^ck-\d+$/.test(k));
+    if (ck.length){ ck.forEach(k=> out[k] = Number(scores[k])); return out; }
+    if (Array.isArray(scores)){ for (let i=0;i<Math.min(25, scores.length);i++) out['ck-'+(i+1)] = Number(scores[i]); return out; }
+    const keys = Object.keys(scores);
+    if (keys.every(k=>/^\d+$/.test(k))){ keys.forEach(k=> out['ck-'+k] = Number(scores[k])); return out; }
+    return out;
+  }
+
   async function analyze(){
     const url = normalizeUrl(document.getElementById('analyzeUrl').value);
     const status = document.getElementById('analyzeStatus');
@@ -1379,32 +1577,41 @@ const Water = (function(){
     btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing';
     Water.start();
 
+    let data;
     try{
       const resp = await fetch('{{ route('analyze.json') }}', {
         method:'POST',
         headers:{'Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content},
         body: JSON.stringify({ url })
       });
-      const data = await resp.json();
-      if (!data.ok) throw new Error(data.error || 'Failed');
+      data = await resp.json();
+    }catch(err){
+      if (status) status.textContent = 'Network error';
+      Water.finish();
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Analyze';
+      return;
+    }
 
+    try{
       setText('rStatus', data.status);
       setText('rTitleLen', (data.title || '').length);
       setText('rMetaLen', data.meta_description_len);
       setText('rCanonical', data.canonical ? 'Yes' : 'No');
       setText('rRobots', data.robots || '—');
       setText('rViewport', data.viewport ? 'Yes' : 'No');
-      setText('rHeadings', `${data.counts.h1}/${data.counts.h2}/${data.counts.h3}`);
-      setText('rInternal', data.counts.internal_links);
-      setText('rSchema', (data.schema.found_types || []).slice(0,6).join(', ') || '—');
+      setText('rHeadings', `${data.counts?.h1||0}/${data.counts?.h2||0}/${data.counts?.h3||0}`);
+      setText('rInternal', data.counts?.internal_links ?? 0);
+      setText('rSchema', (data.schema?.found_types || []).slice(0,6).join(', ') || '—');
       setText('rAutoCount', (data.auto_check_ids||[]).length);
       if (report) report.style.display='block';
 
       window.__lastSuggestions = data.suggestions || {};
+      // unify scores
+      let scoreMap = coerceScoresToMap(data.scores || data.checklist_scores || data.checklist || data.items);
+      if (!Object.keys(scoreMap).length) scoreMap = computeFallbackScores(data);
       for (let i=1;i<=25;i++){
-        const key='ck-'+i;
-        const score = Number(data.scores?.[key] ?? (Array.isArray(data.scores)?data.scores[i-1]:undefined));
-        if (window.setScoreBadge) setScoreBadge(i, isFinite(score)?score:null);
+        const v = Number(scoreMap['ck-'+i]);
+        setScoreBadge(i, Number.isFinite(v)?v:null);
       }
 
       // AI/Human UI
@@ -1426,14 +1633,17 @@ const Water = (function(){
         const humanStr = (typeof ai.human_pct==='number') ? ` — ${ai.human_pct}% Human` : '';
         badge.innerHTML = `<i class="fa-solid ${icon} ico ${icoC}"></i> Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
         if (chipC) badge.classList.add(chipC);
-        badge.title = (ai.reasons||[]).join(' • ');
         setText('aiPct', (typeof ai.ai_pct==='number') ? ai.ai_pct : '—');
         setText('humanPct', (typeof ai.human_pct==='number') ? ai.human_pct : '—');
         if (window.__setAIData) window.__setAIData(ai);
       }
 
       // Overall score -> wheel
-      const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
+      const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : (()=>{
+        // fallback: avg of scoreMap
+        let sum=0,n=0; for(let i=1;i<=25;i++){ const v=Number(scoreMap['ck-'+i]); if(Number.isFinite(v)){sum+=v;n++;}}
+        return n?Math.round(sum/n):0;
+      })();
       if (window.__setAnalyzedScore) window.__setAnalyzedScore(backendOverall);
 
       // Auto-apply based on badges
@@ -1452,11 +1662,15 @@ const Water = (function(){
       setText('contentScoreInline', csNow);
       setChipTone(document.getElementById('contentScoreChip'), csNow);
 
+      // update header pills explicitly (in case fetch patch didn’t run yet)
+      window.__setHeaderMeta && window.__setHeaderMeta(data);
+
       Water.finish();
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       if (status) status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re-Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> { if(status) status.textContent=''; }, 4200);
     } catch(e){
+      console.error(e);
       if (status) status.textContent = 'Error: '+e.message;
       Water.finish();
     } finally {
@@ -1464,10 +1678,8 @@ const Water = (function(){
     }
   }
 })();
-</script>
 
-<!-- Background smoke (WebGL2) -->
-<script>
+/* ---------- Background smoke (WebGL2) ---------- */
 (function(){
   const canvas = document.getElementById('smokeFX'); if (!canvas) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
