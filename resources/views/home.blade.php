@@ -917,7 +917,7 @@ const Water = (function(){
   requestAnimationFrame(frame);
 })();
 
-/* ---------- Analyze flow (robust auto-select ≥ 80) ---------- */
+/* ---------- Analyze flow (robust auto-select from RENDERED badges ≥ 80) ---------- */
 (function(){
   const $ = s => document.querySelector(s);
   const AUTO_SCORE_THRESHOLD = 80;
@@ -943,48 +943,18 @@ const Water = (function(){
   document.getElementById('analyzeForm').addEventListener('submit', (e)=>{ e.preventDefault(); document.getElementById('analyzeBtn').click(); });
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
 
-  // --- Extract ids with score ≥ 80 from ANY reasonable shape ---
-  function idsFromAnyScores(scores){
-    const out = new Set();
-    if (!scores) return out;
-
-    // Case A: array of numbers (index 0=>ck-1, etc.)
-    if (Array.isArray(scores)){
-      scores.forEach((v, i)=>{
-        const num = Number(v);
-        if (Number.isFinite(num) && num >= AUTO_SCORE_THRESHOLD){
-          out.add('ck-'+(i+1));
-        }
-      });
-      return out;
+  // ---- NEW: read the visible badges (#sc-N) and check items with score ≥ 80 ----
+  function autoSelectFromRenderedBadges(){
+    const picks = new Set();
+    for(let i=1;i<=25;i++){
+      const badge = document.getElementById('sc-'+i);
+      if(!badge) continue;
+      const val = parseInt((badge.textContent||'').trim(), 10);
+      if(Number.isFinite(val) && val >= AUTO_SCORE_THRESHOLD){
+        picks.add('ck-'+i);
+      }
     }
-
-    // Case B: array of objects [{id:'ck-1', score:85}, ...]
-    if (Array.isArray(scores.items)){
-      scores.items.forEach(it=>{
-        const id = it?.id || it?.key;
-        const val = Number(it?.score ?? it?.value);
-        if (id && Number.isFinite(val) && val >= AUTO_SCORE_THRESHOLD){
-          // map numeric id to ck-n
-          const m = String(id).match(/^(\d+)$/);
-          out.add(m ? ('ck-'+m[1]) : String(id));
-        }
-      });
-    }
-
-    // Case C: object map {'ck-1': 90, '2': 88, label:'score', ...}
-    Object.entries(scores).forEach(([k, v])=>{
-      const val = Number(v?.score ?? v?.value ?? v);
-      if (!Number.isFinite(val) || val < AUTO_SCORE_THRESHOLD) return;
-      let id = k;
-      const m1 = String(k).match(/^ck-(\d+)$/);
-      const m2 = String(k).match(/^(\d+)$/);
-      if (m1) id = 'ck-'+m1[1];
-      else if (m2) id = 'ck-'+m2[1];
-      out.add(id);
-    });
-
-    return out;
+    return picks;
   }
 
   async function analyze(){
@@ -1019,9 +989,13 @@ const Water = (function(){
       setText('rAutoCount', (data.auto_check_ids||[]).length);
       if (report) report.style.display='block';
 
-      // Suggestions + per item scores (also paint badges)
+      // Suggestions + paint badges
       window.__lastSuggestions = data.suggestions || {};
-      for (let i=1;i<=25;i++){ const key='ck-'+i; const score = Number(data.scores?.[key] ?? (Array.isArray(data.scores)?data.scores[i-1]:undefined)); if (window.setScoreBadge) setScoreBadge(i, isFinite(score)?score:null); }
+      for (let i=1;i<=25;i++){
+        const key='ck-'+i;
+        const score = Number(data.scores?.[key] ?? (Array.isArray(data.scores)?data.scores[i-1]:undefined));
+        if (window.setScoreBadge) setScoreBadge(i, isFinite(score)?score:null);
+      }
 
       // AI/Human UI
       const ai = data.ai_detection || {};
@@ -1052,10 +1026,11 @@ const Water = (function(){
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
       if (window.__setAnalyzedScore) window.__setAnalyzedScore(backendOverall);
 
-      // ===== Auto-apply: union of backend auto_check_ids and items with score ≥ 80 (robust shapes)
+      // ===== Auto-apply: union of backend auto_check_ids + scores≥80 derived from RENDERED badges
       if (document.getElementById('autoApply').checked) {
-        const fromScores = idsFromAnyScores(data.scores);
-        const union = new Set([...(data.auto_check_ids||[]), ...fromScores]);
+        const fromBadges = autoSelectFromRenderedBadges(); // <- robust (connected to visible results)
+        const union = new Set([...(data.auto_check_ids||[]), ...fromBadges]);
+
         const all = document.querySelectorAll('#analyzer input[type="checkbox"]');
         all.forEach(cb => cb.checked = union.has(cb.id));
 
