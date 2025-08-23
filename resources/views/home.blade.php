@@ -128,77 +128,36 @@ body{
 /* Layout */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
-/* (Old header styles exist; new special header below will override where needed) */
-header.site{padding:14px 0 22px;}
-
-/* ====== Special Effect Header ====== */
-.hyper-header{
-  position:relative;
-  display:grid;
-  grid-template-columns: 1fr auto;
-  gap:1.2rem;
-  align-items:center;
-  padding:18px clamp(10px, 2vw, 18px);
-  border-bottom:1px solid rgba(255,255,255,.12);
-  background:
-    radial-gradient(1200px 700px at -10% -20%, rgba(155,92,255,.10), transparent 60%),
-    radial-gradient(900px 500px at 110% 0%, rgba(61,226,255,.10), transparent 60%),
-    rgba(15,16,34,.45);
-  backdrop-filter: blur(10px) saturate(130%);
+/* ===== Simple header (restored) ===== */
+header.site{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; padding:14px 0 22px; border-bottom:1px solid rgba(255,255,255,.08);
 }
-.hyper-left{display:flex;align-items:flex-start;gap:14px}
-.hyper-badge{
-  width:66px;height:66px;border-radius:16px;display:grid;place-items:center;
-  background:linear-gradient(135deg, rgba(157,92,255,.35), rgba(255,32,69,.28));
-  border:1px solid rgba(255,255,255,.14); color:#ffd1dc; font-size:1.25rem;
-  box-shadow:0 10px 30px rgba(0,0,0,.35), inset 0 0 24px rgba(155,92,255,.18);
+.brand{ display:flex; align-items:center; gap:.8rem; min-width:0 }
+.brand-badge{
+  width:48px; height:48px; border-radius:12px; display:grid; place-items:center;
+  background:linear-gradient(135deg, rgba(157,92,255,.25), rgba(61,226,255,.25));
+  border:1px solid rgba(255,255,255,.14); color:#fff; font-size:1.05rem;
+  box-shadow:0 8px 22px rgba(0,0,0,.28);
 }
-.hyper-title-wrap{display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.brand-info{ display:flex; flex-direction:column; min-width:0 }
+.hero-heading{ font-weight:1000; letter-spacing:.4px; font-size:clamp(1.4rem,3.2vw,2rem) }
+.hero-sub{ color:var(--text-dim); font-size:.95rem }
+.header-actions{ display:flex; gap:.5rem; align-items:center }
+@media (max-width:768px){ header.site{ flex-direction:column; align-items:flex-start; gap:.6rem } }
 
-/* Layered neon title with soft reflection */
-.hyper-title{
-  --glow: 32px;
-  margin:0; line-height:1.02; letter-spacing:.6px;
-  font-weight:1000; font-size:clamp(1.8rem, 4.8vw, 3.6rem);
-  position:relative; isolation:isolate;
-  filter:drop-shadow(0 8px 24px rgba(61,226,255,.15));
+/* ======= Buttons (minimal) ======= */
+.btn{
+  display:inline-flex; align-items:center; gap:.5rem; cursor:pointer;
+  padding:.55rem .9rem; border-radius:12px; border:1px solid rgba(255,255,255,.16);
+  color:#fff; background:rgba(255,255,255,.06); font-weight:800; letter-spacing:.2px;
 }
-.hyper-title > span{
-  display:inline-block;
-  background:conic-gradient(from 0deg, #b892ff 0%, #3de2ff 25%, #ff2045 50%, #ff8a5b 75%, #b892ff 100%);
-  -webkit-background-clip:text; background-clip:text; color:transparent;
-  text-shadow:
-    0 0 calc(var(--glow)*.25) rgba(61,226,255,.35),
-    0 0 calc(var(--glow)*.16) rgba(155,92,255,.35);
-}
-.hyper-title::after{
-  content:""; position:absolute; left:0; right:0; height:40%; top:0;
-  background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,0));
-  border-radius:12px; opacity:.12; pointer-events:none; mix-blend-mode:screen;
-}
-
-/* Animated underline (liquid) */
-.title-underline{margin-top:.15rem; position:relative; width:min(760px, 80vw)}
-.title-wave{display:block; width:100%; height:36px}
-.title-wave1{animation:waveX 7.2s linear infinite}
-.title-wave2{animation:waveX 10.4s linear infinite reverse}
-
-/* Quick glow change by score */
-.hyper-title.good  > span{ text-shadow: 0 0 24px rgba(34,197,94,.35), 0 0 12px rgba(34,197,94,.25) }
-.hyper-title.mid   > span{ text-shadow: 0 0 24px rgba(245,158,11,.35), 0 0 12px rgba(245,158,11,.25) }
-.hyper-title.bad   > span{ text-shadow: 0 0 24px rgba(239,68,68,.35),  0 0 12px rgba(239,68,68,.25) }
-
-@keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
-
-/* Right-side stat pills */
-.hyper-right{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;justify-content:flex-end}
-.stat-pill{
-  display:inline-flex; align-items:center; gap:.45rem;
-  padding:.5rem .7rem; border-radius:999px; font-weight:900; letter-spacing:.2px;
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
-  box-shadow:0 6px 18px rgba(0,0,0,.25);
-}
-.stat-pill i{opacity:.9}
+.btn i{opacity:.95}
+.btn:hover{ background:rgba(255,255,255,.12) }
+.btn:disabled{ opacity:.6; cursor:not-allowed }
+.btn-ghost{ background:transparent }
+.btn-neon{ background:linear-gradient(135deg, #3de2ff33, #9b5cff33) }
+.btn-danger{ background:linear-gradient(135deg, #ff204533, #ff8a5b33) }
 
 /* Section titles & analyzer */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
@@ -472,7 +431,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .share-native{ display:grid; }
   .checklist-item{ grid-template-columns:1fr auto auto; }
   .checklist-item .improve-btn{ grid-column: 1 / -1; justify-self:flex-start; margin-top:.25rem; }
-  .stat-pill{ margin-top:.3rem; }
 }
 @media (max-width:480px){
   .score-container{width:150px}
@@ -482,7 +440,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce){
-  .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2,.title-wave1,.title-wave2{ animation:none !important }
+  .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{ animation:none !important }
   .multiHue,.multiHueFast{ filter:none !important }
 }
 @media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site #backTop,.lang-dock,.lang-panel,.share-dock{display:none!important}}
@@ -520,7 +478,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <!-- Language Dock -->
 <div class="lang-dock" style="position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem">
-  <button class="lang-btn" id="langOpen" title="Language" style="width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)"><i class="fa-solid fa-globe"></i></button>
+  <button class="btn" id="langOpen" title="Language" style="width:48px;height:48px;border-radius:12px;"><i class="fa-solid fa-globe"></i></button>
 </div>
 <div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
 
@@ -535,67 +493,25 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <div class="wrap">
-  <!-- ===== SPECIAL EFFECT HEADER ===== -->
-  <header class="site hyper-header">
-    <div class="hyper-left">
-      <div class="hyper-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
-
-      <div class="hyper-title-wrap">
-        <h1 class="hyper-title" id="appTitle">
-          <span data-text="Semantic SEO Master Analyzer">Semantic SEO Master Analyzer</span>
-        </h1>
-
-        <!-- Liquid underline that fills + color based on Overall score -->
-        <div class="title-underline">
-          <svg class="title-wave" viewBox="0 0 600 36" preserveAspectRatio="none" aria-hidden="true">
-            <defs>
-              <clipPath id="titleClip"><rect x="0" y="0" width="600" height="36" rx="18" ry="18"/></clipPath>
-              <clipPath id="titleFillClip"><rect id="titleFillRect" x="0" y="0" width="0" height="36"/></clipPath>
-              <linearGradient id="titleGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop id="titleStop1" offset="0%" stop-color="#22c55e"/>
-                <stop id="titleStop2" offset="100%" stop-color="#16a34a"/>
-              </linearGradient>
-              <path id="titleWavePath" d="M0 18 Q 40 6 80 18 T 160 18 T 240 18 T 320 18 T 400 18 T 480 18 T 560 18 T 640 18 V 40 H 0 Z"/>
-            </defs>
-            <g clip-path="url(#titleClip)">
-              <rect x="0" y="0" width="600" height="36" fill="#0b0d21"></rect>
-              <g clip-path="url(#titleFillClip)">
-                <g class="title-wave1">
-                  <use href="#titleWavePath" x="0"  fill="url(#titleGrad)"/>
-                  <use href="#titleWavePath" x="600" fill="url(#titleGrad)"/>
-                </g>
-                <g class="title-wave2" opacity=".75">
-                  <use href="#titleWavePath" x="0"   y="3" fill="url(#titleGrad)"/>
-                  <use href="#titleWavePath" x="600" y="3" fill="url(#titleGrad)"/>
-                </g>
-              </g>
-            </g>
-          </svg>
-        </div>
+  <!-- ===== Simple Header (restored) ===== -->
+  <header class="site">
+    <div class="brand">
+      <div class="brand-badge" aria-hidden="true">
+        <i class="fa-solid fa-brain"></i>
+      </div>
+      <div class="brand-info">
+        <div class="hero-heading" data-i="title">Semantic SEO Master Analyzer</div>
+        <div class="hero-sub">Analyze URLs, get scores & suggestions</div>
       </div>
     </div>
 
-    <div class="hyper-right">
-      <div class="stat-pill" title="Overall score mirrors the wheel">
-        <i class="fa-solid fa-droplet"></i>
-        <span>Overall</span>
-        <b id="hdrScore">0%</b>
-      </div>
-      <div class="stat-pill" title="Mobile viewport detection">
-        <i class="fa-solid fa-mobile-screen"></i>
-        <span>Mobile</span>
-        <b id="hdrMobile">—</b>
-      </div>
-      <div class="stat-pill" title="Top schema types found">
-        <i class="fa-solid fa-code"></i>
-        <span>Schema</span>
-        <b id="hdrSchema">—</b>
-      </div>
-
-      <button class="btn btn-ghost" id="printTop" style="--pad:.5rem .8rem"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+    <div class="header-actions">
+      <button class="btn btn-ghost" id="printTop">
+        <i class="fa-solid fa-print"></i> <span data-i="print">Print</span>
+      </button>
     </div>
   </header>
-  <!-- ===== /HEADER ===== -->
+  <!-- ===== /Header ===== -->
 
   <main class="analyzer" id="analyzer" role="main" aria-label="Semantic SEO Analyzer">
     <h2 class="section-title" data-i="analyze_title">Analyze a URL</h2>
@@ -939,7 +855,7 @@ const LANGS = [["en","English"]];
   let bw, bh, pts=[]; function rs(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; pts = Array.from({length:80},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
   addEventListener('resize',rs,{passive:true}); rs();
   (function loop(){ bctx.clearRect(0,0,bw,bh); for(const p of pts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>bw) p.vx*=-1; if(p.y<0||p.y>bh) p.vy*=-1; }
-    for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
+    for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x,bh? a.y-b.y:0); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
 })();
 
 /* ---------- Back to Top ---------- */
@@ -1002,57 +918,6 @@ function setScoreWheel(value){
   setChipTone(document.getElementById('overallChip'), v);
 }
 
-/* ===== Header hook: sync title underline + glow & stat pills ===== */
-(function(){
-  const title     = document.getElementById('appTitle');
-  const stop1     = document.getElementById('titleStop1');
-  const stop2     = document.getElementById('titleStop2');
-  const fillRect  = document.getElementById('titleFillRect');
-  const hdrScore  = document.getElementById('hdrScore');
-  const hdrMobile = document.getElementById('hdrMobile');
-  const hdrSchema = document.getElementById('hdrSchema');
-
-  function toneFor(v){
-    if (v >= 80) return ['#22c55e','#16a34a','good'];
-    if (v >= 60) return ['#f59e0b','#fb923c','mid'];
-    return ['#ef4444','#b91c1c','bad'];
-  }
-  function updateHeader(score){
-    const v = Math.max(0, Math.min(100, Number(score)||0));
-    const [c1,c2,tone] = toneFor(v);
-    stop1?.setAttribute('stop-color', c1);
-    stop2?.setAttribute('stop-color', c2);
-    if (fillRect){ const w = Math.round(600 * v / 100); fillRect.setAttribute('width', String(w)); }
-    if (hdrScore){ hdrScore.textContent = Math.round(v) + '%'; }
-    if (title){ title.classList.remove('good','mid','bad'); title.classList.add(tone); }
-  }
-  const oldSetScoreWheel = window.setScoreWheel;
-  window.setScoreWheel = function(v){ try{ oldSetScoreWheel(v); }catch(e){} try{ updateHeader(v); }catch(e){} };
-
-  // expose a tiny helper to update pills from analyze response
-  window.__setHeaderMeta = function(data){
-    try{
-      if (hdrMobile){ hdrMobile.textContent = data?.viewport ? 'Yes' : 'No'; }
-      if (hdrSchema){ const arr = (data?.schema?.found_types||[]); hdrSchema.textContent = arr.length ? arr.slice(0,2).join(', ') : '—'; }
-    }catch(e){}
-  };
-
-  // Also patch fetch to tap into analyze.json responses without touching backend
-  const _origFetch = window.fetch;
-  window.fetch = async function(resource, init){
-    const res = await _origFetch(resource, init);
-    try{
-      if (typeof resource === 'string' && resource.includes('analyze.json')){
-        const clone = res.clone(); const json = await clone.json();
-        setTimeout(()=> window.__setHeaderMeta(json), 0);
-      }
-    }catch(e){}
-    return res;
-  };
-
-  updateHeader(0);
-})();
-
 /* ---------- Social buttons effects (burst + ripple) ---------- */
 (function(){
   const dock = document.getElementById('shareDock');
@@ -1090,6 +955,17 @@ function setScoreWheel(value){
                 btn.classList.contains('share-wa') ? 140 : 10;
     fxBurstFrom(btn, 16, hue);
   });
+
+  // Build share URLs
+  const url = encodeURIComponent(location.href);
+  const title = encodeURIComponent(document.title);
+  document.getElementById('shareFb').href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+  document.getElementById('shareX').href  = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+  document.getElementById('shareLn').href = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`;
+  document.getElementById('shareWa').href = `https://api.whatsapp.com/send?text=${title}%20${url}`;
+  document.getElementById('shareEm').href = `mailto:?subject=${title}&body=${url}`;
+  const nat = document.getElementById('shareNative');
+  if(nat){ nat.addEventListener('click', async ()=>{ try{ if(navigator.share){ await navigator.share({ title: document.title, url: location.href }); } else { window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`,'_blank'); } }catch(e){} }); }
 })();
 
 /* ---------- Per-category smoke ---------- */
@@ -1468,24 +1344,6 @@ const Water = (function(){
   const AUTO_SCORE_THRESHOLD = 80;
   const STORAGE_KEY = 'semanticSeoChecklistV6';
 
-  // Social share URLs
-  (function(){
-    const url = encodeURIComponent(location.href);
-    const title = encodeURIComponent(document.title);
-    const fb = document.getElementById('shareFb');
-    const x  = document.getElementById('shareX');
-    const ln = document.getElementById('shareLn');
-    const wa = document.getElementById('shareWa');
-    const em = document.getElementById('shareEm');
-    if(fb) fb.href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-    if(x)  x.href  = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
-    if(ln) ln.href = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`;
-    if(wa) wa.href = `https://api.whatsapp.com/send?text=${title}%20${url}`;
-    if(em) em.href = `mailto:?subject=${title}&body=${url}`;
-    const nat = document.getElementById('shareNative');
-    if(nat){ nat.addEventListener('click', async ()=>{ try{ if(navigator.share){ await navigator.share({ title: document.title, url: location.href }); } else { window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`,'_blank'); } }catch(e){} }); }
-  })();
-
   document.getElementById('copyQuick').addEventListener('click', async ()=>{
     const bits = [
       `HTTP: ${document.getElementById('rStatus')?.textContent||''}`,
@@ -1640,7 +1498,6 @@ const Water = (function(){
 
       // Overall score -> wheel
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : (()=>{
-        // fallback: avg of scoreMap
         let sum=0,n=0; for(let i=1;i<=25;i++){ const v=Number(scoreMap['ck-'+i]); if(Number.isFinite(v)){sum+=v;n++;}}
         return n?Math.round(sum/n):0;
       })();
@@ -1661,9 +1518,6 @@ const Water = (function(){
       const csNow = window.__getContentScore ? window.__getContentScore() : 0;
       setText('contentScoreInline', csNow);
       setChipTone(document.getElementById('contentScoreChip'), csNow);
-
-      // update header pills explicitly (in case fetch patch didn’t run yet)
-      window.__setHeaderMeta && window.__setHeaderMeta(data);
 
       Water.finish();
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
