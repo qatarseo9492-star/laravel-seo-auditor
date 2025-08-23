@@ -7,9 +7,11 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Semantic SEO Master • Ultra Tech Global</title>
 
+<!-- Favicons (optional) -->
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
@@ -33,10 +35,8 @@ body{
   overflow-x:hidden;
 }
 
-/* BG lines */
+/* Background canvases */
 #brainCanvas,#linesCanvas,#linesCanvas2{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9}
-
-/* Procedural colorful smoke */
 #smokeFX{position:fixed;inset:0;z-index:1;pointer-events:none;filter:saturate(115%) contrast(105%)}
 
 /* Content wrapper above effects */
@@ -48,7 +48,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:3.7rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language (kept minimal) */
+/* Language (simple) */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -69,16 +69,85 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 
 /* Analyzer panel */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
-.section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
+
+/* ===== ANALYZER HERO UPGRADE ===== */
+.analyzer-hero{
+  position: relative;
+  border-radius: 22px;
+  padding: 18px;
+  background:
+    radial-gradient(120% 140% at 5% 0%, rgba(157,92,255,.14), transparent 60%),
+    radial-gradient(120% 140% at 100% 40%, rgba(61,226,255,.12), transparent 65%),
+    rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.10);
+  overflow: hidden;
+  box-shadow: 0 18px 60px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter: blur(8px) saturate(120%);
+}
+.analyzer-hero::before{
+  content:"";
+  position:absolute; inset:-2px;
+  border-radius: 24px;
+  padding:2px;
+  background: conic-gradient(from 220deg,
+     rgba(61,226,255,.55), rgba(155,92,255,.55), rgba(255,32,69,.45),
+     rgba(255,182,72,.45), rgba(34,197,94,.45), rgba(61,226,255,.55));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events: none;
+  filter: blur(6px) saturate(140%);
+  opacity:.6;
+}
+.analyzer-head{
+  display:grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items:center;
+}
+.head-left{
+  position:relative;
+  aspect-ratio: 1/1;
+  border-radius: 18px;
+  background: radial-gradient(80% 80% at 50% 35%, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.06);
+  display:grid; place-items:center;
+  overflow:hidden;
+}
+.head-left::after{
+  content:""; position:absolute; inset:-40%;
+  background: conic-gradient(from 0deg, rgba(155,92,255,.18), rgba(61,226,255,.18), rgba(255,32,69,.15), rgba(155,92,255,.18));
+  animation: spinGlow 18s linear infinite;
+  filter: blur(22px);
+}
+@keyframes spinGlow{ to{ transform: rotate(360deg); } }
+.head-right .kicker{ color: var(--text-dim); margin:0 0 8px; font-weight:600; }
+.head-right .title{ font-weight:1000; font-size:clamp(1.2rem,1.1rem + 1vw,1.6rem); margin:0 0 8px; }
+.stat-badges{ display:flex; flex-wrap:wrap; gap:.55rem; }
+.badge{
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:.5rem .75rem; border-radius:999px; font-weight:800;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+}
+.badge i{ opacity:.9 }
+.badge-primary{
+  background:linear-gradient(135deg,#3de2ff,#9b5cff); color:#001018; border-color:transparent;
+  box-shadow:0 10px 28px rgba(61,226,255,.25);
+}
+.btn-soft{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.14);
+  color:#fff; border-radius:12px; padding:.55rem .8rem; font-weight:900;
+}
+.btn-soft:hover{ background:rgba(255,255,255,.10); transform:translateY(-1px); }
 
 /* Wheel */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
-.score-container{width:240px}
+.score-container{width:230px}
 .score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
 .score-wheel circle{fill:none;stroke-width:14;stroke-linecap:round}
 .score-wheel .bg{stroke:rgba(255,255,255,.12)}
 .score-wheel .progress{stroke:url(#gradBad);stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .6s ease,stroke .25s ease,filter .25s ease;filter:drop-shadow(0 0 12px rgba(155,92,255,.28))}
-.score-text{font-size:3.1rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
+.score-text{font-size:3rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
 
 /* URL input */
 .analyze-form input[type="url"]{
@@ -94,10 +163,10 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
 
-/* Category grid */
+/* Checklist grid */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 
-/* === Stylish checklist cards === */
+/* Stylish checklist cards */
 .category-card{
   position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
   border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow);
@@ -116,7 +185,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
 .checklist{list-style:none;margin:10px 0 0;padding:0}
 
-/* Item visual + score-to-color link */
 .checklist-item{
   --accent: rgba(255,255,255,.12);
   position:relative;
@@ -146,12 +214,11 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .checklist-item input[type="checkbox"]:checked{background:linear-gradient(135deg,#3de2ff,#9b5cff)}
 .checklist-item input[type="checkbox"]:checked::after{left:21px;background:#0a1222}
 
-/* Score pill reflects rating */
+/* Score badge */
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22); border-color:rgba(22,193,114,.45)}
 .score-mid{ background:rgba(245,158,11,.22); border-color:rgba(245,158,11,.45)}
 .score-bad{ background:rgba(239,68,68,.24); border-color:rgba(239,68,68,.5)}
-
 .improve-btn{padding:.4rem .75rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer}
 .improve-btn:hover{background:rgba(255,255,255,.1)}
 
@@ -220,36 +287,42 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   </header>
 
   <section class="analyzer" id="analyzer">
-    <h2 class="section-title" data-i="analyze_title">Analyze a URL</h2>
-    <p class="section-subtitle" data-i="legend_line">
-      The wheel fills with your overall score.
-      <span class="chip" style="background:rgba(34,197,94,.18)">Green ≥ 80</span>
-      <span class="chip" style="background:rgba(245,158,11,.18)">Orange 60–79</span>
-      <span class="chip" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
-    </p>
 
-    <div class="score-area">
-      <div class="score-container">
-        <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
-          <circle class="bg" cx="60" cy="60" r="54"/>
-          <circle class="progress" cx="60" cy="60" r="54"/>
-          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
-        </svg>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:.5rem">
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <span class="chip">Overall: <b id="overallScoreInline">0</b>/100</span>
-          <span class="chip" id="aiBadge">Writer: <b>—</b></span>
-          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem"><i class="fa-solid fa-robot"></i> Evidence</button>
+    <!-- Upgraded hero block -->
+    <div class="analyzer-hero">
+      <div class="analyzer-head">
+        <div class="head-left">
+          <div class="score-container">
+            <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
+              <circle class="bg" cx="60" cy="60" r="54"/>
+              <circle class="progress" cx="60" cy="60" r="54"/>
+              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
+            </svg>
+          </div>
         </div>
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</button>
-          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</button>
+        <div class="head-right">
+          <p class="kicker" data-i="legend_line">
+            The wheel fills with your overall score.
+            <span class="badge" style="background:rgba(34,197,94,.18)">Green ≥ 80</span>
+            <span class="badge" style="background:rgba(245,158,11,.18)">Orange 60–79</span>
+            <span class="badge" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
+          </p>
+          <h2 class="title" data-i="analyze_title">Analyze a URL</h2>
+          <div class="stat-badges">
+            <span class="badge"><i class="fa-solid fa-gauge-high"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
+            <span class="badge" id="aiBadge"><i class="fa-solid fa-user-pen"></i> Writer: <b>—</b></span>
+            <button id="viewAIText" class="badge badge-primary" type="button">
+              <i class="fa-solid fa-robot"></i> Evidence
+            </button>
+            <button id="viewHumanBtn" class="btn-soft" type="button"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</button>
+            <button id="viewAIBtn" class="btn-soft" type="button"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</button>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
+    <!-- Analyze form -->
+    <div class="analyze-box" style="margin-top:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
       <form id="analyzeForm" class="analyze-form" onsubmit="return false;">
         <label for="analyzeUrl" style="display:block;font-weight:800;margin-bottom:.35rem" data-i="page_url">Page URL</label>
         <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" />
@@ -268,20 +341,21 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
       <div id="analyzeReport" style="margin-top:.9rem;display:none">
         <div style="display:flex;flex-wrap:wrap;gap:.5rem">
-          <span class="chip">HTTP: <b id="rStatus">—</b></span>
-          <span class="chip">Title: <b id="rTitleLen">—</b></span>
-          <span class="chip">Meta desc: <b id="rMetaLen">—</b></span>
-          <span class="chip">Canonical: <b id="rCanonical">—</b></span>
-          <span class="chip">Robots: <b id="rRobots">—</b></span>
-          <span class="chip">Viewport: <b id="rViewport">—</b></span>
-          <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
-          <span class="chip">Internal links: <b id="rInternal">—</b></span>
-          <span class="chip">Schema: <b id="rSchema">—</b></span>
-          <span class="chip">Auto‑checked: <b id="rAutoCount">—</b></span>
+          <span class="badge">HTTP: <b id="rStatus">—</b></span>
+          <span class="badge">Title: <b id="rTitleLen">—</b></span>
+          <span class="badge">Meta desc: <b id="rMetaLen">—</b></span>
+          <span class="badge">Canonical: <b id="rCanonical">—</b></span>
+          <span class="badge">Robots: <b id="rRobots">—</b></span>
+          <span class="badge">Viewport: <b id="rViewport">—</b></span>
+          <span class="badge">H1/H2/H3: <b id="rHeadings">—</b></span>
+          <span class="badge">Internal links: <b id="rInternal">—</b></span>
+          <span class="badge">Schema: <b id="rSchema">—</b></span>
+          <span class="badge">Auto‑checked: <b id="rAutoCount">—</b></span>
         </div>
       </div>
     </div>
 
+    <!-- Progress -->
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
@@ -332,7 +406,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
             </div>
-            <span class="chip"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
+            <span class="badge"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
           </header>
           <ul class="checklist">
             @for($i=$c[1];$i<=$c[2];$i++)
@@ -393,12 +467,21 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <script>
 /* ---- Simple i18n (en only here) ---- */
-const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='chip' style='background:rgba(34,197,94,.18)'>Green ≥ 80</span> <span class='chip' style='background:rgba(245,158,11,.18)'>Orange 60–79</span> <span class='chip' style='background:rgba(239,68,68,.18)'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 80)"} };
+const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='badge' style='background:rgba(34,197,94,.18)'>Green ≥ 80</span> <span class='badge' style='background:rgba(245,158,11,.18)'>Orange 60–79</span> <span class='badge' style='background:rgba(239,68,68,.18)'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 80)"} };
 const LANGS = [["en","English"]];
 (function(){
   const dockBtn=document.getElementById('langOpen'), panel=document.getElementById('langPanel'), card=document.getElementById('langCard');
   function fill(){ card.innerHTML=''; LANGS.forEach(([c,l])=>{ const d=document.createElement('div'); d.className='lang-item'; d.dataset.code=c; d.innerHTML=`<span class="lang-flag"></span><strong>${l}</strong>`; card.appendChild(d); }); }
-  function apply(code){ const d=I18N[code]||I18N.en; document.querySelector('[data-i="title"]').textContent=d.title; document.querySelector('[data-i="analyze_title"]').textContent=d.analyze_title; document.querySelector('[data-i="legend_line"]').innerHTML=d.legend_line; document.querySelector('[data-i="page_url"]').textContent=d.page_url; document.querySelectorAll('[data-i="analyze"]').forEach(n=>n.textContent=d.analyze); document.querySelectorAll('[data-i="print"]').forEach(n=>n.textContent=d.print); document.querySelectorAll('[data-i="reset"]').forEach(n=>n.textContent=d.reset); document.querySelectorAll('[data-i="auto_check"]').forEach(n=>n.textContent=d.auto_check); }
+  function apply(code){ const d=I18N[code]||I18N.en;
+    document.querySelector('[data-i="title"]').textContent=d.title;
+    document.querySelector('[data-i="analyze_title"]').textContent=d.analyze_title;
+    document.querySelector('[data-i="legend_line"]').innerHTML=d.legend_line;
+    document.querySelector('[data-i="page_url"]').textContent=d.page_url;
+    document.querySelectorAll('[data-i="analyze"]').forEach(n=>n.textContent=d.analyze);
+    document.querySelectorAll('[data-i="print"]').forEach(n=>n.textContent=d.print);
+    document.querySelectorAll('[data-i="reset"]').forEach(n=>n.textContent=d.reset);
+    document.querySelectorAll('[data-i="auto_check"]').forEach(n=>n.textContent=d.auto_check);
+  }
   dockBtn.addEventListener('click', ()=> panel.style.display = panel.style.display==='block' ? 'none' : 'block');
   panel.addEventListener('click', e=>{ const it=e.target.closest('.lang-item'); if(!it) return; apply(it.dataset.code); panel.style.display='none'; });
   fill(); apply('en');
@@ -439,7 +522,7 @@ const LANGS = [["en","English"]];
   precision highp float; const vec2 V[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));
   out vec2 uv; void main(){ vec2 p=V[gl_VertexID]; uv=.5*(p+1.); gl_Position=vec4(p,0,1); }`;
   const fs=`#version 300 es
-  precision highp float; in vec2 uv; out vec4 o; uniform vec2 r; uniform float t;
+  precision highp float; in vec2 uv; out vec4 o; uniform float t;
   float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
   float n(vec2 p){ vec2 i=floor(p), f=fract(p); float a=h(i), b=h(i+vec2(1,0)), c=h(i+vec2(0,1)), d=h(i+vec2(1,1));
     vec2 u=f*f*(3.-2.*f); return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y; }
@@ -449,7 +532,7 @@ const LANGS = [["en","English"]];
     p.x += t*.15; p.y += t*.10;
     float q=f(p*1.6);
     float d=smoothstep(.30,.95,q);
-    // rainbow-ish through x, brighter near emitter
+    // rainbow-ish gradient; brighter near emitter
     vec3 base=mix(vec3(.24,.88,1.),vec3(.96,.31,.41),uv.x);
     vec3 c=mix(base, vec3(1.,.72,.28), 0.35*uv.y);
     o=vec4(c*d, .72*d);
@@ -480,7 +563,17 @@ function setScoreWheel(value){
   else if(v>=60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
   else WHEEL.circle.setAttribute('stroke','url(#gradBad)');
   const n=Math.round(v); WHEEL.text.textContent=n+'%'; document.getElementById('overallScoreInline').textContent=n;
+  if (window.__setRingGlow) window.__setRingGlow(n);
 }
+/* adaptive ring glow hook */
+(function(){
+  const ring = document.querySelector('.score-wheel .progress');
+  if(!ring) return;
+  window.__setRingGlow = (v)=>{
+    const k = Math.max(0, Math.min(100, +v||0)) / 100;
+    ring.style.filter = `drop-shadow(0 0 ${8 + 12*k}px rgba(155,92,255,${.2 + .25*k}))`;
+  };
+})();
 
 /* ---- Checklist storage & UI sync ---- */
 (function(){
@@ -503,7 +596,6 @@ function setScoreWheel(value){
     }
     rowEl.style.setProperty('--accent', col);
   }
-
   function updateCats(){
     document.querySelectorAll('.category-card').forEach(card=>{
       const all=card.querySelectorAll('input[type="checkbox"]');
@@ -548,11 +640,9 @@ function setScoreWheel(value){
     if(s>=80) pill.classList.add('score-good'); else if(s>=60) pill.classList.add('score-mid'); else pill.classList.add('score-bad');
     setRowAccent(row,s);
   };
-
-  load();
 })();
 
-/* ---- Modal ---- */
+/* ---- Modal (suggestions & evidence) ---- */
 (function(){
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const backdrop=$('#modalBackdrop'), modal=$('#tipModal'), closeBtn=$('#modalClose');
@@ -590,7 +680,10 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
 
 (function(){
   const $=s=>document.querySelector(s);
-  function setChecked(id,on){ const el=document.getElementById(id); if(el){ el.checked=!!on; el.classList.toggle('autoPulse', !!on); } }
+  function setChecked(id,on){
+    const el=document.getElementById(id);
+    if(el){ el.checked=!!on; if(on) el.classList.add('autoPulse'); else el.classList.remove('autoPulse'); }
+  }
 
   document.getElementById('analyzeForm').addEventListener('submit', e=>{ e.preventDefault(); document.getElementById('analyzeBtn').click(); });
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
@@ -622,26 +715,25 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       $('#rSchema').textContent=(data.schema.found_types||[]).slice(0,6).join(', ')||'—';
       report.style.display='block';
 
-      // Suggestions blob saved for modal
+      // Suggestions for modal
       window.__lastSuggestions = (data.suggestions && typeof data.suggestions==='object') ? data.suggestions : {};
 
-      // Per-item scores + color accents + auto-select (robust)
+      // Per-item scores + auto-select
       let autoCount=0;
       for(let i=1;i<=25;i++){
         const key='ck-'+i, row=document.getElementById('row-'+i);
         const score=(data.scores && typeof data.scores[key]==='number') ? data.scores[key] : null;
         setScoreBadge(i, score);
         if(row) row.title = (score==null?'No score':`Score: ${Math.round(score)}`);
-
         if($('#autoApply').checked){
           if(typeof score==='number' && score>=80){ setChecked(key,true); autoCount++; }
           else { setChecked(key,false); }
         }
       }
-      $('#rAutoCount').textContent=autoCount.toString();
-      document.dispatchEvent(new Event('change')); // update progress
+      document.getElementById('rAutoCount').textContent=autoCount.toString();
+      document.dispatchEvent(new Event('change')); // update progress bar & counts
 
-      // Overall wheel
+      // Overall wheel + glow
       const overall = (typeof data.overall_score==='number') ? data.overall_score : 0;
       setScoreWheel(overall);
 
