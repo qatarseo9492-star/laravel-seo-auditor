@@ -11,7 +11,6 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
-<!-- Tech/Digital font for score -->
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
 
@@ -20,7 +19,7 @@
   --bg:#08080f; --panel:#0f1022; --panel-2:#141433; --line:#1e1a33;
   --text:#f0effa; --text-dim:#b6b3d6; --text-muted:#9aa0c3;
   --primary:#9b5cff; --secondary:#ff2045; --accent:#3de2ff;
-  --good:#16c172; --warn:#f59e0b; --bad:#ef4444;
+  --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
   --radius:18px; --shadow:0 10px 40px rgba(0,0,0,.55);
   --container:1200px;
 }
@@ -36,13 +35,11 @@ body{
   overflow-x:hidden;
 }
 
-/* BG lines */
+/* BG canvases */
 #brainCanvas,#linesCanvas,#linesCanvas2{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9}
-
-/* Procedural colorful smoke */
 #smokeFX{position:fixed;inset:0;z-index:1;pointer-events:none;filter:saturate(115%) contrast(105%)}
 
-/* Content wrapper above effects */
+/* Layout */
 .wrap{position:relative;z-index:3;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
 /* Header */
@@ -51,7 +48,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:3.7rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language (kept minimal) */
+/* Lang */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -69,70 +66,89 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .btn-ghost:hover{background:rgba(255,255,255,.08);transform:translateY(-2px)}
 .btn-danger{background:linear-gradient(135deg,#ff2045,#ff7a59);color:#fff;box-shadow:0 8px 30px rgba(255,32,69,.25)}
 .btn-danger:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,32,69,.35)}
+/* Button flare */
+.btn[data-flare]{position:relative;overflow:hidden}
+.btn[data-flare]::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.18) 40%,transparent 80%);transform:translateX(-120%);filter:blur(2px)}
+.btn[data-flare]:hover::after{animation:btnShine .8s ease}
+@keyframes btnShine{to{transform:translateX(120%)}}
 
-/* Analyzer panel */
+/* Analyzer box */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* ===================== TECH WHEEL ===================== */
+/* ===================== NEW TECH WHEEL ===================== */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{
-  width: clamp(200px, 40vw, 280px);
+  width: clamp(200px, 40vw, 300px);
   aspect-ratio: 1/1;
-  position:relative;
-  border-radius:50%;
-  isolation:isolate;
-  /* animated conic pulse behind SVG */
-}
-.score-container::before{
-  content:"";
-  position:absolute; inset:8% 8%;
-  border-radius:50%;
+  position:relative; border-radius:50%; isolation:isolate;
   background:
     radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.08), transparent 60%),
-    conic-gradient(from 0deg,
-      rgba(61,226,255,.10),
-      rgba(155,92,255,.10),
-      rgba(255,182,72,.10),
-      rgba(255,32,69,.12),
-      rgba(34,197,94,.12),
-      rgba(61,226,255,.10));
-  filter: blur(8px) saturate(120%);
-  animation:spinHue 10s linear infinite;
-  z-index:0;
+    radial-gradient(80% 80% at 50% 50%, rgba(255,255,255,.05), transparent 80%);
 }
-@keyframes spinHue { to { filter:hue-rotate(360deg) saturate(120%); } }
+.score-container::before{
+  /* animated conic halo */
+  content:"";position:absolute;inset:10% 10%;border-radius:50%;
+  background:conic-gradient(from 0deg,
+    rgba(61,226,255,.08),
+    rgba(155,92,255,.10),
+    rgba(255,182,72,.10),
+    rgba(255,32,69,.12),
+    rgba(34,197,94,.12),
+    rgba(61,226,255,.08));
+  filter:blur(10px) saturate(120%);
+  animation:spinHue 10s linear infinite; z-index:0;
+}
+@keyframes spinHue{to{filter:hue-rotate(360deg) saturate(120%)}}
+
+.score-glass{
+  /* thin frosted rim */
+  position:absolute; inset:4% 4%; border-radius:50%;
+  background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,.06));
+  mix-blend-mode:overlay; opacity:.25; z-index:3; pointer-events:none;
+}
 
 .score-wheel{
   position:relative; z-index:2; width:100%; height:100%;
   transform:rotate(-90deg);
 }
 .score-wheel circle{fill:none;stroke-linecap:round}
-.score-wheel .bg{stroke:rgba(255,255,255,.10);stroke-width:16}
-.score-wheel .ticks{stroke-dasharray:2 10;stroke-width:2;stroke:rgba(255,255,255,.22);opacity:.9}
-.score-wheel .progress{
-  stroke:url(#gradBad);
+
+/* Base rings */
+.ring-outer{stroke:rgba(255,255,255,.12);stroke-width:16}
+.ring-inner{stroke:rgba(255,255,255,.08);stroke-width:6}
+.ring-dash{stroke:rgba(255,255,255,.22);stroke-width:3;stroke-dasharray:2 8;opacity:.9}
+
+/* Progress ring */
+.progress{
+  stroke:url(#gradBad); /* default; JS overrides by thresholds */
   stroke-width:18; stroke-dasharray:339; stroke-dashoffset:339;
   filter:drop-shadow(0 0 10px rgba(61,226,255,.45));
   transition:stroke-dashoffset .6s ease, stroke .25s ease, filter .25s ease;
 }
 
+/* “Energy sweep” overlay */
+.sweep{
+  stroke:rgba(255,255,255,.35);
+  stroke-width:6; stroke-dasharray:18 321; /* small bright segment */
+  stroke-linecap:round;
+  filter:blur(1px) drop-shadow(0 0 6px rgba(255,255,255,.35));
+  animation:sweepSpin 2.2s linear infinite;
+}
+@keyframes sweepSpin{to{transform:rotate(360deg)}}
+
 /* Digital score text (upright) */
 .score-text{
   font-family:"Orbitron", monospace;
   font-weight:900;
-  font-size: clamp(2.0rem, 3.6vw, 2.8rem); /* responsive smaller per your ask */
+  font-size: clamp(2.0rem, 3.8vw, 2.7rem); /* smaller per your ask */
   transform:rotate(90deg);
-  dominant-baseline:middle; text-anchor:middle;
   filter:drop-shadow(0 0 10px rgba(157,92,255,.35));
   animation:scanPulse 2.5s ease-in-out infinite;
 }
-@keyframes scanPulse{
-  0%,100%{opacity:1}
-  50%{opacity:.86}
-}
+@keyframes scanPulse{0%,100%{opacity:1}50%{opacity:.86}}
 
-/* Orbital dot (tech vibe) */
+/* orbit dot */
 .orbit-dot{
   position:absolute; inset:0; margin:auto; width:12px; height:12px; border-radius:50%;
   background:radial-gradient(circle at 35% 35%, #3de2ff 0%, #9b5cff 60%, transparent 80%);
@@ -142,10 +158,10 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 }
 @keyframes orbitAnim{ to{ transform: rotate(360deg);} }
 
-/* Threshold color states for text glow */
-.score-container.good  .score-text{ fill:#22c55e; text-shadow:0 0 8px rgba(34,197,94,.65), 0 0 18px rgba(34,197,94,.35); }
-.score-container.mid   .score-text{ fill:#f59e0b; text-shadow:0 0 8px rgba(245,158,11,.65), 0 0 18px rgba(245,158,11,.35); }
-.score-container.bad   .score-text{ fill:#ef4444; text-shadow:0 0 8px rgba(239,68,68,.65), 0 0 18px rgba(239,68,68,.35); }
+/* threshold states color for text */
+.score-container.good  .score-text{ fill:var(--good);  text-shadow:0 0 8px rgba(34,197,94,.65), 0 0 18px rgba(34,197,94,.35) }
+.score-container.mid   .score-text{ fill:var(--warn);  text-shadow:0 0 8px rgba(245,158,11,.65),0 0 18px rgba(245,158,11,.35) }
+.score-container.bad   .score-text{ fill:var(--bad);   text-shadow:0 0 8px rgba(239,68,68,.65), 0 0 18px rgba(239,68,68,.35) }
 
 /* URL input */
 .analyze-form input[type="url"]{
@@ -155,27 +171,14 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .analyze-form input[type="url"]:focus{ outline:none; border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15); }
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
-/* Buttons boost effect */
-.btn[data-flare]{
-  position:relative; overflow:hidden;
-}
-.btn[data-flare]::after{
-  content:""; position:absolute; inset:0; background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.18) 40%, transparent 80%);
-  transform:translateX(-120%); filter:blur(2px);
-}
-.btn[data-flare]:hover::after{ animation:btnShine .8s ease; }
-@keyframes btnShine{ to{ transform:translateX(120%);} }
-
 /* Progress */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .progress-bar{width:100%;height:12px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid #101826}
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
 
-/* Category grid */
+/* Checklist cards (kept) */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
-
-/* Stylish checklist cards */
 .category-card{
   position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
   border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow);
@@ -194,7 +197,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
 .checklist{list-style:none;margin:10px 0 0;padding:0}
 
-/* Item visual + score-to-color link */
+/* Item visual + score accent */
 .checklist-item{
   --accent: rgba(255,255,255,.12);
   position:relative;
@@ -211,8 +214,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 }
 .checklist-item:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(0,0,0,.28);border-color:rgba(255,255,255,.16)}
 .checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.6rem; }
-.checklist-item .autoPulse{ animation:selPulse .8s ease; }
-@keyframes selPulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.0)}70%{box-shadow:0 0 0 12px rgba(34,197,94,.18)}100%{box-shadow:0 0 0 0 rgba(34,197,94,.0)}}
 
 /* Toggle switch */
 .checklist-item input[type="checkbox"]{
@@ -224,9 +225,9 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .checklist-item input[type="checkbox"]:checked{background:linear-gradient(135deg,#3de2ff,#9b5cff)}
 .checklist-item input[type="checkbox"]:checked::after{left:21px;background:#0a1222}
 
-/* Score pill reflects rating */
+/* Score pill */
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
-.score-good{background:rgba(22,193,114,.22); border-color:rgba(22,193,114,.45)}
+.score-good{background:rgba(34,197,94,.22); border-color:rgba(34,197,94,.45)}
 .score-mid{ background:rgba(245,158,11,.22); border-color:rgba(245,158,11,.45)}
 .score-bad{ background:rgba(239,68,68,.24); border-color:rgba(239,68,68,.5)}
 
@@ -247,7 +248,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .tabpanes > div.active{display:block}
 .pre{white-space:pre-wrap;background:#0b0d21;border:1px solid #1b1b35;border-radius:12px;padding:12px;color:#cfd3f6;max-height:60vh;overflow:auto}
 
-/* Footer + back to top */
+/* Footer */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 .footer-brand{display:flex;align-items:center;gap:.6rem}
 .footer-brand .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#3de2ff,#9b5cff)}
@@ -259,7 +260,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 @media (max-width:992px){
   .category-card{grid-column:span 12}
   .hero-heading{font-size:2.7rem}
-  .score-container{width: clamp(170px, 38vw, 220px)}
+  .score-container{width: clamp(170px, 38vw, 230px)}
   footer.site{flex-direction:column;align-items:flex-start}
 }
 @media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
@@ -277,6 +278,13 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/></linearGradient>
     <linearGradient id="gradMid"  x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/></linearGradient>
     <linearGradient id="gradBad"  x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/></linearGradient>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
 </svg>
 
@@ -309,13 +317,26 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     <div class="score-area">
       <div class="score-container" id="scoreContainer">
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
-          <circle class="bg"     cx="60" cy="60" r="54"/>
-          <circle class="ticks"  cx="60" cy="60" r="54"/>
-          <circle class="progress" cx="60" cy="60" r="54" />
-          <!-- Upright digital text (we rotate whole svg -90deg, so rotate text back 90 in CSS) -->
+          <!-- Outer base ring -->
+          <circle class="ring-outer" cx="60" cy="60" r="54"/>
+          <!-- Segmented dash track (ticks) -->
+          <circle class="ring-dash" cx="60" cy="60" r="48" style="opacity:.35"/>
+          <!-- Minor ticks close to center -->
+          <circle class="ring-inner" cx="60" cy="60" r="40" style="opacity:.25"/>
+
+          <!-- PROGRESS (main) -->
+          <circle class="progress" cx="60" cy="60" r="54" filter="url(#softGlow)"/>
+
+          <!-- Energy sweep overlay (just a short dash orbiting) -->
+          <g transform-origin="60 60" class="sweep-g">
+            <circle class="sweep" cx="60" cy="60" r="54"/>
+          </g>
+
+          <!-- Upright score (we rotate the whole svg -90°, text is turned upright via CSS) -->
           <text x="60" y="60" class="score-text" id="overallScore">0%</text>
         </svg>
         <div class="orbit-dot"></div>
+        <div class="score-glass"></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:.5rem">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
@@ -324,8 +345,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem" data-flare><i class="fa-solid fa-robot"></i> Evidence</button>
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem" data-flare><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</button>
-          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem" data-flare><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</button>
+          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem" data-flare><i class="fa-solid fa-user" style="color:#22c55e"></i> Human‑like: <b id="humanPct">—</b>%</button>
+          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem" data-flare><i class="fa-solid fa-microchip" style="color:#9b5cff"></i> AI‑like: <b id="aiPct">—</b>%</button>
         </div>
       </div>
     </div>
@@ -473,7 +494,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---- Simple i18n (en only) ---- */
+/* ---- Simple i18n (en) ---- */
 const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='chip' style='background:rgba(34,197,94,.18)'>Green ≥ 80</span> <span class='chip' style='background:rgba(245,158,11,.18)'>Orange 60–79</span> <span class='chip' style='background:rgba(239,68,68,.18)'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 80)"} };
 const LANGS = [["en","English"]];
 (function(){
@@ -485,7 +506,7 @@ const LANGS = [["en","English"]];
   fill(); apply('en');
 })();
 
-/* ---- Dancing lines background ---- */
+/* ---- Dancing lines ---- */
 (function(){
   function layer(id,count,maxDist,colorFn,vel=1){
     const c=document.getElementById(id),ctx=c.getContext('2d'); let w,h,nodes=[],mouse={x:-9999,y:-9999};
@@ -510,7 +531,7 @@ const LANGS = [["en","English"]];
   layer('linesCanvas2',110,120,a=>`rgba(255,32,69,${a*0.6})`,0.9);
 })();
 
-/* ---- Procedural multi‑color smoke (WebGL2) ---- */
+/* ---- Procedural smoke (WebGL2) ---- */
 (function(){
   const canvas=document.getElementById('smokeFX'); if(!canvas) return;
   let gl; try{ gl=canvas.getContext('webgl2',{alpha:true,antialias:false,depth:false,stencil:false}); }catch(e){}
@@ -549,7 +570,7 @@ const LANGS = [["en","English"]];
   btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
 })();
 
-/* ---- Wheel controller (threshold color + text + stroke) ---- */
+/* ---- Wheel controller (threshold color + animated sweep) ---- */
 const WHEEL={circumference:339, circle:null, text:null, container:null};
 function setScoreWheel(value){
   if(!WHEEL.circle){
@@ -561,7 +582,7 @@ function setScoreWheel(value){
   const offset=WHEEL.circumference - (v/100)*WHEEL.circumference;
   WHEEL.circle.style.strokeDashoffset=offset;
 
-  // stroke color + container text color class
+  // Threshold color
   WHEEL.container.classList.remove('good','mid','bad');
   if(v>=80){ WHEEL.circle.setAttribute('stroke','url(#gradGood)'); WHEEL.container.classList.add('good'); }
   else if(v>=60){ WHEEL.circle.setAttribute('stroke','url(#gradMid)'); WHEEL.container.classList.add('mid'); }
@@ -574,7 +595,7 @@ function setScoreWheel(value){
 
 /* ---- Checklist storage & UI sync ---- */
 (function(){
-  const STORAGE_KEY='semanticSeoChecklistV6';
+  const STORAGE_KEY='semanticSeoChecklistV7';
   const total=25;
   const boxes=()=>Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar=document.getElementById('progressBar');
@@ -675,7 +696,7 @@ function setScoreWheel(value){
   }
 })();
 
-/* ---- Analyze: connect per-item scores to UI & auto-select ≥80 ---- */
+/* ---- Analyze flow ---- */
 function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test(u)) u='https://'+u.replace(/^\/+/, ''); try{ new URL(u);}catch(e){} return u; }
 
 (function(){
@@ -700,7 +721,7 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       const data=await resp.json();
       if(!data.ok) throw new Error(data.error||'Failed');
 
-      // Meta chips
+      // Chips
       $('#rStatus').textContent=data.status;
       $('#rTitleLen').textContent=(data.title||'').length;
       $('#rMetaLen').textContent=data.meta_description_len;
@@ -746,7 +767,6 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       document.getElementById('aiBadge').innerHTML='Writer: '+parts.join(' • ');
       window.__setAIData(ai);
 
-      // Status line
       const wheel=parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent='', 4200);
