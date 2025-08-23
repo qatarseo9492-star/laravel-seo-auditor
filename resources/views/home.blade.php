@@ -7,7 +7,6 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Semantic SEO Master • Ultra Tech Global</title>
 
-<!-- Favicons -->
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
@@ -34,116 +33,94 @@ body{
   overflow-x:hidden;
 }
 
-/* Background canvases */
-#brainCanvas,#linesCanvas,#linesCanvas2{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9}
-#smokeFX{position:fixed;inset:0;z-index:1;pointer-events:none;filter:saturate(115%) contrast(105%)}
+/* BG FX */
+#linesCanvas,#linesCanvas2{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.85}
+#smokeFX{position:fixed;inset:0;z-index:1;pointer-events:none;mix-blend-mode:screen;filter:saturate(115%) contrast(105%)}
 
-/* Content wrapper above effects */
+/* Layout */
 .wrap{position:relative;z-index:3;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
 /* Header */
 header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 0 22px;border-bottom:1px solid var(--line);backdrop-filter:saturate(140%) blur(10px);background:rgba(15,16,34,.35)}
 .brand{display:flex;align-items:center;gap:1rem}
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
-.hero-heading{font-size:3.7rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
+.hero-heading{font-size:3.3rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.6px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-/* Language dock (minimal) */
-.lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
-.lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
-.lang-btn:hover{background:rgba(255,255,255,.1)}
-.lang-panel{position:fixed;left:74px;top:50%;transform:translateY(-50%);z-index:70;display:none}
-.lang-card{background:var(--panel-2);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow);padding:10px 12px;min-width:240px}
-.lang-item{padding:.45rem .55rem;border-radius:10px;display:flex;align-items:center;gap:.5rem;cursor:pointer}
-.lang-item:hover{background:rgba(255,255,255,.06)}
-.lang-flag{width:18px;height:14px;border-radius:2px;background:#888}
-
-/* Buttons */
+/* Chips & buttons */
+.badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .8rem;border-radius:999px;font-weight:900;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+.badge i{opacity:.9}
+.badge-green{background:rgba(22,193,114,.18);border-color:rgba(22,193,114,.42)}
+.badge-orange{background:rgba(245,158,11,.20);border-color:rgba(245,158,11,.45)}
+.badge-red{background:rgba(239,68,68,.22);border-color:rgba(239,68,68,.50)}
 .btn{--pad:.75rem 1.05rem;display:inline-flex;align-items:center;gap:.5rem;padding:var(--pad);border-radius:14px;border:1px solid transparent;cursor:pointer;font-weight:800;letter-spacing:.2px;transition:.2s}
-.btn-neon{background:linear-gradient(135deg,#3de2ff,#9b5cff);box-shadow:0 8px 30px rgba(61,226,255,.25);color:#001018}
-.btn-neon:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(61,226,255,.35)}
+.btn-gradient{background:linear-gradient(135deg,#ff2045,#ff7a59);box-shadow:0 10px 26px rgba(255,32,69,.35)}
+.btn-gradient:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(255,32,69,.45)}
+.btn-neon{background:linear-gradient(135deg,#3de2ff,#9b5cff);box-shadow:0 8px 30px rgba(61,226,255,.30);color:#02131e}
+.btn-neon:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(61,226,255,.40)}
 .btn-ghost{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.16);color:#fff}
 .btn-ghost:hover{background:rgba(255,255,255,.08);transform:translateY(-2px)}
-.btn-danger{background:linear-gradient(135deg,#ff2045,#ff7a59);color:#fff;box-shadow:0 8px 30px rgba(255,32,69,.25)}
-.btn-danger:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,32,69,.35)}
-.btn-gradient{background:linear-gradient(135deg,#ff2045,#ff7a59);box-shadow:0 10px 26px rgba(255,32,69,.35);transition:transform .15s ease,box-shadow .25s ease}
-.btn-gradient:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(255,32,69,.45)}
-.btn-glass{background:linear-gradient(135deg,#3de2ff,#9b5cff);color:#041018;box-shadow:0 8px 26px rgba(61,226,255,.30)}
-.btn-glass:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(61,226,255,.40)}
 
-/* Analyzer panel */
+/* Analyzer container */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
-.section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* Score hero (wheel + titles) */
-.score-hero{position:relative;padding:20px;border-radius:22px;background:
-  radial-gradient(120% 160% at 0% 0%, rgba(61,226,255,.06), transparent 60%),
-  radial-gradient(120% 160% at 100% 100%, rgba(255,32,69,.06), transparent 60%),
-  linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 48px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.03);overflow:hidden}
-.score-hero::before{content:"";position:absolute;inset:-2px;border-radius:24px;padding:2px;background:linear-gradient(120deg,#3de2ff55,#9b5cff55,#ff7a5955,#22c55e55);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
-.score-hero-grid{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
-.badge-soft{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .7rem;border-radius:999px;font-weight:800;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
-.badge-soft i{opacity:.9}
-
-/* Wheel */
-.score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
-.score-container{width:240px}
-.score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
-.score-wheel circle{fill:none;stroke-width:14;stroke-linecap:round}
-.score-wheel .bg{stroke:rgba(255,255,255,.12)}
-.score-wheel .progress{stroke:url(#gradBad);stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .6s ease,stroke .25s ease,filter .25s ease;filter:drop-shadow(0 0 12px rgba(155,92,255,.28))}
-.score-text{font-size:3.1rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
+/* ===== New Stylish Score Wheel ===== */
+.score-hero{position:relative;margin:0 0 8px;border-radius:22px;padding:18px;background:
+  radial-gradient(140% 200% at 10% 0%, rgba(157,92,255,.10), transparent 55%),
+  radial-gradient(140% 160% at 90% 100%, rgba(61,226,255,.10), transparent 50%),
+  linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+border:1px solid rgba(255,255,255,.08);overflow:hidden}
+.score-hero::before{/* soft animated rim */
+  content:"";position:absolute;inset:-2px;padding:2px;border-radius:24px;
+  background:conic-gradient(from 0deg, #3de2ff55, #9b5cff55, #ff7a5955, #16c17255, #3de2ff55);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;animation:rim 10s linear infinite;
+}
+@keyframes rim{to{transform:rotate(360deg)}}
+.score-grid{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
+.wheel-wrap{position:relative;width:250px;aspect-ratio:1}
+.wheel{width:100%;height:100%}
+.wheel .track{stroke:rgba(255,255,255,.16);stroke-width:16;fill:none;filter:url(#innerShadow)}
+.wheel .ticks{stroke:rgba(255,255,255,.18);stroke-width:2;stroke-dasharray:2 10;stroke-linecap:round;fill:none;opacity:.8}
+.wheel .progress{stroke:url(#wheelGrad);stroke-width:16;stroke-linecap:round;fill:none;stroke-dasharray:339;stroke-dashoffset:339;filter:url(#glow)}
+.wheel .halo{fill:none;stroke:rgba(255,255,255,.10);stroke-width:28;filter:url(#blurHalo)}
+.wheel-center{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:70%;height:70%;border-radius:50%;
+  backdrop-filter:blur(6px) saturate(140%);background:radial-gradient(120% 140% at 50% 0%, rgba(255,255,255,.14), rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 0 40px rgba(0,0,0,.35);}
+.wheel-score{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);font-size:3rem;font-weight:1000}
+.wheel-label{position:absolute;left:50%;top:60%;transform:translate(-50%,0);opacity:.8;font-weight:800;letter-spacing:.4px}
 
 /* URL card */
-.url-card{margin-top:14px;background:
+.url-card{margin-top:12px;background:
   radial-gradient(160% 180% at 100% 0%, rgba(157,92,255,.10), transparent 45%),
   radial-gradient(150% 180% at 0% 100%, rgba(61,226,255,.10), transparent 45%),
   rgba(255,255,255,.03);
 border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:14px;box-shadow:0 18px 44px rgba(0,0,0,.35)}
 .input-wrap{position:relative}
 .input-wrap .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);border:1px solid rgba(255,255,255,.16);color:#dce6ff}
-.input-wrap input{padding-left:52px !important;height:52px;font-weight:700;border-radius:14px !important}
-.analyze-form input[type="url"]{width:100%;padding:1rem 1.2rem;border-radius:14px;border:1px solid #1b1b35;background:#0b0d21;color:var(--text);box-shadow:0 0 0 0 rgba(155,92,255,.0);transition:.25s}
+.analyze-form input[type="url"]{width:100%;padding:1rem 1.2rem 1rem 52px;border-radius:14px;border:1px solid #1b1b35;background:#0b0d21;color:var(--text);box-shadow:0 0 0 0 rgba(155,92,255,.0);transition:.25s}
 .analyze-form input[type="url"]:focus{outline:none;border-color:#5942ff;box-shadow:0 0 0 6px rgba(155,92,255,.15)}
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
-.actions{display:grid;grid-auto-flow:column;gap:.6rem;align-items:center;width:max-content}
 
-/* Chips under URL */
+/* Quick report chips */
 .report-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem}
-.report-chips .chip{padding:.45rem .75rem;border-radius:999px;font-weight:900;letter-spacing:.1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.report-chips .chip{padding:.45rem .75rem;border-radius:999px;font-weight:900;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
 
-/* Progress */
+/* Progress + checklist (unchanged visuals) */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .progress-bar{width:100%;height:12px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid #101826}
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
-
-/* Category grid + stylish checklist */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
-.category-card{position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
-.category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:conic-gradient(from 180deg, rgba(61,226,255,.35), rgba(155,92,255,.35), rgba(255,182,72,.30), rgba(255,32,69,.30), rgba(34,197,94,.30), rgba(61,226,255,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 7s linear infinite;pointer-events:none}
-@keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
+.category-card{position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow);overflow:hidden}
 .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
 .category-icon{width:46px;height:46px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
 .checklist{list-style:none;margin:10px 0 0;padding:0}
-.checklist-item{--accent: rgba(255,255,255,.12);position:relative;display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.75rem .8rem .75rem 1rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.03));overflow:hidden}
+.checklist-item{--accent: rgba(255,255,255,.12);position:relative;display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.75rem .8rem .75rem 1rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.03))}
 .checklist-item + .checklist-item{margin-top:.28rem}
-.checklist-item::after{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);box-shadow:0 0 20px var(--accent);transition:.25s}
-.checklist-item:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(0,0,0,.28);border-color:rgba(255,255,255,.16)}
-.checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.6rem}
-.checklist-item .autoPulse{animation:selPulse .8s ease}
-@keyframes selPulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.0)}70%{box-shadow:0 0 0 12px rgba(34,197,94,.18)}100%{box-shadow:0 0 0 0 rgba(34,197,94,.0)}}
-
-/* Toggle switch */
-.checklist-item input[type="checkbox"]{appearance:none;width:42px;height:24px;border-radius:999px;background:#2a2a46;border:1px solid rgba(255,255,255,.18);position:relative;cursor:pointer;outline:none;transition:.2s}
-.checklist-item input[type="checkbox"]::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#cfd3f6;top:2.5px;left:2.5px;transition:.2s;box-shadow:0 2px 10px rgba(0,0,0,.3)}
-.checklist-item input[type="checkbox"]:checked{background:linear-gradient(135deg,#3de2ff,#9b5cff)}
-.checklist-item input[type="checkbox"]:checked::after{left:21px;background:#0a1222}
-
-/* Score pills */
+.checklist-item::after{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);box-shadow:0 0 20px var(--accent)}
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22); border-color:rgba(22,193,114,.45)}
 .score-mid{ background:rgba(245,158,11,.22); border-color:rgba(245,158,11,.45)}
@@ -151,121 +128,112 @@ border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:14px;box-shado
 .improve-btn{padding:.4rem .75rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer}
 .improve-btn:hover{background:rgba(255,255,255,.1)}
 
-/* Modal */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;z-index:9000}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9010}
-.modal-card{width:min(1000px,96vw);background:var(--panel-2);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow);padding:16px}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
-.modal-title{margin:0;font-size:1.2rem}
-.modal-close{background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;padding:.35rem .6rem;cursor:pointer}
-.tabs{display:flex;gap:.4rem;margin:.4rem 0;flex-wrap:wrap}
-.tab{padding:.35rem .7rem;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);cursor:pointer;font-weight:800}
-.tab.active{background:linear-gradient(135deg,#3de2ff22,#9b5cff22);border-color:#3de2ff66}
-.tabpanes > div{display:none}
-.tabpanes > div.active{display:block}
-.pre{white-space:pre-wrap;background:#0b0d21;border:1px solid #1b1b35;border-radius:12px;padding:12px;color:#cfd3f6;max-height:60vh;overflow:auto}
-
-/* Footer + back to top */
+/* Footer */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
-.footer-brand{display:flex;align-items:center;gap:.6rem}
-.footer-brand .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#3de2ff,#9b5cff)}
 .footer-links a{color:var(--text-dim);margin-left:.9rem}
 .footer-links a:hover{color:#fff;text-decoration:underline}
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
 #backTop:hover{background:rgba(255,255,255,.12)}
-
-@media (max-width:992px){
-  .category-card{grid-column:span 12}
-  .hero-heading{font-size:2.7rem}
-  .score-container{width:200px}
-  footer.site{flex-direction:column;align-items:flex-start}
-}
-@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
+@media (max-width:992px){.analyzer-grid .category-card{grid-column:span 12}.wheel-wrap{width:200px}.hero-heading{font-size:2.4rem}}
+@media print{#linesCanvas,#linesCanvas2,#smokeFX,header.site,#backTop{display:none!important}}
 </style>
 </head>
 <body>
-<canvas id="brainCanvas"></canvas>
 <canvas id="linesCanvas"></canvas>
 <canvas id="linesCanvas2"></canvas>
 <canvas id="smokeFX" aria-hidden="true"></canvas>
 
-<!-- gradients for score wheel -->
+<!-- SVG defs for wheel -->
 <svg width="0" height="0" aria-hidden="true">
   <defs>
-    <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/></linearGradient>
-    <linearGradient id="gradMid"  x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/></linearGradient>
-    <linearGradient id="gradBad"  x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/></linearGradient>
+    <linearGradient id="gradGreen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/>
+    </linearGradient>
+    <linearGradient id="gradOrange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/>
+    </linearGradient>
+    <linearGradient id="gradRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+    <radialGradient id="halo" r="65%">
+      <stop offset="60%" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,.12)"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.2" result="b"/><feMerge>
+        <feMergeNode in="b"/><feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="innerShadow">
+      <feOffset dx="0" dy="1"/><feGaussianBlur stdDeviation="1.5" result="o"/>
+      <feComposite in="o" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 .45 0"/>
+      <feComposite in2="SourceGraphic" operator="over"/>
+    </filter>
+    <filter id="blurHalo"><feGaussianBlur stdDeviation="6"/></filter>
   </defs>
 </svg>
-
-<!-- Language Dock -->
-<div class="lang-dock"><button class="lang-btn" id="langOpen" title="Language"><i class="fa-solid fa-globe"></i></button></div>
-<div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
 
 <div class="wrap">
   <header class="site">
     <div class="brand">
       <div class="brand-badge"><i class="fa-solid fa-brain"></i></div>
-      <div><div class="hero-heading" data-i="title">Semantic SEO Master Analyzer</div></div>
+      <div><div class="hero-heading">Semantic SEO Master Analyzer</div></div>
     </div>
     <div style="display:flex;gap:.5rem">
-      <button class="btn btn-ghost" id="printTop"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+      <button class="btn btn-ghost" id="printTop"><i class="fa-solid fa-print"></i> Print</button>
     </div>
   </header>
 
   <section class="analyzer" id="analyzer">
-    <!-- stylish hero replacing old header -->
-    <h2 class="section-title" data-i="analyze_title" style="display:none">Analyze a URL</h2>
     <div class="score-hero">
-      <div class="score-hero-grid">
-        <div class="score-container">
-          <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
-            <circle class="bg" cx="60" cy="60" r="54"/>
-            <circle class="progress" cx="60" cy="60" r="54"/>
-            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
+      <div class="score-grid">
+        <!-- Wheel -->
+        <div class="wheel-wrap">
+          <svg class="wheel" viewBox="0 0 120 120" role="img" aria-label="Overall score">
+            <!-- outer subtle halo -->
+            <circle class="halo" cx="60" cy="60" r="54" stroke="url(#halo)"></circle>
+            <!-- tick ring -->
+            <circle class="ticks" cx="60" cy="60" r="54" stroke-dasharray="1 8" transform="rotate(-90 60 60)"/>
+            <!-- base track -->
+            <circle class="track" cx="60" cy="60" r="54"/>
+            <!-- progress arc (stroke set in JS via grad) -->
+            <circle class="progress" id="wheelProgress" cx="60" cy="60" r="54" transform="rotate(-90 60 60)"/>
           </svg>
+          <div class="wheel-center" aria-hidden="true"></div>
+          <div id="overallScore" class="wheel-score">0%</div>
+          <div class="wheel-label">Overall</div>
         </div>
+
+        <!-- Badges + URL -->
         <div>
-          <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:.35rem;">
-            <span class="section-subtitle" data-i="legend_line">
-              The wheel fills with your overall score.
-              <span class="badge-soft" style="background:rgba(34,197,94,.18)">Green ≥ 80</span>
-              <span class="badge-soft" style="background:rgba(245,158,11,.18)">Orange 60–79</span>
-              <span class="badge-soft" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
-            </span>
-          </div>
-          <h3 class="hero-heading" style="font-size:2.2rem;margin:.3rem 0 .6rem">Analyze a URL</h3>
-          <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:.35rem;">
-            <span class="badge-soft"><i class="fa-solid fa-gauge"></i> <b>Overall:</b>&nbsp;<span id="overallScoreInline">0</span> /100</span>
-            <span class="badge-soft" id="aiBadge">Writer: <b>—</b></span>
-            <button id="viewAIText" class="btn btn-glass" style="--pad:.5rem .9rem"><i class="fa-solid fa-robot"></i> Evidence</button>
-            <span class="badge-soft"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</span>
-            <span class="badge-soft"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</span>
+          <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:.55rem">
+            <span id="overallChip" class="badge"><i class="fa-solid fa-gauge"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
+            <span id="writerChip" class="badge badge-green"><i class="fa-solid fa-user-check"></i> Writer: <b>Likely Human</b></span>
+            <button id="viewAIText" class="btn btn-neon" style="--pad:.45rem .8rem"><i class="fa-solid fa-robot"></i> Evidence</button>
+            <span class="badge"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</span>
+            <span class="badge"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</span>
           </div>
 
           <!-- URL card -->
           <div class="url-card">
             <form id="analyzeForm" class="analyze-form" onsubmit="return false;">
-              <label for="analyzeUrl" style="display:block;font-weight:900;margin-bottom:.45rem" data-i="page_url">Page URL</label>
+              <label for="analyzeUrl" style="display:block;font-weight:900;margin-bottom:.45rem">Page URL</label>
               <div class="input-wrap">
                 <span class="icon"><i class="fa-solid fa-link"></i></span>
-                <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="Paste a page URL… e.g. https://example.com/guide" />
+                <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="Paste a page URL… e.g. https://example.com/guide"/>
               </div>
-              <div class="analyze-row" style="grid-template-columns: 1fr auto auto auto;">
+              <div class="analyze-row">
                 <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer">
-                  <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)">
-                  <span data-i="auto_check">Auto‑apply checkmarks (≥ 80)</span>
+                  <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)"> Auto‑apply checkmarks (≥ 80)
                 </label>
-                <div class="actions">
-                  <button id="analyzeBtn" class="btn btn-gradient" type="button"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
-                  <button class="btn btn-neon" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
-                  <button class="btn btn-ghost" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
-                </div>
+                <button id="analyzeBtn" class="btn btn-gradient" type="button"><i class="fa-solid fa-magnifying-glass"></i> Analyze</button>
+                <button class="btn btn-neon" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> Print</button>
+                <button class="btn btn-ghost" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
               </div>
               <div id="analyzeStatus" style="margin-top:.6rem;color:var(--text-dim)"></div>
             </form>
 
-            <!-- quick report chips -->
             <div id="analyzeReport" style="display:none">
               <div class="report-chips">
                 <span class="chip">HTTP: <b id="rStatus">—</b></span>
@@ -280,17 +248,18 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                 <span class="chip">Auto‑checked: <b id="rAutoCount">—</b></span>
               </div>
             </div>
-          </div><!-- /url-card -->
+          </div>
         </div>
-      </div>
+      </div><!-- /grid -->
     </div>
 
+    <!-- Progress + Checklist (same as before; omitted for brevity) -->
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Checklist groups -->
+    {{-- === Checklist === --}}
     <div class="analyzer-grid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -319,7 +288,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
         24=>'Valid schema markup (Article/FAQ/Product)',
         25=>'sameAs/Organization details present'
       ]; @endphp
-
       @foreach ([
         ['Content & Keywords',1,5,'fa-pen-nib'],
         ['Technical Elements',6,9,'fa-code'],
@@ -340,9 +308,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <ul class="checklist">
             @for($i=$c[1];$i<=$c[2];$i++)
               <li class="checklist-item" id="row-{{ $i }}" data-score="">
-                <label>
-                  <input type="checkbox" id="ck-{{ $i }}"><span>{{ $labels[$i] }}</span>
-                </label>
+                <label><input type="checkbox" id="ck-{{ $i }}"> <span>{{ $labels[$i] }}</span></label>
                 <span class="score-badge" id="sc-{{ $i }}">—</span>
                 <button class="improve-btn" type="button" data-id="ck-{{ $i }}">Improve</button>
               </li>
@@ -355,7 +321,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <footer class="site">
-  <div class="footer-brand"><span class="dot"></span><strong>Semantic SEO Master</strong></div>
   <div class="footer-links">
     <a href="#analyzer">Analyzer</a>
     <a href="#" id="toTopLink">Back to top</a>
@@ -367,45 +332,11 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </footer>
 <button id="backTop" title="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- Modal -->
-<div class="modal-backdrop" id="modalBackdrop"></div>
-<div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3 class="modal-title" id="modalTitle">Improve</h3>
-      <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="tabs">
-      <button class="tab active" data-tab="tipsTab"><i class="fa-solid fa-lightbulb"></i> Tips</button>
-      <button class="tab" data-tab="examplesTab"><i class="fa-brands fa-google"></i> Examples</button>
-      <button class="tab" data-tab="humanTab"><i class="fa-solid fa-user"></i> Human‑like</button>
-      <button class="tab" data-tab="aiTab"><i class="fa-solid fa-microchip"></i> AI‑like</button>
-      <button class="tab" data-tab="fullTab"><i class="fa-solid fa-file-lines"></i> Full Text</button>
-    </div>
-    <div class="tabpanes">
-      <div id="tipsTab" class="active"><ul id="modalList"></ul></div>
-      <div id="examplesTab"><div class="pre" id="examplesPre">—</div></div>
-      <div id="humanTab"><div class="pre" id="humanSnippetsPre">Run Analyze to view human‑like snippets.</div></div>
-      <div id="aiTab"><div class="pre" id="aiSnippetsPre">Run Analyze to view AI‑like snippets.</div></div>
-      <div id="fullTab"><div class="pre" id="fullTextPre">Run Analyze to load full text.</div></div>
-    </div>
-  </div>
-</div>
+<!-- Simple modal for evidence -->
+<div id="evidenceModal" style="display:none"></div>
 
 <script>
-/* ---- Simple i18n (en only) ---- */
-const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='badge-soft' style='background:rgba(34,197,94,.18)'>Green ≥ 80</span> <span class='badge-soft' style='background:rgba(245,158,11,.18)'>Orange 60–79</span> <span class='badge-soft' style='background:rgba(239,68,68,.18)'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 80)"} };
-const LANGS = [["en","English"]];
-(function(){
-  const dockBtn=document.getElementById('langOpen'), panel=document.getElementById('langPanel'), card=document.getElementById('langCard');
-  function fill(){ card.innerHTML=''; LANGS.forEach(([c,l])=>{ const d=document.createElement('div'); d.className='lang-item'; d.dataset.code=c; d.innerHTML=`<span class="lang-flag"></span><strong>${l}</strong>`; card.appendChild(d); }); }
-  function apply(code){ const d=I18N[code]||I18N.en; document.querySelector('[data-i="title"]').textContent=d.title; document.querySelector('[data-i="analyze_title"]').textContent=d.analyze_title; document.querySelector('[data-i="legend_line"]').innerHTML=d.legend_line; document.querySelector('[data-i="page_url"]').textContent=d.page_url; document.querySelectorAll('[data-i="analyze"]').forEach(n=>n.textContent=d.analyze); document.querySelectorAll('[data-i="print"]').forEach(n=>n.textContent=d.print); document.querySelectorAll('[data-i="reset"]').forEach(n=>n.textContent=d.reset); document.querySelectorAll('[data-i="auto_check"]').forEach(n=>n.textContent=d.auto_check); }
-  dockBtn.addEventListener('click', ()=> panel.style.display = panel.style.display==='block' ? 'none' : 'block');
-  panel.addEventListener('click', e=>{ const it=e.target.closest('.lang-item'); if(!it) return; apply(it.dataset.code); panel.style.display='none'; });
-  fill(); apply('en');
-})();
-
-/* ---- Dancing lines background ---- */
+/* Background lines */
 (function(){
   function layer(id,count,maxDist,colorFn,vel=1){
     const c=document.getElementById(id),ctx=c.getContext('2d'); let w,h,nodes=[],mouse={x:-9999,y:-9999};
@@ -420,17 +351,17 @@ const LANGS = [["en","English"]];
         if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1;
       }
       for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
-        const A=nodes[i],B=nodes[j], d=Math.hypot(A.x-B.x,B.y-A.y);
+        const A=nodes[i],B=nodes[j], d=Math.hypot(A.x-B.x, A.y-B.y);
         if(d<maxDist){ const al=(1-d/maxDist)*.65; ctx.strokeStyle=colorFn(al); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke(); }
       }
       requestAnimationFrame(loop);
     })();
   }
   layer('linesCanvas',140,130,a=>`rgba(61,226,255,${a})`,1.1);
-  layer('linesCanvas2',110,120,a=>`rgba(255,32,69,${a*0.6})`,0.9);
+  layer('linesCanvas2',110,120,a=>`rgba(255,32,69,${a*0.55})`,0.9);
 })();
 
-/* ---- Multi‑color smoke (WebGL2) ---- */
+/* Subtle smoke (WebGL2) */
 (function(){
   const canvas=document.getElementById('smokeFX'); if(!canvas) return;
   let gl; try{ gl=canvas.getContext('webgl2',{alpha:true,antialias:false,depth:false,stencil:false}); }catch(e){}
@@ -448,13 +379,13 @@ const LANGS = [["en","English"]];
     vec2 u=f*f*(3.-2.*f); return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y; }
   float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
   void main(){
-    vec2 p=(uv-vec2(1.,1.)) * vec2(2.2, 2.0);
-    p.x += t*.15; p.y += t*.10;
+    vec2 p=(uv-vec2(1.,1.)) * vec2(2.2,2.0);
+    p.x += t*.12; p.y += t*.09;
     float q=f(p*1.6);
     float d=smoothstep(.30,.95,q);
     vec3 base=mix(vec3(.24,.88,1.),vec3(.96,.31,.41),uv.x);
     vec3 c=mix(base, vec3(1.,.72,.28), 0.35*uv.y);
-    o=vec4(c*d, .72*d);
+    o=vec4(c*d, .65*d);
   }`;
   function sh(src,type){const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s;}
   const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl.VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
@@ -462,31 +393,32 @@ const LANGS = [["en","English"]];
   (function loop(t){ requestAnimationFrame(loop); gl.useProgram(prog); gl.uniform1f(ut,t*1e-3); gl.drawArrays(gl.TRIANGLES,0,3); })(performance.now());
 })();
 
-/* ---- Back to Top ---- */
-(function(){
-  const btn=document.getElementById('backTop'), link=document.getElementById('toTopLink');
-  function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
-  addEventListener('scroll', onScroll, {passive:true}); onScroll();
-  const goTop = e => { e && e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); };
-  btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
-})();
+/* Back to top */
+(function(){const b=document.getElementById('backTop');const l=document.getElementById('toTopLink');function s(){b.style.display=scrollY>300?'grid':'none'}addEventListener('scroll',s,{passive:true});s();[b,l].forEach(el=>el&&el.addEventListener('click',e=>{e.preventDefault();scrollTo({top:0,behavior:'smooth'})}))})();
 
-/* ---- Wheel color + % inside ---- */
-const WHEEL={circumference:339, circle:null, text:null};
-function setScoreWheel(value){
-  if(!WHEEL.circle){ WHEEL.circle=document.querySelector('.score-wheel .progress'); WHEEL.text=document.getElementById('overallScore'); }
-  const v=Math.max(0,Math.min(100,Number(value)||0));
-  const offset=WHEEL.circumference - (v/100)*WHEEL.circumference;
-  WHEEL.circle.style.strokeDashoffset=offset;
-  if(v>=80) WHEEL.circle.setAttribute('stroke','url(#gradGood)');
-  else if(v>=60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
-  else WHEEL.circle.setAttribute('stroke','url(#gradBad)');
-  const n=Math.round(v); WHEEL.text.textContent=n+'%'; document.getElementById('overallScoreInline').textContent=n;
+/* ===== Wheel logic (green ≥80, orange 61–79, red ≤60) ===== */
+const CIRC=339;
+function paintWheel(v){
+  const arc=document.getElementById('wheelProgress');
+  const n=Math.max(0,Math.min(100,Number(v)||0));
+  const off=CIRC - (n/100)*CIRC;
+  arc.style.strokeDashoffset=off;
+  // color rules
+  let grad = 'url(#gradRed)';
+  if(n>=80) grad = 'url(#gradGreen)';
+  else if(n>60) grad = 'url(#gradOrange)'; // exactly 60 -> red
+  arc.setAttribute('stroke', grad);
+  document.getElementById('overallScore').textContent=Math.round(n)+'%';
+  document.getElementById('overallScoreInline').textContent=Math.round(n);
+  // chip color class
+  const chip=document.getElementById('overallChip');
+  chip.classList.remove('badge-green','badge-orange','badge-red');
+  chip.classList.add(n>=80?'badge-green':(n>60?'badge-orange':'badge-red'));
 }
 
-/* ---- Checklist storage & UI sync ---- */
+/* Checklist storage, score pills, progress */
 (function(){
-  const STORAGE_KEY='semanticSeoChecklistV6';
+  const STORAGE_KEY='semanticSeoChecklistV7';
   const total=25;
   const boxes=()=>Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar=document.getElementById('progressBar');
@@ -500,9 +432,7 @@ function setScoreWheel(value){
       else if(score>=60) col='rgba(245,158,11,.6)';
       else col='rgba(239,68,68,.6)';
       rowEl.dataset.score=String(score);
-    } else {
-      rowEl.dataset.score='';
-    }
+    } else rowEl.dataset.score='';
     rowEl.style.setProperty('--accent', col);
   }
 
@@ -534,12 +464,12 @@ function setScoreWheel(value){
     localStorage.removeItem(STORAGE_KEY);
     boxes().forEach(cb=>cb.checked=false);
     for(let i=1;i<=25;i++){ setScoreBadge(i,null); setRowAccent(document.getElementById('row-'+i), null); }
-    setScoreWheel(0); update();
+    paintWheel(0); update();
   });
   document.getElementById('printChecklist').addEventListener('click', ()=>window.print());
   document.getElementById('printTop').addEventListener('click', ()=>window.print());
 
-  // Expose helpers
+  // expose
   window.setScoreBadge=(num,score)=>{
     const pill=document.getElementById('sc-'+num), row=document.getElementById('row-'+num);
     if(!pill) return;
@@ -550,60 +480,28 @@ function setScoreWheel(value){
     if(s>=80) pill.classList.add('score-good'); else if(s>=60) pill.classList.add('score-mid'); else pill.classList.add('score-bad');
     setRowAccent(row,s);
   };
-
   load();
 })();
 
-/* ---- Modal + Improve ---- */
-(function(){
-  const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-  const backdrop=$('#modalBackdrop'), modal=$('#tipModal'), closeBtn=$('#modalClose');
-  const panes={ tipsTab:$('#tipsTab'), examplesTab:$('#examplesTab'), humanTab:$('#humanTab'), aiTab:$('#aiTab'), fullTab:$('#fullTab') };
-  const tabs=$$('.tab');
-  function openM(){backdrop.style.display='block'; modal.style.display='flex';}
-  function closeM(){backdrop.style.display='none'; modal.style.display='none';}
-  closeBtn.addEventListener('click',closeM); backdrop.addEventListener('click',closeM); document.addEventListener('keydown',e=>{if(e.key==='Escape') closeM();});
-  tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); Object.values(panes).forEach(p=>p.classList.remove('active')); t.classList.add('active'); panes[t.dataset.tab].classList.add('active'); }));
-  document.addEventListener('click', e=>{
-    const btn=e.target.closest('.improve-btn'); if(!btn) return;
-    const id=btn.dataset.id; const label=(document.getElementById(id)?.parentElement?.querySelector('span')?.textContent||'Improve').trim();
-    document.getElementById('modalTitle').textContent='Improve: '+label;
-    const tipsList=document.getElementById('modalList');
-    const tips=(window.__lastSuggestions && Array.isArray(window.__lastSuggestions[id])) ? window.__lastSuggestions[id] : ['Run Analyze to generate contextual suggestions.'];
-    tipsList.innerHTML=''; tips.forEach(t=>{const li=document.createElement('li'); li.textContent=t; tipsList.appendChild(li);});
-    tabs.forEach(x=>x.classList.remove('active')); panes.tipsTab.classList.add('active'); document.querySelector('[data-tab="tipsTab"]').classList.add('active');
-    Object.values(panes).forEach(p=>p.classList.remove('active')); panes.tipsTab.classList.add('active');
-    openM();
-  });
-  document.getElementById('viewAIText').addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openM();});
-  window.__setAIData=function(ai){
-    document.getElementById('aiSnippetsPre').textContent=(ai?.ai_sentences||[]).join('\n\n')||'No AI‑like snippets detected.';
-    document.getElementById('humanSnippetsPre').textContent=(ai?.human_sentences||[]).join('\n\n')||'No human‑like snippets isolated.';
-    document.getElementById('fullTextPre').textContent=ai?.full_text||'No text captured.';
-    document.getElementById('aiPct').textContent=typeof ai?.ai_pct==='number'?ai.ai_pct:'—';
-    document.getElementById('humanPct').textContent=typeof ai?.human_pct==='number'?ai.human_pct:'—';
-  }
-})();
-
-/* ---- Analyze: connect scores + auto-select ≥80 ---- */
+/* Analyze hookup */
 function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test(u)) u='https://'+u.replace(/^\/+/, ''); try{ new URL(u);}catch(e){} return u; }
 
 (function(){
   const $=s=>document.querySelector(s);
   function setChecked(id,on){ const el=document.getElementById(id); if(el){ el.checked=!!on; el.classList.toggle('autoPulse', !!on); } }
 
-  // little pulse animation on click (visual only)
-  (function(){
-    const btn=document.getElementById('analyzeBtn');
-    if(!btn) return;
-    btn.addEventListener('click', ()=>{
-      btn.animate([{boxShadow:'0 0 0 0 rgba(255,32,69,.0)'},{boxShadow:'0 0 0 12px rgba(255,32,69,.18)'},{boxShadow:'0 0 0 0 rgba(255,32,69,.0)'}],
-                    {duration:600, easing:'ease-out'});
-    });
-  })();
-
   document.getElementById('analyzeForm').addEventListener('submit', e=>{ e.preventDefault(); document.getElementById('analyzeBtn').click(); });
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
+
+  window.__setAIData=function(ai){
+    document.getElementById('aiPct').textContent=typeof ai?.ai_pct==='number'?ai.ai_pct:'—';
+    document.getElementById('humanPct').textContent=typeof ai?.human_pct==='number'?ai.human_pct:'—';
+    // Writer chip color (Likely Human/Mixed/Likely AI)
+    const writer=document.getElementById('writerChip');
+    writer.classList.remove('badge-green','badge-orange','badge-red');
+    const map={likely_human:['badge-green','Likely Human'],mixed:['badge-orange','Mixed'],likely_ai:['badge-red','Likely AI'],unknown:['','Unknown']};
+    const t=map[ai?.label||'unknown']; if(t){ if(t[0]) writer.classList.add(t[0]); writer.innerHTML=`<i class="fa-solid fa-user-check"></i> Writer: <b>${t[1]}</b>`; }
+  };
 
   async function analyze(){
     const url=normalizeUrl($('#analyzeUrl').value);
@@ -620,7 +518,7 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       const data=await resp.json();
       if(!data.ok) throw new Error(data.error||'Failed');
 
-      // chips
+      // quick chips
       $('#rStatus').textContent=data.status;
       $('#rTitleLen').textContent=(data.title||'').length;
       $('#rMetaLen').textContent=data.meta_description_len;
@@ -632,50 +530,41 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       $('#rSchema').textContent=(data.schema.found_types||[]).slice(0,6).join(', ')||'—';
       report.style.display='block';
 
-      // Suggestions for modal
-      window.__lastSuggestions = (data.suggestions && typeof data.suggestions==='object') ? data.suggestions : {};
-
-      // Per-item scores + auto-select ≥80
+      // per-item scores + auto-select
       let autoCount=0;
       for(let i=1;i<=25;i++){
         const key='ck-'+i, row=document.getElementById('row-'+i);
         const score=(data.scores && typeof data.scores[key]==='number') ? data.scores[key] : null;
         setScoreBadge(i, score);
         if(row) row.title = (score==null?'No score':`Score: ${Math.round(score)}`);
-
         if($('#autoApply').checked){
           if(typeof score==='number' && score>=80){ setChecked(key,true); autoCount++; }
           else { setChecked(key,false); }
         }
       }
       document.getElementById('rAutoCount').textContent = autoCount.toString();
-      document.dispatchEvent(new Event('change')); // update progress
+      document.dispatchEvent(new Event('change'));
 
-      // Overall wheel
-      const overall = (typeof data.overall_score==='number') ? data.overall_score : 0;
-      setScoreWheel(overall);
+      // overall wheel color + % (rules: ≥80 green, 61–79 orange, ≤60 red)
+      paintWheel(typeof data.overall_score==='number'?data.overall_score:0);
 
-      // AI/Human badge (no fabricated numbers)
-      const ai=data.ai_detection||{};
-      const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI', unknown:'Unknown'};
-      const label=labelMap[ai.label]||'Unknown';
-      const humanPct=typeof ai.human_pct==='number'?ai.human_pct:null;
-      const aiPct=typeof ai.ai_pct==='number'?ai.ai_pct:null;
-      const parts=[`<b>${label}</b>`]; if(humanPct!==null) parts.push(`Human ${humanPct}%`); if(aiPct!==null) parts.push(`AI ${aiPct}%`);
-      document.getElementById('aiBadge').innerHTML='Writer: '+parts.join(' • ');
-      window.__setAIData(ai);
+      // writer/human/ai
+      window.__setAIData(data.ai_detection||{});
 
-      // status line
-      const wheel=parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
-      status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
+      // status message
+      const n=parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
+      status.textContent = n>=80 ? 'Great! You passed — keep going.' : (n<=60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent='', 4200);
 
     }catch(e){
-      $('#analyzeStatus').textContent='Error: '+e.message;
+      status.textContent='Error: '+e.message;
     }finally{
       btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-magnifying-glass"></i> Analyze';
     }
   }
+
+  // initial paint (0%)
+  paintWheel(0);
 })();
 </script>
 </body>
