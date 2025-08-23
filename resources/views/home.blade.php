@@ -6,12 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Semantic SEO Master • Ultra Tech Global</title>
-
-<!-- Favicon (optional; remove if not present in /public) -->
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
@@ -28,60 +25,35 @@ html{scroll-behavior:smooth}
 body{
   margin:0; color:var(--text);
   font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
-  background: radial-gradient(1200px 700px at 0% -10%, #201046 0%, transparent 55%),
-              radial-gradient(1100px 800px at 110% 0%, #1a0f2a 0%, transparent 50%),
-              var(--bg);
+  background:
+    radial-gradient(1200px 700px at 0% -10%, #201046 0%, transparent 55%),
+    radial-gradient(1100px 800px at 110% 0%, #1a0f2a 0%, transparent 50%),
+    var(--bg);
   overflow-x:hidden;
 }
 
-/* ---------- Lines canvases (bottom) ---------- */
+/* Layering */
 #linesCanvas, #linesCanvas2 { position:fixed; inset:0; z-index:0; pointer-events:none; }
+.bg-smoke{ position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+#smokeCanvas{ position:fixed; inset:0; z-index:2; pointer-events:none; } /* procedural smoke layer */
+.wrap{ position:relative; z-index:3; max-width:var(--container); margin:0 auto; padding:28px 5% }
+.modal-backdrop{ z-index:9000 } .modal{ z-index:9010 }
 
-/* ---------- SMOKE + CLOUDS (visible layer above lines, below content) ---------- */
-.bg-smoke{
-  position:fixed; inset:0; z-index:1;
-  pointer-events:none; overflow:hidden;
-  will-change:transform, opacity, filter;
-}
-.blob{
-  position:absolute; border-radius:50%;
-  filter:blur(95px); mix-blend-mode:screen;
-  animation:float 36s linear infinite;
-  will-change:transform, filter, opacity;
-}
-/* multi‑color blobs */
-.blob.cyan   { background:radial-gradient(closest-side,rgba(61,226,255,.34),rgba(61,226,255,0) 70%) }
-.blob.purple { background:radial-gradient(closest-side,rgba(155,92,255,.38),rgba(155,92,255,0) 70%) }
-.blob.red    { background:radial-gradient(closest-side,rgba(255,32,69,.30), rgba(255,32,69,0) 70%) }
-.blob.orange { background:radial-gradient(closest-side,rgba(255,182,72,.30),rgba(255,182,72,0) 70%) }
-.blob.teal   { background:radial-gradient(closest-side,rgba(34,197,94,.30), rgba(34,197,94,0) 70%) }
-/* positions/sizes */
+/* Soft “blob” ambience (under the procedural smoke) */
+.blob{position:absolute;border-radius:50%;filter:blur(95px);mix-blend-mode:screen;animation:float 36s linear infinite}
+.blob.cyan   { background:radial-gradient(closest-side,rgba(61,226,255,.28), rgba(61,226,255,0) 70%) }
+.blob.purple { background:radial-gradient(closest-side,rgba(155,92,255,.32),rgba(155,92,255,0) 70%) }
+.blob.red    { background:radial-gradient(closest-side,rgba(255,32,69,.26),  rgba(255,32,69,0) 70%) }
+.blob.orange { background:radial-gradient(closest-side,rgba(255,182,72,.26), rgba(255,182,72,0) 70%) }
+.blob.teal   { background:radial-gradient(closest-side,rgba(34,197,94,.26),  rgba(34,197,94,0) 70%) }
 .b1{top:-18%;left:-15%;width:60vmax;height:60vmax}
 .b2{bottom:-22%;right:-10%;width:62vmax;height:62vmax;animation-direction:reverse;animation-duration:30s}
 .b3{top:10%;right:15%;width:50vmax;height:50vmax;animation-duration:28s}
 .b4{bottom:12%;left:25%;width:48vmax;height:48vmax;animation-duration:40s}
-.b5{bottom:0%;right:0%;width:40vmax;height:40vmax;animation-duration:52s}
-
-.clouds { position:absolute; right:-6vmax; bottom:-6vmax; width:80vmax; height:60vmax; pointer-events:none; }
-.clouds .c { position:absolute; border-radius:50%; filter:blur(42px); opacity:.95; mix-blend-mode:screen; }
-.clouds .cyan   { background:radial-gradient(closest-side, rgba(61,226,255,.9),  rgba(61,226,255,0) 75%); }
-.clouds .purple { background:radial-gradient(closest-side, rgba(155,92,255,.85), rgba(155,92,255,0) 75%); }
-.clouds .red    { background:radial-gradient(closest-side, rgba(255,32,69,.80),  rgba(255,32,69,0) 75%); }
-.clouds .orange { background:radial-gradient(closest-side, rgba(255,182,72,.85), rgba(255,182,72,0) 75%); }
-.clouds .teal   { background:radial-gradient(closest-side, rgba(34,197,94,.82),  rgba(34,197,94,0) 75%); }
-.c1{ width:50vmax;height:28vmax; right:0;     bottom:0;   animation:cloud 40s ease-in-out infinite; }
-.c2{ width:46vmax;height:26vmax; right:6vmax; bottom:2vmax; animation:cloud 46s ease-in-out infinite reverse; }
-.c3{ width:42vmax;height:24vmax; right:10vmax;bottom:3vmax; animation:cloud 52s ease-in-out infinite; }
-.c4{ width:38vmax;height:22vmax; right:14vmax;bottom:5vmax; animation:cloud 58s ease-in-out infinite reverse; }
-.c5{ width:34vmax;height:20vmax; right:18vmax;bottom:7vmax; animation:cloud 62s ease-in-out infinite; }
-
+.b5{bottom:-8%;right:-6%;width:50vmax;height:50vmax;animation-duration:52s}
 @keyframes float{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-6%,7%,0)}100%{transform:translate3d(0,0,0)}}
-@keyframes cloud{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-3%,-4%,0)}100%{transform:translate3d(0,0,0)}}
 
-/* content above smoke */
-.wrap{position:relative; z-index:2; max-width:var(--container); margin:0 auto; padding:28px 5%}
-
-/* ---------- Header ---------- */
+/* Header */
 header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 0 22px;border-bottom:1px solid var(--line);backdrop-filter:saturate(140%) blur(10px);background:rgba(15,16,34,.35)}
 .brand{display:flex;align-items:center;gap:1rem}
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
@@ -95,11 +67,11 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .btn-danger{background:linear-gradient(135deg,#ff2045,#ff7a59);color:#fff;box-shadow:0 8px 30px rgba(255,32,69,.25)}
 .btn-danger:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,32,69,.35)}
 
-/* ---------- Analyzer panel ---------- */
+/* Analyzer panel */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* ---------- SCORE WHEEL ---------- */
+/* Score wheel */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:240px}
 .score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
@@ -117,7 +89,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 }
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
 
-/* ---------- URL input ---------- */
+/* URL input */
 .analyze-form input[type="url"]{
   position:relative; z-index:5; width:100%; padding:1rem 1.2rem; border-radius:14px;
   border:1px solid #1b1b35; background:#0b0d21; color:var(--text);
@@ -126,13 +98,13 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .analyze-form input[type="url"]:focus{ outline:none; border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15); }
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
-/* ---------- Progress ---------- */
+/* Progress */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .progress-bar{width:100%;height:12px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid #101826}
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
 
-/* ---------- CHECKLIST (new look) ---------- */
+/* Checklist */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{
   position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
@@ -156,8 +128,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900
 }
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
-
-/* Items */
 .checklist{list-style:none;margin:10px 0 0;padding:0}
 .checklist-item{
   display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;
@@ -178,8 +148,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   border-color:rgba(255,255,255,.16);
 }
 .checklist-item > *{ position:relative; z-index:1; }
-
-/* Modern toggle */
 .checklist-item input[type="checkbox"]{
   appearance:none; width:38px;height:22px;border-radius:999px; background:#2a2a46;
   border:1px solid rgba(255,255,255,.18); position:relative; outline:none; transition:.2s; cursor:pointer;
@@ -190,7 +158,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 }
 .checklist-item input[type="checkbox"]:checked{ background:linear-gradient(135deg,#3de2ff,#9b5cff); }
 .checklist-item input[type="checkbox"]:checked::after{ left:20px; background:#0a1222; }
-
 .score-badge{
   font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);
   background:rgba(255,255,255,.06);min-width:52px;text-align:center;
@@ -201,9 +168,9 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .improve-btn{padding:.4rem .75rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer}
 .improve-btn:hover{background:rgba(255,255,255,.1)}
 
-/* ---------- Modal ---------- */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;z-index:9000}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9010}
+/* Modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center}
 .modal-card{width:min(1000px,96vw);background:var(--panel-2);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow);padding:16px}
 .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
 .modal-title{margin:0;font-size:1.2rem}
@@ -215,7 +182,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .tabpanes > div.active{display:block}
 .pre{white-space:pre-wrap;background:#0b0d21;border:1px solid #1b1b35;border-radius:12px;padding:12px;color:#cfd3f6;max-height:60vh;overflow:auto}
 
-/* ---------- Footer + back to top ---------- */
+/* Footer + back to top */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 .footer-brand{display:flex;align-items:center;gap:.6rem}
 .footer-brand .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#3de2ff,#9b5cff)}
@@ -230,33 +197,28 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .score-container{width:200px}
   footer.site{flex-direction:column;align-items:flex-start}
 }
-@media print{#linesCanvas,#linesCanvas2,.bg-smoke,.modal-backdrop,.modal,header.site,#backTop{display:none!important}}
+@media print{#linesCanvas,#linesCanvas2,.bg-smoke,#smokeCanvas,.modal-backdrop,.modal,header.site,#backTop{display:none!important}}
 </style>
 </head>
 <body>
 <canvas id="linesCanvas"></canvas>
 <canvas id="linesCanvas2"></canvas>
 
-<!-- Smoke + Clouds (all colors) -->
+<!-- Ambient blobs under procedural smoke -->
 <div class="bg-smoke">
   <span class="blob cyan   b1"></span>
   <span class="blob purple b2"></span>
   <span class="blob red    b3"></span>
   <span class="blob orange b4"></span>
   <span class="blob teal   b5"></span>
-  <div class="clouds">
-    <span class="c cyan   c1"></span>
-    <span class="c purple c2"></span>
-    <span class="c red    c3"></span>
-    <span class="c orange c4"></span>
-    <span class="c teal   c5"></span>
-  </div>
 </div>
+
+<!-- Procedural cloud/smoke (all colors) -->
+<canvas id="smokeCanvas"></canvas>
 
 <!-- Gradients for score wheel -->
 <svg width="0" height="0" aria-hidden="true">
   <defs>
-    <!-- smoke multicolor base -->
     <linearGradient id="gradSmoke" x1="0%" y1="0%" x2="100%">
       <stop offset="0%"  stop-color="#3de2ff"/>
       <stop offset="25%" stop-color="#9b5cff"/>
@@ -264,7 +226,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <stop offset="80%" stop-color="#ffb648"/>
       <stop offset="100%" stop-color="#22c55e"/>
     </linearGradient>
-    <!-- thresholds -->
     <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%">
       <stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/>
     </linearGradient>
@@ -291,7 +252,10 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   <section class="analyzer" id="analyzer">
     <h2 class="section-title">Analyze a URL</h2>
     <p class="section-subtitle">
-      The wheel fills with your overall score. <span class="chip" style="background:rgba(34,197,94,.18)">Green ≥ 80</span> <span class="chip" style="background:rgba(245,158,11,.18)">Orange 60–79</span> <span class="chip" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
+      The wheel fills with your overall score.
+      <span class="chip" style="background:rgba(34,197,94,.18)">Green ≥ 80</span>
+      <span class="chip" style="background:rgba(245,158,11,.18)">Orange 60–79</span>
+      <span class="chip" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
     </p>
 
     <div class="score-area">
@@ -347,13 +311,11 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       </div>
     </div>
 
-    <!-- Progress -->
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Categories / checklist -->
     <div class="analyzer-grid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -432,7 +394,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <button id="backTop" title="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- Modal -->
 <div class="modal-backdrop" id="modalBackdrop"></div>
 <div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-card">
@@ -458,28 +419,13 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---------- Smoke "breathing" pulse ---------- */
-(function(){
-  const smoke = document.querySelector('.bg-smoke');
-  if(!smoke) return;
-  let t=0;
-  function loop(){
-    t += 0.008;
-    const op = 0.85 + Math.sin(t)*0.08;         // 0.77–0.93
-    const sc = 1.00 + Math.cos(t*0.6)*0.02;     // 0.98–1.02
-    smoke.style.opacity = op.toFixed(3);
-    smoke.style.transform = `scale(${sc.toFixed(3)})`;
-    requestAnimationFrame(loop);
-  }
-  loop();
-})();
-
-/* ---------- Dancing lines (2 layers) ---------- */
+/* ---- Dancing lines background ---- */
 (function(){
   function runLayer(id, count, maxDist, colorFn, vel=1){
     const c = document.getElementById(id), ctx = c.getContext('2d');
     let w,h,nodes=[],mouse={x:-9999,y:-9999};
-    function resize(){ w=c.width=innerWidth; h=c.height=innerHeight; nodes=Array.from({length:count},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*vel,vy:(Math.random()-.5)*vel}))}
+    function resize(){ w=c.width=innerWidth; h=c.height=innerHeight;
+      nodes=Array.from({length:count},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*vel,vy:(Math.random()-.5)*vel}))}
     addEventListener('resize',resize,{passive:true}); resize();
     addEventListener('mousemove',e=>{mouse.x=e.clientX; mouse.y=e.clientY},{passive:true});
     (function loop(){
@@ -500,11 +446,93 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       requestAnimationFrame(loop);
     })();
   }
-  runLayer('linesCanvas', 140, 130, a=>`rgba(61,226,255,${a})`, 1.1); // cyan
-  runLayer('linesCanvas2', 110, 120, a=>`rgba(255,32,69,${a*0.6})`, 0.9); // red
+  runLayer('linesCanvas', 140, 130, a=>`rgba(61,226,255,${a})`, 1.1);
+  runLayer('linesCanvas2', 110, 120, a=>`rgba(255,32,69,${a*0.6})`, 0.9);
 })();
 
-/* ---------- Back to Top ---------- */
+/* ---- Procedural multi‑color smoke (bottom‑right emitter) ---- */
+(function(){
+  const canvas = document.getElementById('smokeCanvas');
+  const ctx = canvas.getContext('2d');
+  let W=0,H=0, DPR = Math.max(1, devicePixelRatio||1);
+  function resize(){ W=canvas.width=innerWidth*DPR; H=canvas.height=innerHeight*DPR; canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; }
+  addEventListener('resize',resize,{passive:true}); resize();
+
+  // Particle pool
+  const MAX = 450; // tune for perf
+  const parts = new Array(MAX).fill(0).map(()=>({x:0,y:0,vx:0,vy:0,life:0,max:0,size:0,h:0,seed:Math.random()*1000}));
+  let emitX = 0, emitY = 0;
+  function updateEmitter(){ emitX = W - 40*DPR; emitY = H - 40*DPR; } updateEmitter(); addEventListener('resize', updateEmitter, {passive:true});
+
+  // Fast pseudo-noise field (periodic)
+  function n2(x,y,t){
+    // hash+trig blend (cheap)
+    const s = Math.sin(x*0.0009 + y*0.0011 + t*0.0006)*0.5 + 0.5;
+    const c = Math.cos(x*0.0012 - y*0.0007 + t*0.0005)*0.5 + 0.5;
+    return (s*0.62 + c*0.38);
+  }
+
+  function spawn(p){
+    p.x = emitX + (Math.random()*20-10)*DPR;
+    p.y = emitY + (Math.random()*20-10)*DPR;
+    p.vx = - (0.8 + Math.random()*0.8) * DPR;  // left
+    p.vy = - (0.3 + Math.random()*0.7) * DPR;  // up
+    p.life = 0;
+    p.max  = 180 + Math.random()*160;
+    p.size = (24 + Math.random()*26) * DPR;    // big soft puffs
+    // pick a base hue among all your requested colors, then wobble slightly
+    const palette = [190, 265, 340, 25, 145]; // cyan, purple, pink/red, orange, green/teal (degrees)
+    p.h = palette[(Math.random()*palette.length)|0] + (Math.random()*12-6);
+  }
+
+  // Prewarm some particles
+  parts.forEach(spawn);
+
+  let last=performance.now();
+  (function loop(now){
+    requestAnimationFrame(loop);
+    const dt = Math.min(64, now-last); last = now;
+    // Fade old frame (trail)
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(8,8,15,0.06)'; // gentle decay
+    ctx.fillRect(0,0,W,H);
+
+    ctx.globalCompositeOperation = 'lighter';
+    for(let i=0;i<parts.length;i++){
+      const p = parts[i];
+      // flow field steering
+      const f = n2(p.x, p.y, now);
+      const ang = f * Math.PI*2;
+      p.vx += Math.cos(ang) * 0.06 * DPR;
+      p.vy += Math.sin(ang) * 0.06 * DPR;
+
+      // integrate
+      p.x += p.vx * (dt/16);
+      p.y += p.vy * (dt/16);
+      p.life += dt;
+
+      // draw soft disc with hue+alpha based on life
+      const a = Math.max(0, 1 - p.life/p.max) * 0.26; // overall opacity
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+      // inner/outer color stops (HSLA) – bright core fading out
+      const h = p.h;
+      grad.addColorStop(0,   `hsla(${h}, 95%, 68%, ${a})`);
+      grad.addColorStop(0.5, `hsla(${h}, 95%, 60%, ${a*0.6})`);
+      grad.addColorStop(1,   `hsla(${h}, 95%, 50%, 0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fill();
+
+      // recycle
+      if(p.life > p.max || p.x < -200*DPR || p.y < -200*DPR){
+        spawn(p);
+      }
+    }
+  })(last);
+})();
+
+/* ---- Back to Top ---- */
 (function(){
   const btn=document.getElementById('backTop'), link=document.getElementById('toTopLink');
   function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
@@ -513,33 +541,28 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
 })();
 
-/* ---------- SCORE wheel (threshold colors + number inside) ---------- */
+/* ---- Score wheel (threshold colors + number inside) ---- */
 const WHEEL = { circumference: 339, circle: null, text: null };
 function setScoreWheel(value){
   if (!WHEEL.circle) { WHEEL.circle = document.querySelector('.score-wheel .progress'); WHEEL.text = document.getElementById('overallScore'); }
   const v = Math.max(0, Math.min(100, value));
   const offset = WHEEL.circumference - (v/100) * WHEEL.circumference;
   WHEEL.circle.style.strokeDashoffset = offset;
-
-  // Threshold colors
   if (v >= 80)      WHEEL.circle.setAttribute('stroke','url(#gradGood)');
   else if (v >= 60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
   else              WHEEL.circle.setAttribute('stroke','url(#gradBad)');
-
-  // Score inside
   const n = Math.round(v);
   WHEEL.text.textContent = n;
   document.getElementById('overallScoreInline').textContent = n;
 }
 
-/* ---------- Checklist counters + storage ---------- */
+/* ---- Checklist counters + storage ---- */
 (function () {
-  const STORAGE_KEY = 'semanticSeoChecklistV8';
+  const STORAGE_KEY = 'semanticSeoChecklist_smokeV1';
   const total = 25;
   const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar = document.getElementById('progressBar');
   const caption = document.getElementById('progressCaption');
-
   function updateCats(){
     document.querySelectorAll('.category-card').forEach(card=>{
       const all = card.querySelectorAll('input[type="checkbox"]');
@@ -570,7 +593,7 @@ function setScoreWheel(value){
   load();
 })();
 
-/* ---------- Modal (Improve) ---------- */
+/* ---- Modal (Improve) ---- */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
@@ -578,25 +601,21 @@ function setScoreWheel(value){
   const title = $('#modalTitle'), tipsList = $('#modalList');
   const panes = { tipsTab: $('#tipsTab'), examplesTab: $('#examplesTab'), humanTab: $('#humanTab'), aiTab: $('#aiTab'), fullTab: $('#fullTab') };
   const tabs = $$('.tab');
-
   function openModal(){ backdrop.style.display='block'; modal.style.display='flex'; }
   function closeModal(){ backdrop.style.display='none'; modal.style.display='none'; }
   closeBtn.addEventListener('click', closeModal); backdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
-
   tabs.forEach(t=> t.addEventListener('click', ()=>{
     tabs.forEach(x=>x.classList.remove('active'));
     Object.values(panes).forEach(p=>p.classList.remove('active'));
     t.classList.add('active'); panes[t.dataset.tab].classList.add('active');
   }));
-
   function labelFor(id){
     const input = document.getElementById(id);
     if (!input) return id;
     const span = input.parentElement?.querySelector('span');
     return span ? span.textContent.trim() : id;
   }
-
   document.addEventListener('click', function(e){
     const btn = e.target.closest('.improve-btn');
     if (!btn) return;
@@ -606,25 +625,22 @@ function setScoreWheel(value){
     const all = (window.__lastSuggestions && typeof window.__lastSuggestions==='object') ? window.__lastSuggestions : {};
     const tips = (id && Array.isArray(all[id]) && all[id].length) ? all[id] : ['Run Analyze first to generate contextual suggestions.'];
     tipsList.innerHTML = ''; tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; tipsList.appendChild(li); });
-
     tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="tipsTab"]').classList.add('active');
     Object.values(panes).forEach(p=>p.classList.remove('active')); panes.tipsTab.classList.add('active');
-
     openModal();
   });
 })();
 
-/* ---------- URL normalization + Analyze (auto-select ≥80) ---------- */
+/* ---- Analyze (auto‑select items with score ≥ 80) ---- */
 function normalizeUrl(u){
   if(!u) return '';
   u = u.trim();
   if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
-  try { new URL(u); } catch(e){ /* allow; backend validates */ }
+  try { new URL(u); } catch(e){ /* backend validates */ }
   return u;
 }
 (function(){
   const $ = s => document.querySelector(s);
-
   document.getElementById('analyzeForm').addEventListener('submit', (e)=>{
     e.preventDefault();
     document.getElementById('analyzeBtn').click();
@@ -646,7 +662,6 @@ function normalizeUrl(u){
       const data = await resp.json();
       if (!data.ok) throw new Error(data.error || 'Failed');
 
-      // Suggestions store
       window.__lastSuggestions = (data && typeof data.suggestions==='object' && data.suggestions) ? data.suggestions : {};
 
       // Chips
@@ -662,7 +677,7 @@ function normalizeUrl(u){
       document.getElementById('rSchema').textContent = types;
       report.style.display='block';
 
-      // Per‑item scores + auto‑select when score ≥ 80 (only those)
+      // Per‑item scores + auto‑select when score ≥ 80
       let autoCount=0;
       for (let i=1;i<=25;i++){
         const key='ck-'+i;
@@ -674,13 +689,13 @@ function normalizeUrl(u){
         }
       }
       document.getElementById('rAutoCount').textContent = autoCount.toString();
-      document.dispatchEvent(new Event('change')); // refresh progress
+      document.dispatchEvent(new Event('change'));
 
-      // Overall wheel color + inner number
+      // Overall wheel
       const overall = typeof data.overall_score === 'number' ? data.overall_score : 0;
       setScoreWheel(overall);
 
-      // AI/Human badge (both percents)
+      // AI/Human badge
       const ai = data.ai_detection || {};
       const labelMap = { likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI', unknown:'Unknown' };
       const label = labelMap[ai.label] || 'Unknown';
@@ -692,17 +707,16 @@ function normalizeUrl(u){
       document.getElementById('aiBadge').innerHTML = `Writer: ${parts.join(' • ')}`;
       document.getElementById('humanPct').textContent = humanPct!==null?humanPct:'—';
       document.getElementById('aiPct').textContent = aiPct!==null?aiPct:'—';
-      document.getElementById('aiSnippetsPre').textContent = (ai.ai_sentences||[]).slice(0,20).join('\n\n') || 'No AI‑like snippets detected.';
-      document.getElementById('humanSnippetsPre').textContent = (ai.human_sentences||[]).slice(0,20).join('\n\n') || 'No human‑like snippets isolated.';
-      document.getElementById('fullTextPre').textContent = ai.full_text || 'No text captured.';
+      document.getElementById('aiSnippetsPre') && (document.getElementById('aiSnippetsPre').textContent = (ai.ai_sentences||[]).slice(0,20).join('\n\n') || 'No AI‑like snippets detected.');
+      document.getElementById('humanSnippetsPre') && (document.getElementById('humanSnippetsPre').textContent = (ai.human_sentences||[]).slice(0,20).join('\n\n') || 'No human‑like snippets isolated.');
+      document.getElementById('fullTextPre') && (document.getElementById('fullTextPre').textContent = ai.full_text || 'No text captured.');
 
-      // Status line
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent = '', 4200);
 
     } catch(e){
-      status.textContent = 'Error: '+e.message;
+      document.getElementById('analyzeStatus').textContent = 'Error: '+e.message;
     } finally {
       btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Analyze';
     }
