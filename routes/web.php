@@ -1,432 +1,320 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
-
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
 
 Route::get('/', function () {
-    return view('home'); // resources/views/home.blade.php
-})->name('home');
+    return view('home');
+});
 
-/**
- * Shared analyzer core. Returns an associative array ready for JSON.
- */
-if (!function_exists('analyzeCore')) {
-    function analyzeCore(string $inputUrl): array
-    {
-        $clamp = fn ($v, $min, $max) => max($min, min($max, (float)$v));
-
-        // Normalize scheme
-        $url = trim($inputUrl);
-        if (!preg_match('~^https?://~i', $url)) {
-            $url = 'https://' . ltrim($url, '/');
-        }
-
-        // --- Fetch -----------------------------------------------------------
-        $html = '';
-        $httpStatus = 0;
-
-        try {
-            $resp = Http::timeout(15)
-                ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (compatible; SemanticSEOMaster/1.0; +https://example.com/bot)',
-                    'Accept'     => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-                ])->get($url);
-
-            $httpStatus = $resp->status();
-            if ($resp->successful()) {
-                $html = (string) $resp->body();
-            }
-        } catch (\Throwable $e) {
-            // Fallback to file_get_contents for hosts blocking Guzzle
-            try {
-                $ctx = stream_context_create([
-                    'http' => [
-                        'method'  => 'GET',
-                        'timeout' => 15,
-                        'header'  => "User-Agent: Mozilla/5.0 (compatible; SemanticSEOMaster/1.0)\r\nAccept: text/html\r\n",
-                    ],
-                    'ssl' => [
-                        'verify_peer'      => false,
-                        'verify_peer_name' => false,
-                    ],
-                ]);
-                $html = @file_get_contents($url, false, $ctx) ?: '';
-                $httpStatus = $httpStatus ?: 200;
-            } catch (\Throwable $e2) {
-                // ignore
-            }
-        }
-
-        if (trim($html) === '') {
-            return [
-                'overall'       => 0,
-                'contentScore'  => 0,
-                'humanPct'      => 0,
-                'aiPct'         => 100,
-                'httpStatus'    => $httpStatus ?: '—',
-                'titleLen'      => 0,
-                'metaLen'       => 0,
-                'canonical'     => '—',
-                'robots'        => '—',
-                'viewport'      => '—',
-                'headings'      => '—',
-                'internalLinks' => '—',
-                'schema'        => '—',
-                'itemScores'    => [],
-                'error'         => 'Empty or unreachable URL',
-            ];
-        }
-
-        // --- Parse -----------------------------------------------------------
-        libxml_use_internal_errors(true);
-        $dom = new \DOMDocument();
-        @$dom->loadHTML($html);
-        $xp  = new \DOMXPath($dom);
-
-        // Helpers (avoid PHP 8-only funcs; use Str helpers)
-        $textOf = function (string $query) use ($xp): string {
-            $nodes = $xp->query($query);
-            $buf = [];
-            if ($nodes) {
-                foreach ($nodes as $n) $buf[] = trim($n->textContent ?? '');
-            }
-            return trim(implode(' ', array_filter($buf)));
-        };
-        $attrOfAll = function (string $query, string $attrName) use ($xp): array {
-            $nodes = $xp->query($query);
-            $out = [];
-            if ($nodes) {
-                foreach ($nodes as $n) {
-                    if ($n instanceof \DOMElement && $n->hasAttribute($attrName)) {
-                        $out[] = trim($n->getAttribute($attrName));
-                    }
-                }
-            }
-            return $out;
-        };
-        $firstAttr = function (string $query, string $attrName) use ($attrOfAll): ?string {
-            $all = $attrOfAll($query, $attrName);
-            return $all[0] ?? null;
-        };
-        $exists = function (string $query) use ($xp): bool {
-            $nodes = $xp->query($query);
-            return $nodes && $nodes->length > 0;
-        };
-
-        // Core extracts
-        $title    = $textOf('//title');
-        $metaDesc = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="description"]', 'content')
-                 ?? $firstAttr('//meta[translate(@property,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="og:description"]', 'content')
-                 ?? '';
-        $canonical = $firstAttr('//link[translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="canonical"]', 'href') ?? '';
-        $robots    = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="robots"]', 'content') ?? '';
-        $viewport  = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="viewport"]', 'content') ?? '';
-
-        $h1Count = ($xp->query('//h1')?->length) ?? 0;
-        $h2Count = ($xp->query('//h2')?->length) ?? 0;
-        $h3Count = ($xp->query('//h3')?->length) ?? 0;
-
-        // Host for internal links
-        $host = parse_url($url, PHP_URL_HOST);
-        $allLinks = $attrOfAll('//a[@href]', 'href');
-        $internalCount = 0;
-        foreach ($allLinks as $href) {
-            $hrefTrim = trim($href);
-            if ($hrefTrim === '' || Str::startsWith($hrefTrim, ['mailto:', 'tel:', '#'])) {
-                continue;
-            }
-            if (Str::startsWith($hrefTrim, '/')) {
-                $internalCount++;
-            } else {
-                $linkHost = parse_url($hrefTrim, PHP_URL_HOST);
-                if ($linkHost && $host && Str::endsWith($linkHost, $host)) {
-                    $internalCount++;
-                }
-            }
-        }
-
-        // JSON-LD schema detection
-        $schemaTypes = [];
-        $scripts = $xp->query('//script[@type="application/ld+json"]');
-        if ($scripts) {
-            foreach ($scripts as $script) {
-                $json = trim($script->textContent ?? '');
-                if ($json === '') continue;
-                $json = preg_replace('/\/\*.*?\*\//s', '', $json);
-                try {
-                    $data = json_decode($json, true, 512, JSON_INVALID_UTF8_IGNORE);
-                    $scan = function ($node) use (&$scan, &$schemaTypes) {
-                        if (is_array($node)) {
-                            if (isset($node['@type'])) {
-                                $t = is_array($node['@type']) ? implode(',', $node['@type']) : (string)$node['@type'];
-                                $schemaTypes[] = $t;
-                            }
-                            foreach ($node as $v) $scan($v);
-                        }
-                    };
-                    $scan($data);
-                } catch (\Throwable $e) {}
-            }
-        }
-
-        // Visible text amalgam
-        $textNodes = $xp->query('//p|//li|//article//text()[normalize-space()]');
-        $bodyText = '';
-        if ($textNodes) {
-            $frags = []; $max = 5000; $len = 0;
-            foreach ($textNodes as $n) {
-                $t = trim($n->textContent ?? '');
-                if ($t === '') continue;
-                $frags[] = $t; $len += strlen($t);
-                if ($len > $max) break;
-            }
-            $bodyText = trim(implode(' ', $frags));
-        }
-
-        // Simple NLP-ish helpers
-        $lower = Str::lower($bodyText);
-        $words = preg_split('/[^a-zA-Z0-9\']+/u', Str::ascii($lower));
-        $words = array_values(array_filter($words, fn ($w) => $w !== '' && !preg_match('/^\d+$/', $w)));
-        $stop = [
-            'the','and','for','that','with','your','you','are','was','were','this','from','have','has','had','but','not','all','any','can','will','about','into','over','than','then','they','them','their','our','out','his','her','its','what','when','where','how','why','which','who','whom','on','in','to','of','a','an','is','it','as','by','or'
-        ];
-        $freq = [];
-        foreach ($words as $w) {
-            if (strlen($w) < 4 || in_array($w, $stop, true)) continue;
-            $freq[$w] = ($freq[$w] ?? 0) + 1;
-        }
-        arsort($freq);
-        $mainKeyword = array_key_first($freq) ?? '';
-
-        // Sentences
-        $sentences = preg_split('/(?<=[\.!\?])\s+/u', $bodyText);
-        $sentences = array_values(array_filter($sentences, fn($s)=>trim($s)!==''));
-        $sentLens = array_map(fn($s)=>str_word_count($s), $sentences);
-        $avgSent = count($sentLens) ? array_sum($sentLens)/count($sentLens) : 0;
-        $varSent = 0.0;
-        if (count($sentLens) > 1) {
-            $m = $avgSent; $acc = 0.0;
-            foreach ($sentLens as $sl) { $acc += ($sl - $m) * ($sl - $m); }
-            $varSent = sqrt($acc / (count($sentLens)-1));
-        }
-
-        // Title/Meta lengths
-        $titleLen = mb_strlen($title);
-        $metaLen  = mb_strlen($metaDesc);
-
-        // Headings chip
-        $headingsChip = "H1:{$h1Count} H2:{$h2Count} H3:{$h3Count}";
-
-        // Robots indexability
-        $isNoindex = Str::contains(Str::lower($robots), 'noindex');
-        $indexable = !$isNoindex;
-
-        // Viewport presence
-        $hasViewport = $viewport !== null && trim($viewport) !== '';
-
-        // Images / media
-        $imgCount   = ($xp->query('//img')?->length) ?? 0;
-        $videoCount = ($xp->query('//video|//iframe[contains(@src,"youtube") or contains(@src,"vimeo")]')?->length) ?? 0;
-
-        // Canonical ok if present
-        $canonicalOk = $canonical ? true : false;
-
-        // Author/date heuristics
-        $hasAuthorMeta = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="author"]', 'content') ? true : false;
-        $hasPublished  = $firstAttr('//meta[translate(@property,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="article:published_time"]', 'content')
-                         || $exists('//time[@datetime]');
-
-        // Breadcrumbs
-        $hasBreadcrumb = $exists('//*[@aria-label="breadcrumb"]')
-                      || $exists('//nav[contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"breadcrumb")]')
-                      || collect($schemaTypes)->contains(fn($t)=>Str::contains(Str::lower($t), 'breadcrumb'));
-
-        // FAQ presence
-        $hasFAQSchema = collect($schemaTypes)->contains(fn($t)=>Str::contains(Str::lower($t), 'faq'));
-
-        // Schema / entities
-        $hasSchema = !empty($schemaTypes);
-        $hasArticleLike = collect($schemaTypes)->contains(function ($t) {
-            $tl = Str::lower($t);
-            return Str::contains($tl, 'article')
-                || Str::contains($tl, 'newsarticle')
-                || Str::contains($tl, 'blogposting')
-                || Str::contains($tl, 'product')
-                || Str::contains($tl, 'organization')
-                || Str::contains($tl, 'webpage');
-        });
-
-        // sameAs links
-        $sameAsCount = 0;
-        if ($scripts) {
-            foreach ($scripts as $script) {
-                $json = trim($script->textContent ?? '');
-                if ($json === '') continue;
-                try {
-                    $data = json_decode($json, true, 512, JSON_INVALID_UTF8_IGNORE);
-                    if (isset($data['sameAs']) && is_array($data['sameAs'])) {
-                        $sameAsCount += count($data['sameAs']);
-                    }
-                } catch (\Throwable $e) {}
-            }
-        }
-
-        // URL slug quality
-        $path = parse_url($url, PHP_URL_PATH) ?: '/';
-        $slug = trim($path, '/');
-        $slugScore = 70;
-        if ($slug === '') { $slugScore = 65; }
-        else {
-            $slugScore = 80;
-            if (strlen($slug) > 100) $slugScore -= 20;
-            if (!Str::contains($slug, '-')) $slugScore -= 10;
-            if (preg_match('/[^\pL\pN\-\/]/u', $slug)) $slugScore -= 15;
-            $slugScore = $clamp($slugScore, 40, 95);
-        }
-
-        // Readability score
-        $readScore = 70;
-        if ($avgSent >= 12 && $avgSent <= 24) $readScore = 90;
-        elseif ($avgSent >= 8 && $avgSent <= 30) $readScore = 80;
-        else $readScore = 58;
-        if ($titleLen > 65) $readScore -= 5;
-
-        // Content coverage / entities heuristic
-        $properNouns = preg_match_all('/\b[A-Z][a-z]{2,}\b/u', $bodyText, $m) ? count(array_unique($m[0])) : 0;
-        $entityScore = $clamp(60 + min(30, $properNouns * 2), 50, 95);
-
-        // Human vs AI heuristic
-        $human = 50;
-        if ($avgSent >= 12 && $avgSent <= 24) $human += 15;
-        if ($varSent >= 6)  $human += 10;
-        if (preg_match('/\b(I|we|my|our|me|us)\b/i', $bodyText)) $human += 8;
-        if (preg_match("/\\b(as an ai|i am an ai|language model)\\b/i", $bodyText)) $human -= 35;
-
-        // Repetition penalty
-        $trigrams = [];
-        $tokens = preg_split('/\s+/', Str::lower(strip_tags($bodyText)));
-        for ($i=0; $i < max(0, count($tokens)-2); $i++) {
-            $tri = $tokens[$i].' '.$tokens[$i+1].' '.$tokens[$i+2];
-            $trigrams[$tri] = ($trigrams[$tri] ?? 0) + 1;
-        }
-        $repMax = empty($trigrams) ? 1 : max($trigrams);
-        if ($repMax >= 6)      $human -= 15;
-        elseif ($repMax >= 4)  $human -= 8;
-
-        $humanPct = (int)$clamp($human, 0, 100);
-        $aiPct    = 100 - $humanPct;
-
-        // --- Score checklist items (1..25) -----------------------------------
-        $item = [];
-        $scoreBool = fn(bool $cond, int $good=90, int $bad=50) => $cond ? $good : $bad;
-        $scoreBand = function (int $value, int $min, int $max) use ($clamp) {
-            if ($value <= 0) return 50;
-            $ratio = ($value - $min) / max(1, ($max - $min));
-            return (int)$clamp(50 + $ratio * 45, 50, 95);
-        };
-
-        $h1Text = $textOf('//h1');
-
-        // 1–25
-        $item[1]  = $scoreBool( $mainKeyword !== '' && (Str::contains(Str::lower($title), $mainKeyword) || Str::contains(Str::lower($h1Text), $mainKeyword)) );
-        $item[2]  = $scoreBand((int)min(12, count(array_slice(array_keys($freq), 0, 12))), 4, 12);
-        $item[3]  = $scoreBool( $mainKeyword !== '' && Str::contains(Str::lower($h1Text), $mainKeyword) );
-        $item[4]  = $scoreBool( $hasFAQSchema || preg_match('/\b(FAQ|Frequently Asked|How|What|Why|When|Where)\b/i', $bodyText) );
-        $item[5]  = $readScore;
-        $item[6]  = ($titleLen >= 50 && $titleLen <= 60) ? 92 : (($titleLen >= 35 && $titleLen <= 65) ? 80 : 58);
-        $item[7]  = ($metaLen >= 140 && $metaLen <= 160) ? 92 : (($metaLen >= 120 && $metaLen <= 180) ? 80 : ($metaLen > 0 ? 60 : 50));
-        $item[8]  = $scoreBool($canonicalOk);
-        $item[9]  = $indexable ? 88 : 50;
-        $item[10] = $scoreBool($hasAuthorMeta || $hasPublished, 86, 58);
-        $item[11] = (int)$entityScore;
-        $item[12] = $scoreBool(preg_match('/\b(2022|2023|2024|2025)\b/', $bodyText) || $hasPublished, 84, 62);
-        $item[13] = $scoreBand($imgCount + $videoCount*2, 1, 8);
-        $item[14] = $scoreBand($h2Count + (int)floor($h3Count/2), 2, 12);
-        $item[15] = $scoreBand($internalCount, 3, 20);
-        $item[16] = $slugScore;
-        $item[17] = $scoreBool($hasBreadcrumb);
-        $item[18] = $scoreBool($hasViewport, 90, 55);
-        $item[19] = $clamp(85 - max(0, $imgCount - 12) * 2, 55, 90);
-        $item[20] = 65;
-        $item[21] = $scoreBool($exists('//button') || preg_match('/\b(contact|buy|shop|subscribe|sign up|download|get started|try now)\b/i', $bodyText), 86, 62);
-        $item[22] = $scoreBool($mainKeyword !== '' && Str::contains(Str::lower($textOf('(//p)[1]')), $mainKeyword), 88, 60);
-        $item[23] = $entityScore;
-        $item[24] = $scoreBool($hasSchema && $hasArticleLike, 90, 60);
-        $item[25] = $scoreBand($sameAsCount, 1, 6);
-
-        // Overall & Content
-        $allScores = array_values($item);
-        $overall = (int) round(array_sum($allScores) / max(1, count($allScores)));
-
-        $contentBucket = array_merge(
-            array_intersect_key($item, array_flip([1,2,3,4,5])),
-            array_intersect_key($item, array_flip([10,11,12,13]))
-        );
-        $contentScore = (int) round(array_sum($contentBucket) / max(1, count($contentBucket)));
-
-        return [
-            'overall'       => $overall,
-            'contentScore'  => $contentScore,
-            'humanPct'      => (int)$humanPct,
-            'aiPct'         => (int)$aiPct,
-
-            'httpStatus'    => $httpStatus ?: '—',
-            'titleLen'      => $titleLen ?: 0,
-            'metaLen'       => $metaLen ?: 0,
-            'canonical'     => $canonical ?: '—',
-            'robots'        => $robots ?: '—',
-            'viewport'      => $hasViewport ? 'yes' : 'no',
-            'headings'      => "H1:{$h1Count} H2:{$h2Count} H3:{$h3Count}",
-            'internalLinks' => $internalCount,
-            'schema'        => empty($schemaTypes) ? 'none' : implode(',', array_unique($schemaTypes)),
-
-            'itemScores'    => array_combine(
-                array_map(fn($n)=>(string)$n, range(1,25)),
-                $allScores
-            ),
-        ];
+Route::post('/analyze.json', function (Request $request) {
+    $url = trim($request->input('url', ''));
+    if (!$url) {
+        return response()->json(['ok' => false, 'error' => 'Missing URL'], 400);
     }
-}
 
-/** POST /analyze — JSON body: { url: "..." } */
-Route::post('/analyze', function (Request $request) {
-    $request->validate(['url' => ['required', 'string', 'min:4']]);
-    $data = analyzeCore($request->input('url', ''));
-    return response()->json($data, 200);
-})->name('analyze');
+    // Normalize URL
+    if (!preg_match('~^https?://~i', $url)) {
+        $url = 'https://' . ltrim($url, '/');
+    }
 
-/** GET /analyze — Query: ?url=https://... (fallback) */
-Route::get('/analyze', function (Request $request) {
-    $u = $request->query('url', '');
-    if (!is_string($u) || trim($u) === '') {
+    try {
+        $resp = Http::withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (compatible; SemanticSEOMaster/1.0; +https://example.com/bot)',
+            'Accept'     => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        ])->timeout(12)->get($url);
+    } catch (\Throwable $e) {
+        return response()->json(['ok' => false, 'error' => 'Fetch failed: ' . $e->getMessage()], 500);
+    }
+
+    $status = $resp->status();
+    $html   = (string) $resp->body();
+
+    if ($status >= 400 || !trim($html)) {
         return response()->json([
-            'overall'=>0,'contentScore'=>0,'humanPct'=>0,'aiPct'=>100,
-            'httpStatus'=>'—','titleLen'=>0,'metaLen'=>0,'canonical'=>'—','robots'=>'—','viewport'=>'—',
-            'headings'=>'—','internalLinks'=>'—','schema'=>'—','itemScores'=>[],
-            'error'=>'Missing ?url parameter',
-        ], 200);
+            'ok' => true,
+            'status' => $status,
+            'overall_score' => 0,
+            'scores' => [],
+            'counts' => ['h1' => 0, 'h2' => 0, 'h3' => 0, 'internal_links' => 0],
+            'title' => '',
+            'meta_description_len' => 0,
+            'canonical' => false,
+            'robots' => '',
+            'viewport' => false,
+            'schema' => ['found_types' => []],
+            'auto_check_ids' => [],
+            'suggestions' => [],
+            'ai_detection' => ['label' => 'mixed', 'ai_pct' => 0, 'human_pct' => 0, 'likelihood' => 0, 'reasons' => []],
+        ]);
     }
-    return response()->json(analyzeCore($u), 200);
-})->name('analyze.get');
 
-/** GET /analyze-json — Safe alias (avoids wildcard route conflicts) */
-Route::get('/analyze-json', function (Request $request) {
-    $u = $request->query('url', '');
-    if (!is_string($u) || trim($u) === '') {
-        return response()->json([
-            'overall'=>0,'contentScore'=>0,'humanPct'=>0,'aiPct'=>100,
-            'httpStatus'=>'—','titleLen'=>0,'metaLen'=>0,'canonical'=>'—','robots'=>'—','viewport'=>'—',
-            'headings'=>'—','internalLinks'=>'—','schema'=>'—','itemScores'=>[],
-            'error'=>'Missing ?url parameter',
-        ], 200);
+    // DOM parsing
+    libxml_use_internal_errors(true);
+    $dom = new DOMDocument();
+    @$dom->loadHTML($html);
+    libxml_clear_errors();
+    $xpath = new DOMXPath($dom);
+
+    // Helpers
+    $text = function(string $query) use($xpath) {
+        $n = $xpath->query($query);
+        $s = [];
+        foreach ($n as $node) $s[] = trim($node->textContent ?? '');
+        return $s;
+    };
+    // RENAMED: $getAttr (function) and $name (parameter) to avoid closure capture collision
+    $getAttr = function(string $query, string $name) use($xpath) {
+        $n = $xpath->query($query);
+        $s = [];
+        foreach ($n as $node) {
+            if ($node instanceof DOMElement && $node->hasAttribute($name)) {
+                $s[] = trim($node->getAttribute($name));
+            }
+        }
+        return $s;
+    };
+    $firstAttr = function(string $query, string $name) use($getAttr) {
+        $a = $getAttr($query, $name);
+        return $a[0] ?? null;
+    };
+
+    // Extract basics
+    $title = ($text('//title')[0] ?? '');
+    $metaDesc = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="description"]', 'content') ?? '';
+    $viewport = (bool) $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="viewport"]', 'content');
+    $robots = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="robots"]', 'content') ?? '';
+    $canon  = $firstAttr('//link[translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="canonical"]', 'href') ?? '';
+
+    // Headings & links
+    $h1s = $text('//h1');
+    $h2s = $text('//h2');
+    $h3s = $text('//h3');
+    $links = $getAttr('//a[@href]', 'href');
+    $host = parse_url($url, PHP_URL_HOST) ?: '';
+    $internalCount = 0;
+    foreach ($links as $href) {
+        if (strpos($href, '#') === 0) continue;
+        if (!preg_match('~^https?://~i', $href)) { $internalCount++; continue; }
+        $h = parse_url($href, PHP_URL_HOST) ?: '';
+        if ($h === $host) $internalCount++;
     }
-    return response()->json(analyzeCore($u), 200);
-})->name('analyze.alias');
+
+    // JSON-LD schema detection (removed is_list() for compatibility)
+    $schemaTypes = [];
+    foreach ($xpath->query('//script[@type="application/ld+json"]') as $node) {
+        $json = trim($node->textContent ?? '');
+        if (!$json) continue;
+        $data = json_decode($json, true);
+        if (!$data) continue;
+        $walk = function($n) use (&$walk, &$schemaTypes) {
+            if (is_array($n)) {
+                if (isset($n['@type'])) {
+                    $t = is_array($n['@type']) ? $n['@type'] : [$n['@type']];
+                    foreach ($t as $x) $schemaTypes[] = (string)$x;
+                }
+                foreach ($n as $v) $walk($v);
+            }
+        };
+        $walk($data);
+    }
+    $schemaTypes = array_values(array_unique(array_filter(array_map('strval', $schemaTypes))));
+
+    // Content text for heuristics
+    $bodyText = trim(preg_replace('~\s+~', ' ', implode(' ', $text('//body//*[not(self::script or self::style)]'))));
+    $sentences = preg_split('~(?<=[.!?])\s+~', $bodyText) ?: [];
+    $avgSentenceLen = 0;
+    if (count($sentences) > 0) {
+        $lens = array_map(fn($s)=>strlen($s), $sentences);
+        $avgSentenceLen = array_sum($lens)/max(1,count($lens));
+    }
+    $hasFAQBlock = stripos($html, '"@type":"FAQPage"') !== false || preg_match('~<details|faq~i', $html);
+    $hasBreadcrumb = in_array('BreadcrumbList', $schemaTypes, true);
+    $hasArticle = in_array('Article', $schemaTypes, true) || in_array('BlogPosting', $schemaTypes, true) || in_array('NewsArticle', $schemaTypes, true);
+    $hasOrg = in_array('Organization', $schemaTypes, true) || in_array('Brand', $schemaTypes, true) || in_array('LocalBusiness', $schemaTypes, true);
+
+    // Slug quality
+    $path = parse_url($url, PHP_URL_PATH) ?: '/';
+    $slug = trim($path, '/');
+    $slugScore = 70;
+    if ($slug !== '') {
+        $len = strlen($slug);
+        $hyph = substr_count($slug, '-');
+        $slugScore = 90;
+        if ($len > 80 || $hyph > 10) $slugScore = 55;
+        if (preg_match('~[A-Z]~', $slug)) $slugScore -= 10;
+    }
+
+    // Title/meta scoring
+    $titleLen = strlen($title);
+    $titleScore = $titleLen >= 45 && $titleLen <= 65 ? 92 : ($titleLen >= 30 && $titleLen <= 72 ? 78 : 45);
+    $metaLen = strlen($metaDesc);
+    $metaScore = $metaLen >= 120 && $metaLen <= 170 ? 90 : ($metaLen >= 80 ? 70 : 40);
+
+    // H1 keyword alignment
+    $tokens = array_filter(explode('-', strtolower($slug)));
+    $primary = $tokens[0] ?? '';
+    $h1Score = 50;
+    if (count($h1s)) {
+        $h1txt = strtolower(implode(' ', $h1s));
+        if ($primary && strpos($h1txt, $primary) !== false) $h1Score = 90; else $h1Score = 70;
+    }
+
+    // Internal links
+    $internalScore = $internalCount >= 8 ? 88 : ($internalCount >= 3 ? 70 : 40);
+
+    // E-E-A-T signals (author/date)
+    $authorLike = preg_match('~by\s+[A-Z][a-z]+~', $bodyText) || stripos($html, 'itemprop="author"') !== false;
+    $dateLike   = preg_match('~\b20(1\d|2\d)\b~', $bodyText) || stripos($html, 'datePublished') !== false;
+    $eeatScore  = 60 + (($authorLike ? 10 : 0) + ($dateLike ? 10 : 0) + ($hasArticle ? 20 : 0)); // 60–100
+
+    // Media presence
+    $imgCount = count($xpath->query('//img'));
+    $videoCount = count($xpath->query('//video')) + count($xpath->query('//iframe[contains(@src,"youtube") or contains(@src,"vimeo")]'));
+    $mediaScore = ($imgCount >= 3 ? 75 : 55) + ($videoCount ? 10 : 0);
+
+    // Readability proxy
+    $readScore = $avgSentenceLen > 220 ? 45 : ($avgSentenceLen > 150 ? 65 : 85);
+
+    // Robots/indexable
+    $indexable = stripos($robots, 'noindex') === false;
+    $indexScore = $indexable ? 82 : 20;
+
+    // Canonical
+    $canonScore = $canon ? 90 : 40;
+
+    // Breadcrumb/schema
+    $breadScore = $hasBreadcrumb ? 85 : 45;
+    $schemaScore = count($schemaTypes) ? 85 : 45;
+
+    // FAQ
+    $faqScore = $hasFAQBlock ? 88 : 55;
+
+    // Mobile
+    $mobileScore = $viewport ? 88 : 40;
+
+    // CTA detection
+    $ctaScore = preg_match('~\b(contact|buy|pricing|subscribe|get started|book|download)\b~i', $bodyText) ? 82 : 60;
+
+    // External citations
+    $externalLinks = 0;
+    foreach ($links as $href) {
+        if (preg_match('~^https?://~i', $href)) {
+            $h = parse_url($href, PHP_URL_HOST) ?: '';
+            if ($h && $h !== $host) $externalLinks++;
+        }
+    }
+    $citeScore = $externalLinks >= 3 ? 80 : ($externalLinks >= 1 ? 70 : 50);
+
+    // Entities (very rough)
+    preg_match_all('~\b[A-Z][a-z]{2,}\b~', $bodyText, $m);
+    $proper = array_values(array_unique($m[0] ?? []));
+    $entityScore = count($proper) >= 10 ? 80 : (count($proper) >= 5 ? 70 : 55);
+
+    // Related entities via H2/H3 variety
+    $h2h3 = array_map('strtolower', array_merge($h2s, $h3s));
+    $uniqueH = count(array_unique(array_filter($h2h3)));
+    $relatedScore = $uniqueH >= 6 ? 82 : ($uniqueH >= 3 ? 70 : 55);
+
+    // Speed/Vitals (heuristics only)
+    $lazyImgs = count($xpath->query('//img[@loading="lazy"]'));
+    $hasPreload = stripos($html, 'rel="preload"') !== false;
+    $speedScore = 60 + min(25, $lazyImgs*3) + ($hasPreload ? 8 : 0);
+    $vitalsScore = 62;
+
+    // Organization sameAs
+    $sameAsScore = preg_match('~"@type"\s*:\s*"(Organization|Brand|LocalBusiness)".+?"sameAs"\s*:\s*\[~is', $html) ? 82 : 40;
+
+    // Map the 25 checklist items
+    $scores = [
+        'ck-1'  => max(60, $titleScore - 5),
+        'ck-2'  => 65,
+        'ck-3'  => $h1Score,
+        'ck-4'  => $faqScore,
+        'ck-5'  => $readScore,
+        'ck-6'  => $titleScore,
+        'ck-7'  => $metaScore,
+        'ck-8'  => $canonScore,
+        'ck-9'  => $indexScore,
+        'ck-10' => $eeatScore,
+        'ck-11' => 65,
+        'ck-12' => $citeScore,
+        'ck-13' => min(95, $mediaScore),
+        'ck-14' => $uniqueH >= 5 ? 80 : ($uniqueH >= 3 ? 70 : 55),
+        'ck-15' => $internalScore,
+        'ck-16' => $slugScore,
+        'ck-17' => $breadScore,
+        'ck-18' => $mobileScore,
+        'ck-19' => min(95, $speedScore),
+        'ck-20' => $vitalsScore,
+        'ck-21' => $ctaScore,
+        'ck-22' => $hasArticle || $hasOrg ? 80 : 60,
+        'ck-23' => $relatedScore,
+        'ck-24' => $schemaScore,
+        'ck-25' => $sameAsScore,
+    ];
+
+    // Overall score (weighted)
+    $weights = [
+        1=>1,2=>1,3=>1.2,4=>1,5=>1.2,6=>1.3,7=>1.1,8=>1.2,9=>1.1,10=>1.2,11=>1,
+        12=>1,13=>1,14=>1,15=>1.1,16=>1,17=>0.9,18=>1.2,19=>1.1,20=>1,21=>1,22=>1,23=>1,24=>1.1,25=>0.9
+    ];
+    $wSum = 0; $acc = 0; $i = 1;
+    foreach ($scores as $k=>$v) { $w = $weights[$i] ?? 1; $acc += $v*$w; $wSum += $w; $i++; }
+    $overall = $wSum ? round($acc/$wSum) : 0;
+
+    // Suggestions
+    $sugs = [];
+    $push = function($id, $txt) use (&$sugs) { $sugs[$id][] = $txt; };
+
+    if ($titleScore < 80)  $push('ck-6', 'Keep title ≈50–60 chars and include the primary keyword once.');
+    if ($metaScore < 80)   $push('ck-7', 'Write a meta description around 140–160 chars with a clear CTA.');
+    if (!$canon)           $push('ck-8', 'Add a canonical link to avoid duplicate content signals.');
+    if (!$viewport)        $push('ck-18', 'Add `<meta name="viewport" content="width=device-width, initial-scale=1">`.');
+    if (!$hasBreadcrumb)   $push('ck-17', 'Add breadcrumbs and BreadcrumbList schema.');
+    if (!count($schemaTypes)) $push('ck-24', 'Add JSON-LD (Article/FAQ/Product) with @id and sameAs if applicable.');
+    if ($internalCount < 3) $push('ck-15', 'Add internal links to related hubs and parent category pages.');
+
+    // AI/Human heuristic
+    $aiLike = 0;
+    if ($avgSentenceLen >= 160) $aiLike += 20;
+    if (preg_match('~\bIn conclusion,|Overall,|Firstly,|Secondly,|Additionally,~', $bodyText)) $aiLike += 10;
+    $aiLike = min(100, $aiLike);
+    $aiPct = $aiLike;
+    $humanPct = max(0, 100 - $aiPct);
+    $label = $aiPct >= 66 ? 'likely_ai' : ($aiPct >= 33 ? 'mixed' : 'likely_human');
+
+    // Auto check IDs (>=80)
+    $auto = [];
+    foreach ($scores as $id=>$val) if ($val >= 80) $auto[] = $id;
+
+    return response()->json([
+        'ok' => true,
+        'status' => $status,
+        'overall_score' => $overall,
+        'scores' => $scores,
+        'title' => $title,
+        'meta_description_len' => $metaLen,
+        'canonical' => (bool)$canon,
+        'robots' => $robots ?: '',
+        'viewport' => $viewport,
+        'counts' => [
+            'h1' => count($h1s), 'h2' => count($h2s), 'h3' => count($h3s),
+            'internal_links' => $internalCount,
+        ],
+        'schema' => ['found_types' => $schemaTypes],
+        'auto_check_ids' => $auto,
+        'suggestions' => $sugs,
+        'ai_detection' => [
+            'label' => $label,
+            'ai_pct' => $aiPct,
+            'human_pct' => $humanPct,
+            'likelihood' => $aiPct,
+            'reasons' => $aiPct >= 66 ? ['Long average sentences', 'Common connective phrases'] : ['Natural sentence variety'],
+            'ai_sentences' => [],
+            'human_sentences' => [],
+            'full_text' => mb_substr($bodyText, 0, 5000),
+        ],
+    ]);
+})->name('analyze.json');
