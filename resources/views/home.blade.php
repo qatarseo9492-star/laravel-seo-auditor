@@ -17,7 +17,7 @@
   --bg:#07080e; --panel:#0f1022; --panel-2:#141433; --line:#1e1a33;
   --text:#f0effa; --text-dim:#b6b3d6; --text-muted:#9aa0c3;
   --primary:#9b5cff; --secondary:#ff2045; --accent:#3de2ff;
-  --good:#16c172; --warn:#f59e0b; --bad:#ef4444;
+  --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
   --radius:18px; --shadow:0 10px 40px rgba(0,0,0,.55);
   --container:1200px;
 }
@@ -84,9 +84,22 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   font-size:clamp(2.2rem, 4.2vw, 3.1rem);
   font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)
 }
-.chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
+.chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)} .l-orange{background:rgba(245,158,11,.18)} .l-green{background:rgba(34,197,94,.18)}
+
+/* Traffic-light chip states */
+.chip-good{background:rgba(34,197,94,.18)!important;border-color:rgba(34,197,94,.45)!important}
+.chip-mid{background:rgba(245,158,11,.18)!important;border-color:rgba(245,158,11,.45)!important}
+.chip-bad{background:rgba(239,68,68,.18)!important;border-color:rgba(239,68,68,.5)!important}
+
+/* Icon tints */
+.ico{width:1.1em;text-align:center}
+.ico-green{color:var(--good)}
+.ico-orange{color:var(--warn)}
+.ico-red{color:var(--bad)}
+.ico-cyan{color:var(--accent)}
+.ico-purple{color:#9b5cff}
 
 /* URL input */
 .analyze-form input[type="url"]{
@@ -208,17 +221,42 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore" aria-live="polite">0%</text>
         </svg>
       </div>
+
       <div style="display:flex;flex-direction:column;gap:.5rem">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <span class="chip"><span data-i="overall">Overall</span>: <b id="overallScoreInline">0</b>/100</span>
-          <span class="chip" id="contentScoreChip">Content: <b id="contentScoreInline">0</b>/100</span>
-          <span class="chip" id="aiBadge" title="AI/Human detection summary">Writer: <b>—</b></span>
-          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem"><i class="fa-solid fa-robot"></i> Evidence</button>
+          <!-- ✅ Overall chip with colored icon -->
+          <span class="chip" id="overallChip">
+            <i class="fa-solid fa-gauge-high ico"></i>
+            <span data-i="overall">Overall</span>: <b id="overallScoreInline">0</b>/100
+          </span>
+
+          <!-- ✅ Content chip with colored icon -->
+          <span class="chip" id="contentScoreChip">
+            <i class="fa-solid fa-file-lines ico ico-purple"></i>
+            Content: <b id="contentScoreInline">0</b>/100
+          </span>
+
+          <!-- ✅ Writer chip with dynamic colored icon/label -->
+          <span class="chip" id="aiBadge" title="AI/Human detection summary">
+            <i class="fa-solid fa-user-check ico ico-green"></i>
+            Writer: <b>—</b>
+          </span>
+
+          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem">
+            <i class="fa-solid fa-robot"></i> Evidence
+          </button>
         </div>
+
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</button>
-          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</button>
-          <button id="copyQuick" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-regular fa-copy"></i> Copy report</button>
+          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem">
+            <i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%
+          </button>
+          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem">
+            <i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%
+          </button>
+          <button id="copyQuick" class="btn btn-ghost" style="--pad:.4rem .7rem">
+            <i class="fa-regular fa-copy ico ico-cyan"></i> Copy report
+          </button>
         </div>
       </div>
     </div>
@@ -230,7 +268,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
         <div class="analyze-row">
           <div style="display:flex;align-items:center;gap:.6rem">
             <label style="display:inline-flex;align-items:center;gap:.45rem;cursor:pointer">
-              <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)"> <span data-i="auto_check">Auto‑apply checkmarks (≥ 70)</span>
+              <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)"> <span data-i="auto_check">Auto-apply checkmarks (≥ 70)</span>
             </label>
           </div>
           <button id="analyzeBtn" class="btn btn-danger"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
@@ -254,7 +292,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
           <span class="chip">Internal links: <b id="rInternal">—</b></span>
           <span class="chip">Schema: <b id="rSchema">—</b></span>
-          <span class="chip">Auto‑checked: <b id="rAutoCount">—</b></span>
+          <span class="chip">Auto-checked: <b id="rAutoCount">—</b></span>
         </div>
       </div>
     </div>
@@ -272,12 +310,12 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
         2=>'Map target & related keywords (synonyms/PAA)',
         3=>'H1 includes primary topic naturally',
         4=>'Integrate FAQs / questions with answers',
-        5=>'Readable, NLP‑friendly language',
+        5=>'Readable, NLP-friendly language',
         6=>'Title tag (≈50–60 chars) w/ primary keyword',
         7=>'Meta description (≈140–160 chars) + CTA',
         8=>'Canonical tag set correctly',
         9=>'Indexable & listed in XML sitemap',
-        10=>'E‑E‑A‑T signals (author, date, expertise)',
+        10=>'E-E-A-T signals (author, date, expertise)',
         11=>'Unique value vs. top competitors',
         12=>'Facts & citations up to date',
         13=>'Helpful media (images/video) w/ captions',
@@ -285,8 +323,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
         15=>'Internal links to hub/related pages',
         16=>'Clean, descriptive URL slug',
         17=>'Breadcrumbs enabled (+ schema)',
-        18=>'Mobile‑friendly, responsive layout',
-        19=>'Optimized speed (compression, lazy‑load)',
+        18=>'Mobile-friendly, responsive layout',
+        19=>'Optimized speed (compression, lazy-load)',
         20=>'Core Web Vitals passing (LCP/INP/CLS)',
         21=>'Clear CTAs and next steps',
         22=>'Primary entity clearly defined',
@@ -355,15 +393,15 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     <div class="tabs" role="tablist">
       <button class="tab active" data-tab="tipsTab" role="tab"><i class="fa-solid fa-lightbulb"></i> Tips</button>
       <button class="tab" data-tab="examplesTab" role="tab"><i class="fa-brands fa-google"></i> Examples (Google)</button>
-      <button class="tab" data-tab="humanTab" role="tab"><i class="fa-solid fa-user"></i> Human‑like</button>
-      <button class="tab" data-tab="aiTab" role="tab"><i class="fa-solid fa-microchip"></i> AI‑like</button>
+      <button class="tab" data-tab="humanTab" role="tab"><i class="fa-solid fa-user"></i> Human-like</button>
+      <button class="tab" data-tab="aiTab" role="tab"><i class="fa-solid fa-microchip"></i> AI-like</button>
       <button class="tab" data-tab="fullTab" role="tab"><i class="fa-solid fa-file-lines"></i> Full Text</button>
     </div>
     <div class="tabpanes">
       <div id="tipsTab" class="active"><ul id="modalList"></ul></div>
       <div id="examplesTab"><div class="pre" id="examplesPre">—</div></div>
-      <div id="humanTab"><div class="pre" id="humanSnippetsPre">Run Analyze to view human‑like snippets.</div></div>
-      <div id="aiTab"><div class="pre" id="aiSnippetsPre">Run Analyze to view AI‑like snippets.</div></div>
+      <div id="humanTab"><div class="pre" id="humanSnippetsPre">Run Analyze to view human-like snippets.</div></div>
+      <div id="aiTab"><div class="pre" id="aiSnippetsPre">Run Analyze to view AI-like snippets.</div></div>
       <div id="fullTab"><div class="pre" id="fullTextPre">Run Analyze to load full text.</div></div>
     </div>
   </div>
@@ -372,7 +410,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <script>
 /* ---------- i18n (trimmed) ---------- */
 const I18N = {
-  en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 70)"},
+  en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto-apply checkmarks (≥ 70)"},
 };
 const LANGS = [["en","English"]];
 (function(){
@@ -417,6 +455,19 @@ const LANGS = [["en","English"]];
   btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
 })();
 
+/* ---------- Chip tone helper ---------- */
+function setChipTone(el, value){
+  if (!el) return;
+  el.classList.remove('chip-good','chip-mid','chip-bad');
+  const ico = el.querySelector('i.ico');
+  if (ico) ico.classList.remove('ico-green','ico-orange','ico-red');
+  const v = Number(value);
+  if (isNaN(v)) return;
+  if (v >= 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
+  else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
+  else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
+}
+
 /* ---------- Score wheel helpers ---------- */
 const WHEEL = { circumference: 339, circle: null, text: null };
 function setScoreWheel(value){
@@ -429,6 +480,8 @@ function setScoreWheel(value){
   else              WHEEL.circle.style.stroke = 'url(#gradBad)';
   WHEEL.text.textContent = Math.round(v) + '%';
   document.getElementById('overallScoreInline').textContent = Math.round(v);
+  // tone the Overall chip too
+  setChipTone(document.getElementById('overallChip'), v);
 }
 
 /* ---------- Checklist + scoring + import/export ---------- */
@@ -438,7 +491,7 @@ function setScoreWheel(value){
   const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar = document.getElementById('progressBar');
   const caption = document.getElementById('progressCaption');
-  const contentChip = document.getElementById('contentScoreInline');
+  const contentScoreInline = document.getElementById('contentScoreInline');
   let lastAnalyzed = 0;
 
   function contentScore(){ const checked = boxes().filter(cb=>cb.checked).length; return Math.round((checked/total)*100); }
@@ -460,7 +513,8 @@ function setScoreWheel(value){
     bar.style.width = ((checked/total)*100)+'%';
     caption.textContent = `${checked} of ${total} items completed`;
     updateCats();
-    const cs = contentScore(); contentChip.textContent = cs;
+    const cs = contentScore(); contentScoreInline.textContent = cs;
+    setChipTone(document.getElementById('contentScoreChip'), cs);
     setScoreWheel( overallScoreBlended() );
   }
   function load(){
@@ -539,8 +593,8 @@ function setScoreWheel(value){
   window.__setAIData = function(ai){
     const aiSn = ai?.ai_sentences || [];
     const huSn = ai?.human_sentences || [];
-    document.getElementById('aiSnippetsPre').textContent = aiSn.length ? aiSn.join('\n\n') : 'No AI‑like snippets detected.';
-    document.getElementById('humanSnippetsPre').textContent = huSn.length ? huSn.join('\n\n') : 'No human‑like snippets isolated.';
+    document.getElementById('aiSnippetsPre').textContent = aiSn.length ? aiSn.join('\n\n') : 'No AI-like snippets detected.';
+    document.getElementById('humanSnippetsPre').textContent = huSn.length ? huSn.join('\n\n') : 'No human-like snippets isolated.';
     document.getElementById('fullTextPre').textContent = ai?.full_text || 'No text captured.';
     document.getElementById('aiPct').textContent = (typeof ai?.ai_pct==='number') ? ai.ai_pct : '—';
     document.getElementById('humanPct').textContent = (typeof ai?.human_pct==='number') ? ai.human_pct : '—';
@@ -611,24 +665,36 @@ function normalizeUrl(u){
       $('#rAutoCount').textContent = (data.auto_check_ids||[]).length;
       report.style.display='block';
 
-      // store suggestions & per‑item scores
+      // store suggestions & per-item scores
       window.__lastSuggestions = data.suggestions || {};
       for (let i=1;i<=25;i++){ const key='ck-'+i; setScoreBadge(i, data.scores?.[key]); }
 
       // overall / content
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
       window.__setAnalyzedScore(backendOverall);
-      document.getElementById('contentScoreInline').textContent = window.__getContentScore();
+      const cs = window.__getContentScore();
+      document.getElementById('contentScoreInline').textContent = cs;
+      setChipTone(document.getElementById('contentScoreChip'), cs);
 
-      // AI DETECTION panes
+      // AI DETECTION panes + writer chip tone/icon
       const ai = data.ai_detection || {};
       const badge = document.getElementById('aiBadge');
+      badge.classList.remove('chip-good','chip-mid','chip-bad');
       const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
-      const label = labelMap[ai.label] || 'Unknown';
+      const iconMap={likely_human:'fa-user-check', mixed:'fa-shuffle', likely_ai:'fa-robot'};
+      const colorMap={likely_human:'ico-green', mixed:'ico-orange', likely_ai:'ico-red'};
+      const chipMap={likely_human:'chip-good', mixed:'chip-mid', likely_ai:'chip-bad'};
+      const key = (ai.label||'').toLowerCase();
+      const label = labelMap[key] || 'Unknown';
+      const icon  = iconMap[key] || 'fa-user';
+      const icoC  = colorMap[key] || 'ico-purple';
+      const chipC = chipMap[key];
+
       const conf = (typeof ai.likelihood==='number') ? ` (${ai.likelihood}%)` : '';
-      const aiStr = (typeof ai.ai_pct==='number') ? ` — ${ai.ai_pct}% AI‑like` : '';
+      const aiStr = (typeof ai.ai_pct==='number') ? ` — ${ai.ai_pct}% AI-like` : '';
       const humanStr = (typeof ai.human_pct==='number') ? ` — ${ai.human_pct}% Human` : '';
-      badge.innerHTML = `Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
+      badge.innerHTML = `<i class="fa-solid ${icon} ico ${icoC}"></i> Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
+      if (chipC) badge.classList.add(chipC);
       badge.title = (ai.reasons||[]).join(' • ');
       document.getElementById('aiPct').textContent = (typeof ai.ai_pct==='number') ? ai.ai_pct : '—';
       document.getElementById('humanPct').textContent = (typeof ai.human_pct==='number') ? ai.human_pct : '—';
@@ -642,7 +708,7 @@ function normalizeUrl(u){
       }
 
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
-      status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
+      status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re-Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent = '', 4200);
     } catch(e){
       status.textContent = 'Error: '+e.message;
