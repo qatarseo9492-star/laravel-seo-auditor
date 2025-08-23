@@ -157,10 +157,27 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 
 /* Items */
 .checklist{list-style:none;margin:10px 0 0;padding:0}
-.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.65rem .7rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02))}
+.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.65rem .7rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02)); transition: box-shadow .25s ease, background .25s ease; }
 .checklist-item + .checklist-item{margin-top:.28rem}
 .checklist-item:hover{transform:translateY(-2px);background:rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
+
+/* >>> Score-severity glow on the row + auto-attention for weak scores <<< */
+.sev-good{box-shadow:0 0 0 1px rgba(34,197,94,.35), 0 8px 30px rgba(34,197,94,.12) inset}
+.sev-mid{box-shadow:0 0 0 1px rgba(245,158,11,.35), 0 8px 30px rgba(245,158,11,.12) inset}
+.sev-bad{box-shadow:0 0 0 1px rgba(239,68,68,.45), 0 8px 30px rgba(239,68,68,.18) inset}
+.sev-mid .improve-btn,
+.sev-bad .improve-btn{animation:attentionPulse 1.6s ease-in-out infinite}
+@keyframes attentionPulse{
+  0%,100%{ box-shadow:0 0 0 0 rgba(255,255,255,.0), 0 0 0 0 rgba(255,255,255,.0)}
+  50%{ box-shadow:0 0 0 6px rgba(255,255,255,.06), 0 0 12px 0 rgba(255,255,255,.08)}
+}
+/* Row flash when Improve is clicked */
+.flash-row{animation:rowFlash 900ms ease-out}
+@keyframes rowFlash{
+  0%{ background:linear-gradient(90deg,rgba(61,226,255,.16),rgba(155,92,255,.12)); }
+  100%{ background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02)); }
+}
 
 /* >>> Custom gradient checkbox tick <<< */
 .checklist-item input[type="checkbox"]{
@@ -190,12 +207,49 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   transform:rotate(45deg) scale(1);
 }
 
+/* Score badges + Improve button */
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22); border-color:rgba(22,193,114,.45)}
 .score-mid{ background:rgba(245,158,11,.22); border-color:rgba(245,158,11,.45)}
 .score-bad{ background:rgba(239,68,68,.24); border-color:rgba(239,68,68,.5)}
-.improve-btn{padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer}
-.improve-btn:hover{background:rgba(255,255,255,.1)}
+
+.improve-btn{
+  position:relative; overflow:hidden;
+  padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
+  font-weight:900; cursor:pointer; transition:.2s;
+  isolation:isolate;
+}
+.improve-btn:hover{ transform:translateY(-1px); background:rgba(255,255,255,.1); }
+.improve-btn:active{ transform:translateY(0); }
+
+/* Sheen highlight */
+.improve-btn::before{
+  content:""; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
+  background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.18) 45%, transparent 50%, transparent 100%);
+  transform:translateX(-120%); animation:btnSheen 3.2s linear infinite;
+}
+@keyframes btnSheen{ 0%{transform:translateX(-120%)} 60%{transform:translateX(120%)} 100%{transform:translateX(120%)} }
+
+/* Ripple circle */
+.improve-btn .ripple{
+  position:absolute; border-radius:50%; pointer-events:none; z-index:1;
+  transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(255,255,255,.35) 0%, rgba(255,255,255,.15) 40%, rgba(255,255,255,0) 70%);
+  width:10px; height:10px; animation:ripple .65s ease-out forwards;
+}
+@keyframes ripple{ to{ width:220px; height:220px; opacity:0 } }
+
+/* Sparkles / confetti */
+.fx-burst{ position:fixed; left:0; top:0; width:0; height:0; pointer-events:none; z-index:120 }
+.fx-spark{
+  position:absolute; width:8px;height:8px;border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.2) 40%, rgba(255,255,255,0) 70%);
+  box-shadow:0 0 12px rgba(255,255,255,.45);
+  animation:spark .8s ease-out forwards;
+}
+@keyframes spark{
+  to{ transform:translate(var(--dx), var(--dy)) rotate(220deg) scale(.6); opacity:0; }
+}
 
 /* Footer + back to top */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
@@ -698,12 +752,12 @@ const CatSmoke = (function(){
   let lastAnalyzed = 0;
 
   const CAT_PALETTES = [
-    ['#22d3ee','#a78bfa'], // Content & Keywords
-    ['#34d399','#60a5fa'], // Technical
-    ['#fcd34d','#fb7185'], // Content Quality
-    ['#86efac','#f0abfc'], // Structure
-    ['#fca5a5','#fde68a'], // UX
-    ['#f472b6','#60a5fa'], // Entities
+    ['#22d3ee','#a78bfa'],
+    ['#34d399','#60a5fa'],
+    ['#fcd34d','#fb7185'],
+    ['#86efac','#f0abfc'],
+    ['#fca5a5','#fde68a'],
+    ['#f472b6','#60a5fa'],
   ];
 
   function contentScore(){ const checked = boxes().filter(cb=>cb.checked).length; return Math.round((checked/total)*100); }
@@ -767,28 +821,84 @@ const CatSmoke = (function(){
     e.target.value='';
   });
 
-  window.setScoreBadge = (num,score)=>{ const el=document.getElementById('sc-'+num); if(!el) return; el.className='score-badge'; if(score==null){el.textContent='—';return;} el.textContent=score; if(score>=80) el.classList.add('score-good'); else if(score>=60) el.classList.add('score-mid'); else el.classList.add('score-bad'); };
+  // Paint badge + severity classes (and prepare Improve attention)
+  window.setScoreBadge = (num,score)=>{
+    const el=document.getElementById('sc-'+num); if(!el) return;
+    el.className='score-badge';
+    const row = el.closest('.checklist-item');
+    row && row.classList.remove('sev-good','sev-mid','sev-bad');
+    if(score==null){el.textContent='—';return;}
+    el.textContent=score;
+    if(score>=80){ el.classList.add('score-good'); row && row.classList.add('sev-good'); }
+    else if(score>=60){ el.classList.add('score-mid'); row && row.classList.add('sev-mid'); }
+    else { el.classList.add('score-bad'); row && row.classList.add('sev-bad'); }
+  };
+
   window.__setAnalyzedScore = function(v){ lastAnalyzed = Math.max(0, Math.min(100, +v||0)); setScoreWheel( overallScoreBlended() ); }
   window.__getContentScore = contentScore;
   window.__updateChecklist = update;
   load();
 })();
 
-/* ---------- Modal + Improve + AI panes ---------- */
+/* ---------- Modal + Improve + AI panes + FX wiring ---------- */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
   const backdrop = $('#modalBackdrop'), modal = $('#tipModal'), closeBtn = $('#modalClose');
   const panes = { tipsTab: $('#tipsTab'), examplesTab: $('#examplesTab'), humanTab: $('#humanTab'), aiTab: $('#aiTab'), fullTab: $('#fullTab') };
   const tabs = $$('.tab');
+
   function openModal(){ backdrop.style.display='block'; modal.style.display='flex'; }
   function closeModal(){ backdrop.style.display='none'; modal.style.display='none'; }
   closeBtn.addEventListener('click', closeModal); backdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
   tabs.forEach(t=> t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); Object.values(panes).forEach(p=>p.classList.remove('active')); t.classList.add('active'); panes[t.dataset.tab].classList.add('active'); }));
 
+  // ---- Special FX helpers ----
+  function fxRipple(e, btn){
+    const r = document.createElement('span');
+    r.className='ripple';
+    const rect = btn.getBoundingClientRect();
+    r.style.left = (e.clientX - rect.left) + 'px';
+    r.style.top  = (e.clientY - rect.top)  + 'px';
+    btn.appendChild(r);
+    setTimeout(()=> r.remove(), 700);
+  }
+  function fxBurstFrom(el, count=14){
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top  + rect.height/2;
+    const wrap = document.createElement('div');
+    wrap.className='fx-burst';
+    document.body.appendChild(wrap);
+    for(let i=0;i<count;i++){
+      const sp = document.createElement('div');
+      sp.className='fx-spark';
+      const ang = (Math.PI*2) * (i/count) + Math.random()*0.6;
+      const dist = 40 + Math.random()*80;
+      sp.style.left = cx + 'px';
+      sp.style.top  = cy + 'px';
+      sp.style.setProperty('--dx', (Math.cos(ang)*dist)+'px');
+      sp.style.setProperty('--dy', (Math.sin(ang)*dist)+'px');
+      sp.style.background = `radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.2) 40%, hsla(${(i*40)%360}, 90%, 55%, 0) 70%)`;
+      wrap.appendChild(sp);
+    }
+    setTimeout(()=> wrap.remove(), 820);
+  }
+  function flashRow(li){
+    li.classList.remove('flash-row');
+    // force reflow to restart animation
+    void li.offsetWidth;
+    li.classList.add('flash-row');
+  }
+
+  // Improve button click: ripple + burst + open modal + row flash
   document.getElementById('checklistGrid').addEventListener('click', (e)=>{
     const btn = e.target.closest('.improve-btn'); if(!btn) return;
+    fxRipple(e, btn);
+    fxBurstFrom(btn);
+    const li = btn.closest('.checklist-item'); if(li) flashRow(li);
+
     const id = btn.dataset.id;
     const idx = parseInt(id.split('-')[1],10);
     const labelEl = btn.parentElement.querySelector('label span');
@@ -920,7 +1030,7 @@ const Water = (function(){
 /* ---------- Analyze flow (auto-select from rendered badges ≥ 80) ---------- */
 (function(){
   const $ = s => document.querySelector(s);
-  const AUTO_SCORE_THRESHOLD = 80; // change if needed
+  const AUTO_SCORE_THRESHOLD = 80;
   const STORAGE_KEY = 'semanticSeoChecklistV6';
 
   document.getElementById('copyQuick').addEventListener('click', async ()=>{
@@ -988,7 +1098,6 @@ const Water = (function(){
       setText('rAutoCount', (data.auto_check_ids||[]).length);
       if (report) report.style.display='block';
 
-      // Suggestions + paint badges
       window.__lastSuggestions = data.suggestions || {};
       for (let i=1;i<=25;i++){
         const key='ck-'+i;
@@ -1025,13 +1134,12 @@ const Water = (function(){
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
       if (window.__setAnalyzedScore) window.__setAnalyzedScore(backendOverall);
 
-      // ===== Auto-apply: union of backend auto_check_ids + scores≥80 derived from RENDERED badges
+      // Auto-apply based on visible badges
       if (document.getElementById('autoApply').checked) {
         const fromBadges = autoSelectFromRenderedBadges();
         const union = new Set([...(data.auto_check_ids||[]), ...fromBadges]);
         const all = document.querySelectorAll('#analyzer input[type="checkbox"]');
         all.forEach(cb => cb.checked = union.has(cb.id));
-
         const selected = Array.from(all).filter(cb=>cb.checked).map(cb=>cb.id);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(selected));
       }
