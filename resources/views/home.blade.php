@@ -44,7 +44,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language dock (kept) */
+/* Language dock */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -224,19 +224,19 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
       <div style="display:flex;flex-direction:column;gap:.5rem">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <!-- ✅ Overall chip with colored icon -->
+          <!-- Overall chip with colored icon (wheel uses ≥80 green) -->
           <span class="chip" id="overallChip">
             <i class="fa-solid fa-gauge-high ico"></i>
             <span data-i="overall">Overall</span>: <b id="overallScoreInline">0</b>/100
           </span>
 
-          <!-- ✅ Content chip with colored icon -->
+          <!-- Content chip with colored icon (YOUR RULE: >80 green, 60–80 orange, <60 red) -->
           <span class="chip" id="contentScoreChip">
             <i class="fa-solid fa-file-lines ico ico-purple"></i>
             Content: <b id="contentScoreInline">0</b>/100
           </span>
 
-          <!-- ✅ Writer chip with dynamic colored icon/label -->
+          <!-- Writer chip -->
           <span class="chip" id="aiBadge" title="AI/Human detection summary">
             <i class="fa-solid fa-user-check ico ico-green"></i>
             Writer: <b>—</b>
@@ -455,17 +455,30 @@ const LANGS = [["en","English"]];
   btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
 })();
 
-/* ---------- Chip tone helper ---------- */
-function setChipTone(el, value){
+/* ---------- Chip tone helpers ----------
+  Overall chip keeps old thresholds (≥80 green).
+  Content chip uses YOUR thresholds: >80 green, 60–80 orange, <60 red.
+--------------------------------------------------- */
+function setChipTone(el, value, {mode='overall'} = {}){
   if (!el) return;
   el.classList.remove('chip-good','chip-mid','chip-bad');
   const ico = el.querySelector('i.ico');
   if (ico) ico.classList.remove('ico-green','ico-orange','ico-red');
+
   const v = Number(value);
-  if (isNaN(v)) return;
-  if (v >= 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
-  else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
-  else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
+  if (Number.isNaN(v)) return;
+
+  if (mode === 'content') {
+    // >80 green, 60–80 orange, <60 red
+    if (v > 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
+    else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
+    else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
+  } else {
+    // overall (legacy): ≥80 green, 60–79 orange, <60 red
+    if (v >= 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
+    else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
+    else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
+  }
 }
 
 /* ---------- Score wheel helpers ---------- */
@@ -480,8 +493,8 @@ function setScoreWheel(value){
   else              WHEEL.circle.style.stroke = 'url(#gradBad)';
   WHEEL.text.textContent = Math.round(v) + '%';
   document.getElementById('overallScoreInline').textContent = Math.round(v);
-  // tone the Overall chip too
-  setChipTone(document.getElementById('overallChip'), v);
+  // tone the Overall chip (overall thresholds)
+  setChipTone(document.getElementById('overallChip'), v, {mode:'overall'});
 }
 
 /* ---------- Checklist + scoring + import/export ---------- */
@@ -492,6 +505,7 @@ function setScoreWheel(value){
   const bar = document.getElementById('progressBar');
   const caption = document.getElementById('progressCaption');
   const contentScoreInline = document.getElementById('contentScoreInline');
+
   let lastAnalyzed = 0;
 
   function contentScore(){ const checked = boxes().filter(cb=>cb.checked).length; return Math.round((checked/total)*100); }
@@ -514,7 +528,8 @@ function setScoreWheel(value){
     caption.textContent = `${checked} of ${total} items completed`;
     updateCats();
     const cs = contentScore(); contentScoreInline.textContent = cs;
-    setChipTone(document.getElementById('contentScoreChip'), cs);
+    // tone Content chip with YOUR thresholds
+    setChipTone(document.getElementById('contentScoreChip'), cs, {mode:'content'});
     setScoreWheel( overallScoreBlended() );
   }
   function load(){
@@ -669,14 +684,7 @@ function normalizeUrl(u){
       window.__lastSuggestions = data.suggestions || {};
       for (let i=1;i<=25;i++){ const key='ck-'+i; setScoreBadge(i, data.scores?.[key]); }
 
-      // overall / content
-      const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
-      window.__setAnalyzedScore(backendOverall);
-      const cs = window.__getContentScore();
-      document.getElementById('contentScoreInline').textContent = cs;
-      setChipTone(document.getElementById('contentScoreChip'), cs);
-
-      // AI DETECTION panes + writer chip tone/icon
+      // writer / AI panes + writer chip coloring
       const ai = data.ai_detection || {};
       const badge = document.getElementById('aiBadge');
       badge.classList.remove('chip-good','chip-mid','chip-bad');
@@ -689,7 +697,6 @@ function normalizeUrl(u){
       const icon  = iconMap[key] || 'fa-user';
       const icoC  = colorMap[key] || 'ico-purple';
       const chipC = chipMap[key];
-
       const conf = (typeof ai.likelihood==='number') ? ` (${ai.likelihood}%)` : '';
       const aiStr = (typeof ai.ai_pct==='number') ? ` — ${ai.ai_pct}% AI-like` : '';
       const humanStr = (typeof ai.human_pct==='number') ? ` — ${ai.human_pct}% Human` : '';
@@ -700,12 +707,23 @@ function normalizeUrl(u){
       document.getElementById('humanPct').textContent = (typeof ai.human_pct==='number') ? ai.human_pct : '—';
       window.__setAIData(ai);
 
-      // Auto-check
+      // overall baseline (from backend)
+      const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
+      window.__setAnalyzedScore(backendOverall);
+
+      // Auto-apply checks, then trigger a real checkbox change so update() runs
       if ($('#autoApply').checked) {
-        for (let i=1;i<=25;i++) { const id='ck-'+i; const el=document.getElementById(id); if(el) el.checked=false; }
+        const all = document.querySelectorAll('#analyzer input[type="checkbox"]');
+        all.forEach(cb => cb.checked = false);
         (data.auto_check_ids||[]).forEach(id => { const el=document.getElementById(id); if(el) el.checked=true; });
-        document.dispatchEvent(new Event('change'));
+        const first = all[0];
+        if (first) first.dispatchEvent(new Event('change', {bubbles:true}));
       }
+
+      // Repaint content chip with your thresholds
+      const csNow = window.__getContentScore();
+      document.getElementById('contentScoreInline').textContent = csNow;
+      setChipTone(document.getElementById('contentScoreChip'), csNow, {mode:'content'});
 
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re-Analyze.' : 'Solid! Improve a few items to hit green.');
