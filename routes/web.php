@@ -339,7 +339,7 @@ if (!function_exists('analyze_document')) {
         $kmap = ($subheads >= 4 && $variety >= 200);
         $scores['ck-2'] = $kmap ? 82 : ($subheads >= 2 ? 65 : 40);
         if ($kmap) $autoCheck[] = 'ck-2';
-        else $suggestions['ck-2'][] = 'Add related subtopics as H2/H3; address PAA questions.';
+        else $suggestions['ck-2'][] = 'Add related subtopics as H2/H3; address PAA questions';
 
         // 3 H1 quality
         $h1Nodes = $xp->query('//h1');
@@ -480,6 +480,7 @@ if (!function_exists('analyze_document')) {
 
         // 25 sameAs / Org
         $hasSameAs = false;
+        $ld = $xp->query('//script[@type="application/ld+json"]');
         if ($ld && $ld->length) {
             foreach ($ld as $sn) {
                 $json = trim($sn->textContent ?? '');
