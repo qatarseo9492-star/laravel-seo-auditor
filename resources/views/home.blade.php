@@ -126,17 +126,24 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   position:relative; height:64px; border-radius:18px; overflow:hidden;
   background:#0b0d21; border:1px solid rgba(255,255,255,.1);
 }
-.water-svg{position:absolute; inset:0; width:100%; height:100%}
+.water-svg{position:absolute; inset:0; width:100%; height:100%; z-index:1;}
 .water-mask-rect{transition:all .25s ease-out}
 .water-overlay{position:absolute; inset:0; pointer-events:none; background:
   radial-gradient(120px 60px at 20% -20%, rgba(255,255,255,.18), transparent 60%),
   linear-gradient(0deg, rgba(255,255,255,.05), transparent 40%, transparent 60%, rgba(255,255,255,.06));
-  mix-blend-mode:screen;
+  mix-blend-mode:screen; z-index:2;
 }
-.water-pct{position:absolute; inset:0; display:grid; place-items:center; font-weight:1000; font-size:1.05rem; text-shadow:0 1px 0 rgba(0,0,0,.45); letter-spacing:.4px}
+.water-pct{position:absolute; inset:0; display:grid; place-items:center; font-weight:1000; font-size:1.05rem; text-shadow:0 1px 0 rgba(0,0,0,.45); letter-spacing:.4px; z-index:4; }
 .wave1{animation:waveX 7s linear infinite}
 .wave2{animation:waveX 10s linear infinite reverse; opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
+
+/* Multi-color cycling */
+.multiHue{animation: hueShift 8s linear infinite; filter: hue-rotate(0deg) saturate(120%);}
+@keyframes hueShift { to { filter: hue-rotate(360deg) saturate(120%); } }
+
+/* Smoke canvas layered above water, below % text */
+#waterSmoke{ position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:screen; }
 
 /* Progress (checklist completion) */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
@@ -254,7 +261,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <span class="chip" id="contentScoreChip"><i class="fa-solid fa-file-lines ico"></i> Content: <b id="contentScoreInline">0</b>/100</span>
           <span class="chip" id="aiBadge" title="AI/Human detection summary"><i class="fa-solid fa-user-check ico ico-green"></i> Writer: <b>—</b></span>
 
-          <!-- Keep all three buttons visible -->
           <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem">
             <i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%
           </button>
@@ -290,7 +296,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
-        <!-- Water progress -->
+        <!-- Water progress with multi-hue waves + smoke -->
         <div class="water-wrap" id="waterWrap" aria-hidden="true">
           <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -304,26 +310,29 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                 </clipPath>
                 <path id="wave" d="M0 120 Q 50 90 100 120 T 200 120 T 300 120 T 400 120 T 500 120 T 600 120 V 220 H 0 Z"/>
               </defs>
+
               <g clip-path="url(#roundClip)">
                 <rect x="0" y="0" width="600" height="200" fill="#0b0d21"/>
                 <g clip-path="url(#fillClip)">
-                  <g class="wave1" fill="url(#waterGrad)" opacity=".95">
+                  <g class="wave1 multiHue" fill="url(#waterGrad)" opacity=".95">
                     <use href="#wave" x="0"/><use href="#wave" x="600"/>
                   </g>
-                  <g class="wave2" fill="url(#waterGrad)" opacity=".65">
+                  <g class="wave2 multiHue" fill="url(#waterGrad)" opacity=".65">
                     <use href="#wave" x="0" y="8"/><use href="#wave" x="600" y="8"/>
                   </g>
                 </g>
                 <rect x="0" y="0" width="600" height="200" fill="transparent"/>
               </g>
             </svg>
+            <!-- smoke right above the water line -->
+            <canvas id="waterSmoke"></canvas>
             <div class="water-overlay"></div>
             <div class="water-pct"><span id="waterPct">0%</span></div>
           </div>
           <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
         </div>
 
-        <!-- Quick chips (kept) -->
+        <!-- Quick chips -->
         <div id="analyzeReport" style="margin-top:.9rem;display:none">
           <div style="display:flex;flex-wrap:wrap;gap:.5rem">
             <span class="chip">HTTP: <b id="rStatus">—</b></span>
@@ -347,7 +356,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Categories / checklist (unchanged content) -->
+    <!-- Categories / checklist -->
     <div class="analyzer-grid" id="checklistGrid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -633,6 +642,75 @@ function setText(id, val){ const el = document.getElementById(id); if (el) el.te
 /* ---------- URL normalization ---------- */
 function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
 
+/* ---------- Smoke particles rising from water ---------- */
+const WaterSmoke = (function(){
+  const canvas = document.getElementById('waterSmoke');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+  let running = false, particles = [], frameId = 0;
+  let levelRatioTop = 1; // 0 = top, 1 = bottom of bar
+
+  function cssW(){ return canvas?.clientWidth || canvas?.parentElement?.clientWidth || 0; }
+  function cssH(){ return canvas?.clientHeight || canvas?.parentElement?.clientHeight || 0; }
+
+  function resize(){
+    if(!canvas || !ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio||1);
+    const w = cssW(), h = cssH();
+    canvas.width = Math.max(1, Math.floor(w * dpr));
+    canvas.height = Math.max(1, Math.floor(h * dpr));
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+
+  function spawn(n=6){
+    if(!canvas) return;
+    const y = cssH() * levelRatioTop; // emitter line
+    for(let i=0;i<n;i++){
+      const x = Math.random()*cssW();
+      const jitter = (Math.random()*4 - 2);
+      const speed = 0.4 + Math.random()*0.8;
+      particles.push({
+        x, y: y + jitter,
+        vx: (Math.random()-.5)*.35,
+        vy: -speed,
+        life: 1,
+        decay: 0.008 + Math.random()*0.02,
+        r: 2 + Math.random()*6,
+        hue: (180 + Math.random()*120) // bluish to magenta
+      });
+    }
+  }
+
+  function tick(){
+    if(!running || !ctx || !canvas){ cancelAnimationFrame(frameId); return; }
+    frameId = requestAnimationFrame(tick);
+    ctx.clearRect(0,0,cssW(),cssH());
+    ctx.globalCompositeOperation = 'lighter';
+
+    if (particles.length < 180) spawn(6);
+
+    for (const p of particles){
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy -= 0.005;   // slight lift
+      p.life -= p.decay;
+
+      const a = Math.max(0, p.life);
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+      g.addColorStop(0, `hsla(${p.hue}, 80%, 70%, ${0.35*a})`);
+      g.addColorStop(1, `hsla(${(p.hue+60)%360}, 90%, 55%, ${0.05*a})`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+    }
+    particles = particles.filter(p=> p.life>0 && p.y > -20);
+  }
+
+  function start(){ if(!canvas||!ctx) return; running=true; resize(); cancelAnimationFrame(frameId); frameId = requestAnimationFrame(tick); }
+  function stop(){ running=false; cancelAnimationFrame(frameId); particles.length = 0; if(ctx) ctx.clearRect(0,0,cssW(),cssH()); }
+  function setLevel(topRatio){ levelRatioTop = Math.max(0, Math.min(1, topRatio)); } // 0 top, 1 bottom
+  window.addEventListener('resize', ()=> running && resize(), {passive:true});
+  return { start, stop, setLevel };
+})();
+
 /* ---------- Water progress controller ---------- */
 const Water = (function(){
   const wrap = document.getElementById('waterWrap');
@@ -641,18 +719,45 @@ const Water = (function(){
   const pct  = document.getElementById('waterPct');
   const label= document.getElementById('pageUrlLabel');
   let prog = 0, intv = null;
-  const H = 200;
+  const H = 200; // SVG viewBox height
+
   function show(){ wrap.style.display='block'; }
   function hide(){ wrap.style.display='none'; }
   function set(v){
     prog = Math.max(0, Math.min(100, v));
-    rect.setAttribute('y', String(H - (H * (prog/100))));
+    const y = H - (H * (prog/100)); // top of water in SVG units
+    rect.setAttribute('y', String(y));
     bar.setAttribute('aria-valuenow', Math.round(prog));
     pct.textContent = Math.round(prog) + '%';
+    // inform smoke of the current waterline:
+    if (WaterSmoke && typeof WaterSmoke.setLevel === 'function') {
+      WaterSmoke.setLevel(y / H); // convert to 0..1 relative to top
+    }
   }
-  function start(){ show(); set(0); label.classList.add('animating'); clearInterval(intv); intv = setInterval(()=>{ if (prog < 90) set(prog + 1.2); }, 50); }
-  function finish(){ clearInterval(intv); const step = ()=>{ if (prog >= 100){ setTimeout(()=> label.classList.remove('animating'), 300); return; } set(prog + Math.max(1.5, (100-prog)*0.12)); requestAnimationFrame(step); }; requestAnimationFrame(step); }
-  function reset(){ clearInterval(intv); set(0); hide(); label.classList.remove('animating'); }
+  function start(){
+    show(); set(0);
+    label.classList.add('animating');
+    if (WaterSmoke && WaterSmoke.start) WaterSmoke.start();
+    clearInterval(intv);
+    intv = setInterval(()=>{ if (prog < 90) set(prog + 1.2); }, 50);
+  }
+  function finish(){
+    clearInterval(intv);
+    const step = ()=>{ if (prog >= 100){
+        setTimeout(()=>{ label.classList.remove('animating'); }, 300);
+        // gentle fade-out of smoke
+        setTimeout(()=>{ if (WaterSmoke && WaterSmoke.stop) WaterSmoke.stop(); }, 800);
+        return;
+      }
+      set(prog + Math.max(1.5, (100-prog)*0.12));
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  function reset(){
+    clearInterval(intv); set(0); hide(); label.classList.remove('animating');
+    if (WaterSmoke && WaterSmoke.stop) WaterSmoke.stop();
+  }
   return { start, finish, reset, set, show, hide };
 })();
 
@@ -767,7 +872,7 @@ const Water = (function(){
 })();
 </script>
 
-<!-- Procedural Smoke (WebGL2) -->
+<!-- Procedural Smoke (WebGL2) background -->
 <script>
 (function(){
   const canvas = document.getElementById('smokeFX'); if (!canvas) return;
