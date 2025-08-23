@@ -76,12 +76,10 @@ body{
   overflow-x:hidden;
 }
 
-/* --- Restored cloudy background smoke layers --- */
-#linesCanvas, #brainCanvas{
-  position:fixed; inset:0; pointer-events:none; z-index:0;
-}
-#linesCanvas{ opacity:.25; }
-#brainCanvas{ opacity:.22; mix-blend-mode:screen; }
+/* --- Cloudy background smoke layers (restored) --- */
+#linesCanvas, #brainCanvas{ position:fixed; inset:0; pointer-events:none; z-index:0; }
+#linesCanvas{ opacity:.35; }   /* increased */
+#brainCanvas{ opacity:.28; }   /* increased */
 
 /* Layout */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
@@ -268,22 +266,22 @@ header.site{
 .checklist-item input[type="checkbox"]:hover{
   border-color:#4c5399; box-shadow:0 0 0 4px rgba(99,102,241,.12);
 }
+.checklist-item input[type="checkbox"]::after{
+  content:""; width:7px;height:12px; border:3px solid transparent;
+  border-left:0;border-top:0; transform:rotate(45deg) scale(.7);
+  transition:.18s ease-in-out;
+}
 .checklist-item input[type="checkbox"]:checked{
   border-color:transparent;
   background:linear-gradient(135deg,#22c55e,#3de2ff,#9b5cff);
   background-size:200% 200%; animation:tickHue 2s linear infinite;
   box-shadow:0 6px 18px rgba(61,226,255,.25), inset 0 0 0 2px rgba(255,255,255,.25);
 }
-@keyframes tickHue{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-.checklist-item input[type="checkbox"]::after{
-  content:""; width:7px;height:12px; border:3px solid transparent;
-  border-left:0;border-top:0; transform:rotate(45deg) scale(.7);
-  transition:.18s ease-in-out;
-}
 .checklist-item input[type="checkbox"]:checked::after{
   border-color:#fff; filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));
   transform:rotate(45deg) scale(1);
 }
+@keyframes tickHue{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 
 /* Score badges + Improve button */
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
@@ -389,7 +387,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </head>
 <body>
 
-<!-- Restored cloudy background canvases -->
+<!-- Cloudy background canvases -->
 <canvas id="linesCanvas"></canvas>
 <canvas id="brainCanvas"></canvas>
 
@@ -709,7 +707,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- Simple modal shell (optional) -->
+<!-- Simple modal shell -->
 <div class="modal-backdrop" id="modalBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98"></div>
 <div class="modal" id="tipModal" style="display:none;position:fixed;inset:0;z-index:99;align-items:center;justify-content:center">
   <div class="modal-card" style="width:min(860px,95vw);max-height:80vh;overflow:auto;background:#0f1022;border:1px solid rgba(255,255,255,.14);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.55)">
@@ -1034,7 +1032,7 @@ const Water = (function(){
 })();
 
 /* ------------------------ Analyze + Checklist glue ------------------------ */
-const ANALYZE_URL = "{{ url('/analyze') }}"; // Laravel route
+const ANALYZE_URLS = ["{{ url('/analyze') }}", "{{ url('/analyze-json') }}"]; // multi-endpoint
 const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 const CAT_RANGES = [
@@ -1047,8 +1045,6 @@ function badgeTone(el, score){
   else if (score>=60) el.classList.add('score-mid');
   else el.classList.add('score-bad');
 }
-function upsert(obj, key, def){ return (obj && obj[key]!=null)? obj[key] : def; }
-
 function updateCategoryBars(){
   document.querySelectorAll('.category-card').forEach((card, idx)=>{
     const total = parseInt(card.querySelector('.total-count').textContent,10)||0;
@@ -1079,6 +1075,9 @@ function autoTickByScores(scoresMap){
     if (badge && !Number.isNaN(score) && score>=0){
       badge.textContent = Math.round(score);
       badgeTone(badge, score);
+      if (score >= 80) cb?.closest('.checklist-item')?.classList.add('sev-good');
+      else if (score >= 60) cb?.closest('.checklist-item')?.classList.add('sev-mid');
+      else cb?.closest('.checklist-item')?.classList.add('sev-bad');
     }
     if (!cb) continue;
     const should = score>=80 && document.getElementById('autoApply').checked;
@@ -1094,59 +1093,63 @@ function autoTickByScores(scoresMap){
   updateCategoryBars();
 }
 
-/* Hardened analyzer: POST + fallback GET */
+/* Hardened analyzer: try POST then GET on /analyze and /analyze-json */
 async function analyze(){
   const input = document.getElementById('analyzeUrl');
   let url = normalizeUrl(input.value);
   if (!url) { input.focus(); return; }
 
-  // visuals
   Water.start();
   document.getElementById('analyzeStatus').textContent = 'Fetching & analyzing…';
   document.getElementById('analyzeReport').style.display = 'none';
 
-  const headers = {
-    'Content-Type':'application/json',
-    'Accept':'application/json',
-    'X-Requested-With':'XMLHttpRequest',
-    'X-CSRF-TOKEN': CSRF
-  };
+  let data = null, ok = false, status = 0, text = '', lastErr = '';
 
-  let data = null, ok = false, status = 0, text = '';
-
-  // Try POST first
-  try{
-    const res = await fetch(ANALYZE_URL, { method:'POST', headers, body: JSON.stringify({ url, _token: CSRF })});
-    status = res.status;
-    text = await res.text();
-    try{ data = JSON.parse(text); }catch{ data = null; }
-    ok = res.ok && data && typeof data === 'object';
-  }catch(e){ ok = false; }
-
-  // Fallback GET if POST failed (419/405/etc.)
-  if (!ok){
+  // Try POST first to each base
+  for (const base of ANALYZE_URLS){
     try{
-      const qs = new URLSearchParams({ url }).toString();
-      const res2 = await fetch(`${ANALYZE_URL}?${qs}`, { method:'GET', headers:{ 'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest' }});
-      status = res2.status;
-      text = await res2.text();
-      try{ data = JSON.parse(text); }catch{ data = null; }
-      ok = res2.ok && data && typeof data === 'object';
-    }catch(e){}
+      const res = await fetch(base, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Accept':'application/json',
+          'X-Requested-With':'XMLHttpRequest',
+          'X-CSRF-TOKEN': CSRF
+        },
+        body: JSON.stringify({ url, _token: CSRF })
+      });
+      status = res.status; text = await res.text();
+      try{ data = JSON.parse(text); }catch(e){ data = null; }
+      if (res.ok && data){ ok = true; break; }
+      lastErr = `POST ${base} -> ${status}`;
+    }catch(e){ lastErr = `POST ${base} failed`; }
+  }
+  // Fallback GET to each base
+  if (!ok){
+    for (const base of ANALYZE_URLS){
+      try{
+        const qs = new URLSearchParams({ url }).toString();
+        const res = await fetch(`${base}?${qs}`, { method:'GET', headers:{ 'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest' }});
+        status = res.status; text = await res.text();
+        try{ data = JSON.parse(text); }catch(e){ data = null; }
+        if (res.ok && data){ ok = true; break; }
+        lastErr = `GET ${base} -> ${status}`;
+      }catch(e){ lastErr = `GET ${base} failed`; }
+    }
   }
 
   if (!ok || !data){
-    console.error('Analyze failed', status, text?.slice(0,300));
+    console.error('Analyze failed', status, lastErr, text?.slice(0,300));
     Water.finish();
-    document.getElementById('analyzeStatus').textContent = 'Could not analyze this URL. Ensure /analyze route exists (POST JSON, GET fallback).';
+    document.getElementById('analyzeStatus').textContent = 'Could not analyze this URL. Check routes and try again.';
     return;
   }
 
   // Apply values
-  const overall = Number(data.overall ?? data.overallScore ?? data.score ?? 0);
-  const contentScore = Number(data.contentScore ?? data.content ?? data.content_score ?? 0);
-  const humanPct = Number(data.humanPct ?? data.human ?? 0);
-  const aiPct    = Number(data.aiPct ?? data.ai ?? 0);
+  const overall = Number(data.overall ?? 0);
+  const contentScore = Number(data.contentScore ?? 0);
+  const humanPct = Number(data.humanPct ?? 0);
+  const aiPct    = Number(data.aiPct ?? 0);
   const writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
 
   setScoreWheel(overall||0);
@@ -1156,7 +1159,6 @@ async function analyze(){
   setText('humanPct', Math.round(humanPct||0));
   setText('aiPct', Math.round(aiPct||0));
 
-  // Report chips
   setText('rStatus', data.httpStatus ?? '—');
   setText('rTitleLen', data.titleLen ?? '—');
   setText('rMetaLen', data.metaLen ?? '—');
@@ -1167,9 +1169,7 @@ async function analyze(){
   setText('rInternal', data.internalLinks ?? '—');
   setText('rSchema', data.schema ?? '—');
 
-  const scoresMap = data.itemScores || data.scores || data.checks || {};
-  autoTickByScores(scoresMap);
-
+  autoTickByScores(data.itemScores || {});
   Water.finish();
   document.getElementById('analyzeStatus').textContent = 'Analysis complete';
   document.getElementById('analyzeReport').style.display = 'block';
@@ -1246,7 +1246,7 @@ async function analyze(){
   updateCategoryBars();
 })();
 
-/* --------- Restored cloudy background rendering (lightweight) --------- */
+/* --------- Cloudy background rendering --------- */
 (function(){
   // Lines layer (soft diagonal moving lines)
   const c = document.getElementById('linesCanvas');
