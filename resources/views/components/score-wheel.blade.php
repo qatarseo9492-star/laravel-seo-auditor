@@ -1,11 +1,14 @@
-{{-- resources/views/components/score-wheel.blade.php --}}
+{{-- Reusable score wheel component
+Usage:
+<x-score-wheel id="overall" :value="0" :size="260" ticks="20"/>
+<script> setScoreWheel('overall', 82); </script>
+--}}
 @props([
-    // Public props
-    'id'    => null,     // required if you want to update this instance from JS
-    'value' => 0,        // initial value (0–100)
-    'size'  => 260,      // px width on desktop
-    'card'  => true,     // wrap with glassy card + glow
-    'ticks' => 20,       // tick marks around the ring
+    'id'    => null,   // required for JS updates
+    'value' => 0,      // 0–100 initial value
+    'size'  => 260,    // px or any CSS size
+    'card'  => true,   // glass card wrapper
+    'ticks' => 20,     // tick marks
 ])
 
 @php
@@ -17,22 +20,16 @@
   @if($card)<div class="score-glow"></div>@endif
 
   <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
-    <!-- tick container (populated per-instance) -->
     <g class="score-ticks" transform="translate(60,60) rotate(-90)"></g>
-
-    <!-- ring -->
     <circle class="bg" cx="60" cy="60" r="54"/>
     <circle class="track" cx="60" cy="60" r="54"/>
     <circle class="progress" cx="60" cy="60" r="54"/>
-
-    <!-- value -->
     <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle"
           class="score-text" id="{{ $wheelId }}-text">0%</text>
   </svg>
 </div>
 
 @once
-  {{-- Gradients shared by all wheel instances --}}
   <svg width="0" height="0" aria-hidden="true">
     <defs>
       <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%">
@@ -48,7 +45,6 @@
   </svg>
 
   <style>
-    /* Card + glow */
     .score-card{
       position:relative; padding:14px; border-radius:18px;
       background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
@@ -61,8 +57,6 @@
       -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
       -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;
     }
-
-    /* Wheel */
     .score-wheel{width:100%; height:auto; transform:rotate(-90deg)}
     .score-wheel circle{fill:none; stroke-linecap:round}
     .score-wheel .bg{stroke:rgba(255,255,255,.10); stroke-width:16}
@@ -79,16 +73,16 @@
       font-weight:1000; fill:#fff; transform:rotate(90deg);
       text-shadow:0 0 18px rgba(255,59,92,.25);
     }
-
-    @media (max-width:992px){ .score-card{width:200px} }
   </style>
 
   <script>
     (function(){
       const CIRC = 339;
 
-      // Public API: setScoreWheel(id, value)
-      window.setScoreWheel = function(id, value){
+      // Global API available to all pages:
+      // Awesome — I turned the wheel into a reusable Blade component so you can drop it anywhere and control it with a single JS call:
+      // setScoreWheel('<id>', <value 0–100>)
+      window.setScoreWheel = window.setScoreWheel || function(id, value){
         const host = document.querySelector('[data-wheel-id="'+id+'"]');
         if(!host) return;
         const circle = host.querySelector('.progress');
@@ -102,8 +96,8 @@
         text.textContent = Math.round(v) + '%';
       };
 
-      // Helper to build ticks for one wheel
-      window.__buildWheelTicks = function(host, count){
+      // helper for ticks
+      window.__buildWheelTicks = window.__buildWheelTicks || function(host, count){
         const g = host.querySelector('.score-ticks');
         if(!g || g.childNodes.length) return;
         for(let i=0;i<count;i++){
