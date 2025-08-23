@@ -76,13 +76,17 @@ body{
   overflow-x:hidden;
 }
 
-/* Remove cloudy background smoke (kept clean) */
-#linesCanvas, #brainCanvas { display:none; }
+/* --- Restored cloudy background smoke layers --- */
+#linesCanvas, #brainCanvas{
+  position:fixed; inset:0; pointer-events:none; z-index:0;
+}
+#linesCanvas{ opacity:.25; }
+#brainCanvas{ opacity:.22; mix-blend-mode:screen; }
 
 /* Layout */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
-/* Header (simple + stable) */
+/* Header */
 header.site{
   display:flex; align-items:center; justify-content:space-between;
   gap:1rem; padding:14px 0 22px; border-bottom:1px solid rgba(255,255,255,.08);
@@ -99,14 +103,14 @@ header.site{
 .hero-sub{ color:var(--text-dim); font-size:.95rem }
 .header-actions{ display:flex; gap:.5rem; align-items:center }
 
-/* Buttons — special effects, full-color icons */
+/* Buttons */
 .btn{
   display:inline-flex; align-items:center; gap:.55rem; cursor:pointer;
   padding:.6rem .95rem; border-radius:14px; border:1px solid rgba(255,255,255,.16);
   color:#fff; font-weight:900; letter-spacing:.2px; position:relative; overflow:hidden;
   box-shadow:0 10px 28px rgba(0,0,0,.25);
 }
-.btn::after{ /* animated sheeny sweep */
+.btn::after{
   content:""; position:absolute; inset:-2px; border-radius:inherit; opacity:.0;
   background:linear-gradient(120deg, transparent, rgba(255,255,255,.22), transparent 60%);
   transform:translateX(-120%); transition:opacity .2s ease;
@@ -121,7 +125,6 @@ header.site{
 .btn-ghost  { background:rgba(255,255,255,.06); }
 .btn:disabled{ opacity:.6; cursor:not-allowed }
 
-/* Icon colors (full color) */
 .btn-analyze i{ color:#03291a }
 .btn-print i{ color:#051735 }
 .btn-reset i{ color:#2a1403 }
@@ -132,7 +135,7 @@ header.site{
 .section-title{font-size:1.6rem;margin:0 0 .3rem}
 .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* SCORE GAUGE (water fill circle) */
+/* SCORE GAUGE */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}
@@ -154,7 +157,7 @@ header.site{
 .ico{width:1.1em;text-align:center}
 .ico-green{color:var(--good)} .ico-orange{color:var(--warn)} .ico-red{color:var(--bad)} .ico-cyan{color:var(--accent)} .ico-purple{color:#9b5cff}
 
-/* URL input: glass + mini buttons */
+/* URL input */
 .url-field{
   position:relative; border-radius:16px; background:#0b0d21; border:1px solid #1b1b35;
   box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), 0 12px 32px rgba(0,0,0,.32);
@@ -163,12 +166,8 @@ header.site{
 .url-field:focus-within{
   border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15), inset 0 0 0 1px rgba(93,65,255,.28);
 }
-.url-field .url-icon{
-  position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9aa0c3; font-size:1rem; opacity:.95;
-}
-.url-field input{
-  all:unset; color:var(--text); width:100%; font-size:1rem; letter-spacing:.2px;
-}
+.url-field .url-icon{ position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9aa0c3; font-size:1rem; opacity:.95; }
+.url-field input{ all:unset; color:var(--text); width:100%; font-size:1rem; letter-spacing:.2px; }
 .url-field .url-mini{
   position:absolute; top:50%; transform:translateY(-50%);
   border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:#fff;
@@ -204,7 +203,7 @@ header.site{
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%); will-change:filter;}
 #waterSmoke{ position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:screen; }
 
-/* COMPLETION water + smoke */
+/* Completion bar */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .comp-water{position:relative; height:52px; border-radius:16px; overflow:hidden; background:#0b0d21; border:1px solid rgba(255,255,255,.1); }
 .comp-svg{position:absolute; inset:0; width:100%; height:100%; z-index:1;}
@@ -218,7 +217,7 @@ header.site{
 .comp-wave2{animation:waveX 12s linear infinite reverse}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.55rem}
 
-/* Category grid & cards */
+/* Category grid & cards + heading water */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden; isolation:isolate;}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite; pointer-events:none; z-index:0;}
@@ -230,7 +229,6 @@ header.site{
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
 
-/* Category heading water + smoke */
 .cat-water{grid-column:1/-1; margin-top:.55rem; position:relative; height:22px;}
 .cat-svg{display:block; width:100%; height:22px;}
 .cat-wave1{animation:catWave 7s linear infinite}
@@ -239,7 +237,7 @@ header.site{
 .cat-water-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.8rem; color:rgba(255,255,255,.9); text-shadow:0 1px 0 rgba(0,0,0,.55); pointer-events:none}
 .cat-smoke{position:absolute; left:0; right:0; bottom:0; height:26px; pointer-events:none; z-index:3; mix-blend-mode:screen;}
 
-/* Checklist rows */
+/* Checklist */
 .checklist{list-style:none;margin:10px 0 0;padding:0}
 .checklist-item{
   display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;
@@ -255,12 +253,11 @@ header.site{
 .checklist-item:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
 
-/* Severity tints */
 .sev-good{ background:linear-gradient(180deg, rgba(34,197,94,.14), rgba(34,197,94,.08)); border-color: rgba(34,197,94,.45); }
 .sev-mid { background:linear-gradient(180deg, rgba(245,158,11,.16), rgba(245,158,11,.08)); border-color: rgba(245,158,11,.45); }
 .sev-bad { background:linear-gradient(180deg, rgba(239,68,68,.16), rgba(239,68,68,.10)); border-color: rgba(239,68,68,.55); }
 
-/* Custom checkbox (tick) */
+/* Custom checkbox */
 .checklist-item input[type="checkbox"]{
   appearance:none; -webkit-appearance:none; outline:none;
   width:22px;height:22px;border-radius:8px;
@@ -315,7 +312,7 @@ header.site{
         radial-gradient(120% 100% at 100% 0%, rgba(155,92,255,.05), transparent 35%); }
 }
 
-/* Floating Share Dock — brand colors locked */
+/* Floating Share Dock */
 .share-dock{
   position:fixed; right:16px; top:50%; transform:translateY(-50%);
   display:flex; flex-direction:column; gap:.5rem; z-index:85;
@@ -387,12 +384,14 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{ animation:none !important }
   .multiHue,.multiHueFast{ filter:none !important }
 }
-@media print{.modal-backdrop,.modal,.lang-dock,.lang-panel,.share-dock,#backTop{display:none!important}}
+@media print{.modal-backdrop,.modal,.lang-dock,.lang-panel,.share-dock,#backTop,#linesCanvas,#brainCanvas{display:none!important}}
 </style>
 </head>
 <body>
 
-<!-- (Removed cloudy background smoke canvases) -->
+<!-- Restored cloudy background canvases -->
+<canvas id="linesCanvas"></canvas>
+<canvas id="brainCanvas"></canvas>
 
 <!-- SVG defs -->
 <svg width="0" height="0" aria-hidden="true">
@@ -710,22 +709,22 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- Modal -->
-<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
-<div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3 class="modal-title" id="modalTitle">Improve</h3>
-      <button class="modal-close" id="modalClose" aria-label="Close dialog"><i class="fa-solid fa-xmark"></i></button>
+<!-- Simple modal shell (optional) -->
+<div class="modal-backdrop" id="modalBackdrop" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98"></div>
+<div class="modal" id="tipModal" style="display:none;position:fixed;inset:0;z-index:99;align-items:center;justify-content:center">
+  <div class="modal-card" style="width:min(860px,95vw);max-height:80vh;overflow:auto;background:#0f1022;border:1px solid rgba(255,255,255,.14);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.55)">
+    <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.12)">
+      <h3 class="modal-title" id="modalTitle" style="margin:0">Improve</h3>
+      <button class="modal-close" id="modalClose" aria-label="Close dialog" style="border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);border-radius:10px;padding:.4rem .6rem;cursor:pointer;color:#fff"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="tabs" role="tablist">
-      <button class="tab active" data-tab="tipsTab" role="tab"><i class="fa-solid fa-lightbulb"></i> Tips</button>
-      <button class="tab" data-tab="examplesTab" role="tab"><i class="fa-brands fa-google"></i> Examples (Google)</button>
-      <button class="tab" data-tab="humanTab" role="tab"><i class="fa-solid fa-user"></i> Human-like</button>
-      <button class="tab" data-tab="aiTab" role="tab"><i class="fa-solid fa-microchip"></i> AI-like</button>
-      <button class="tab" data-tab="fullTab" role="tab"><i class="fa-solid fa-file-lines"></i> Full Text</button>
+    <div class="tabs" role="tablist" style="display:flex;gap:.4rem;padding:.55rem .6rem;border-bottom:1px dashed rgba(255,255,255,.12)">
+      <button class="tab active" data-tab="tipsTab" role="tab" style="font-weight:900;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.06);padding:.4rem .6rem;color:#fff"><i class="fa-solid fa-lightbulb"></i> Tips</button>
+      <button class="tab" data-tab="examplesTab" role="tab" style="font-weight:900;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.06);padding:.4rem .6rem;color:#fff"><i class="fa-brands fa-google"></i> Examples</button>
+      <button class="tab" data-tab="humanTab" role="tab" style="font-weight:900;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.06);padding:.4rem .6rem;color:#fff"><i class="fa-solid fa-user"></i> Human-like</button>
+      <button class="tab" data-tab="aiTab" role="tab" style="font-weight:900;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.06);padding:.4rem .6rem;color:#fff"><i class="fa-solid fa-microchip"></i> AI-like</button>
+      <button class="tab" data-tab="fullTab" role="tab" style="font-weight:900;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(255,255,255,.06);padding:.4rem .6rem;color:#fff"><i class="fa-solid fa-file-lines"></i> Full Text</button>
     </div>
-    <div class="tabpanes">
+    <div class="tabpanes" style="padding:12px">
       <div id="tipsTab" class="active"><ul id="modalList"></ul></div>
       <div id="examplesTab"><div class="pre" id="examplesPre">—</div></div>
       <div id="humanTab"><div class="pre" id="humanSnippetsPre">Run Analyze to view human-like snippets.</div></div>
@@ -736,6 +735,9 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
+/* -------- Global hue drift for multi-color water -------- */
+(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+
 /* ------------------------ Language (10) + auto-detect ------------------------ */
 const I18N = {
   en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto-apply checkmarks (≥ 80)"},
@@ -770,7 +772,6 @@ const LANGS = [
     }
     return 'en';
   }
-
   function fillList(activeCode){
     card.innerHTML='';
     LANGS.forEach(([code,label,flag])=>{
@@ -781,7 +782,6 @@ const LANGS = [
       card.appendChild(div);
     });
   }
-
   function apply(code){
     code = code || 'en';
     const d = I18N[code] || I18N.en;
@@ -798,23 +798,15 @@ const LANGS = [
     localStorage.setItem('lang', code);
     fillList(code);
   }
-
-  dockBtn.addEventListener('click', ()=>{
-    panel.style.display = panel.style.display==='block' ? 'none' : 'block';
-  });
-  document.addEventListener('click', (e)=>{
-    if (!panel.contains(e.target) && !dockBtn.contains(e.target)) panel.style.display='none';
-  });
-  panel.addEventListener('click', (e)=>{
-    const it = e.target.closest('.lang-item'); if(!it) return;
-    apply(it.dataset.code); panel.style.display='none';
-  });
+  dockBtn.addEventListener('click', ()=>{ panel.style.display = panel.style.display==='block' ? 'none' : 'block'; });
+  document.addEventListener('click', (e)=>{ if (!panel.contains(e.target) && !dockBtn.contains(e.target)) panel.style.display='none'; });
+  panel.addEventListener('click', (e)=>{ const it = e.target.closest('.lang-item'); if(!it) return; apply(it.dataset.code); panel.style.display='none'; });
 
   const initial = localStorage.getItem('lang') || bestMatch();
   fillList(initial); apply(initial);
 })();
 
-/* ------------------------ Helpers & visual routines ------------------------ */
+/* ------------------------ Helpers ------------------------ */
 function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
 function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 function setChipTone(el, value){
@@ -827,7 +819,7 @@ function setChipTone(el, value){
   else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
 }
 
-/* Gauge control */
+/* Gauge */
 const GAUGE = { rect:null, stop1:null, stop2:null, r1:null, r2:null, arc:null, text:null, H:200, CIRC: 2*Math.PI*95 };
 function setScoreWheel(value){
   if (!GAUGE.rect){
@@ -866,14 +858,7 @@ function setScoreWheel(value){
   setChipTone(document.getElementById('overallChip'), v);
 }
 
-/* Global hue drift for multi-color water */
-(function(){
-  const root=document.documentElement; let start=performance.now();
-  function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame); }
-  requestAnimationFrame(frame);
-})();
-
-/* Smoky water overlays for bars */
+/* Smoky water overlays for category + completion */
 const CatSmoke = (function(){
   const canvases = [];
   function attachAll(){
@@ -947,7 +932,7 @@ const CompSmoke = (function(){
   return { setPct(p){ ratio=Math.max(0,Math.min(1,p/100)); } };
 })();
 
-/* Water progress controller */
+/* Water progress controller (+ smoke) */
 const WaterSmoke = (function(){
   const canvas = document.getElementById('waterSmoke');
   const ctx = canvas ? canvas.getContext('2d') : null;
@@ -991,7 +976,6 @@ const Water = (function(){
   const label= document.getElementById('pageUrlLabel');
   let prog = 0, intv = null;
   const H = 200;
-
   function show(){ wrap.style.display='block'; }
   function hide(){ wrap.style.display='none'; }
   function set(v){
@@ -1050,7 +1034,7 @@ const Water = (function(){
 })();
 
 /* ------------------------ Analyze + Checklist glue ------------------------ */
-const ANALYZE_URL = "{{ url('/analyze') }}"; // your Laravel route
+const ANALYZE_URL = "{{ url('/analyze') }}"; // Laravel route
 const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 const CAT_RANGES = [
@@ -1087,7 +1071,6 @@ function updateCategoryBars(){
 }
 
 function autoTickByScores(scoresMap){
-  // scoresMap: { '1': 90, '2': 50, ... }
   let autoCount = 0;
   for (let i=1;i<=25;i++){
     const score = Number(scoresMap?.[i] ?? scoresMap?.[String(i)] ?? scoresMap?.[`item${i}`] ?? -1);
@@ -1100,8 +1083,8 @@ function autoTickByScores(scoresMap){
     if (!cb) continue;
     const should = score>=80 && document.getElementById('autoApply').checked;
     const prev = cb.checked;
-    cb.checked = should ? true : cb.checked;
-    if (cb.checked && !prev && should){
+    if (should && !prev){
+      cb.checked = true;
       cb.closest('.checklist-item')?.classList.add('flash-row');
       setTimeout(()=> cb.closest('.checklist-item')?.classList.remove('flash-row'), 700);
       autoCount++;
@@ -1111,76 +1094,85 @@ function autoTickByScores(scoresMap){
   updateCategoryBars();
 }
 
+/* Hardened analyzer: POST + fallback GET */
 async function analyze(){
   const input = document.getElementById('analyzeUrl');
   let url = normalizeUrl(input.value);
   if (!url) { input.focus(); return; }
 
-  // visual start
+  // visuals
   Water.start();
   document.getElementById('analyzeStatus').textContent = 'Fetching & analyzing…';
   document.getElementById('analyzeReport').style.display = 'none';
 
+  const headers = {
+    'Content-Type':'application/json',
+    'Accept':'application/json',
+    'X-Requested-With':'XMLHttpRequest',
+    'X-CSRF-TOKEN': CSRF
+  };
+
+  let data = null, ok = false, status = 0, text = '';
+
+  // Try POST first
   try{
-    const res = await fetch(ANALYZE_URL, {
-      method:'POST',
-      headers: {
-        'Content-Type':'application/json',
-        'Accept':'application/json',
-        'X-CSRF-TOKEN': CSRF
-      },
-      body: JSON.stringify({ url })
-    });
+    const res = await fetch(ANALYZE_URL, { method:'POST', headers, body: JSON.stringify({ url, _token: CSRF })});
+    status = res.status;
+    text = await res.text();
+    try{ data = JSON.parse(text); }catch{ data = null; }
+    ok = res.ok && data && typeof data === 'object';
+  }catch(e){ ok = false; }
 
-    const data = await res.json().catch(()=> ({}));
-
-    // Apply values resiliently (handles various backend shapes)
-    const overall = Number(
-      upsert(data,'overall', upsert(data,'overallScore', upsert(data,'score', 0)))
-    );
-    const contentScore = Number(
-      upsert(data,'contentScore', upsert(data,'content', upsert(data,'content_score', 0)))
-    );
-    const humanPct = Number(upsert(data,'humanPct', upsert(data,'human', 0)));
-    const aiPct    = Number(upsert(data,'aiPct', upsert(data,'ai', 0)));
-    const writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
-
-    // Update gauge + chips
-    setScoreWheel(overall||0);
-    setText('contentScoreInline', Math.round(contentScore||0));
-    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
-
-    const badge = document.getElementById('aiBadge');
-    if (badge){ badge.querySelector('b').textContent = writer; }
-
-    setText('humanPct', Math.round(humanPct||0));
-    setText('aiPct', Math.round(aiPct||0));
-
-    // Report chips (if present)
-    setText('rStatus', upsert(data,'httpStatus', '—'));
-    setText('rTitleLen', upsert(data,'titleLen', '—'));
-    setText('rMetaLen', upsert(data,'metaLen', '—'));
-    setText('rCanonical', upsert(data,'canonical', '—'));
-    setText('rRobots', upsert(data,'robots', '—'));
-    setText('rViewport', upsert(data,'viewport', '—'));
-    setText('rHeadings', upsert(data,'headings', '—'));
-    setText('rInternal', upsert(data,'internalLinks', '—'));
-    setText('rSchema', upsert(data,'schema', '—'));
-
-    // Checklist scores map can be: data.itemScores / data.scores / data.checks
-    const scoresMap = data.itemScores || data.scores || data.checks || {};
-    autoTickByScores(scoresMap);
-
-    // Finish visuals
-    Water.finish();
-    document.getElementById('analyzeStatus').textContent = 'Analysis complete';
-    document.getElementById('analyzeReport').style.display = 'block';
-
-  }catch(e){
-    console.error(e);
-    Water.finish();
-    document.getElementById('analyzeStatus').textContent = 'Could not analyze this URL. Make sure the /analyze route is active.';
+  // Fallback GET if POST failed (419/405/etc.)
+  if (!ok){
+    try{
+      const qs = new URLSearchParams({ url }).toString();
+      const res2 = await fetch(`${ANALYZE_URL}?${qs}`, { method:'GET', headers:{ 'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest' }});
+      status = res2.status;
+      text = await res2.text();
+      try{ data = JSON.parse(text); }catch{ data = null; }
+      ok = res2.ok && data && typeof data === 'object';
+    }catch(e){}
   }
+
+  if (!ok || !data){
+    console.error('Analyze failed', status, text?.slice(0,300));
+    Water.finish();
+    document.getElementById('analyzeStatus').textContent = 'Could not analyze this URL. Ensure /analyze route exists (POST JSON, GET fallback).';
+    return;
+  }
+
+  // Apply values
+  const overall = Number(data.overall ?? data.overallScore ?? data.score ?? 0);
+  const contentScore = Number(data.contentScore ?? data.content ?? data.content_score ?? 0);
+  const humanPct = Number(data.humanPct ?? data.human ?? 0);
+  const aiPct    = Number(data.aiPct ?? data.ai ?? 0);
+  const writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
+
+  setScoreWheel(overall||0);
+  setText('contentScoreInline', Math.round(contentScore||0));
+  setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
+  const badge = document.getElementById('aiBadge'); if (badge){ badge.querySelector('b').textContent = writer; }
+  setText('humanPct', Math.round(humanPct||0));
+  setText('aiPct', Math.round(aiPct||0));
+
+  // Report chips
+  setText('rStatus', data.httpStatus ?? '—');
+  setText('rTitleLen', data.titleLen ?? '—');
+  setText('rMetaLen', data.metaLen ?? '—');
+  setText('rCanonical', data.canonical ?? '—');
+  setText('rRobots', data.robots ?? '—');
+  setText('rViewport', data.viewport ?? '—');
+  setText('rHeadings', data.headings ?? '—');
+  setText('rInternal', data.internalLinks ?? '—');
+  setText('rSchema', data.schema ?? '—');
+
+  const scoresMap = data.itemScores || data.scores || data.checks || {};
+  autoTickByScores(scoresMap);
+
+  Water.finish();
+  document.getElementById('analyzeStatus').textContent = 'Analysis complete';
+  document.getElementById('analyzeReport').style.display = 'block';
 }
 
 /* Wire controls */
@@ -1188,17 +1180,11 @@ async function analyze(){
   const input = document.getElementById('analyzeUrl');
   const pasteBtn = document.getElementById('pasteUrl');
   const clearBtn = document.getElementById('clearUrl');
-
-  pasteBtn.addEventListener('click', async ()=>{
-    try{
-      const txt = await navigator.clipboard.readText();
-      if (txt){ input.value = txt.trim(); input.dispatchEvent(new Event('input')); }
-    }catch(e){}
-  });
+  pasteBtn.addEventListener('click', async ()=>{ try{ const txt = await navigator.clipboard.readText(); if (txt){ input.value = txt.trim(); input.dispatchEvent(new Event('input')); } }catch(e){} });
   clearBtn.addEventListener('click', ()=>{ input.value=''; input.focus(); input.dispatchEvent(new Event('input')); });
   input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); analyze(); }});
-
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
+
   document.getElementById('resetChecklist').addEventListener('click', ()=>{
     document.querySelectorAll('.checklist input[type="checkbox"]').forEach(cb=> cb.checked=false);
     document.querySelectorAll('.score-badge').forEach(b=>{ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
@@ -1216,7 +1202,6 @@ async function analyze(){
   const exportBtn = document.getElementById('exportChecklist');
   const importBtn = document.getElementById('importChecklist');
   const importFile= document.getElementById('importFile');
-
   exportBtn.addEventListener('click', ()=>{
     const payload = { checked:[], scores:{} };
     for(let i=1;i<=25;i++){
@@ -1228,9 +1213,7 @@ async function analyze(){
     }
     const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'checklist.json';
-    a.click();
+    a.href = URL.createObjectURL(blob); a.download = 'checklist.json'; a.click();
     URL.revokeObjectURL(a.href);
   });
   importBtn.addEventListener('click', ()=> importFile.click());
@@ -1248,7 +1231,7 @@ async function analyze(){
     }catch(e){ alert('Invalid JSON'); }
   });
 
-  // Improve modal basics
+  // Improve modal
   const modal = document.getElementById('tipModal');
   const backdrop = document.getElementById('modalBackdrop');
   function openModal(){ backdrop.style.display='block'; modal.style.display='flex'; }
@@ -1259,12 +1242,83 @@ async function analyze(){
     btn.addEventListener('click', (e)=>{ e.preventDefault(); openModal(); });
   });
 
-  // Initial state
+  // Initial
   updateCategoryBars();
 })();
 
-/* Keep the water hue moving */
-(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+/* --------- Restored cloudy background rendering (lightweight) --------- */
+(function(){
+  // Lines layer (soft diagonal moving lines)
+  const c = document.getElementById('linesCanvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  let dpr = Math.min(2, window.devicePixelRatio||1);
+  function resize(){
+    c.width = Math.floor(innerWidth * dpr);
+    c.height= Math.floor(innerHeight * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function draw(t){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    const w = innerWidth, h = innerHeight;
+    const rows = 12, spacing = Math.max(60, h/rows);
+    for(let i=-2;i<rows+2;i++){
+      const y = i*spacing + (t*0.02 % spacing);
+      const g = ctx.createLinearGradient(0,y,w,y+80);
+      g.addColorStop(0, 'rgba(61,226,255,0.03)');
+      g.addColorStop(0.5, 'rgba(155,92,255,0.05)');
+      g.addColorStop(1, 'rgba(255,32,69,0.03)');
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-100, y);
+      ctx.lineTo(w+100, y+80);
+      ctx.stroke();
+    }
+    requestAnimationFrame(draw);
+  }
+  addEventListener('resize', resize, {passive:true});
+  resize(); requestAnimationFrame(draw);
+})();
+(function(){
+  // Brain/fog layer (soft floating blobs)
+  const c = document.getElementById('brainCanvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  let dpr = Math.min(2, window.devicePixelRatio||1);
+  let blobs = [];
+  function resize(){
+    c.width = Math.floor(innerWidth * dpr);
+    c.height= Math.floor(innerHeight * dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    blobs = Array.from({length: 36}).map(()=> ({
+      x: Math.random()*innerWidth,
+      y: Math.random()*innerHeight,
+      r: 40 + Math.random()*120,
+      vx:(Math.random()-.5)*.2,
+      vy:(Math.random()-.5)*.2,
+      hue: 180+Math.random()*140,
+      a: .08+.08*Math.random()
+    }));
+  }
+  function draw(){
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    ctx.globalCompositeOperation = 'lighter';
+    for(const b of blobs){
+      b.x += b.vx; b.y += b.vy;
+      if (b.x < -200) b.x = innerWidth+200; if (b.x > innerWidth+200) b.x = -200;
+      if (b.y < -200) b.y = innerHeight+200; if (b.y > innerHeight+200) b.y = -200;
+      const g = ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+      g.addColorStop(0, `hsla(${b.hue}, 85%, 65%, ${b.a})`);
+      g.addColorStop(1, `hsla(${(b.hue+60)%360}, 85%, 55%, 0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  addEventListener('resize', resize, {passive:true});
+  resize(); requestAnimationFrame(draw);
+})();
 </script>
 </body>
 </html>
