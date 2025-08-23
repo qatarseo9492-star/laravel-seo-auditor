@@ -204,7 +204,7 @@ if (!function_exists('analyze_document')) {
             }
         }
 
-        // schema
+        // schema types
         $types = [];
         $ld = $xp->query('//script[@type="application/ld+json"]');
         if ($ld && $ld->length) {
@@ -228,7 +228,7 @@ if (!function_exists('analyze_document')) {
         }
         $types = array_values(array_filter(array_unique($types)));
 
-        // sitemap quick probe
+        // sitemap probe
         $baseHost = parse_url($url, PHP_URL_SCHEME) . '://' . parse_url($url, PHP_URL_HOST);
         $xmlMap = false;
         try {
@@ -286,7 +286,7 @@ if (!function_exists('analyze_document')) {
         $indexable = !preg_match('~noindex~i', $robotsStr);
         $hasCTA = $xp->query('//a[contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"btn") or contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"button") or contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"cta")]')->length > 0;
 
-        /* individual checks (same as earlier) */
+        /* checks (same logic as before) */
         $intentOk = ($h1 > 0 || (mb_strlen($title) >= 20 && $wc >= 300));
         $scores['ck-1'] = $intentOk ? 80 : ($wc >= 150 ? 55 : 25);
         if ($intentOk) $autoCheck[] = 'ck-1'; else $suggestions['ck-1'][] = 'State the primary intent in H1 and intro paragraph.';
@@ -346,6 +346,7 @@ if (!function_exists('analyze_document')) {
         $scores['ck-13'] = $mediaOk ? 85 : ($mediaCnt ? 70 : 45);
         if ($mediaOk) $autoCheck[]='ck-13'; else $suggestions['ck-13'][]='Add descriptive images/charts or a short explainer video.';
 
+        $subheads = $h2 + $h3;
         $structureOk = ($subheads >= 4);
         $scores['ck-14'] = $structureOk ? 86 : ($subheads ? 70 : 48);
         if ($structureOk) $autoCheck[]='ck-14'; else $suggestions['ck-14'][]='Use H2 for major subtopics, H3 for subsections.';
