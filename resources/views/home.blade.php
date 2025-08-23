@@ -917,10 +917,10 @@ const Water = (function(){
   requestAnimationFrame(frame);
 })();
 
-/* ---------- Analyze flow (robust auto-select from RENDERED badges ≥ 80) ---------- */
+/* ---------- Analyze flow (auto-select from rendered badges ≥ 80) ---------- */
 (function(){
   const $ = s => document.querySelector(s);
-  const AUTO_SCORE_THRESHOLD = 80;
+  const AUTO_SCORE_THRESHOLD = 80; // change if needed
   const STORAGE_KEY = 'semanticSeoChecklistV6';
 
   document.getElementById('copyQuick').addEventListener('click', async ()=>{
@@ -943,7 +943,6 @@ const Water = (function(){
   document.getElementById('analyzeForm').addEventListener('submit', (e)=>{ e.preventDefault(); document.getElementById('analyzeBtn').click(); });
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
 
-  // ---- NEW: read the visible badges (#sc-N) and check items with score ≥ 80 ----
   function autoSelectFromRenderedBadges(){
     const picks = new Set();
     for(let i=1;i<=25;i++){
@@ -1028,13 +1027,11 @@ const Water = (function(){
 
       // ===== Auto-apply: union of backend auto_check_ids + scores≥80 derived from RENDERED badges
       if (document.getElementById('autoApply').checked) {
-        const fromBadges = autoSelectFromRenderedBadges(); // <- robust (connected to visible results)
+        const fromBadges = autoSelectFromRenderedBadges();
         const union = new Set([...(data.auto_check_ids||[]), ...fromBadges]);
-
         const all = document.querySelectorAll('#analyzer input[type="checkbox"]');
         all.forEach(cb => cb.checked = union.has(cb.id));
 
-        // persist selection to localStorage immediately
         const selected = Array.from(all).filter(cb=>cb.checked).map(cb=>cb.id);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(selected));
       }
