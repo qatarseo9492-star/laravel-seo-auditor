@@ -12,6 +12,7 @@
   $metaDescription = $metaDescription ?? 'Analyze any URL for content quality, entities, technical SEO, and UX signals, with water-fill scoring, auto-checklist, and AI/Human signals.';
   $metaImage = $metaImage ?? asset('og-image.png');
   $canonical = $canonical ?? url()->current();
+  $twitterHandle = '@UltraTechGlobal'; // change to your handle
 @endphp
 
 <title>{{ $metaTitle }}</title>
@@ -21,26 +22,50 @@
 <meta name="description" content="{{ $metaDescription }}">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <link rel="alternate" hreflang="en" href="{{ $canonical }}"/>
+<meta name="keywords" content="SEO analyzer, semantic SEO, content score, technical SEO, entities, E-E-A-T, schema, Core Web Vitals">
+<meta name="author" content="Ultra Tech Global">
+<meta name="publisher" content="Ultra Tech Global">
+<meta name="theme-color" content="#0f1022">
+<meta name="application-name" content="{{ $siteName }}">
 
-{{-- Open Graph / Twitter --}}
+{{-- PWA / Platform --}}
+<link rel="manifest" href="{{ asset('site.webmanifest') }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="msapplication-TileColor" content="#0f1022">
+
+{{-- Open Graph --}}
+<meta property="og:locale" content="en_US">
 <meta property="og:title" content="{{ $metaTitle }}">
 <meta property="og:description" content="{{ $metaDescription }}">
 <meta property="og:type" content="website">
 <meta property="og:url" content="{{ request()->fullUrl() }}">
 <meta property="og:image" content="{{ $metaImage }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:site_name" content="{{ $siteName }}">
+
+{{-- Twitter Card --}}
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="{{ $twitterHandle }}">
+<meta name="twitter:creator" content="{{ $twitterHandle }}">
 <meta name="twitter:title" content="{{ $metaTitle }}">
 <meta name="twitter:description" content="{{ $metaDescription }}">
 <meta name="twitter:image" content="{{ $metaImage }}">
 
-{{-- Structured Data --}}
+{{-- Structured Data: WebSite, WebPage, Breadcrumb --}}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "{{ $siteName }}",
   "url": "{{ url('/') }}",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ultra Tech Global",
+    "logo": { "@type": "ImageObject", "url": "{{ asset('logo.png') }}" }
+  },
   "potentialAction": {
     "@type": "SearchAction",
     "target": "{{ url('/') }}?q={search_term_string}",
@@ -50,11 +75,23 @@
 </script>
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Ultra Tech Global",
-  "url": "{{ url('/') }}",
-  "logo": "{{ asset('logo.png') }}"
+  "@context":"https://schema.org",
+  "@type":"WebPage",
+  "name":"{{ $metaTitle }}",
+  "description":"{{ $metaDescription }}",
+  "url":"{{ $canonical }}",
+  "isPartOf":{"@type":"WebSite","name":"{{ $siteName }}","url":"{{ url('/') }}"},
+  "inLanguage":"en-US"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"BreadcrumbList",
+  "itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"{{ url('/') }}"},
+    {"@type":"ListItem","position":2,"name":"Analyzer","item":"{{ $canonical }}"}
+  ]
 }
 </script>
 
@@ -178,11 +215,19 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%); will-change:filter;}
 #waterSmoke{ position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:screen; }
 
-/* Progress (completion) */
+/* ======= COMPLETION (Items Completed) – Water + Smoke ======= */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
-.progress-bar{width:100%;height:12px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid #101826}
-.progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
-.progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
+.comp-water{position:relative; height:52px; border-radius:16px; overflow:hidden; background:#0b0d21; border:1px solid rgba(255,255,255,.1); }
+.comp-svg{position:absolute; inset:0; width:100%; height:100%; z-index:1;}
+.comp-overlay{position:absolute; inset:0; background:
+  radial-gradient(120px 50px at 15% -25%, rgba(255,255,255,.16), transparent 55%),
+  linear-gradient(180deg, rgba(255,255,255,.08), transparent 35%, rgba(255,255,255,.06));
+  pointer-events:none; mix-blend-mode:screen; z-index:3;}
+.comp-pct{position:absolute; inset:0; display:grid; place-items:center; font-weight:1000; font-size:1rem; z-index:4; text-shadow:0 1px 0 rgba(0,0,0,.45); }
+#compSmoke{ position:absolute; inset:0; pointer-events:none; z-index:2; mix-blend-mode:screen; }
+.comp-wave1{animation:waveX 8s linear infinite}
+.comp-wave2{animation:waveX 12s linear infinite reverse}
+.progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.55rem}
 
 /* Category grid */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
@@ -206,19 +251,42 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .cat-water-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.8rem; color:rgba(255,255,255,.9); text-shadow:0 1px 0 rgba(0,0,0,.55); pointer-events:none}
 .cat-smoke{position:absolute; left:0; right:0; bottom:0; height:26px; pointer-events:none; z-index:3; mix-blend-mode:screen;}
 
-/* Items */
+/* Items (improved box colors) */
 .checklist{list-style:none;margin:10px 0 0;padding:0}
-.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.65rem .7rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02)); transition: box-shadow .25s ease, background .25s ease; }
+.checklist-item{
+  display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;
+  padding:.7rem .75rem;border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+    radial-gradient(100% 120% at 0% 0%, rgba(61,226,255,.06), transparent 30%),
+    radial-gradient(120% 100% at 100% 0%, rgba(155,92,255,.05), transparent 35%);
+  transition: box-shadow .25s ease, background .25s ease, transform .12s ease;
+}
 .checklist-item + .checklist-item{margin-top:.28rem}
-.checklist-item:hover{transform:translateY(-2px);background:rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.checklist-item:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
 
-/* Severity glow + attention */
-.sev-good{box-shadow:0 0 0 1px rgba(34,197,94,.35), 0 8px 30px rgba(34,197,94,.12) inset}
-.sev-mid{box-shadow:0 0 0 1px rgba(245,158,11,.35), 0 8px 30px rgba(245,158,11,.12) inset}
-.sev-bad{box-shadow:0 0 0 1px rgba(239,68,68,.45), 0 8px 30px rgba(239,68,68,.18) inset}
-.sev-mid .improve-btn,
-.sev-bad .improve-btn{animation:attentionPulse 1.6s ease-in-out infinite}
+/* Severity glow + tints */
+.sev-good{
+  background:
+    linear-gradient(180deg, rgba(34,197,94,.14), rgba(34,197,94,.08)),
+    radial-gradient(100% 120% at 0% 0%, rgba(61,226,255,.06), transparent 30%);
+  border-color: rgba(34,197,94,.45);
+}
+.sev-mid{
+  background:
+    linear-gradient(180deg, rgba(245,158,11,.16), rgba(245,158,11,.08)),
+    radial-gradient(100% 120% at 0% 0%, rgba(61,226,255,.06), transparent 30%);
+  border-color: rgba(245,158,11,.45);
+}
+.sev-bad{
+  background:
+    linear-gradient(180deg, rgba(239,68,68,.16), rgba(239,68,68,.10)),
+    radial-gradient(100% 120% at 0% 0%, rgba(61,226,255,.06), transparent 30%);
+  border-color: rgba(239,68,68,.55);
+}
+.sev-mid .improve-btn, .sev-bad .improve-btn{animation:attentionPulse 1.6s ease-in-out infinite}
 @keyframes attentionPulse{
   0%,100%{ box-shadow:0 0 0 0 rgba(255,255,255,.0), 0 0 0 0 rgba(255,255,255,.0)}
   50%{ box-shadow:0 0 0 6px rgba(255,255,255,.06), 0 0 12px 0 rgba(255,255,255,.08)}
@@ -226,8 +294,11 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 /* Row flash */
 .flash-row{animation:rowFlash 900ms ease-out}
 @keyframes rowFlash{
-  0%{ background:linear-gradient(90deg,rgba(61,226,255,.16),rgba(155,92,255,.12)); }
-  100%{ background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02)); }
+  0%{ background:linear-gradient(90deg,rgba(61,226,255,.20),rgba(155,92,255,.16)); }
+  100%{ background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)),
+        radial-gradient(100% 120% at 0% 0%, rgba(61,226,255,.06), transparent 30%),
+        radial-gradient(120% 100% at 100% 0%, rgba(155,92,255,.05), transparent 35%); }
 }
 
 /* Custom checkbox */
@@ -269,8 +340,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   padding:.45rem .8rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);
   background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
   font-weight:900; cursor:pointer; transition:.2s;
-  isolation:isolate;
-  min-width:88px;
+  isolation:isolate; min-width:88px;
 }
 .improve-btn:hover{ transform:translateY(-1px); background:rgba(255,255,255,.1); }
 .improve-btn:active{ transform:translateY(0); }
@@ -297,7 +367,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   to{ transform:translate(var(--dx), var(--dy)) rotate(220deg) scale(.6); opacity:0; }
 }
 
-/* Floating Share Dock */
+/* Floating Share Dock (colorful + effect) */
 .share-dock{
   position:fixed; right:16px; top:50%; transform:translateY(-50%);
   display:flex; flex-direction:column; gap:.5rem; z-index:85;
@@ -307,10 +377,19 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .share-btn{
   width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);
   display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.06); cursor:pointer; text-decoration:none;
+  position:relative; overflow:hidden; transition:transform .15s ease, box-shadow .15s ease;
 }
-.share-btn:hover{ background:rgba(255,255,255,.12) }
+.share-btn:hover{ transform:translateY(-2px); box-shadow:0 10px 24px rgba(0,0,0,.35) }
+.share-btn::after{
+  content:""; position:absolute; inset:-2px; background:radial-gradient(120px 40px at -20% -20%, rgba(255,255,255,.3), transparent 55%); mix-blend-mode:screen; opacity:.6;
+}
 .share-btn i{ font-size:1.05rem }
 .share-native{ display:none; }
+.share-fb{ background:linear-gradient(135deg,#1877F2,#3b5998); }
+.share-x { background:linear-gradient(135deg,#000000,#232323); }
+.share-ln{ background:linear-gradient(135deg,#0a66c2,#1d87e5); }
+.share-wa{ background:linear-gradient(135deg,#25D366,#128C7E); }
+.share-em{ background:linear-gradient(135deg,#ff7a59,#ff2045); }
 
 /* Footer + back to top */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
@@ -322,9 +401,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 #backTop:hover{background:rgba(255,255,255,.12)}
 
 /* ======= Mobile Optimizations ======= */
-@media (max-width:1200px){
-  .wrap{padding:24px 4%}
-}
+@media (max-width:1200px){ .wrap{padding:24px 4%} }
 @media (max-width:992px){
   .category-card{grid-column:span 12}
   .hero-heading{font-size:2.9rem}
@@ -357,7 +434,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce){
-  .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2{ animation:none !important }
+  .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{ animation:none !important }
   .multiHue,.multiHueFast{ filter:none !important }
 }
 @media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel,.share-dock{display:none!important}}
@@ -383,7 +460,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <canvas id="linesCanvas2" aria-hidden="true"></canvas>
 <canvas id="smokeFX" aria-hidden="true"></canvas>
 
-<!-- Gradients -->
+<!-- Gradients for main + completion water -->
 <svg width="0" height="0" aria-hidden="true">
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#9b5cff"/><stop offset="100%" stop-color="#ff2045"/></linearGradient>
@@ -399,14 +476,14 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 <div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
 
-<!-- Floating Share -->
+<!-- Floating Share (colorful) -->
 <div class="share-dock" id="shareDock" aria-label="Share">
-  <a id="shareFb" class="share-btn" aria-label="Share on Facebook" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
-  <a id="shareX" class="share-btn" aria-label="Share on X" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
-  <a id="shareLn" class="share-btn" aria-label="Share on LinkedIn" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
-  <a id="shareWa" class="share-btn" aria-label="Share on WhatsApp" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
-  <a id="shareEm" class="share-btn" aria-label="Share via Email" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
-  <button id="shareNative" class="share-btn share-native" aria-label="Share"><i class="fa-solid fa-share-nodes"></i></button>
+  <a id="shareFb" class="share-btn share-fb" aria-label="Share on Facebook" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
+  <a id="shareX"  class="share-btn share-x"  aria-label="Share on X" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
+  <a id="shareLn" class="share-btn share-ln" aria-label="Share on LinkedIn" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
+  <a id="shareWa" class="share-btn share-wa" aria-label="Share on WhatsApp" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
+  <a id="shareEm" class="share-btn share-em" aria-label="Share via Email" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
+  <button id="shareNative" class="share-btn share-x share-native" aria-label="Share"><i class="fa-solid fa-share-nodes"></i></button>
 </div>
 
 <div class="wrap">
@@ -563,9 +640,35 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       </form>
     </div>
 
-    <!-- Progress (checklist completion) -->
+    <!-- Progress (checklist completion) — water + smoke -->
     <div class="progress-wrap">
-      <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+      <div class="comp-water" id="compWater" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <svg class="comp-svg" viewBox="0 0 600 140" preserveAspectRatio="none">
+          <defs>
+            <clipPath id="compRound"><rect x="1" y="1" width="598" height="138" rx="14" ry="14"/></clipPath>
+            <clipPath id="compFillClip"><rect id="compClipRect" x="0" y="0" width="0" height="140"/></clipPath>
+            <linearGradient id="compGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop id="compStop1" offset="0%" stop-color="#3de2ff"/>
+              <stop id="compStop2" offset="100%" stop-color="#9b5cff"/>
+            </linearGradient>
+            <path id="compWave" d="M0 80 Q 50 60 100 80 T 200 80 T 300 80 T 400 80 T 500 80 T 600 80 V 160 H 0 Z"/>
+          </defs>
+          <g clip-path="url(#compRound)">
+            <rect x="0" y="0" width="600" height="140" fill="#0b0d21"/>
+            <g clip-path="url(#compFillClip)">
+              <g class="comp-wave1 multiHue">
+                <use href="#compWave" x="0" fill="url(#compGrad)"/><use href="#compWave" x="600" fill="url(#compGrad)"/>
+              </g>
+              <g class="comp-wave2 multiHue" opacity=".75">
+                <use href="#compWave" x="0" y="6" fill="url(#compGrad)"/><use href="#compWave" x="600" y="6" fill="url(#compGrad)"/>
+              </g>
+            </g>
+          </g>
+        </svg>
+        <canvas id="compSmoke"></canvas>
+        <div class="comp-overlay"></div>
+        <div class="comp-pct"><span id="compPct">0%</span></div>
+      </div>
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
@@ -799,6 +902,45 @@ function setScoreWheel(value){
   setChipTone(document.getElementById('overallChip'), v);
 }
 
+/* ---------- Social buttons effects (burst + ripple) ---------- */
+(function(){
+  const dock = document.getElementById('shareDock');
+  function fxBurstFrom(el, count=14, hueOffset=0){
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width/2, cy = rect.top + rect.height/2;
+    const wrap = document.createElement('div'); wrap.className='fx-burst'; document.body.appendChild(wrap);
+    for(let i=0;i<count;i++){
+      const sp = document.createElement('div'); sp.className='fx-spark';
+      const ang = (Math.PI*2) * (i/count) + Math.random()*0.6, dist = 30 + Math.random()*70;
+      sp.style.left = cx + 'px'; sp.style.top  = cy + 'px';
+      sp.style.setProperty('--dx', (Math.cos(ang)*dist)+'px');
+      sp.style.setProperty('--dy', (Math.sin(ang)*dist)+'px');
+      const hue = (hueOffset + i*30) % 360;
+      sp.style.background = `radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.2) 40%, hsla(${hue}, 90%, 60%, 0) 70%)`;
+      wrap.appendChild(sp);
+    }
+    setTimeout(()=> wrap.remove(), 820);
+  }
+  function ripple(e, el){
+    const r = document.createElement('span');
+    r.style.cssText = 'position:absolute;border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);background:radial-gradient(circle, rgba(255,255,255,.45) 0%, rgba(255,255,255,.15) 40%, rgba(255,255,255,0) 70%);width:10px;height:10px;animation:r .7s ease-out forwards;z-index:2';
+    const rect = el.getBoundingClientRect();
+    r.style.left = (e.clientX - rect.left) + 'px'; r.style.top  = (e.clientY - rect.top)  + 'px';
+    el.appendChild(r);
+    r.addEventListener('animationend', ()=> r.remove());
+  }
+  const style = document.createElement('style'); style.textContent='@keyframes r{to{width:220px;height:220px;opacity:0}}'; document.head.appendChild(style);
+  dock.addEventListener('click', e=>{
+    const btn = e.target.closest('.share-btn'); if (!btn) return;
+    ripple(e, btn);
+    const hue = btn.classList.contains('share-fb') ? 220 :
+                btn.classList.contains('share-x')  ? 0   :
+                btn.classList.contains('share-ln') ? 200 :
+                btn.classList.contains('share-wa') ? 140 : 10;
+    fxBurstFrom(btn, 16, hue);
+  });
+})();
+
 /* ---------- Per-category smoke ---------- */
 const CatSmoke = (function(){
   const canvases = [];
@@ -844,14 +986,43 @@ const CatSmoke = (function(){
   return { setPct(i, pct){ const o=canvases[i]; if(!o) return; o.ratio=Math.max(0,Math.min(1,(pct||0)/100)); } };
 })();
 
+/* ---------- COMPLETION Smoke ---------- */
+const CompSmoke = (function(){
+  const cv = document.getElementById('compSmoke'); const ctx = cv?.getContext('2d');
+  if (!cv || !ctx) return { setPct(){} };
+  let ratio=0, dpr=Math.min(2, window.devicePixelRatio||1), parts=[];
+  function resize(){ const w=cv.clientWidth||600, h=cv.clientHeight||140; cv.width=Math.floor(w*dpr); cv.height=Math.floor(h*dpr); ctx.setTransform(dpr,0,0,dpr,0,0); }
+  function spawn(n=4){
+    const W=cv.clientWidth||600, H=cv.clientHeight||140, span = Math.max(12, W*ratio), baseY=H*0.55;
+    for(let i=0;i<n;i++){
+      const x = Math.random()*span;
+      parts.push({x,y:baseY+(Math.random()*2-1),vx:(Math.random()-.5)*.35,vy:-(.25+Math.random()*.45),
+        life:1,decay:.02+Math.random()*.04,r:1.6+Math.random()*3.2,hue:160+Math.random()*140});
+    }
+  }
+  function loop(){
+    const W=cv.clientWidth||600, H=cv.clientHeight||140;
+    ctx.clearRect(0,0,W,H); ctx.globalCompositeOperation='lighter';
+    if (parts.length < 200*ratio) spawn(6);
+    for(const p of parts){
+      p.x+=p.vx; p.y+=p.vy; p.vy-=0.002; p.life-=p.decay; const a=Math.max(0,p.life);
+      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r);
+      g.addColorStop(0,`hsla(${p.hue},80%,70%,${0.3*a})`); g.addColorStop(1,`hsla(${(p.hue+60)%360},90%,55%,0)`);
+      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    }
+    parts = parts.filter(p=>p.life>0 && p.y>-20);
+    requestAnimationFrame(loop);
+  }
+  window.addEventListener('resize', resize, {passive:true}); resize(); requestAnimationFrame(loop);
+  return { setPct(p){ ratio=Math.max(0,Math.min(1,p/100)); } };
+})();
+
 /* ---------- Checklist + scoring ---------- */
 (function () {
   const STORAGE_KEY = 'semanticSeoChecklistV6';
   const total = 25;
   const cards = () => Array.from(document.querySelectorAll('.category-card'));
   const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
-  const bar = document.getElementById('progressBar');
-  const caption = document.getElementById('progressCaption');
   const contentScoreInline = document.getElementById('contentScoreInline');
   let lastAnalyzed = 0;
 
@@ -869,6 +1040,32 @@ const CatSmoke = (function(){
     const cs = contentScore();
     if (cs===100) return 100;
     return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
+  }
+
+  // ===== Completion water controller =====
+  const compRect = document.getElementById('compClipRect');
+  const compStop1 = document.getElementById('compStop1');
+  const compStop2 = document.getElementById('compStop2');
+  const compPct   = document.getElementById('compPct');
+  const compBar   = document.getElementById('compWater');
+
+  function setCompletion(vPct){
+    const v = Math.max(0, Math.min(100, vPct|0));
+    const width = Math.round(600 * v / 100);
+    if (compRect) compRect.setAttribute('width', String(width));
+    if (compBar)  compBar.setAttribute('aria-valuenow', v);
+    if (compPct)  compPct.textContent = v + '%';
+
+    // color: ≥80 green, 60–79 orange, <60 red
+    let c1,c2;
+    if (v >= 80){ c1='#22c55e'; c2='#16a34a'; }
+    else if (v >= 60){ c1='#f59e0b'; c2='#fb923c'; }
+    else { c1='#ef4444'; c2='#b91c1c'; }
+    compStop1?.setAttribute('stop-color', c1);
+    compStop2?.setAttribute('stop-color', c2);
+
+    // smoke intensity by ratio
+    if (window.CompSmoke && typeof CompSmoke.setPct === 'function') CompSmoke.setPct(v);
   }
 
   function updateCatHeadingBars(){
@@ -896,10 +1093,11 @@ const CatSmoke = (function(){
 
   function update(){
     const checked = boxes().filter(cb=>cb.checked).length;
-    bar.style.width = ((checked/total)*100)+'%';
-    caption.textContent = `${checked} of ${total} items completed`;
+    const pct = Math.round((checked/total)*100);
+    document.getElementById('progressCaption').textContent = `${checked} of ${total} items completed`;
 
     updateCatHeadingBars();
+    setCompletion(pct);
 
     const cs = contentScore(); contentScoreInline.textContent = cs;
     setChipTone(document.getElementById('contentScoreChip'), cs);
