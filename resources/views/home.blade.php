@@ -270,8 +270,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
           <!-- ticks -->
           <g class="score-ticks" transform="translate(60,60) rotate(-90)">
-            <!-- 20 tick marks -->
-            <template id="ticks"></template>
+            <!-- built via JS -->
           </g>
           <circle class="bg" cx="60" cy="60" r="54"/>
           <circle class="track" cx="60" cy="60" r="54"/>
