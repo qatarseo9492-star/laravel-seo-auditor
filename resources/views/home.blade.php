@@ -5,7 +5,58 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>Semantic SEO Master • Ultra Tech Global</title>
+
+@php
+  $siteName = config('app.name', 'Semantic SEO Master');
+  $metaTitle = $metaTitle ?? 'Semantic SEO Master • Ultra Tech Global';
+  $metaDescription = $metaDescription ?? 'Analyze any URL for content quality, entities, technical SEO, and UX signals, with water-fill scoring, auto-checklist, and AI/Human signals.';
+  $metaImage = $metaImage ?? asset('og-image.png');
+  $canonical = $canonical ?? url()->current();
+@endphp
+
+<title>{{ $metaTitle }}</title>
+
+{{-- Core SEO --}}
+<link rel="canonical" href="{{ $canonical }}">
+<meta name="description" content="{{ $metaDescription }}">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<link rel="alternate" hreflang="en" href="{{ $canonical }}"/>
+
+{{-- Open Graph / Twitter --}}
+<meta property="og:title" content="{{ $metaTitle }}">
+<meta property="og:description" content="{{ $metaDescription }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ request()->fullUrl() }}">
+<meta property="og:image" content="{{ $metaImage }}">
+<meta property="og:site_name" content="{{ $siteName }}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $metaTitle }}">
+<meta name="twitter:description" content="{{ $metaDescription }}">
+<meta name="twitter:image" content="{{ $metaImage }}">
+
+{{-- Structured Data --}}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "{{ $siteName }}",
+  "url": "{{ url('/') }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "{{ url('/') }}?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Ultra Tech Global",
+  "url": "{{ url('/') }}",
+  "logo": "{{ asset('logo.png') }}"
+}
+</script>
 
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
@@ -162,7 +213,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .checklist-item:hover{transform:translateY(-2px);background:rgba(255,255,255,.05);box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
 
-/* >>> Score-severity glow on the row + auto-attention for weak scores <<< */
+/* Severity glow + attention */
 .sev-good{box-shadow:0 0 0 1px rgba(34,197,94,.35), 0 8px 30px rgba(34,197,94,.12) inset}
 .sev-mid{box-shadow:0 0 0 1px rgba(245,158,11,.35), 0 8px 30px rgba(245,158,11,.12) inset}
 .sev-bad{box-shadow:0 0 0 1px rgba(239,68,68,.45), 0 8px 30px rgba(239,68,68,.18) inset}
@@ -172,14 +223,14 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   0%,100%{ box-shadow:0 0 0 0 rgba(255,255,255,.0), 0 0 0 0 rgba(255,255,255,.0)}
   50%{ box-shadow:0 0 0 6px rgba(255,255,255,.06), 0 0 12px 0 rgba(255,255,255,.08)}
 }
-/* Row flash when Improve is clicked */
+/* Row flash */
 .flash-row{animation:rowFlash 900ms ease-out}
 @keyframes rowFlash{
   0%{ background:linear-gradient(90deg,rgba(61,226,255,.16),rgba(155,92,255,.12)); }
   100%{ background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02)); }
 }
 
-/* >>> Custom gradient checkbox tick <<< */
+/* Custom checkbox */
 .checklist-item input[type="checkbox"]{
   appearance:none; -webkit-appearance:none; outline:none;
   width:22px;height:22px;border-radius:8px;
@@ -215,31 +266,26 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 
 .improve-btn{
   position:relative; overflow:hidden;
-  padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);
+  padding:.45rem .8rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);
   background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));
   font-weight:900; cursor:pointer; transition:.2s;
   isolation:isolate;
+  min-width:88px;
 }
 .improve-btn:hover{ transform:translateY(-1px); background:rgba(255,255,255,.1); }
 .improve-btn:active{ transform:translateY(0); }
-
-/* Sheen highlight */
 .improve-btn::before{
   content:""; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
   background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.18) 45%, transparent 50%, transparent 100%);
   transform:translateX(-120%); animation:btnSheen 3.2s linear infinite;
 }
 @keyframes btnSheen{ 0%{transform:translateX(-120%)} 60%{transform:translateX(120%)} 100%{transform:translateX(120%)} }
-
-/* Ripple circle */
 .improve-btn .ripple{
   position:absolute; border-radius:50%; pointer-events:none; z-index:1;
   transform:translate(-50%,-50%); background:radial-gradient(circle, rgba(255,255,255,.35) 0%, rgba(255,255,255,.15) 40%, rgba(255,255,255,0) 70%);
   width:10px; height:10px; animation:ripple .65s ease-out forwards;
 }
 @keyframes ripple{ to{ width:220px; height:220px; opacity:0 } }
-
-/* Sparkles / confetti */
 .fx-burst{ position:fixed; left:0; top:0; width:0; height:0; pointer-events:none; z-index:120 }
 .fx-spark{
   position:absolute; width:8px;height:8px;border-radius:50%;
@@ -251,6 +297,21 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   to{ transform:translate(var(--dx), var(--dy)) rotate(220deg) scale(.6); opacity:0; }
 }
 
+/* Floating Share Dock */
+.share-dock{
+  position:fixed; right:16px; top:50%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:.5rem; z-index:85;
+  background:rgba(10,12,28,.35); border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:.5rem;
+  backdrop-filter:blur(8px);
+}
+.share-btn{
+  width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);
+  display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.06); cursor:pointer; text-decoration:none;
+}
+.share-btn:hover{ background:rgba(255,255,255,.12) }
+.share-btn i{ font-size:1.05rem }
+.share-native{ display:none; }
+
 /* Footer + back to top */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 .footer-brand{display:flex;align-items:center;gap:.6rem}
@@ -260,13 +321,46 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
 #backTop:hover{background:rgba(255,255,255,.12)}
 
+/* ======= Mobile Optimizations ======= */
+@media (max-width:1200px){
+  .wrap{padding:24px 4%}
+}
 @media (max-width:992px){
   .category-card{grid-column:span 12}
-  .hero-heading{font-size:2.7rem}
+  .hero-heading{font-size:2.9rem}
   .score-container{width:190px}
   footer.site{flex-direction:column;align-items:flex-start}
+  .analyze-row{ grid-template-columns:1fr auto auto; grid-row-gap:.5rem; }
 }
-@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
+@media (max-width:768px){
+  .wrap{padding:18px 4%}
+  .score-area{flex-direction:column;align-items:flex-start;gap:.8rem}
+  .score-container{width:170px}
+  .analyze-row{ grid-template-columns:1fr; }
+  .analyze-row .btn{ width:100%; justify-content:center; }
+  .share-dock{
+    top:auto; bottom:10px; right:50%; transform:translateX(50%);
+    flex-direction:row; padding:.35rem .45rem; border-radius:999px;
+    gap:.4rem; background:rgba(10,12,28,.55);
+  }
+  .share-btn{ width:44px;height:44px;border-radius:999px }
+  .share-native{ display:grid; }
+  .checklist-item{ grid-template-columns:1fr auto auto; }
+  .checklist-item .improve-btn{ grid-column: 1 / -1; justify-self:flex-start; margin-top:.25rem; }
+}
+@media (max-width:480px){
+  .hero-heading{font-size:2.1rem}
+  .score-container{width:150px}
+  .category-icon{width:40px;height:40px}
+  .category-title{font-size:1rem}
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2{ animation:none !important }
+  .multiHue,.multiHueFast{ filter:none !important }
+}
+@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel,.share-dock{display:none!important}}
 /* Modal */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:95}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
@@ -299,11 +393,21 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   </defs>
 </svg>
 
-<!-- Lang dock -->
+<!-- Language Dock -->
 <div class="lang-dock">
   <button class="lang-btn" id="langOpen" title="Language"><i class="fa-solid fa-globe"></i></button>
 </div>
 <div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
+
+<!-- Floating Share -->
+<div class="share-dock" id="shareDock" aria-label="Share">
+  <a id="shareFb" class="share-btn" aria-label="Share on Facebook" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
+  <a id="shareX" class="share-btn" aria-label="Share on X" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
+  <a id="shareLn" class="share-btn" aria-label="Share on LinkedIn" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
+  <a id="shareWa" class="share-btn" aria-label="Share on WhatsApp" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
+  <a id="shareEm" class="share-btn" aria-label="Share via Email" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
+  <button id="shareNative" class="share-btn share-native" aria-label="Share"><i class="fa-solid fa-share-nodes"></i></button>
+</div>
 
 <div class="wrap">
   <header class="site">
@@ -821,7 +925,7 @@ const CatSmoke = (function(){
     e.target.value='';
   });
 
-  // Paint badge + severity classes (and prepare Improve attention)
+  // Paint badges + severity
   window.setScoreBadge = (num,score)=>{
     const el=document.getElementById('sc-'+num); if(!el) return;
     el.className='score-badge';
@@ -840,7 +944,7 @@ const CatSmoke = (function(){
   load();
 })();
 
-/* ---------- Modal + Improve + AI panes + FX wiring ---------- */
+/* ---------- Modal + Improve + FX ---------- */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
@@ -854,7 +958,6 @@ const CatSmoke = (function(){
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
   tabs.forEach(t=> t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); Object.values(panes).forEach(p=>p.classList.remove('active')); t.classList.add('active'); panes[t.dataset.tab].classList.add('active'); }));
 
-  // ---- Special FX helpers ----
   function fxRipple(e, btn){
     const r = document.createElement('span');
     r.className='ripple';
@@ -885,18 +988,11 @@ const CatSmoke = (function(){
     }
     setTimeout(()=> wrap.remove(), 820);
   }
-  function flashRow(li){
-    li.classList.remove('flash-row');
-    // force reflow to restart animation
-    void li.offsetWidth;
-    li.classList.add('flash-row');
-  }
+  function flashRow(li){ li.classList.remove('flash-row'); void li.offsetWidth; li.classList.add('flash-row'); }
 
-  // Improve button click: ripple + burst + open modal + row flash
   document.getElementById('checklistGrid').addEventListener('click', (e)=>{
     const btn = e.target.closest('.improve-btn'); if(!btn) return;
-    fxRipple(e, btn);
-    fxBurstFrom(btn);
+    fxRipple(e, btn); fxBurstFrom(btn);
     const li = btn.closest('.checklist-item'); if(li) flashRow(li);
 
     const id = btn.dataset.id;
@@ -1014,24 +1110,32 @@ const Water = (function(){
   return { start, finish, reset, set, show, hide };
 })();
 
-/* ---------- Ultra-fast hue cycler ---------- */
-(function(){
-  const root = document.documentElement;
-  let start = performance.now();
-  function frame(now){
-    const elapsed = now - start;
-    const angle = (elapsed / 4) % 360;
-    root.style.setProperty('--hue', angle + 'deg');
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-})();
+/* ---------- Hue cycler ---------- */
+(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
 
-/* ---------- Analyze flow (auto-select from rendered badges ≥ 80) ---------- */
+/* ---------- Analyze flow (auto-select from badges ≥80) ---------- */
 (function(){
   const $ = s => document.querySelector(s);
   const AUTO_SCORE_THRESHOLD = 80;
   const STORAGE_KEY = 'semanticSeoChecklistV6';
+
+  // Social share URLs
+  (function(){
+    const url = encodeURIComponent(location.href);
+    const title = encodeURIComponent(document.title);
+    const fb = document.getElementById('shareFb');
+    const x  = document.getElementById('shareX');
+    const ln = document.getElementById('shareLn');
+    const wa = document.getElementById('shareWa');
+    const em = document.getElementById('shareEm');
+    if(fb) fb.href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+    if(x)  x.href  = `https://twitter.com/intent/tweet?url=${url}&text=${title}`;
+    if(ln) ln.href = `https://www.linkedin.com/shareArticle?mini=true&url=${url}&title=${title}`;
+    if(wa) wa.href = `https://api.whatsapp.com/send?text=${title}%20${url}`;
+    if(em) em.href = `mailto:?subject=${title}&body=${url}`;
+    const nat = document.getElementById('shareNative');
+    if(nat){ nat.addEventListener('click', async ()=>{ try{ if(navigator.share){ await navigator.share({ title: document.title, url: location.href }); } else { window.open(`https://twitter.com/intent/tweet?url=${url}&text=${title}`,'_blank'); } }catch(e){} }); }
+  })();
 
   document.getElementById('copyQuick').addEventListener('click', async ()=>{
     const bits = [
@@ -1067,7 +1171,7 @@ const Water = (function(){
   }
 
   async function analyze(){
-    const url = normalizeUrl($('#analyzeUrl').value);
+    const url = normalizeUrl(document.getElementById('analyzeUrl').value);
     const status = document.getElementById('analyzeStatus');
     const btn = document.getElementById('analyzeBtn');
     const report = document.getElementById('analyzeReport');
@@ -1134,7 +1238,7 @@ const Water = (function(){
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
       if (window.__setAnalyzedScore) window.__setAnalyzedScore(backendOverall);
 
-      // Auto-apply based on visible badges
+      // Auto-apply based on badges
       if (document.getElementById('autoApply').checked) {
         const fromBadges = autoSelectFromRenderedBadges();
         const union = new Set([...(data.auto_check_ids||[]), ...fromBadges]);
