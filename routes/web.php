@@ -53,23 +53,23 @@ if (!function_exists('fetch_html')) {
 
 if (!function_exists('dom_xp')) {
     function dom_xp(string $html): array {
-        $dom = new DOMDocument();
+        $dom = new \DOMDocument();
         libxml_use_internal_errors(true);
         @$dom->loadHTML($html);
         libxml_clear_errors();
-        $xp = new DOMXPath($dom);
+        $xp = new \DOMXPath($dom);
         return [$dom, $xp];
     }
 }
 
 if (!function_exists('node_text')) {
-    function node_text(?DOMNode $n): string {
+    function node_text(?\DOMNode $n): string {
         return $n ? trim($n->textContent ?? '') : '';
     }
 }
 
 if (!function_exists('extract_full_text')) {
-    function extract_full_text(DOMXPath $xp): string {
+    function extract_full_text(\DOMXPath $xp): string {
         $parts = [];
         foreach ([
             '//main//text()',
@@ -159,7 +159,7 @@ if (!function_exists('ai_human_detect')) {
 
 /*
 |--------------------------------------------------------------------------
-| Core analyzer (strict 25 checks)
+| Core analyzer (25 checks)
 |--------------------------------------------------------------------------
 */
 
@@ -167,7 +167,6 @@ if (!function_exists('analyze_document')) {
     function analyze_document(string $url, string $html): array {
         [$dom, $xp] = dom_xp($html);
 
-        // basic fields
         $title = node_text($xp->query('//title')->item(0));
         $metaDescNode = $xp->query(
             '//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="description"]'
@@ -236,7 +235,7 @@ if (!function_exists('analyze_document')) {
         }
         $types = array_values(array_filter(array_unique($types)));
 
-        // sitemap probe
+        // basic sitemap existence probe
         $xmlMap = false;
         try {
             $host = parse_url($url, PHP_URL_SCHEME) . '://' . parse_url($url, PHP_URL_HOST);
@@ -252,7 +251,7 @@ if (!function_exists('analyze_document')) {
 
         $path = parse_url($url, PHP_URL_PATH) ?: '/';
 
-        // --- 25 checks ---
+        // --- 25 checks (scores + suggestions + auto_check) ---
         $scores = [];
         $autoCheck = [];
         $suggestions = [];
@@ -383,6 +382,7 @@ if (!function_exists('analyze_document')) {
         if (!$mediaOk) $suggestions['ck-13'][] = 'Add descriptive images/charts or a short explainer video.';
 
         // 14
+        $subheads = $h2 + $h3;
         $structureOk = ($subheads >= 4);
         $scores['ck-14'] = $structureOk ? 86 : ($subheads ? 70 : 48);
         if ($structureOk) $autoCheck[] = 'ck-14';
@@ -427,7 +427,7 @@ if (!function_exists('analyze_document')) {
         if (!$hasCTA) $suggestions['ck-21'][] = 'Add a clear CTA (“Try”, “Download”, “Get a quote”).';
 
         // 22
-        $entityOk = ($articleT || $productT || $howtoT || ($h1Ok && $wc >= 300));
+        $entityOk = ($articleT || $productT || $howtoT || ($h1 && $wc >= 300));
         $scores['ck-22'] = $entityOk ? 82 : 58;
         if ($entityOk) $autoCheck[] = 'ck-22';
         if (!$entityOk) $suggestions['ck-22'][] = 'Define the main entity in intro and add matching schema.';
@@ -474,7 +474,9 @@ if (!function_exists('analyze_document')) {
                 'h1' => $h1, 'h2' => $h2, 'h3' => $h3,
                 'internal_links' => $internal
             ],
-            'schema' => ['found_types' => $types],
+            'schema' => [
+                'found_types' => $types
+            ],
             'ai_detection' => $ai,
             'readability' => $read,
             'scores' => $scores,
@@ -487,7 +489,7 @@ if (!function_exists('analyze_document')) {
 
 /*
 |--------------------------------------------------------------------------
-| API: Analyze (POST) — used by Blade via route('analyze.json')
+| API: Analyze (POST) — named analyze.json to match Blade
 |--------------------------------------------------------------------------
 */
 
