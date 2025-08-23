@@ -124,7 +124,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{
   position:relative; height:64px; border-radius:18px; overflow:hidden;
-  background:linear-gradient(180deg,#0b0d21,#0b0d21); border:1px solid rgba(255,255,255,.1);
+  background:#0b0d21; border:1px solid rgba(255,255,255,.1);
 }
 .water-svg{position:absolute; inset:0; width:100%; height:100%}
 .water-mask-rect{transition:all .25s ease-out}
@@ -133,10 +133,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   linear-gradient(0deg, rgba(255,255,255,.05), transparent 40%, transparent 60%, rgba(255,255,255,.06));
   mix-blend-mode:screen;
 }
-.water-pct{
-  position:absolute; inset:0; display:grid; place-items:center; font-weight:1000;
-  font-size:1.05rem; text-shadow:0 1px 0 rgba(0,0,0,.45); letter-spacing:.4px;
-}
+.water-pct{position:absolute; inset:0; display:grid; place-items:center; font-weight:1000; font-size:1.05rem; text-shadow:0 1px 0 rgba(0,0,0,.45); letter-spacing:.4px}
 .wave1{animation:waveX 7s linear infinite}
 .wave2{animation:waveX 10s linear infinite reverse; opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
@@ -256,7 +253,21 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <span class="chip" id="overallChip"><i class="fa-solid fa-gauge-high ico"></i> <span data-i="overall">Overall</span>: <b id="overallScoreInline">0</b>/100</span>
           <span class="chip" id="contentScoreChip"><i class="fa-solid fa-file-lines ico"></i> Content: <b id="contentScoreInline">0</b>/100</span>
           <span class="chip" id="aiBadge" title="AI/Human detection summary"><i class="fa-solid fa-user-check ico ico-green"></i> Writer: <b>—</b></span>
-          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem"><i class="fa-solid fa-robot"></i> Evidence</button>
+
+          <!-- Keep all three buttons visible -->
+          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem">
+            <i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%
+          </button>
+          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem">
+            <i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%
+          </button>
+          <button id="copyQuick" class="btn btn-ghost" style="--pad:.4rem .7rem">
+            <i class="fa-regular fa-copy ico ico-cyan"></i> Copy report
+          </button>
+
+          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem">
+            <i class="fa-solid fa-robot"></i> Evidence
+          </button>
         </div>
       </div>
     </div>
@@ -279,7 +290,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
-        <!-- NEW: Water progress (hidden until Analyze starts) -->
+        <!-- Water progress -->
         <div class="water-wrap" id="waterWrap" aria-hidden="true">
           <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -289,20 +300,13 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                 </linearGradient>
                 <clipPath id="roundClip"><rect x="1" y="1" width="598" height="198" rx="18" ry="18"/></clipPath>
                 <clipPath id="fillClip">
-                  <!-- y of this rect is raised/lowered by JS -->
                   <rect id="waterClipRect" class="water-mask-rect" x="0" y="200" width="600" height="200"/>
                 </clipPath>
-                <path id="wave" d="M0 120
-                  Q 50 90 100 120 T 200 120 T 300 120 T 400 120 T 500 120 T 600 120
-                  V 220 H 0 Z"/>
+                <path id="wave" d="M0 120 Q 50 90 100 120 T 200 120 T 300 120 T 400 120 T 500 120 T 600 120 V 220 H 0 Z"/>
               </defs>
-
-              <!-- Base rounded shape -->
               <g clip-path="url(#roundClip)">
                 <rect x="0" y="0" width="600" height="200" fill="#0b0d21"/>
-                <!-- Water fill (masked by height) -->
                 <g clip-path="url(#fillClip)">
-                  <!-- Two tiled waves moving horizontally -->
                   <g class="wave1" fill="url(#waterGrad)" opacity=".95">
                     <use href="#wave" x="0"/><use href="#wave" x="600"/>
                   </g>
@@ -310,7 +314,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                     <use href="#wave" x="0" y="8"/><use href="#wave" x="600" y="8"/>
                   </g>
                 </g>
-                <!-- subtle glass overlay -->
                 <rect x="0" y="0" width="600" height="200" fill="transparent"/>
               </g>
             </svg>
@@ -319,7 +322,22 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           </div>
           <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
         </div>
-        <!-- /water -->
+
+        <!-- Quick chips (kept) -->
+        <div id="analyzeReport" style="margin-top:.9rem;display:none">
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+            <span class="chip">HTTP: <b id="rStatus">—</b></span>
+            <span class="chip">Title: <b id="rTitleLen">—</b></span>
+            <span class="chip">Meta desc: <b id="rMetaLen">—</b></span>
+            <span class="chip">Canonical: <b id="rCanonical">—</b></span>
+            <span class="chip">Robots: <b id="rRobots">—</b></span>
+            <span class="chip">Viewport: <b id="rViewport">—</b></span>
+            <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
+            <span class="chip">Internal links: <b id="rInternal">—</b></span>
+            <span class="chip">Schema: <b id="rSchema">—</b></span>
+            <span class="chip">Auto-checked: <b id="rAutoCount">—</b></span>
+          </div>
+        </div>
       </form>
     </div>
 
@@ -408,7 +426,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- Modal (unchanged) -->
+<!-- Modal -->
 <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
 <div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-card">
@@ -434,10 +452,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* i18n (trimmed) */
-const I18N = {
-  en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto-apply checkmarks (≥ 70)"},
-};
+/* ---------- i18n ---------- */
+const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto-apply checkmarks (≥ 70)"} };
 const LANGS = [["en","English"]];
 (function(){
   const dockBtn = document.getElementById('langOpen');
@@ -463,7 +479,7 @@ const LANGS = [["en","English"]];
   fill(); apply(localStorage.getItem('lang')||'en');
 })();
 
-/* Background canvas (trim) */
+/* ---------- Background canvases (trim) ---------- */
 (function(){
   const bc = document.getElementById('brainCanvas'), bctx = bc.getContext('2d');
   let bw, bh, pts=[]; function rs(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; pts = Array.from({length:80},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
@@ -472,7 +488,7 @@ const LANGS = [["en","English"]];
     for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
 })();
 
-/* Back to Top */
+/* ---------- Back to Top ---------- */
 (function(){
   const btn = document.getElementById('backTop'); const link = document.getElementById('toTopLink');
   function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
@@ -481,7 +497,7 @@ const LANGS = [["en","English"]];
   btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
 })();
 
-/* Chip tone helpers (content thresholds: >80 green / 60-80 orange / <60 red) */
+/* ---------- Helpers ---------- */
 function setChipTone(el, value, {mode='overall'} = {}){
   if (!el) return;
   el.classList.remove('chip-good','chip-mid','chip-bad');
@@ -497,8 +513,6 @@ function setChipTone(el, value, {mode='overall'} = {}){
     else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
   }
 }
-
-/* Score wheel */
 const WHEEL = { circumference: 339, circle: null, text: null };
 function setScoreWheel(value){
   if (!WHEEL.circle) { WHEEL.circle = document.querySelector('.score-wheel .progress'); WHEEL.text = document.getElementById('overallScore'); }
@@ -512,8 +526,9 @@ function setScoreWheel(value){
   document.getElementById('overallScoreInline').textContent = Math.round(v);
   setChipTone(document.getElementById('overallChip'), v, {mode:'overall'});
 }
+function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 
-/* Checklist + scoring (unchanged core) */
+/* ---------- Checklist + scoring ---------- */
 (function () {
   const STORAGE_KEY = 'semanticSeoChecklistV6';
   const total = 25;
@@ -572,7 +587,7 @@ function setScoreWheel(value){
   load();
 })();
 
-/* Modal + Improve & AI panes (trimmed) */
+/* ---------- Modal + Improve + AI panes ---------- */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
@@ -584,6 +599,7 @@ function setScoreWheel(value){
   closeBtn.addEventListener('click', closeModal); backdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
   tabs.forEach(t=> t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); Object.values(panes).forEach(p=>p.classList.remove('active')); t.classList.add('active'); panes[t.dataset.tab].classList.add('active'); }));
+
   document.getElementById('checklistGrid').addEventListener('click', (e)=>{
     const btn = e.target.closest('.improve-btn'); if(!btn) return;
     const id = btn.dataset.id;
@@ -597,25 +613,27 @@ function setScoreWheel(value){
     tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="tipsTab"]').classList.add('active');
     Object.values(panes).forEach(p=>p.classList.remove('active')); panes.tipsTab.classList.add('active'); openModal();
   });
+
   document.getElementById('viewAIText').addEventListener('click', ()=> switchTo('aiTab'));
   document.getElementById('viewHumanBtn').addEventListener('click', ()=> switchTo('humanTab'));
   document.getElementById('viewAIBtn').addEventListener('click', ()=> switchTo('aiTab'));
   function switchTo(key){ tabs.forEach(x=>x.classList.remove('active')); document.querySelector(`[data-tab="${key}"]`).classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes[key].classList.add('active'); openModal(); }
+
   window.__setAIData = function(ai){
     const aiSn = ai?.ai_sentences || [];
     const huSn = ai?.human_sentences || [];
-    document.getElementById('aiSnippetsPre').textContent = aiSn.length ? aiSn.join('\n\n') : 'No AI-like snippets detected.';
-    document.getElementById('humanSnippetsPre').textContent = huSn.length ? huSn.join('\n\n') : 'No human-like snippets isolated.';
-    document.getElementById('fullTextPre').textContent = ai?.full_text || 'No text captured.';
-    document.getElementById('aiPct').textContent = (typeof ai?.ai_pct==='number') ? ai.ai_pct : '—';
-    document.getElementById('humanPct').textContent = (typeof ai?.human_pct==='number') ? ai.human_pct : '—';
+    setText('aiSnippetsPre', aiSn.length ? aiSn.join('\n\n') : 'No AI-like snippets detected.');
+    setText('humanSnippetsPre', huSn.length ? huSn.join('\n\n') : 'No human-like snippets isolated.');
+    setText('fullTextPre', ai?.full_text || 'No text captured.');
+    setText('aiPct', (typeof ai?.ai_pct==='number') ? ai.ai_pct : '—');
+    setText('humanPct', (typeof ai?.human_pct==='number') ? ai.human_pct : '—');
   }
 })();
 
-/* URL normalize */
+/* ---------- URL normalization ---------- */
 function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
 
-/* NEW: Water progress controller */
+/* ---------- Water progress controller ---------- */
 const Water = (function(){
   const wrap = document.getElementById('waterWrap');
   const bar  = document.getElementById('waterBar');
@@ -623,36 +641,26 @@ const Water = (function(){
   const pct  = document.getElementById('waterPct');
   const label= document.getElementById('pageUrlLabel');
   let prog = 0, intv = null;
-  const H = 200; // viewBox height
+  const H = 200;
   function show(){ wrap.style.display='block'; }
   function hide(){ wrap.style.display='none'; }
   function set(v){
     prog = Math.max(0, Math.min(100, v));
-    const y = H - (H * (prog/100));
-    rect.setAttribute('y', String(y));
+    rect.setAttribute('y', String(H - (H * (prog/100))));
     bar.setAttribute('aria-valuenow', Math.round(prog));
     pct.textContent = Math.round(prog) + '%';
   }
-  function start(){
-    show(); set(0);
-    label.classList.add('animating');
-    clearInterval(intv);
-    intv = setInterval(()=>{ if (prog < 90) set(prog + 1.2); }, 50);
-  }
-  function finish(){
-    clearInterval(intv);
-    const step = ()=>{ if (prog >= 100){ setTimeout(()=>{ label.classList.remove('animating'); }, 300); return; }
-      set(prog + Math.max(1.5, (100-prog)*0.12)); requestAnimationFrame(step); };
-    requestAnimationFrame(step);
-  }
+  function start(){ show(); set(0); label.classList.add('animating'); clearInterval(intv); intv = setInterval(()=>{ if (prog < 90) set(prog + 1.2); }, 50); }
+  function finish(){ clearInterval(intv); const step = ()=>{ if (prog >= 100){ setTimeout(()=> label.classList.remove('animating'), 300); return; } set(prog + Math.max(1.5, (100-prog)*0.12)); requestAnimationFrame(step); }; requestAnimationFrame(step); }
   function reset(){ clearInterval(intv); set(0); hide(); label.classList.remove('animating'); }
   return { start, finish, reset, set, show, hide };
 })();
 
-/* Analyze flow */
+/* ---------- Analyze flow ---------- */
 (function(){
   const $ = s => document.querySelector(s);
-  document.getElementById('copyQuick').addEventListener?.('click', async ()=>{
+
+  document.getElementById('copyQuick').addEventListener('click', async ()=>{
     const bits = [
       `HTTP: ${document.getElementById('rStatus')?.textContent||''}`,
       `Title: ${document.getElementById('rTitleLen')?.textContent||''}`,
@@ -674,9 +682,12 @@ const Water = (function(){
 
   async function analyze(){
     const url = normalizeUrl($('#analyzeUrl').value);
-    const status = $('#analyzeStatus'); const btn = $('#analyzeBtn'); const report = $('#analyzeReport');
-    if (!url){ status.textContent = 'Please enter a URL.'; Water.reset(); return; }
-    status.textContent = 'Analyzing…';
+    const status = document.getElementById('analyzeStatus');
+    const btn = document.getElementById('analyzeBtn');
+    const report = document.getElementById('analyzeReport');
+
+    if (!url){ if(status) status.textContent = 'Please enter a URL.'; Water.reset(); return; }
+    if(status) status.textContent = 'Analyzing…';
     btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing';
     Water.start();
 
@@ -689,25 +700,21 @@ const Water = (function(){
       const data = await resp.json();
       if (!data.ok) throw new Error(data.error || 'Failed');
 
-      // fill quick chips
-      $('#rStatus')?.textContent = data.status;
-      $('#rTitleLen')?.textContent = (data.title || '').length;
-      $('#rMetaLen')?.textContent = data.meta_description_len;
-      $('#rCanonical')?.textContent = data.canonical ? 'Yes' : 'No';
-      $('#rRobots')?.textContent = data.robots || '—';
-      $('#rViewport')?.textContent = data.viewport ? 'Yes' : 'No';
-      $('#rHeadings')?.textContent = `${data.counts.h1}/${data.counts.h2}/${data.counts.h3}`;
-      $('#rInternal')?.textContent = data.counts.internal_links;
-      const types = (data.schema.found_types || []).slice(0,6).join(', ') || '—';
-      $('#rSchema')?.textContent = types;
-      $('#rAutoCount')?.textContent = (data.auto_check_ids||[]).length;
-      report && (report.style.display='block');
+      setText('rStatus', data.status);
+      setText('rTitleLen', (data.title || '').length);
+      setText('rMetaLen', data.meta_description_len);
+      setText('rCanonical', data.canonical ? 'Yes' : 'No');
+      setText('rRobots', data.robots || '—');
+      setText('rViewport', data.viewport ? 'Yes' : 'No');
+      setText('rHeadings', `${data.counts.h1}/${data.counts.h2}/${data.counts.h3}`);
+      setText('rInternal', data.counts.internal_links);
+      setText('rSchema', (data.schema.found_types || []).slice(0,6).join(', ') || '—');
+      setText('rAutoCount', (data.auto_check_ids||[]).length);
+      if (report) report.style.display='block';
 
-      // per-item scores
       window.__lastSuggestions = data.suggestions || {};
-      for (let i=1;i<=25;i++){ const key='ck-'+i; window.setScoreBadge && setScoreBadge(i, data.scores?.[key]); }
+      for (let i=1;i<=25;i++){ const key='ck-'+i; if (window.setScoreBadge) setScoreBadge(i, data.scores?.[key]); }
 
-      // writer chip
       const ai = data.ai_detection || {};
       const badge = document.getElementById('aiBadge');
       if (badge){
@@ -727,35 +734,31 @@ const Water = (function(){
         badge.innerHTML = `<i class="fa-solid ${icon} ico ${icoC}"></i> Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
         if (chipC) badge.classList.add(chipC);
         badge.title = (ai.reasons||[]).join(' • ');
-        document.getElementById('aiPct').textContent = (typeof ai.ai_pct==='number') ? ai.ai_pct : '—';
-        document.getElementById('humanPct').textContent = (typeof ai.human_pct==='number') ? ai.human_pct : '—';
-        window.__setAIData && window.__setAIData(ai);
+        setText('aiPct', (typeof ai.ai_pct==='number') ? ai.ai_pct : '—');
+        setText('humanPct', (typeof ai.human_pct==='number') ? ai.human_pct : '—');
+        if (window.__setAIData) window.__setAIData(ai);
       }
 
-      // blend overall score baseline
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
-      window.__setAnalyzedScore && window.__setAnalyzedScore(backendOverall);
+      if (window.__setAnalyzedScore) window.__setAnalyzedScore(backendOverall);
 
-      // Auto-apply checks then recompute UI
-      if ($('#autoApply')?.checked) {
+      if (document.getElementById('autoApply').checked) {
         const all = document.querySelectorAll('#analyzer input[type="checkbox"]');
         all.forEach(cb => cb.checked = false);
         (data.auto_check_ids||[]).forEach(id => { const el=document.getElementById(id); if(el) el.checked=true; });
       }
-      window.__updateChecklist && window.__updateChecklist();
+      if (window.__updateChecklist) window.__updateChecklist();
 
-      // repaint content chip
       const csNow = window.__getContentScore ? window.__getContentScore() : 0;
-      document.getElementById('contentScoreInline').textContent = csNow;
+      setText('contentScoreInline', csNow);
       setChipTone(document.getElementById('contentScoreChip'), csNow, {mode:'content'});
 
-      // done
       Water.finish();
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
-      status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re-Analyze.' : 'Solid! Improve a few items to hit green.');
-      setTimeout(()=> status.textContent = '', 4200);
+      if (status) status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re-Analyze.' : 'Solid! Improve a few items to hit green.');
+      setTimeout(()=> { if(status) status.textContent=''; }, 4200);
     } catch(e){
-      document.getElementById('analyzeStatus').textContent = 'Error: '+e.message;
+      if (status) status.textContent = 'Error: '+e.message;
       Water.finish();
     } finally {
       btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Analyze';
