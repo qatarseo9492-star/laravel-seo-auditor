@@ -68,24 +68,21 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .section-title{font-size:1.6rem;margin:0 0 .3rem}
 .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* Score wheel + chips */
+/* ======= SCORE GAUGE: circular water fill ======= */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
-.score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
-.score-wheel circle{fill:none;stroke-width:14;stroke-linecap:round}
-.score-wheel .bg{stroke:rgba(255,255,255,.12)}
-.score-wheel .progress{
-  stroke:url(#grad);
-  stroke-dasharray:339; stroke-dashoffset:339;
-  transition:stroke-dashoffset .6s ease,stroke .3s ease,filter .3s ease;
-  filter:drop-shadow(0 0 10px rgba(155,92,255,.35))
-}
-.score-text{font-size:clamp(2.2rem, 4.2vw, 3.1rem);font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
+.score-gauge{position:relative;width:100%;aspect-ratio:1/1}
+.gauge-svg{width:100%;height:auto;display:block}
+.score-mask-rect{transition:all .6s cubic-bezier(.22,1,.36,1)}
+.score-wave1{animation:scoreWave 8s linear infinite}
+.score-wave2{animation:scoreWave 11s linear infinite reverse}
+@keyframes scoreWave{from{transform:translateX(0)}to{transform:translateX(-210px)}}
+.score-text{font-size:clamp(2.2rem, 4.2vw, 3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
+
+/* Chips + legends */
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)} .l-orange{background:rgba(245,158,11,.18)} .l-green{background:rgba(34,197,94,.18)}
-
-/* Traffic-light chip states */
 .chip-good{background:rgba(34,197,94,.18)!important;border-color:rgba(34,197,94,.45)!important}
 .chip-mid{background:rgba(245,158,11,.18)!important;border-color:rgba(245,158,11,.45)!important}
 .chip-bad{background:rgba(239,68,68,.18)!important;border-color:rgba(239,68,68,.5)!important}
@@ -120,7 +117,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
-/* NEW: Water progress bar */
+/* ======= Water progress bar (Analyze) with smoke ======= */
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{
   position:relative; height:64px; border-radius:18px; overflow:hidden;
@@ -137,12 +134,8 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .wave1{animation:waveX 7s linear infinite}
 .wave2{animation:waveX 10s linear infinite reverse; opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
-
-/* Multi-color cycling */
 .multiHue{animation: hueShift 8s linear infinite; filter: hue-rotate(0deg) saturate(120%);}
 @keyframes hueShift { to { filter: hue-rotate(360deg) saturate(120%); } }
-
-/* Smoke canvas layered above water, below % text */
 #waterSmoke{ position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:screen; }
 
 /* Progress (checklist completion) */
@@ -213,7 +206,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <canvas id="linesCanvas2" aria-hidden="true"></canvas>
 <canvas id="smokeFX" aria-hidden="true"></canvas>
 
-<!-- gradients for score wheel -->
+<!-- Gradients (kept for other UI) -->
 <svg width="0" height="0" aria-hidden="true">
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#9b5cff"/><stop offset="100%" stop-color="#ff2045"/></linearGradient>
@@ -248,11 +241,45 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
     <div class="score-area">
       <div class="score-container">
-        <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
-          <circle class="bg" cx="60" cy="60" r="54"/>
-          <circle class="progress" cx="60" cy="60" r="54" style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
-          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore" aria-live="polite">0%</text>
-        </svg>
+        <!-- ======= New circular water-fill score gauge ======= -->
+        <div class="score-gauge">
+          <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
+            <defs>
+              <clipPath id="scoreCircleClip">
+                <circle cx="100" cy="100" r="88"/>
+              </clipPath>
+              <clipPath id="scoreFillClip">
+                <rect id="scoreClipRect" class="score-mask-rect" x="0" y="200" width="200" height="200"/>
+              </clipPath>
+              <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop id="scoreStop1" offset="0%" stop-color="#22c55e"/>
+                <stop id="scoreStop2" offset="100%" stop-color="#16a34a"/>
+              </linearGradient>
+              <path id="scoreWavePath" d="M0 110 Q 15 90 30 110 T 60 110 T 90 110 T 120 110 T 150 110 T 180 110 T 210 110 V 220 H 0 Z"/>
+            </defs>
+
+            <!-- Outer dish -->
+            <circle cx="100" cy="100" r="96" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+
+            <!-- Water area -->
+            <g clip-path="url(#scoreCircleClip)">
+              <rect x="0" y="0" width="200" height="200" fill="#0b0d21"/>
+              <g clip-path="url(#scoreFillClip)">
+                <g class="score-wave1">
+                  <use href="#scoreWavePath" x="0" fill="url(#scoreGrad)"/>
+                  <use href="#scoreWavePath" x="210" fill="url(#scoreGrad)"/>
+                </g>
+                <g class="score-wave2" opacity=".85">
+                  <use href="#scoreWavePath" x="0" y="6" fill="url(#scoreGrad)"/>
+                  <use href="#scoreWavePath" x="210" y="6" fill="url(#scoreGrad)"/>
+                </g>
+              </g>
+            </g>
+
+            <!-- Score text -->
+            <text id="overallScore" x="100" y="106" text-anchor="middle" dominant-baseline="middle" class="score-text">0%</text>
+          </svg>
+        </div>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:.5rem">
@@ -522,20 +549,33 @@ function setChipTone(el, value, {mode='overall'} = {}){
     else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
   }
 }
-const WHEEL = { circumference: 339, circle: null, text: null };
+function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
+
+/* ---------- NEW: Score Gauge controller (water fill in circle) ---------- */
+const GAUGE = { rect:null, stop1:null, stop2:null, text:null, H:200 };
 function setScoreWheel(value){
-  if (!WHEEL.circle) { WHEEL.circle = document.querySelector('.score-wheel .progress'); WHEEL.text = document.getElementById('overallScore'); }
-  const v = Math.max(0, Math.min(100, Number(value)));
-  const offset = WHEEL.circumference - (v/100) * WHEEL.circumference;
-  WHEEL.circle.style.strokeDashoffset = offset;
-  if (v >= 80)      WHEEL.circle.style.stroke = 'url(#gradGood)';
-  else if (v >= 60) WHEEL.circle.style.stroke = 'url(#gradMid)';
-  else              WHEEL.circle.style.stroke = 'url(#gradBad)';
-  WHEEL.text.textContent = Math.round(v) + '%';
-  document.getElementById('overallScoreInline').textContent = Math.round(v);
+  if (!GAUGE.rect){
+    GAUGE.rect  = document.getElementById('scoreClipRect');
+    GAUGE.stop1 = document.getElementById('scoreStop1');
+    GAUGE.stop2 = document.getElementById('scoreStop2');
+    GAUGE.text  = document.getElementById('overallScore');
+  }
+  const v = Math.max(0, Math.min(100, Number(value)||0));
+  const y = GAUGE.H - (GAUGE.H * (v/100));              // top of water
+  GAUGE.rect.setAttribute('y', String(y));
+  GAUGE.text.textContent = Math.round(v) + '%';
+  // color thresholds
+  let c1, c2;
+  if (v >= 80){ c1='#22c55e'; c2='#16a34a'; }           // green
+  else if (v >= 60){ c1='#f59e0b'; c2='#fb923c'; }      // orange
+  else { c1='#ef4444'; c2='#b91c1c'; }                  // red
+  GAUGE.stop1.setAttribute('stop-color', c1);
+  GAUGE.stop2.setAttribute('stop-color', c2);
+
+  // Inline score + chip tone
+  setText('overallScoreInline', Math.round(v));
   setChipTone(document.getElementById('overallChip'), v, {mode:'overall'});
 }
-function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 
 /* ---------- Checklist + scoring ---------- */
 (function () {
@@ -642,12 +682,12 @@ function setText(id, val){ const el = document.getElementById(id); if (el) el.te
 /* ---------- URL normalization ---------- */
 function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
 
-/* ---------- Smoke particles rising from water ---------- */
+/* ---------- Smoke particles rising from progress water ---------- */
 const WaterSmoke = (function(){
   const canvas = document.getElementById('waterSmoke');
   const ctx = canvas ? canvas.getContext('2d') : null;
   let running = false, particles = [], frameId = 0;
-  let levelRatioTop = 1; // 0 = top, 1 = bottom of bar
+  let levelRatioTop = 1; // 0 = top, 1 = bottom
 
   function cssW(){ return canvas?.clientWidth || canvas?.parentElement?.clientWidth || 0; }
   function cssH(){ return canvas?.clientHeight || canvas?.parentElement?.clientHeight || 0; }
@@ -663,7 +703,7 @@ const WaterSmoke = (function(){
 
   function spawn(n=6){
     if(!canvas) return;
-    const y = cssH() * levelRatioTop; // emitter line
+    const y = cssH() * levelRatioTop;
     for(let i=0;i<n;i++){
       const x = Math.random()*cssW();
       const jitter = (Math.random()*4 - 2);
@@ -675,7 +715,7 @@ const WaterSmoke = (function(){
         life: 1,
         decay: 0.008 + Math.random()*0.02,
         r: 2 + Math.random()*6,
-        hue: (180 + Math.random()*120) // bluish to magenta
+        hue: (180 + Math.random()*120)
       });
     }
   }
@@ -685,33 +725,26 @@ const WaterSmoke = (function(){
     frameId = requestAnimationFrame(tick);
     ctx.clearRect(0,0,cssW(),cssH());
     ctx.globalCompositeOperation = 'lighter';
-
     if (particles.length < 180) spawn(6);
-
     for (const p of particles){
-      p.x += p.vx;
-      p.y += p.vy;
-      p.vy -= 0.005;   // slight lift
-      p.life -= p.decay;
-
+      p.x += p.vx; p.y += p.vy; p.vy -= 0.005; p.life -= p.decay;
       const a = Math.max(0, p.life);
       const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
       g.addColorStop(0, `hsla(${p.hue}, 80%, 70%, ${0.35*a})`);
       g.addColorStop(1, `hsla(${(p.hue+60)%360}, 90%, 55%, ${0.05*a})`);
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
     }
     particles = particles.filter(p=> p.life>0 && p.y > -20);
   }
 
   function start(){ if(!canvas||!ctx) return; running=true; resize(); cancelAnimationFrame(frameId); frameId = requestAnimationFrame(tick); }
   function stop(){ running=false; cancelAnimationFrame(frameId); particles.length = 0; if(ctx) ctx.clearRect(0,0,cssW(),cssH()); }
-  function setLevel(topRatio){ levelRatioTop = Math.max(0, Math.min(1, topRatio)); } // 0 top, 1 bottom
+  function setLevel(topRatio){ levelRatioTop = Math.max(0, Math.min(1, topRatio)); }
   window.addEventListener('resize', ()=> running && resize(), {passive:true});
   return { start, stop, setLevel };
 })();
 
-/* ---------- Water progress controller ---------- */
+/* ---------- Analyze water progress controller ---------- */
 const Water = (function(){
   const wrap = document.getElementById('waterWrap');
   const bar  = document.getElementById('waterBar');
@@ -725,13 +758,12 @@ const Water = (function(){
   function hide(){ wrap.style.display='none'; }
   function set(v){
     prog = Math.max(0, Math.min(100, v));
-    const y = H - (H * (prog/100)); // top of water in SVG units
+    const y = H - (H * (prog/100));
     rect.setAttribute('y', String(y));
     bar.setAttribute('aria-valuenow', Math.round(prog));
     pct.textContent = Math.round(prog) + '%';
-    // inform smoke of the current waterline:
     if (WaterSmoke && typeof WaterSmoke.setLevel === 'function') {
-      WaterSmoke.setLevel(y / H); // convert to 0..1 relative to top
+      WaterSmoke.setLevel(y / H);
     }
   }
   function start(){
@@ -745,7 +777,6 @@ const Water = (function(){
     clearInterval(intv);
     const step = ()=>{ if (prog >= 100){
         setTimeout(()=>{ label.classList.remove('animating'); }, 300);
-        // gentle fade-out of smoke
         setTimeout(()=>{ if (WaterSmoke && WaterSmoke.stop) WaterSmoke.stop(); }, 800);
         return;
       }
