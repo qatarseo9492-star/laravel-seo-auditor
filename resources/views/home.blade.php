@@ -7,16 +7,14 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Semantic SEO Master • Ultra Tech Global</title>
 
-<!-- Favicon -->
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
 :root{
-  --bg:#08080f; --panel:#0f1022; --panel-2:#141433; --line:#1e1a33;
+  --bg:#07080e; --panel:#0f1022; --panel-2:#141433; --line:#1e1a33;
   --text:#f0effa; --text-dim:#b6b3d6; --text-muted:#9aa0c3;
   --primary:#9b5cff; --secondary:#ff2045; --accent:#3de2ff;
   --good:#16c172; --warn:#f59e0b; --bad:#ef4444;
@@ -34,28 +32,19 @@ body{
   overflow-x:hidden;
 }
 
-/* --- Canvas layers --- */
-#linesCanvas, #linesCanvas2, #brainCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; }
+/* Canvas decor */
+#linesCanvas, #linesCanvas2, #brainCanvas, #smokeFX { position:fixed; inset:0; z-index:0; pointer-events:none; }
 #brainCanvas{opacity:.10}
+#smokeFX{ opacity:1; filter:saturate(115%) contrast(105%); }
 
-/* Procedural Cloud Smoke canvas */
-#smokeFX{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:1; filter:saturate(115%) contrast(105%); }
-
-/* Hide old decorative blobs/clouds */
-.bg-smoke .blob, .clouds { display:none !important; }
-
-/* Fallback kept but hidden */
-.bg-smoke{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-
+/* Layout */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
-
-/* Header */
 header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 0 22px;border-bottom:1px solid var(--line);backdrop-filter:saturate(140%) blur(10px);background:rgba(15,16,34,.35)}
 .brand{display:flex;align-items:center;gap:1rem}
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language dock */
+/* Language dock (kept) */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -76,21 +65,25 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 
 /* Analyzer panel */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
-.section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
+.section-title{font-size:1.6rem;margin:0 0 .3rem}
+.section-subtitle{margin:0;color:var(--text-dim)}
 
-/* Wheel row + Content score chip */
+/* Score wheel + chips */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
 .score-wheel circle{fill:none;stroke-width:14;stroke-linecap:round}
 .score-wheel .bg{stroke:rgba(255,255,255,.12)}
 .score-wheel .progress{
-  stroke:url(#grad); /* default; JS overrides inline */
+  stroke:url(#grad);
   stroke-dasharray:339; stroke-dashoffset:339;
   transition:stroke-dashoffset .6s ease,stroke .3s ease,filter .3s ease;
   filter:drop-shadow(0 0 10px rgba(155,92,255,.35))
 }
-.score-text{font-size:3rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
+.score-text{
+  font-size:clamp(2.2rem, 4.2vw, 3.1rem);
+  font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)
+}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)} .l-orange{background:rgba(245,158,11,.18)} .l-green{background:rgba(34,197,94,.18)}
@@ -102,7 +95,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   box-shadow:0 0 0 0 rgba(155,92,255,.0); transition:.25s;
 }
 .analyze-form input[type="url"]:focus{ outline:none; border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15); }
-.analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
+.analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
 /* Progress */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
@@ -135,20 +128,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .improve-btn{padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer}
 .improve-btn:hover{background:rgba(255,255,255,.1)}
 
-/* Modal */
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;z-index:70}
-.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:80}
-.modal-card{width:min(1000px,96vw);background:var(--panel-2);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow);padding:16px}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
-.modal-title{margin:0;font-size:1.2rem}
-.modal-close{background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:10px;color:#fff;padding:.35rem .6rem;cursor:pointer}
-.tabs{display:flex;gap:.4rem;margin:.4rem 0;flex-wrap:wrap}
-.tab{padding:.35rem .7rem;border-radius:10px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);cursor:pointer;font-weight:800}
-.tab.active{background:linear-gradient(135deg,#3de2ff22,#9b5cff22);border-color:#3de2ff66}
-.tabpanes > div{display:none}
-.tabpanes > div.active{display:block}
-.pre{white-space:pre-wrap;background:#0b0d21;border:1px solid #1b1b35;border-radius:12px;padding:12px;color:#cfd3f6;max-height:60vh;overflow:auto}
-
 /* Footer + back to top */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 .footer-brand{display:flex;align-items:center;gap:.6rem}
@@ -164,13 +143,13 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   .score-container{width:190px}
   footer.site{flex-direction:column;align-items:flex-start}
 }
-@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.bg-smoke,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
+@media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
 </style>
 </head>
 <body>
-<canvas id="brainCanvas"></canvas>
-<canvas id="linesCanvas"></canvas>
-<canvas id="linesCanvas2"></canvas>
+<canvas id="brainCanvas" aria-hidden="true"></canvas>
+<canvas id="linesCanvas" aria-hidden="true"></canvas>
+<canvas id="linesCanvas2" aria-hidden="true"></canvas>
 <canvas id="smokeFX" aria-hidden="true"></canvas>
 
 <!-- gradients for score wheel -->
@@ -192,7 +171,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <div class="wrap">
   <header class="site">
     <div class="brand">
-      <div class="brand-badge"><i class="fa-solid fa-brain"></i></div>
+      <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
       <div><div class="hero-heading" data-i="title">Semantic SEO Master Analyzer</div></div>
     </div>
     <div style="display:flex;gap:.5rem">
@@ -200,7 +179,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     </div>
   </header>
 
-  <section class="analyzer" id="analyzer">
+  <main class="analyzer" id="analyzer" role="main" aria-label="Semantic SEO Analyzer">
     <h2 class="section-title" data-i="analyze_title">Analyze a URL</h2>
     <p class="section-subtitle" data-i="legend_line">
       The wheel fills with your overall score. <span class="legend l-green">Green ≥ 80</span> <span class="legend l-orange">Orange 60–79</span> <span class="legend l-red">Red &lt; 60</span>
@@ -212,27 +191,28 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <circle class="bg" cx="60" cy="60" r="54"/>
           <circle class="progress" cx="60" cy="60" r="54"
                   style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
-          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
+          <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore" aria-live="polite">0%</text>
         </svg>
       </div>
       <div style="display:flex;flex-direction:column;gap:.5rem">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
           <span class="chip"><span data-i="overall">Overall</span>: <b id="overallScoreInline">0</b>/100</span>
           <span class="chip" id="contentScoreChip">Content: <b id="contentScoreInline">0</b>/100</span>
-          <span class="chip" id="aiBadge">Writer: <b>—</b></span>
+          <span class="chip" id="aiBadge" title="AI/Human detection summary">Writer: <b>—</b></span>
           <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem"><i class="fa-solid fa-robot"></i> Evidence</button>
         </div>
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
           <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</button>
           <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</button>
+          <button id="copyQuick" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-regular fa-copy"></i> Copy report</button>
         </div>
       </div>
     </div>
 
     <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
-      <form id="analyzeForm" class="analyze-form" onsubmit="return false;">
+      <form id="analyzeForm" class="analyze-form" onsubmit="return false;" aria-label="Analyze form">
         <label for="analyzeUrl" style="display:block;font-weight:800;margin-bottom:.35rem" data-i="page_url">Page URL</label>
-        <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" />
+        <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" aria-describedby="analyzeStatus" />
         <div class="analyze-row">
           <div style="display:flex;align-items:center;gap:.6rem">
             <label style="display:inline-flex;align-items:center;gap:.45rem;cursor:pointer">
@@ -242,8 +222,11 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <button id="analyzeBtn" class="btn btn-danger"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
           <button class="btn btn-neon" id="printChecklist"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
           <button class="btn btn-ghost" id="resetChecklist"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
+          <button class="btn btn-ghost" id="exportChecklist" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
+          <button class="btn btn-ghost" id="importChecklist" title="Import checklist JSON"><i class="fa-solid fa-file-import"></i> Import</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
-        <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)"></div>
+        <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
       </form>
 
       <div id="analyzeReport" style="margin-top:.9rem;display:none">
@@ -268,8 +251,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Categories / checklist (unchanged structure) -->
-    <div class="analyzer-grid">
+    <!-- Categories / checklist -->
+    <div class="analyzer-grid" id="checklistGrid">
       @php $labels = [
         1=>'Define search intent & primary topic',
         2=>'Map target & related keywords (synonyms/PAA)',
@@ -308,7 +291,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       ] as $c)
         <article class="category-card" style="background-image:{{ $c[4] }}; background-blend-mode: lighten;">
           <header class="category-head">
-            <span class="category-icon"><i class="fas {{ $c[3] }}"></i></span>
+            <span class="category-icon" aria-hidden="true"><i class="fas {{ $c[3] }}"></i></span>
             <div>
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
@@ -319,21 +302,21 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
             @for($i=$c[1];$i<=$c[2];$i++)
               <li class="checklist-item">
                 <label>
-                  <input type="checkbox" id="ck-{{ $i }}">
+                  <input type="checkbox" id="ck-{{ $i }}" aria-label="{{ $labels[$i] }}">
                   <span>{{ $labels[$i] }}</span>
                 </label>
                 <span class="score-badge" id="sc-{{ $i }}">—</span>
-                <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
+                <button class="improve-btn" data-id="ck-{{ $i }}" aria-haspopup="dialog">Improve</button>
               </li>
             @endfor
           </ul>
         </article>
       @endforeach
     </div>
-  </section>
+  </main>
 </div>
 
-<footer class="site">
+<footer class="site" role="contentinfo">
   <div class="footer-brand"><span class="dot"></span><strong>Semantic SEO Master</strong></div>
   <div class="footer-links">
     <a href="#analyzer">Analyzer</a>
@@ -345,22 +328,22 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   </div>
 </footer>
 
-<button id="backTop" title="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+<button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
 <!-- Modal -->
-<div class="modal-backdrop" id="modalBackdrop"></div>
+<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
 <div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-card">
     <div class="modal-header">
       <h3 class="modal-title" id="modalTitle">Improve</h3>
-      <button class="modal-close" id="modalClose"><i class="fa-solid fa-xmark"></i></button>
+      <button class="modal-close" id="modalClose" aria-label="Close dialog"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="tabs">
-      <button class="tab active" data-tab="tipsTab"><i class="fa-solid fa-lightbulb"></i> Tips</button>
-      <button class="tab" data-tab="examplesTab"><i class="fa-brands fa-google"></i> Examples (Google)</button>
-      <button class="tab" data-tab="humanTab"><i class="fa-solid fa-user"></i> Human‑like</button>
-      <button class="tab" data-tab="aiTab"><i class="fa-solid fa-microchip"></i> AI‑like</button>
-      <button class="tab" data-tab="fullTab"><i class="fa-solid fa-file-lines"></i> Full Text</button>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="tipsTab" role="tab"><i class="fa-solid fa-lightbulb"></i> Tips</button>
+      <button class="tab" data-tab="examplesTab" role="tab"><i class="fa-brands fa-google"></i> Examples (Google)</button>
+      <button class="tab" data-tab="humanTab" role="tab"><i class="fa-solid fa-user"></i> Human‑like</button>
+      <button class="tab" data-tab="aiTab" role="tab"><i class="fa-solid fa-microchip"></i> AI‑like</button>
+      <button class="tab" data-tab="fullTab" role="tab"><i class="fa-solid fa-file-lines"></i> Full Text</button>
     </div>
     <div class="tabpanes">
       <div id="tipsTab" class="active"><ul id="modalList"></ul></div>
@@ -373,7 +356,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---------- i18n (same languages) ---------- */
+/* ---------- i18n (trimmed) ---------- */
 const I18N = {
   en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 70)"},
 };
@@ -420,26 +403,23 @@ const LANGS = [["en","English"]];
   btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
 })();
 
-/* ---------- Score wheel helpers (color via inline style + % inside) ---------- */
+/* ---------- Score wheel helpers ---------- */
 const WHEEL = { circumference: 339, circle: null, text: null };
 function setScoreWheel(value){
   if (!WHEEL.circle) { WHEEL.circle = document.querySelector('.score-wheel .progress'); WHEEL.text = document.getElementById('overallScore'); }
   const v = Math.max(0, Math.min(100, Number(value)));
   const offset = WHEEL.circumference - (v/100) * WHEEL.circumference;
   WHEEL.circle.style.strokeDashoffset = offset;
-
-  // Set color using inline style (overrides CSS)
   if (v >= 80)      WHEEL.circle.style.stroke = 'url(#gradGood)';
   else if (v >= 60) WHEEL.circle.style.stroke = 'url(#gradMid)';
   else              WHEEL.circle.style.stroke = 'url(#gradBad)';
-
   WHEEL.text.textContent = Math.round(v) + '%';
   document.getElementById('overallScoreInline').textContent = Math.round(v);
 }
 
-/* ---------- Checklist + scoring ---------- */
+/* ---------- Checklist + scoring + import/export ---------- */
 (function () {
-  const STORAGE_KEY = 'semanticSeoChecklistV5';
+  const STORAGE_KEY = 'semanticSeoChecklistV6';
   const total = 25;
   const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar = document.getElementById('progressBar');
@@ -481,27 +461,67 @@ function setScoreWheel(value){
   document.getElementById('resetChecklist').addEventListener('click', ()=>{ if(!confirm('Reset the checklist?')) return; localStorage.removeItem(STORAGE_KEY); boxes().forEach(cb=>cb.checked=false); for(let i=1;i<=25;i++){ setScoreBadge(i,null);} lastAnalyzed=0; setScoreWheel(0); update(); });
   document.getElementById('printChecklist').addEventListener('click', ()=> window.print());
   document.getElementById('printTop').addEventListener('click', ()=> window.print());
+  document.getElementById('exportChecklist').addEventListener('click', (e)=>{
+    e.preventDefault();
+    const data = { checked: boxes().filter(cb=>cb.checked).map(cb=>cb.id), ts: Date.now(), v: 1 };
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='semantic-seo-checklist.json'; a.click(); URL.revokeObjectURL(a.href);
+  });
+  document.getElementById('importChecklist').addEventListener('click', (e)=>{ e.preventDefault(); document.getElementById('importFile').click(); });
+  document.getElementById('importFile').addEventListener('change', async (e)=>{
+    const file = e.target.files?.[0]; if(!file) return;
+    try { const text = await file.text(); const json = JSON.parse(text||'{}'); boxes().forEach(cb=> cb.checked = (json.checked||[]).includes(cb.id)); save(); update(); } catch(err){ alert('Invalid JSON'); }
+    e.target.value='';
+  });
+
   window.setScoreBadge = (num,score)=>{ const el=document.getElementById('sc-'+num); if(!el) return; el.className='score-badge'; if(score==null){el.textContent='—';return;} el.textContent=score; if(score>=80) el.classList.add('score-good'); else if(score>=60) el.classList.add('score-mid'); else el.classList.add('score-bad'); };
   window.__setAnalyzedScore = function(v){ lastAnalyzed = Math.max(0, Math.min(100, +v||0)); setScoreWheel( overallScoreBlended() ); }
   window.__getContentScore = contentScore;
   load();
 })();
 
-/* ---------- Modal + examples + panes (trimmed) ---------- */
+/* ---------- Modal + examples + panes + Improve buttons ---------- */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
   const backdrop = $('#modalBackdrop'), modal = $('#tipModal'), closeBtn = $('#modalClose');
   const panes = { tipsTab: $('#tipsTab'), examplesTab: $('#examplesTab'), humanTab: $('#humanTab'), aiTab: $('#aiTab'), fullTab: $('#fullTab') };
   const tabs = $$('.tab');
+
   function openModal(){ backdrop.style.display='block'; modal.style.display='flex'; }
   function closeModal(){ backdrop.style.display='none'; modal.style.display='none'; }
   closeBtn.addEventListener('click', closeModal); backdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
   tabs.forEach(t=> t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); Object.values(panes).forEach(p=>p.classList.remove('active')); t.classList.add('active'); panes[t.dataset.tab].classList.add('active'); }));
-  document.getElementById('viewAIText').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openModal(); });
-  document.getElementById('viewHumanBtn').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="humanTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.humanTab.classList.add('active'); openModal(); });
-  document.getElementById('viewAIBtn').addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openModal(); });
+
+  // Hook "Improve" buttons
+  document.getElementById('checklistGrid').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.improve-btn'); if(!btn) return;
+    const id = btn.dataset.id;
+    const idx = parseInt(id.split('-')[1],10);
+    const labelEl = document.querySelector(`label[for="${id}"]`) || btn.parentElement.querySelector('span');
+    const label = labelEl ? labelEl.textContent.trim() : `Item ${idx}`;
+
+    const tips = (window.__lastSuggestions||{})[id] || ['Run Analyze to get fresh tips for this item.'];
+    const ul = document.getElementById('modalList'); ul.innerHTML='';
+    tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
+    // Examples tab builds safe Google queries
+    const q = encodeURIComponent(label + ' SEO examples');
+    document.getElementById('examplesPre').innerHTML = `Open examples:\nhttps://www.google.com/search?q=${q}\n\nTry site: operators with top competitors.`;
+
+    tabs.forEach(x=>x.classList.remove('active'));
+    document.querySelector('[data-tab="tipsTab"]').classList.add('active');
+    Object.values(panes).forEach(p=>p.classList.remove('active'));
+    panes.tipsTab.classList.add('active');
+    openModal();
+  });
+
+  // AI panes wiring
+  document.getElementById('viewAIText').addEventListener('click', ()=>{ switchTo('aiTab'); });
+  document.getElementById('viewHumanBtn').addEventListener('click', ()=>{ switchTo('humanTab'); });
+  document.getElementById('viewAIBtn').addEventListener('click', ()=>{ switchTo('aiTab'); });
+  function switchTo(key){ tabs.forEach(x=>x.classList.remove('active')); document.querySelector(`[data-tab="${key}"]`).classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes[key].classList.add('active'); openModal(); }
+
   window.__setAIData = function(ai){
     const aiSn = ai?.ai_sentences || [];
     const huSn = ai?.human_sentences || [];
@@ -524,6 +544,24 @@ function normalizeUrl(u){
 (function(){
   const $ = s => document.querySelector(s);
   const setChecked = (id, on) => { const el = document.getElementById(id); if (el) el.checked = !!on; };
+
+  // Copy quick report
+  document.getElementById('copyQuick').addEventListener('click', async ()=>{
+    const bits = [
+      `HTTP: ${document.getElementById('rStatus').textContent}`,
+      `Title: ${document.getElementById('rTitleLen').textContent}`,
+      `Meta: ${document.getElementById('rMetaLen').textContent}`,
+      `Canon: ${document.getElementById('rCanonical').textContent}`,
+      `Robots: ${document.getElementById('rRobots').textContent}`,
+      `H1/H2/H3: ${document.getElementById('rHeadings').textContent}`,
+      `Internal: ${document.getElementById('rInternal').textContent}`,
+      `Schema: ${document.getElementById('rSchema').textContent}`,
+      `Overall: ${document.getElementById('overallScoreInline').textContent}/100`,
+      `Content: ${document.getElementById('contentScoreInline').textContent}/100`,
+      `AI: ${document.getElementById('aiPct').textContent || '—'}% / Human: ${document.getElementById('humanPct').textContent || '—'}%`
+    ];
+    try { await navigator.clipboard.writeText(bits.join('\n')); alert('Report copied!'); } catch(e){ alert('Could not copy'); }
+  });
 
   document.getElementById('analyzeForm').addEventListener('submit', (e)=>{
     e.preventDefault();
@@ -560,7 +598,7 @@ function normalizeUrl(u){
       $('#rAutoCount').textContent = (data.auto_check_ids||[]).length;
       report.style.display='block';
 
-      // per-item scores
+      // per-item scores + tips storage
       window.__lastSuggestions = data.suggestions || {};
       for (let i=1;i<=25;i++){ const key='ck-'+i; setScoreBadge(i, data.scores?.[key]); }
 
@@ -569,32 +607,27 @@ function normalizeUrl(u){
       window.__setAnalyzedScore(backendOverall);
       document.getElementById('contentScoreInline').textContent = window.__getContentScore();
 
-      // ===== AI DETECTION (REAL VALUES ONLY) =====
+      // AI DETECTION
       const ai = data.ai_detection || {};
       const badge = document.getElementById('aiBadge');
       const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
       const label = labelMap[ai.label] || 'Unknown';
       const conf = (typeof ai.likelihood==='number') ? ` (${ai.likelihood}%)` : '';
-
-      // Build badge without fabricating numbers
       const aiStr = (typeof ai.ai_pct==='number') ? ` — ${ai.ai_pct}% AI‑like` : '';
       const humanStr = (typeof ai.human_pct==='number') ? ` — ${ai.human_pct}% Human` : '';
       badge.innerHTML = `Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
       badge.title = (ai.reasons||[]).join(' • ');
-
-      // Update quick chips/panes strictly from backend values
       document.getElementById('aiPct').textContent = (typeof ai.ai_pct==='number') ? ai.ai_pct : '—';
       document.getElementById('humanPct').textContent = (typeof ai.human_pct==='number') ? ai.human_pct : '—';
       window.__setAIData(ai);
 
       // Auto-check
       if ($('#autoApply').checked) {
-        for (let i=1;i<=25;i++) setChecked('ck-'+i, false);
-        (data.auto_check_ids||[]).forEach(id => setChecked(id, true));
+        for (let i=1;i<=25;i++) { const id='ck-'+i; const el=document.getElementById(id); if(el) el.checked=false; }
+        (data.auto_check_ids||[]).forEach(id => { const el=document.getElementById(id); if(el) el.checked=true; });
         document.dispatchEvent(new Event('change'));
       }
 
-      // Status line
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent = '', 4200);
@@ -607,17 +640,15 @@ function normalizeUrl(u){
 })();
 </script>
 
-<!-- ========== Procedural Colorful Smoke (WebGL2 shader + 2D fallback) (trimmed) ========== -->
+<!-- Procedural Smoke (WebGL2) -->
 <script>
 (function(){
   const canvas = document.getElementById('smokeFX'); if (!canvas) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   let gl = null, vw=0, vh=0, start=performance.now();
-
   function resize(){ vw = canvas.clientWidth  = innerWidth; vh = canvas.clientHeight = innerHeight; canvas.width  = Math.floor(vw * dpr); canvas.height = Math.floor(vh * dpr); if (gl) gl.viewport(0,0,canvas.width,canvas.height); }
   addEventListener('resize', resize, {passive:true}); resize();
   try { gl = canvas.getContext('webgl2', { alpha:true, antialias:false, depth:false, stencil:false }); } catch(e){}
-
   if (!gl) return;
   const vs=`#version 300 es
   precision highp float; const vec2 v[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));
