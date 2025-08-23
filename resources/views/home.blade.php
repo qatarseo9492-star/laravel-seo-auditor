@@ -81,9 +81,17 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .score-wheel .progress2{stroke:url(#gradSweep);stroke-width:16;stroke-linecap:round;fill:none;stroke-dasharray:339;stroke-dashoffset:339;opacity:.35}
 .score-wheel .spark{stroke:#fff;stroke-width:2.2;stroke-dasharray:1 338;animation:orbit 3.6s linear infinite;filter:drop-shadow(0 0 6px rgba(255,255,255,.55))}
 @keyframes orbit{to{stroke-dashoffset:-339}}
+/* ↓↓↓ NEW: smaller, responsive, and animated score text */
 .score-text{
-  font-size:clamp(1.4rem,6.2vw,3.1rem);
+  font-size:clamp(2.4rem,4.2vw,3.1rem);
   font-weight:1000;fill:#fff;text-anchor:middle;dominant-baseline:middle;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.35));
+  animation:scoreGlow 3s ease-in-out infinite;
+  letter-spacing:.02em;
+}
+@keyframes scoreGlow{
+  0%,100%{ text-shadow:0 0 8px rgba(255,255,255,.35), 0 0 18px rgba(155,92,255,.15) }
+  50%{    text-shadow:0 0 14px rgba(255,255,255,.55), 0 0 28px rgba(61,226,255,.25) }
 }
 .score-text.green{fill:#22c55e}
 .score-text.orange{fill:#f59e0b}
@@ -697,7 +705,7 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
   function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
   addEventListener('scroll', onScroll, {passive:true}); onScroll();
   const goTop = e => { e && e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); };
-  btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
+  btn.addEventListener('click', goTop); if(link) link.addEventListener('click', go Top);
 })();
 </script>
 </body>
