@@ -251,7 +251,7 @@ if (!function_exists('analyze_document')) {
 
         $path = parse_url($url, PHP_URL_PATH) ?: '/';
 
-        // --- 25 checks (unchanged logic) ---
+        // --- 25 checks (same scoring as earlier) ---
         $scores = [];
         $autoCheck = [];
         $suggestions = [];
@@ -292,14 +292,12 @@ if (!function_exists('analyze_document')) {
         $indexable = !preg_match('~noindex~i', (string)$robots);
         $hasCTA = $xp->query('//a[contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"btn") or contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"button") or contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"cta")]')->length > 0;
 
-        // (same scoring as your previous version) ...
-        // 1
+        // 1..25 (unchanged—see earlier message; kept here fully)
         $intentOk = ($h1 > 0 || (mb_strlen($title) >= 20 && $wc >= 300));
         $scores['ck-1'] = $intentOk ? 80 : ($wc >= 150 ? 55 : 25);
         if ($intentOk) $autoCheck[] = 'ck-1';
         if (!$intentOk) $suggestions['ck-1'][] = 'State the primary intent in H1 and intro paragraph.';
 
-        // 2
         $subheads = $h2 + $h3;
         $variety = preg_match_all('~\b\w{5,}\b~u', $fullText);
         $kmap = ($subheads >= 4 && $variety >= 200);
@@ -307,7 +305,6 @@ if (!function_exists('analyze_document')) {
         if ($kmap) $autoCheck[] = 'ck-2';
         if (!$kmap) $suggestions['ck-2'][] = 'Add related subtopics as H2/H3; address PAA questions.';
 
-        // 3
         $h1Nodes = $xp->query('//h1');
         $h1Text  = $h1Nodes->length ? trim($h1Nodes->item(0)->textContent ?? '') : '';
         $h1Ok    = ($h1 > 0 && mb_strlen($h1Text) >= 12);
@@ -315,42 +312,35 @@ if (!function_exists('analyze_document')) {
         if ($h1Ok) $autoCheck[] = 'ck-3';
         if (!$h1Ok) $suggestions['ck-3'][] = 'Write a descriptive H1 (~6–12 words) with the primary topic.';
 
-        // 4
         $faqOk = ($faqType || $hasQMarks($fullText) >= 3);
         $scores['ck-4'] = $faqOk ? 88 : 45;
         if ($faqType) $autoCheck[] = 'ck-4';
         if (!$faqOk) $suggestions['ck-4'][] = 'Add a short FAQ section and FAQPage schema.';
 
-        // 5
         $fre = $read['fre'] ?? 0;
         $scores['ck-5'] = ($fre >= 60 ? 88 : ($fre >= 50 ? 75 : 55));
         if ($fre >= 60 && $wc >= 300) $autoCheck[] = 'ck-5';
         if ($fre < 60) $suggestions['ck-5'][] = 'Shorten sentences, use simpler words, add subheads.';
 
-        // 6
         $titleOk = $lenBetween($title, 50, 65);
         $scores['ck-6'] = $titleOk ? 90 : ($title ? 65 : 10);
         if ($titleOk) $autoCheck[] = 'ck-6';
         if (!$titleOk) $suggestions['ck-6'][] = 'Keep title around 50–60 chars; lead with the primary term.';
 
-        // 7
         $metaOk = ($metaDescLen >= 140 && $metaDescLen <= 170);
         $scores['ck-7'] = $metaOk ? 90 : ($metaDescLen ? 65 : 15);
         if ($metaOk) $autoCheck[] = 'ck-7';
         if (!$metaOk) $suggestions['ck-7'][] = 'Write a compelling 150–160 char meta with benefit + CTA.';
 
-        // 8
         $scores['ck-8'] = $canonical ? 100 : 20;
         if ($canonical) $autoCheck[] = 'ck-8';
         if (!$canonical) $suggestions['ck-8'][] = 'Add a canonical link to the preferred URL.';
 
-        // 9
         $scores['ck-9'] = ($indexable && $xmlMap) ? 92 : ($indexable ? 72 : 15);
         if ($indexable && $xmlMap) $autoCheck[] = 'ck-9';
         if (!$indexable) $suggestions['ck-9'][] = 'Remove “noindex” if this page should rank.';
         if (!$xmlMap)   $suggestions['ck-9'][] = 'Add page to XML sitemap and resubmit in Search Console.';
 
-        // 10
         $hasAuthor = $xp->query('//*[@itemprop="author"]|//*[@rel="author"]|//*[contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"author")]')->length > 0;
         $hasDate   = $xp->query('//*[@datetime or contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"date")]')->length > 0;
         $eeatOk    = ($hasAuthor || $hasDate);
@@ -358,58 +348,44 @@ if (!function_exists('analyze_document')) {
         if ($eeatOk) $autoCheck[] = 'ck-10';
         if (!$eeatOk) $suggestions['ck-10'][] = 'Show author name/credentials and publish/update dates.';
 
-        // 11
         $uniqueSignals = ($wc >= 900) + ($mediaCnt >= 2) + (int)$textHas(' vs ') + (int)$textHas('comparison');
         $scores['ck-11'] = $uniqueSignals >= 2 ? 80 : ($wc >= 600 ? 68 : 50);
         if ($uniqueSignals >= 2) $autoCheck[] = 'ck-11';
         if ($uniqueSignals < 2) $suggestions['ck-11'][] = 'Add unique insights, original data, or comparisons.';
 
-        // 12
         $externalLinks = 0;
-        if ($a) {
-            foreach ($a as $node) {
-                $href = $node->getAttribute('href');
-                if (preg_match('~^https?://~i', $href)) $externalLinks++;
-            }
-        }
+        if ($a) foreach ($a as $node) if (preg_match('~^https?://~i', $node->getAttribute('href'))) $externalLinks++;
         $scores['ck-12'] = $externalLinks >= 3 ? 86 : ($externalLinks ? 66 : 40);
         if ($externalLinks >= 3) $autoCheck[] = 'ck-12';
         if ($externalLinks < 3) $suggestions['ck-12'][] = 'Cite 2–3 authoritative sources with descriptive anchors.';
 
-        // 13
         $mediaOk = $mediaCnt >= 2;
         $scores['ck-13'] = $mediaOk ? 85 : ($mediaCnt ? 70 : 45);
         if ($mediaOk) $autoCheck[] = 'ck-13';
         if (!$mediaOk) $suggestions['ck-13'][] = 'Add descriptive images/charts or a short explainer video.';
 
-        // 14
         $structureOk = ($subheads >= 4);
         $scores['ck-14'] = $structureOk ? 86 : ($subheads ? 70 : 48);
         if ($structureOk) $autoCheck[] = 'ck-14';
         if (!$structureOk) $suggestions['ck-14'][] = 'Use H2 for major subtopics, H3 for subsections.';
 
-        // 15
         $scores['ck-15'] = $internal >= 5 ? 85 : ($internal ? 65 : 40);
         if ($internal >= 5) $autoCheck[] = 'ck-15';
         if ($internal < 5) $suggestions['ck-15'][] = 'Add 3–5 contextual internal links to pillar/related pages.';
 
-        // 16
         $slugOk = $slugClean($path ?: '/');
         $scores['ck-16'] = $slugOk ? 90 : 60;
         if ($slugOk) $autoCheck[] = 'ck-16';
         if (!$slugOk) $suggestions['ck-16'][] = 'Shorten/simplify slug (lowercase, hyphens, ≤100 chars).';
 
-        // 17
         $scores['ck-17'] = $breadcrumbs ? 92 : 55;
         if ($breadcrumbs) $autoCheck[] = 'ck-17';
         if (!$breadcrumbs) $suggestions['ck-17'][] = 'Add breadcrumb nav and BreadcrumbList schema.';
 
-        // 18
         $scores['ck-18'] = $viewport ? 95 : 40;
         if ($viewport) $autoCheck[] = 'ck-18';
         if (!$viewport) $suggestions['ck-18'][] = 'Add meta viewport and ensure responsive layout.';
 
-        // 19
         $lazyImgs = $xp->query('//img[@loading="lazy"]')->length;
         $webpImgs = $xp->query('//img[contains(translate(@src,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),".webp")]')->length;
         $perfOk = ($lazyImgs >= 3 || $webpImgs >= 2);
@@ -417,34 +393,28 @@ if (!function_exists('analyze_document')) {
         if ($perfOk) $autoCheck[] = 'ck-19';
         if (!$perfOk) $suggestions['ck-19'][] = 'Use WebP/AVIF, lazy‑load images, defer non‑critical JS.';
 
-        // 20
         $scores['ck-20'] = 60;
         $suggestions['ck-20'][] = 'Run PSI (mobile); fix LCP<2.5s, INP<200ms, CLS<0.1.';
 
-        // 21
         $scores['ck-21'] = $hasCTA ? 84 : 56;
         if ($hasCTA) $autoCheck[] = 'ck-21';
         if (!$hasCTA) $suggestions['ck-21'][] = 'Add a clear CTA (“Try”, “Download”, “Get a quote”).';
 
-        // 22
         $entityOk = ($articleT || $productT || $howtoT || ($h1Ok && $wc >= 300));
         $scores['ck-22'] = $entityOk ? 82 : 58;
         if ($entityOk) $autoCheck[] = 'ck-22';
         if (!$entityOk) $suggestions['ck-22'][] = 'Define the main entity in intro and add matching schema.';
 
-        // 23
         $proper = preg_match_all('~\b[A-Z][a-z]{3,}\b~u', $fullText);
         $scores['ck-23'] = $proper >= 6 ? 84 : ($proper ? 66 : 48);
         if ($proper >= 6) $autoCheck[] = 'ck-23';
         if ($proper < 6) $suggestions['ck-23'][] = 'Mention related entities (brands, places, standards) with context.';
 
-        // 24
         $schemaOk = ($articleT || $productT || $howtoT || $faqType);
         $scores['ck-24'] = $schemaOk ? 90 : 45;
         if ($schemaOk) $autoCheck[] = 'ck-24';
         if (!$schemaOk) $suggestions['ck-24'][] = 'Add JSON‑LD (Article/FAQ/Product/HowTo) and validate.';
 
-        // 25
         $hasSameAs = false;
         if ($ld && $ld->length) {
             foreach ($ld as $sn) {
