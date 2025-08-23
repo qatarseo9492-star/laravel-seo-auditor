@@ -33,7 +33,7 @@ body{
   overflow-x:hidden;
 }
 
-/* Canvases */
+/* Decor canvases */
 #linesCanvas, #linesCanvas2, #brainCanvas, #smokeFX { position:fixed; inset:0; z-index:0; pointer-events:none; }
 #brainCanvas{opacity:.10}
 
@@ -44,7 +44,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Lang dock */
+/* Language dock */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -68,7 +68,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .section-title{font-size:1.6rem;margin:0 0 .3rem}
 .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* ======= SCORE GAUGE ======= */
+/* ======= SCORE GAUGE (with progress arc) ======= */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}
@@ -90,7 +90,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .ico{width:1.1em;text-align:center}
 .ico-green{color:var(--good)} .ico-orange{color:var(--warn)} .ico-red{color:var(--bad)} .ico-cyan{color:var(--accent)} .ico-purple{color:#9b5cff}
 
-/* URL input */
+/* URL field */
 .analyze-form input[type="url"]{
   width:100%; padding:1rem 1.2rem; border-radius:16px;
   border:1px solid #1b1b35; background:#0b0d21; color:var(--text); transition:.25s;
@@ -111,7 +111,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 @keyframes underlineWave{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
-/* ======= Water progress bar ======= */
+/* ======= Analyze water progress ======= */
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{position:relative; height:64px; border-radius:18px; overflow:hidden;background:#0b0d21; border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute; inset:0; width:100%; height:100%; z-index:1;}
@@ -127,7 +127,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%); will-change:filter;}
 #waterSmoke{ position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:screen; }
 
-/* Progress (checklist completion) */
+/* Progress (completion) */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .progress-bar{width:100%;height:12px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid #101826}
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
@@ -217,7 +217,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   </defs>
 </svg>
 
-<!-- Language Dock -->
+<!-- Lang dock -->
 <div class="lang-dock">
   <button class="lang-btn" id="langOpen" title="Language"><i class="fa-solid fa-globe"></i></button>
 </div>
@@ -242,7 +242,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
     <div class="score-area">
       <div class="score-container">
-        <!-- CIRCULAR GAUGE with PROGRESS ARC -->
+        <!-- Gauge -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
@@ -316,7 +316,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
         <div class="analyze-row">
           <div style="display:flex;align-items:center;gap:.6rem">
             <label style="display:inline-flex;align-items:center;gap:.45rem;cursor:pointer">
-              <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)"> <span data-i="auto_check">Auto-apply checkmarks (≥ 70)</span>
+              <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)">
+              <span data-i="auto_check">Auto-apply checkmarks (≥ 80)</span>
             </label>
           </div>
           <button id="analyzeBtn" class="btn btn-danger"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
@@ -432,9 +433,10 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                   <defs>
                     <clipPath id="catClip-{{ $loop->index }}"><rect x="0" y="0" width="600" height="24" rx="10" ry="10"/></clipPath>
                     <clipPath id="catFillClip-{{ $loop->index }}"><rect id="catFillRect-{{ $loop->index }}" x="0" y="0" width="0" height="24"/></clipPath>
+                    <!-- gradient colors will be set from JS palette -->
                     <linearGradient id="catGrad-{{ $loop->index }}" x1="0" y1="0" x2="1" y2="1">
-                      <stop id="catStop1-{{ $loop->index }}" offset="0%" stop-color="#ef4444"/>
-                      <stop id="catStop2-{{ $loop->index }}" offset="100%" stop-color="#b91c1c"/>
+                      <stop id="catStop1-{{ $loop->index }}" offset="0%" stop-color="#22d3ee"/>
+                      <stop id="catStop2-{{ $loop->index }}" offset="100%" stop-color="#a78bfa"/>
                     </linearGradient>
                     <path id="catWave-{{ $loop->index }}" d="M0 12 Q 40 6 80 12 T 160 12 T 240 12 T 320 12 T 400 12 T 480 12 T 560 12 T 640 12 V 30 H 0 Z"/>
                   </defs>
@@ -517,7 +519,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <script>
 /* ---------- i18n ---------- */
-const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto-apply checkmarks (≥ 70)"} };
+const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto-apply checkmarks (≥ 80)"} };
 const LANGS = [["en","English"]];
 (function(){
   const dockBtn = document.getElementById('langOpen');
@@ -543,13 +545,13 @@ const LANGS = [["en","English"]];
   fill(); apply(localStorage.getItem('lang')||'en');
 })();
 
-/* ---------- Background wireframe ---------- */
+/* ---------- wireframe bg ---------- */
 (function(){
   const bc = document.getElementById('brainCanvas'), bctx = bc.getContext('2d');
   let bw, bh, pts=[]; function rs(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; pts = Array.from({length:80},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
   addEventListener('resize',rs,{passive:true}); rs();
   (function loop(){ bctx.clearRect(0,0,bw,bh); for(const p of pts){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>bw) p.vx*=-1; if(p.y<0||p.y>bh) p.vy*=-1; }
-    for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
+    for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
 })();
 
 /* ---------- Back to Top ---------- */
@@ -567,19 +569,13 @@ function setChipTone(el, value, {mode='overall'} = {}){
   el.classList.remove('chip-good','chip-mid','chip-bad');
   const ico = el.querySelector('i.ico'); if (ico) ico.classList.remove('ico-green','ico-orange','ico-red','ico-purple');
   const v = Number(value); if (Number.isNaN(v)) return;
-  if (mode === 'content') {
-    if (v > 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
-    else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
-    else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
-  } else {
-    if (v >= 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
-    else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
-    else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
-  }
+  if (v >= 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
+  else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
+  else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
 }
 function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 
-/* ---------- Score Gauge controller (with progress arc) ---------- */
+/* ---------- Score Gauge controller ---------- */
 const GAUGE = { rect:null, stop1:null, stop2:null, r1:null, r2:null, arc:null, text:null, H:200, CIRC: 2*Math.PI*95 };
 function setScoreWheel(value){
   if (!GAUGE.rect){
@@ -615,18 +611,18 @@ function setScoreWheel(value){
   }
 
   setText('overallScoreInline', Math.round(v));
-  setChipTone(document.getElementById('overallChip'), v, {mode:'overall'});
+  setChipTone(document.getElementById('overallChip'), v);
 }
 
-/* ---------- Per-category smoke (heading bars) ---------- */
+/* ---------- Per-category smoke & palette ---------- */
 const CatSmoke = (function(){
-  const list = []; // each: {el, ctx, parts, ratio, dpr}
+  const canvases = []; // {el, ctx, parts, ratio, dpr}
   function attachAll(){
     document.querySelectorAll('.cat-smoke').forEach((cv, i)=>{
       const ctx = cv.getContext('2d');
       const o = { el: cv, ctx, parts: [], ratio: 0, dpr: Math.min(2, window.devicePixelRatio||1) };
       resizeOne(o);
-      list[i] = o;
+      canvases[i] = o;
     });
   }
   function resizeOne(o){
@@ -639,7 +635,7 @@ const CatSmoke = (function(){
     const W = o.el.clientWidth || 600;
     const H = o.el.clientHeight || 26;
     const span = Math.max(8, W * o.ratio);
-    const baseY = H * 0.55; // near the wave crest
+    const baseY = H * 0.55;
     for(let i=0;i<n;i++){
       const x = Math.random() * span;
       o.parts.push({
@@ -653,13 +649,13 @@ const CatSmoke = (function(){
       });
     }
   }
-  function step(){
-    for(const o of list){
+  function tick(){
+    for(const o of canvases){
       if (!o) continue;
       const W = o.el.clientWidth || 600, H = o.el.clientHeight || 26;
       o.ctx.clearRect(0,0,W,H);
       o.ctx.globalCompositeOperation = 'lighter';
-      const intensity = 40 * (0.25 + 0.75 * o.ratio); // more fill => more smoke
+      const intensity = 40 * (0.25 + 0.75 * o.ratio);
       if (o.parts.length < intensity) spawn(o, 2);
       for(const p of o.parts){
         p.x += p.vx; p.y += p.vy; p.vy -= 0.0018; p.life -= p.decay;
@@ -671,16 +667,11 @@ const CatSmoke = (function(){
       }
       o.parts = o.parts.filter(p => p.life > 0 && p.y > -10);
     }
-    requestAnimationFrame(step);
+    requestAnimationFrame(tick);
   }
-  function setPct(index, pct){
-    const o = list[index]; if(!o) return;
-    o.ratio = Math.max(0, Math.min(1, (pct||0)/100));
-  }
-  window.addEventListener('resize', ()=> list.forEach(o=>o&&resizeOne(o)), {passive:true});
-  // init at parse time (script is at the end of body)
-  attachAll(); requestAnimationFrame(step);
-  return { setPct };
+  window.addEventListener('resize', ()=> canvases.forEach(o=>o&&resizeOne(o)), {passive:true});
+  attachAll(); requestAnimationFrame(tick);
+  return { setPct(i, pct){ const o=canvases[i]; if(!o) return; o.ratio=Math.max(0,Math.min(1,(pct||0)/100)); } };
 })();
 
 /* ---------- Checklist + scoring ---------- */
@@ -694,6 +685,16 @@ const CatSmoke = (function(){
   const contentScoreInline = document.getElementById('contentScoreInline');
   let lastAnalyzed = 0;
 
+  /* Per-category heading gradient palette (distinct colors) */
+  const CAT_PALETTES = [
+    ['#22d3ee','#a78bfa'], // Content & Keywords: cyan -> purple
+    ['#34d399','#60a5fa'], // Technical: emerald -> blue
+    ['#fcd34d','#fb7185'], // Content Quality: amber -> rose
+    ['#86efac','#f0abfc'], // Structure: green -> fuchsia
+    ['#fca5a5','#fde68a'], // UX: rose -> yellow
+    ['#f472b6','#60a5fa'], // Entities: pink -> blue
+  ];
+
   function contentScore(){ const checked = boxes().filter(cb=>cb.checked).length; return Math.round((checked/total)*100); }
   function overallScoreBlended(){
     const cs = contentScore();
@@ -701,7 +702,7 @@ const CatSmoke = (function(){
     return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
   }
 
-  /* Update per-category water bars + smoke */
+  /* Update per-category bars */
   function updateCatHeadingBars(){
     cards().forEach((card, idx)=>{
       const all = card.querySelectorAll('input[type="checkbox"]');
@@ -712,25 +713,20 @@ const CatSmoke = (function(){
       card.querySelector('.checked-count').textContent = done.length;
       card.querySelector('.total-count').textContent = all.length;
 
-      // fill bar width
+      // fill width
       const rect = document.getElementById(`catFillRect-${idx}`);
       const pctEl = document.getElementById(`catPct-${idx}`);
-      const stop1 = document.getElementById(`catStop1-${idx}`);
-      const stop2 = document.getElementById(`catStop2-${idx}`);
       if (rect) rect.setAttribute('width', String(Math.round(600 * pct / 100)));
       if (pctEl) pctEl.textContent = `${done.length}/${all.length} • ${pct}%`;
 
-      // threshold color
-      let c1, c2;
-      if (pct >= 80){ c1='#22c55e'; c2='#16a34a'; }
-      else if (pct >= 60){ c1='#f59e0b'; c2='#fb923c'; }
-      else { c1='#ef4444'; c2='#b91c1c'; }
+      // color palette per category (distinct colors)
+      const [c1,c2] = CAT_PALETTES[idx % CAT_PALETTES.length];
+      const stop1 = document.getElementById(`catStop1-${idx}`);
+      const stop2 = document.getElementById(`catStop2-${idx}`);
       if (stop1 && stop2){ stop1.setAttribute('stop-color', c1); stop2.setAttribute('stop-color', c2); }
 
-      // smoke intensity across filled width
-      if (window.CatSmoke && typeof CatSmoke.setPct === 'function') {
-        CatSmoke.setPct(idx, pct);
-      }
+      // smoke intensity based on fill
+      if (window.CatSmoke && typeof CatSmoke.setPct === 'function') CatSmoke.setPct(idx, pct);
     });
   }
 
@@ -742,7 +738,7 @@ const CatSmoke = (function(){
     updateCatHeadingBars();
 
     const cs = contentScore(); contentScoreInline.textContent = cs;
-    setChipTone(document.getElementById('contentScoreChip'), cs, {mode:'content'});
+    setChipTone(document.getElementById('contentScoreChip'), cs);
     setScoreWheel( overallScoreBlended() );
   }
   function load(){ try{const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); boxes().forEach(cb=>cb.checked = saved.includes(cb.id));}catch(e){} update(); }
@@ -818,7 +814,7 @@ const CatSmoke = (function(){
 /* ---------- URL normalization ---------- */
 function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
 
-/* ---------- Smoke particles for progress water ---------- */
+/* ---------- Water Smoke for progress bar ---------- */
 const WaterSmoke = (function(){
   const canvas = document.getElementById('waterSmoke');
   const ctx = canvas ? canvas.getContext('2d') : null;
@@ -827,32 +823,17 @@ const WaterSmoke = (function(){
 
   function cssW(){ return canvas?.clientWidth || canvas?.parentElement?.clientWidth || 0; }
   function cssH(){ return canvas?.clientHeight || canvas?.parentElement?.clientHeight || 0; }
-
-  function resize(){
-    if(!canvas || !ctx) return;
-    const dpr = Math.min(2, window.devicePixelRatio||1);
-    const w = cssW(), h = cssH();
-    canvas.width = Math.max(1, Math.floor(w * dpr));
-    canvas.height = Math.max(1, Math.floor(h * dpr));
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-  }
-
+  function resize(){ if(!canvas || !ctx) return; const dpr = Math.min(2, window.devicePixelRatio||1); const w = cssW(), h = cssH(); canvas.width = Math.max(1, Math.floor(w * dpr)); canvas.height = Math.max(1, Math.floor(h * dpr)); ctx.setTransform(dpr,0,0,dpr,0,0); }
   function spawn(n=6){
-    if(!canvas) return;
-    const y = cssH() * levelRatioTop;
-    for(let i=0;i<n;i++){
-      const x = Math.random()*cssW();
-      const jitter = (Math.random()*4 - 2);
-      const speed = 0.4 + Math.random()*0.8;
-      particles.push({ x, y: y + jitter, vx:(Math.random()-.5)*.35, vy: -speed, life:1, decay:0.008 + Math.random()*0.02, r: 2 + Math.random()*6, hue: (180 + Math.random()*120) });
+    if(!canvas) return; const y = cssH() * levelRatioTop;
+    for(let i=0;i<n;i++){ const x = Math.random()*cssW(); const jitter=(Math.random()*4-2); const speed = 0.4 + Math.random()*0.8;
+      particles.push({ x, y:y+jitter, vx:(Math.random()-.5)*.35, vy:-speed, life:1, decay:0.008+Math.random()*0.02, r:2+Math.random()*6, hue:(180+Math.random()*120) });
     }
   }
-
   function tick(){
     if(!running || !ctx || !canvas){ cancelAnimationFrame(frameId); return; }
     frameId = requestAnimationFrame(tick);
-    ctx.clearRect(0,0,cssW(),cssH());
-    ctx.globalCompositeOperation = 'lighter';
+    ctx.clearRect(0,0,cssW(),cssH()); ctx.globalCompositeOperation = 'lighter';
     if (particles.length < 180) spawn(6);
     for (const p of particles){
       p.x += p.vx; p.y += p.vy; p.vy -= 0.005; p.life -= p.decay;
@@ -864,7 +845,6 @@ const WaterSmoke = (function(){
     }
     particles = particles.filter(p=> p.life>0 && p.y > -20);
   }
-
   function start(){ if(!canvas||!ctx) return; running=true; resize(); cancelAnimationFrame(frameId); frameId = requestAnimationFrame(tick); }
   function stop(){ running=false; cancelAnimationFrame(frameId); particles.length = 0; if(ctx) ctx.clearRect(0,0,cssW(),cssH()); }
   function setLevel(topRatio){ levelRatioTop = Math.max(0, Math.min(1, topRatio)); }
@@ -872,7 +852,7 @@ const WaterSmoke = (function(){
   return { start, stop, setLevel };
 })();
 
-/* ---------- Analyze water progress controller ---------- */
+/* ---------- Analyze progress controller ---------- */
 const Water = (function(){
   const wrap = document.getElementById('waterWrap');
   const bar  = document.getElementById('waterBar');
@@ -933,9 +913,10 @@ const Water = (function(){
   requestAnimationFrame(frame);
 })();
 
-/* ---------- Analyze flow ---------- */
+/* ---------- Analyze flow (auto-select ≥ 80) ---------- */
 (function(){
   const $ = s => document.querySelector(s);
+  const AUTO_SCORE_THRESHOLD = 80;
 
   document.getElementById('copyQuick').addEventListener('click', async ()=>{
     const bits = [
@@ -989,9 +970,17 @@ const Water = (function(){
       setText('rAutoCount', (data.auto_check_ids||[]).length);
       if (report) report.style.display='block';
 
+      // Suggestions + per item scores
       window.__lastSuggestions = data.suggestions || {};
-      for (let i=1;i<=25;i++){ const key='ck-'+i; if (window.setScoreBadge) setScoreBadge(i, data.scores?.[key]); }
+      const idsFromScores = [];
+      for (let i=1;i<=25;i++){
+        const key='ck-'+i;
+        const score = Number(data.scores?.[key]);
+        if (window.setScoreBadge) setScoreBadge(i, isFinite(score)?score:null);
+        if (isFinite(score) && score >= AUTO_SCORE_THRESHOLD) idsFromScores.push(key);
+      }
 
+      // AI/Human UI
       const ai = data.ai_detection || {};
       const badge = document.getElementById('aiBadge');
       if (badge){
@@ -1016,19 +1005,21 @@ const Water = (function(){
         if (window.__setAIData) window.__setAIData(ai);
       }
 
+      // Overall score into the wheel
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
       if (window.__setAnalyzedScore) window.__setAnalyzedScore(backendOverall);
 
+      // ===== Auto-apply: union of backend auto_check_ids and items with score ≥ 80
       if (document.getElementById('autoApply').checked) {
+        const union = new Set([...(data.auto_check_ids||[]), ...idsFromScores]);
         const all = document.querySelectorAll('#analyzer input[type="checkbox"]');
-        all.forEach(cb => cb.checked = false);
-        (data.auto_check_ids||[]).forEach(id => { const el=document.getElementById(id); if(el) el.checked=true; });
+        all.forEach(cb => cb.checked = union.has(cb.id));
       }
       if (window.__updateChecklist) window.__updateChecklist();
 
       const csNow = window.__getContentScore ? window.__getContentScore() : 0;
       setText('contentScoreInline', csNow);
-      setChipTone(document.getElementById('contentScoreChip'), csNow, {mode:'content'});
+      setChipTone(document.getElementById('contentScoreChip'), csNow);
 
       Water.finish();
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
@@ -1044,7 +1035,7 @@ const Water = (function(){
 })();
 </script>
 
-<!-- Subtle procedural smoke background (WebGL2) -->
+<!-- Background smoke (WebGL2) -->
 <script>
 (function(){
   const canvas = document.getElementById('smokeFX'); if (!canvas) return;
