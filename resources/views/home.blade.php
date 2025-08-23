@@ -47,29 +47,37 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .hero-heading{font-size:3.3rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.6px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
 /* Chips & buttons */
-.badge{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem .8rem;border-radius:999px;font-weight:900;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
-.badge i{opacity:.9}
+.badge{display:inline-flex;align-items:center;gap:.55rem;padding:.5rem .85rem;border-radius:999px;font-weight:900;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+.badge i{opacity:.95}
 .badge-green{background:rgba(22,193,114,.18);border-color:rgba(22,193,114,.42)}
 .badge-orange{background:rgba(245,158,11,.20);border-color:rgba(245,158,11,.45)}
 .badge-red{background:rgba(239,68,68,.22);border-color:rgba(239,68,68,.50)}
-.btn{--pad:.75rem 1.05rem;display:inline-flex;align-items:center;gap:.5rem;padding:var(--pad);border-radius:14px;border:1px solid transparent;cursor:pointer;font-weight:800;letter-spacing:.2px;transition:.2s}
+.badge-human{background:rgba(99,102,241,.18);border-color:rgba(99,102,241,.45)}
+.badge-ai-low{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.45)}  /* AI% < 40 good */
+.badge-ai-mid{background:rgba(245,158,11,.20);border-color:rgba(245,158,11,.45)} /* AI 40–59 */
+.badge-ai-high{background:rgba(239,68,68,.22);border-color:rgba(239,68,68,.50)} /* AI ≥ 60 */
+
+.btn{--pad:.78rem 1.05rem;display:inline-flex;align-items:center;gap:.55rem;padding:var(--pad);border-radius:14px;border:1px solid transparent;cursor:pointer;font-weight:800;letter-spacing:.2px;transition:.22s;position:relative;overflow:hidden}
+.btn::after{content:"";position:absolute;inset:-200% -50% auto -50%;height:300%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);opacity:0;transition:opacity .2s}
+.btn:hover::after{opacity:1;animation:shine 1.1s ease}
+@keyframes shine{to{transform:translateX(180%) rotate(25deg)}}
 .btn-gradient{background:linear-gradient(135deg,#ff2045,#ff7a59);box-shadow:0 10px 26px rgba(255,32,69,.35)}
-.btn-gradient:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(255,32,69,.45)}
+.btn-gradient:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 14px 38px rgba(255,32,69,.45)}
 .btn-neon{background:linear-gradient(135deg,#3de2ff,#9b5cff);box-shadow:0 8px 30px rgba(61,226,255,.30);color:#02131e}
-.btn-neon:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(61,226,255,.40)}
-.btn-ghost{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.16);color:#fff}
-.btn-ghost:hover{background:rgba(255,255,255,.08);transform:translateY(-2px)}
+.btn-neon:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 12px 36px rgba(61,226,255,.40)}
+.btn-ghost{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);color:#fff}
+.btn-ghost:hover{background:rgba(255,255,255,.10);transform:translateY(-2px)}
 
 /* Analyzer container */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 
-/* ===== New Stylish Score Wheel ===== */
+/* ===== Stylish & Colorful Score Wheel ===== */
 .score-hero{position:relative;margin:0 0 8px;border-radius:22px;padding:18px;background:
   radial-gradient(140% 200% at 10% 0%, rgba(157,92,255,.10), transparent 55%),
   radial-gradient(140% 160% at 90% 100%, rgba(61,226,255,.10), transparent 50%),
   linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
 border:1px solid rgba(255,255,255,.08);overflow:hidden}
-.score-hero::before{/* soft animated rim */
+.score-hero::before{
   content:"";position:absolute;inset:-2px;padding:2px;border-radius:24px;
   background:conic-gradient(from 0deg, #3de2ff55, #9b5cff55, #ff7a5955, #16c17255, #3de2ff55);
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
@@ -77,17 +85,23 @@ border:1px solid rgba(255,255,255,.08);overflow:hidden}
 }
 @keyframes rim{to{transform:rotate(360deg)}}
 .score-grid{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center}
-.wheel-wrap{position:relative;width:250px;aspect-ratio:1}
+.wheel-wrap{position:relative;width:260px;aspect-ratio:1}
 .wheel{width:100%;height:100%}
 .wheel .track{stroke:rgba(255,255,255,.16);stroke-width:16;fill:none;filter:url(#innerShadow)}
-.wheel .ticks{stroke:rgba(255,255,255,.18);stroke-width:2;stroke-dasharray:2 10;stroke-linecap:round;fill:none;opacity:.8}
-.wheel .progress{stroke:url(#wheelGrad);stroke-width:16;stroke-linecap:round;fill:none;stroke-dasharray:339;stroke-dashoffset:339;filter:url(#glow)}
-.wheel .halo{fill:none;stroke:rgba(255,255,255,.10);stroke-width:28;filter:url(#blurHalo)}
-.wheel-center{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:70%;height:70%;border-radius:50%;
+.wheel .ticks{stroke:rgba(255,255,255,.18);stroke-width:2;stroke-dasharray:2 10;stroke-linecap:round;fill:none;opacity:.85}
+.wheel .progress{stroke:url(#gradRed);stroke-width:16;stroke-linecap:round;fill:none;stroke-dasharray:339;stroke-dashoffset:339;filter:url(#glow)}
+.wheel .halo{fill:none;stroke:rgba(255,255,255,.10);stroke-width:30;filter:url(#blurHalo)}
+/* Rainbow core (CSS, masked circle) */
+.wheel-rainbow{position:absolute;inset:14% 14% 14% 14%;border-radius:50%;
+  background:conic-gradient(#6ee7ff, #60a5fa, #a78bfa, #f472b6, #fb7185, #f59e0b, #22c55e, #6ee7ff);
+  filter:blur(8px) saturate(1.3);mix-blend-mode:screen;animation:spin 12s linear infinite;opacity:.70}
+@keyframes spin{to{transform:rotate(360deg)}}
+.wheel-center{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:72%;height:72%;border-radius:50%;
   backdrop-filter:blur(6px) saturate(140%);background:radial-gradient(120% 140% at 50% 0%, rgba(255,255,255,.14), rgba(255,255,255,.02));
   border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 0 40px rgba(0,0,0,.35);}
-.wheel-score{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);font-size:3rem;font-weight:1000}
-.wheel-label{position:absolute;left:50%;top:60%;transform:translate(-50%,0);opacity:.8;font-weight:800;letter-spacing:.4px}
+.wheel-score{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);font-size:3.2rem;font-weight:1000}
+.wheel-score.green{color:#22c55e}.wheel-score.orange{color:#f59e0b}.wheel-score.red{color:#ef4444}
+.wheel-label{position:absolute;left:50%;top:62%;transform:translate(-50%,0);opacity:.8;font-weight:800;letter-spacing:.4px}
 
 /* URL card */
 .url-card{margin-top:12px;background:
@@ -101,12 +115,10 @@ border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:14px;box-shado
 .analyze-form input[type="url"]:focus{outline:none;border-color:#5942ff;box-shadow:0 0 0 6px rgba(155,92,255,.15)}
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
-/* Quick report chips */
+/* Quick report chips & checklist (kept) */
 .report-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem}
 .report-chips .chip{padding:.45rem .75rem;border-radius:999px;font-weight:900;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
-
-/* Progress + checklist (unchanged visuals) */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .progress-bar{width:100%;height:12px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid #101826}
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
@@ -134,7 +146,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 .footer-links a:hover{color:#fff;text-decoration:underline}
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
 #backTop:hover{background:rgba(255,255,255,.12)}
-@media (max-width:992px){.analyzer-grid .category-card{grid-column:span 12}.wheel-wrap{width:200px}.hero-heading{font-size:2.4rem}}
+@media (max-width:992px){.analyzer-grid .category-card{grid-column:span 12}.wheel-wrap{width:210px}.hero-heading{font-size:2.4rem}}
 @media print{#linesCanvas,#linesCanvas2,#smokeFX,header.site,#backTop{display:none!important}}
 </style>
 </head>
@@ -190,18 +202,15 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div class="score-grid">
         <!-- Wheel -->
         <div class="wheel-wrap">
+          <div class="wheel-rainbow" aria-hidden="true"></div>
           <svg class="wheel" viewBox="0 0 120 120" role="img" aria-label="Overall score">
-            <!-- outer subtle halo -->
             <circle class="halo" cx="60" cy="60" r="54" stroke="url(#halo)"></circle>
-            <!-- tick ring -->
             <circle class="ticks" cx="60" cy="60" r="54" stroke-dasharray="1 8" transform="rotate(-90 60 60)"/>
-            <!-- base track -->
             <circle class="track" cx="60" cy="60" r="54"/>
-            <!-- progress arc (stroke set in JS via grad) -->
             <circle class="progress" id="wheelProgress" cx="60" cy="60" r="54" transform="rotate(-90 60 60)"/>
           </svg>
           <div class="wheel-center" aria-hidden="true"></div>
-          <div id="overallScore" class="wheel-score">0%</div>
+          <div id="overallScore" class="wheel-score red">0%</div>
           <div class="wheel-label">Overall</div>
         </div>
 
@@ -211,8 +220,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
             <span id="overallChip" class="badge"><i class="fa-solid fa-gauge"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
             <span id="writerChip" class="badge badge-green"><i class="fa-solid fa-user-check"></i> Writer: <b>Likely Human</b></span>
             <button id="viewAIText" class="btn btn-neon" style="--pad:.45rem .8rem"><i class="fa-solid fa-robot"></i> Evidence</button>
-            <span class="badge"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</span>
-            <span class="badge"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</span>
+            <span id="humanChip" class="badge badge-human"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</span>
+            <span id="aiChip" class="badge"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</span>
           </div>
 
           <!-- URL card -->
@@ -253,7 +262,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       </div><!-- /grid -->
     </div>
 
-    <!-- Progress + Checklist (same as before; omitted for brevity) -->
+    <!-- Progress + Checklist (unchanged logic/markup) -->
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
@@ -332,9 +341,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </footer>
 <button id="backTop" title="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- Simple modal for evidence -->
-<div id="evidenceModal" style="display:none"></div>
-
 <script>
 /* Background lines */
 (function(){
@@ -396,29 +402,33 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 /* Back to top */
 (function(){const b=document.getElementById('backTop');const l=document.getElementById('toTopLink');function s(){b.style.display=scrollY>300?'grid':'none'}addEventListener('scroll',s,{passive:true});s();[b,l].forEach(el=>el&&el.addEventListener('click',e=>{e.preventDefault();scrollTo({top:0,behavior:'smooth'})}))})();
 
-/* ===== Wheel logic (green ≥80, orange 61–79, red ≤60) ===== */
+/* ===== Wheel logic (≥80 green, 61–79 orange, ≤60 red) ===== */
 const CIRC=339;
 function paintWheel(v){
   const arc=document.getElementById('wheelProgress');
+  const txt=document.getElementById('overallScore');
   const n=Math.max(0,Math.min(100,Number(v)||0));
   const off=CIRC - (n/100)*CIRC;
   arc.style.strokeDashoffset=off;
-  // color rules
-  let grad = 'url(#gradRed)';
-  if(n>=80) grad = 'url(#gradGreen)';
-  else if(n>60) grad = 'url(#gradOrange)'; // exactly 60 -> red
-  arc.setAttribute('stroke', grad);
-  document.getElementById('overallScore').textContent=Math.round(n)+'%';
-  document.getElementById('overallScoreInline').textContent=Math.round(n);
-  // chip color class
+
+  let grad='url(#gradRed)', cls='red';
+  if(n>=80){ grad='url(#gradGreen)'; cls='green'; }
+  else if(n>60){ grad='url(#gradOrange)'; cls='orange'; } // exactly 60 is red
+  arc.setAttribute('stroke',grad);
+
+  txt.textContent=Math.round(n)+'%';
+  txt.classList.remove('green','orange','red'); txt.classList.add(cls);
+
   const chip=document.getElementById('overallChip');
   chip.classList.remove('badge-green','badge-orange','badge-red');
   chip.classList.add(n>=80?'badge-green':(n>60?'badge-orange':'badge-red'));
+
+  document.getElementById('overallScoreInline').textContent=Math.round(n);
 }
 
 /* Checklist storage, score pills, progress */
 (function(){
-  const STORAGE_KEY='semanticSeoChecklistV7';
+  const STORAGE_KEY='semanticSeoChecklistV8';
   const total=25;
   const boxes=()=>Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar=document.getElementById('progressBar');
@@ -494,13 +504,29 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
 
   window.__setAIData=function(ai){
-    document.getElementById('aiPct').textContent=typeof ai?.ai_pct==='number'?ai.ai_pct:'—';
-    document.getElementById('humanPct').textContent=typeof ai?.human_pct==='number'?ai.human_pct:'—';
-    // Writer chip color (Likely Human/Mixed/Likely AI)
+    // Writer pill color
     const writer=document.getElementById('writerChip');
     writer.classList.remove('badge-green','badge-orange','badge-red');
     const map={likely_human:['badge-green','Likely Human'],mixed:['badge-orange','Mixed'],likely_ai:['badge-red','Likely AI'],unknown:['','Unknown']};
     const t=map[ai?.label||'unknown']; if(t){ if(t[0]) writer.classList.add(t[0]); writer.innerHTML=`<i class="fa-solid fa-user-check"></i> Writer: <b>${t[1]}</b>`; }
+
+    // Human/AI percentage chips with dynamic colors
+    const humanPct=typeof ai?.human_pct==='number'?ai.human_pct:null;
+    const aiPct=typeof ai?.ai_pct==='number'?ai.ai_pct:null;
+
+    const humanChip=document.getElementById('humanChip');
+    humanChip.classList.remove('badge-green','badge-orange','badge-red');
+    if(humanPct!==null){
+      humanChip.querySelector('b').textContent = humanPct;
+      humanChip.classList.add(humanPct>=80?'badge-green':(humanPct>60?'badge-orange':'badge-red'));
+    }else{ document.getElementById('humanPct').textContent='—'; }
+
+    const aiChip=document.getElementById('aiChip');
+    aiChip.classList.remove('badge-ai-low','badge-ai-mid','badge-ai-high');
+    if(aiPct!==null){
+      document.getElementById('aiPct').textContent=aiPct;
+      aiChip.classList.add(aiPct<40?'badge-ai-low':(aiPct<60?'badge-ai-mid':'badge-ai-high'));
+    }else{ document.getElementById('aiPct').textContent='—'; }
   };
 
   async function analyze(){
@@ -545,13 +571,13 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       document.getElementById('rAutoCount').textContent = autoCount.toString();
       document.dispatchEvent(new Event('change'));
 
-      // overall wheel color + % (rules: ≥80 green, 61–79 orange, ≤60 red)
+      // wheel
       paintWheel(typeof data.overall_score==='number'?data.overall_score:0);
 
       // writer/human/ai
       window.__setAIData(data.ai_detection||{});
 
-      // status message
+      // status
       const n=parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = n>=80 ? 'Great! You passed — keep going.' : (n<=60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent='', 4200);
@@ -563,7 +589,7 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
     }
   }
 
-  // initial paint (0%)
+  // initial 0%
   paintWheel(0);
 })();
 </script>
