@@ -1,468 +1,330 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 Route::get('/', function () {
-    return view('home'); // resources/views/home.blade.php
-})->name('home');
+    // return your landing view
+    return view('home');
+});
 
-/* ---------- Helpers ---------- */
-if (!function_exists('safe_url')) {
-    function safe_url(string $u): string {
-        $u = trim($u);
-        if ($u === '') return '';
-        if (!preg_match('~^https?://~i', $u)) $u = 'https://' . ltrim($u, '/');
-        return $u;
+Route::post('/analyze.json', function (Request $request) {
+    $url = trim($request->input('url', ''));
+    if (!$url) {
+        return response()->json(['ok' => false, 'error' => 'Missing URL'], 400);
     }
-}
-if (!function_exists('fetch_html')) {
-    function fetch_html(string $url, int $timeout = 12): array {
-        try {
-            $res = Http::timeout($timeout)
-                ->withOptions(['allow_redirects' => true])
-                ->withHeaders([
-                    'User-Agent' => 'Semantic-SEO-Master/1.1 (+https://example.com/)',
-                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                ])->get($url);
 
-            return [
-                'ok'     => $res->successful(),
-                'status' => $res->status(),
-                'html'   => $res->body() ?? '',
-                'headers'=> $res->headers(),
-            ];
-        } catch (\Throwable $e) {
-            return ['ok' => false, 'status' => 0, 'html' => '', 'error' => $e->getMessage()];
-        }
+    // Normalize URL
+    if (!preg_match('~^https?://~i', $url)) {
+        $url = 'https://' . ltrim($url, '/');
     }
-}
-if (!function_exists('dom_xp')) {
-    function dom_xp(string $html): array {
-        $dom = new DOMDocument();
-        libxml_use_internal_errors(true);
-        @$dom->loadHTML($html);
-        libxml_clear_errors();
-        $xp = new DOMXPath($dom);
-        return [$dom, $xp];
+
+    try {
+        $resp = Http::withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (compatible; SemanticSEOMaster/1.0; +https://example.com/bot)',
+            'Accept'     => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        ])->timeout(12)->get($url);
+    } catch (\Throwable $e) {
+        return response()->json(['ok' => false, 'error' => 'Fetch failed: ' . $e->getMessage()], 500);
     }
-}
-if (!function_exists('node_text')) {
-    function node_text(?DOMNode $n): string {
-        return $n ? trim($n->textContent ?? '') : '';
+
+    $status = $resp->status();
+    $html   = (string) $resp->body();
+
+    // Minimal HTML guard
+    if ($status >= 400 || !trim($html)) {
+        return response()->json([
+            'ok' => true,
+            'status' => $status,
+            'overall_score' => 0,
+            'scores' => [],
+            'counts' => ['h1' => 0, 'h2' => 0, 'h3' => 0, 'internal_links' => 0],
+            'title' => '',
+            'meta_description_len' => 0,
+            'canonical' => false,
+            'robots' => '',
+            'viewport' => false,
+            'schema' => ['found_types' => []],
+            'auto_check_ids' => [],
+            'suggestions' => [],
+            'ai_detection' => ['label' => 'mixed', 'ai_pct' => 0, 'human_pct' => 0, 'likelihood' => 0, 'reasons' => []],
+        ]);
     }
-}
-if (!function_exists('extract_full_text')) {
-    function extract_full_text(DOMXPath $xp): string {
-        $parts = [];
-        foreach ([
-            '//main//text()',
-            '//article//text()',
-            '//div[contains(@class,"content") or contains(@id,"content")]//text()',
-            '//body//p//text()'
-        ] as $q) {
-            $nl = $xp->query($q);
-            if ($nl && $nl->length) {
-                foreach ($nl as $n) {
-                    $t = trim($n->nodeValue ?? '');
-                    if ($t !== '') $parts[] = $t;
-                }
+
+    // DOM parsing
+    libxml_use_internal_errors(true);
+    $dom = new DOMDocument();
+    @$dom->loadHTML($html);
+    libxml_clear_errors();
+    $xpath = new DOMXPath($dom);
+
+    // Helpers
+    $text = function(string $query) use($xpath) {
+        $n = $xpath->query($query);
+        $s = [];
+        foreach ($n as $node) $s[] = trim($node->textContent ?? '');
+        return $s;
+    };
+    $attr = function(string $query, string $attr) use($xpath) {
+        $n = $xpath->query($query);
+        $s = [];
+        foreach ($n as $node) {
+            if ($node instanceof DOMElement && $node->hasAttribute($attr)) {
+                $s[] = trim($node->getAttribute($attr));
             }
-            if (strlen(implode(' ', $parts)) > 3000) break;
         }
-        $text = preg_replace('~\s+~', ' ', implode(' ', $parts));
-        return trim($text);
+        return $s;
+    };
+    $firstAttr = function(string $query, string $attr) use($attr) {
+        $a = $attr($query, $attr);
+        return $a[0] ?? null;
+    };
+
+    // Extract basics
+    $title = ($text('//title')[0] ?? '');
+    $metaDesc = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="description"]', 'content') ?? '';
+    $viewport = (bool) $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="viewport"]', 'content');
+    $robots = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="robots"]', 'content') ?? '';
+    $canon  = $firstAttr('//link[translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="canonical"]', 'href') ?? '';
+
+    // Headings & links
+    $h1s = $text('//h1');
+    $h2s = $text('//h2');
+    $h3s = $text('//h3');
+    $links = $attr('//a[@href]', 'href');
+    $host = parse_url($url, PHP_URL_HOST) ?: '';
+    $internalCount = 0;
+    foreach ($links as $href) {
+        if (strpos($href, '#') === 0) continue;
+        if (!preg_match('~^https?://~i', $href)) { $internalCount++; continue; }
+        $h = parse_url($href, PHP_URL_HOST) ?: '';
+        if ($h === $host) $internalCount++;
     }
-}
-if (!function_exists('readability')) {
-    function readability(string $text): array {
-        if (!$text) return ['fre' => 0, 'fk' => 0];
-        $words = preg_split('~\s+~u', trim($text), -1, PREG_SPLIT_NO_EMPTY);
-        $sents = preg_split('~[\.!\?]+~u', $text, -1, PREG_SPLIT_NO_EMPTY);
-        $w = max(1, count($words));
-        $s = max(1, count($sents));
-        $syll = 0;
-        foreach ($words as $wrd) {
-            $v = preg_match_all('~[aeiouy]+~i', $wrd);
-            $syll += max(1, (int)$v);
-        }
-        $fre = 206.835 - 1.015 * ($w / $s) - 84.6 * ($syll / $w);
-        $fk  = 0.39 * ($w / $s) + 11.8 * ($syll / $w) - 15.59;
-        return ['fre' => round($fre,1), 'fk' => round($fk,1)];
+
+    // JSON-LD schema detection
+    $schemaTypes = [];
+    foreach ($xpath->query('//script[@type="application/ld+json"]') as $node) {
+        $json = trim($node->textContent ?? '');
+        if (!$json) continue;
+        $data = json_decode($json, true);
+        if (!$data) continue;
+        $walk = function($n) use (&$walk, &$schemaTypes) {
+            if (is_array($n)) {
+                if (isset($n['@type'])) {
+                    $t = is_array($n['@type']) ? $n['@type'] : [$n['@type']];
+                    foreach ($t as $x) $schemaTypes[] = (string)$x;
+                }
+                foreach ($n as $k => $v) $walk($v);
+            } elseif (is_list($n)) {
+                foreach ($n as $v) $walk($v);
+            }
+        };
+        $walk($data);
     }
-}
-if (!function_exists('ai_human_detect')) {
-    function ai_human_detect(string $text): array {
-        $text = trim($text);
-        if ($text === '') {
-            return [
-                'label' => 'unknown',
-                'likelihood' => 0,
-                'ai_pct' => 0,
-                'human_pct' => 0,
-                'reasons' => ['No content extracted'],
-                'ai_sentences' => [],
-                'human_sentences' => [],
-                'full_text' => ''
-            ];
+    $schemaTypes = array_values(array_unique(array_filter(array_map('strval', $schemaTypes))));
+
+    // Content text for heuristics
+    $bodyText = trim(preg_replace('~\s+~', ' ', implode(' ', $text('//body//*[not(self::script or self::style)]'))));
+    $sentences = preg_split('~(?<=[.!?])\s+~', $bodyText) ?: [];
+    $avgSentenceLen = 0;
+    if (count($sentences) > 0) {
+        $lens = array_map(fn($s)=>strlen($s), $sentences);
+        $avgSentenceLen = array_sum($lens)/max(1,count($lens));
+    }
+    $hasFAQBlock = stripos($html, '"@type":"FAQPage"') !== false || preg_match('~<details|faq~i', $html);
+    $hasBreadcrumb = in_array('BreadcrumbList', $schemaTypes, true);
+    $hasArticle = in_array('Article', $schemaTypes, true) || in_array('BlogPosting', $schemaTypes, true) || in_array('NewsArticle', $schemaTypes, true);
+    $hasOrg = in_array('Organization', $schemaTypes, true) || in_array('Brand', $schemaTypes, true) || in_array('LocalBusiness', $schemaTypes, true);
+
+    // Slug quality
+    $path = parse_url($url, PHP_URL_PATH) ?: '/';
+    $slug = trim($path, '/');
+    $slugScore = 70;
+    if ($slug === '') { $slugScore = 70; }
+    else {
+        $len = strlen($slug);
+        $hyph = substr_count($slug, '-');
+        $slugScore = 90;
+        if ($len > 80 || $hyph > 10) $slugScore = 55;
+        if (preg_match('~[A-Z]~', $slug)) $slugScore -= 10;
+    }
+
+    // Title/meta scoring
+    $titleLen = strlen($title);
+    $titleScore = $titleLen >= 45 && $titleLen <= 65 ? 92 : ($titleLen >= 30 && $titleLen <= 72 ? 78 : 45);
+    $metaLen = strlen($metaDesc);
+    $metaScore = $metaLen >= 120 && $metaLen <= 170 ? 90 : ($metaLen >= 80 ? 70 : 40);
+
+    // H1 keyword alignment
+    $tokens = array_filter(explode('-', strtolower($slug)));
+    $primary = $tokens[0] ?? '';
+    $h1Score = 50;
+    if (count($h1s)) {
+        $h1txt = strtolower(implode(' ', $h1s));
+        if ($primary && str_contains($h1txt, $primary)) $h1Score = 90; else $h1Score = 70;
+    }
+
+    // Internal links
+    $internalScore = $internalCount >= 8 ? 88 : ($internalCount >= 3 ? 70 : 40);
+
+    // E-E-A-T signals (author/date)
+    $authorLike = preg_match('~by\s+[A-Z][a-z]+~', $bodyText) || stripos($html, 'itemprop="author"') !== false;
+    $dateLike   = preg_match('~\b20(1\d|2\d)\b~', $bodyText) || stripos($html, 'datePublished') !== false;
+    $eeatScore  = ($authorLike ? 10 : 0) + ($dateLike ? 10 : 0) + ($hasArticle ? 20 : 0);
+    $eeatScore  = 60 + $eeatScore; // 60–100
+
+    // Media presence
+    $imgCount = count($xpath->query('//img'));
+    $videoCount = count($xpath->query('//video')) + count($xpath->query('//iframe[contains(@src,"youtube") or contains(@src,"vimeo")]'));
+    $mediaScore = ($imgCount >= 3 ? 75 : 55) + ($videoCount ? 10 : 0);
+
+    // Readability proxy: avg sentence length
+    $readScore = $avgSentenceLen > 220 ? 45 : ($avgSentenceLen > 150 ? 65 : 85);
+
+    // Robots/indexable
+    $indexable = stripos($robots, 'noindex') === false;
+    $indexScore = $indexable ? 82 : 20;
+
+    // Canonical
+    $canonScore = $canon ? 90 : 40;
+
+    // Breadcrumb/schema
+    $breadScore = $hasBreadcrumb ? 85 : 45;
+    $schemaScore = count($schemaTypes) ? 85 : 45;
+
+    // FAQ
+    $faqScore = $hasFAQBlock ? 88 : 55;
+
+    // Mobile
+    $mobileScore = $viewport ? 88 : 40;
+
+    // CTA detection
+    $ctaScore = preg_match('~\b(contact|buy|pricing|subscribe|get started|book|download)\b~i', $bodyText) ? 82 : 60;
+
+    // External citations
+    $externalLinks = 0;
+    foreach ($links as $href) {
+        if (preg_match('~^https?://~i', $href)) {
+            $h = parse_url($href, PHP_URL_HOST) ?: '';
+            if ($h && $h !== $host) $externalLinks++;
         }
-        $sents = preg_split('~(?<=[\.!\?])\s+~u', $text, -1, PREG_SPLIT_NO_EMPTY);
-        $ai_like = []; $human_like = [];
-        foreach ($sents as $s) {
-            $len = mb_strlen($s);
-            $comma = substr_count($s, ',');
-            $perp  = substr_count($s, '(') + substr_count($s, ')');
-            $passive = preg_match('~\b(is|was|were|be|been|being)\s+(?:\w+ed)\b~i', $s);
-            $hedge  = preg_match('~\b(may|might|could|seems?|appears?|in general|overall)\b~i', $s);
-            $aiCue  = preg_match('~\b(as an ai|language model|cannot|i am unable)\b~i', mb_strtolower($s));
-            $aiScore = ($len > 160) + ($comma >= 3) + ($perp >= 2) + $passive + $hedge + (2*$aiCue);
-            if ($aiScore >= 2) $ai_like[] = trim($s); else $human_like[] = trim($s);
-        }
-        $total = max(1, count($sents));
-        $aiPct = (int) round(count($ai_like) / $total * 100);
-        $humanPct = 100 - $aiPct;
-        $label = $aiPct >= 60 ? 'likely_ai' : ($aiPct >= 35 ? 'mixed' : 'likely_human');
-        return [
+    }
+    $citeScore = $externalLinks >= 3 ? 80 : ($externalLinks >= 1 ? 70 : 50);
+
+    // Entities (very rough): unique proper-cased words
+    preg_match_all('~\b[A-Z][a-z]{2,}\b~', $bodyText, $m);
+    $proper = array_values(array_unique($m[0] ?? []));
+    $entityScore = count($proper) >= 10 ? 80 : (count($proper) >= 5 ? 70 : 55);
+
+    // Related entities via H2/H3 variety
+    $h2h3 = array_map('strtolower', array_merge($h2s, $h3s));
+    $uniqueH = count(array_unique(array_filter($h2h3)));
+    $relatedScore = $uniqueH >= 6 ? 82 : ($uniqueH >= 3 ? 70 : 55);
+
+    // Speed/Vitals (heuristics only)
+    $lazyImgs = count($xpath->query('//img[@loading="lazy"]'));
+    $hasPreload = stripos($html, 'rel="preload"') !== false;
+    $speedScore = 60 + min(25, $lazyImgs*3) + ($hasPreload ? 8 : 0);
+    $vitalsScore = 62; // unknown; neutral-ish
+
+    // Organization sameAs
+    $sameAsScore = 40;
+    if (preg_match('~"@type"\s*:\s*"(Organization|Brand|LocalBusiness)".+?"sameAs"\s*:\s*\[~is', $html)) {
+        $sameAsScore = 82;
+    }
+
+    // Slug quality already computed -> $slugScore
+
+    // Map the 25 checklist items
+    $scores = [
+        'ck-1'  => max(60, $titleScore - 5),                // Search intent & topic proxy
+        'ck-2'  => 65,                                      // Keyword mapping (unknown)
+        'ck-3'  => $h1Score,                                // H1 has primary topic
+        'ck-4'  => $faqScore,                               // FAQs present
+        'ck-5'  => $readScore,                              // Readable/NLP-friendly
+        'ck-6'  => $titleScore,                             // Title length
+        'ck-7'  => $metaScore,                              // Meta description length
+        'ck-8'  => $canonScore,                             // Canonical
+        'ck-9'  => $indexScore,                             // Indexable
+        'ck-10' => $eeatScore,                              // E-E-A-T
+        'ck-11' => 65,                                      // Unique value (unknown)
+        'ck-12' => $citeScore,                              // Citations
+        'ck-13' => min(95, $mediaScore),                    // Media
+        'ck-14' => $uniqueH >= 5 ? 80 : ($uniqueH >= 3 ? 70 : 55), // Logical headings
+        'ck-15' => $internalScore,                          // Internal links
+        'ck-16' => $slugScore,                              // Clean URL
+        'ck-17' => $breadScore,                             // Breadcrumbs
+        'ck-18' => $mobileScore,                            // Mobile-friendly
+        'ck-19' => min(95, $speedScore),                    // Speed hints
+        'ck-20' => $vitalsScore,                            // CWV (unknown)
+        'ck-21' => $ctaScore,                               // CTAs present
+        'ck-22' => $hasArticle || $hasOrg ? 80 : 60,        // Primary entity via schema
+        'ck-23' => $relatedScore,                           // Related entities
+        'ck-24' => $schemaScore,                            // Valid schema present
+        'ck-25' => $sameAsScore,                            // sameAs/Org details
+    ];
+
+    // Overall score (weighted average leaning a bit on content + technical)
+    $weights = [
+        1=>1,2=>1,3=>1.2,4=>1,5=>1.2,6=>1.3,7=>1.1,8=>1.2,9=>1.1,10=>1.2,11=>1,
+        12=>1,13=>1,14=>1,15=>1.1,16=>1,17=>0.9,18=>1.2,19=>1.1,20=>1,21=>1,22=>1,23=>1,24=>1.1,25=>0.9
+    ];
+    $wSum = 0; $acc = 0; $i = 1;
+    foreach ($scores as $k=>$v) { $w = $weights[$i] ?? 1; $acc += $v*$w; $wSum += $w; $i++; }
+    $overall = $wSum ? round($acc/$wSum) : 0;
+
+    // Suggestions (only a few targeted examples)
+    $sugs = [];
+    $push = function($id, $txt) use (&$sugs) { $sugs[$id][] = $txt; };
+
+    if ($titleScore < 80)  $push('ck-6', 'Keep title ≈50–60 chars and include the primary keyword once.');
+    if ($metaScore < 80)   $push('ck-7', 'Write a meta description around 140–160 chars with a clear CTA.');
+    if (!$canon)           $push('ck-8', 'Add a canonical link to avoid duplicate content signals.');
+    if (!$viewport)        $push('ck-18', 'Add `<meta name="viewport" content="width=device-width, initial-scale=1">`.');
+    if (!$hasBreadcrumb)   $push('ck-17', 'Add breadcrumbs and BreadcrumbList schema.');
+    if (!count($schemaTypes)) $push('ck-24', 'Add JSON-LD (Article/FAQ/Product) with @id and sameAs if applicable.');
+    if ($internalCount < 3) $push('ck-15', 'Add internal links to related hubs and parent category pages.');
+
+    // AI/Human very rough heuristic
+    $aiLike = 0;
+    if ($avgSentenceLen >= 160) $aiLike += 20;
+    if (preg_match('~\bIn conclusion,|Overall,|Firstly,|Secondly,|Additionally,~', $bodyText)) $aiLike += 10;
+    $aiLike = min(100, $aiLike);
+    $aiPct = $aiLike;
+    $humanPct = max(0, 100 - $aiPct);
+    $label = $aiPct >= 66 ? 'likely_ai' : ($aiPct >= 33 ? 'mixed' : 'likely_human');
+
+    // Auto check IDs (>=80)
+    $auto = [];
+    foreach ($scores as $id=>$val) if ($val >= 80) $auto[] = $id;
+
+    return response()->json([
+        'ok' => true,
+        'status' => $status,
+        'overall_score' => $overall,
+        'scores' => $scores,
+        'title' => $title,
+        'meta_description_len' => $metaLen,
+        'canonical' => (bool)$canon,
+        'robots' => $robots ?: '',
+        'viewport' => $viewport,
+        'counts' => [
+            'h1' => count($h1s), 'h2' => count($h2s), 'h3' => count($h3s),
+            'internal_links' => $internalCount,
+        ],
+        'schema' => ['found_types' => $schemaTypes],
+        'auto_check_ids' => $auto,
+        'suggestions' => $sugs,
+        'ai_detection' => [
             'label' => $label,
-            'likelihood' => abs(50 - abs(50 - $aiPct)),
             'ai_pct' => $aiPct,
             'human_pct' => $humanPct,
-            'reasons' => [
-                'Heuristics: sentence length, passive voice, hedging, punctuation density',
-                'Indicative only'
-            ],
-            'ai_sentences' => array_slice($ai_like, 0, 40),
-            'human_sentences' => array_slice($human_like, 0, 40),
-            'full_text' => $text
-        ];
-    }
-}
-
-/* ---------- Analyzer ---------- */
-if (!function_exists('analyze_document')) {
-    function analyze_document(string $url, string $html, array $headers = []): array {
-        [$dom, $xp] = dom_xp($html);
-
-        $title = node_text($xp->query('//title')->item(0));
-        $metaDescNode = $xp->query('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="description"]')->item(0);
-        $metaDesc = $metaDescNode ? $metaDescNode->getAttribute('content') : '';
-        $metaDescLen = mb_strlen($metaDesc);
-
-        $canonAttr = $xp->query('//link[translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="canonical"]/@href')->item(0);
-        $canonical = null;
-        if ($canonAttr) {
-            $c = trim($canonAttr->nodeValue ?? '');
-            if ($c) {
-                if (!preg_match('~^https?://~i', $c)) {
-                    $base = parse_url($url);
-                    $root = ($base['scheme'] ?? 'https') . '://' . ($base['host'] ?? '');
-                    $c = rtrim($root, '/') . '/' . ltrim($c, '/');
-                }
-                $canonical = $c;
-            }
-        }
-
-        $robotsNode = $xp->query('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="robots"]/@content')->item(0);
-        $robotsMeta = $robotsNode ? (string)$robotsNode->nodeValue : null;
-        $xRobots = null;
-        foreach ($headers as $k => $v) {
-            if (strtolower($k) === 'x-robots-tag') {
-                $xRobots = is_array($v) ? implode(', ', $v) : (string)$v;
-                break;
-            }
-        }
-        $robotsCombined = trim(implode(', ', array_filter([$robotsMeta, $xRobots])));
-
-        $viewportNode = $xp->query('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="viewport"]')->item(0);
-        $viewport = (bool)$viewportNode;
-
-        $h1 = $xp->query('//h1')->length;
-        $h2 = $xp->query('//h2')->length;
-        $h3 = $xp->query('//h3')->length;
-
-        // internal links
-        $internal = 0; $a = $xp->query('//a[@href]');
-        if ($a) {
-            foreach ($a as $node) {
-                $href = $node->getAttribute('href');
-                if (!$href) continue;
-                if (Str::startsWith($href, ['#','mailto:','tel:'])) continue;
-                $isInternal = false;
-                if (Str::startsWith($href, '/')) $isInternal = true;
-                else {
-                    try {
-                        $u = parse_url($href);
-                        $host = $u['host'] ?? '';
-                        $baseHost = parse_url($url, PHP_URL_HOST) ?: '';
-                        if ($host && $baseHost && Str::endsWith($host, $baseHost)) $isInternal = true;
-                    } catch (\Throwable $e) {}
-                }
-                if ($isInternal) $internal++;
-            }
-        }
-
-        // schema types
-        $types = [];
-        $ld = $xp->query('//script[@type="application/ld+json"]');
-        if ($ld && $ld->length) {
-            foreach ($ld as $sn) {
-                $json = trim($sn->textContent ?? '');
-                if ($json) {
-                    $obj = @json_decode($json, true);
-                    if (is_array($obj)) {
-                        $cand = [];
-                        $iter = function ($x) use (&$cand, &$iter) {
-                            if (is_array($x)) {
-                                if (isset($x['@type'])) $cand[] = $x['@type'];
-                                foreach ($x as $v) $iter($v);
-                            }
-                        };
-                        $iter($obj);
-                        foreach ($cand as $t) $types[] = is_string($t) ? $t : (is_array($t) ? implode(',', $t) : '');
-                    }
-                }
-            }
-        }
-        $types = array_values(array_filter(array_unique($types)));
-
-        // sitemap probe
-        $baseHost = parse_url($url, PHP_URL_SCHEME) . '://' . parse_url($url, PHP_URL_HOST);
-        $xmlMap = false;
-        try {
-            $sitemapUrl = rtrim($baseHost, '/') . '/sitemap.xml';
-            $sm = Http::timeout(6)->get($sitemapUrl);
-            $xmlMap = $sm->ok();
-            if (!$xmlMap) {
-                $robotsUrl = rtrim($baseHost, '/') . '/robots.txt';
-                $rb = Http::timeout(6)->get($robotsUrl);
-                if ($rb->ok() && preg_match('~^sitemap:\s*https?://~im', (string)$rb->body())) $xmlMap = true;
-            }
-        } catch (\Throwable $e) {}
-
-        // text + analyses
-        $fullText = extract_full_text($xp);
-        $ai = ai_human_detect($fullText);
-        $read = readability($fullText);
-
-        $path = parse_url($url, PHP_URL_PATH) ?: '/';
-
-        /* scoring */
-        $scores = []; $autoCheck = []; $suggestions = [];
-
-        $lenBetween = function (?string $s, int $min, int $max): bool {
-            $l = mb_strlen((string)$s); return $l >= $min && $l <= $max;
-        };
-        $hasQMarks = function (string $s): int { return substr_count($s, '?'); };
-        $textHas = function (string $needle) use ($fullText): bool { return stripos($fullText, $needle) !== false; };
-        $hasSchemaType = function (string $type) use ($types): bool {
-            foreach ($types as $t) if (is_string($t) && stripos($t, $type) !== false) return true;
-            return false;
-        };
-
-        $wc       = max(0, str_word_count($fullText));
-        $faqType  = $hasSchemaType('FAQPage');
-        $articleT = $hasSchemaType('Article');
-        $productT = $hasSchemaType('Product');
-        $howtoT   = $hasSchemaType('HowTo');
-
-        $imgCount = $xp->query('//img')->length;
-        $videoCnt = $xp->query('//video|//iframe[contains(@src,"youtube") or contains(@src,"vimeo")]')->length;
-        $mediaCnt = $imgCount + $videoCnt;
-
-        $breadcrumbs = $xp->query('//*[contains(@class,"breadcrumb") or contains(@class,"breadcrumbs")]')->length > 0 || $hasSchemaType('BreadcrumbList');
-
-        $slugClean = function (string $p): bool {
-            if ($p === '' || $p === '/') return false;
-            if (preg_match('~[A-Z]~', $p)) return false;
-            if (strlen($p) > 100) return false;
-            if (preg_match('~(%[0-9A-Fa-f]{2})~', $p)) return false;
-            return true;
-        };
-
-        $robotsStr = strtolower((string)$robotsCombined);
-        $indexable = !preg_match('~noindex~i', $robotsStr);
-        $hasCTA = $xp->query('//a[contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"btn") or contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"button") or contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"cta")]')->length > 0;
-
-        /* checks (same logic as before) */
-        $intentOk = ($h1 > 0 || (mb_strlen($title) >= 20 && $wc >= 300));
-        $scores['ck-1'] = $intentOk ? 80 : ($wc >= 150 ? 55 : 25);
-        if ($intentOk) $autoCheck[] = 'ck-1'; else $suggestions['ck-1'][] = 'State the primary intent in H1 and intro paragraph.';
-
-        $subheads = $h2 + $h3;
-        $variety = preg_match_all('~\b\w{5,}\b~u', $fullText);
-        $kmap = ($subheads >= 4 && $variety >= 200);
-        $scores['ck-2'] = $kmap ? 82 : ($subheads >= 2 ? 65 : 40);
-        if ($kmap) $autoCheck[]='ck-2'; else $suggestions['ck-2'][]='Add related subtopics as H2/H3; address PAA questions';
-
-        $h1Nodes = $xp->query('//h1');
-        $h1Text  = $h1Nodes->length ? trim($h1Nodes->item(0)->textContent ?? '') : '';
-        $h1Ok    = ($h1 > 0 && mb_strlen($h1Text) >= 12);
-        $scores['ck-3'] = $h1Ok ? 85 : ($h1 > 0 ? 60 : 20);
-        if ($h1Ok) $autoCheck[]='ck-3'; else $suggestions['ck-3'][]='Write a descriptive H1 (~6–12 words) with the primary topic.';
-
-        $faqOk = ($faqType || $hasQMarks($fullText) >= 3);
-        $scores['ck-4'] = $faqOk ? 88 : 45;
-        if ($faqType) $autoCheck[]='ck-4'; else $suggestions['ck-4'][]='Add a short FAQ section and FAQPage schema.';
-
-        $fre = $read['fre'] ?? 0;
-        $scores['ck-5'] = ($fre >= 60 ? 88 : ($fre >= 50 ? 75 : 55));
-        if ($fre >= 60 && $wc >= 300) $autoCheck[]='ck-5'; else $suggestions['ck-5'][]='Shorten sentences, use simpler words, add subheads.';
-
-        $titleOk = $lenBetween($title, 50, 65);
-        $scores['ck-6'] = $titleOk ? 90 : ($title ? 65 : 10);
-        if ($titleOk) $autoCheck[]='ck-6'; else $suggestions['ck-6'][]='Keep title around 50–60 chars; lead with the primary term.';
-
-        $metaOk = ($metaDescLen >= 140 && $metaDescLen <= 170);
-        $scores['ck-7'] = $metaOk ? 90 : ($metaDescLen ? 65 : 15);
-        if ($metaOk) $autoCheck[]='ck-7'; else $suggestions['ck-7'][]='Write a compelling 150–160 char meta with benefit + CTA.';
-
-        $scores['ck-8'] = $canonical ? 100 : 20;
-        if ($canonical) $autoCheck[]='ck-8'; else $suggestions['ck-8'][]='Add a canonical link to the preferred URL.';
-
-        $scores['ck-9'] = ($indexable && $xmlMap) ? 92 : ($indexable ? 72 : 15);
-        if ($indexable && $xmlMap) $autoCheck[]='ck-9';
-        if (!$indexable) $suggestions['ck-9'][]='Remove “noindex” if this page should rank.';
-        if (!$xmlMap)   $suggestions['ck-9'][]='Add page to XML sitemap and resubmit in Search Console.';
-
-        $hasAuthor = $xp->query('//*[@itemprop="author"]|//*[@rel="author"]|//*[contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"author")]')->length > 0;
-        $hasDate   = $xp->query('//*[@datetime or contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"date")]')->length > 0;
-        $eeatOk    = ($hasAuthor || $hasDate);
-        $scores['ck-10'] = $eeatOk ? 82 : 55;
-        if ($eeatOk) $autoCheck[]='ck-10'; else $suggestions['ck-10'][]='Show author name/credentials and publish/update dates.';
-
-        $uniqueSignals = ($wc >= 900) + ($mediaCnt >= 2) + (int)$textHas(' vs ') + (int)$textHas('comparison');
-        $scores['ck-11'] = $uniqueSignals >= 2 ? 80 : ($wc >= 600 ? 68 : 50);
-        if ($uniqueSignals >= 2) $autoCheck[]='ck-11'; else $suggestions['ck-11'][]='Add unique insights, original data, or comparisons.';
-
-        $externalLinks = 0;
-        if ($a) foreach ($a as $node) if (preg_match('~^https?://~i', $node->getAttribute('href'))) $externalLinks++;
-        $scores['ck-12'] = $externalLinks >= 3 ? 86 : ($externalLinks ? 66 : 40);
-        if ($externalLinks >= 3) $autoCheck[]='ck-12'; else $suggestions['ck-12'][]='Cite 2–3 authoritative sources with descriptive anchors.';
-
-        $mediaOk = $mediaCnt >= 2;
-        $scores['ck-13'] = $mediaOk ? 85 : ($mediaCnt ? 70 : 45);
-        if ($mediaOk) $autoCheck[]='ck-13'; else $suggestions['ck-13'][]='Add descriptive images/charts or a short explainer video.';
-
-        $subheads = $h2 + $h3;
-        $structureOk = ($subheads >= 4);
-        $scores['ck-14'] = $structureOk ? 86 : ($subheads ? 70 : 48);
-        if ($structureOk) $autoCheck[]='ck-14'; else $suggestions['ck-14'][]='Use H2 for major subtopics, H3 for subsections.';
-
-        $scores['ck-15'] = $internal >= 5 ? 85 : ($internal ? 65 : 40);
-        if ($internal >= 5) $autoCheck[]='ck-15'; else $suggestions['ck-15'][]='Add 3–5 contextual internal links to pillar/related pages.';
-
-        $slugOk = $slugClean($path ?: '/');
-        $scores['ck-16'] = $slugOk ? 90 : 60;
-        if ($slugOk) $autoCheck[]='ck-16'; else $suggestions['ck-16'][]='Shorten/simplify slug (lowercase, hyphens, ≤100 chars).';
-
-        $breadcrumbsOk = $breadcrumbs;
-        $scores['ck-17'] = $breadcrumbsOk ? 92 : 55;
-        if ($breadcrumbsOk) $autoCheck[]='ck-17'; else $suggestions['ck-17'][]='Add breadcrumb nav and BreadcrumbList schema.';
-
-        $scores['ck-18'] = $viewport ? 95 : 40;
-        if ($viewport) $autoCheck[]='ck-18'; else $suggestions['ck-18'][]='Add meta viewport and ensure responsive layout.';
-
-        $lazyImgs = $xp->query('//img[@loading="lazy"]')->length;
-        $webpImgs = $xp->query('//img[contains(translate(@src,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),".webp")]')->length;
-        $perfOk = ($lazyImgs >= 3 || $webpImgs >= 2);
-        $scores['ck-19'] = $perfOk ? 78 : 58;
-        if ($perfOk) $autoCheck[]='ck-19'; else $suggestions['ck-19'][]='Use WebP/AVIF, lazy-load images, defer non-critical JS.';
-
-        $scores['ck-20'] = 60;
-        $suggestions['ck-20'][] = 'Run PSI (mobile); fix LCP<2.5s, INP<200ms, CLS<0.1.';
-
-        $scores['ck-21'] = $hasCTA ? 84 : 56;
-        if ($hasCTA) $autoCheck[]='ck-21'; else $suggestions['ck-21'][]='Add a clear CTA (“Try”, “Download”, “Get a quote”).';
-
-        $entityOk = ($articleT || $productT || $howtoT || ($h1Ok && $wc >= 300));
-        $scores['ck-22'] = $entityOk ? 82 : 58;
-        if ($entityOk) $autoCheck[]='ck-22'; else $suggestions['ck-22'][]='Define the main entity in intro and add matching schema.';
-
-        $proper = preg_match_all('~\b[A-Z][a-z]{3,}\b~u', $fullText);
-        $scores['ck-23'] = $proper >= 6 ? 84 : ($proper ? 66 : 48);
-        if ($proper >= 6) $autoCheck[]='ck-23'; else $suggestions['ck-23'][]='Mention related entities with context.';
-
-        $schemaOk = ($articleT || $productT || $howtoT || $faqType);
-        $scores['ck-24'] = $schemaOk ? 90 : 45;
-        if ($schemaOk) $autoCheck[]='ck-24'; else $suggestions['ck-24'][]='Add JSON-LD and validate.';
-
-        $hasSameAs = false;
-        $ld = $xp->query('//script[@type="application/ld+json"]');
-        if ($ld && $ld->length) {
-            foreach ($ld as $sn) {
-                $json = trim($sn->textContent ?? '');
-                if ($json) {
-                    $obj = @json_decode($json, true);
-                    if (is_array($obj)) {
-                        $same = data_get($obj, 'sameAs');
-                        if (is_array($same) && count($same)) { $hasSameAs = true; break; }
-                    }
-                }
-            }
-        }
-        $scores['ck-25'] = $hasSameAs ? 88 : 52;
-        if ($hasSameAs) $autoCheck[]='ck-25'; else $suggestions['ck-25'][]='Add Organization/Person schema with “sameAs” links.';
-
-        $overall = (int) round(array_sum($scores) / max(1, count($scores)));
-
-        return [
-            'title' => $title,
-            'meta_description_len' => $metaDescLen,
-            'canonical' => !!$canonical,
-            'robots' => $robotsCombined ?: null,
-            'viewport' => $viewport,
-            'counts' => ['h1'=>$h1,'h2'=>$h2,'h3'=>$h3,'internal_links'=>$internal],
-            'schema' => ['found_types' => $types],
-            'ai_detection' => $ai,
-            'readability' => $read,
-            'scores' => $scores,
-            'auto_check_ids' => array_values(array_unique($autoCheck)),
-            'overall_score' => $overall,
-            'suggestions' => $suggestions
-        ];
-    }
-}
-
-/* ---------- API ---------- */
-Route::middleware('throttle:30,1')->post('/analyze.json', function (Request $req) {
-    $data = $req->validate([
-        'url'  => ['nullable','string','max:2048'],
-        'html' => ['nullable','string','max:1048576'],
+            'likelihood' => $aiPct,
+            'reasons' => $aiPct >= 66 ? ['Long average sentences', 'Common connective phrases'] : ['Natural sentence variety'],
+            'ai_sentences' => [],
+            'human_sentences' => [],
+            'full_text' => mb_substr($bodyText, 0, 5000),
+        ],
     ]);
-
-    $url = safe_url((string)($data['url'] ?? ''));
-    $html = (string)($data['html'] ?? '');
-
-    if ($html === '' && $url === '') {
-        return response()->json(['ok' => false, 'error' => 'Provide a URL or HTML'], 422);
-    }
-
-    if ($html !== '') {
-        $an = analyze_document($url ?: 'https://local.test/', $html, []);
-        $an['status'] = 200;
-        $an['schema']['found_types'] = $an['schema']['found_types'] ?? [];
-        $an['auto_check_ids'] = $an['auto_check_ids'] ?? [];
-        $an['counts'] = $an['counts'] ?? ['h1'=>0,'h2'=>0,'h3'=>0,'internal_links'=>0];
-        return response()->json(['ok' => true] + $an);
-    }
-
-    $cacheKey = 'analyze:v3:' . sha1($url);
-    $res = Cache::remember($cacheKey, now()->addMinutes(15), function () use ($url) {
-        return fetch_html($url);
-    });
-
-    if (!$res['ok']) {
-        return response()->json(['ok' => false, 'error' => 'Fetch failed', 'detail' => $res['error'] ?? null], 502);
-    }
-
-    $an = analyze_document($url, $res['html'], $res['headers'] ?? []);
-    $an['status'] = $res['status'];
-    $an['schema']['found_types'] = $an['schema']['found_types'] ?? [];
-    $an['auto_check_ids'] = $an['auto_check_ids'] ?? [];
-    $an['counts'] = $an['counts'] ?? ['h1'=>0,'h2'=>0,'h3'=>0,'internal_links'=>0];
-
-    return response()->json(['ok' => true] + $an);
 })->name('analyze.json');
