@@ -82,7 +82,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .score-wheel .spark{stroke:#fff;stroke-width:2.2;stroke-dasharray:1 338;animation:orbit 3.6s linear infinite;filter:drop-shadow(0 0 6px rgba(255,255,255,.55))}
 @keyframes orbit{to{stroke-dashoffset:-339}}
 .score-text{
-  font-size:clamp(1.4rem,4.2vw,3.1rem);
+  font-size:clamp(1.4rem,2.2vw,2.1rem);
   font-weight:1000;fill:#fff;text-anchor:middle;dominant-baseline:middle;
 }
 .score-text.green{fill:#22c55e}
