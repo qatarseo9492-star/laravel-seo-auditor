@@ -44,7 +44,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language dock (kept) */
+/* Language dock */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -80,10 +80,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
   transition:stroke-dashoffset .6s ease,stroke .3s ease,filter .3s ease;
   filter:drop-shadow(0 0 10px rgba(155,92,255,.35))
 }
-.score-text{
-  font-size:clamp(2.2rem, 4.2vw, 3.1rem);
-  font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)
-}
+.score-text{font-size:clamp(2.2rem, 4.2vw, 3.1rem);font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)} .l-orange{background:rgba(245,158,11,.18)} .l-green{background:rgba(34,197,94,.18)}
@@ -101,29 +98,62 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .ico-cyan{color:var(--accent)}
 .ico-purple{color:#9b5cff}
 
-/* URL input */
+/* URL input + animated label */
 .analyze-form input[type="url"]{
-  position:relative; z-index:5; width:100%; padding:1rem 1.2rem; border-radius:14px;
-  border:1px solid #1b1b35; background:#0b0d21; color:var(--text);
-  box-shadow:0 0 0 0 rgba(155,92,255,.0); transition:.25s;
+  width:100%; padding:1rem 1.2rem; border-radius:16px;
+  border:1px solid #1b1b35; background:#0b0d21; color:var(--text); transition:.25s;
 }
 .analyze-form input[type="url"]:focus{ outline:none; border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15); }
+.url-label{display:inline-block;font-weight:900;margin-bottom:.35rem;position:relative}
+.url-label.animating{
+  background:linear-gradient(90deg,#fff,#9b5cff,#3de2ff,#fff);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  animation:shine 1.2s linear infinite;
+}
+.url-label.animating::after{
+  content:""; position:absolute; left:0; right:0; bottom:-4px; height:3px;
+  background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045,#3de2ff);
+  filter:blur(.3px); border-radius:999px; animation:underlineWave 1.6s ease-in-out infinite;
+}
+@keyframes shine{0%{background-position:0%}100%{background-position:200%}}
+@keyframes underlineWave{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
+
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
-/* Progress */
+/* NEW: Water progress bar */
+.water-wrap{margin-top:.8rem;display:none}
+.waterbar{
+  position:relative; height:64px; border-radius:18px; overflow:hidden;
+  background:linear-gradient(180deg,#0b0d21,#0b0d21); border:1px solid rgba(255,255,255,.1);
+}
+.water-svg{position:absolute; inset:0; width:100%; height:100%}
+.water-mask-rect{transition:all .25s ease-out}
+.water-overlay{position:absolute; inset:0; pointer-events:none; background:
+  radial-gradient(120px 60px at 20% -20%, rgba(255,255,255,.18), transparent 60%),
+  linear-gradient(0deg, rgba(255,255,255,.05), transparent 40%, transparent 60%, rgba(255,255,255,.06));
+  mix-blend-mode:screen;
+}
+.water-pct{
+  position:absolute; inset:0; display:grid; place-items:center; font-weight:1000;
+  font-size:1.05rem; text-shadow:0 1px 0 rgba(0,0,0,.45); letter-spacing:.4px;
+}
+.wave1{animation:waveX 7s linear infinite}
+.wave2{animation:waveX 10s linear infinite reverse; opacity:.7}
+@keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
+
+/* Progress (checklist completion) */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .progress-bar{width:100%;height:12px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid #101826}
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
 
-/* Category grid */
+/* Category grid (unchanged) */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden; isolation:isolate;}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite; pointer-events:none; z-index:0;}
 .category-card > *{position:relative; z-index:1;}
 .checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.55rem; }
 .checklist-item input[type="checkbox"], .improve-btn { pointer-events:auto; position:relative; z-index:2; }
-
 @keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
 .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
 .category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
@@ -216,54 +246,24 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div class="score-container">
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
           <circle class="bg" cx="60" cy="60" r="54"/>
-          <circle class="progress" cx="60" cy="60" r="54"
-                  style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
+          <circle class="progress" cx="60" cy="60" r="54" style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
           <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore" aria-live="polite">0%</text>
         </svg>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:.5rem">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <!-- ✅ Overall chip -->
-          <span class="chip" id="overallChip">
-            <i class="fa-solid fa-gauge-high ico"></i>
-            <span data-i="overall">Overall</span>: <b id="overallScoreInline">0</b>/100
-          </span>
-
-          <!-- ✅ Content chip (icon has NO static color; JS will tint it) -->
-          <span class="chip" id="contentScoreChip">
-            <i class="fa-solid fa-file-lines ico"></i>
-            Content: <b id="contentScoreInline">0</b>/100
-          </span>
-
-          <!-- ✅ Writer chip -->
-          <span class="chip" id="aiBadge" title="AI/Human detection summary">
-            <i class="fa-solid fa-user-check ico ico-green"></i>
-            Writer: <b>—</b>
-          </span>
-
-          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem">
-            <i class="fa-solid fa-robot"></i> Evidence
-          </button>
-        </div>
-
-        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem">
-            <i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%
-          </button>
-          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem">
-            <i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%
-          </button>
-          <button id="copyQuick" class="btn btn-ghost" style="--pad:.4rem .7rem">
-            <i class="fa-regular fa-copy ico ico-cyan"></i> Copy report
-          </button>
+          <span class="chip" id="overallChip"><i class="fa-solid fa-gauge-high ico"></i> <span data-i="overall">Overall</span>: <b id="overallScoreInline">0</b>/100</span>
+          <span class="chip" id="contentScoreChip"><i class="fa-solid fa-file-lines ico"></i> Content: <b id="contentScoreInline">0</b>/100</span>
+          <span class="chip" id="aiBadge" title="AI/Human detection summary"><i class="fa-solid fa-user-check ico ico-green"></i> Writer: <b>—</b></span>
+          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem"><i class="fa-solid fa-robot"></i> Evidence</button>
         </div>
       </div>
     </div>
 
     <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
       <form id="analyzeForm" class="analyze-form" onsubmit="return false;" aria-label="Analyze form">
-        <label for="analyzeUrl" style="display:block;font-weight:800;margin-bottom:.35rem" data-i="page_url">Page URL</label>
+        <label id="pageUrlLabel" for="analyzeUrl" class="url-label" data-i="page_url">Page URL</label>
         <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" aria-describedby="analyzeStatus" />
         <div class="analyze-row">
           <div style="display:flex;align-items:center;gap:.6rem">
@@ -278,32 +278,58 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <button class="btn btn-ghost" id="importChecklist" title="Import checklist JSON"><i class="fa-solid fa-file-import"></i> Import</button>
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
-        <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
-      </form>
 
-      <div id="analyzeReport" style="margin-top:.9rem;display:none">
-        <div style="display:flex;flex-wrap:wrap;gap:.5rem">
-          <span class="chip">HTTP: <b id="rStatus">—</b></span>
-          <span class="chip">Title: <b id="rTitleLen">—</b></span>
-          <span class="chip">Meta desc: <b id="rMetaLen">—</b></span>
-          <span class="chip">Canonical: <b id="rCanonical">—</b></span>
-          <span class="chip">Robots: <b id="rRobots">—</b></span>
-          <span class="chip">Viewport: <b id="rViewport">—</b></span>
-          <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
-          <span class="chip">Internal links: <b id="rInternal">—</b></span>
-          <span class="chip">Schema: <b id="rSchema">—</b></span>
-          <span class="chip">Auto-checked: <b id="rAutoCount">—</b></span>
+        <!-- NEW: Water progress (hidden until Analyze starts) -->
+        <div class="water-wrap" id="waterWrap" aria-hidden="true">
+          <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="waterGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#3de2ff"/><stop offset="100%" stop-color="#9b5cff"/>
+                </linearGradient>
+                <clipPath id="roundClip"><rect x="1" y="1" width="598" height="198" rx="18" ry="18"/></clipPath>
+                <clipPath id="fillClip">
+                  <!-- y of this rect is raised/lowered by JS -->
+                  <rect id="waterClipRect" class="water-mask-rect" x="0" y="200" width="600" height="200"/>
+                </clipPath>
+                <path id="wave" d="M0 120
+                  Q 50 90 100 120 T 200 120 T 300 120 T 400 120 T 500 120 T 600 120
+                  V 220 H 0 Z"/>
+              </defs>
+
+              <!-- Base rounded shape -->
+              <g clip-path="url(#roundClip)">
+                <rect x="0" y="0" width="600" height="200" fill="#0b0d21"/>
+                <!-- Water fill (masked by height) -->
+                <g clip-path="url(#fillClip)">
+                  <!-- Two tiled waves moving horizontally -->
+                  <g class="wave1" fill="url(#waterGrad)" opacity=".95">
+                    <use href="#wave" x="0"/><use href="#wave" x="600"/>
+                  </g>
+                  <g class="wave2" fill="url(#waterGrad)" opacity=".65">
+                    <use href="#wave" x="0" y="8"/><use href="#wave" x="600" y="8"/>
+                  </g>
+                </g>
+                <!-- subtle glass overlay -->
+                <rect x="0" y="0" width="600" height="200" fill="transparent"/>
+              </g>
+            </svg>
+            <div class="water-overlay"></div>
+            <div class="water-pct"><span id="waterPct">0%</span></div>
+          </div>
+          <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
         </div>
-      </div>
+        <!-- /water -->
+      </form>
     </div>
 
-    <!-- Progress -->
+    <!-- Progress (checklist completion) -->
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Categories / checklist -->
+    <!-- Categories / checklist (unchanged content) -->
     <div class="analyzer-grid" id="checklistGrid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -382,7 +408,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- Modal -->
+<!-- Modal (unchanged) -->
 <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
 <div class="modal" id="tipModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-card">
@@ -408,7 +434,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---------- i18n (trimmed) ---------- */
+/* i18n (trimmed) */
 const I18N = {
   en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='legend l-green'>Green ≥ 80</span> <span class='legend l-orange'>Orange 60–79</span> <span class='legend l-red'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto-apply checkmarks (≥ 70)"},
 };
@@ -437,7 +463,7 @@ const LANGS = [["en","English"]];
   fill(); apply(localStorage.getItem('lang')||'en');
 })();
 
-/* ---------- Background canvases (trimmed) ---------- */
+/* Background canvas (trim) */
 (function(){
   const bc = document.getElementById('brainCanvas'), bctx = bc.getContext('2d');
   let bw, bh, pts=[]; function rs(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; pts = Array.from({length:80},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
@@ -446,7 +472,7 @@ const LANGS = [["en","English"]];
     for(let i=0;i<pts.length;i++){ for(let j=i+1;j<pts.length;j++){ const a=pts[i],b=pts[j]; const d=Math.hypot(a.x-b.x,a.y-b.y); if(d<140){ const al=(1-d/140)*0.45; bctx.strokeStyle=`rgba(157,92,255,${al})`; bctx.beginPath(); bctx.moveTo(a.x,a.y); bctx.lineTo(b.x,b.y); bctx.stroke(); } } } requestAnimationFrame(loop); })();
 })();
 
-/* ---------- Back to Top ---------- */
+/* Back to Top */
 (function(){
   const btn = document.getElementById('backTop'); const link = document.getElementById('toTopLink');
   function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
@@ -455,30 +481,24 @@ const LANGS = [["en","English"]];
   btn.addEventListener('click', goTop); link.addEventListener('click', goTop);
 })();
 
-/* ---------- Chip tone helper ---------- */
+/* Chip tone helpers (content thresholds: >80 green / 60-80 orange / <60 red) */
 function setChipTone(el, value, {mode='overall'} = {}){
   if (!el) return;
   el.classList.remove('chip-good','chip-mid','chip-bad');
-  const ico = el.querySelector('i.ico');
-  if (ico) ico.classList.remove('ico-green','ico-orange','ico-red','ico-purple'); // also remove purple if present
-
-  const v = Number(value);
-  if (Number.isNaN(v)) return;
-
+  const ico = el.querySelector('i.ico'); if (ico) ico.classList.remove('ico-green','ico-orange','ico-red','ico-purple');
+  const v = Number(value); if (Number.isNaN(v)) return;
   if (mode === 'content') {
-    // YOUR rule: >80 green, 60–80 orange, <60 red
     if (v > 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
     else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
     else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
   } else {
-    // overall: ≥80 green, 60–79 orange, <60 red
     if (v >= 80){ el.classList.add('chip-good'); if (ico) ico.classList.add('ico-green'); }
     else if (v >= 60){ el.classList.add('chip-mid'); if (ico) ico.classList.add('ico-orange'); }
     else { el.classList.add('chip-bad'); if (ico) ico.classList.add('ico-red'); }
   }
 }
 
-/* ---------- Score wheel helpers ---------- */
+/* Score wheel */
 const WHEEL = { circumference: 339, circle: null, text: null };
 function setScoreWheel(value){
   if (!WHEEL.circle) { WHEEL.circle = document.querySelector('.score-wheel .progress'); WHEEL.text = document.getElementById('overallScore'); }
@@ -493,7 +513,7 @@ function setScoreWheel(value){
   setChipTone(document.getElementById('overallChip'), v, {mode:'overall'});
 }
 
-/* ---------- Checklist + scoring + import/export ---------- */
+/* Checklist + scoring (unchanged core) */
 (function () {
   const STORAGE_KEY = 'semanticSeoChecklistV6';
   const total = 25;
@@ -501,7 +521,6 @@ function setScoreWheel(value){
   const bar = document.getElementById('progressBar');
   const caption = document.getElementById('progressCaption');
   const contentScoreInline = document.getElementById('contentScoreInline');
-
   let lastAnalyzed = 0;
 
   function contentScore(){ const checked = boxes().filter(cb=>cb.checked).length; return Math.round((checked/total)*100); }
@@ -527,14 +546,8 @@ function setScoreWheel(value){
     setChipTone(document.getElementById('contentScoreChip'), cs, {mode:'content'});
     setScoreWheel( overallScoreBlended() );
   }
-  function load(){
-    try{const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); boxes().forEach(cb=>cb.checked = saved.includes(cb.id));}catch(e){}
-    update();
-  }
-  function save(){
-    const ids = boxes().filter(cb=>cb.checked).map(cb=>cb.id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-  }
+  function load(){ try{const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); boxes().forEach(cb=>cb.checked = saved.includes(cb.id));}catch(e){} update(); }
+  function save(){ const ids = boxes().filter(cb=>cb.checked).map(cb=>cb.id); localStorage.setItem(STORAGE_KEY, JSON.stringify(ids)); }
   document.addEventListener('change', (e)=>{ if(e.target.matches('#analyzer input[type="checkbox"]')){ update(); save(); }});
   document.getElementById('resetChecklist').addEventListener('click', ()=>{ if(!confirm('Reset the checklist?')) return; localStorage.removeItem(STORAGE_KEY); boxes().forEach(cb=>cb.checked=false); for(let i=1;i<=25;i++){ setScoreBadge(i,null);} lastAnalyzed=0; setScoreWheel(0); update(); });
   document.getElementById('printChecklist').addEventListener('click', ()=> window.print());
@@ -555,52 +568,39 @@ function setScoreWheel(value){
   window.setScoreBadge = (num,score)=>{ const el=document.getElementById('sc-'+num); if(!el) return; el.className='score-badge'; if(score==null){el.textContent='—';return;} el.textContent=score; if(score>=80) el.classList.add('score-good'); else if(score>=60) el.classList.add('score-mid'); else el.classList.add('score-bad'); };
   window.__setAnalyzedScore = function(v){ lastAnalyzed = Math.max(0, Math.min(100, +v||0)); setScoreWheel( overallScoreBlended() ); }
   window.__getContentScore = contentScore;
-  window.__updateChecklist = update; // ✅ expose to call directly after auto-apply
+  window.__updateChecklist = update;
   load();
 })();
 
-/* ---------- Modal + examples + panes + Improve buttons ---------- */
+/* Modal + Improve & AI panes (trimmed) */
 (function(){
   const $ = s=>document.querySelector(s);
   const $$ = s=>Array.from(document.querySelectorAll(s));
   const backdrop = $('#modalBackdrop'), modal = $('#tipModal'), closeBtn = $('#modalClose');
   const panes = { tipsTab: $('#tipsTab'), examplesTab: $('#examplesTab'), humanTab: $('#humanTab'), aiTab: $('#aiTab'), fullTab: $('#fullTab') };
   const tabs = $$('.tab');
-
   function openModal(){ backdrop.style.display='block'; modal.style.display='flex'; }
   function closeModal(){ backdrop.style.display='none'; modal.style.display='none'; }
   closeBtn.addEventListener('click', closeModal); backdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
   tabs.forEach(t=> t.addEventListener('click', ()=>{ tabs.forEach(x=>x.classList.remove('active')); Object.values(panes).forEach(p=>p.classList.remove('active')); t.classList.add('active'); panes[t.dataset.tab].classList.add('active'); }));
-
-  // Hook "Improve" buttons
   document.getElementById('checklistGrid').addEventListener('click', (e)=>{
     const btn = e.target.closest('.improve-btn'); if(!btn) return;
     const id = btn.dataset.id;
     const idx = parseInt(id.split('-')[1],10);
     const labelEl = btn.parentElement.querySelector('label span');
     const label = labelEl ? labelEl.textContent.trim() : `Item ${idx}`;
-
     const tips = (window.__lastSuggestions||{})[id] || ['Run Analyze to get fresh tips for this item.'];
-    const ul = document.getElementById('modalList'); ul.innerHTML='';
-    tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
-
+    const ul = document.getElementById('modalList'); ul.innerHTML=''; tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
     const q = encodeURIComponent(label + ' SEO examples');
     document.getElementById('examplesPre').innerHTML = `Open examples:\nhttps://www.google.com/search?q=${q}\n\nTry site: operators with top competitors.`;
-
-    tabs.forEach(x=>x.classList.remove('active'));
-    document.querySelector('[data-tab="tipsTab"]').classList.add('active');
-    Object.values(panes).forEach(p=>p.classList.remove('active'));
-    panes.tipsTab.classList.add('active');
-    openModal();
+    tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="tipsTab"]').classList.add('active');
+    Object.values(panes).forEach(p=>p.classList.remove('active')); panes.tipsTab.classList.add('active'); openModal();
   });
-
-  // AI panes wiring
-  document.getElementById('viewAIText').addEventListener('click', ()=>{ switchTo('aiTab'); });
-  document.getElementById('viewHumanBtn').addEventListener('click', ()=>{ switchTo('humanTab'); });
-  document.getElementById('viewAIBtn').addEventListener('click', ()=>{ switchTo('aiTab'); });
+  document.getElementById('viewAIText').addEventListener('click', ()=> switchTo('aiTab'));
+  document.getElementById('viewHumanBtn').addEventListener('click', ()=> switchTo('humanTab'));
+  document.getElementById('viewAIBtn').addEventListener('click', ()=> switchTo('aiTab'));
   function switchTo(key){ tabs.forEach(x=>x.classList.remove('active')); document.querySelector(`[data-tab="${key}"]`).classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes[key].classList.add('active'); openModal(); }
-
   window.__setAIData = function(ai){
     const aiSn = ai?.ai_sentences || [];
     const huSn = ai?.human_sentences || [];
@@ -612,46 +612,73 @@ function setScoreWheel(value){
   }
 })();
 
-/* ---------- URL normalization + Analyze ---------- */
-function normalizeUrl(u){
-  if(!u) return '';
-  u = u.trim();
-  if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, '');
-  try { new URL(u); } catch(e){}
-  return u;
-}
+/* URL normalize */
+function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
+
+/* NEW: Water progress controller */
+const Water = (function(){
+  const wrap = document.getElementById('waterWrap');
+  const bar  = document.getElementById('waterBar');
+  const rect = document.getElementById('waterClipRect');
+  const pct  = document.getElementById('waterPct');
+  const label= document.getElementById('pageUrlLabel');
+  let prog = 0, intv = null;
+  const H = 200; // viewBox height
+  function show(){ wrap.style.display='block'; }
+  function hide(){ wrap.style.display='none'; }
+  function set(v){
+    prog = Math.max(0, Math.min(100, v));
+    const y = H - (H * (prog/100));
+    rect.setAttribute('y', String(y));
+    bar.setAttribute('aria-valuenow', Math.round(prog));
+    pct.textContent = Math.round(prog) + '%';
+  }
+  function start(){
+    show(); set(0);
+    label.classList.add('animating');
+    clearInterval(intv);
+    intv = setInterval(()=>{ if (prog < 90) set(prog + 1.2); }, 50);
+  }
+  function finish(){
+    clearInterval(intv);
+    const step = ()=>{ if (prog >= 100){ setTimeout(()=>{ label.classList.remove('animating'); }, 300); return; }
+      set(prog + Math.max(1.5, (100-prog)*0.12)); requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+  function reset(){ clearInterval(intv); set(0); hide(); label.classList.remove('animating'); }
+  return { start, finish, reset, set, show, hide };
+})();
+
+/* Analyze flow */
 (function(){
   const $ = s => document.querySelector(s);
-
-  // Copy quick report
-  document.getElementById('copyQuick').addEventListener('click', async ()=>{
+  document.getElementById('copyQuick').addEventListener?.('click', async ()=>{
     const bits = [
-      `HTTP: ${document.getElementById('rStatus').textContent}`,
-      `Title: ${document.getElementById('rTitleLen').textContent}`,
-      `Meta: ${document.getElementById('rMetaLen').textContent}`,
-      `Canon: ${document.getElementById('rCanonical').textContent}`,
-      `Robots: ${document.getElementById('rRobots').textContent}`,
-      `H1/H2/H3: ${document.getElementById('rHeadings').textContent}`,
-      `Internal: ${document.getElementById('rInternal').textContent}`,
-      `Schema: ${document.getElementById('rSchema').textContent}`,
-      `Overall: ${document.getElementById('overallScoreInline').textContent}/100`,
-      `Content: ${document.getElementById('contentScoreInline').textContent}/100`,
-      `AI: ${document.getElementById('aiPct').textContent || '—'}% / Human: ${document.getElementById('humanPct').textContent || '—'}%`
+      `HTTP: ${document.getElementById('rStatus')?.textContent||''}`,
+      `Title: ${document.getElementById('rTitleLen')?.textContent||''}`,
+      `Meta: ${document.getElementById('rMetaLen')?.textContent||''}`,
+      `Canon: ${document.getElementById('rCanonical')?.textContent||''}`,
+      `Robots: ${document.getElementById('rRobots')?.textContent||''}`,
+      `H1/H2/H3: ${document.getElementById('rHeadings')?.textContent||''}`,
+      `Internal: ${document.getElementById('rInternal')?.textContent||''}`,
+      `Schema: ${document.getElementById('rSchema')?.textContent||''}`,
+      `Overall: ${document.getElementById('overallScoreInline')?.textContent||''}/100`,
+      `Content: ${document.getElementById('contentScoreInline')?.textContent||''}/100`,
+      `AI: ${document.getElementById('aiPct')?.textContent || '—'}% / Human: ${document.getElementById('humanPct')?.textContent || '—'}%`
     ];
     try { await navigator.clipboard.writeText(bits.join('\n')); alert('Report copied!'); } catch(e){ alert('Could not copy'); }
   });
 
-  document.getElementById('analyzeForm').addEventListener('submit', (e)=>{
-    e.preventDefault();
-    document.getElementById('analyzeBtn').click();
-  });
+  document.getElementById('analyzeForm').addEventListener('submit', (e)=>{ e.preventDefault(); document.getElementById('analyzeBtn').click(); });
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
 
   async function analyze(){
     const url = normalizeUrl($('#analyzeUrl').value);
     const status = $('#analyzeStatus'); const btn = $('#analyzeBtn'); const report = $('#analyzeReport');
-    if (!url){ status.textContent = 'Please enter a URL.'; return; }
-    status.textContent = 'Analyzing…'; btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing';
+    if (!url){ status.textContent = 'Please enter a URL.'; Water.reset(); return; }
+    status.textContent = 'Analyzing…';
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing';
+    Water.start();
 
     try{
       const resp = await fetch('{{ route('analyze.json') }}', {
@@ -662,71 +689,74 @@ function normalizeUrl(u){
       const data = await resp.json();
       if (!data.ok) throw new Error(data.error || 'Failed');
 
-      // chips
-      $('#rStatus').textContent = data.status;
-      $('#rTitleLen').textContent = (data.title || '').length;
-      $('#rMetaLen').textContent = data.meta_description_len;
-      $('#rCanonical').textContent = data.canonical ? 'Yes' : 'No';
-      $('#rRobots').textContent = data.robots || '—';
-      $('#rViewport').textContent = data.viewport ? 'Yes' : 'No';
-      $('#rHeadings').textContent = `${data.counts.h1}/${data.counts.h2}/${data.counts.h3}`;
-      $('#rInternal').textContent = data.counts.internal_links;
+      // fill quick chips
+      $('#rStatus')?.textContent = data.status;
+      $('#rTitleLen')?.textContent = (data.title || '').length;
+      $('#rMetaLen')?.textContent = data.meta_description_len;
+      $('#rCanonical')?.textContent = data.canonical ? 'Yes' : 'No';
+      $('#rRobots')?.textContent = data.robots || '—';
+      $('#rViewport')?.textContent = data.viewport ? 'Yes' : 'No';
+      $('#rHeadings')?.textContent = `${data.counts.h1}/${data.counts.h2}/${data.counts.h3}`;
+      $('#rInternal')?.textContent = data.counts.internal_links;
       const types = (data.schema.found_types || []).slice(0,6).join(', ') || '—';
-      $('#rSchema').textContent = types;
-      $('#rAutoCount').textContent = (data.auto_check_ids||[]).length;
-      report.style.display='block';
+      $('#rSchema')?.textContent = types;
+      $('#rAutoCount')?.textContent = (data.auto_check_ids||[]).length;
+      report && (report.style.display='block');
 
-      // store suggestions & per-item scores
+      // per-item scores
       window.__lastSuggestions = data.suggestions || {};
-      for (let i=1;i<=25;i++){ const key='ck-'+i; setScoreBadge(i, data.scores?.[key]); }
+      for (let i=1;i<=25;i++){ const key='ck-'+i; window.setScoreBadge && setScoreBadge(i, data.scores?.[key]); }
 
       // writer chip
       const ai = data.ai_detection || {};
       const badge = document.getElementById('aiBadge');
-      badge.classList.remove('chip-good','chip-mid','chip-bad');
-      const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
-      const iconMap={likely_human:'fa-user-check', mixed:'fa-shuffle', likely_ai:'fa-robot'};
-      const colorMap={likely_human:'ico-green', mixed:'ico-orange', likely_ai:'ico-red'};
-      const chipMap={likely_human:'chip-good', mixed:'chip-mid', likely_ai:'chip-bad'};
-      const key = (ai.label||'').toLowerCase();
-      const label = labelMap[key] || 'Unknown';
-      const icon  = iconMap[key] || 'fa-user';
-      const icoC  = colorMap[key] || 'ico-purple';
-      const chipC = chipMap[key];
-      const conf = (typeof ai.likelihood==='number') ? ` (${ai.likelihood}%)` : '';
-      const aiStr = (typeof ai.ai_pct==='number') ? ` — ${ai.ai_pct}% AI-like` : '';
-      const humanStr = (typeof ai.human_pct==='number') ? ` — ${ai.human_pct}% Human` : '';
-      badge.innerHTML = `<i class="fa-solid ${icon} ico ${icoC}"></i> Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
-      if (chipC) badge.classList.add(chipC);
-      badge.title = (ai.reasons||[]).join(' • ');
-      document.getElementById('aiPct').textContent = (typeof ai.ai_pct==='number') ? ai.ai_pct : '—';
-      document.getElementById('humanPct').textContent = (typeof ai.human_pct==='number') ? ai.human_pct : '—';
-      window.__setAIData(ai);
+      if (badge){
+        badge.classList.remove('chip-good','chip-mid','chip-bad');
+        const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
+        const iconMap={likely_human:'fa-user-check', mixed:'fa-shuffle', likely_ai:'fa-robot'};
+        const colorMap={likely_human:'ico-green', mixed:'ico-orange', likely_ai:'ico-red'};
+        const chipMap={likely_human:'chip-good', mixed:'chip-mid', likely_ai:'chip-bad'};
+        const key = (ai.label||'').toLowerCase();
+        const label = labelMap[key] || 'Unknown';
+        const icon  = iconMap[key] || 'fa-user';
+        const icoC  = colorMap[key] || 'ico-purple';
+        const chipC = chipMap[key];
+        const conf = (typeof ai.likelihood==='number') ? ` (${ai.likelihood}%)` : '';
+        const aiStr = (typeof ai.ai_pct==='number') ? ` — ${ai.ai_pct}% AI-like` : '';
+        const humanStr = (typeof ai.human_pct==='number') ? ` — ${ai.human_pct}% Human` : '';
+        badge.innerHTML = `<i class="fa-solid ${icon} ico ${icoC}"></i> Writer: <b>${label}${conf}${aiStr}${humanStr}</b>`;
+        if (chipC) badge.classList.add(chipC);
+        badge.title = (ai.reasons||[]).join(' • ');
+        document.getElementById('aiPct').textContent = (typeof ai.ai_pct==='number') ? ai.ai_pct : '—';
+        document.getElementById('humanPct').textContent = (typeof ai.human_pct==='number') ? ai.human_pct : '—';
+        window.__setAIData && window.__setAIData(ai);
+      }
 
-      // baseline (backend)
+      // blend overall score baseline
       const backendOverall = typeof data.overall_score === 'number' ? data.overall_score : 0;
-      window.__setAnalyzedScore(backendOverall);
+      window.__setAnalyzedScore && window.__setAnalyzedScore(backendOverall);
 
-      // Auto-apply checks
-      if ($('#autoApply').checked) {
+      // Auto-apply checks then recompute UI
+      if ($('#autoApply')?.checked) {
         const all = document.querySelectorAll('#analyzer input[type="checkbox"]');
         all.forEach(cb => cb.checked = false);
         (data.auto_check_ids||[]).forEach(id => { const el=document.getElementById(id); if(el) el.checked=true; });
       }
+      window.__updateChecklist && window.__updateChecklist();
 
-      // ✅ Force a full UI recompute (no reliance on events)
-      if (window.__updateChecklist) window.__updateChecklist();
-
-      // Repaint content chip explicitly with your thresholds
+      // repaint content chip
       const csNow = window.__getContentScore ? window.__getContentScore() : 0;
       document.getElementById('contentScoreInline').textContent = csNow;
       setChipTone(document.getElementById('contentScoreChip'), csNow, {mode:'content'});
 
+      // done
+      Water.finish();
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re-Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent = '', 4200);
     } catch(e){
-      status.textContent = 'Error: '+e.message;
+      document.getElementById('analyzeStatus').textContent = 'Error: '+e.message;
+      Water.finish();
     } finally {
       btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Analyze';
     }
