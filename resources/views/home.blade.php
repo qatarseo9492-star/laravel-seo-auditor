@@ -6,9 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Semantic SEO Master • Ultra Tech Global</title>
+
+<!-- Favicon (optional; remove if not present in /public) -->
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
+
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
@@ -17,7 +20,6 @@
   --text:#f0effa; --text-dim:#b6b3d6; --text-muted:#9aa0c3;
   --primary:#9b5cff; --secondary:#ff2045; --accent:#3de2ff;
   --good:#16c172; --warn:#f59e0b; --bad:#ef4444;
-  --green-2:#16a34a; --orange-2:#fb923c; --red-2:#b91c1c;
   --radius:18px; --shadow:0 10px 40px rgba(0,0,0,.55);
   --container:1200px;
 }
@@ -32,48 +34,59 @@ body{
   overflow-x:hidden;
 }
 
-/* ---------- Dancing line canvases (bottom layer) ---------- */
+/* ---------- Lines canvases (bottom) ---------- */
 #linesCanvas, #linesCanvas2 { position:fixed; inset:0; z-index:0; pointer-events:none; }
 
-/* ---------- Smoke + clouds (middle layer, clearly visible) ---------- */
+/* ---------- SMOKE + CLOUDS (visible layer above lines, below content) ---------- */
 .bg-smoke{
-  position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden;
+  position:fixed; inset:0; z-index:1;
+  pointer-events:none; overflow:hidden;
   will-change:transform, opacity, filter;
 }
-.blob{position:absolute;border-radius:50%;filter:blur(90px);mix-blend-mode:screen;animation:float 36s linear infinite;will-change:transform}
-.blob.p{background:radial-gradient(closest-side,rgba(155,92,255,.38),rgba(155,92,255,0) 70%)} /* purple */
-.blob.r{background:radial-gradient(closest-side,rgba(255,32,69,.34),rgba(255,32,69,0) 70%)}  /* red */
-.blob.c{background:radial-gradient(closest-side,rgba(61,226,255,.32),rgba(61,226,255,0) 70%)} /* cyan */
+.blob{
+  position:absolute; border-radius:50%;
+  filter:blur(95px); mix-blend-mode:screen;
+  animation:float 36s linear infinite;
+  will-change:transform, filter, opacity;
+}
+/* multi‑color blobs */
+.blob.cyan   { background:radial-gradient(closest-side,rgba(61,226,255,.34),rgba(61,226,255,0) 70%) }
+.blob.purple { background:radial-gradient(closest-side,rgba(155,92,255,.38),rgba(155,92,255,0) 70%) }
+.blob.red    { background:radial-gradient(closest-side,rgba(255,32,69,.30), rgba(255,32,69,0) 70%) }
+.blob.orange { background:radial-gradient(closest-side,rgba(255,182,72,.30),rgba(255,182,72,0) 70%) }
+.blob.teal   { background:radial-gradient(closest-side,rgba(34,197,94,.30), rgba(34,197,94,0) 70%) }
+/* positions/sizes */
 .b1{top:-18%;left:-15%;width:60vmax;height:60vmax}
 .b2{bottom:-22%;right:-10%;width:62vmax;height:62vmax;animation-direction:reverse;animation-duration:30s}
 .b3{top:10%;right:15%;width:50vmax;height:50vmax;animation-duration:28s}
-.b4{bottom:10%;left:25%;width:48vmax;height:48vmax;animation-duration:40s}
+.b4{bottom:12%;left:25%;width:48vmax;height:48vmax;animation-duration:40s}
+.b5{bottom:0%;right:0%;width:40vmax;height:40vmax;animation-duration:52s}
 
-/* Cloud cluster (bottom-right) */
 .clouds { position:absolute; right:-6vmax; bottom:-6vmax; width:80vmax; height:60vmax; pointer-events:none; }
 .clouds .c { position:absolute; border-radius:50%; filter:blur(42px); opacity:.95; mix-blend-mode:screen; }
-.clouds .c.cyan   { background:radial-gradient(closest-side, rgba(61,226,255,.9),  rgba(61,226,255,0) 75%); }
-.clouds .c.purple { background:radial-gradient(closest-side, rgba(155,92,255,.85), rgba(155,92,255,0) 75%); }
-.clouds .c.orange { background:radial-gradient(closest-side, rgba(255,182,72,.85), rgba(255,182,72,0) 75%); }
-.clouds .c.teal   { background:radial-gradient(closest-side, rgba(34,197,94,.82),  rgba(34,197,94,0) 75%); }
-.clouds .c1{ width:50vmax;height:28vmax; right:0; bottom:0; animation:cloud 40s ease-in-out infinite; }
-.clouds .c2{ width:46vmax;height:26vmax; right:6vmax; bottom:2vmax; animation:cloud 46s ease-in-out infinite reverse; }
-.clouds .c3{ width:42vmax;height:24vmax; right:10vmax; bottom:3vmax; animation:cloud 52s ease-in-out infinite; }
-.clouds .c4{ width:38vmax;height:22vmax; right:14vmax; bottom:5vmax; animation:cloud 58s ease-in-out infinite reverse; }
+.clouds .cyan   { background:radial-gradient(closest-side, rgba(61,226,255,.9),  rgba(61,226,255,0) 75%); }
+.clouds .purple { background:radial-gradient(closest-side, rgba(155,92,255,.85), rgba(155,92,255,0) 75%); }
+.clouds .red    { background:radial-gradient(closest-side, rgba(255,32,69,.80),  rgba(255,32,69,0) 75%); }
+.clouds .orange { background:radial-gradient(closest-side, rgba(255,182,72,.85), rgba(255,182,72,0) 75%); }
+.clouds .teal   { background:radial-gradient(closest-side, rgba(34,197,94,.82),  rgba(34,197,94,0) 75%); }
+.c1{ width:50vmax;height:28vmax; right:0;     bottom:0;   animation:cloud 40s ease-in-out infinite; }
+.c2{ width:46vmax;height:26vmax; right:6vmax; bottom:2vmax; animation:cloud 46s ease-in-out infinite reverse; }
+.c3{ width:42vmax;height:24vmax; right:10vmax;bottom:3vmax; animation:cloud 52s ease-in-out infinite; }
+.c4{ width:38vmax;height:22vmax; right:14vmax;bottom:5vmax; animation:cloud 58s ease-in-out infinite reverse; }
+.c5{ width:34vmax;height:20vmax; right:18vmax;bottom:7vmax; animation:cloud 62s ease-in-out infinite; }
 
 @keyframes float{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-6%,7%,0)}100%{transform:translate3d(0,0,0)}}
 @keyframes cloud{0%{transform:translate3d(0,0,0)}50%{transform:translate3d(-3%,-4%,0)}100%{transform:translate3d(0,0,0)}}
 
-/* ---------- Main content sits above smoke ---------- */
+/* content above smoke */
 .wrap{position:relative; z-index:2; max-width:var(--container); margin:0 auto; padding:28px 5%}
 
-/* Header */
+/* ---------- Header ---------- */
 header.site{display:flex;align-items:center;justify-content:space-between;padding:14px 0 22px;border-bottom:1px solid var(--line);backdrop-filter:saturate(140%) blur(10px);background:rgba(15,16,34,.35)}
 .brand{display:flex;align-items:center;gap:1rem}
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
-.hero-heading{font-size:3.6rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
+.hero-heading{font-size:3.7rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Buttons */
 .btn{--pad:.75rem 1.05rem;display:inline-flex;align-items:center;gap:.5rem;padding:var(--pad);border-radius:14px;border:1px solid transparent;cursor:pointer;font-weight:800;letter-spacing:.2px;transition:.2s}
 .btn-neon{background:linear-gradient(135deg,#3de2ff,#9b5cff);box-shadow:0 8px 30px rgba(61,226,255,.25);color:#001018}
 .btn-neon:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(61,226,255,.35)}
@@ -82,11 +95,11 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .btn-danger{background:linear-gradient(135deg,#ff2045,#ff7a59);color:#fff;box-shadow:0 8px 30px rgba(255,32,69,.25)}
 .btn-danger:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,32,69,.35)}
 
-/* Analyzer panel */
+/* ---------- Analyzer panel ---------- */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* SCORE WHEEL */
+/* ---------- SCORE WHEEL ---------- */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:240px}
 .score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
@@ -94,7 +107,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .score-wheel .bg{stroke:rgba(255,255,255,.12)}
 .score-wheel .progress{
   stroke:url(#gradSmoke);
-  stroke-dasharray:339;stroke-dashoffset:339;
+  stroke-dasharray:339; stroke-dashoffset:339;
   transition:stroke-dashoffset .6s ease,stroke .25s ease,filter .25s ease;
   filter:drop-shadow(0 0 12px rgba(155,92,255,.28)) drop-shadow(0 0 20px rgba(255,32,69,.18));
 }
@@ -104,7 +117,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 }
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
 
-/* URL input */
+/* ---------- URL input ---------- */
 .analyze-form input[type="url"]{
   position:relative; z-index:5; width:100%; padding:1rem 1.2rem; border-radius:14px;
   border:1px solid #1b1b35; background:#0b0d21; color:var(--text);
@@ -113,13 +126,13 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .analyze-form input[type="url"]:focus{ outline:none; border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15); }
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
-/* Progress */
+/* ---------- Progress ---------- */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .progress-bar{width:100%;height:12px;border-radius:999px;background:#0b1220;overflow:hidden;border:1px solid #101826}
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
 
-/* Checklist grid + new look */
+/* ---------- CHECKLIST (new look) ---------- */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{
   position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
@@ -128,7 +141,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 }
 .category-card::before{
   content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;
-  background:conic-gradient(from 200deg, rgba(61,226,255,.35), rgba(155,92,255,.35), rgba(255,182,72,.30), rgba(255,32,69,.30), rgba(61,226,255,.35));
+  background:conic-gradient(from 180deg, rgba(61,226,255,.35), rgba(155,92,255,.35), rgba(255,182,72,.30), rgba(255,32,69,.30), rgba(34,197,94,.30), rgba(61,226,255,.35));
   -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
   -webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 7s linear infinite;
   pointer-events:none; z-index:0;
@@ -149,12 +162,13 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .checklist-item{
   display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;
   padding:.75rem .8rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);
-  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.03)); position:relative; overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.03));
+  position:relative; overflow:hidden;
 }
 .checklist-item + .checklist-item{margin-top:.28rem}
 .checklist-item::before{
   content:""; position:absolute; inset:-2px; border-radius:16px;
-  background:conic-gradient(from 200deg, rgba(61,226,255,.20), rgba(155,92,255,.20), rgba(255,32,69,.18), rgba(255,182,72,.18), rgba(61,226,255,.20));
+  background:conic-gradient(from 200deg, rgba(61,226,255,.20), rgba(155,92,255,.20), rgba(255,32,69,.18), rgba(255,182,72,.18), rgba(34,197,94,.18), rgba(61,226,255,.20));
   opacity:.0; transition:.25s; filter:blur(14px); z-index:0;
 }
 .checklist-item:hover::before{ opacity:.55 }
@@ -187,7 +201,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .improve-btn{padding:.4rem .75rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:900;cursor:pointer}
 .improve-btn:hover{background:rgba(255,255,255,.1)}
 
-/* Modal (keep above smoke) */
+/* ---------- Modal ---------- */
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;z-index:9000}
 .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9010}
 .modal-card{width:min(1000px,96vw);background:var(--panel-2);border:1px solid rgba(255,255,255,.12);border-radius:16px;box-shadow:var(--shadow);padding:16px}
@@ -201,7 +215,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .tabpanes > div.active{display:block}
 .pre{white-space:pre-wrap;background:#0b0d21;border:1px solid #1b1b35;border-radius:12px;padding:12px;color:#cfd3f6;max-height:60vh;overflow:auto}
 
-/* Footer + back to top */
+/* ---------- Footer + back to top ---------- */
 footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 .footer-brand{display:flex;align-items:center;gap:.6rem}
 .footer-brand .dot{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#3de2ff,#9b5cff)}
@@ -223,28 +237,34 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <canvas id="linesCanvas"></canvas>
 <canvas id="linesCanvas2"></canvas>
 
-<!-- Smoke / clouds -->
+<!-- Smoke + Clouds (all colors) -->
 <div class="bg-smoke">
-  <span class="blob p b1"></span>
-  <span class="blob r b2"></span>
-  <span class="blob c b3"></span>
-  <span class="blob p b4"></span>
+  <span class="blob cyan   b1"></span>
+  <span class="blob purple b2"></span>
+  <span class="blob red    b3"></span>
+  <span class="blob orange b4"></span>
+  <span class="blob teal   b5"></span>
   <div class="clouds">
     <span class="c cyan   c1"></span>
     <span class="c purple c2"></span>
-    <span class="c orange c3"></span>
-    <span class="c teal   c4"></span>
+    <span class="c red    c3"></span>
+    <span class="c orange c4"></span>
+    <span class="c teal   c5"></span>
   </div>
 </div>
 
-<!-- Gradients (smoke + thresholds) -->
+<!-- Gradients for score wheel -->
 <svg width="0" height="0" aria-hidden="true">
   <defs>
+    <!-- smoke multicolor base -->
     <linearGradient id="gradSmoke" x1="0%" y1="0%" x2="100%">
       <stop offset="0%"  stop-color="#3de2ff"/>
-      <stop offset="50%" stop-color="#9b5cff"/>
-      <stop offset="100%" stop-color="#ff2045"/>
+      <stop offset="25%" stop-color="#9b5cff"/>
+      <stop offset="55%" stop-color="#ff2045"/>
+      <stop offset="80%" stop-color="#ffb648"/>
+      <stop offset="100%" stop-color="#22c55e"/>
     </linearGradient>
+    <!-- thresholds -->
     <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%">
       <stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/>
     </linearGradient>
@@ -438,7 +458,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---------- Subtle smoke "breathing" pulse ---------- */
+/* ---------- Smoke "breathing" pulse ---------- */
 (function(){
   const smoke = document.querySelector('.bg-smoke');
   if(!smoke) return;
@@ -501,10 +521,12 @@ function setScoreWheel(value){
   const offset = WHEEL.circumference - (v/100) * WHEEL.circumference;
   WHEEL.circle.style.strokeDashoffset = offset;
 
+  // Threshold colors
   if (v >= 80)      WHEEL.circle.setAttribute('stroke','url(#gradGood)');
   else if (v >= 60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
   else              WHEEL.circle.setAttribute('stroke','url(#gradBad)');
 
+  // Score inside
   const n = Math.round(v);
   WHEEL.text.textContent = n;
   document.getElementById('overallScoreInline').textContent = n;
@@ -512,7 +534,7 @@ function setScoreWheel(value){
 
 /* ---------- Checklist counters + storage ---------- */
 (function () {
-  const STORAGE_KEY = 'semanticSeoChecklistV7';
+  const STORAGE_KEY = 'semanticSeoChecklistV8';
   const total = 25;
   const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
   const bar = document.getElementById('progressBar');
@@ -592,7 +614,7 @@ function setScoreWheel(value){
   });
 })();
 
-/* ---------- URL normalization + Analyze ---------- */
+/* ---------- URL normalization + Analyze (auto-select ≥80) ---------- */
 function normalizeUrl(u){
   if(!u) return '';
   u = u.trim();
@@ -600,10 +622,8 @@ function normalizeUrl(u){
   try { new URL(u); } catch(e){ /* allow; backend validates */ }
   return u;
 }
-
 (function(){
   const $ = s => document.querySelector(s);
-  const boxes = () => Array.from(document.querySelectorAll('#analyzer input[type="checkbox"]'));
 
   document.getElementById('analyzeForm').addEventListener('submit', (e)=>{
     e.preventDefault();
@@ -630,56 +650,51 @@ function normalizeUrl(u){
       window.__lastSuggestions = (data && typeof data.suggestions==='object' && data.suggestions) ? data.suggestions : {};
 
       // Chips
-      $('#rStatus').textContent = data.status;
-      $('#rTitleLen').textContent = (data.title || '').length;
-      $('#rMetaLen').textContent = data.meta_description_len;
-      $('#rCanonical').textContent = data.canonical ? 'Yes' : 'No';
-      $('#rRobots').textContent = data.robots || '—';
-      $('#rViewport').textContent = data.viewport ? 'Yes' : 'No';
-      $('#rHeadings').textContent = `${data.counts.h1}/${data.counts.h2}/${data.counts.h3}`;
-      $('#rInternal').textContent = data.counts.internal_links;
+      document.getElementById('rStatus').textContent = data.status;
+      document.getElementById('rTitleLen').textContent = (data.title || '').length;
+      document.getElementById('rMetaLen').textContent = data.meta_description_len;
+      document.getElementById('rCanonical').textContent = data.canonical ? 'Yes' : 'No';
+      document.getElementById('rRobots').textContent = data.robots || '—';
+      document.getElementById('rViewport').textContent = data.viewport ? 'Yes' : 'No';
+      document.getElementById('rHeadings').textContent = `${data.counts.h1}/${data.counts.h2}/${data.counts.h3}`;
+      document.getElementById('rInternal').textContent = data.counts.internal_links;
       const types = (data.schema.found_types || []).slice(0,6).join(', ') || '—';
-      $('#rSchema').textContent = types;
+      document.getElementById('rSchema').textContent = types;
       report.style.display='block';
 
-      // Per‑item scores + auto‑select when score ≥ 80
+      // Per‑item scores + auto‑select when score ≥ 80 (only those)
       let autoCount=0;
       for (let i=1;i<=25;i++){
         const key='ck-'+i;
         const score = (data.scores && typeof data.scores[key]==='number') ? data.scores[key] : null;
         setScoreBadge(i, score);
         const cb = document.getElementById(key);
-        if (cb && $('#autoApply').checked && typeof score==='number' && score>=80){
+        if (cb && document.getElementById('autoApply').checked && typeof score==='number' && score>=80){
           cb.checked = true; autoCount++;
         }
       }
       document.getElementById('rAutoCount').textContent = autoCount.toString();
       document.dispatchEvent(new Event('change')); // refresh progress
 
-      // Overall wheel color + number
+      // Overall wheel color + inner number
       const overall = typeof data.overall_score === 'number' ? data.overall_score : 0;
       setScoreWheel(overall);
 
-      // AI/Human badge
-      {
-        const ai = data.ai_detection || {};
-        const badge = document.getElementById('aiBadge');
-        const labelMap = { likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI', unknown:'Unknown' };
-        const label = labelMap[ai.label] || 'Unknown';
-        const humanPct = (typeof ai.human_pct==='number') ? ai.human_pct : null;
-        const aiPct    = (typeof ai.ai_pct==='number') ? ai.ai_pct : null;
-        let parts = [`<b>${label}</b>`];
-        if (humanPct!==null) parts.push(`Human ${humanPct}%`);
-        if (aiPct!==null)    parts.push(`AI ${aiPct}%`);
-        badge.innerHTML = `Writer: ${parts.join(' • ')}`;
-        badge.title = (ai.reasons || []).join(' • ');
-        if(document.getElementById('humanPct')) document.getElementById('humanPct').textContent = humanPct!==null?humanPct:'—';
-        if(document.getElementById('aiPct')) document.getElementById('aiPct').textContent = aiPct!==null?aiPct:'—';
-
-        document.getElementById('aiSnippetsPre').textContent = (ai.ai_sentences||[]).slice(0,20).join('\n\n') || 'No AI‑like snippets detected.';
-        document.getElementById('humanSnippetsPre').textContent = (ai.human_sentences||[]).slice(0,20).join('\n\n') || 'No human‑like snippets isolated.';
-        document.getElementById('fullTextPre').textContent = ai.full_text || 'No text captured.';
-      }
+      // AI/Human badge (both percents)
+      const ai = data.ai_detection || {};
+      const labelMap = { likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI', unknown:'Unknown' };
+      const label = labelMap[ai.label] || 'Unknown';
+      const humanPct = (typeof ai.human_pct==='number') ? ai.human_pct : null;
+      const aiPct    = (typeof ai.ai_pct==='number') ? ai.ai_pct : null;
+      const parts = [`<b>${label}</b>`];
+      if (humanPct!==null) parts.push(`Human ${humanPct}%`);
+      if (aiPct!==null)    parts.push(`AI ${aiPct}%`);
+      document.getElementById('aiBadge').innerHTML = `Writer: ${parts.join(' • ')}`;
+      document.getElementById('humanPct').textContent = humanPct!==null?humanPct:'—';
+      document.getElementById('aiPct').textContent = aiPct!==null?aiPct:'—';
+      document.getElementById('aiSnippetsPre').textContent = (ai.ai_sentences||[]).slice(0,20).join('\n\n') || 'No AI‑like snippets detected.';
+      document.getElementById('humanSnippetsPre').textContent = (ai.human_sentences||[]).slice(0,20).join('\n\n') || 'No human‑like snippets isolated.';
+      document.getElementById('fullTextPre').textContent = ai.full_text || 'No text captured.';
 
       // Status line
       const wheel = parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
