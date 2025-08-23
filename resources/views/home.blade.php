@@ -11,6 +11,9 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<!-- Tech/Digital font for score -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 :root{
@@ -59,7 +62,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .lang-flag{width:18px;height:14px;border-radius:2px;background:#888}
 
 /* Buttons */
-.btn{--pad:.75rem 1.05rem;display:inline-flex;align-items:center;gap:.5rem;padding:var(--pad);border-radius:14px;border:1px solid transparent;cursor:pointer;font-weight:800;letter-spacing:.2px;transition:.2s}
+.btn{--pad:.75rem 1.05rem;display:inline-flex;align-items:center;gap:.5rem;padding:var(--pad);border-radius:14px;border:1px solid transparent;cursor:pointer;font-weight:800;letter-spacing:.2px;transition:.25s}
 .btn-neon{background:linear-gradient(135deg,#3de2ff,#9b5cff);box-shadow:0 8px 30px rgba(61,226,255,.25);color:#001018}
 .btn-neon:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(61,226,255,.35)}
 .btn-ghost{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.16);color:#fff}
@@ -71,23 +74,78 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* Wheel */
+/* ===================== TECH WHEEL ===================== */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
-.score-container{width:clamp(180px,40vw,260px)}
-.score-wheel{width:100%;height:auto}
-.score-wheel circle{fill:none;stroke-width:16;stroke-linecap:round}
-.score-wheel .bg{stroke:rgba(255,255,255,.12)}
-.score-wheel .progress{stroke:url(#gradBad);stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .6s ease,stroke .25s ease,filter .25s ease;filter:drop-shadow(0 0 12px rgba(155,92,255,.28))}
-.score-wheel .progress2{stroke:url(#gradSweep);stroke-width:16;stroke-linecap:round;fill:none;stroke-dasharray:339;stroke-dashoffset:339;opacity:.35}
-.score-wheel .spark{stroke:#fff;stroke-width:2.2;stroke-dasharray:1 338;animation:orbit 3.6s linear infinite;filter:drop-shadow(0 0 6px rgba(255,255,255,.55))}
-@keyframes orbit{to{stroke-dashoffset:-339}}
-.score-text{
-  font-size:clamp(1.4rem,2.2vw,2.1rem);
-  font-weight:1000;fill:#fff;text-anchor:middle;dominant-baseline:middle;
+.score-container{
+  width: clamp(200px, 40vw, 280px);
+  aspect-ratio: 1/1;
+  position:relative;
+  border-radius:50%;
+  isolation:isolate;
+  /* animated conic pulse behind SVG */
 }
-.score-text.green{fill:#22c55e}
-.score-text.orange{fill:#f59e0b}
-.score-text.red{fill:#ef4444}
+.score-container::before{
+  content:"";
+  position:absolute; inset:8% 8%;
+  border-radius:50%;
+  background:
+    radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.08), transparent 60%),
+    conic-gradient(from 0deg,
+      rgba(61,226,255,.10),
+      rgba(155,92,255,.10),
+      rgba(255,182,72,.10),
+      rgba(255,32,69,.12),
+      rgba(34,197,94,.12),
+      rgba(61,226,255,.10));
+  filter: blur(8px) saturate(120%);
+  animation:spinHue 10s linear infinite;
+  z-index:0;
+}
+@keyframes spinHue { to { filter:hue-rotate(360deg) saturate(120%); } }
+
+.score-wheel{
+  position:relative; z-index:2; width:100%; height:100%;
+  transform:rotate(-90deg);
+}
+.score-wheel circle{fill:none;stroke-linecap:round}
+.score-wheel .bg{stroke:rgba(255,255,255,.10);stroke-width:16}
+.score-wheel .ticks{stroke-dasharray:2 10;stroke-width:2;stroke:rgba(255,255,255,.22);opacity:.9}
+.score-wheel .progress{
+  stroke:url(#gradBad);
+  stroke-width:18; stroke-dasharray:339; stroke-dashoffset:339;
+  filter:drop-shadow(0 0 10px rgba(61,226,255,.45));
+  transition:stroke-dashoffset .6s ease, stroke .25s ease, filter .25s ease;
+}
+
+/* Digital score text (upright) */
+.score-text{
+  font-family:"Orbitron", monospace;
+  font-weight:900;
+  font-size: clamp(2.0rem, 3.6vw, 2.8rem); /* responsive smaller per your ask */
+  transform:rotate(90deg);
+  dominant-baseline:middle; text-anchor:middle;
+  filter:drop-shadow(0 0 10px rgba(157,92,255,.35));
+  animation:scanPulse 2.5s ease-in-out infinite;
+}
+@keyframes scanPulse{
+  0%,100%{opacity:1}
+  50%{opacity:.86}
+}
+
+/* Orbital dot (tech vibe) */
+.orbit-dot{
+  position:absolute; inset:0; margin:auto; width:12px; height:12px; border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #3de2ff 0%, #9b5cff 60%, transparent 80%);
+  transform-origin: 50% calc(50% + 46%);
+  animation:orbitAnim 6.2s linear infinite;
+  z-index:3; pointer-events:none;
+}
+@keyframes orbitAnim{ to{ transform: rotate(360deg);} }
+
+/* Threshold color states for text glow */
+.score-container.good  .score-text{ fill:#22c55e; text-shadow:0 0 8px rgba(34,197,94,.65), 0 0 18px rgba(34,197,94,.35); }
+.score-container.mid   .score-text{ fill:#f59e0b; text-shadow:0 0 8px rgba(245,158,11,.65), 0 0 18px rgba(245,158,11,.35); }
+.score-container.bad   .score-text{ fill:#ef4444; text-shadow:0 0 8px rgba(239,68,68,.65), 0 0 18px rgba(239,68,68,.35); }
 
 /* URL input */
 .analyze-form input[type="url"]{
@@ -96,6 +154,17 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 }
 .analyze-form input[type="url"]:focus{ outline:none; border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15); }
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
+
+/* Buttons boost effect */
+.btn[data-flare]{
+  position:relative; overflow:hidden;
+}
+.btn[data-flare]::after{
+  content:""; position:absolute; inset:0; background:linear-gradient(120deg, transparent 0%, rgba(255,255,255,.18) 40%, transparent 80%);
+  transform:translateX(-120%); filter:blur(2px);
+}
+.btn[data-flare]:hover::after{ animation:btnShine .8s ease; }
+@keyframes btnShine{ to{ transform:translateX(120%);} }
 
 /* Progress */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
@@ -190,7 +259,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 @media (max-width:992px){
   .category-card{grid-column:span 12}
   .hero-heading{font-size:2.7rem}
-  .score-container{width:200px}
+  .score-container{width: clamp(170px, 38vw, 220px)}
   footer.site{flex-direction:column;align-items:flex-start}
 }
 @media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
@@ -208,11 +277,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/></linearGradient>
     <linearGradient id="gradMid"  x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/></linearGradient>
     <linearGradient id="gradBad"  x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/></linearGradient>
-    <!-- decorative sweep -->
-    <linearGradient id="gradSweep" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6ee7ff"/><stop offset="50%" stop-color="#f472b6"/><stop offset="100%" stop-color="#22c55e"/>
-      <animateTransform attributeName="gradientTransform" type="rotate" from="0 .5 .5" to="360 .5 .5" dur="14s" repeatCount="indefinite"/>
-    </linearGradient>
   </defs>
 </svg>
 
@@ -229,7 +293,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
       <div><div class="hero-heading" data-i="title">Semantic SEO Master Analyzer</div></div>
     </div>
     <div style="display:flex;gap:.5rem">
-      <button class="btn btn-ghost" id="printTop"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+      <button class="btn btn-ghost" id="printTop" data-flare><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
     </div>
   </header>
 
@@ -237,27 +301,31 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     <h2 class="section-title" data-i="analyze_title">Analyze a URL</h2>
     <p class="section-subtitle" data-i="legend_line">
       The wheel fills with your overall score.
-      <span class="btn btn-ghost" style="--pad:.25rem .6rem;background:rgba(34,197,94,.18)">Green ≥ 80</span>
-      <span class="btn btn-ghost" style="--pad:.25rem .6rem;background:rgba(245,158,11,.18)">Orange 60–79</span>
-      <span class="btn btn-ghost" style="--pad:.25rem .6rem;background:rgba(239,68,68,.18)">Red &lt; 60</span>
+      <span class="chip" style="background:rgba(34,197,94,.18)">Green ≥ 80</span>
+      <span class="chip" style="background:rgba(245,158,11,.18)">Orange 60–79</span>
+      <span class="chip" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
     </p>
 
     <div class="score-area">
-      <div class="score-container">
+      <div class="score-container" id="scoreContainer">
         <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
-          <circle class="bg" cx="60" cy="60" r="54"/>
-          <circle class="progress2" cx="60" cy="60" r="54" transform="rotate(-90 60 60)"/>
-          <circle class="progress" id="wheelProgress" cx="60" cy="60" r="54" transform="rotate(-90 60 60)"/>
-          <circle class="spark" cx="60" cy="60" r="54" transform="rotate(-90 60 60)"/>
-          <text x="60" y="65" class="score-text red" id="overallScore">0%</text>
+          <circle class="bg"     cx="60" cy="60" r="54"/>
+          <circle class="ticks"  cx="60" cy="60" r="54"/>
+          <circle class="progress" cx="60" cy="60" r="54" />
+          <!-- Upright digital text (we rotate whole svg -90deg, so rotate text back 90 in CSS) -->
+          <text x="60" y="60" class="score-text" id="overallScore">0%</text>
         </svg>
+        <div class="orbit-dot"></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:.5rem">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <span id="overallChip" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-gauge"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
-          <span class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</span>
-          <span class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</span>
-          <span id="aiBadge" class="btn btn-ghost" style="--pad:.4rem .7rem"><i class="fa-solid fa-user-pen"></i> Writer: <b>—</b></span>
+          <span class="chip">Overall: <b id="overallScoreInline">0</b>/100</span>
+          <span class="chip" id="aiBadge">Writer: <b>—</b></span>
+          <button id="viewAIText" class="btn btn-neon" style="--pad:.5rem .8rem" data-flare><i class="fa-solid fa-robot"></i> Evidence</button>
+        </div>
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <button id="viewHumanBtn" class="btn btn-ghost" style="--pad:.4rem .7rem" data-flare><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</button>
+          <button id="viewAIBtn" class="btn btn-ghost" style="--pad:.4rem .7rem" data-flare><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</button>
         </div>
       </div>
     </div>
@@ -272,25 +340,25 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
               <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)"> <span data-i="auto_check">Auto‑apply checkmarks (≥ 80)</span>
             </label>
           </div>
-          <button id="analyzeBtn" class="btn btn-danger" type="button"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
-          <button class="btn btn-neon" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
-          <button class="btn btn-ghost" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
+          <button id="analyzeBtn" class="btn btn-danger" type="button" data-flare><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
+          <button class="btn btn-neon" id="printChecklist" type="button" data-flare><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+          <button class="btn btn-ghost" id="resetChecklist" type="button" data-flare><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
         </div>
         <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)"></div>
       </form>
 
       <div id="analyzeReport" style="margin-top:.9rem;display:none">
         <div style="display:flex;flex-wrap:wrap;gap:.5rem">
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">HTTP: <b id="rStatus">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">Title: <b id="rTitleLen">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">Meta desc: <b id="rMetaLen">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">Canonical: <b id="rCanonical">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">Robots: <b id="rRobots">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">Viewport: <b id="rViewport">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">H1/H2/H3: <b id="rHeadings">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">Internal links: <b id="rInternal">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">Schema: <b id="rSchema">—</b></span>
-          <span class="btn btn-ghost" style="--pad:.25rem .6rem">Auto‑checked: <b id="rAutoCount">—</b></span>
+          <span class="chip">HTTP: <b id="rStatus">—</b></span>
+          <span class="chip">Title: <b id="rTitleLen">—</b></span>
+          <span class="chip">Meta desc: <b id="rMetaLen">—</b></span>
+          <span class="chip">Canonical: <b id="rCanonical">—</b></span>
+          <span class="chip">Robots: <b id="rRobots">—</b></span>
+          <span class="chip">Viewport: <b id="rViewport">—</b></span>
+          <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
+          <span class="chip">Internal links: <b id="rInternal">—</b></span>
+          <span class="chip">Schema: <b id="rSchema">—</b></span>
+          <span class="chip">Auto‑checked: <b id="rAutoCount">—</b></span>
         </div>
       </div>
     </div>
@@ -345,7 +413,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
             </div>
-            <span class="btn btn-ghost" style="--pad:.25rem .6rem"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
+            <span class="chip"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
           </header>
           <ul class="checklist">
             @for($i=$c[1];$i<=$c[2];$i++)
@@ -405,8 +473,8 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---- Simple i18n (en only here) ---- */
-const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='btn btn-ghost' style='--pad:.25rem .6rem;background:rgba(34,197,94,.18)'>Green ≥ 80</span> <span class='btn btn-ghost' style='--pad:.25rem .6rem;background:rgba(245,158,11,.18)'>Orange 60–79</span> <span class='btn btn-ghost' style='--pad:.25rem .6rem;background:rgba(239,68,68,.18)'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 80)"} };
+/* ---- Simple i18n (en only) ---- */
+const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='chip' style='background:rgba(34,197,94,.18)'>Green ≥ 80</span> <span class='chip' style='background:rgba(245,158,11,.18)'>Orange 60–79</span> <span class='chip' style='background:rgba(239,68,68,.18)'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 80)"} };
 const LANGS = [["en","English"]];
 (function(){
   const dockBtn=document.getElementById('langOpen'), panel=document.getElementById('langPanel'), card=document.getElementById('langCard');
@@ -432,7 +500,7 @@ const LANGS = [["en","English"]];
         if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1;
       }
       for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
-        const A=nodes[i],B=nodes[j], d=Math.hypot(A.x-B.x,B.y-A.y);
+        const A=nodes[i],B=nodes[j], d=Math.hypot(A.x-B.x,A.y-B.y);
         if(d<maxDist){ const al=(1-d/maxDist)*.65; ctx.strokeStyle=colorFn(al); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke(); }
       }
       requestAnimationFrame(loop);
@@ -469,7 +537,7 @@ const LANGS = [["en","English"]];
   function sh(src,type){const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s); return s;}
   const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl.VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
   const ut=gl.getUniformLocation(prog,'t');
-  (function loop(ti){ requestAnimationFrame(loop); gl.useProgram(prog); gl.uniform1f(ut,ti*1e-3); gl.drawArrays(gl.TRIANGLES,0,3); })(performance.now());
+  (function loop(t){ requestAnimationFrame(loop); gl.useProgram(prog); gl.uniform1f(ut,t*1e-3); gl.drawArrays(gl.TRIANGLES,0,3); })(performance.now());
 })();
 
 /* ---- Back to Top ---- */
@@ -481,28 +549,27 @@ const LANGS = [["en","English"]];
   btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
 })();
 
-/* ---- Wheel helpers ---- */
-const WHEEL={circumference:339, arc:null, deco:null, text:null};
+/* ---- Wheel controller (threshold color + text + stroke) ---- */
+const WHEEL={circumference:339, circle:null, text:null, container:null};
 function setScoreWheel(value){
-  if(!WHEEL.arc){
-    WHEEL.arc=document.getElementById('wheelProgress');
-    WHEEL.deco=document.querySelector('.progress2');
+  if(!WHEEL.circle){
+    WHEEL.circle=document.querySelector('.score-wheel .progress');
     WHEEL.text=document.getElementById('overallScore');
+    WHEEL.container=document.getElementById('scoreContainer');
   }
   const v=Math.max(0,Math.min(100,Number(value)||0));
-  const off=WHEEL.circumference - (v/100)*WHEEL.circumference;
-  WHEEL.arc.style.strokeDashoffset=off;
-  WHEEL.deco.style.strokeDashoffset=off;
-  let grad='url(#gradBad)', cls='red';
-  if(v>=80){grad='url(#gradGood)'; cls='green';}
-  else if(v>=60){grad='url(#gradMid)'; cls='orange';}
-  WHEEL.arc.setAttribute('stroke',grad);
-  const n=Math.round(v); WHEEL.text.textContent=n+'%';
-  WHEEL.text.classList.remove('green','orange','red'); WHEEL.text.classList.add(cls);
+  const offset=WHEEL.circumference - (v/100)*WHEEL.circumference;
+  WHEEL.circle.style.strokeDashoffset=offset;
+
+  // stroke color + container text color class
+  WHEEL.container.classList.remove('good','mid','bad');
+  if(v>=80){ WHEEL.circle.setAttribute('stroke','url(#gradGood)'); WHEEL.container.classList.add('good'); }
+  else if(v>=60){ WHEEL.circle.setAttribute('stroke','url(#gradMid)'); WHEEL.container.classList.add('mid'); }
+  else { WHEEL.circle.setAttribute('stroke','url(#gradBad)'); WHEEL.container.classList.add('bad'); }
+
+  const n=Math.round(v);
+  WHEEL.text.textContent=n+'%';
   document.getElementById('overallScoreInline').textContent=n;
-  const chip=document.getElementById('overallChip');
-  chip.className='btn btn-ghost';
-  chip.style.background = (cls==='green')?'rgba(34,197,94,.18)':(cls==='orange')?'rgba(245,158,11,.18)':'rgba(239,68,68,.18)';
 }
 
 /* ---- Checklist storage & UI sync ---- */
@@ -596,9 +663,9 @@ function setScoreWheel(value){
     Object.values(panes).forEach(p=>p.classList.remove('active')); panes.tipsTab.classList.add('active');
     openM();
   });
-  document.getElementById('viewAIText')?.addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openM();});
-  document.getElementById('viewHumanBtn')?.addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="humanTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.humanTab.classList.add('active'); openM();});
-  document.getElementById('viewAIBtn')?.addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openM();});
+  document.getElementById('viewAIText').addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openM();});
+  document.getElementById('viewHumanBtn').addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="humanTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.humanTab.classList.add('active'); openM();});
+  document.getElementById('viewAIBtn').addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openM();});
   window.__setAIData=function(ai){
     document.getElementById('aiSnippetsPre').textContent=(ai?.ai_sentences||[]).join('\n\n')||'No AI‑like snippets detected.';
     document.getElementById('humanSnippetsPre').textContent=(ai?.human_sentences||[]).join('\n\n')||'No human‑like snippets isolated.';
@@ -608,7 +675,7 @@ function setScoreWheel(value){
   }
 })();
 
-/* ---- Analyze: real fetch + per-item scores + auto-select ≥80 ---- */
+/* ---- Analyze: connect per-item scores to UI & auto-select ≥80 ---- */
 function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test(u)) u='https://'+u.replace(/^\/+/, ''); try{ new URL(u);}catch(e){} return u; }
 
 (function(){
@@ -645,26 +712,25 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       $('#rSchema').textContent=(data.schema.found_types||[]).slice(0,6).join(', ')||'—';
       report.style.display='block';
 
-      // Suggestions blob saved for modal
+      // Suggestions for modal
       window.__lastSuggestions = (data.suggestions && typeof data.suggestions==='object') ? data.suggestions : {};
 
-      // Per-item scores + color accents + auto-select (robust)
+      // Per-item scores + auto-select ≥80
       let autoCount=0;
       for(let i=1;i<=25;i++){
         const key='ck-'+i, row=document.getElementById('row-'+i);
         const score=(data.scores && typeof data.scores[key]==='number') ? data.scores[key] : null;
         setScoreBadge(i, score);
         if(row) row.title = (score==null?'No score':`Score: ${Math.round(score)}`);
-
         if($('#autoApply').checked){
           if(typeof score==='number' && score>=80){ setChecked(key,true); autoCount++; }
           else { setChecked(key,false); }
         }
       }
       $('#rAutoCount').textContent=autoCount.toString();
-      document.dispatchEvent(new Event('change')); // update progress
+      document.dispatchEvent(new Event('change'));
 
-      // Overall wheel (with colors + responsive text)
+      // Overall wheel
       const overall = (typeof data.overall_score==='number') ? data.overall_score : 0;
       setScoreWheel(overall);
 
@@ -674,7 +740,9 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       const label=labelMap[ai.label]||'Unknown';
       const humanPct=typeof ai.human_pct==='number'?ai.human_pct:null;
       const aiPct=typeof ai.ai_pct==='number'?ai.ai_pct:null;
-      const parts=[`<b>${label}</b>`]; if(humanPct!==null) parts.push(`<i class="fa-solid fa-user" style="color:#22c55e"></i> ${humanPct}%`); if(aiPct!==null) parts.push(`<i class="fa-solid fa-microchip" style="color:#f59e0b"></i> ${aiPct}%`);
+      const parts=[`<b>${label}</b>`];
+      if(humanPct!==null) parts.push(`<i class="fa-solid fa-user" style="color:#22c55e"></i> ${humanPct}%`);
+      if(aiPct!==null) parts.push(`<i class="fa-solid fa-microchip" style="color:#9b5cff"></i> ${aiPct}%`);
       document.getElementById('aiBadge').innerHTML='Writer: '+parts.join(' • ');
       window.__setAIData(ai);
 
@@ -689,15 +757,6 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-magnifying-glass"></i> Analyze';
     }
   }
-})();
-
-/* ---- Back to top ---- */
-(function(){
-  const btn=document.getElementById('backTop'), link=document.getElementById('toTopLink');
-  function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
-  addEventListener('scroll', onScroll, {passive:true}); onScroll();
-  const goTop = e => { e && e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); };
-  btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
 })();
 </script>
 </body>
