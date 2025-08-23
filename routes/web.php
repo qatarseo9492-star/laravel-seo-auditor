@@ -284,7 +284,7 @@ if (!function_exists('analyze_document')) {
         $path = parse_url($url, PHP_URL_PATH) ?: '/';
 
         /*
-        | Strict 25‑item scoring + conservative auto‑check
+        | Strict 25-item scoring + conservative auto-check
         */
         $scores = [];
         $autoCheck = [];
@@ -449,7 +449,7 @@ if (!function_exists('analyze_document')) {
         $perfOk = ($lazyImgs >= 3 || $webpImgs >= 2);
         $scores['ck-19'] = $perfOk ? 78 : 58;
         if ($perfOk) $autoCheck[] = 'ck-19';
-        else $suggestions['ck-19'][] = 'Use WebP/AVIF, lazy‑load images, defer non‑critical JS.';
+        else $suggestions['ck-19'][] = 'Use WebP/AVIF, lazy-load images, defer non-critical JS.';
 
         // 20 Web Vitals (advisory)
         $scores['ck-20'] = 60;
@@ -476,7 +476,7 @@ if (!function_exists('analyze_document')) {
         $schemaOk = ($articleT || $productT || $howtoT || $faqType);
         $scores['ck-24'] = $schemaOk ? 90 : 45;
         if ($schemaOk) $autoCheck[] = 'ck-24';
-        else $suggestions['ck-24'][] = 'Add JSON‑LD (Article/FAQ/Product/HowTo) and validate.';
+        else $suggestions['ck-24'][] = 'Add JSON-LD (Article/FAQ/Product/HowTo) and validate.';
 
         // 25 sameAs / Org
         $hasSameAs = false;
