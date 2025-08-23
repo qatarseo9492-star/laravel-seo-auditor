@@ -5,7 +5,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 Route::get('/', function () {
-    // return your landing view
     return view('home');
 });
 
@@ -32,7 +31,6 @@ Route::post('/analyze.json', function (Request $request) {
     $status = $resp->status();
     $html   = (string) $resp->body();
 
-    // Minimal HTML guard
     if ($status >= 400 || !trim($html)) {
         return response()->json([
             'ok' => true,
@@ -66,18 +64,19 @@ Route::post('/analyze.json', function (Request $request) {
         foreach ($n as $node) $s[] = trim($node->textContent ?? '');
         return $s;
     };
-    $attr = function(string $query, string $attr) use($xpath) {
+    // RENAMED: $getAttr (function) and $name (parameter) to avoid closure capture collision
+    $getAttr = function(string $query, string $name) use($xpath) {
         $n = $xpath->query($query);
         $s = [];
         foreach ($n as $node) {
-            if ($node instanceof DOMElement && $node->hasAttribute($attr)) {
-                $s[] = trim($node->getAttribute($attr));
+            if ($node instanceof DOMElement && $node->hasAttribute($name)) {
+                $s[] = trim($node->getAttribute($name));
             }
         }
         return $s;
     };
-    $firstAttr = function(string $query, string $attr) use($attr) {
-        $a = $attr($query, $attr);
+    $firstAttr = function(string $query, string $name) use($getAttr) {
+        $a = $getAttr($query, $name);
         return $a[0] ?? null;
     };
 
@@ -92,7 +91,7 @@ Route::post('/analyze.json', function (Request $request) {
     $h1s = $text('//h1');
     $h2s = $text('//h2');
     $h3s = $text('//h3');
-    $links = $attr('//a[@href]', 'href');
+    $links = $getAttr('//a[@href]', 'href');
     $host = parse_url($url, PHP_URL_HOST) ?: '';
     $internalCount = 0;
     foreach ($links as $href) {
@@ -102,7 +101,7 @@ Route::post('/analyze.json', function (Request $request) {
         if ($h === $host) $internalCount++;
     }
 
-    // JSON-LD schema detection
+    // JSON-LD schema detection (removed is_list() for compatibility)
     $schemaTypes = [];
     foreach ($xpath->query('//script[@type="application/ld+json"]') as $node) {
         $json = trim($node->textContent ?? '');
@@ -115,8 +114,6 @@ Route::post('/analyze.json', function (Request $request) {
                     $t = is_array($n['@type']) ? $n['@type'] : [$n['@type']];
                     foreach ($t as $x) $schemaTypes[] = (string)$x;
                 }
-                foreach ($n as $k => $v) $walk($v);
-            } elseif (is_list($n)) {
                 foreach ($n as $v) $walk($v);
             }
         };
@@ -141,8 +138,7 @@ Route::post('/analyze.json', function (Request $request) {
     $path = parse_url($url, PHP_URL_PATH) ?: '/';
     $slug = trim($path, '/');
     $slugScore = 70;
-    if ($slug === '') { $slugScore = 70; }
-    else {
+    if ($slug !== '') {
         $len = strlen($slug);
         $hyph = substr_count($slug, '-');
         $slugScore = 90;
@@ -162,7 +158,7 @@ Route::post('/analyze.json', function (Request $request) {
     $h1Score = 50;
     if (count($h1s)) {
         $h1txt = strtolower(implode(' ', $h1s));
-        if ($primary && str_contains($h1txt, $primary)) $h1Score = 90; else $h1Score = 70;
+        if ($primary && strpos($h1txt, $primary) !== false) $h1Score = 90; else $h1Score = 70;
     }
 
     // Internal links
@@ -171,15 +167,14 @@ Route::post('/analyze.json', function (Request $request) {
     // E-E-A-T signals (author/date)
     $authorLike = preg_match('~by\s+[A-Z][a-z]+~', $bodyText) || stripos($html, 'itemprop="author"') !== false;
     $dateLike   = preg_match('~\b20(1\d|2\d)\b~', $bodyText) || stripos($html, 'datePublished') !== false;
-    $eeatScore  = ($authorLike ? 10 : 0) + ($dateLike ? 10 : 0) + ($hasArticle ? 20 : 0);
-    $eeatScore  = 60 + $eeatScore; // 60–100
+    $eeatScore  = 60 + (($authorLike ? 10 : 0) + ($dateLike ? 10 : 0) + ($hasArticle ? 20 : 0)); // 60–100
 
     // Media presence
     $imgCount = count($xpath->query('//img'));
     $videoCount = count($xpath->query('//video')) + count($xpath->query('//iframe[contains(@src,"youtube") or contains(@src,"vimeo")]'));
     $mediaScore = ($imgCount >= 3 ? 75 : 55) + ($videoCount ? 10 : 0);
 
-    // Readability proxy: avg sentence length
+    // Readability proxy
     $readScore = $avgSentenceLen > 220 ? 45 : ($avgSentenceLen > 150 ? 65 : 85);
 
     // Robots/indexable
@@ -212,7 +207,7 @@ Route::post('/analyze.json', function (Request $request) {
     }
     $citeScore = $externalLinks >= 3 ? 80 : ($externalLinks >= 1 ? 70 : 50);
 
-    // Entities (very rough): unique proper-cased words
+    // Entities (very rough)
     preg_match_all('~\b[A-Z][a-z]{2,}\b~', $bodyText, $m);
     $proper = array_values(array_unique($m[0] ?? []));
     $entityScore = count($proper) >= 10 ? 80 : (count($proper) >= 5 ? 70 : 55);
@@ -226,46 +221,41 @@ Route::post('/analyze.json', function (Request $request) {
     $lazyImgs = count($xpath->query('//img[@loading="lazy"]'));
     $hasPreload = stripos($html, 'rel="preload"') !== false;
     $speedScore = 60 + min(25, $lazyImgs*3) + ($hasPreload ? 8 : 0);
-    $vitalsScore = 62; // unknown; neutral-ish
+    $vitalsScore = 62;
 
     // Organization sameAs
-    $sameAsScore = 40;
-    if (preg_match('~"@type"\s*:\s*"(Organization|Brand|LocalBusiness)".+?"sameAs"\s*:\s*\[~is', $html)) {
-        $sameAsScore = 82;
-    }
-
-    // Slug quality already computed -> $slugScore
+    $sameAsScore = preg_match('~"@type"\s*:\s*"(Organization|Brand|LocalBusiness)".+?"sameAs"\s*:\s*\[~is', $html) ? 82 : 40;
 
     // Map the 25 checklist items
     $scores = [
-        'ck-1'  => max(60, $titleScore - 5),                // Search intent & topic proxy
-        'ck-2'  => 65,                                      // Keyword mapping (unknown)
-        'ck-3'  => $h1Score,                                // H1 has primary topic
-        'ck-4'  => $faqScore,                               // FAQs present
-        'ck-5'  => $readScore,                              // Readable/NLP-friendly
-        'ck-6'  => $titleScore,                             // Title length
-        'ck-7'  => $metaScore,                              // Meta description length
-        'ck-8'  => $canonScore,                             // Canonical
-        'ck-9'  => $indexScore,                             // Indexable
-        'ck-10' => $eeatScore,                              // E-E-A-T
-        'ck-11' => 65,                                      // Unique value (unknown)
-        'ck-12' => $citeScore,                              // Citations
-        'ck-13' => min(95, $mediaScore),                    // Media
-        'ck-14' => $uniqueH >= 5 ? 80 : ($uniqueH >= 3 ? 70 : 55), // Logical headings
-        'ck-15' => $internalScore,                          // Internal links
-        'ck-16' => $slugScore,                              // Clean URL
-        'ck-17' => $breadScore,                             // Breadcrumbs
-        'ck-18' => $mobileScore,                            // Mobile-friendly
-        'ck-19' => min(95, $speedScore),                    // Speed hints
-        'ck-20' => $vitalsScore,                            // CWV (unknown)
-        'ck-21' => $ctaScore,                               // CTAs present
-        'ck-22' => $hasArticle || $hasOrg ? 80 : 60,        // Primary entity via schema
-        'ck-23' => $relatedScore,                           // Related entities
-        'ck-24' => $schemaScore,                            // Valid schema present
-        'ck-25' => $sameAsScore,                            // sameAs/Org details
+        'ck-1'  => max(60, $titleScore - 5),
+        'ck-2'  => 65,
+        'ck-3'  => $h1Score,
+        'ck-4'  => $faqScore,
+        'ck-5'  => $readScore,
+        'ck-6'  => $titleScore,
+        'ck-7'  => $metaScore,
+        'ck-8'  => $canonScore,
+        'ck-9'  => $indexScore,
+        'ck-10' => $eeatScore,
+        'ck-11' => 65,
+        'ck-12' => $citeScore,
+        'ck-13' => min(95, $mediaScore),
+        'ck-14' => $uniqueH >= 5 ? 80 : ($uniqueH >= 3 ? 70 : 55),
+        'ck-15' => $internalScore,
+        'ck-16' => $slugScore,
+        'ck-17' => $breadScore,
+        'ck-18' => $mobileScore,
+        'ck-19' => min(95, $speedScore),
+        'ck-20' => $vitalsScore,
+        'ck-21' => $ctaScore,
+        'ck-22' => $hasArticle || $hasOrg ? 80 : 60,
+        'ck-23' => $relatedScore,
+        'ck-24' => $schemaScore,
+        'ck-25' => $sameAsScore,
     ];
 
-    // Overall score (weighted average leaning a bit on content + technical)
+    // Overall score (weighted)
     $weights = [
         1=>1,2=>1,3=>1.2,4=>1,5=>1.2,6=>1.3,7=>1.1,8=>1.2,9=>1.1,10=>1.2,11=>1,
         12=>1,13=>1,14=>1,15=>1.1,16=>1,17=>0.9,18=>1.2,19=>1.1,20=>1,21=>1,22=>1,23=>1,24=>1.1,25=>0.9
@@ -274,7 +264,7 @@ Route::post('/analyze.json', function (Request $request) {
     foreach ($scores as $k=>$v) { $w = $weights[$i] ?? 1; $acc += $v*$w; $wSum += $w; $i++; }
     $overall = $wSum ? round($acc/$wSum) : 0;
 
-    // Suggestions (only a few targeted examples)
+    // Suggestions
     $sugs = [];
     $push = function($id, $txt) use (&$sugs) { $sugs[$id][] = $txt; };
 
@@ -286,7 +276,7 @@ Route::post('/analyze.json', function (Request $request) {
     if (!count($schemaTypes)) $push('ck-24', 'Add JSON-LD (Article/FAQ/Product) with @id and sameAs if applicable.');
     if ($internalCount < 3) $push('ck-15', 'Add internal links to related hubs and parent category pages.');
 
-    // AI/Human very rough heuristic
+    // AI/Human heuristic
     $aiLike = 0;
     if ($avgSentenceLen >= 160) $aiLike += 20;
     if (preg_match('~\bIn conclusion,|Overall,|Firstly,|Secondly,|Additionally,~', $bodyText)) $aiLike += 10;
