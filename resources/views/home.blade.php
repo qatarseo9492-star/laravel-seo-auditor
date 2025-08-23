@@ -20,7 +20,7 @@
   --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
   --radius:18px; --shadow:0 10px 40px rgba(0,0,0,.55);
   --container:1200px;
-  --hue: 0deg; /* live hue for ultra-fast multi-color water */
+  --hue: 0deg;
 }
 *{box-sizing:border-box} html,body{height:100%}
 html{scroll-behavior:smooth}
@@ -33,10 +33,9 @@ body{
   overflow-x:hidden;
 }
 
-/* Canvas decor */
+/* Canvases */
 #linesCanvas, #linesCanvas2, #brainCanvas, #smokeFX { position:fixed; inset:0; z-index:0; pointer-events:none; }
 #brainCanvas{opacity:.10}
-#smokeFX{ opacity:1; filter:saturate(115%) contrast(105%); }
 
 /* Layout */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
@@ -45,7 +44,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:4.2rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language dock */
+/* Lang dock */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -69,7 +68,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .section-title{font-size:1.6rem;margin:0 0 .3rem}
 .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* ======= SCORE GAUGE: circular water fill + gradient progress arc ======= */
+/* ======= SCORE GAUGE ======= */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}
@@ -79,26 +78,19 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .score-wave2{animation:scoreWave 11s linear infinite reverse}
 @keyframes scoreWave{from{transform:translateX(0)}to{transform:translateX(-210px)}}
 .score-text{font-size:clamp(2.2rem, 4.2vw, 3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
-/* live hue cycler for “every millisecond” feel */
 .multiHueFast{ filter:hue-rotate(var(--hue)) saturate(140%); will-change:filter; }
 
-/* Chips + legends */
+/* Chips */
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)} .l-orange{background:rgba(245,158,11,.18)} .l-green{background:rgba(34,197,94,.18)}
 .chip-good{background:rgba(34,197,94,.18)!important;border-color:rgba(34,197,94,.45)!important}
 .chip-mid{background:rgba(245,158,11,.18)!important;border-color:rgba(245,158,11,.45)!important}
 .chip-bad{background:rgba(239,68,68,.18)!important;border-color:rgba(239,68,68,.5)!important}
-
-/* Icon tints */
 .ico{width:1.1em;text-align:center}
-.ico-green{color:var(--good)}
-.ico-orange{color:var(--warn)}
-.ico-red{color:var(--bad)}
-.ico-cyan{color:var(--accent)}
-.ico-purple{color:#9b5cff}
+.ico-green{color:var(--good)} .ico-orange{color:var(--warn)} .ico-red{color:var(--bad)} .ico-cyan{color:var(--accent)} .ico-purple{color:#9b5cff}
 
-/* URL input + animated label */
+/* URL input */
 .analyze-form input[type="url"]{
   width:100%; padding:1rem 1.2rem; border-radius:16px;
   border:1px solid #1b1b35; background:#0b0d21; color:var(--text); transition:.25s;
@@ -117,23 +109,18 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 }
 @keyframes shine{0%{background-position:0%}100%{background-position:200%}}
 @keyframes underlineWave{0%,100%{transform:translateX(0)}50%{transform:translateX(8px)}}
-
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
 
-/* ======= Water progress bar (Analyze) with smoke ======= */
+/* ======= Water progress bar ======= */
 .water-wrap{margin-top:.8rem;display:none}
-.waterbar{
-  position:relative; height:64px; border-radius:18px; overflow:hidden;
-  background:#0b0d21; border:1px solid rgba(255,255,255,.1);
-}
+.waterbar{position:relative; height:64px; border-radius:18px; overflow:hidden;background:#0b0d21; border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute; inset:0; width:100%; height:100%; z-index:1;}
 .water-mask-rect{transition:all .25s ease-out}
 .water-overlay{position:absolute; inset:0; pointer-events:none; background:
   radial-gradient(120px 60px at 20% -20%, rgba(255,255,255,.18), transparent 60%),
   linear-gradient(0deg, rgba(255,255,255,.05), transparent 40%, transparent 60%, rgba(255,255,255,.06));
-  mix-blend-mode:screen; z-index:2;
-}
-.water-pct{position:absolute; inset:0; display:grid; place-items:center; font-weight:1000; font-size:1.05rem; text-shadow:0 1px 0 rgba(0,0,0,.45); letter-spacing:.4px; z-index:4; }
+  mix-blend-mode:screen; z-index:2}
+.water-pct{position:absolute; inset:0; display:grid; place-items:center; font-weight:1000; font-size:1.05rem; text-shadow:0 1px 0 rgba(0,0,0,.45); letter-spacing:.4px; z-index:4}
 .wave1{animation:waveX 7s linear infinite}
 .wave2{animation:waveX 10s linear infinite reverse; opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
@@ -159,13 +146,14 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
 
-/* Water-fill heading bar inside each category header */
+/* Water-fill heading bar + smoke */
 .cat-water{grid-column:1/-1; margin-top:.55rem; position:relative; height:22px;}
 .cat-svg{display:block; width:100%; height:22px;}
 .cat-wave1{animation:catWave 7s linear infinite}
 .cat-wave2{animation:catWave 10s linear infinite reverse}
 @keyframes catWave{from{transform:translateX(0)}to{transform:translateX(-640px)}}
 .cat-water-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.8rem; color:rgba(255,255,255,.9); text-shadow:0 1px 0 rgba(0,0,0,.55); pointer-events:none}
+.cat-smoke{position:absolute; left:0; right:0; bottom:0; height:26px; pointer-events:none; z-index:3; mix-blend-mode:screen;}
 
 /* Items */
 .checklist{list-style:none;margin:10px 0 0;padding:0}
@@ -219,7 +207,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 <canvas id="linesCanvas2" aria-hidden="true"></canvas>
 <canvas id="smokeFX" aria-hidden="true"></canvas>
 
-<!-- Gradients (kept for other UI) -->
+<!-- Gradients -->
 <svg width="0" height="0" aria-hidden="true">
   <defs>
     <linearGradient id="grad" x1="0%" y1="0%" x2="100%"><stop offset="0%" stop-color="#9b5cff"/><stop offset="100%" stop-color="#ff2045"/></linearGradient>
@@ -254,21 +242,16 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
     <div class="score-area">
       <div class="score-container">
-        <!-- ======= Circular water-fill score gauge with PROGRESS ARC ======= -->
+        <!-- CIRCULAR GAUGE with PROGRESS ARC -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
-              <clipPath id="scoreCircleClip">
-                <circle cx="100" cy="100" r="88"/>
-              </clipPath>
-              <clipPath id="scoreFillClip">
-                <rect id="scoreClipRect" class="score-mask-rect" x="0" y="200" width="200" height="200"/>
-              </clipPath>
+              <clipPath id="scoreCircleClip"><circle cx="100" cy="100" r="88"/></clipPath>
+              <clipPath id="scoreFillClip"><rect id="scoreClipRect" class="score-mask-rect" x="0" y="200" width="200" height="200"/></clipPath>
               <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop id="scoreStop1" offset="0%" stop-color="#22c55e"/>
                 <stop id="scoreStop2" offset="100%" stop-color="#16a34a"/>
               </linearGradient>
-              <!-- Border ring gradient -->
               <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop id="ringStop1" offset="0%" stop-color="#22c55e"/>
                 <stop id="ringStop2" offset="100%" stop-color="#16a34a"/>
@@ -280,14 +263,10 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
               <path id="scoreWavePath" d="M0 110 Q 15 90 30 110 T 60 110 T 90 110 T 120 110 T 150 110 T 180 110 T 210 110 V 220 H 0 Z"/>
             </defs>
 
-            <!-- Back plate -->
             <circle cx="100" cy="100" r="96" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
-            <!-- Track ring -->
             <circle id="ringTrack" cx="100" cy="100" r="95" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="6" transform="rotate(-90 100 100)"/>
-            <!-- Progress arc ring (dash-controlled) -->
             <circle id="ringArc" cx="100" cy="100" r="95" fill="none" stroke="url(#ringGrad)" stroke-width="6" stroke-linecap="round" filter="url(#ringGlow)" opacity=".95" transform="rotate(-90 100 100)" />
 
-            <!-- Water area -->
             <g clip-path="url(#scoreCircleClip)">
               <rect x="0" y="0" width="200" height="200" fill="#0b0d21"/>
               <g clip-path="url(#scoreFillClip)">
@@ -302,7 +281,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
               </g>
             </g>
 
-            <!-- Score text -->
             <text id="overallScore" x="100" y="106" text-anchor="middle" dominant-baseline="middle" class="score-text">0%</text>
           </svg>
         </div>
@@ -349,7 +327,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
-        <!-- Water progress with multi-hue waves + smoke -->
+        <!-- Water progress -->
         <div class="water-wrap" id="waterWrap" aria-hidden="true">
           <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -358,12 +336,9 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                   <stop offset="0%" stop-color="#3de2ff"/><stop offset="100%" stop-color="#9b5cff"/>
                 </linearGradient>
                 <clipPath id="roundClip"><rect x="1" y="1" width="598" height="198" rx="18" ry="18"/></clipPath>
-                <clipPath id="fillClip">
-                  <rect id="waterClipRect" class="water-mask-rect" x="0" y="200" width="600" height="200"/>
-                </clipPath>
+                <clipPath id="fillClip"><rect id="waterClipRect" class="water-mask-rect" x="0" y="200" width="600" height="200"/></clipPath>
                 <path id="wave" d="M0 120 Q 50 90 100 120 T 200 120 T 300 120 T 400 120 T 500 120 T 600 120 V 220 H 0 Z"/>
               </defs>
-
               <g clip-path="url(#roundClip)">
                 <rect x="0" y="0" width="600" height="200" fill="#0b0d21"/>
                 <g clip-path="url(#fillClip)">
@@ -377,7 +352,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                 <rect x="0" y="0" width="600" height="200" fill="transparent"/>
               </g>
             </svg>
-            <!-- smoke right above the water line -->
             <canvas id="waterSmoke"></canvas>
             <div class="water-overlay"></div>
             <div class="water-pct"><span id="waterPct">0%</span></div>
@@ -385,7 +359,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
         </div>
 
-        <!-- Quick chips -->
         <div id="analyzeReport" style="margin-top:.9rem;display:none">
           <div style="display:flex;flex-wrap:wrap;gap:.5rem">
             <span class="chip">HTTP: <b id="rStatus">—</b></span>
@@ -453,7 +426,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
             <div>
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
-              <!-- Animated water-fill heading bar with count + % -->
+              <!-- Water heading bar + per-category smoke -->
               <div class="cat-water" id="catWater-{{ $loop->index }}">
                 <svg class="cat-svg" viewBox="0 0 600 24" preserveAspectRatio="none">
                   <defs>
@@ -479,6 +452,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                     </g>
                   </g>
                 </svg>
+                <canvas class="cat-smoke" id="catSmoke-{{ $loop->index }}"></canvas>
                 <div class="cat-water-pct" id="catPct-{{ $loop->index }}">0/0 • 0%</div>
               </div>
             </div>
@@ -569,7 +543,7 @@ const LANGS = [["en","English"]];
   fill(); apply(localStorage.getItem('lang')||'en');
 })();
 
-/* ---------- Background canvases (trim) ---------- */
+/* ---------- Background wireframe ---------- */
 (function(){
   const bc = document.getElementById('brainCanvas'), bctx = bc.getContext('2d');
   let bw, bh, pts=[]; function rs(){bw= bc.width = innerWidth; bh= bc.height = innerHeight; pts = Array.from({length:80},()=>({x:Math.random()*bw,y:Math.random()*bh,vx:(Math.random()-.5)*.4,vy:(Math.random()-.5)*.4}))}
@@ -605,7 +579,7 @@ function setChipTone(el, value, {mode='overall'} = {}){
 }
 function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 
-/* ---------- Score Gauge controller (water fill + PROGRESS ARC ring) ---------- */
+/* ---------- Score Gauge controller (with progress arc) ---------- */
 const GAUGE = { rect:null, stop1:null, stop2:null, r1:null, r2:null, arc:null, text:null, H:200, CIRC: 2*Math.PI*95 };
 function setScoreWheel(value){
   if (!GAUGE.rect){
@@ -616,41 +590,98 @@ function setScoreWheel(value){
     GAUGE.r2    = document.getElementById('ringStop2');
     GAUGE.arc   = document.getElementById('ringArc');
     GAUGE.text  = document.getElementById('overallScore');
-    // initialize dasharray for progress arc
     if (GAUGE.arc){
       GAUGE.arc.style.strokeDasharray = GAUGE.CIRC.toFixed(2);
       GAUGE.arc.style.strokeDashoffset = GAUGE.CIRC.toFixed(2);
     }
   }
   const v = Math.max(0, Math.min(100, Number(value)||0));
-  const y = GAUGE.H - (GAUGE.H * (v/100));              // top of water
+  const y = GAUGE.H - (GAUGE.H * (v/100));
   GAUGE.rect.setAttribute('y', String(y));
   GAUGE.text.textContent = Math.round(v) + '%';
 
-  // threshold base colors
   let c1, c2;
-  if (v >= 80){ c1='#22c55e'; c2='#16a34a'; }           // green
-  else if (v >= 60){ c1='#f59e0b'; c2='#fb923c'; }      // orange
-  else { c1='#ef4444'; c2='#b91c1c'; }                  // red
-
-  // Set water gradient base (we also hue-cycle on top)
+  if (v >= 80){ c1='#22c55e'; c2='#16a34a'; }
+  else if (v >= 60){ c1='#f59e0b'; c2='#fb923c'; }
+  else { c1='#ef4444'; c2='#b91c1c'; }
   GAUGE.stop1.setAttribute('stop-color', c1);
   GAUGE.stop2.setAttribute('stop-color', c2);
-
-  // Set border ring gradient (threshold-colored)
   GAUGE.r1.setAttribute('stop-color', c1);
   GAUGE.r2.setAttribute('stop-color', c2);
 
-  // Update progress arc dashoffset
   if (GAUGE.arc){
     const offset = GAUGE.CIRC * (1 - (v/100));
     GAUGE.arc.style.strokeDashoffset = offset.toFixed(2);
   }
 
-  // Inline score + chip tone
   setText('overallScoreInline', Math.round(v));
   setChipTone(document.getElementById('overallChip'), v, {mode:'overall'});
 }
+
+/* ---------- Per-category smoke (heading bars) ---------- */
+const CatSmoke = (function(){
+  const list = []; // each: {el, ctx, parts, ratio, dpr}
+  function attachAll(){
+    document.querySelectorAll('.cat-smoke').forEach((cv, i)=>{
+      const ctx = cv.getContext('2d');
+      const o = { el: cv, ctx, parts: [], ratio: 0, dpr: Math.min(2, window.devicePixelRatio||1) };
+      resizeOne(o);
+      list[i] = o;
+    });
+  }
+  function resizeOne(o){
+    const w = o.el.clientWidth || 600, h = o.el.clientHeight || 26;
+    o.el.width = Math.max(1, Math.floor(w * o.dpr));
+    o.el.height = Math.max(1, Math.floor(h * o.dpr));
+    o.ctx.setTransform(o.dpr,0,0,o.dpr,0,0);
+  }
+  function spawn(o, n=2){
+    const W = o.el.clientWidth || 600;
+    const H = o.el.clientHeight || 26;
+    const span = Math.max(8, W * o.ratio);
+    const baseY = H * 0.55; // near the wave crest
+    for(let i=0;i<n;i++){
+      const x = Math.random() * span;
+      o.parts.push({
+        x, y: baseY + (Math.random()*2 - 1),
+        vx: (Math.random()-.5)*.30,
+        vy: -(.25 + Math.random()*.45),
+        life: 1,
+        decay: .03 + Math.random()*.05,
+        r: 1.2 + Math.random()*2.6,
+        hue: 180 + Math.random()*120
+      });
+    }
+  }
+  function step(){
+    for(const o of list){
+      if (!o) continue;
+      const W = o.el.clientWidth || 600, H = o.el.clientHeight || 26;
+      o.ctx.clearRect(0,0,W,H);
+      o.ctx.globalCompositeOperation = 'lighter';
+      const intensity = 40 * (0.25 + 0.75 * o.ratio); // more fill => more smoke
+      if (o.parts.length < intensity) spawn(o, 2);
+      for(const p of o.parts){
+        p.x += p.vx; p.y += p.vy; p.vy -= 0.0018; p.life -= p.decay;
+        const a = Math.max(0, p.life);
+        const g = o.ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+        g.addColorStop(0, `hsla(${p.hue}, 80%, 70%, ${0.28*a})`);
+        g.addColorStop(1, `hsla(${(p.hue+60)%360}, 90%, 55%, 0)`);
+        o.ctx.fillStyle = g; o.ctx.beginPath(); o.ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); o.ctx.fill();
+      }
+      o.parts = o.parts.filter(p => p.life > 0 && p.y > -10);
+    }
+    requestAnimationFrame(step);
+  }
+  function setPct(index, pct){
+    const o = list[index]; if(!o) return;
+    o.ratio = Math.max(0, Math.min(1, (pct||0)/100));
+  }
+  window.addEventListener('resize', ()=> list.forEach(o=>o&&resizeOne(o)), {passive:true});
+  // init at parse time (script is at the end of body)
+  attachAll(); requestAnimationFrame(step);
+  return { setPct };
+})();
 
 /* ---------- Checklist + scoring ---------- */
 (function () {
@@ -670,34 +701,36 @@ function setScoreWheel(value){
     return Math.round( Math.max(lastAnalyzed, (lastAnalyzed*0.6 + cs*0.4)) );
   }
 
-  /* Per-category water heading bars (with count + %) */
+  /* Update per-category water bars + smoke */
   function updateCatHeadingBars(){
     cards().forEach((card, idx)=>{
       const all = card.querySelectorAll('input[type="checkbox"]');
       const done = card.querySelectorAll('input[type="checkbox"]:checked');
       const pct = all.length ? Math.round((done.length / all.length) * 100) : 0;
 
-      // Update counts
+      // counts
       card.querySelector('.checked-count').textContent = done.length;
       card.querySelector('.total-count').textContent = all.length;
 
-      // Water fill width
+      // fill bar width
       const rect = document.getElementById(`catFillRect-${idx}`);
       const pctEl = document.getElementById(`catPct-${idx}`);
       const stop1 = document.getElementById(`catStop1-${idx}`);
       const stop2 = document.getElementById(`catStop2-${idx}`);
-      if (rect) {
-        const width = Math.round(600 * pct / 100); // viewBox width = 600
-        rect.setAttribute('width', String(width));
-      }
+      if (rect) rect.setAttribute('width', String(Math.round(600 * pct / 100)));
       if (pctEl) pctEl.textContent = `${done.length}/${all.length} • ${pct}%`;
 
-      // Threshold colors
+      // threshold color
       let c1, c2;
       if (pct >= 80){ c1='#22c55e'; c2='#16a34a'; }
       else if (pct >= 60){ c1='#f59e0b'; c2='#fb923c'; }
       else { c1='#ef4444'; c2='#b91c1c'; }
       if (stop1 && stop2){ stop1.setAttribute('stop-color', c1); stop2.setAttribute('stop-color', c2); }
+
+      // smoke intensity across filled width
+      if (window.CatSmoke && typeof CatSmoke.setPct === 'function') {
+        CatSmoke.setPct(idx, pct);
+      }
     });
   }
 
@@ -785,12 +818,12 @@ function setScoreWheel(value){
 /* ---------- URL normalization ---------- */
 function normalizeUrl(u){ if(!u) return ''; u = u.trim(); if (!/^https?:\/\//i.test(u)) u = 'https://' + u.replace(/^\/+/, ''); try { new URL(u); } catch(e){} return u; }
 
-/* ---------- Smoke particles rising from progress water ---------- */
+/* ---------- Smoke particles for progress water ---------- */
 const WaterSmoke = (function(){
   const canvas = document.getElementById('waterSmoke');
   const ctx = canvas ? canvas.getContext('2d') : null;
   let running = false, particles = [], frameId = 0;
-  let levelRatioTop = 1; // 0 = top, 1 = bottom
+  let levelRatioTop = 1;
 
   function cssW(){ return canvas?.clientWidth || canvas?.parentElement?.clientWidth || 0; }
   function cssH(){ return canvas?.clientHeight || canvas?.parentElement?.clientHeight || 0; }
@@ -811,15 +844,7 @@ const WaterSmoke = (function(){
       const x = Math.random()*cssW();
       const jitter = (Math.random()*4 - 2);
       const speed = 0.4 + Math.random()*0.8;
-      particles.push({
-        x, y: y + jitter,
-        vx: (Math.random()-.5)*.35,
-        vy: -speed,
-        life: 1,
-        decay: 0.008 + Math.random()*0.02,
-        r: 2 + Math.random()*6,
-        hue: (180 + Math.random()*120)
-      });
+      particles.push({ x, y: y + jitter, vx:(Math.random()-.5)*.35, vy: -speed, life:1, decay:0.008 + Math.random()*0.02, r: 2 + Math.random()*6, hue: (180 + Math.random()*120) });
     }
   }
 
@@ -855,7 +880,7 @@ const Water = (function(){
   const pct  = document.getElementById('waterPct');
   const label= document.getElementById('pageUrlLabel');
   let prog = 0, intv = null;
-  const H = 200; // SVG viewBox height
+  const H = 200;
 
   function show(){ wrap.style.display='block'; }
   function hide(){ wrap.style.display='none'; }
@@ -895,13 +920,13 @@ const Water = (function(){
   return { start, finish, reset, set, show, hide };
 })();
 
-/* ---------- Ultra-fast hue cycler (updates every frame) ---------- */
+/* ---------- Ultra-fast hue cycler ---------- */
 (function(){
   const root = document.documentElement;
   let start = performance.now();
   function frame(now){
-    const elapsed = now - start;                // ms
-    const angle = (elapsed / 4) % 360;          // ~0.25 deg per ms
+    const elapsed = now - start;
+    const angle = (elapsed / 4) % 360;
     root.style.setProperty('--hue', angle + 'deg');
     requestAnimationFrame(frame);
   }
@@ -1019,13 +1044,13 @@ const Water = (function(){
 })();
 </script>
 
-<!-- Procedural Smoke (WebGL2) background -->
+<!-- Subtle procedural smoke background (WebGL2) -->
 <script>
 (function(){
   const canvas = document.getElementById('smokeFX'); if (!canvas) return;
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  let gl = null, vw=0, vh=0, start=performance.now();
-  function resize(){ vw = canvas.clientWidth  = innerWidth; vh = canvas.clientHeight = innerHeight; canvas.width  = Math.floor(vw * dpr); canvas.height = Math.floor(vh * dpr); if (gl) gl.viewport(0,0,canvas.width,canvas.height); }
+  let gl = null, start=performance.now();
+  function resize(){ canvas.width = Math.floor(innerWidth*dpr); canvas.height=Math.floor(innerHeight*dpr); if (gl) gl.viewport(0,0,canvas.width,canvas.height); }
   addEventListener('resize', resize, {passive:true}); resize();
   try { gl = canvas.getContext('webgl2', { alpha:true, antialias:false, depth:false, stencil:false }); } catch(e){}
   if (!gl) return;
@@ -1033,16 +1058,16 @@ const Water = (function(){
   precision highp float; const vec2 v[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));
   out vec2 uv; void main(){ vec2 p=v[gl_VertexID]; uv=.5*(p+1.); gl_Position=vec4(p,0,1); }`;
   const fs=`#version 300 es
-  precision highp float; in vec2 uv; out vec4 o; uniform vec2 r; uniform float t,a;
+  precision highp float; in vec2 uv; out vec4 o; uniform float t;
   float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
   float n(vec2 p){ vec2 i=floor(p), f=fract(p); float A=h(i),B=h(i+vec2(1,0)),C=h(i+vec2(0,1)),D=h(i+vec2(1,1));
     vec2 u=f*f*(3.-2.*f); return mix(A,B,u.x)+(C-A)*u.y*(1.-u.x)+(D-B)*u.x*u.y; }
   float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
-  void main(){ vec2 p=(uv-.5)*vec2(a,1.); float q=f(p*1.6+vec2(t*.4,-t*.3)); float d=smoothstep(.35,.95,q); vec3 c=mix(vec3(.24,.88,1.),vec3(.61,.36,1.),uv.x); o=vec4(c*d,.75*d); }`;
-  function sh(s,t){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
+  void main(){ vec2 p=(uv-.5)*vec2(1.6,1.0); float q=f(p*1.6+vec2(t*.4,-t*.3)); float d=smoothstep(.35,.95,q); vec3 c=mix(vec3(.24,.88,1.),vec3(.61,.36,1.),uv.x); o=vec4(c*d,.6*d); }`;
+  function sh(src,type){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
   const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl.VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
-  const ur=gl.getUniformLocation(prog,'r'), ut=gl.getUniformLocation(prog,'t'), ua=gl.getUniformLocation(prog,'a');
-  function draw(now){ gl.useProgram(prog); gl.uniform2f(ur,canvas.width,canvas.height); gl.uniform1f(ut,(now-start)*1e-3); gl.uniform1f(ua,canvas.width/Math.max(1.,canvas.height)); gl.drawArrays(gl.TRIANGLES,0,3); requestAnimationFrame(draw); }
+  const ut=gl.getUniformLocation(prog,'t');
+  function draw(now){ gl.useProgram(prog); gl.uniform1f(ut,(now-start)*1e-3); gl.drawArrays(gl.TRIANGLES,0,3); requestAnimationFrame(draw); }
   requestAnimationFrame(draw);
 })();
 </script>
