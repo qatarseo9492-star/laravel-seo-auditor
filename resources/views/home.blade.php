@@ -20,8 +20,7 @@
   --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
   --radius:18px; --shadow:0 10px 40px rgba(0,0,0,.55);
   --container:1200px;
-  /* live hue for ultra-fast multi-color water */
-  --hue: 0deg;
+  --hue: 0deg; /* live hue for ultra-fast multi-color water */
 }
 *{box-sizing:border-box} html,body{height:100%}
 html{scroll-behavior:smooth}
@@ -70,7 +69,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .section-title{font-size:1.6rem;margin:0 0 .3rem}
 .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* ======= SCORE GAUGE: circular water fill + gradient borders ======= */
+/* ======= SCORE GAUGE: circular water fill + gradient progress arc ======= */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}
@@ -138,7 +137,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .wave1{animation:waveX 7s linear infinite}
 .wave2{animation:waveX 10s linear infinite reverse; opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
-/* Replace old slow hue shift with fast continuous variant */
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%); will-change:filter;}
 #waterSmoke{ position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:screen; }
 
@@ -161,7 +159,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
 
-/* NEW: Water-fill heading bar inside each category header */
+/* Water-fill heading bar inside each category header */
 .cat-water{grid-column:1/-1; margin-top:.55rem; position:relative; height:22px;}
 .cat-svg{display:block; width:100%; height:22px;}
 .cat-wave1{animation:catWave 7s linear infinite}
@@ -256,7 +254,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
     <div class="score-area">
       <div class="score-container">
-        <!-- ======= Circular water-fill score gauge with gradient borders ======= -->
+        <!-- ======= Circular water-fill score gauge with PROGRESS ARC ======= -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
@@ -270,7 +268,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
                 <stop id="scoreStop1" offset="0%" stop-color="#22c55e"/>
                 <stop id="scoreStop2" offset="100%" stop-color="#16a34a"/>
               </linearGradient>
-              <!-- Border ring gradient + soft glow -->
+              <!-- Border ring gradient -->
               <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
                 <stop id="ringStop1" offset="0%" stop-color="#22c55e"/>
                 <stop id="ringStop2" offset="100%" stop-color="#16a34a"/>
@@ -284,10 +282,10 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 
             <!-- Back plate -->
             <circle cx="100" cy="100" r="96" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
-            <!-- Outer gradient ring (threshold colored) -->
-            <circle cx="100" cy="100" r="95" fill="none" stroke="url(#ringGrad)" stroke-width="3.5" filter="url(#ringGlow)" opacity=".9"/>
-            <!-- Inner subtle ring -->
-            <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.5"/>
+            <!-- Track ring -->
+            <circle id="ringTrack" cx="100" cy="100" r="95" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="6" transform="rotate(-90 100 100)"/>
+            <!-- Progress arc ring (dash-controlled) -->
+            <circle id="ringArc" cx="100" cy="100" r="95" fill="none" stroke="url(#ringGrad)" stroke-width="6" stroke-linecap="round" filter="url(#ringGlow)" opacity=".95" transform="rotate(-90 100 100)" />
 
             <!-- Water area -->
             <g clip-path="url(#scoreCircleClip)">
@@ -351,7 +349,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
-        <!-- Water progress with ultra-fast multi-hue waves + smoke -->
+        <!-- Water progress with multi-hue waves + smoke -->
         <div class="water-wrap" id="waterWrap" aria-hidden="true">
           <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -607,8 +605,8 @@ function setChipTone(el, value, {mode='overall'} = {}){
 }
 function setText(id, val){ const el = document.getElementById(id); if (el) el.textContent = val; return el; }
 
-/* ---------- Score Gauge controller (water fill in circle + ring colors) ---------- */
-const GAUGE = { rect:null, stop1:null, stop2:null, r1:null, r2:null, text:null, H:200 };
+/* ---------- Score Gauge controller (water fill + PROGRESS ARC ring) ---------- */
+const GAUGE = { rect:null, stop1:null, stop2:null, r1:null, r2:null, arc:null, text:null, H:200, CIRC: 2*Math.PI*95 };
 function setScoreWheel(value){
   if (!GAUGE.rect){
     GAUGE.rect  = document.getElementById('scoreClipRect');
@@ -616,7 +614,13 @@ function setScoreWheel(value){
     GAUGE.stop2 = document.getElementById('scoreStop2');
     GAUGE.r1    = document.getElementById('ringStop1');
     GAUGE.r2    = document.getElementById('ringStop2');
+    GAUGE.arc   = document.getElementById('ringArc');
     GAUGE.text  = document.getElementById('overallScore');
+    // initialize dasharray for progress arc
+    if (GAUGE.arc){
+      GAUGE.arc.style.strokeDasharray = GAUGE.CIRC.toFixed(2);
+      GAUGE.arc.style.strokeDashoffset = GAUGE.CIRC.toFixed(2);
+    }
   }
   const v = Math.max(0, Math.min(100, Number(value)||0));
   const y = GAUGE.H - (GAUGE.H * (v/100));              // top of water
@@ -633,9 +637,15 @@ function setScoreWheel(value){
   GAUGE.stop1.setAttribute('stop-color', c1);
   GAUGE.stop2.setAttribute('stop-color', c2);
 
-  // Set border ring gradient (no hue-cycle — stays threshold-colored)
+  // Set border ring gradient (threshold-colored)
   GAUGE.r1.setAttribute('stop-color', c1);
   GAUGE.r2.setAttribute('stop-color', c2);
+
+  // Update progress arc dashoffset
+  if (GAUGE.arc){
+    const offset = GAUGE.CIRC * (1 - (v/100));
+    GAUGE.arc.style.strokeDashoffset = offset.toFixed(2);
+  }
 
   // Inline score + chip tone
   setText('overallScoreInline', Math.round(v));
@@ -682,7 +692,7 @@ function setScoreWheel(value){
       }
       if (pctEl) pctEl.textContent = `${done.length}/${all.length} • ${pct}%`;
 
-      // Threshold colors (kept stable for readability)
+      // Threshold colors
       let c1, c2;
       if (pct >= 80){ c1='#22c55e'; c2='#16a34a'; }
       else if (pct >= 60){ c1='#f59e0b'; c2='#fb923c'; }
@@ -885,14 +895,13 @@ const Water = (function(){
   return { start, finish, reset, set, show, hide };
 })();
 
-/* ---------- Ultra-fast hue cycler (updates every frame ~1–16ms) ---------- */
+/* ---------- Ultra-fast hue cycler (updates every frame) ---------- */
 (function(){
-  // Continuously rotate hue; browsers clamp timers, so using rAF is smooth & fast.
   const root = document.documentElement;
   let start = performance.now();
   function frame(now){
-    const elapsed = now - start;                                   // ms
-    const angle = (elapsed / 4) % 360;                             // ~0.25 deg per ms
+    const elapsed = now - start;                // ms
+    const angle = (elapsed / 4) % 360;          // ~0.25 deg per ms
     root.style.setProperty('--hue', angle + 'deg');
     requestAnimationFrame(frame);
   }
@@ -1031,7 +1040,7 @@ const Water = (function(){
   float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
   void main(){ vec2 p=(uv-.5)*vec2(a,1.); float q=f(p*1.6+vec2(t*.4,-t*.3)); float d=smoothstep(.35,.95,q); vec3 c=mix(vec3(.24,.88,1.),vec3(.61,.36,1.),uv.x); o=vec4(c*d,.75*d); }`;
   function sh(s,t){const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return o;}
-  const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl_VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
+  const prog=gl.createProgram(); gl.attachShader(prog,sh(vs,gl.VERTEX_SHADER)); gl.attachShader(prog,sh(fs,gl.FRAGMENT_SHADER)); gl.linkProgram(prog);
   const ur=gl.getUniformLocation(prog,'r'), ut=gl.getUniformLocation(prog,'t'), ua=gl.getUniformLocation(prog,'a');
   function draw(now){ gl.useProgram(prog); gl.uniform2f(ur,canvas.width,canvas.height); gl.uniform1f(ut,(now-start)*1e-3); gl.uniform1f(ua,canvas.width/Math.max(1.,canvas.height)); gl.drawArrays(gl.TRIANGLES,0,3); requestAnimationFrame(draw); }
   requestAnimationFrame(draw);
