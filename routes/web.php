@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Response;
 
 /*
 |--------------------------------------------------------------------------
@@ -236,7 +237,7 @@ if (!function_exists('analyze_document')) {
         }
         $types = array_values(array_filter(array_unique($types)));
 
-        // sitemap probe
+        // basic sitemap existence probe
         $xmlMap = false;
         try {
             $host = parse_url($url, PHP_URL_SCHEME) . '://' . parse_url($url, PHP_URL_HOST);
@@ -252,7 +253,12 @@ if (!function_exists('analyze_document')) {
 
         $path = parse_url($url, PHP_URL_PATH) ?: '/';
 
-        // --- 25 checks ---
+        /*
+        |--------------------------------------------------------------
+        | STRICT 25‑ITEM SCORING + CONSERVATIVE AUTO‑CHECK
+        | (exactly the block you asked for)
+        |--------------------------------------------------------------
+        */
         $scores = [];
         $autoCheck = [];
         $suggestions = [];
@@ -474,7 +480,9 @@ if (!function_exists('analyze_document')) {
                 'h1' => $h1, 'h2' => $h2, 'h3' => $h3,
                 'internal_links' => $internal
             ],
-            'schema' => ['found_types' => $types],
+            'schema' => [
+                'found_types' => $types
+            ],
             'ai_detection' => $ai,
             'readability' => $read,
             'scores' => $scores,
@@ -487,7 +495,7 @@ if (!function_exists('analyze_document')) {
 
 /*
 |--------------------------------------------------------------------------
-| API: Analyze (POST) — used by Blade via route('analyze.json')
+| API: Analyze (POST) — named analyze.json to match Blade
 |--------------------------------------------------------------------------
 */
 
