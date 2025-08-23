@@ -144,6 +144,20 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   footer.site{flex-direction:column;align-items:flex-start}
 }
 @media print{#linesCanvas,#linesCanvas2,#brainCanvas,#smokeFX,.modal-backdrop,.modal,header.site,#backTop,.lang-dock,.lang-panel{display:none!important}}
+/* Modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:95}
+.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:100}
+.modal-card{width:min(980px,95vw);max-height:85vh;overflow:auto;background:var(--panel-2);border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:var(--shadow);padding:16px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:8px;margin-bottom:8px}
+.modal-title{margin:0;font-weight:900}
+.modal-close{background:transparent;border:1px solid rgba(255,255,255,.18);border-radius:10px;color:#fff;padding:.35rem .6rem;cursor:pointer}
+
+.tabs{display:flex;gap:.5rem;border-bottom:1px solid rgba(255,255,255,.12);padding-bottom:.3rem;margin-bottom:.5rem}
+.tab{padding:.4rem .7rem;border:1px solid rgba(255,255,255,.14);border-bottom:none;border-radius:12px 12px 0 0;background:rgba(255,255,255,.05);cursor:pointer;font-weight:900}
+.tab.active{background:linear-gradient(135deg,#3de2ff33,#9b5cff33)}
+.tabpanes > div{display:none;padding:.6rem .2rem}
+.tabpanes > div.active{display:block}
+.pre{white-space:pre-wrap;background:#0b0d21;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px}
 </style>
 </head>
 <body>
@@ -499,13 +513,13 @@ function setScoreWheel(value){
     const btn = e.target.closest('.improve-btn'); if(!btn) return;
     const id = btn.dataset.id;
     const idx = parseInt(id.split('-')[1],10);
-    const labelEl = document.querySelector(`label[for="${id}"]`) || btn.parentElement.querySelector('span');
+    const labelEl = btn.parentElement.querySelector('label span');
     const label = labelEl ? labelEl.textContent.trim() : `Item ${idx}`;
 
     const tips = (window.__lastSuggestions||{})[id] || ['Run Analyze to get fresh tips for this item.'];
     const ul = document.getElementById('modalList'); ul.innerHTML='';
     tips.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
-    // Examples tab builds safe Google queries
+
     const q = encodeURIComponent(label + ' SEO examples');
     document.getElementById('examplesPre').innerHTML = `Open examples:\nhttps://www.google.com/search?q=${q}\n\nTry site: operators with top competitors.`;
 
@@ -543,7 +557,6 @@ function normalizeUrl(u){
 }
 (function(){
   const $ = s => document.querySelector(s);
-  const setChecked = (id, on) => { const el = document.getElementById(id); if (el) el.checked = !!on; };
 
   // Copy quick report
   document.getElementById('copyQuick').addEventListener('click', async ()=>{
@@ -598,7 +611,7 @@ function normalizeUrl(u){
       $('#rAutoCount').textContent = (data.auto_check_ids||[]).length;
       report.style.display='block';
 
-      // per-item scores + tips storage
+      // store suggestions & per‑item scores
       window.__lastSuggestions = data.suggestions || {};
       for (let i=1;i<=25;i++){ const key='ck-'+i; setScoreBadge(i, data.scores?.[key]); }
 
@@ -607,7 +620,7 @@ function normalizeUrl(u){
       window.__setAnalyzedScore(backendOverall);
       document.getElementById('contentScoreInline').textContent = window.__getContentScore();
 
-      // AI DETECTION
+      // AI DETECTION panes
       const ai = data.ai_detection || {};
       const badge = document.getElementById('aiBadge');
       const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI'};
