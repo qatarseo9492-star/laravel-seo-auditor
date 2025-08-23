@@ -7,11 +7,10 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <title>Semantic SEO Master • Ultra Tech Global</title>
 
-<!-- Favicons (optional) -->
+<!-- Favicons -->
 <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
 <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
-
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
@@ -48,7 +47,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .brand-badge{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(155,92,255,.3),rgba(255,32,69,.25));border:1px solid rgba(255,255,255,.08); color:#ffd1dc}
 .hero-heading{font-size:3.7rem;font-weight:1000;line-height:1.02;margin:.1rem 0;letter-spacing:.8px;background:linear-gradient(90deg,#b892ff,#ff2045 55%,#ff8a5b 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 28px rgba(155,92,255,.25)}
 
-/* Language (simple) */
+/* Language dock (minimal) */
 .lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:70;display:flex;flex-direction:column;gap:.6rem}
 .lang-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(6px)}
 .lang-btn:hover{background:rgba(255,255,255,.1)}
@@ -66,96 +65,53 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .btn-ghost:hover{background:rgba(255,255,255,.08);transform:translateY(-2px)}
 .btn-danger{background:linear-gradient(135deg,#ff2045,#ff7a59);color:#fff;box-shadow:0 8px 30px rgba(255,32,69,.25)}
 .btn-danger:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(255,32,69,.35)}
+.btn-gradient{background:linear-gradient(135deg,#ff2045,#ff7a59);box-shadow:0 10px 26px rgba(255,32,69,.35);transition:transform .15s ease,box-shadow .25s ease}
+.btn-gradient:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(255,32,69,.45)}
+.btn-glass{background:linear-gradient(135deg,#3de2ff,#9b5cff);color:#041018;box-shadow:0 8px 26px rgba(61,226,255,.30)}
+.btn-glass:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(61,226,255,.40)}
 
 /* Analyzer panel */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
+.section-title{font-size:1.6rem;margin:0 0 .3rem} .section-subtitle{margin:0;color:var(--text-dim)}
 
-/* ===== ANALYZER HERO UPGRADE ===== */
-.analyzer-hero{
-  position: relative;
-  border-radius: 22px;
-  padding: 18px;
-  background:
-    radial-gradient(120% 140% at 5% 0%, rgba(157,92,255,.14), transparent 60%),
-    radial-gradient(120% 140% at 100% 40%, rgba(61,226,255,.12), transparent 65%),
-    rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.10);
-  overflow: hidden;
-  box-shadow: 0 18px 60px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.04);
-  backdrop-filter: blur(8px) saturate(120%);
-}
-.analyzer-hero::before{
-  content:"";
-  position:absolute; inset:-2px;
-  border-radius: 24px;
-  padding:2px;
-  background: conic-gradient(from 220deg,
-     rgba(61,226,255,.55), rgba(155,92,255,.55), rgba(255,32,69,.45),
-     rgba(255,182,72,.45), rgba(34,197,94,.45), rgba(61,226,255,.55));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  pointer-events: none;
-  filter: blur(6px) saturate(140%);
-  opacity:.6;
-}
-.analyzer-head{
-  display:grid;
-  grid-template-columns: 260px 1fr;
-  gap: 20px;
-  align-items:center;
-}
-.head-left{
-  position:relative;
-  aspect-ratio: 1/1;
-  border-radius: 18px;
-  background: radial-gradient(80% 80% at 50% 35%, rgba(255,255,255,.06), rgba(255,255,255,.02));
-  border: 1px solid rgba(255,255,255,.06);
-  display:grid; place-items:center;
-  overflow:hidden;
-}
-.head-left::after{
-  content:""; position:absolute; inset:-40%;
-  background: conic-gradient(from 0deg, rgba(155,92,255,.18), rgba(61,226,255,.18), rgba(255,32,69,.15), rgba(155,92,255,.18));
-  animation: spinGlow 18s linear infinite;
-  filter: blur(22px);
-}
-@keyframes spinGlow{ to{ transform: rotate(360deg); } }
-.head-right .kicker{ color: var(--text-dim); margin:0 0 8px; font-weight:600; }
-.head-right .title{ font-weight:1000; font-size:clamp(1.2rem,1.1rem + 1vw,1.6rem); margin:0 0 8px; }
-.stat-badges{ display:flex; flex-wrap:wrap; gap:.55rem; }
-.badge{
-  display:inline-flex; align-items:center; gap:.5rem;
-  padding:.5rem .75rem; border-radius:999px; font-weight:800;
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
-}
-.badge i{ opacity:.9 }
-.badge-primary{
-  background:linear-gradient(135deg,#3de2ff,#9b5cff); color:#001018; border-color:transparent;
-  box-shadow:0 10px 28px rgba(61,226,255,.25);
-}
-.btn-soft{
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.14);
-  color:#fff; border-radius:12px; padding:.55rem .8rem; font-weight:900;
-}
-.btn-soft:hover{ background:rgba(255,255,255,.10); transform:translateY(-1px); }
+/* Score hero (wheel + titles) */
+.score-hero{position:relative;padding:20px;border-radius:22px;background:
+  radial-gradient(120% 160% at 0% 0%, rgba(61,226,255,.06), transparent 60%),
+  radial-gradient(120% 160% at 100% 100%, rgba(255,32,69,.06), transparent 60%),
+  linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 48px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.03);overflow:hidden}
+.score-hero::before{content:"";position:absolute;inset:-2px;border-radius:24px;padding:2px;background:linear-gradient(120deg,#3de2ff55,#9b5cff55,#ff7a5955,#22c55e55);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.score-hero-grid{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center}
+.badge-soft{display:inline-flex;align-items:center;gap:.45rem;padding:.45rem .7rem;border-radius:999px;font-weight:800;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+.badge-soft i{opacity:.9}
 
 /* Wheel */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
-.score-container{width:230px}
+.score-container{width:240px}
 .score-wheel{width:100%;height:auto;transform:rotate(-90deg)}
 .score-wheel circle{fill:none;stroke-width:14;stroke-linecap:round}
 .score-wheel .bg{stroke:rgba(255,255,255,.12)}
 .score-wheel .progress{stroke:url(#gradBad);stroke-dasharray:339;stroke-dashoffset:339;transition:stroke-dashoffset .6s ease,stroke .25s ease,filter .25s ease;filter:drop-shadow(0 0 12px rgba(155,92,255,.28))}
-.score-text{font-size:3rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
+.score-text{font-size:3.1rem;font-weight:1000;fill:#fff;transform:rotate(90deg);text-shadow:0 0 18px rgba(255,32,69,.25)}
 
-/* URL input */
-.analyze-form input[type="url"]{
-  width:100%; padding:1rem 1.2rem; border-radius:14px; border:1px solid #1b1b35; background:#0b0d21; color:var(--text);
-  box-shadow:0 0 0 0 rgba(155,92,255,.0); transition:.25s;
-}
-.analyze-form input[type="url"]:focus{ outline:none; border-color:#5942ff; box-shadow:0 0 0 6px rgba(155,92,255,.15); }
+/* URL card */
+.url-card{margin-top:14px;background:
+  radial-gradient(160% 180% at 100% 0%, rgba(157,92,255,.10), transparent 45%),
+  radial-gradient(150% 180% at 0% 100%, rgba(61,226,255,.10), transparent 45%),
+  rgba(255,255,255,.03);
+border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:14px;box-shadow:0 18px 44px rgba(0,0,0,.35)}
+.input-wrap{position:relative}
+.input-wrap .icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:28px;height:28px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);border:1px solid rgba(255,255,255,.16);color:#dce6ff}
+.input-wrap input{padding-left:52px !important;height:52px;font-weight:700;border-radius:14px !important}
+.analyze-form input[type="url"]{width:100%;padding:1rem 1.2rem;border-radius:14px;border:1px solid #1b1b35;background:#0b0d21;color:var(--text);box-shadow:0 0 0 0 rgba(155,92,255,.0);transition:.25s}
+.analyze-form input[type="url"]:focus{outline:none;border-color:#5942ff;box-shadow:0 0 0 6px rgba(155,92,255,.15)}
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;margin-top:.5rem}
+.actions{display:grid;grid-auto-flow:column;gap:.6rem;align-items:center;width:max-content}
+
+/* Chips under URL */
+.report-chips{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem}
+.report-chips .chip{padding:.45rem .75rem;border-radius:999px;font-weight:900;letter-spacing:.1px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}
+.chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28)}
 
 /* Progress */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
@@ -163,58 +119,31 @@ header.site{display:flex;align-items:center;justify-content:space-between;paddin
 .progress-fill{height:100%;background:linear-gradient(135deg,#9b5cff,#ff2045);width:0%;transition:width .35s ease}
 .progress-caption{color:var(--text-muted);font-size:.95rem;margin-top:.5rem}
 
-/* Checklist grid */
+/* Category grid + stylish checklist */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
-
-/* Stylish checklist cards */
-.category-card{
-  position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));
-  border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow);
-  overflow:hidden;isolation:isolate;
-}
-.category-card::before{
-  content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;
-  background:conic-gradient(from 180deg, rgba(61,226,255,.35), rgba(155,92,255,.35), rgba(255,182,72,.30), rgba(255,32,69,.30), rgba(34,197,94,.30), rgba(61,226,255,.35));
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 7s linear infinite; pointer-events:none;
-}
+.category-card{position:relative;grid-column:span 6;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
+.category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:conic-gradient(from 180deg, rgba(61,226,255,.35), rgba(155,92,255,.35), rgba(255,182,72,.30), rgba(255,32,69,.30), rgba(34,197,94,.30), rgba(61,226,255,.35));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 7s linear infinite;pointer-events:none}
 @keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
 .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
 .category-icon{width:46px;height:46px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
 .checklist{list-style:none;margin:10px 0 0;padding:0}
-
-.checklist-item{
-  --accent: rgba(255,255,255,.12);
-  position:relative;
-  display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;
-  padding:.75rem .8rem .75rem 1rem;border-radius:14px;
-  border:1px solid rgba(255,255,255,.10);
-  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.03));
-  overflow:hidden;
-}
+.checklist-item{--accent: rgba(255,255,255,.12);position:relative;display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.75rem .8rem .75rem 1rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.03));overflow:hidden}
 .checklist-item + .checklist-item{margin-top:.28rem}
-.checklist-item::after{
-  content:""; position:absolute; left:0; top:0; bottom:0; width:6px; background:var(--accent);
-  box-shadow:0 0 20px var(--accent); transition:.25s;
-}
+.checklist-item::after{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--accent);box-shadow:0 0 20px var(--accent);transition:.25s}
 .checklist-item:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(0,0,0,.28);border-color:rgba(255,255,255,.16)}
-.checklist-item label { cursor:pointer; display:inline-flex; align-items:center; gap:.6rem; }
-.checklist-item .autoPulse{ animation:selPulse .8s ease; }
+.checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.6rem}
+.checklist-item .autoPulse{animation:selPulse .8s ease}
 @keyframes selPulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.0)}70%{box-shadow:0 0 0 12px rgba(34,197,94,.18)}100%{box-shadow:0 0 0 0 rgba(34,197,94,.0)}}
 
 /* Toggle switch */
-.checklist-item input[type="checkbox"]{
-  appearance:none;width:42px;height:24px;border-radius:999px;background:#2a2a46;border:1px solid rgba(255,255,255,.18);position:relative;cursor:pointer;outline:none;transition:.2s
-}
-.checklist-item input[type="checkbox"]::after{
-  content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#cfd3f6;top:2.5px;left:2.5px;transition:.2s;box-shadow:0 2px 10px rgba(0,0,0,.3)
-}
+.checklist-item input[type="checkbox"]{appearance:none;width:42px;height:24px;border-radius:999px;background:#2a2a46;border:1px solid rgba(255,255,255,.18);position:relative;cursor:pointer;outline:none;transition:.2s}
+.checklist-item input[type="checkbox"]::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#cfd3f6;top:2.5px;left:2.5px;transition:.2s;box-shadow:0 2px 10px rgba(0,0,0,.3)}
 .checklist-item input[type="checkbox"]:checked{background:linear-gradient(135deg,#3de2ff,#9b5cff)}
 .checklist-item input[type="checkbox"]:checked::after{left:21px;background:#0a1222}
 
-/* Score badge */
+/* Score pills */
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22); border-color:rgba(22,193,114,.45)}
 .score-mid{ background:rgba(245,158,11,.22); border-color:rgba(245,158,11,.45)}
@@ -270,9 +199,7 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </svg>
 
 <!-- Language Dock -->
-<div class="lang-dock">
-  <button class="lang-btn" id="langOpen" title="Language"><i class="fa-solid fa-globe"></i></button>
-</div>
+<div class="lang-dock"><button class="lang-btn" id="langOpen" title="Language"><i class="fa-solid fa-globe"></i></button></div>
 <div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
 
 <div class="wrap">
@@ -287,81 +214,83 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
   </header>
 
   <section class="analyzer" id="analyzer">
-
-    <!-- Upgraded hero block -->
-    <div class="analyzer-hero">
-      <div class="analyzer-head">
-        <div class="head-left">
-          <div class="score-container">
-            <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
-              <circle class="bg" cx="60" cy="60" r="54"/>
-              <circle class="progress" cx="60" cy="60" r="54"/>
-              <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
-            </svg>
-          </div>
+    <!-- stylish hero replacing old header -->
+    <h2 class="section-title" data-i="analyze_title" style="display:none">Analyze a URL</h2>
+    <div class="score-hero">
+      <div class="score-hero-grid">
+        <div class="score-container">
+          <svg class="score-wheel" viewBox="0 0 120 120" aria-label="Overall score">
+            <circle class="bg" cx="60" cy="60" r="54"/>
+            <circle class="progress" cx="60" cy="60" r="54"/>
+            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" class="score-text" id="overallScore">0%</text>
+          </svg>
         </div>
-        <div class="head-right">
-          <p class="kicker" data-i="legend_line">
-            The wheel fills with your overall score.
-            <span class="badge" style="background:rgba(34,197,94,.18)">Green ≥ 80</span>
-            <span class="badge" style="background:rgba(245,158,11,.18)">Orange 60–79</span>
-            <span class="badge" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
-          </p>
-          <h2 class="title" data-i="analyze_title">Analyze a URL</h2>
-          <div class="stat-badges">
-            <span class="badge"><i class="fa-solid fa-gauge-high"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
-            <span class="badge" id="aiBadge"><i class="fa-solid fa-user-pen"></i> Writer: <b>—</b></span>
-            <button id="viewAIText" class="badge badge-primary" type="button">
-              <i class="fa-solid fa-robot"></i> Evidence
-            </button>
-            <button id="viewHumanBtn" class="btn-soft" type="button"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</button>
-            <button id="viewAIBtn" class="btn-soft" type="button"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</button>
+        <div>
+          <div style="display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:.35rem;">
+            <span class="section-subtitle" data-i="legend_line">
+              The wheel fills with your overall score.
+              <span class="badge-soft" style="background:rgba(34,197,94,.18)">Green ≥ 80</span>
+              <span class="badge-soft" style="background:rgba(245,158,11,.18)">Orange 60–79</span>
+              <span class="badge-soft" style="background:rgba(239,68,68,.18)">Red &lt; 60</span>
+            </span>
           </div>
+          <h3 class="hero-heading" style="font-size:2.2rem;margin:.3rem 0 .6rem">Analyze a URL</h3>
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-bottom:.35rem;">
+            <span class="badge-soft"><i class="fa-solid fa-gauge"></i> <b>Overall:</b>&nbsp;<span id="overallScoreInline">0</span> /100</span>
+            <span class="badge-soft" id="aiBadge">Writer: <b>—</b></span>
+            <button id="viewAIText" class="btn btn-glass" style="--pad:.5rem .9rem"><i class="fa-solid fa-robot"></i> Evidence</button>
+            <span class="badge-soft"><i class="fa-solid fa-user"></i> Human‑like: <b id="humanPct">—</b>%</span>
+            <span class="badge-soft"><i class="fa-solid fa-microchip"></i> AI‑like: <b id="aiPct">—</b>%</span>
+          </div>
+
+          <!-- URL card -->
+          <div class="url-card">
+            <form id="analyzeForm" class="analyze-form" onsubmit="return false;">
+              <label for="analyzeUrl" style="display:block;font-weight:900;margin-bottom:.45rem" data-i="page_url">Page URL</label>
+              <div class="input-wrap">
+                <span class="icon"><i class="fa-solid fa-link"></i></span>
+                <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="Paste a page URL… e.g. https://example.com/guide" />
+              </div>
+              <div class="analyze-row" style="grid-template-columns: 1fr auto auto auto;">
+                <label style="display:inline-flex;align-items:center;gap:.5rem;cursor:pointer">
+                  <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)">
+                  <span data-i="auto_check">Auto‑apply checkmarks (≥ 80)</span>
+                </label>
+                <div class="actions">
+                  <button id="analyzeBtn" class="btn btn-gradient" type="button"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
+                  <button class="btn btn-neon" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
+                  <button class="btn btn-ghost" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
+                </div>
+              </div>
+              <div id="analyzeStatus" style="margin-top:.6rem;color:var(--text-dim)"></div>
+            </form>
+
+            <!-- quick report chips -->
+            <div id="analyzeReport" style="display:none">
+              <div class="report-chips">
+                <span class="chip">HTTP: <b id="rStatus">—</b></span>
+                <span class="chip">Title: <b id="rTitleLen">—</b></span>
+                <span class="chip">Meta desc: <b id="rMetaLen">—</b></span>
+                <span class="chip">Canonical: <b id="rCanonical">—</b></span>
+                <span class="chip">Robots: <b id="rRobots">—</b></span>
+                <span class="chip">Viewport: <b id="rViewport">—</b></span>
+                <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
+                <span class="chip">Internal links: <b id="rInternal">—</b></span>
+                <span class="chip">Schema: <b id="rSchema">—</b></span>
+                <span class="chip">Auto‑checked: <b id="rAutoCount">—</b></span>
+              </div>
+            </div>
+          </div><!-- /url-card -->
         </div>
       </div>
     </div>
 
-    <!-- Analyze form -->
-    <div class="analyze-box" style="margin-top:14px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
-      <form id="analyzeForm" class="analyze-form" onsubmit="return false;">
-        <label for="analyzeUrl" style="display:block;font-weight:800;margin-bottom:.35rem" data-i="page_url">Page URL</label>
-        <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" />
-        <div class="analyze-row">
-          <div style="display:flex;align-items:center;gap:.6rem">
-            <label style="display:inline-flex;align-items:center;gap:.45rem;cursor:pointer">
-              <input id="autoApply" type="checkbox" checked style="accent-color:var(--primary)"> <span data-i="auto_check">Auto‑apply checkmarks (≥ 80)</span>
-            </label>
-          </div>
-          <button id="analyzeBtn" class="btn btn-danger" type="button"><i class="fa-solid fa-magnifying-glass"></i> <span data-i="analyze">Analyze</span></button>
-          <button class="btn btn-neon" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> <span data-i="print">Print</span></button>
-          <button class="btn btn-ghost" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> <span data-i="reset">Reset</span></button>
-        </div>
-        <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)"></div>
-      </form>
-
-      <div id="analyzeReport" style="margin-top:.9rem;display:none">
-        <div style="display:flex;flex-wrap:wrap;gap:.5rem">
-          <span class="badge">HTTP: <b id="rStatus">—</b></span>
-          <span class="badge">Title: <b id="rTitleLen">—</b></span>
-          <span class="badge">Meta desc: <b id="rMetaLen">—</b></span>
-          <span class="badge">Canonical: <b id="rCanonical">—</b></span>
-          <span class="badge">Robots: <b id="rRobots">—</b></span>
-          <span class="badge">Viewport: <b id="rViewport">—</b></span>
-          <span class="badge">H1/H2/H3: <b id="rHeadings">—</b></span>
-          <span class="badge">Internal links: <b id="rInternal">—</b></span>
-          <span class="badge">Schema: <b id="rSchema">—</b></span>
-          <span class="badge">Auto‑checked: <b id="rAutoCount">—</b></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Progress -->
     <div class="progress-wrap">
       <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
       <div id="progressCaption" class="progress-caption">0 of 25 items completed</div>
     </div>
 
-    <!-- Checklist -->
+    <!-- Checklist groups -->
     <div class="analyzer-grid">
       @php $labels = [
         1=>'Define search intent & primary topic',
@@ -406,14 +335,13 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
             </div>
-            <span class="badge"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
+            <span class="chip"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
           </header>
           <ul class="checklist">
             @for($i=$c[1];$i<=$c[2];$i++)
               <li class="checklist-item" id="row-{{ $i }}" data-score="">
                 <label>
-                  <input type="checkbox" id="ck-{{ $i }}">
-                  <span>{{ $labels[$i] }}</span>
+                  <input type="checkbox" id="ck-{{ $i }}"><span>{{ $labels[$i] }}</span>
                 </label>
                 <span class="score-badge" id="sc-{{ $i }}">—</span>
                 <button class="improve-btn" type="button" data-id="ck-{{ $i }}">Improve</button>
@@ -437,7 +365,6 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
     <a href="#">Terms</a>
   </div>
 </footer>
-
 <button id="backTop" title="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
 <!-- Modal -->
@@ -466,22 +393,13 @@ footer.site{ margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bo
 </div>
 
 <script>
-/* ---- Simple i18n (en only here) ---- */
-const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='badge' style='background:rgba(34,197,94,.18)'>Green ≥ 80</span> <span class='badge' style='background:rgba(245,158,11,.18)'>Orange 60–79</span> <span class='badge' style='background:rgba(239,68,68,.18)'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 80)"} };
+/* ---- Simple i18n (en only) ---- */
+const I18N = { en:{title:"Semantic SEO Master Analyzer", analyze_title:"Analyze a URL", legend_line:"The wheel fills with your overall score. <span class='badge-soft' style='background:rgba(34,197,94,.18)'>Green ≥ 80</span> <span class='badge-soft' style='background:rgba(245,158,11,.18)'>Orange 60–79</span> <span class='badge-soft' style='background:rgba(239,68,68,.18)'>Red &lt; 60</span>", overall:"Overall", page_url:"Page URL", analyze:"Analyze", print:"Print", reset:"Reset", auto_check:"Auto‑apply checkmarks (≥ 80)"} };
 const LANGS = [["en","English"]];
 (function(){
   const dockBtn=document.getElementById('langOpen'), panel=document.getElementById('langPanel'), card=document.getElementById('langCard');
   function fill(){ card.innerHTML=''; LANGS.forEach(([c,l])=>{ const d=document.createElement('div'); d.className='lang-item'; d.dataset.code=c; d.innerHTML=`<span class="lang-flag"></span><strong>${l}</strong>`; card.appendChild(d); }); }
-  function apply(code){ const d=I18N[code]||I18N.en;
-    document.querySelector('[data-i="title"]').textContent=d.title;
-    document.querySelector('[data-i="analyze_title"]').textContent=d.analyze_title;
-    document.querySelector('[data-i="legend_line"]').innerHTML=d.legend_line;
-    document.querySelector('[data-i="page_url"]').textContent=d.page_url;
-    document.querySelectorAll('[data-i="analyze"]').forEach(n=>n.textContent=d.analyze);
-    document.querySelectorAll('[data-i="print"]').forEach(n=>n.textContent=d.print);
-    document.querySelectorAll('[data-i="reset"]').forEach(n=>n.textContent=d.reset);
-    document.querySelectorAll('[data-i="auto_check"]').forEach(n=>n.textContent=d.auto_check);
-  }
+  function apply(code){ const d=I18N[code]||I18N.en; document.querySelector('[data-i="title"]').textContent=d.title; document.querySelector('[data-i="analyze_title"]').textContent=d.analyze_title; document.querySelector('[data-i="legend_line"]').innerHTML=d.legend_line; document.querySelector('[data-i="page_url"]').textContent=d.page_url; document.querySelectorAll('[data-i="analyze"]').forEach(n=>n.textContent=d.analyze); document.querySelectorAll('[data-i="print"]').forEach(n=>n.textContent=d.print); document.querySelectorAll('[data-i="reset"]').forEach(n=>n.textContent=d.reset); document.querySelectorAll('[data-i="auto_check"]').forEach(n=>n.textContent=d.auto_check); }
   dockBtn.addEventListener('click', ()=> panel.style.display = panel.style.display==='block' ? 'none' : 'block');
   panel.addEventListener('click', e=>{ const it=e.target.closest('.lang-item'); if(!it) return; apply(it.dataset.code); panel.style.display='none'; });
   fill(); apply('en');
@@ -502,7 +420,7 @@ const LANGS = [["en","English"]];
         if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1;
       }
       for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){
-        const A=nodes[i],B=nodes[j], d=Math.hypot(A.x-B.x,A.y-B.y);
+        const A=nodes[i],B=nodes[j], d=Math.hypot(A.x-B.x,B.y-A.y);
         if(d<maxDist){ const al=(1-d/maxDist)*.65; ctx.strokeStyle=colorFn(al); ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke(); }
       }
       requestAnimationFrame(loop);
@@ -512,11 +430,13 @@ const LANGS = [["en","English"]];
   layer('linesCanvas2',110,120,a=>`rgba(255,32,69,${a*0.6})`,0.9);
 })();
 
-/* ---- Procedural multi‑color smoke (WebGL2) ---- */
+/* ---- Multi‑color smoke (WebGL2) ---- */
 (function(){
   const canvas=document.getElementById('smokeFX'); if(!canvas) return;
   let gl; try{ gl=canvas.getContext('webgl2',{alpha:true,antialias:false,depth:false,stencil:false}); }catch(e){}
-  const dpr=Math.min(2,devicePixelRatio||1); function resize(){ canvas.width=innerWidth*dpr; canvas.height=innerHeight*dpr; canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; if(gl) gl.viewport(0,0,canvas.width,canvas.height); } addEventListener('resize',resize,{passive:true}); resize();
+  const dpr=Math.min(2,devicePixelRatio||1);
+  function resize(){ canvas.width=innerWidth*dpr; canvas.height=innerHeight*dpr; canvas.style.width=innerWidth+'px'; canvas.style.height=innerHeight+'px'; if(gl) gl.viewport(0,0,canvas.width,canvas.height); }
+  addEventListener('resize',resize,{passive:true}); resize();
   if(!gl) return;
   const vs=`#version 300 es
   precision highp float; const vec2 V[3]=vec2[3](vec2(-1.,-1.),vec2(3.,-1.),vec2(-1.,3.));
@@ -528,11 +448,10 @@ const LANGS = [["en","English"]];
     vec2 u=f*f*(3.-2.*f); return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y; }
   float f(vec2 p){ float v=0., s=.5; mat2 m=mat2(1.6,1.2,-1.2,1.6); for(int i=0;i<5;i++){ v+=s*n(p); p=m*p; s*=.5; } return v; }
   void main(){
-    vec2 p=(uv-vec2(1.,1.)) * vec2(2.2, 2.0); // emit from bottom-right
+    vec2 p=(uv-vec2(1.,1.)) * vec2(2.2, 2.0);
     p.x += t*.15; p.y += t*.10;
     float q=f(p*1.6);
     float d=smoothstep(.30,.95,q);
-    // rainbow-ish gradient; brighter near emitter
     vec3 base=mix(vec3(.24,.88,1.),vec3(.96,.31,.41),uv.x);
     vec3 c=mix(base, vec3(1.,.72,.28), 0.35*uv.y);
     o=vec4(c*d, .72*d);
@@ -552,7 +471,7 @@ const LANGS = [["en","English"]];
   btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
 })();
 
-/* ---- Wheel ---- */
+/* ---- Wheel color + % inside ---- */
 const WHEEL={circumference:339, circle:null, text:null};
 function setScoreWheel(value){
   if(!WHEEL.circle){ WHEEL.circle=document.querySelector('.score-wheel .progress'); WHEEL.text=document.getElementById('overallScore'); }
@@ -563,17 +482,7 @@ function setScoreWheel(value){
   else if(v>=60) WHEEL.circle.setAttribute('stroke','url(#gradMid)');
   else WHEEL.circle.setAttribute('stroke','url(#gradBad)');
   const n=Math.round(v); WHEEL.text.textContent=n+'%'; document.getElementById('overallScoreInline').textContent=n;
-  if (window.__setRingGlow) window.__setRingGlow(n);
 }
-/* adaptive ring glow hook */
-(function(){
-  const ring = document.querySelector('.score-wheel .progress');
-  if(!ring) return;
-  window.__setRingGlow = (v)=>{
-    const k = Math.max(0, Math.min(100, +v||0)) / 100;
-    ring.style.filter = `drop-shadow(0 0 ${8 + 12*k}px rgba(155,92,255,${.2 + .25*k}))`;
-  };
-})();
 
 /* ---- Checklist storage & UI sync ---- */
 (function(){
@@ -596,6 +505,7 @@ function setScoreWheel(value){
     }
     rowEl.style.setProperty('--accent', col);
   }
+
   function updateCats(){
     document.querySelectorAll('.category-card').forEach(card=>{
       const all=card.querySelectorAll('input[type="checkbox"]');
@@ -633,16 +543,18 @@ function setScoreWheel(value){
   window.setScoreBadge=(num,score)=>{
     const pill=document.getElementById('sc-'+num), row=document.getElementById('row-'+num);
     if(!pill) return;
-    pill.className='score-badge'; // reset
+    pill.className='score-badge';
     if(score==null || Number.isNaN(score)){ pill.textContent='—'; setRowAccent(row,null); return; }
     const s=Math.round(score);
     pill.textContent=s;
     if(s>=80) pill.classList.add('score-good'); else if(s>=60) pill.classList.add('score-mid'); else pill.classList.add('score-bad');
     setRowAccent(row,s);
   };
+
+  load();
 })();
 
-/* ---- Modal (suggestions & evidence) ---- */
+/* ---- Modal + Improve ---- */
 (function(){
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const backdrop=$('#modalBackdrop'), modal=$('#tipModal'), closeBtn=$('#modalClose');
@@ -664,8 +576,6 @@ function setScoreWheel(value){
     openM();
   });
   document.getElementById('viewAIText').addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openM();});
-  document.getElementById('viewHumanBtn').addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="humanTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.humanTab.classList.add('active'); openM();});
-  document.getElementById('viewAIBtn').addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active')); document.querySelector('[data-tab="aiTab"]').classList.add('active'); Object.values(panes).forEach(p=>p.classList.remove('active')); panes.aiTab.classList.add('active'); openM();});
   window.__setAIData=function(ai){
     document.getElementById('aiSnippetsPre').textContent=(ai?.ai_sentences||[]).join('\n\n')||'No AI‑like snippets detected.';
     document.getElementById('humanSnippetsPre').textContent=(ai?.human_sentences||[]).join('\n\n')||'No human‑like snippets isolated.';
@@ -675,15 +585,22 @@ function setScoreWheel(value){
   }
 })();
 
-/* ---- Analyze: connect per-item scores to UI & auto-select ≥80 ---- */
+/* ---- Analyze: connect scores + auto-select ≥80 ---- */
 function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test(u)) u='https://'+u.replace(/^\/+/, ''); try{ new URL(u);}catch(e){} return u; }
 
 (function(){
   const $=s=>document.querySelector(s);
-  function setChecked(id,on){
-    const el=document.getElementById(id);
-    if(el){ el.checked=!!on; if(on) el.classList.add('autoPulse'); else el.classList.remove('autoPulse'); }
-  }
+  function setChecked(id,on){ const el=document.getElementById(id); if(el){ el.checked=!!on; el.classList.toggle('autoPulse', !!on); } }
+
+  // little pulse animation on click (visual only)
+  (function(){
+    const btn=document.getElementById('analyzeBtn');
+    if(!btn) return;
+    btn.addEventListener('click', ()=>{
+      btn.animate([{boxShadow:'0 0 0 0 rgba(255,32,69,.0)'},{boxShadow:'0 0 0 12px rgba(255,32,69,.18)'},{boxShadow:'0 0 0 0 rgba(255,32,69,.0)'}],
+                    {duration:600, easing:'ease-out'});
+    });
+  })();
 
   document.getElementById('analyzeForm').addEventListener('submit', e=>{ e.preventDefault(); document.getElementById('analyzeBtn').click(); });
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
@@ -703,7 +620,7 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       const data=await resp.json();
       if(!data.ok) throw new Error(data.error||'Failed');
 
-      // Meta chips
+      // chips
       $('#rStatus').textContent=data.status;
       $('#rTitleLen').textContent=(data.title||'').length;
       $('#rMetaLen').textContent=data.meta_description_len;
@@ -718,26 +635,27 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       // Suggestions for modal
       window.__lastSuggestions = (data.suggestions && typeof data.suggestions==='object') ? data.suggestions : {};
 
-      // Per-item scores + auto-select
+      // Per-item scores + auto-select ≥80
       let autoCount=0;
       for(let i=1;i<=25;i++){
         const key='ck-'+i, row=document.getElementById('row-'+i);
         const score=(data.scores && typeof data.scores[key]==='number') ? data.scores[key] : null;
         setScoreBadge(i, score);
         if(row) row.title = (score==null?'No score':`Score: ${Math.round(score)}`);
+
         if($('#autoApply').checked){
           if(typeof score==='number' && score>=80){ setChecked(key,true); autoCount++; }
           else { setChecked(key,false); }
         }
       }
-      document.getElementById('rAutoCount').textContent=autoCount.toString();
-      document.dispatchEvent(new Event('change')); // update progress bar & counts
+      document.getElementById('rAutoCount').textContent = autoCount.toString();
+      document.dispatchEvent(new Event('change')); // update progress
 
-      // Overall wheel + glow
+      // Overall wheel
       const overall = (typeof data.overall_score==='number') ? data.overall_score : 0;
       setScoreWheel(overall);
 
-      // AI/Human badge
+      // AI/Human badge (no fabricated numbers)
       const ai=data.ai_detection||{};
       const labelMap={likely_human:'Likely Human', mixed:'Mixed', likely_ai:'Likely AI', unknown:'Unknown'};
       const label=labelMap[ai.label]||'Unknown';
@@ -747,7 +665,7 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       document.getElementById('aiBadge').innerHTML='Writer: '+parts.join(' • ');
       window.__setAIData(ai);
 
-      // Status line
+      // status line
       const wheel=parseInt(document.getElementById('overallScoreInline').textContent||'0',10);
       status.textContent = wheel>=80 ? 'Great! You passed—keep going.' : (wheel<60 ? 'Score is low — optimize and re‑Analyze.' : 'Solid! Improve a few items to hit green.');
       setTimeout(()=> status.textContent='', 4200);
@@ -758,15 +676,6 @@ function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(!/^https?:\/\//i.test
       btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-magnifying-glass"></i> Analyze';
     }
   }
-})();
-
-/* ---- Back to top ---- */
-(function(){
-  const btn=document.getElementById('backTop'), link=document.getElementById('toTopLink');
-  function onScroll(){ btn.style.display = window.scrollY>300 ? 'grid' : 'none'; }
-  addEventListener('scroll', onScroll, {passive:true}); onScroll();
-  const goTop = e => { e && e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'}); };
-  btn.addEventListener('click', goTop); if(link) link.addEventListener('click', goTop);
 })();
 </script>
 </body>
