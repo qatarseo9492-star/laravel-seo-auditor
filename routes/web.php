@@ -45,7 +45,7 @@ if (!function_exists('analyzeCore')) {
                 $html = (string) $resp->body();
             }
         } catch (\Throwable $e) {
-            // Fallback to file_get_contents
+            // Fallback to file_get_contents for hosts blocking Guzzle
             try {
                 $ctx = stream_context_create([
                     'http' => [
@@ -91,14 +91,12 @@ if (!function_exists('analyzeCore')) {
         @$dom->loadHTML($html);
         $xp  = new \DOMXPath($dom);
 
-        // Helpers (careful to avoid variable/parameter name conflicts)
+        // Helpers (avoid PHP 8-only funcs; use Str helpers)
         $textOf = function (string $query) use ($xp): string {
             $nodes = $xp->query($query);
             $buf = [];
             if ($nodes) {
-                foreach ($nodes as $n) {
-                    $buf[] = trim($n->textContent ?? '');
-                }
+                foreach ($nodes as $n) $buf[] = trim($n->textContent ?? '');
             }
             return trim(implode(' ', array_filter($buf)));
         };
@@ -124,13 +122,13 @@ if (!function_exists('analyzeCore')) {
         };
 
         // Core extracts
-        $title = $textOf('//title');
+        $title    = $textOf('//title');
         $metaDesc = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="description"]', 'content')
-            ?? $firstAttr('//meta[translate(@property,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="og:description"]', 'content')
-            ?? '';
+                 ?? $firstAttr('//meta[translate(@property,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="og:description"]', 'content')
+                 ?? '';
         $canonical = $firstAttr('//link[translate(@rel,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="canonical"]', 'href') ?? '';
-        $robots = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="robots"]', 'content') ?? '';
-        $viewport = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="viewport"]', 'content') ?? '';
+        $robots    = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="robots"]', 'content') ?? '';
+        $viewport  = $firstAttr('//meta[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="viewport"]', 'content') ?? '';
 
         $h1Count = ($xp->query('//h1')?->length) ?? 0;
         $h2Count = ($xp->query('//h2')?->length) ?? 0;
@@ -142,10 +140,10 @@ if (!function_exists('analyzeCore')) {
         $internalCount = 0;
         foreach ($allLinks as $href) {
             $hrefTrim = trim($href);
-            if ($hrefTrim === '' || str_starts_with($hrefTrim, 'mailto:') || str_starts_with($hrefTrim, 'tel:') || str_starts_with($hrefTrim, '#')) {
+            if ($hrefTrim === '' || Str::startsWith($hrefTrim, ['mailto:', 'tel:', '#'])) {
                 continue;
             }
-            if (str_starts_with($hrefTrim, '/')) {
+            if (Str::startsWith($hrefTrim, '/')) {
                 $internalCount++;
             } else {
                 $linkHost = parse_url($hrefTrim, PHP_URL_HOST);
@@ -171,7 +169,7 @@ if (!function_exists('analyzeCore')) {
                                 $t = is_array($node['@type']) ? implode(',', $node['@type']) : (string)$node['@type'];
                                 $schemaTypes[] = $t;
                             }
-                            foreach ($node as $v) { $scan($v); }
+                            foreach ($node as $v) $scan($v);
                         }
                     };
                     $scan($data);
@@ -183,14 +181,11 @@ if (!function_exists('analyzeCore')) {
         $textNodes = $xp->query('//p|//li|//article//text()[normalize-space()]');
         $bodyText = '';
         if ($textNodes) {
-            $frags = [];
-            $max = 5000;
-            $len = 0;
+            $frags = []; $max = 5000; $len = 0;
             foreach ($textNodes as $n) {
                 $t = trim($n->textContent ?? '');
                 if ($t === '') continue;
-                $frags[] = $t;
-                $len += strlen($t);
+                $frags[] = $t; $len += strlen($t);
                 if ($len > $max) break;
             }
             $bodyText = trim(implode(' ', $frags));
@@ -218,8 +213,7 @@ if (!function_exists('analyzeCore')) {
         $avgSent = count($sentLens) ? array_sum($sentLens)/count($sentLens) : 0;
         $varSent = 0.0;
         if (count($sentLens) > 1) {
-            $m = $avgSent;
-            $acc = 0.0;
+            $m = $avgSent; $acc = 0.0;
             foreach ($sentLens as $sl) { $acc += ($sl - $m) * ($sl - $m); }
             $varSent = sqrt($acc / (count($sentLens)-1));
         }
@@ -239,7 +233,7 @@ if (!function_exists('analyzeCore')) {
         $hasViewport = $viewport !== null && trim($viewport) !== '';
 
         // Images / media
-        $imgCount = ($xp->query('//img')?->length) ?? 0;
+        $imgCount   = ($xp->query('//img')?->length) ?? 0;
         $videoCount = ($xp->query('//video|//iframe[contains(@src,"youtube") or contains(@src,"vimeo")]')?->length) ?? 0;
 
         // Canonical ok if present
@@ -251,8 +245,9 @@ if (!function_exists('analyzeCore')) {
                          || $exists('//time[@datetime]');
 
         // Breadcrumbs
-        $hasBreadcrumb = $exists('//*[@aria-label="breadcrumb"]') || $exists('//nav[contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"breadcrumb")]')
-                         || collect($schemaTypes)->contains(fn($t)=>Str::contains(Str::lower($t), 'breadcrumb'));
+        $hasBreadcrumb = $exists('//*[@aria-label="breadcrumb"]')
+                      || $exists('//nav[contains(translate(@class,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"breadcrumb")]')
+                      || collect($schemaTypes)->contains(fn($t)=>Str::contains(Str::lower($t), 'breadcrumb'));
 
         // FAQ presence
         $hasFAQSchema = collect($schemaTypes)->contains(fn($t)=>Str::contains(Str::lower($t), 'faq'));
@@ -261,7 +256,12 @@ if (!function_exists('analyzeCore')) {
         $hasSchema = !empty($schemaTypes);
         $hasArticleLike = collect($schemaTypes)->contains(function ($t) {
             $tl = Str::lower($t);
-            return Str::contains($tl, 'article') || Str::contains($tl, 'newsarticle') || Str::contains($tl, 'blogposting') || Str::contains($tl, 'product') || Str::contains($tl, 'organization') || Str::contains($tl, 'webpage');
+            return Str::contains($tl, 'article')
+                || Str::contains($tl, 'newsarticle')
+                || Str::contains($tl, 'blogposting')
+                || Str::contains($tl, 'product')
+                || Str::contains($tl, 'organization')
+                || Str::contains($tl, 'webpage');
         });
 
         // sameAs links
@@ -306,7 +306,7 @@ if (!function_exists('analyzeCore')) {
         // Human vs AI heuristic
         $human = 50;
         if ($avgSent >= 12 && $avgSent <= 24) $human += 15;
-        if ($varSent >= 6) $human += 10;
+        if ($varSent >= 6)  $human += 10;
         if (preg_match('/\b(I|we|my|our|me|us)\b/i', $bodyText)) $human += 8;
         if (preg_match("/\\b(as an ai|i am an ai|language model)\\b/i", $bodyText)) $human -= 35;
 
@@ -318,8 +318,8 @@ if (!function_exists('analyzeCore')) {
             $trigrams[$tri] = ($trigrams[$tri] ?? 0) + 1;
         }
         $repMax = empty($trigrams) ? 1 : max($trigrams);
-        if ($repMax >= 6) $human -= 15;
-        elseif ($repMax >= 4) $human -= 8;
+        if ($repMax >= 6)      $human -= 15;
+        elseif ($repMax >= 4)  $human -= 8;
 
         $humanPct = (int)$clamp($human, 0, 100);
         $aiPct    = 100 - $humanPct;
@@ -335,7 +335,7 @@ if (!function_exists('analyzeCore')) {
 
         $h1Text = $textOf('//h1');
 
-        // 1–25 (same mapping your Blade expects)
+        // 1–25
         $item[1]  = $scoreBool( $mainKeyword !== '' && (Str::contains(Str::lower($title), $mainKeyword) || Str::contains(Str::lower($h1Text), $mainKeyword)) );
         $item[2]  = $scoreBand((int)min(12, count(array_slice(array_keys($freq), 0, 12))), 4, 12);
         $item[3]  = $scoreBool( $mainKeyword !== '' && Str::contains(Str::lower($h1Text), $mainKeyword) );
@@ -384,7 +384,7 @@ if (!function_exists('analyzeCore')) {
             'canonical'     => $canonical ?: '—',
             'robots'        => $robots ?: '—',
             'viewport'      => $hasViewport ? 'yes' : 'no',
-            'headings'      => $headingsChip,
+            'headings'      => "H1:{$h1Count} H2:{$h2Count} H3:{$h3Count}",
             'internalLinks' => $internalCount,
             'schema'        => empty($schemaTypes) ? 'none' : implode(',', array_unique($schemaTypes)),
 
@@ -396,42 +396,37 @@ if (!function_exists('analyzeCore')) {
     }
 }
 
-/**
- * POST /analyze — JSON body: { url: "..." }
- */
+/** POST /analyze — JSON body: { url: "..." } */
 Route::post('/analyze', function (Request $request) {
-    $request->validate([
-        'url' => ['required', 'string', 'min:4'],
-    ]);
+    $request->validate(['url' => ['required', 'string', 'min:4']]);
     $data = analyzeCore($request->input('url', ''));
     return response()->json($data, 200);
 })->name('analyze');
 
-/**
- * GET /analyze — Query: ?url=https://...
- * Fallback for clients that can’t POST (or hit CSRF/419).
- */
+/** GET /analyze — Query: ?url=https://... (fallback) */
 Route::get('/analyze', function (Request $request) {
     $u = $request->query('url', '');
     if (!is_string($u) || trim($u) === '') {
         return response()->json([
-            'overall'       => 0,
-            'contentScore'  => 0,
-            'humanPct'      => 0,
-            'aiPct'         => 100,
-            'httpStatus'    => '—',
-            'titleLen'      => 0,
-            'metaLen'       => 0,
-            'canonical'     => '—',
-            'robots'        => '—',
-            'viewport'      => '—',
-            'headings'      => '—',
-            'internalLinks' => '—',
-            'schema'        => '—',
-            'itemScores'    => [],
-            'error'         => 'Missing ?url parameter',
+            'overall'=>0,'contentScore'=>0,'humanPct'=>0,'aiPct'=>100,
+            'httpStatus'=>'—','titleLen'=>0,'metaLen'=>0,'canonical'=>'—','robots'=>'—','viewport'=>'—',
+            'headings'=>'—','internalLinks'=>'—','schema'=>'—','itemScores'=>[],
+            'error'=>'Missing ?url parameter',
         ], 200);
     }
-    $data = analyzeCore($u);
-    return response()->json($data, 200);
+    return response()->json(analyzeCore($u), 200);
 })->name('analyze.get');
+
+/** GET /analyze-json — Safe alias (avoids wildcard route conflicts) */
+Route::get('/analyze-json', function (Request $request) {
+    $u = $request->query('url', '');
+    if (!is_string($u) || trim($u) === '') {
+        return response()->json([
+            'overall'=>0,'contentScore'=>0,'humanPct'=>0,'aiPct'=>100,
+            'httpStatus'=>'—','titleLen'=>0,'metaLen'=>0,'canonical'=>'—','robots'=>'—','viewport'=>'—',
+            'headings'=>'—','internalLinks'=>'—','schema'=>'—','itemScores'=>[],
+            'error'=>'Missing ?url parameter',
+        ], 200);
+    }
+    return response()->json(analyzeCore($u), 200);
+})->name('analyze.alias');
