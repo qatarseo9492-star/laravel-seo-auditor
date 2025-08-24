@@ -7,7 +7,6 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @php
-  $siteName = config('app.name', 'Semantic SEO Master');
   $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
   $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, and UX signals, with water-fill scoring, auto-checklist, and AI/Human signals.';
   $metaImage = asset('og-image.png');
@@ -34,7 +33,9 @@
 :root{--bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg}
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
-#linesCanvas,#brainCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}#linesCanvas{opacity:.35}#brainCanvas{opacity:.28}
+/* cloud canvases behind everything, never block clicks */
+#linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+#linesCanvas{opacity:.38}#smokeCanvas{opacity:.42}
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
 /* Header */
@@ -123,7 +124,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .cat-wave1{animation:catWave 7s linear infinite}.cat-wave2{animation:catWave 10s linear infinite reverse}
 @keyframes catWave{from{transform:translateX(0)}to{transform:translateX(-640px)}}
 .cat-water-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:rgba(255,255,255,.9);text-shadow:0 1px 0 rgba(0,0,0,.55);pointer-events:none}
-.cat-smoke{position:absolute;left:0;right:0;bottom:0;height:26px;pointer-events:none;z-index:3;mix-blend-mode:screen}
 
 .checklist{list-style:none;margin:10px 0 0;padding:0}
 .checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s ease,background .25s ease,transform .12s ease}
@@ -151,7 +151,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .improve-btn::before{content:"";position:absolute;inset:-2px;border-radius:inherit;z-index:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.18) 45%,transparent 50%,transparent 100%);transform:translateX(-120%);animation:btnSheen 3.2s linear infinite}
 @keyframes btnSheen{0%{transform:translateX(-120%)}60%{transform:translateX(120%)}100%{transform:translateX(120%)}}
 
-/* Share dock */
+/* Social dock */
 .share-dock{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:85;background:rgba(10,12,28,.35);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.5rem;backdrop-filter:blur(8px)}
 .share-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;color:#fff;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease}
 .share-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
@@ -166,17 +166,17 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (max-width:768px){.wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}.share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}.checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}}
 @media (max-width:480px){.score-container{width:150px}.category-icon{width:40px;height:40px}.category-title{font-size:1rem}}
 @media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
-@media print{.modal,.lang-dock,.share-dock,#backTop,#linesCanvas,#brainCanvas{display:none!important}}
+@media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
 </style>
 </head>
 <body>
 
-<!-- Cloudy background canvases -->
+<!-- Background canvases -->
 <canvas id="linesCanvas"></canvas>
-<canvas id="brainCanvas"></canvas>
+<canvas id="smokeCanvas"></canvas>
 
-<!-- Social dock -->
-<div class="share-dock" id="shareDock" aria-label="Share">
+<!-- Share dock -->
+<div class="share-dock" aria-label="Share">
   <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
   <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
   <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
@@ -209,7 +209,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
     <div class="score-area">
       <div class="score-container">
-        <!-- Circular water score -->
+        <!-- Circular water gauge -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
@@ -280,8 +280,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             </label>
           </div>
 
-          <!-- Analyze button fixed -->
-          <button id="analyzeBtn" type="button" onclick="try{ analyze(); }catch(e){ console.error(e); }" class="btn btn-analyze">
+          <!-- Triple-safe Analyze button -->
+          <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
 
@@ -292,7 +292,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
-        <!-- Analyze water progress -->
         <div class="water-wrap" id="waterWrap" aria-hidden="true">
           <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -339,7 +338,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
-    <!-- Completion -->
     <div class="progress-wrap">
       <div class="comp-water" id="compWater" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <svg class="comp-svg" viewBox="0 0 600 140" preserveAspectRatio="none">
@@ -369,20 +367,19 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       <div id="progressCaption" class="progress-caption" style="color:var(--text-dim)">0 of 25 items completed</div>
     </div>
 
-    <!-- Checklist -->
-    <div class="analyzer-grid" id="checklistGrid">
-      @php $labels = [
-        1=>'Define search intent & primary topic', 2=>'Map target & related keywords (synonyms/PAA)', 3=>'H1 includes primary topic naturally',
-        4=>'Integrate FAQs / questions with answers', 5=>'Readable, NLP-friendly language', 6=>'Title tag (≈50–60 chars) w/ primary keyword',
-        7=>'Meta description (≈140–160 chars) + CTA', 8=>'Canonical tag set correctly', 9=>'Indexable & listed in XML sitemap',
-        10=>'E-E-A-T signals (author, date, expertise)', 11=>'Unique value vs. top competitors', 12=>'Facts & citations up to date',
-        13=>'Helpful media (images/video) w/ captions', 14=>'Logical H2/H3 headings & topic clusters', 15=>'Internal links to hub/related pages',
-        16=>'Clean, descriptive URL slug', 17=>'Breadcrumbs enabled (+ schema)', 18=>'Mobile-friendly, responsive layout',
-        19=>'Optimized speed (compression, lazy-load)', 20=>'Core Web Vitals passing (LCP/INP/CLS)', 21=>'Clear CTAs and next steps',
-        22=>'Primary entity clearly defined', 23=>'Related entities covered with context', 24=>'Valid schema markup (Article/FAQ/Product)',
-        25=>'sameAs/Organization details present'
-      ]; @endphp
+    @php $labels = [
+      1=>'Define search intent & primary topic', 2=>'Map target & related keywords (synonyms/PAA)', 3=>'H1 includes primary topic naturally',
+      4=>'Integrate FAQs / questions with answers', 5=>'Readable, NLP-friendly language', 6=>'Title tag (≈50–60 chars) w/ primary keyword',
+      7=>'Meta description (≈140–160 chars) + CTA', 8=>'Canonical tag set correctly', 9=>'Indexable & listed in XML sitemap',
+      10=>'E-E-A-T signals (author, date, expertise)', 11=>'Unique value vs. top competitors', 12=>'Facts & citations up to date',
+      13=>'Helpful media (images/video) w/ captions', 14=>'Logical H2/H3 headings & topic clusters', 15=>'Internal links to hub/related pages',
+      16=>'Clean, descriptive URL slug', 17=>'Breadcrumbs enabled (+ schema)', 18=>'Mobile-friendly, responsive layout',
+      19=>'Optimized speed (compression, lazy-load)', 20=>'Core Web Vitals passing (LCP/INP/CLS)', 21=>'Clear CTAs and next steps',
+      22=>'Primary entity clearly defined', 23=>'Related entities covered with context', 24=>'Valid schema markup (Article/FAQ/Product)',
+      25=>'sameAs/Organization details present'
+    ]; @endphp
 
+    <div class="analyzer-grid" id="checklistGrid">
       @foreach ([
         ['Content & Keywords',1,5,'fa-pen-nib','linear-gradient(135deg,#22d3ee33,#a78bfa33)'],
         ['Technical Elements',6,9,'fa-code','linear-gradient(135deg,#a7f3d033,#60a5fa33)'],
@@ -452,83 +449,70 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
+<!-- 0) Tiny safety script so the button always does something -->
 <script>
-/* -------- Global hue drift for multi-color water -------- */
-(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+  function SEMSEO_go(){ try { if (typeof analyze === 'function') { analyze(); } else { console.warn('Analyzer not ready'); alert('Analyzer not ready — please wait a moment and click again.'); } } catch(e){ console.error(e); alert('JS error: '+ e.message); } }
+</script>
 
-/* -------- Helpers -------- */
+<script>
+/* 1) Show any JS errors near the progress area */
+window.addEventListener('error', e=>{
+  const s=document.getElementById('analyzeStatus');
+  if (s) s.textContent = 'JavaScript error: ' + (e?.message || e);
+});
+
+/* 2) Hue drift for multi-color water */
+(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ root.style.setProperty('--hue', ((now-start)/4)%360 + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+
+/* 3) Helper utilities */
 function setText(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; return el; }
-function setChipTone(el, v){
-  if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad');
-  const n=Number(v)||0;
-  el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad'));
-}
-function badgeTone(el, v){
-  if(!el) return; el.classList.remove('score-good','score-mid','score-bad');
-  el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad'));
-}
+function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); const n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
+function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
 
-/* -------- Gauge (overall water circle) -------- */
+/* 4) Overall gauge */
 const GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
 function setScoreWheel(value){
   if(!GAUGE.rect){
-    GAUGE.rect=document.getElementById('scoreClipRect');
-    GAUGE.stop1=document.getElementById('scoreStop1');
-    GAUGE.stop2=document.getElementById('scoreStop2');
-    GAUGE.r1=document.getElementById('ringStop1');
-    GAUGE.r2=document.getElementById('ringStop2');
-    GAUGE.arc=document.getElementById('ringArc');
-    GAUGE.text=document.getElementById('overallScore');
+    GAUGE.rect=document.getElementById('scoreClipRect'); GAUGE.stop1=document.getElementById('scoreStop1'); GAUGE.stop2=document.getElementById('scoreStop2');
+    GAUGE.r1=document.getElementById('ringStop1'); GAUGE.r2=document.getElementById('ringStop2');
+    GAUGE.arc=document.getElementById('ringArc'); GAUGE.text=document.getElementById('overallScore');
     if(GAUGE.arc){ GAUGE.arc.style.strokeDasharray=GAUGE.CIRC.toFixed(2); GAUGE.arc.style.strokeDashoffset=GAUGE.CIRC.toFixed(2); }
   }
   const v=Math.max(0,Math.min(100,Number(value)||0));
   const y=GAUGE.H-(GAUGE.H*(v/100));
-  GAUGE.rect && GAUGE.rect.setAttribute('y',String(y));
+  GAUGE.rect?.setAttribute('y',String(y));
   GAUGE.text && (GAUGE.text.textContent=Math.round(v)+'%');
 
   let c1,c2; if(v>=80){c1='#22c55e';c2='#16a34a'} else if(v>=60){c1='#f59e0b';c2='#fb923c'} else {c1='#ef4444';c2='#b91c1c'}
   GAUGE.stop1?.setAttribute('stop-color',c1); GAUGE.stop2?.setAttribute('stop-color',c2);
   GAUGE.r1?.setAttribute('stop-color',c1); GAUGE.r2?.setAttribute('stop-color',c2);
   if(GAUGE.arc){ const offset=GAUGE.CIRC*(1-(v/100)); GAUGE.arc.style.strokeDashoffset=offset.toFixed(2); }
-  setText('overallScoreInline',Math.round(v));
-  setChipTone(document.getElementById('overallChip'),v);
+  setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
 }
 
-/* -------- Category bars + completion -------- */
+/* 5) Category bars + completion */
 function updateCategoryBars(){
   const cards=[...document.querySelectorAll('.category-card')];
   let total=0, checked=0;
   cards.forEach((card,idx)=>{
     const items=[...card.querySelectorAll('.checklist-item')];
-    const t=items.length;
-    const done=items.filter(li=>li.querySelector('input')?.checked).length;
-    total += t; checked += done;
-
+    const t=items.length, done=items.filter(li=>li.querySelector('input')?.checked).length;
+    total+=t; checked+=done;
     const pct=t?Math.round(done*100/t):0;
-    const fill=document.getElementById(`catFillRect-${idx}`);
-    const pctEl=document.getElementById(`catPct-${idx}`);
-    const sub=card.querySelector('.category-sub');
-    const cnt=card.querySelector('.checked-count');
-
-    fill?.setAttribute('width', String(6*pct)); // 600px width → 6*pct
-    pctEl && (pctEl.textContent = `${done}/${t} • ${pct}%`);
-    sub && (sub.textContent = pct>=80?'Great progress':'Keep improving');
-    cnt && (cnt.textContent = done);
-
+    document.getElementById(`catFillRect-${idx}`)?.setAttribute('width', String(6*pct));
+    const pctEl=document.getElementById(`catPct-${idx}`); pctEl && (pctEl.textContent = `${done}/${t} • ${pct}%`);
+    const sub=card.querySelector('.category-sub'); sub && (sub.textContent = pct>=80?'Great progress':'Keep improving');
+    const cnt=card.querySelector('.checked-count'); cnt && (cnt.textContent = done);
     const stop1=document.getElementById(`catStop1-${idx}`), stop2=document.getElementById(`catStop2-${idx}`);
-    const c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444');
-    const c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
-    stop1?.setAttribute('stop-color', c1); stop2?.setAttribute('stop-color', c2);
+    const c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444'); const c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
+    stop1?.setAttribute('stop-color',c1); stop2?.setAttribute('stop-color',c2);
   });
-
-  // completion bar
   const pctAll = total? Math.round(checked*100/total) : 0;
   document.getElementById('compClipRect')?.setAttribute('width', String(6*pctAll));
-  setText('compPct', pctAll + '%');
-  setText('progressCaption', `${checked} of ${total} items completed`);
+  setText('compPct', pctAll + '%'); setText('progressCaption', `${checked} of ${total} items completed`);
 }
 
-/* -------- Auto check from item scores -------- */
+/* 6) Auto-tick by item scores */
 function autoTickByScores(map){
   let autoCount=0;
   for(let i=1;i<=25;i++){
@@ -536,30 +520,20 @@ function autoTickByScores(map){
     const badge=document.getElementById(`sc-${i}`);
     const row=document.getElementById(`ck-${i}`)?.closest('.checklist-item');
     if (!badge) continue;
-
     if (Number.isFinite(scVal)) {
-      badge.textContent = scVal;
-      badgeTone(badge, scVal);
+      badge.textContent = scVal; badgeTone(badge, scVal);
       if (document.getElementById('autoApply').checked && scVal>=80) {
-        const cb=document.getElementById(`ck-${i}`);
-        if (cb && !cb.checked) { cb.checked=true; autoCount++; }
-        row?.classList.add('flash-row'); setTimeout(()=>row?.classList.remove('flash-row'), 900);
+        const cb=document.getElementById(`ck-${i}`); if (cb && !cb.checked) { cb.checked=true; autoCount++; }
         row?.classList.remove('sev-mid','sev-bad'); row?.classList.add('sev-good');
-      } else if (scVal>=60) {
-        row?.classList.remove('sev-bad','sev-good'); row?.classList.add('sev-mid');
-      } else {
-        row?.classList.remove('sev-mid','sev-good'); row?.classList.add('sev-bad');
-      }
-    } else {
-      badge.textContent = '—';
-      badge.classList.remove('score-good','score-mid','score-bad');
-    }
+      } else if (scVal>=60) { row?.classList.remove('sev-bad','sev-good'); row?.classList.add('sev-mid'); }
+      else { row?.classList.remove('sev-mid','sev-good'); row?.classList.add('sev-bad'); }
+    } else { badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad'); }
   }
   setText('rAutoCount', autoCount);
   updateCategoryBars();
 }
 
-/* -------- Water progress controller -------- */
+/* 7) Water progress controller */
 const Water=(function(){
   const wrap=()=>document.getElementById('waterWrap');
   const clip=()=>document.getElementById('waterClipRect');
@@ -575,104 +549,84 @@ const Water=(function(){
   };
 })();
 
-/* -------- Share + UX helpers -------- */
+/* 8) Share & UX helpers */
 (function(){
-  const url = encodeURIComponent(location.href);
-  const title = encodeURIComponent(document.title);
-  const fb = document.getElementById('shareFb');
-  const x  = document.getElementById('shareX');
-  const ln = document.getElementById('shareLn');
-  const wa = document.getElementById('shareWa');
-  const em = document.getElementById('shareEm');
-  fb.href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-  x.href  = `https://twitter.com/intent/tweet?text=${title}&url=${url}`;
-  ln.href = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
-  wa.href = `https://wa.me/?text=${title}%20${url}`;
-  em.href = `mailto:?subject=${title}&body=${url}`;
+  const url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
+  const fb = document.getElementById('shareFb'), x = document.getElementById('shareX'),
+        ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'),
+        em = document.getElementById('shareEm');
+  fb && (fb.href = `https://www.facebook.com/sharer/sharer.php?u=${url}`);
+  x  && (x.href  = `https://twitter.com/intent/tweet?text=${title}&url=${url}`);
+  ln && (ln.href = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`);
+  wa && (wa.href = `https://wa.me/?text=${title}%20${url}`);
+  em && (em.href = `mailto:?subject=${title}&body=${url}`);
 })();
-(function(){ const btn=document.getElementById('backTop'); addEventListener('scroll',()=>{ btn.style.display = (scrollY>500)?'grid':'none'; }); document.getElementById('toTopLink')?.addEventListener('click',e=>{e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){ const btn=document.getElementById('backTop'); addEventListener('scroll',()=>{ btn && (btn.style.display = (scrollY>500)?'grid':'none'); }); document.getElementById('toTopLink')?.addEventListener('click',e=>{e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});});})();
 
-/* -------- Analyze (uses ABSOLUTE named routes) -------- */
+/* 9) Analyze logic (ABSOLUTE routes, resilient) */
 const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 function normalizeUrl(u) {
   if (!u) return '';
   u = u.trim();
-
-  // If it already has scheme, validate directly
-  if (/^https?:\/\//i.test(u)) {
-    try { new URL(u); return u; } catch { return ''; }
-  }
-
-  // Allow plain domains like example.com or sub.domain/path
+  if (/^https?:\/\//i.test(u)) { try { new URL(u); return u; } catch { return ''; } }
   const guess = 'https://' + u.replace(/^\/+/, '');
   try { new URL(guess); return guess; } catch { return ''; }
 }
 
 async function analyze(){
   const input = document.getElementById('analyzeUrl');
-  let url = normalizeUrl(input.value);
-  if (!url) { input.focus(); return; }
+  let url = normalizeUrl(input?.value || '');
+  if (!url) { input && input.focus(); return; }
 
   Water.start();
-  document.getElementById('analyzeStatus').textContent = 'Fetching & analyzing…';
+  const statusEl = document.getElementById('analyzeStatus');
+  statusEl && (statusEl.textContent = 'Fetching & analyzing…');
   document.getElementById('analyzeReport').style.display = 'none';
 
   let data=null, ok=false, status=0, text='', lastErr='';
   const qs = new URLSearchParams({ url }).toString();
 
-  // 1) GET /analyze-json (absolute)
   try{
     const res = await fetch(@json(route('analyze.json')).concat('?'+qs), {
-      method:'GET',
-      headers:{ 'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest' }
+      method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' }
     });
     status = res.status; text = await res.text();
     try{ data = JSON.parse(text); }catch{}
     if (res.ok && data) ok = true;
-  }catch(e){ lastErr = 'GET analyze.json failed'; }
+  }catch(e){ lastErr = 'GET analyze.json failed: '+e.message; }
 
-  // 2) POST /analyze (absolute) with CSRF
   if (!ok){
     try{
       const res = await fetch(@json(route('analyze')), {
         method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'Accept':'application/json',
-          'X-Requested-With':'XMLHttpRequest',
-          'X-CSRF-TOKEN': CSRF
-        },
+        headers:{ 'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': CSRF },
         body: JSON.stringify({ url, _token: CSRF })
       });
       status = res.status; text = await res.text();
       try{ data = JSON.parse(text); }catch{}
       if (res.ok && data) ok = true;
-    }catch(e){ lastErr = 'POST analyze failed'; }
+    }catch(e){ lastErr = 'POST analyze failed: '+e.message; }
   }
 
-  // 3) GET /analyze fallback (absolute)
   if (!ok){
     try{
       const res = await fetch(@json(route('analyze')).concat('?'+qs), {
-        method:'GET',
-        headers:{ 'Accept':'application/json', 'X-Requested-With':'XMLHttpRequest' }
+        method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' }
       });
       status = res.status; text = await res.text();
       try{ data = JSON.parse(text); }catch{}
       if (res.ok && data) ok = true;
-    }catch(e){ lastErr = 'GET analyze failed'; }
+    }catch(e){ lastErr = 'GET analyze failed: '+e.message; }
   }
 
   if (!ok || !data){
     console.error('Analyze failed', status, lastErr, text?.slice?.(0,300));
     Water.finish();
-    const msg = (text && text.length < 400 ? text : 'Could not analyze this URL. Check routes and try again.');
-    document.getElementById('analyzeStatus').textContent = msg;
+    statusEl && (statusEl.textContent = (text && text.length < 400 ? text : `Could not analyze this URL (status ${status}). ${lastErr || ''}`));
     return;
   }
 
-  // Update UI from payload
   const overall = Number(data.overall ?? 0);
   const contentScore = Number(data.contentScore ?? 0);
   const humanPct = Number(data.humanPct ?? 0);
@@ -697,13 +651,12 @@ async function analyze(){
   setText('rSchema', data.schema ?? '—');
 
   autoTickByScores(data.itemScores || {});
-
   Water.finish();
-  document.getElementById('analyzeStatus').textContent = 'Analysis complete';
+  statusEl && (statusEl.textContent = 'Analysis complete');
   document.getElementById('analyzeReport').style.display = 'block';
 }
 
-/* -------- Wire up controls -------- */
+/* 10) Wire up controls (also keeps inline fallback on button) */
 (function(){
   const input = document.getElementById('analyzeUrl');
   const pasteBtn = document.getElementById('pasteUrl');
@@ -718,40 +671,32 @@ async function analyze(){
   document.getElementById('resetChecklist')?.addEventListener('click', ()=>{
     document.querySelectorAll('.checklist input[type="checkbox"]').forEach(cb=> cb.checked=false);
     document.querySelectorAll('.score-badge').forEach(b=>{ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
-    updateCategoryBars();
-    setScoreWheel(0);
+    updateCategoryBars(); setScoreWheel(0);
     setText('contentScoreInline', 0); setChipTone(document.getElementById('contentScoreChip'), 0);
     setText('humanPct','—'); setText('aiPct','—'); document.getElementById('aiBadge')?.querySelector('b')?.textContent='—';
     Water.reset();
   });
 
-  // Export / Import
-  const exportBtn = document.getElementById('exportChecklist');
-  const importBtn = document.getElementById('importChecklist');
-  const importFile= document.getElementById('importFile');
+  const exportBtn=document.getElementById('exportChecklist'), importBtn=document.getElementById('importChecklist'), importFile=document.getElementById('importFile');
   exportBtn?.addEventListener('click', ()=>{
     const payload = { checked:[], scores:{} };
     for(let i=1;i<=25;i++){
-      const cb=document.getElementById(`ck-${i}`);
-      const sc=document.getElementById(`sc-${i}`);
+      const cb=document.getElementById(`ck-${i}`); const sc=document.getElementById(`sc-${i}`);
       if (cb?.checked) payload.checked.push(i);
-      const s = parseInt(sc?.textContent||'NaN',10);
-      if (!Number.isNaN(s)) payload.scores[i]=s;
+      const s = parseInt(sc?.textContent||'NaN',10); if (!Number.isNaN(s)) payload.scores[i]=s;
     }
-    const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'checklist.json'; a.click();
-    URL.revokeObjectURL(a.href);
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
   });
   importBtn?.addEventListener('click', ()=> importFile.click());
   importFile?.addEventListener('change', async ()=>{
     const file = importFile.files[0]; if (!file) return;
     try{
-      const txt = await file.text();
-      const data = JSON.parse(txt);
+      const txt = await file.text(), data = JSON.parse(txt);
       for(let i=1;i<=25;i++){
-        const cb = document.getElementById(`ck-${i}`); if (cb) cb.checked = (data.checked||[]).includes(i);
-        const sc = document.getElementById(`sc-${i}`); const val = data.scores?.[i];
-        if (sc && typeof val==='number'){ sc.textContent = val; badgeTone(sc, val); }
+        const cb=document.getElementById(`ck-${i}`); if (cb) cb.checked=(data.checked||[]).includes(i);
+        const sc=document.getElementById(`sc-${i}`); const val=data.scores?.[i];
+        if (sc && typeof val==='number'){ sc.textContent=val; badgeTone(sc,val); }
       }
       updateCategoryBars();
     }catch(e){ alert('Invalid JSON'); }
@@ -760,36 +705,29 @@ async function analyze(){
   document.getElementById('printTop')?.addEventListener('click', ()=> window.print());
   document.getElementById('printChecklist')?.addEventListener('click', ()=> window.print());
 
-  // Show JS errors under progress bar for quick diagnosis
-  window.addEventListener('error', e=>{
-    const s=document.getElementById('analyzeStatus');
-    if (s) s.textContent = 'JavaScript error: ' + (e?.message || e);
-  });
-
   updateCategoryBars();
 })();
 
-/* -------- Cloud-like background layers -------- */
-(function(){ // lines layer
-  const c=document.getElementById('linesCanvas'); if(!c) return; const ctx=c.getContext('2d');
-  let dpr=Math.min(2,devicePixelRatio||1);
+/* 11) Background “cloud smoke” (two independent canvases) */
+(function(){ // moving diagonal glow lines
+  const c=document.getElementById('linesCanvas'); if(!c) return; const ctx=c.getContext('2d'); let dpr=Math.min(2,window.devicePixelRatio||1);
   function resize(){ c.width=Math.floor(innerWidth*dpr); c.height=Math.floor(innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
   function draw(t){ ctx.clearRect(0,0,innerWidth,innerHeight); const w=innerWidth,h=innerHeight,rows=12,spacing=Math.max(60,h/rows);
     for(let i=-2;i<rows+2;i++){ const y=i*spacing+(t*0.02%spacing); const g=ctx.createLinearGradient(0,y,w,y+80);
-      g.addColorStop(0,'rgba(61,226,255,0.03)'); g.addColorStop(0.5,'rgba(155,92,255,0.05)'); g.addColorStop(1,'rgba(255,32,69,0.03)');
+      g.addColorStop(0,'rgba(61,226,255,0.06)'); g.addColorStop(0.5,'rgba(155,92,255,0.08)'); g.addColorStop(1,'rgba(255,32,69,0.06)');
       ctx.strokeStyle=g; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(-100,y); ctx.lineTo(w+100,y+80); ctx.stroke(); }
     requestAnimationFrame(draw);
   }
   addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
 })();
-(function(){ // fog blobs
-  const c=document.getElementById('brainCanvas'); if(!c) return; const ctx=c.getContext('2d'); let dpr=Math.min(2,devicePixelRatio||1); let blobs=[];
+(function(){ // drifting colored fog “smoke”
+  const c=document.getElementById('smokeCanvas'); if(!c) return; const ctx=c.getContext('2d'); let dpr=Math.min(2,window.devicePixelRatio||1), blobs=[];
   function resize(){ c.width=Math.floor(innerWidth*dpr); c.height=Math.floor(innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-    blobs=Array.from({length:36}).map(()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:40+Math.random()*120,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,hue:180+Math.random()*140,a:.08+.08*Math.random()}));
+    blobs=Array.from({length:42}).map(()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:60+Math.random()*160,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,hue:180+Math.random()*140,a:.12+.10*Math.random()}));
   }
   function draw(){ ctx.clearRect(0,0,innerWidth,innerHeight); ctx.globalCompositeOperation='lighter';
     for(const b of blobs){ b.x+=b.vx; b.y+=b.vy;
-      if(b.x<-200)b.x=innerWidth+200; if(b.x>innerWidth+200)b.x=-200; if(b.y<-200)b.y=innerHeight+200; if(b.y>innerHeight+200)b.y=-200;
+      if(b.x<-220)b.x=innerWidth+220; if(b.x>innerWidth+220)b.x=-220; if(b.y<-220)b.y=innerHeight+220; if(b.y>innerHeight+220)b.y=-220;
       const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r); g.addColorStop(0,`hsla(${b.hue},85%,65%,${b.a})`); g.addColorStop(1,`hsla(${(b.hue+60)%360},85%,55%,0)`);
       ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
     } requestAnimationFrame(draw);
