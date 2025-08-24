@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-24aa --}}
+{{-- resources/views/home.blade.php — v2025-08-24ab (Speed panel moved right below Entities; PSI auto-start fix) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -72,7 +72,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)}.l-orange{background:rgba(245,158,11,.18)}.l-green{background:rgba(34,197,94,.18)}
 
-/* Score gauge + chips (unchanged core) */
+/* Score gauge + chips */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}.gauge-svg{width:100%;height:auto;display:block}
@@ -93,7 +93,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .url-field .url-mini:hover{background:rgba(255,255,255,.12)}.url-field .url-clear{right:60px;width:36px;height:32px;display:grid;place-items:center}.url-field #pasteUrl{right:12px}
 .url-field .url-border{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,#3de2ff,#9b5cff,#ff2045,#f59e0b,#3de2ff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;pointer-events:none;filter:hue-rotate(var(--hue))}
 
-/* Waterbars + comp bar (unchanged core visuals) */
+/* Waterbars + comp bar */
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{position:relative;height:64px;border-radius:18px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
@@ -105,54 +105,18 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 
-/* Category cards (checklist area) */
-.analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
-.category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
-.category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite;pointer-events:none;z-index:0}
-@keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
-.category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
-.category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
-.category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
-.category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
-
-/* Checklist rows */
-.checklist{list-style:none;margin:10px 0 0;padding:0}
-.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:
-linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),
-radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),
-radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s,background .25s,transform .12s}
-.checklist-item+.checklist-item{margin-top:.28rem}.checklist-item:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
-.checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.55rem}
-.sev-good{background:linear-gradient(180deg,rgba(34,197,94,.14),rgba(34,197,94,.08));border-color:rgba(34,197,94,.45)}
-.sev-mid{background:linear-gradient(180deg,rgba(245,158,11,.16),rgba(245,158,11,.08));border-color:rgba(245,158,11,.45)}
-.sev-bad{background:linear-gradient(180deg,rgba(239,68,68,.16),rgba(239,68,68,.10));border-color:rgba(239,68,68,.55)}
-.checklist-item input[type="checkbox"]{appearance:none;-webkit-appearance:none;outline:none;width:22px;height:22px;border-radius:8px;background:#0b1220;border:2px solid #2a2f4d;position:relative;display:inline-grid;place-items:center;transition:.18s;box-shadow:inset 0 0 0 0 rgba(99,102,241,.0)}
-.checklist-item input[type="checkbox"]:hover{border-color:#4c5399;box-shadow:0 0 0 4px rgba(99,102,241,.12)}
-.checklist-item input[type="checkbox"]::after{content:"";width:7px;height:12px;border:3px solid transparent;border-left:0;border-top:0;transform:rotate(45deg) scale(.7);transition:.18s}
-.checklist-item input[type="checkbox"]:checked{border-color:transparent;background:linear-gradient(135deg,#22c55e,#3de2ff,#9b5cff);background-size:200% 200%;animation:tickHue 2s linear infinite;box-shadow:0 6px 18px rgba(61,226,255,.25),inset 0 0 0 2px rgba(255,255,255,.25)}
-.checklist-item input[type="checkbox"]:checked::after{border-color:#fff;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));transform:rotate(45deg) scale(1)}
-@keyframes tickHue{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-.score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
-.score-good{background:rgba(22,193,114,.22);border-color:rgba(22,193,114,.45)}
-.score-mid{background:rgba(245,158,11,.22);border-color:rgba(245,158,11,.45)}
-.score-bad{background:rgba(239,68,68,.24);border-color:rgba(239,68,68,.5)}
-.improve-btn{position:relative;overflow:hidden;padding:.45rem .8rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));font-weight:900;cursor:pointer;transition:.2s;isolation:isolate;min-width:88px}
-.improve-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.1)}
-.improve-btn::before{content:"";position:absolute;inset:-2px;border-radius:inherit;z-index:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.18) 45%,transparent 50%,transparent 100%);transform:translateX(-120%);animation:btnSheen 3.2s linear infinite}
-@keyframes btnSheen{0%{transform:translateX(-120%)}60%{transform:translateX(120%)}100%{transform:translateX(120%)}}
-
-/* Panels below analyzer — colorful section shells */
+/* Panels */
 .panel{margin-top:16px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
 .panel-header{display:flex;align-items:center;gap:.65rem;margin-bottom:.5rem}
 .panel-title{margin:0;font-size:1.15rem;font-weight:1000;background:linear-gradient(90deg,#3de2ff,#a78bfa,#ff58a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-/* Human vs AI (animated dual bar) */
+/* Human vs AI */
 .hvai-wrap{display:grid;grid-template-columns:repeat(12,1fr);gap:.75rem}
 .hvai-card{grid-column:span 12;background:linear-gradient(145deg,rgba(61,226,255,.08),rgba(155,92,255,.08));border:1px dashed rgba(255,255,255,.14);border-radius:14px;padding:12px}
 .hvai-meter{position:relative;height:20px;border-radius:999px;background:#0b0d21;border:1px solid rgba(255,255,255,.12);overflow:hidden}
-.hvai-human,.hvai-ai{position:absolute;left:0;top:0;bottom:0;width:50%;transition:width .6s cubic-bezier(.22,1,.36,1)}
-.hvai-human{background:linear-gradient(90deg,#22c55e,#3de2ff)}
-.hvai-ai{right:0;left:auto;background:linear-gradient(90deg,#ef4444,#f59e0b)}
+.hvai-human,.hvai-ai{position:absolute;top:0;bottom:0;width:50%;transition:width .6s cubic-bezier(.22,1,.36,1)}
+.hvai-human{left:0;background:linear-gradient(90deg,#22c55e,#3de2ff)}
+.hvai-ai{right:0;background:linear-gradient(90deg,#ef4444,#f59e0b)}
 .hvai-labels{display:flex;justify-content:space-between;font-weight:900;margin-top:.35rem}
 .det-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.5rem;margin-top:.5rem}
 .det-item{grid-column:span 6;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.55rem .6rem}
@@ -163,7 +127,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
 .det-fill-human{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#22c55e,#3de2ff);transition:width .35s ease}
 .det-fill-ai{position:absolute;right:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b);transition:width .35s ease}
 
-/* Readability Insights */
+/* Readability */
 .read-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.75rem}
 .read-card{grid-column:span 6;background:linear-gradient(160deg,rgba(56,189,248,.10),rgba(168,85,247,.08));border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.75rem}
 .read-row{display:grid;grid-template-columns:auto 1fr auto;gap:.5rem;align-items:center}
@@ -188,7 +152,36 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
 .skel{height:12px;border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06));animation:sk 1.2s infinite;background-size:200% 100%}
 @keyframes sk{0%{background-position:0 0}100%{background-position:200% 0}}
 
-/* Responsive tweaks */
+/* Checklist (unchanged) */
+.analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
+.category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
+.category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite;pointer-events:none;z-index:0}
+@keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
+.category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
+.category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
+.category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
+.category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
+.checklist{list-style:none;margin:10px 0 0;padding:0}
+.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:
+linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),
+radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),
+radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s,background .25s,transform .12s}
+.checklist-item+.checklist-item{margin-top:.28rem}.checklist-item:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.55rem}
+.sev-good{background:linear-gradient(180deg,rgba(34,197,94,.14),rgba(34,197,94,.08));border-color:rgba(34,197,94,.45)}
+.sev-mid{background:linear-gradient(180deg,rgba(245,158,11,.16),rgba(245,158,11,.08));border-color:rgba(245,158,11,.45)}
+.sev-bad{background:linear-gradient(180deg,rgba(239,68,68,.16),rgba(239,68,68,.10));border-color:rgba(239,68,68,.55)}
+.checklist-item input[type="checkbox"]{appearance:none;-webkit-appearance:none;outline:none;width:22px;height:22px;border-radius:8px;background:#0b1220;border:2px solid #2a2f4d;position:relative;display:inline-grid;place-items:center;transition:.18s;box-shadow:inset 0 0 0 0 rgba(99,102,241,.0)}
+.checklist-item input[type="checkbox"]:hover{border-color:#4c5399;box-shadow:0 0 0 4px rgba(99,102,241,.12)}
+.checklist-item input[type="checkbox"]::after{content:"";width:7px;height:12px;border:3px solid transparent;border-left:0;border-top:0;transform:rotate(45deg) scale(.7);transition:.18s}
+.checklist-item input[type="checkbox"]:checked{border-color:transparent;background:linear-gradient(135deg,#22c55e,#3de2ff,#9b5cff);background-size:200% 200%;animation:tickHue 2s linear infinite;box-shadow:0 6px 18px rgba(61,226,255,.25),inset 0 0 0 2px rgba(255,255,255,.25)}
+.checklist-item input[type="checkbox"]:checked::after{border-color:#fff;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));transform:rotate(45deg) scale(1)}
+.score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
+.score-good{background:rgba(22,193,114,.22);border-color:rgba(22,193,114,.45)}
+.score-mid{background:rgba(245,158,11,.22);border-color:rgba(245,158,11,.45)}
+.score-bad{background:rgba(239,68,68,.24);border-color:rgba(239,68,68,.5)}
+
+/* Responsive */
 @media (max-width:992px){.category-card{grid-column:span 12}.score-container{width:190px}}
 @media (max-width:768px){
   .wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}
@@ -216,7 +209,6 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   };
   window.SEMSEO.READY = false;
   window.SEMSEO.BUSY = false;
-  window.SEMSEO.QUEUE = 0;
 </script>
 
 <div class="wrap">
@@ -225,7 +217,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
       <div>
         <div class="hero-heading">Semantic SEO Master Analyzer</div>
-        <div class="hero-sub">Analyze URLs with stylish insights (Human vs AI → Readability → Entities → Site Speed)</div>
+        <div class="hero-sub">Human vs AI → Readability → Entities → Site Speed (colorful, responsive)</div>
       </div>
     </div>
     <div class="header-actions">
@@ -238,10 +230,11 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
     <p class="section-subtitle">
       Wheel + water bars fill with your scores.
       <span class="legend l-green">Green ≥ 80</span>
-      <span class="legend l-orange">Orange 60–79</span>
-      <span class="legend l-red">Red &lt; 60</span>
+      <span class="legend l-orange">60–79</span>
+      <span class="legend l-red">&lt; 60</span>
     </p>
 
+    <!-- Score header -->
     <div class="score-area">
       <div class="score-container">
         <!-- Circular water score -->
@@ -279,10 +272,11 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
           <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-robot ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
-        <small style="color:var(--text-dim)">If the backend returns no scores, a local ensemble + heuristics derive stable, varied scores so the UI always reflects reality.</small>
+        <small style="color:var(--text-dim)">Local ensemble ensures scores even if backend returns no data.</small>
       </div>
     </div>
 
+    <!-- URL form -->
     <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
       <form id="analyzeForm" onsubmit="event.preventDefault(); analyze(); return false;">
         <label for="analyzeUrl" style="display:inline-block;font-weight:900;margin-bottom:.35rem">Page URL</label>
@@ -333,7 +327,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
           <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
         </div>
 
-        <!-- Meta chips recap -->
+        <!-- Meta recap -->
         <div id="analyzeReport" style="margin-top:.9rem;display:none">
           <div style="display:flex;flex-wrap:wrap;gap:.5rem">
             <span class="chip">HTTP: <b id="rStatus">—</b></span>
@@ -353,7 +347,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
 
     <!-- ===== ORDERED PANELS ===== -->
 
-    <!-- 1) Human vs AI Panel -->
+    <!-- 1) Human vs AI -->
     <section id="hvaiPanel" class="panel">
       <div class="panel-header">
         <i class="fa-solid fa-scale-balanced ico ico-purple"></i>
@@ -371,26 +365,20 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
           </div>
         </div>
       </div>
-
       <div class="chip" style="margin-top:.5rem"><i class="fa-solid fa-shield-halved ico"></i> Confidence: <b id="detConfidence">—</b>%</div>
-      <div class="chip" style="margin-top:.5rem"><i class="fa-solid fa-circle-info ico"></i> Bars show <b>Human-leaning</b> vs <b>AI-leaning</b> per detector</div>
-
+      <div class="chip" style="margin-top:.5rem"><i class="fa-solid fa-circle-info ico"></i> Bars show <b>Human</b> vs <b>AI</b> tendency per detector</div>
       <div class="det-grid" id="detGrid"></div>
       <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
     </section>
 
-    <!-- 2) Readability Insights -->
+    <!-- 2) Readability -->
     <section id="readPanel" class="panel">
       <div class="panel-header">
         <i class="fa-solid fa-book-open-reader ico ico-cyan"></i>
         <h3 class="panel-title">Readability Insights</h3>
       </div>
-      <div class="read-grid" id="readGrid">
-        <!-- cards injected -->
-      </div>
-      <div style="margin-top:.5rem;color:var(--text-dim)">
-        Tips adapt to your content. Aim for clear sentences, varied vocabulary, and limited repetition.
-      </div>
+      <div class="read-grid" id="readGrid"></div>
+      <div style="margin-top:.5rem;color:var(--text-dim)">Aim for clear sentences, varied vocabulary, and limited repetition.</div>
     </section>
 
     <!-- 3) Entities & Topics -->
@@ -399,15 +387,46 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
         <i class="fa-solid fa-tags ico" style="color:#f59e0b"></i>
         <h3 class="panel-title">Entities & Topics</h3>
       </div>
-      <div class="ent-grid" id="entitiesGrid">
-        <!-- entity buckets injected -->
+      <div class="ent-grid" id="entitiesGrid"></div>
+      <div style="margin-top:.5rem;color:var(--text-dim)">Click a tag to open a search (Google / Wikipedia).</div>
+    </section>
+
+    <!-- 4) Site Speed & Core Web Vitals (NOW directly below Entities) -->
+    <section id="speedPanel" class="panel">
+      <div class="panel-header">
+        <i class="fa-solid fa-gauge-high ico" style="color:#22c55e"></i>
+        <h3 class="panel-title">Site Speed & Core Web Vitals</h3>
       </div>
-      <div style="margin-top:.5rem;color:var(--text-dim)">
-        Click a tag to open a search in a new tab (Google / Wikipedia).
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+        <button id="runMobile" class="btn btn-ghost"><i class="fa-solid fa-mobile-screen-button"></i> Run Mobile</button>
+        <button id="runDesktop" class="btn btn-ghost"><i class="fa-solid fa-desktop"></i> Run Desktop</button>
+        <button id="runBoth" class="btn btn-ghost"><i class="fa-solid fa-repeat"></i> Re-test Both</button>
+        <span class="chip"><i class="fa-regular fa-clock ico"></i> Last test: <b id="psiTime">—</b></span>
+      </div>
+      <div class="speed-wrap">
+        <div class="speed-card">
+          <div class="chip"><i class="fa-solid fa-mobile-screen-button"></i> Mobile</div>
+          <div id="mobilePerf" class="kpi"><div class="left"><i class="fa-solid fa-bolt"></i> Performance</div><b>—</b></div>
+          <div id="mobileLCP" class="kpi"><div class="left"><i class="fa-regular fa-image"></i> LCP</div><b>—</b></div>
+          <div id="mobileINP" class="kpi"><div class="left"><i class="fa-solid fa-hand-pointer"></i> INP</div><b>—</b></div>
+          <div id="mobileCLS" class="kpi"><div class="left"><i class="fa-solid fa-border-all"></i> CLS</div><b>—</b></div>
+          <div id="mobileHints" style="margin-top:.4rem"></div>
+        </div>
+        <div class="speed-card">
+          <div class="chip"><i class="fa-solid fa-desktop"></i> Desktop</div>
+          <div id="desktopPerf" class="kpi"><div class="left"><i class="fa-solid fa-bolt"></i> Performance</div><b>—</b></div>
+          <div id="desktopLCP" class="kpi"><div class="left"><i class="fa-regular fa-image"></i> LCP</div><b>—</b></div>
+          <div id="desktopINP" class="kpi"><div class="left"><i class="fa-solid fa-hand-pointer"></i> INP</div><b>—</b></div>
+          <div id="desktopCLS" class="kpi"><div class="left"><i class="fa-solid fa-border-all"></i> CLS</div><b>—</b></div>
+          <div id="desktopHints" style="margin-top:.4rem"></div>
+        </div>
+      </div>
+      <div style="margin-top:.6rem;color:var(--text-dim)">
+        Tips come from Lighthouse audits: optimize images (AVIF/WebP), defer non-critical JS, enable compression, and reduce layout shifts with reserved space.
       </div>
     </section>
 
-    <!-- Checklist (unchanged placement inside main analyzer, not part of the four panels) -->
+    <!-- Checklist is now AFTER Speed panel -->
     @php $labels = [
       1=>'Define search intent & primary topic', 2=>'Map target & related keywords (synonyms/PAA)', 3=>'H1 includes primary topic naturally',
       4=>'Integrate FAQs / questions with answers', 5=>'Readable, NLP-friendly language', 6=>'Title tag (≈50–60 chars) w/ primary keyword',
@@ -474,41 +493,6 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       @endforeach
     </div>
 
-    <!-- 4) Site Speed & Core Web Vitals (END) -->
-    <section id="speedPanel" class="panel">
-      <div class="panel-header">
-        <i class="fa-solid fa-gauge-high ico" style="color:#22c55e"></i>
-        <h3 class="panel-title">Site Speed & Core Web Vitals</h3>
-      </div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
-        <button id="runMobile" class="btn btn-ghost"><i class="fa-solid fa-mobile-screen-button"></i> Run Mobile</button>
-        <button id="runDesktop" class="btn btn-ghost"><i class="fa-solid fa-desktop"></i> Run Desktop</button>
-        <button id="runBoth" class="btn btn-ghost"><i class="fa-solid fa-repeat"></i> Re-test Both</button>
-        <span class="chip"><i class="fa-regular fa-clock ico"></i> Last test: <b id="psiTime">—</b></span>
-      </div>
-      <div class="speed-wrap">
-        <div class="speed-card">
-          <div class="chip"><i class="fa-solid fa-mobile-screen-button"></i> Mobile</div>
-          <div id="mobilePerf" class="kpi"><div class="left"><i class="fa-solid fa-bolt"></i> Performance</div><b>—</b></div>
-          <div id="mobileLCP" class="kpi"><div class="left"><i class="fa-regular fa-image"></i> LCP</div><b>—</b></div>
-          <div id="mobileINP" class="kpi"><div class="left"><i class="fa-solid fa-hand-pointer"></i> INP</div><b>—</b></div>
-          <div id="mobileCLS" class="kpi"><div class="left"><i class="fa-solid fa-border-all"></i> CLS</div><b>—</b></div>
-          <div id="mobileHints" style="margin-top:.4rem"></div>
-        </div>
-        <div class="speed-card">
-          <div class="chip"><i class="fa-solid fa-desktop"></i> Desktop</div>
-          <div id="desktopPerf" class="kpi"><div class="left"><i class="fa-solid fa-bolt"></i> Performance</div><b>—</b></div>
-          <div id="desktopLCP" class="kpi"><div class="left"><i class="fa-regular fa-image"></i> LCP</div><b>—</b></div>
-          <div id="desktopINP" class="kpi"><div class="left"><i class="fa-solid fa-hand-pointer"></i> INP</div><b>—</b></div>
-          <div id="desktopCLS" class="kpi"><div class="left"><i class="fa-solid fa-border-all"></i> CLS</div><b>—</b></div>
-          <div id="desktopHints" style="margin-top:.4rem"></div>
-        </div>
-      </div>
-      <div style="margin-top:.6rem;color:var(--text-dim)">
-        Suggestions are derived from Lighthouse audits. Optimize images, defer non-critical JS, use HTTP/2, enable compression, and reduce layout shifts.
-      </div>
-    </section>
-
   </main>
 </div>
 
@@ -535,7 +519,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
   function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
 
-  /* ===== Score wheel ===== */
+  /* ===== Gauge ===== */
   var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
   window.setScoreWheel = function(value){
     if(!GAUGE.rect){
@@ -545,40 +529,36 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
     }
     var v=Math.max(0,Math.min(100,Number(value)||0));
     var y=GAUGE.H-(GAUGE.H*(v/100));
-    if(GAUGE.rect) GAUGE.rect.setAttribute('y',String(y));
-    if(GAUGE.text) GAUGE.text.textContent=Math.round(v)+'%';
+    GAUGE.rect?.setAttribute('y',String(y));
+    GAUGE.text && (GAUGE.text.textContent=Math.round(v)+'%');
 
     var c1,c2; if(v>=80){c1='#22c55e';c2='#16a34a'} else if(v>=60){c1='#f59e0b';c2='#fb923c'} else {c1='#ef4444';c2='#b91c1c'}
-    if(GAUGE.stop1) GAUGE.stop1.setAttribute('stop-color',c1); if(GAUGE.stop2) GAUGE.stop2.setAttribute('stop-color',c2);
-    if(GAUGE.r1) GAUGE.r1.setAttribute('stop-color',c1); if(GAUGE.r2) GAUGE.r2.setAttribute('stop-color',c2);
+    GAUGE.stop1?.setAttribute('stop-color',c1); GAUGE.stop2?.setAttribute('stop-color',c2);
+    GAUGE.r1?.setAttribute('stop-color',c1); GAUGE.r2?.setAttribute('stop-color',c2);
     if(GAUGE.arc){ var offset=GAUGE.CIRC*(1-(v/100)); GAUGE.arc.style.strokeDashoffset=offset.toFixed(2); }
     setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
   };
 
-  /* ===== Category bars + completion ===== */
+  /* ===== Category completion ===== */
   function updateCategoryBars(){
     var cards=[].slice.call(document.querySelectorAll('.category-card'));
     var total=0, checked=0;
-    cards.forEach(function(card,idx){
+    cards.forEach(function(card){
       var items=[].slice.call(card.querySelectorAll('.checklist-item'));
-      var t=items.length, done=items.filter(function(li){ var c=li.querySelector('input'); return c && c.checked; }).length;
-      total+=t; checked+=done;
+      total+=items.length; checked+=items.filter(li => li.querySelector('input')?.checked).length;
     });
     var pctAll = total? Math.round(checked*100/total) : 0;
-    var comp=document.getElementById('compClipRect'); if(comp) comp.setAttribute('width', String(6*pctAll));
+    document.getElementById('compClipRect')?.setAttribute('width', String(6*pctAll));
     setText('compPct', pctAll + '%'); setText('progressCaption', checked+' of '+total+' items completed');
   }
   window.updateCategoryBars = updateCategoryBars;
 
   /* ===== Water progress ===== */
   var Water=(function(){
-    var wrapId=function(){ return document.getElementById('waterWrap'); };
-    var clipId=function(){ return document.getElementById('waterClipRect'); };
-    var pctId=function(){ return document.getElementById('waterPct'); };
     var t=null, value=0;
-    function show(){ var w=wrapId(); if(w) w.style.display='block'; }
-    function hide(){ var w=wrapId(); if(w) w.style.display='none'; }
-    function set(v){ value=Math.max(0,Math.min(100,v)); var y=200 - (200*value/100); var clip=clipId(); if(clip) clip.setAttribute('y', String(y)); var p=pctId(); if(p) p.textContent = Math.round(value) + '%'; }
+    function show(){ var w=document.getElementById('waterWrap'); if(w) w.style.display='block'; }
+    function hide(){ var w=document.getElementById('waterWrap'); if(w) w.style.display='none'; }
+    function set(v){ value=Math.max(0,Math.min(100,v)); var y=200 - (200*value/100); var clip=document.getElementById('waterClipRect'); clip&&clip.setAttribute('y', String(y)); var p=document.getElementById('waterPct'); p&&(p.textContent = Math.round(value) + '%'); }
     return {
       start:function(){ show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
       finish:function(){ if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
@@ -587,53 +567,37 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   })();
   window.Water = Water;
 
-  /* ===== Text prep + stylometry ===== */
-  function _countSyllables(word){
-    var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0;
-    var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m);
-  }
-  function _flesch(text){
-    var sents = (text.match(/[.!?]+/g)||[]).length || 1;
-    var words = (text.match(/[A-Za-z\u00C0-\u024f']+/g)||[]); var wN = words.length||1;
-    var syll = 0; for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
-    return clamp(206.835 - 1.015*(wN/sents) - 84.6*(syll/wN), -20, 120);
-  }
+  /* ===== Text stats / detection / entities / readability ===== */
+  function _countSyllables(word){ var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0; var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m); }
+  function _flesch(text){ var sents=(text.match(/[.!?]+/g)||[]).length||1; var words=(text.match(/[A-Za-z\u00C0-\u024f']+/g)||[]); var wN=words.length||1; var syll=0; for(var i=0;i<words.length;i++){ syll+=_countSyllables(words[i]); } return clamp(206.835 - 1.015*(wN/sents) - 84.6*(syll/wN), -20, 120); }
   function _prep(text){
     text=(text||'')+''; text=text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
-    var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(text.match(wordRe)||[]).map(function(w){return w.toLowerCase();});
+    var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(text.match(wordRe)||[]).map(w=>w.toLowerCase());
     var sents=text.split(/(?<=[.!?])\s+|\n+(?=\S)/g).filter(Boolean); var tokens=words.length||1;
-    var freq=Object.create(null); words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
+    var freq=Object.create(null); words.forEach(w=>{freq[w]=(freq[w]||0)+1;});
     var types=Object.keys(freq).length, hapax=0; for(var k in freq){ if(freq[k]===1) hapax++; }
-    var lens=sents.map(function(s){return (s.match(wordRe)||[]).length;}).filter(function(v){return v>0;});
-    var mean=lens.reduce(function(a,b){return a+b;},0)/(lens.length||1);
-    var variance=lens.reduce(function(a,b){return a+Math.pow(b-mean,2);},0)/(lens.length||1);
+    var lens=sents.map(s=>(s.match(wordRe)||[]).length).filter(v=>v>0);
+    var mean=lens.reduce((a,b)=>a+b,0)/(lens.length||1);
+    var variance=lens.reduce((a,b)=>a+Math.pow(b-mean,2),0)/(lens.length||1);
     var cov=mean?Math.sqrt(variance)/mean:0;
     var tri={}, triT=0, triR=0; for(var i=0;i<tokens-2;i++){ var g=words[i]+' '+words[i+1]+' '+words[i+2]; tri[g]=(tri[g]||0)+1; triT++; } for(var kk in tri){ if(tri[kk]>1) triR+=tri[kk]-1; }
     var digits=(text.match(/\d/g)||[]).length*100/(tokens||1);
     var avgLen=tokens? (words.join('').length/tokens):0;
-    var longRatio=(lens.filter(function(L){return L>=28;}).length)/(lens.length||1);
+    var longRatio=(lens.filter(L=>L>=28).length)/(lens.length||1);
     var TTR=types/(tokens||1);
     return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits };
   }
   function detectUltra(text){
-    var s=_prep(text||'');
-    if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
+    var s=_prep(text||''); if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
     var ai=10; var covT=0.45; if(s.cov<covT) ai+=clamp((covT-s.cov)/covT,0,1)*25; var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18;
     var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
     return { humanPct: 100-clamp(Math.round(ai),0,100), aiPct: clamp(Math.round(ai),0,100), confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai:clamp(Math.round(ai),0,100),w:1}], _s:s };
   }
-
-  /* ===== Feature: Entities extraction (simple + category guesses) ===== */
   function extractEntities(sample){
-    var text = (sample||'').replace(/\s+/g,' ').trim();
-    var result = { People:[], Orgs:[], Places:[], Software:[], Games:[], Other:[] };
-    if(!text) return result;
-    // naive caps terms
-    var caps = text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || [];
-    var freq = {}; caps.forEach(t => { freq[t]= (freq[t]||0)+1; });
-    var top = Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).slice(0,80);
+    var text=(sample||'').replace(/\s+/g,' ').trim(); var result={ People:[], Orgs:[], Places:[], Software:[], Games:[], Other:[] }; if(!text) return result;
+    var caps = text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || []; var freq={}; caps.forEach(t=>{freq[t]=(freq[t]||0)+1;});
+    var top=Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).slice(0,80);
     top.forEach(t=>{
-      var low = t.toLowerCase();
       if (/\b(inc|ltd|corp|llc|gmbh|company|studio)\b/i.test(t)) result.Orgs.push(t);
       else if (/\b(city|town|province|state|country|park|river|lake)\b/i.test(t)) result.Places.push(t);
       else if (/\b(software|suite|editor|studio|cloud|api|sdk|framework|wordpress|laravel|android|ios|windows|linux|mac)\b/i.test(t)) result.Software.push(t);
@@ -641,236 +605,125 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       else if (/\s/.test(t)) result.People.push(t);
       else result.Other.push(t);
     });
-    // APK / download hints
-    var apkHits = (text.match(/\bapk\b|\b\.apk\b/ig)||[]).length;
-    if (apkHits>0 && !result.Software.includes('APK')) result.Software.unshift('APK');
-
-    // dedupe and trim counts
+    var apkHits=(text.match(/\bapk\b|\b\.apk\b/ig)||[]).length; if(apkHits>0 && !result.Software.includes('APK')) result.Software.unshift('APK');
     function uniq(arr){ var s=new Set(); var out=[]; arr.forEach(v=>{var k=v.trim(); if(!s.has(k) && k.length>1){ s.add(k); out.push(k); }}); return out.slice(0,20); }
     Object.keys(result).forEach(k=>{ result[k]=uniq(result[k]); });
     return result;
   }
 
-  /* ===== Readability UI ===== */
-  function gradeFromFlesch(f){
-    if (f>=90) return {label:'Very Easy', hint:'Great for all audiences', pct:100};
-    if (f>=70) return {label:'Easy', hint:'Good web reading', pct:88};
-    if (f>=60) return {label:'Fairly Easy', hint:'Still fine', pct:78};
-    if (f>=50) return {label:'Plain', hint:'OK. Keep sentences short', pct:66};
-    if (f>=30) return {label:'Fairly Difficult', hint:'Use simpler words', pct:48};
-    return {label:'Difficult', hint:'Shorten sentences, simplify vocab', pct:34};
-  }
+  /* Readability UI */
+  function gradeFromFlesch(f){ if (f>=90) return {label:'Very Easy', hint:'Great for all audiences', pct:100}; if (f>=70) return {label:'Easy', hint:'Good web reading', pct:88}; if (f>=60) return {label:'Fairly Easy', hint:'Still fine', pct:78}; if (f>=50) return {label:'Plain', hint:'OK. Keep sentences short', pct:66}; if (f>=30) return {label:'Fairly Difficult', hint:'Use simpler words', pct:48}; return {label:'Difficult', hint:'Shorten sentences, simplify vocab', pct:34}; }
   function pctBand(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return Math.round((x-l)*100/(h-l)); }
-
   function renderReadability(s){
-    var grid = document.getElementById('readGrid'); if(!grid) return;
-    grid.innerHTML = '';
-    var items = [];
-
-    var g = gradeFromFlesch(s.flesch);
-    items.push({ icon:'fa-book', label:'Flesch Score', value: Math.round(s.flesch), badge:g.label, pct: clamp(g.pct,0,100), hint:g.hint });
-
-    items.push({ icon:'fa-random', label:'Sentence Variation (CoV inverse)', value: (1-s.cov).toFixed(2), pct: clamp(Math.round((1-s.cov)*100),0,100), hint:'Aim for balanced sentence lengths' });
-
-    items.push({ icon:'fa-font', label:'Type-Token Ratio (TTR)', value: s.TTR.toFixed(2), pct: pctBand(s.TTR,0.30,0.65), hint:'Varied vocabulary improves clarity' });
-
-    items.push({ icon:'fa-align-left', label:'Long Sentences (lower is better)', value: Math.round(s.longRatio*100)+'%', pct: clamp(Math.round((1-s.longRatio)*100),0,100), hint:'Split long sentences (≥28 words)' });
-
-    items.push({ icon:'fa-text-height', label:'Avg Word Length', value: s.avgWordLen.toFixed(2), pct: pctBand(6 - s.avgWordLen, 0.2, 2.0), hint:'Prefer shorter words where possible' });
-
-    items.push({ icon:'fa-hashtag', label:'Digits per 100 words', value: s.digitsPer100.toFixed(1), pct: clamp(Math.round(100 - s.digitsPer100*5),0,100), hint:'Reduce numeric noise if excessive' });
-
-    items.push({ icon:'fa-layer-group', label:'Trigram Repetition (lower is better)', value: (s.triRepeatRatio*100).toFixed(1)+'%', pct: clamp(Math.round(100 - s.triRepeatRatio*100),0,100), hint:'Avoid repetitive phrasing' });
-
-    items.push({ icon:'fa-file-alt', label:'Word Count', value: s.wordCount, pct: clamp(Math.round(Math.min(1, s.wordCount/1200)*100),0,100), hint:'For depth, target 800–1500 words (topic dependent)' });
-
+    var grid = document.getElementById('readGrid'); if(!grid) return; grid.innerHTML='';
+    var items=[];
+    var g=gradeFromFlesch(s.flesch); items.push({ icon:'fa-book', label:'Flesch Score', value: Math.round(s.flesch), badge:g.label, pct: clamp(g.pct,0,100), hint:g.hint });
+    items.push({ icon:'fa-random', label:'Sentence Variation (CoV inverse)', value: (1-s.cov).toFixed(2), pct: clamp(Math.round((1-s.cov)*100),0,100), hint:'Balance sentence lengths' });
+    items.push({ icon:'fa-font', label:'Type-Token Ratio (TTR)', value: s.TTR.toFixed(2), pct: pctBand(s.TTR,0.30,0.65), hint:'Vary vocabulary' });
+    items.push({ icon:'fa-align-left', label:'Long Sentences', value: Math.round(s.longRatio*100)+'%', pct: clamp(Math.round((1-s.longRatio)*100),0,100), hint:'Split sentences ≥28 words' });
+    items.push({ icon:'fa-text-height', label:'Avg Word Length', value: s.avgWordLen.toFixed(2), pct: pctBand(6 - s.avgWordLen, 0.2, 2.0), hint:'Prefer shorter words' });
+    items.push({ icon:'fa-hashtag', label:'Digits per 100 words', value: s.digitsPer100.toFixed(1), pct: clamp(Math.round(100 - s.digitsPer100*5),0,100), hint:'Reduce numeric noise' });
+    items.push({ icon:'fa-layer-group', label:'Trigram Repetition', value: (s.triRepeatRatio*100).toFixed(1)+'%', pct: clamp(Math.round(100 - s.triRepeatRatio*100),0,100), hint:'Avoid repetitive phrasing' });
+    items.push({ icon:'fa-file-alt', label:'Word Count', value: s.wordCount, pct: clamp(Math.round(Math.min(1, s.wordCount/1200)*100),0,100), hint:'Target 800–1500 words (topic dependent)' });
     items.forEach(function(it){
-      var card = document.createElement('div'); card.className='read-card';
-      card.innerHTML =
-        '<div class="read-row">'+
-          '<div class="left"><i class="fa '+it.icon+'"></i> <b>'+it.label+'</b></div>'+
-          '<div class="read-bar"><div class="read-fill" style="width:'+it.pct+'%"></div></div>'+
-          '<div class="badge-mini">'+it.value+'</div>'+
-        '</div>'+
-        '<div style="color:var(--text-dim);margin-top:.3rem"><i class="fa-regular fa-lightbulb"></i> '+it.hint+'</div>';
+      var card=document.createElement('div'); card.className='read-card';
+      card.innerHTML='<div class="read-row"><div class="left"><i class="fa '+it.icon+'"></i> <b>'+it.label+'</b></div><div class="read-bar"><div class="read-fill" style="width:'+it.pct+'%"></div></div><div class="badge-mini">'+it.value+'</div></div><div style="color:var(--text-dim);margin-top:.3rem"><i class="fa-regular fa-lightbulb"></i> '+it.hint+'</div>';
       grid.appendChild(card);
     });
   }
 
-  /* ===== Entities UI ===== */
+  /* Entities UI */
   function tagHTML(txt){
-    var g = encodeURIComponent(txt);
-    var w = encodeURIComponent(txt.replace(/\s+/g,'_'));
+    var g = encodeURIComponent(txt), w = encodeURIComponent(txt.replace(/\s+/g,'_'));
     return '<span class="tag"><i class="fa-solid fa-tag"></i>'+txt+
       ' <a href="https://www.google.com/search?q='+g+'" target="_blank" rel="noopener" title="Google"><i class="fa-brands fa-google"></i></a>'+
       ' <a href="https://en.wikipedia.org/wiki/'+w+'" target="_blank" rel="noopener" title="Wikipedia"><i class="fa-brands fa-wikipedia-w"></i></a>'+
     '</span>';
   }
   function renderEntities(ents){
-    var grid = document.getElementById('entitiesGrid'); if(!grid) return;
-    grid.innerHTML = '';
-    var groups = [
-      {k:'People', icon:'fa-user', color:'#22c55e'},
-      {k:'Orgs', icon:'fa-building', color:'#60a5fa'},
-      {k:'Places', icon:'fa-location-dot', color:'#f59e0b'},
-      {k:'Software', icon:'fa-code', color:'#a78bfa'},
-      {k:'Games', icon:'fa-gamepad', color:'#fb7185'},
-      {k:'Other', icon:'fa-shapes', color:'#94a3b8'}
-    ];
+    var grid=document.getElementById('entitiesGrid'); if(!grid) return; grid.innerHTML='';
+    var groups=[{k:'People',icon:'fa-user',color:'#22c55e'},{k:'Orgs',icon:'fa-building',color:'#60a5fa'},{k:'Places',icon:'fa-location-dot',color:'#f59e0b'},{k:'Software',icon:'fa-code',color:'#a78bfa'},{k:'Games',icon:'fa-gamepad',color:'#fb7185'},{k:'Other',icon:'fa-shapes',color:'#94a3b8'}];
     groups.forEach(function(g){
-      var list = ents[g.k]||[];
-      if (!list.length) return;
-      var card = document.createElement('div'); card.className='ent-card';
-      card.innerHTML = '<div class="chip" style="border-color:'+g.color+';background:color-mix(in srgb,'+g.color+' 18%, transparent)"><i class="fa '+g.icon+'"></i> '+g.k+'</div>';
-      var wrap = document.createElement('div');
-      list.forEach(function(t){ wrap.innerHTML += tagHTML(t); });
-      card.appendChild(wrap);
-      grid.appendChild(card);
+      var list=ents[g.k]||[]; if(!list.length) return;
+      var card=document.createElement('div'); card.className='ent-card';
+      card.innerHTML='<div class="chip" style="border-color:'+g.color+';background:color-mix(in srgb,'+g.color+' 18%, transparent)"><i class="fa '+g.icon+'"></i> '+g.k+'</div>';
+      var wrap=document.createElement('div'); list.forEach(t=>{ wrap.innerHTML += tagHTML(t); }); card.appendChild(wrap); grid.appendChild(card);
     });
   }
 
-  /* ===== PSI helpers ===== */
+  /* PSI helpers */
   function kpiTone(el, val, type){
-    // thresholds: LCP(ms) good<2500 mid<4000 bad>=4000 ; INP(ms) good<200 mid<500 ; CLS good<0.1 mid<0.25
     var good=false, mid=false;
     if(type==='perf'){ good=val>=90; mid=val>=50 && val<90; }
     if(type==='lcp'){ good=val<2500; mid=val<4000 && val>=2500; }
     if(type==='inp'){ good=val<200; mid=val<500 && val>=200; }
     if(type==='cls'){ good=val<0.1; mid=val<0.25 && val>=0.1; }
-    el.classList.remove('good','mid','bad');
-    el.classList.add(good?'good':(mid?'mid':'bad'));
+    el.classList.remove('good','mid','bad'); el.classList.add(good?'good':(mid?'mid':'bad'));
   }
   function fmtMs(x){ return Math.round(x) + ' ms'; }
   function fmtScore(x){ return Math.round((x||0)*100); }
 
   async function runPSI(url, strategy){
-    var ep = (window.SEMSEO.ENDPOINTS.psi||'api/pagespeed') + '?url='+encodeURIComponent(url)+'&strategy='+encodeURIComponent(strategy||'mobile');
+    var ep=(window.SEMSEO.ENDPOINTS.psi||'/api/pagespeed')+'?url='+encodeURIComponent(url)+'&strategy='+encodeURIComponent(strategy||'mobile');
     try{
-      var r = await fetch(ep, {headers:{'Accept':'application/json'}});
-      var j = await r.json();
-      if(!r.ok){ throw new Error((j && j.error)? j.error : 'PSI failed'); }
+      var r=await fetch(ep,{headers:{'Accept':'application/json'}});
+      var j=await r.json(); if(!r.ok){ throw new Error((j && j.error)? j.error : 'PSI failed'); }
       return j;
-    }catch(e){
-      return { error: e.message||String(e) };
-    }
+    }catch(e){ return { error: e.message||String(e) }; }
   }
-
   function applyPSIToSide(j, side){
-    // Elements
-    var perf = document.getElementById(side+'Perf');
-    var lcp  = document.getElementById(side+'LCP');
-    var inp  = document.getElementById(side+'INP');
-    var cls  = document.getElementById(side+'CLS');
-    var hints= document.getElementById(side+'Hints');
-
-    // Clear skeleton if any
-    [perf,lcp,inp,cls].forEach(function(el){ if(!el) return; el.querySelector('b').textContent='—'; el.classList.remove('good','mid','bad'); });
-
-    if(!j || j.error){ setHTML(side+'Hints', '<div class="chip" style="border-color:#ef4444;background:rgba(239,68,68,.15)"><i class="fa-solid fa-circle-exclamation"></i> '+(j?.error||'Error')+'</div>'); return; }
-
-    var lh = j.lighthouseResult || {};
-    var score = (lh.categories && lh.categories.performance && lh.categories.performance.score) || 0;
-    var audits = lh.audits || {};
-    var LCP = (audits['largest-contentful-paint'] && audits['largest-contentful-paint'].numericValue) || null;
-    var INP = (audits['interaction-to-next-paint'] && audits['interaction-to-next-paint'].numericValue) || null;
-    var CLS = (audits['cumulative-layout-shift'] && audits['cumulative-layout-shift'].numericValue) || null;
-
-    // Field data (CrUX) if present
-    var le = j.loadingExperience || j.originLoadingExperience || {};
-    var m = le.metrics || {};
-    if(!LCP && m.LARGEST_CONTENTFUL_PAINT_MS){ LCP = m.LARGEST_CONTENTFUL_PAINT_MS.percentile; }
-    if(!INP && (m.INTERACTION_TO_NEXT_PAINT || m.FIRST_INPUT_DELAY_MS)){
-      INP = (m.INTERACTION_TO_NEXT_PAINT && m.INTERACTION_TO_NEXT_PAINT.percentile) || (m.FIRST_INPUT_DELAY_MS && m.FIRST_INPUT_DELAY_MS.percentile) || null;
-    }
-    if(!CLS && m.CUMULATIVE_LAYOUT_SHIFT_SCORE){ CLS = m.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile/100; } // percentile*100
-
-    // Apply UI
-    perf.querySelector('b').textContent = fmtScore(score);
-    kpiTone(perf, Math.round(score*100), 'perf');
-
-    if (LCP!=null){ lcp.querySelector('b').textContent = fmtMs(LCP); kpiTone(lcp, LCP, 'lcp'); }
-    if (INP!=null){ inp.querySelector('b').textContent = fmtMs(INP); kpiTone(inp, INP, 'inp'); }
-    if (CLS!=null){ cls.querySelector('b').textContent = (Math.round(CLS*1000)/1000).toFixed(3); kpiTone(cls, CLS, 'cls'); }
-
-    // Suggestions (pick a few heavy hitters)
-    var tips = [];
-    function pushIf(code, label, suggest){
-      var a = audits[code]; if(a && a.score < 0.9){ tips.push('<div class="chip"><i class="fa-regular fa-lightbulb"></i> '+label+': <b>'+suggest+'</b></div>'); }
-    }
-    pushIf('unused-javascript', 'Reduce JS', 'Code-split & remove unused JS');
-    pushIf('render-blocking-resources', 'Eliminate render-blocking', 'Preload critical CSS/JS');
-    pushIf('uses-optimized-images', 'Optimize images', 'Use AVIF/WebP + proper sizes');
-    pushIf('server-response-time', 'Server response', 'Cache + faster hosting');
-    pushIf('total-blocking-time', 'Blocking time', 'Defer non-critical scripts');
-    pushIf('cumulative-layout-shift', 'Layout shifts', 'Reserve media space & avoid late ads');
-
-    hints.innerHTML = tips.join(' ') || '<div class="chip"><i class="fa-solid fa-circle-check" style="color:#22c55e"></i> No major suggestions from Lighthouse.</div>';
+    var perf=document.getElementById(side+'Perf'), lcp=document.getElementById(side+'LCP'), inp=document.getElementById(side+'INP'), cls=document.getElementById(side+'CLS'), hints=document.getElementById(side+'Hints');
+    [perf,lcp,inp,cls].forEach(el=>{ if(el){ el.querySelector('b').textContent='—'; el.classList.remove('good','mid','bad'); }});
+    if(!j || j.error){ setHTML(side+'Hints','<div class="chip" style="border-color:#ef4444;background:rgba(239,68,68,.15)"><i class="fa-solid fa-circle-exclamation"></i> '+(j?.error||'Error')+'</div>'); return; }
+    var lh=j.lighthouseResult||{}, score=(lh.categories&&lh.categories.performance&&lh.categories.performance.score)||0, audits=lh.audits||{};
+    var LCP=(audits['largest-contentful-paint']&&audits['largest-contentful-paint'].numericValue)||null;
+    var INP=(audits['interaction-to-next-paint']&&audits['interaction-to-next-paint'].numericValue)||null;
+    var CLS=(audits['cumulative-layout-shift']&&audits['cumulative-layout-shift'].numericValue)||null;
+    var le=j.loadingExperience||j.originLoadingExperience||{}, m=le.metrics||{};
+    if(!LCP && m.LARGEST_CONTENTFUL_PAINT_MS){ LCP=m.LARGEST_CONTENTFUL_PAINT_MS.percentile; }
+    if(!INP && (m.INTERACTION_TO_NEXT_PAINT || m.FIRST_INPUT_DELAY_MS)){ INP=(m.INTERACTION_TO_NEXT_PAINT&&m.INTERACTION_TO_NEXT_PAINT.percentile)||(m.FIRST_INPUT_DELAY_MS&&m.FIRST_INPUT_DELAY_MS.percentile)||null; }
+    if(!CLS && m.CUMULATIVE_LAYOUT_SHIFT_SCORE){ CLS=m.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile/100; }
+    perf.querySelector('b').textContent=fmtScore(score); kpiTone(perf, Math.round(score*100), 'perf');
+    if(LCP!=null){ lcp.querySelector('b').textContent=fmtMs(LCP); kpiTone(lcp, LCP, 'lcp'); }
+    if(INP!=null){ inp.querySelector('b').textContent=fmtMs(INP); kpiTone(inp, INP, 'inp'); }
+    if(CLS!=null){ cls.querySelector('b').textContent=(Math.round(CLS*1000)/1000).toFixed(3); kpiTone(cls, CLS, 'cls'); }
+    var tips=[]; function pushIf(code,label,suggest){ var a=audits[code]; if(a && a.score<0.9){ tips.push('<div class="chip"><i class="fa-regular fa-lightbulb"></i> '+label+': <b>'+suggest+'</b></div>'); } }
+    pushIf('unused-javascript','Reduce JS','Code-split & remove unused JS');
+    pushIf('render-blocking-resources','Eliminate render-blocking','Preload critical CSS/JS');
+    pushIf('uses-optimized-images','Optimize images','Use AVIF/WebP + proper sizes');
+    pushIf('server-response-time','Server response','Cache + faster hosting');
+    pushIf('total-blocking-time','Blocking time','Defer non-critical scripts');
+    pushIf('cumulative-layout-shift','Layout shifts','Reserve media space & avoid late ads');
+    hints.innerHTML=tips.join(' ')||'<div class="chip"><i class="fa-solid fa-circle-check" style="color:#22c55e"></i> No major suggestions.</div>';
   }
-
   async function runPageSpeedBoth(url){
     setText('psiTime', new Date().toLocaleTimeString());
-    // Skeletons while loading
     ['mobile','desktop'].forEach(side=>{
       ['Perf','LCP','INP','CLS'].forEach(k=>{
         var el=document.getElementById(side+k); if(el){ el.querySelector('b').innerHTML='<span class="skel" style="display:inline-block;min-width:80px"></span>'; }
       });
       setHTML(side+'Hints','<div class="skel" style="height:16px;width:70%;border-radius:10px"></div>');
     });
-    var [m,d] = await Promise.all([runPSI(url,'mobile'), runPSI(url,'desktop')]);
-    applyPSIToSide(m, 'mobile'); applyPSIToSide(d, 'desktop');
+    var [m,d]=await Promise.all([runPSI(url,'mobile'), runPSI(url,'desktop')]);
+    applyPSIToSide(m,'mobile'); applyPSIToSide(d,'desktop');
   }
 
-  /* ===== Backend fetchers ===== */
-  function normalizeUrl(u) {
-    if (!u) return '';
-    u = u.trim();
-    if (/^https?:\/\//i.test(u)) { try { new URL(u); return u; } catch(e) { return ''; } }
-    var guess = 'https://' + u.replace(/^\/+/, '');
-    try { new URL(guess); return guess; } catch(e) { return ''; }
-  }
-
+  /* Merge/normalize helpers */
+  function normalizeUrl(u){ if(!u) return ''; u=u.trim(); if(/^https?:\/\//i.test(u)){ try{ new URL(u); return u; }catch(e){ return ''; } } var guess='https://'+u.replace(/^\/+/, ''); try{ new URL(guess); return guess; }catch(e){ return ''; } }
   async function fetchBackend(url){
     let data=null, ok=false, status=0, text='';
     const qs=new URLSearchParams({url}).toString();
-    try{
-      const r1=await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
-      status=r1.status; text=await r1.text(); try{ data=JSON.parse(text);}catch(_){}
-      if(r1.ok && data) ok=true;
-    }catch(_){}
-    if(!ok){
-      try{
-        const r2=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})});
-        status=r2.status; text=await r2.text(); try{ data=JSON.parse(text);}catch(_){}
-        if(r2.ok && data) ok=true;
-      }catch(_){}
-    }
-    if(!ok){
-      try{
-        const r3=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
-        status=r3.status; text=await r3.text(); try{ data=JSON.parse(text);}catch(_){}
-        if(r3.ok && data) ok=true;
-      }catch(_){}
-    }
+    try{ const r1=await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}}); status=r1.status; text=await r1.text(); try{ data=JSON.parse(text);}catch(_){ } if(r1.ok && data) ok=true;}catch(_){}
+    if(!ok){ try{ const r2=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})}); status=r2.status; text=await r2.text(); try{ data=JSON.parse(text);}catch(_){ } if(r2.ok && data) ok=true;}catch(_){}
+    if(!ok){ try{ const r3=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}}); status=r3.status; text=await r3.text(); try{ data=JSON.parse(text);}catch(_){ } if(r3.ok && data) ok=true;}catch(_){}
     return {ok,data,status};
   }
-
-  async function fetchRawHtml(url){
-    try{
-      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
-      if(r.ok){ const html=await r.text(); if(html && html.length>200) return html; }
-    }catch(_){}
-    return '';
-  }
+  async function fetchRawHtml(url){ try{ const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'}); if(r.ok){ const html=await r.text(); if(html && html.length>200) return html; } }catch(_){ } return ''; }
   async function fetchReadableText(url){
-    try{
-      const httpsR=await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,'')); if(httpsR.ok){ const t=await httpsR.text(); if(t && t.length>200) return t; }
-    }catch(_){}
-    try{
-      const altR=await fetch('https://r.jina.ai/'+url); if(altR.ok){ const t=await altR.text(); if(t && t.length>200) return t; }
-    }catch(_){}
+    try{ const httpsR=await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,'')); if(httpsR.ok){ const t=await httpsR.text(); if(t && t.length>200) return t; } }catch(_){}
+    try{ const altR=await fetch('https://r.jina.ai/'+url); if(altR.ok){ const t=await altR.text(); if(t && t.length>200) return t; } }catch(_){}
     return '';
   }
-
   function extractMetaFromHtml(html, baseUrl){
     try{
       var d=(new DOMParser()).parseFromString(html,'text/html');
@@ -892,21 +745,15 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   }
   function mergeMeta(into, add){
     if(!into) into={};
-    var keys=['titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText'];
-    keys.forEach(function(k){
-      if((into[k]===undefined || into[k]===null || into[k]==='—' || into[k]==='' ) && add && add[k]!==undefined && add[k]!==null){
-        into[k]=add[k];
-      }
+    ['titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText'].forEach(function(k){
+      if((into[k]===undefined || into[k]===null || into[k]==='—' || into[k]==='' ) && add && add[k]!==undefined && add[k]!==null) into[k]=add[k];
     });
     return into;
   }
-
   function deriveItemScoresFromSignals(s){
-    function pct(x){ return clamp(Math.round(x),0,100); }
-    function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
+    function pct(x){ return clamp(Math.round(x),0,100); } function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
     var read=pct(band(s.flesch,35,75)), rep=pct(100*(1 - s.triRepeatRatio)), ttr=pct(band(s.TTR,0.30,0.65)), longS=pct(band(1-s.longRatio, 0.6, 0.95)), avgLen=pct(band(s.avgWordLen,4.2,5.8)), digits=pct(100*(1 - s.digitsPer100/20));
-    var i=[];
-    i[1]=pct(.5*read+.5*ttr); i[2]=pct(.6*ttr+.4*avgLen); i[3]=pct(.4*ttr+.6*read); i[4]=pct(.7*read+.3*rep); i[5]=pct(.5*read+.5*avgLen);
+    var i=[]; i[1]=pct(.5*read+.5*ttr); i[2]=pct(.6*ttr+.4*avgLen); i[3]=pct(.4*ttr+.6*read); i[4]=pct(.7*read+.3*rep); i[5]=pct(.5*read+.5*avgLen);
     i[6]=pct(.4*ttr+.6*read); i[7]=pct(.4*read+.6*rep); i[8]=pct(.6*rep+.4*digits); i[9]=pct(.6*avgLen+.4*digits); i[10]=pct(.6*avgLen+.4*ttr);
     i[11]=pct(.5*ttr+.5*rep); i[12]=pct(.6*rep+.4*digits); i[13]=pct(.6*read+.4*rep); i[14]=pct(.6*read+.4*ttr); i[15]=pct(.5*ttr+.5*read);
     i[16]=pct(.6*digits+.4*read); i[17]=pct(.5*avgLen+.5*ttr); i[18]=pct(.5*read+.5*longS); i[19]=pct(.6*rep+.4*avgLen); i[20]=pct(.5*longS+.5*avgLen);
@@ -915,63 +762,45 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   }
   function deriveSummaryScoresFromItems(itemMap){
     var all=[]; for(var i=1;i<=25;i++){ if(isFinite(itemMap[i])) all.push(itemMap[i]); }
-    var avg = function(a){ return a.length? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : 0; };
+    var avg = a => a.length? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : 0;
     return { contentScore: avg(all.slice(0,13)), overall: avg(all) };
   }
   function buildSampleFromData(data){
-    var parts = [];
-    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
-    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){
-      var v = data?.[k];
-      if (typeof v === 'string' && v.trim()) parts.push(v);
-      if (Array.isArray(v)) parts.push(v.join('. '));
-    });
-    var txt = parts.join('\n\n').replace(/\s{2,}/g,' ').trim();
-    return txt.length>140000 ? txt.slice(0,140000) : txt;
+    var parts=[]; ['textSample','extractedText','plainText','body','sample','content','text'].forEach(k=>{ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
+    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){ var v=data?.[k]; if (typeof v === 'string' && v.trim()) parts.push(v); if (Array.isArray(v)) parts.push(v.join('. ')); });
+    var txt=parts.join('\n\n').replace(/\s{2,}/g,' ').trim(); return txt.length>140000 ? txt.slice(0,140000) : txt;
   }
   function ensureScoresExist(data, sample, ensemble){
-    var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
-    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
-    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
-    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
-    if (needItems) data.itemScores = deriveItemScoresFromSignals(s);
-    if (needContent || needOverall){
-      var sums = deriveSummaryScoresFromItems(data.itemScores||{});
-      if (needContent) data.contentScore = sums.contentScore;
-      if (needOverall) data.overall = sums.overall;
-    }
+    var needItems=!data.itemScores || Object.keys(data.itemScores).length===0;
+    var needContent=typeof data.contentScore!=='number' || isNaN(data.contentScore);
+    var needOverall=typeof data.overall!=='number' || isNaN(data.overall);
+    var s=(ensemble && ensemble._s)? ensemble._s : _prep(sample||'');
+    if(needItems) data.itemScores=deriveItemScoresFromSignals(s);
+    if(needContent || needOverall){ var sums=deriveSummaryScoresFromItems(data.itemScores||{}); if(needContent) data.contentScore=sums.contentScore; if(needOverall) data.overall=sums.overall; }
     return data;
   }
 
-  /* ===== Human vs AI rendering ===== */
+  /* Human vs AI UI */
   function renderDetectors(res){
-    var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
+    var grid=document.getElementById('detGrid'), confEl=document.getElementById('detConfidence');
     if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
-    if(!grid) return; grid.innerHTML = '';
+    if(!grid) return; grid.innerHTML='';
     (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
-      var id='det-'+d.key; var wrap=document.createElement('div');
-      wrap.className='det-item'; 
-      var ai = clamp(d.ai||0,0,100); var human = clamp(100-ai,0,100);
-      wrap.innerHTML =
-        '<div class="det-row"><div class="det-label"><i class="fa-solid fa-wave-square"></i> '+d.label+'</div><div class="det-score">'+human+'% H / '+ai+'% AI</div></div>'+
-        '<div class="det-bar">'+
-          '<div class="det-fill-human" style="width:'+human+'%"></div>'+
-          '<div class="det-fill-ai" style="width:'+ai+'%"></div>'+
-        '</div>';
+      var ai=clamp(d.ai||0,0,100), human=clamp(100-ai,0,100); var wrap=document.createElement('div'); wrap.className='det-item';
+      wrap.innerHTML='<div class="det-row"><div class="det-label"><i class="fa-solid fa-wave-square"></i> '+d.label+'</div><div class="det-score">'+human+'% H / '+ai+'% AI</div></div><div class="det-bar"><div class="det-fill-human" style="width:'+human+'%"></div><div class="det-fill-ai" style="width:'+ai+'%"></div></div>';
       grid.appendChild(wrap);
     });
   }
   function applyDetection(humanPct, aiPct, confidence, breakdown){
-    var hp = isFinite(humanPct)? Math.round(humanPct) : NaN;
-    var ap = isFinite(aiPct)? Math.round(aiPct) : NaN;
-    if (isFinite(hp)) { setText('humanPct', hp); setText('hvaiHumanPct', hp); document.getElementById('hvaiHuman').style.width = hp+'%'; }
-    if (isFinite(ap)) { setText('aiPct', ap); setText('hvaiAIPct', ap); document.getElementById('hvaiAI').style.width = ap+'%'; }
-    var writer = (isFinite(hp) && isFinite(ap) && hp>=ap) ? 'Likely Human' : 'AI-like';
-    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
-    if (breakdown && breakdown.detectors){ renderDetectors(breakdown); } else { document.getElementById('detGrid').innerHTML=''; }
+    var hp=isFinite(humanPct)? Math.round(humanPct) : NaN; var ap=isFinite(aiPct)? Math.round(aiPct) : NaN;
+    if(isFinite(hp)){ setText('humanPct', hp); setText('hvaiHumanPct', hp); document.getElementById('hvaiHuman').style.width=hp+'%'; }
+    if(isFinite(ap)){ setText('aiPct', ap); setText('hvaiAIPct', ap); document.getElementById('hvaiAI').style.width=ap+'%'; }
+    var writer=(isFinite(hp)&&isFinite(ap)&&hp>=ap)? 'Likely Human' : 'AI-like';
+    var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent=writer; badge.title='Confidence: ' + (confidence? confidence+'%':'—'); }
+    if(breakdown && breakdown.detectors){ renderDetectors(breakdown); } else { document.getElementById('detGrid').innerHTML=''; }
   }
 
-  /* ===== Checklist auto tick ===== */
+  /* Checklist auto tick */
   function autoTickByScores(map){
     var autoCount=0;
     for(var i=1;i<=25;i++){
@@ -983,11 +812,11 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       if (!isNaN(scVal)) {
         badge.textContent = Math.round(scVal);
         badgeTone(badge, scVal);
-        if (document.getElementById('autoApply') && document.getElementById('autoApply').checked && scVal>=80) {
+        if (document.getElementById('autoApply')?.checked && scVal>=80) {
           if (cb && !cb.checked) { cb.checked=true; autoCount++; }
-          if(row){ row.classList.remove('sev-mid','sev-bad'); row.classList.add('sev-good'); }
-        } else if (scVal>=60) { if(row){ row.classList.remove('sev-bad','sev-good'); row.classList.add('sev-mid'); } }
-        else { if(row){ row.classList.remove('sev-mid','sev-good'); row.classList.add('sev-bad'); } }
+          row?.classList.remove('sev-mid','sev-bad'); row?.classList.add('sev-good');
+        } else if (scVal>=60) { row?.classList.remove('sev-bad','sev-good'); row?.classList.add('sev-mid'); }
+        else { row?.classList.remove('sev-mid','sev-good'); row?.classList.add('sev-bad'); }
       } else {
         badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad');
       }
@@ -997,198 +826,139 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   }
   window.autoTickByScores = autoTickByScores;
 
-  /* ===== Analyze main ===== */
+  /* Analyze */
   async function analyze(){
     if (window.SEMSEO.BUSY) return;
     window.SEMSEO.BUSY = true;
 
-    var input = document.getElementById('analyzeUrl');
-    var url = normalizeUrl(input ? input.value : '');
-    if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
-
-    // Remember URL
+    var input=document.getElementById('analyzeUrl'); var url=normalizeUrl(input?input.value:''); if(!url){ input?.focus(); window.SEMSEO.BUSY=false; return; }
     try{ localStorage.setItem('last_url', url); }catch(_){}
+    window.Water?.start();
+    var statusEl=document.getElementById('analyzeStatus'); statusEl && (statusEl.textContent='Fetching & analyzing…');
+    document.getElementById('analyzeReport').style.display='none';
 
-    if (window.Water) window.Water.start();
-    var statusEl = document.getElementById('analyzeStatus');
-    if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
-    var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
+    var {ok,data}=await fetchBackend(url); if(!data) data={};
+    var sample=buildSampleFromData(data);
 
-    // 1) Backend
-    var {ok,data} = await fetchBackend(url);
-    if(!data) data = {};
-
-    // 2) Build sample
-    var sample = buildSampleFromData(data);
-
-    // 3) AllOrigins meta + sample fallback
     try{
-      var raw = await fetchRawHtml(url);
+      var raw=await fetchRawHtml(url);
       if(raw){
-        var meta = extractMetaFromHtml(raw, url);
-        data = mergeMeta(data, meta);
-        if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
+        var meta=extractMetaFromHtml(raw,url);
+        data=mergeMeta(data,meta);
+        if((!sample || sample.length<200) && meta.sampleText) sample=meta.sampleText;
       }
     }catch(_){}
-
-    // 4) Readable reader fallback
-    if ((!sample || sample.length < 200)){
-      try{ var read = await fetchReadableText(url);
-        if (read && read.length>200){ sample = read; }
-      }catch(_){}
+    if((!sample || sample.length<200)){
+      try{ var read=await fetchReadableText(url); if(read && read.length>200) sample=read; }catch(_){}
     }
 
-    // 5) Local detection + guaranteed item scores
     var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
     data = ensureScoresExist(data, sample, ensemble);
 
-    // Scores → UI
-    var overall = Number(data.overall || 0);
-    var contentScore = Number(data.contentScore || 0);
+    var overall=Number(data.overall||0), contentScore=Number(data.contentScore||0);
     window.setScoreWheel(overall||0);
     setText('contentScoreInline', Math.round(contentScore||0));
     setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
 
-    // Meta chips
-    setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
-    setText('rTitleLen',  (data.titleLen   !== undefined && data.titleLen !== null) ? data.titleLen   : '—');
-    setText('rMetaLen',   (data.metaLen    !== undefined && data.metaLen  !== null) ? data.metaLen    : '—');
-    setText('rCanonical', data.canonical  ? data.canonical  : '—');
-    setText('rRobots',    data.robots     ? data.robots     : '—');
-    setText('rViewport',  data.viewport   ? data.viewport   : '—');
-    setText('rHeadings',  data.headings   ? data.headings   : '—');
-    setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
-    setText('rSchema',    data.schema     ? data.schema     : '—');
+    setText('rStatus', data.httpStatus ? data.httpStatus : '200?');
+    setText('rTitleLen', (data.titleLen!==undefined && data.titleLen!==null)? data.titleLen : '—');
+    setText('rMetaLen', (data.metaLen!==undefined && data.metaLen!==null)? data.metaLen : '—');
+    setText('rCanonical', data.canonical ? data.canonical : '—');
+    setText('rRobots', data.robots ? data.robots : '—');
+    setText('rViewport', data.viewport ? data.viewport : '—');
+    setText('rHeadings', data.headings ? data.headings : '—');
+    setText('rInternal', (data.internalLinks!==undefined && data.internalLinks!==null)? data.internalLinks : '—');
+    setText('rSchema', data.schema ? data.schema : '—');
 
-    // Human vs AI
-    var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-    var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-    var backendConf = (typeof data.confidence==='number')? data.confidence : null;
-    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
-      applyDetection(hp, ap, backendConf, ensemble || null);
-    } else if (ensemble){
-      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-    } else if (isFinite(hp) && isFinite(ap)){
-      applyDetection(hp, ap, backendConf || 60, null);
-    } else {
-      applyDetection(NaN, NaN, null, null);
-    }
+    var hp=(typeof data.humanPct==='number')? data.humanPct : NaN;
+    var ap=(typeof data.aiPct==='number')? data.aiPct : NaN;
+    var backendConf=(typeof data.confidence==='number')? data.confidence : null;
+    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){ applyDetection(hp,ap,backendConf,ensemble||null);
+    } else if (ensemble){ applyDetection(ensemble.humanPct,ensemble.aiPct,ensemble.confidence,ensemble);
+    } else if (isFinite(hp) && isFinite(ap)){ applyDetection(hp,ap,backendConf||60,null);
+    } else { applyDetection(NaN,NaN,null,null); }
 
-    // Readability insights
-    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
-    renderReadability(s);
+    var s=(ensemble && ensemble._s)? ensemble._s : _prep(sample||''); renderReadability(s);
+    var ents=extractEntities(sample||''); renderEntities(ents);
 
-    // Entities & topics
-    var ents = extractEntities(sample||'');
-    renderEntities(ents);
+    window.autoTickByScores(data.itemScores||{});
 
-    // Checklist scores + autotick
-    window.autoTickByScores(data.itemScores || {});
+    window.Water?.finish();
+    statusEl && (statusEl.textContent='Analysis complete');
+    document.getElementById('analyzeReport').style.display='block';
 
-    if (window.Water) window.Water.finish();
-    if (statusEl) statusEl.textContent = 'Analysis complete';
-    if (report) report.style.display = 'block';
-
-    // ===== AUTO-RUN PSI after analyze =====
-    runPageSpeedBoth(url);
+    // ===== AUTO-RUN PSI after analyze (defer to avoid race with layout) =====
+    setTimeout(function(){
+      var ep = window.SEMSEO.ENDPOINTS.psi || '/api/pagespeed';
+      if (ep && url) { runPageSpeedBoth(url); }
+    }, 60);
 
     window.SEMSEO.BUSY = false;
   }
   window.analyze = analyze;
 
-  /* ===== Events & UX ===== */
+  /* Events & UX */
   document.addEventListener('DOMContentLoaded', function(){
     try{
-      // Buttons
       document.getElementById('analyzeBtn')?.addEventListener('click', function(e){ e.preventDefault(); analyze(); });
-      var input = document.getElementById('analyzeUrl');
-      input?.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); analyze(); }});
-
+      var input=document.getElementById('analyzeUrl'); input?.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); analyze(); }});
       document.getElementById('clearUrl')?.addEventListener('click', function(){ if(input){ input.value=''; input.focus(); } });
-      if (navigator.clipboard){
-        document.getElementById('pasteUrl')?.addEventListener('click', async function(){ try{ var t=await navigator.clipboard.readText(); if(t && input){ input.value=t.trim(); } }catch(e){} });
-      }
+      if (navigator.clipboard){ document.getElementById('pasteUrl')?.addEventListener('click', async function(){ try{ var t=await navigator.clipboard.readText(); if(t && input){ input.value=t.trim(); } }catch(e){} }); }
 
-      // Site speed controls
-      document.getElementById('runMobile')?.addEventListener('click', async function(){
-        var u = normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return;
-        setText('psiTime', new Date().toLocaleTimeString());
-        var m = await runPSI(u,'mobile'); applyPSIToSide(m,'mobile');
-      });
-      document.getElementById('runDesktop')?.addEventListener('click', async function(){
-        var u = normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return;
-        setText('psiTime', new Date().toLocaleTimeString());
-        var d = await runPSI(u,'desktop'); applyPSIToSide(d,'desktop');
-      });
-      document.getElementById('runBoth')?.addEventListener('click', async function(){
-        var u = normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return;
-        runPageSpeedBoth(u);
-      });
+      document.getElementById('runMobile')?.addEventListener('click', async function(){ var u=normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return; setText('psiTime', new Date().toLocaleTimeString()); var m=await runPSI(u,'mobile'); applyPSIToSide(m,'mobile'); });
+      document.getElementById('runDesktop')?.addEventListener('click', async function(){ var u=normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return; setText('psiTime', new Date().toLocaleTimeString()); var d=await runPSI(u,'desktop'); applyPSIToSide(d,'desktop'); });
+      document.getElementById('runBoth')?.addEventListener('click', async function(){ var u=normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return; runPageSpeedBoth(u); });
 
-      // Reset/Export/Import/Print
       document.getElementById('resetChecklist')?.addEventListener('click', function(){
-        Array.prototype.forEach.call(document.querySelectorAll('.checklist input[type="checkbox"]'), function(cb){ cb.checked=false; });
-        Array.prototype.forEach.call(document.querySelectorAll('.score-badge'), function(b){ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
-        updateCategoryBars();
-        window.setScoreWheel?.(0);
+        Array.prototype.forEach.call(document.querySelectorAll('.checklist input[type="checkbox"]'), cb=>cb.checked=false);
+        Array.prototype.forEach.call(document.querySelectorAll('.score-badge'), b=>{ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
+        updateCategoryBars(); window.setScoreWheel?.(0);
         ['contentScoreInline','humanPct','aiPct'].forEach(id=>{ var el=document.getElementById(id); if(el) el.textContent='—'; });
         document.getElementById('aiBadge')?.querySelector('b') && (document.getElementById('aiBadge').querySelector('b').textContent='—');
-        document.getElementById('detGrid').innerHTML='';
-        document.getElementById('readGrid').innerHTML='';
-        document.getElementById('entitiesGrid').innerHTML='';
-        if (window.Water) window.Water.reset();
+        document.getElementById('detGrid').innerHTML=''; document.getElementById('readGrid').innerHTML=''; document.getElementById('entitiesGrid').innerHTML='';
+        window.Water?.reset();
       });
       document.getElementById('exportChecklist')?.addEventListener('click', function(){
-        var payload = { checked:[], scores:{} };
+        var payload={ checked:[], scores:{} };
         for(var i=1;i<=25;i++){
           var cb=document.getElementById('ck-'+i), sc=document.getElementById('sc-'+i);
-          if (cb && cb.checked) payload.checked.push(i);
-          var s = parseInt(sc ? sc.textContent : 'NaN',10); if (!isNaN(s)) payload.scores[i]=s;
+          if(cb && cb.checked) payload.checked.push(i);
+          var s=parseInt(sc ? sc.textContent : 'NaN',10); if(!isNaN(s)) payload.scores[i]=s;
         }
-        var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-        var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
+        var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}); var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
       });
       document.getElementById('importChecklist')?.addEventListener('click', function(){ document.getElementById('importFile')?.click(); });
       document.getElementById('importFile')?.addEventListener('change', function(){
-        var file = this.files?.[0]; if (!file) return;
-        var fr = new FileReader();
-        fr.onload = function(){ try{
-          var data = JSON.parse(fr.result);
+        var file=this.files?.[0]; if(!file) return;
+        var fr=new FileReader(); fr.onload=function(){ try{
+          var data=JSON.parse(fr.result);
           for(var i=1;i<=25;i++){
-            var cb=document.getElementById('ck-'+i); if (cb) cb.checked=(data.checked||[]).includes(i);
+            var cb=document.getElementById('ck-'+i); if(cb) cb.checked=(data.checked||[]).includes(i);
             var sc=document.getElementById('sc-'+i); var val=data.scores ? data.scores[i] : undefined;
-            if (sc && typeof val==='number'){ sc.textContent=val; (window.badgeTone||function(){ })(sc,val); }
+            if(sc && typeof val==='number'){ sc.textContent=val; (window.badgeTone||function(){ })(sc,val); }
           }
           updateCategoryBars();
-        }catch(e){ alert('Invalid JSON'); } };
-        fr.readAsText(file);
+        }catch(e){ alert('Invalid JSON'); } }; fr.readAsText(file);
       });
 
-      // Print buttons
       document.getElementById('printTop')?.addEventListener('click', function(){ window.print(); });
       document.getElementById('printChecklist')?.addEventListener('click', function(){ window.print(); });
 
-      // Back to top
-      var backTop=document.getElementById('backTop');
-      window.addEventListener('scroll', function(){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
-      backTop?.addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+      var backTop=document.getElementById('backTop'); window.addEventListener('scroll', function(){ if(backTop) backTop.style.display=(window.scrollY>500)?'grid':'none'; }); backTop?.addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
 
-      // Restore last URL if any
-      try{ var last = localStorage.getItem('last_url'); if(last && document.getElementById('analyzeUrl')) document.getElementById('analyzeUrl').value=last; }catch(_){}
+      try{ var last=localStorage.getItem('last_url'); if(last && document.getElementById('analyzeUrl')) document.getElementById('analyzeUrl').value=last; }catch(_){}
 
       window.SEMSEO.READY = true;
     }catch(err){
       var s=document.getElementById('analyzeStatus'); if(s) s.textContent='Boot error: '+err.message;
     }
   });
-
 })();
 </script>
 
 <!-- Background FX -->
 <script>
 try{
-  // Tech lines
   (function(){
     var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
     function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
@@ -1201,44 +971,25 @@ try{
     window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
   })();
 
-  // Colorful smoke
   (function(){
     var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d');
     var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], last=performance.now();
-    var PERIOD = 1000000000;
     function resize(){
       c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-      var W=window.innerWidth, H=window.innerHeight;
-      var N = 64;
+      var W=window.innerWidth, H=window.innerHeight; var N=64;
       blobs=new Array(N).fill(0).map(function(_,i){
-        var px = W*0.65 + Math.random()*W*0.45;
-        var py = H*0.65 + Math.random()*H*0.45;
-        var r  = 120 + Math.random()*260;
-        var speed = 0.18 + Math.random()*0.22;
-        return {
-          x:px, y:py, r:r,
-          vx: -speed*(0.6+Math.random()*0.8),
-          vy: -speed*(0.6+Math.random()*0.8),
-          baseHue: (i*37)%360,
-          alpha: .22 + .22*Math.random()
-        };
+        var px=W*0.65 + Math.random()*W*0.45, py=H*0.65 + Math.random()*H*0.45, r=120+Math.random()*260, speed=0.18+Math.random()*0.22;
+        return { x:px, y:py, r:r, vx:-speed*(0.6+Math.random()*0.8), vy:-speed*(0.6+Math.random()*0.8), baseHue:(i*37)%360, alpha:.22+.22*Math.random() };
       });
       last=performance.now();
     }
     function draw(now){
-      var W=window.innerWidth, H=window.innerHeight;
-      ctx.clearRect(0,0,W,H);
-      ctx.globalCompositeOperation='screen';
-      var dt = now - last; last = now;
+      var W=window.innerWidth, H=window.innerHeight; ctx.clearRect(0,0,W,H); ctx.globalCompositeOperation='screen';
+      var dt=now-last; last=now;
       for(var i=0;i<blobs.length;i++){
-        var b=blobs[i];
-        b.x += b.vx * dt; b.y += b.vy * dt;
-        if(b.x < -360 || b.y < -360){ b.x = W + Math.random()*260; b.y = H + Math.random()*260; }
-        var hue = (b.baseHue + (now % PERIOD) * (360/PERIOD)) % 360;
-        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
-        g.addColorStop(0,'hsla('+hue+',88%,68%,'+b.alpha+')');
-        g.addColorStop(1,'hsla('+((hue+70)%360)+',88%,50%,0)');
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+        var b=blobs[i]; b.x+=b.vx*dt; b.y+=b.vy*dt; if(b.x<-360 || b.y<-360){ b.x=W+Math.random()*260; b.y=H+Math.random()*260; }
+        var hue=(b.baseHue + (now % 1000000000) * (360/1000000000)) % 360;
+        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r); g.addColorStop(0,'hsla('+hue+',88%,68%,'+b.alpha+')'); g.addColorStop(1,'hsla('+((hue+70)%360)+',88%,50%,0)'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
       }
       requestAnimationFrame(draw);
     }
