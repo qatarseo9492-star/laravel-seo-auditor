@@ -17,12 +17,12 @@ Route::get('/analyze-json', [AnalyzeController::class, 'analyzeJson'])->name('an
 Route::match(['POST', 'GET'], '/analyze', [AnalyzeController::class, 'analyze'])->name('analyze');
 
 /**
- * PageSpeed Insights proxy (server-side key; protects quota & hides API key)
- * Throttled to 20 req/minute to avoid abuse.
+ * PageSpeed Insights proxy (server-side API key)
+ * Throttled to avoid abuse.
  */
 Route::get('/psi-proxy', [AnalyzeController::class, 'psiProxy'])
     ->name('psi.proxy')
     ->middleware('throttle:20,1');
 
-/* Optional health check */
+/* Optional quick health check */
 Route::get('/ping', fn() => response()->json(['ok' => true, 'time' => now()->toIso8601String()]));
