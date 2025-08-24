@@ -5,12 +5,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AnalyzeController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
 Route::get('/', function () {
     return view('home'); // resources/views/home.blade.php
 })->name('home');
@@ -24,46 +18,56 @@ Route::get('/', function () {
 Route::get('/analyze-json', [AnalyzeController::class, 'analyzeJson'])->name('analyze.json');
 Route::match(['POST', 'GET'], '/analyze', [AnalyzeController::class, 'analyze'])->name('analyze');
 
-/**
- * PageSpeed Insights proxy (keeps API key hidden on server)
- * GET /api/pagespeed?url=https://example.com&strategy=mobile|desktop
- */
-Route::get('/api/pagespeed', function (Request $request) {
-    $url = $request->query('url', '');
-    $strategy = $request->query('strategy', 'mobile');
+/* Optional quick health check */
+Route::get('/ping', fn() => response()->json(['ok' => true, 'time' => now()->toIso8601String()]));
 
+/**
+ * PSI Proxy (keeps API key hidden)
+ * Usage: /api/psi?url=https://example.com&strategy=mobile
+ *
+ * Reads your key from config/services.php → 'google' => ['key' => env('GOOGLE_API_KEY')]
+ */
+Route::get('/api/psi', function (Request $request) {
+    $url = trim($request->query('url', ''));
     if (!$url) {
-        return response()->json(['error' => 'Missing url'], 422);
+        return response()->json(['ok' => false, 'error' => 'Missing url parameter'], 422);
+    }
+    // Normalize URL
+    if (!preg_match('~^https?://~i', $url)) {
+        $url = 'https://' . ltrim($url, '/');
+    }
+    $strategy = $request->query('strategy', 'mobile');
+    if (!in_array($strategy, ['mobile', 'desktop'], true)) {
+        $strategy = 'mobile';
     }
 
-    $apiKey = config('services.google.pagespeed.key') ?: env('GOOGLE_PAGESPEED_API_KEY');
-    if (!$apiKey) {
-        return response()->json(['error' => 'PageSpeed API key missing on server'], 500);
+    $key = config('services.google.key');
+    if (!$key) {
+        return response()->json(['ok' => false, 'error' => 'Google API key not configured'], 500);
     }
 
     $endpoint = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+    $params = [
+        'url'       => $url,
+        'strategy'  => $strategy,
+        // Ask for more categories (not all are always returned by PSI)
+        'category'  => ['performance', 'seo', 'best-practices', 'accessibility'],
+        'utm_source'=> 'semantic-seo-master',
+        'key'       => $key,
+    ];
 
     try {
-        $resp = Http::timeout(30)->get($endpoint, [
-            'url'      => $url,
-            'strategy' => $strategy, // 'mobile' or 'desktop'
-            'category' => ['performance', 'accessibility', 'best-practices', 'seo'],
-            'key'      => $apiKey,
-        ]);
-
+        $resp = Http::timeout(20)->retry(2, 300)->get($endpoint, $params);
         if (!$resp->ok()) {
             return response()->json([
-                'error'  => 'PSI error',
+                'ok' => false,
+                'error' => 'PSI error',
                 'status' => $resp->status(),
-                'body'   => $resp->json(),
-            ], $resp->status());
+                'body' => $resp->json()
+            ], 502);
         }
-
-        return response()->json($resp->json());
+        return response()->json(['ok' => true, 'strategy' => $strategy, 'data' => $resp->json()]);
     } catch (\Throwable $e) {
-        return response()->json(['error' => 'PSI request failed', 'message' => $e->getMessage()], 500);
+        return response()->json(['ok' => false, 'error' => $e->getMessage()], 500);
     }
-})->name('pagespeed.proxy');
-
-/* Optional quick health check */
-Route::get('/ping', fn () => response()->json(['ok' => true, 'time' => now()->toIso8601String()]));
+})->name('psi.proxy');
