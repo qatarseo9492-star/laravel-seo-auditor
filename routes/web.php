@@ -2,7 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnalyzeController;
-use App\Http\Controllers\PsiController; // <-- add this
+use App\Http\Controllers\PsiController;
+use App\Http\Controllers\CruxController;
 
 Route::get('/', function () {
     return view('home'); // resources/views/home.blade.php
@@ -18,11 +19,12 @@ Route::get('/analyze-json', [AnalyzeController::class, 'analyzeJson'])->name('an
 Route::match(['POST', 'GET'], '/analyze', [AnalyzeController::class, 'analyze'])->name('analyze');
 
 /**
- * PageSpeed Insights proxy (keeps API key server-side)
- * Example: GET /api/psi?url=https://example.com&strategy=mobile
- * strategy: mobile|desktop (default mobile)
+ * Performance APIs (keys are never exposed to the browser)
+ * /api/crux  -> Chrome UX Report (fast CWV p75)
+ * /api/psi   -> PageSpeed Insights (full Lighthouse)
  */
-Route::middleware('throttle:30,1')->get('/api/psi', [PsiController::class, 'run'])->name('psi.run');
+Route::middleware('throttle:60,1')->get('/api/crux', [CruxController::class, 'url'])->name('crux.url');
+Route::middleware('throttle:30,1')->get('/api/psi',  [PsiController::class, 'run'])->name('psi.run');
 
 /* Optional quick health check */
 Route::get('/ping', fn() => response()->json(['ok' => true, 'time' => now()->toIso8601String()]));
