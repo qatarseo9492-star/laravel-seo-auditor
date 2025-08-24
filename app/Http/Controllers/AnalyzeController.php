@@ -9,7 +9,6 @@ class AnalyzeController extends Controller
 {
     public function analyzeJson(Request $request)
     {
-        // Alias used by the front-end (GET)
         return $this->analyze($request);
     }
 
@@ -66,7 +65,7 @@ class AnalyzeController extends Controller
         $ldJsonCount = $count("//script[@type='application/ld+json']");
         $imgs = $count('//img'); $vids = $count('//video');
 
-        // internal/external links (rough)
+        // internal/external links
         $host = parse_url($url, PHP_URL_HOST) ?: '';
         $allLinks = $xp->query('//a[@href]'); $internal = 0; $external = 0;
         if ($allLinks) foreach ($allLinks as $a) {
