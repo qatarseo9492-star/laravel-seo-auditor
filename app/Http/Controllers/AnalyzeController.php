@@ -83,7 +83,7 @@ class AnalyzeController extends Controller
         $sentences = max(1, preg_match_all('/[\.!\?]+(\s|$)/u', $textOnly, $m));
         $wps = $wordCount / $sentences;
 
-        // item scores 1..25 (same as previous assistant message)
+        // item scores 1..25 (heuristics)
         $item = [];
         $item[1]=65;
         $item[2]=min(90, 50 + min(40, $h2c*4 + $h3c*2));
