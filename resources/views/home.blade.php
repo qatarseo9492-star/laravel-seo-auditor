@@ -562,7 +562,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   })();
   window.Water = Water;
 
-  /* ===================== ULTRA ENSEMBLE (same as before) ===================== */
+  /* ===================== ULTRA ENSEMBLE (fallback if backend empty) ===================== */
   function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
   function _entropy(counts,total){ if(!total||total<=0) return 0; var H=0; for(var k in counts){ if(!counts.hasOwnProperty(k)) continue; var p=counts[k]/total; if(p>0){ H += -p*Math.log(p); } } return H; }
   function _gini(arr){ if(!arr||arr.length===0) return 0; var n=arr.length; var s=0; for(var i=0;i<n;i++){ s+=arr[i]; } if(s===0) return 0; var sorted=arr.slice().sort(function(a,b){return a-b;}); var cum=0; for(var j=0;j<n;j++){ cum += (2*(j+1)-n-1)*sorted[j]; } return cum/(n*s); }
@@ -757,18 +757,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
   /* === NEW: derive per-item scores if backend missing === */
   function deriveItemScoresFromSignals(s){
-    // helper transforms
     function pct(x){ return clamp(Math.round(x),0,100); }
     function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
     function peak(x,c,w){ var d=Math.abs(x-c); if(d>=w) return 0; return (1-d/w)*100; }
 
-    // core signals to 0..100
     var m = {
-      rep: pct(100*(1 - s.triRepeatRatio)),              // less repetition is better
-      read: pct(peak(s.flesch, 60, 30)),                 // ~60 best
-      lex: pct(band(s.TTR, 0.30, 0.65)),                 // diversity
-      starter: pct(100*(1 - s.starterDom)),              // varied sentence starts
-      qna: pct(band(s.qRatio, 0.3, 1.6) * 60/100 + Math.min(100, s.listRatio*280)), // Qs + lists
+      rep: pct(100*(1 - s.triRepeatRatio)),
+      read: pct(peak(s.flesch, 60, 30)),
+      lex: pct(band(s.TTR, 0.30, 0.65)),
+      starter: pct(100*(1 - s.starterDom)),
+      qna: pct(band(s.qRatio, 0.3, 1.6) * 60/100 + Math.min(100, s.listRatio*280)),
       passive: pct(100*(1 - s.passivePer100/4)),
       punct: pct(band(s.Hnorm, 0.6, 0.95)),
       proper: pct(band(s.properRatio, 0.03, 0.12)),
@@ -781,7 +779,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       charH: pct(band(s.charH, 4.0, 6.5))
     };
 
-    // map 25 items using varied blends so outputs differ across pages
     var item = [];
     item[1]  = pct((m.read*0.35 + m.lex*0.35 + m.qna*0.30));
     item[2]  = pct((m.lex*0.45 + m.rare*0.30 + m.proper*0.25));
@@ -791,8 +788,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
     item[6]  = pct((m.proper*0.35 + m.read*0.35 + m.lex*0.30));
     item[7]  = pct((m.read*0.40 + m.lex*0.30 + m.rep*0.30));
-    item[8]  = pct((m.comp*0.50 + m.digits*0.25 + m.rep*0.25));     // proxy for clean canonical presence
-    item[9]  = pct((m.comp*0.45 + m.zipf*0.30 + m.digits*0.25));    // proxy for indexability signals
+    item[8]  = pct((m.comp*0.50 + m.digits*0.25 + m.rep*0.25));
+    item[9]  = pct((m.comp*0.45 + m.zipf*0.30 + m.digits*0.25));
 
     item[10] = pct((m.proper*0.40 + m.rare*0.35 + m.lenW*0.25));
     item[11] = pct((m.rare*0.35 + m.rep*0.35 + m.lex*0.30));
@@ -814,7 +811,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     item[24] = pct((m.proper*0.35 + m.punct*0.35 + m.comp*0.30));
     item[25] = pct((m.proper*0.50 + m.digits*0.30 + m.zipf*0.20));
 
-    // fill missing indices 1..25 just in case
     var map={}; for(var i=1;i<=25;i++){ map[i] = isFinite(item[i]) ? item[i] : 50; }
     return map;
   }
@@ -828,12 +824,10 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
 
   function ensureScoresExist(data, sample, ensemble){
-    // if backend already provides, keep; otherwise derive
     var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
     var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
     var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
 
-    // signals: use ensemble prep if available
     var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
 
     if (needItems){
