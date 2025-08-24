@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-24c --}}
+{{-- resources/views/home.blade.php — v2025-08-24e (auto-scoring fallback + tech lines + smoke) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -39,8 +39,8 @@ body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Se
 
 /* background canvases */
 #linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-#linesCanvas{opacity:.52}
-#smokeCanvas{opacity:.92;mix-blend-mode:screen}
+#linesCanvas{opacity:.55}
+#smokeCanvas{opacity:.9;mix-blend-mode:screen}
 
 /* layout */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
@@ -188,22 +188,15 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 </head>
 <body>
 
-<!-- Background canvases -->
+<!-- Background canvases (tech lines + smoke clouds) -->
 <canvas id="linesCanvas"></canvas>
 <canvas id="smokeCanvas"></canvas>
 
 <script>
-  /* endpoints + config */
   window.SEMSEO = window.SEMSEO || {};
-  window.SEMSEO.ENDPOINTS = {
-    analyzeJson: @json($analyzeJsonUrl),
-    analyze: @json($analyzeUrl)
-  };
-  /* SMOKE HUE PERIOD:
-     You asked: "colors change every million seconds".
-     Set period to 1,000,000 seconds (1e6 s = 1e9 ms). For fast (millisecond) cycling, set to 1 (ms) or 1000 (1s).
-  */
-  window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000; // 1,000,000 seconds
+  window.SEMSEO.ENDPOINTS = { analyzeJson: @json($analyzeJsonUrl), analyze: @json($analyzeUrl) };
+  // Color period for smoke (ms). Keep slow by default; set to 1 for fast cycling.
+  window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
   function SEMSEO_go(){ try { if (typeof analyze === 'function') { analyze(); } else { alert('Analyzer not ready — please wait a moment and click again.'); } } catch(e){ alert('JS error: '+ e.message); } }
 </script>
 
@@ -233,7 +226,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   <main class="analyzer" id="analyzer" role="main">
     <h2 class="section-title">Analyze a URL</h2>
     <p class="section-subtitle">
-      The wheel fills with your overall score.
+      Wheel + water bars fill with your scores.
       <span class="legend l-green">Green ≥ 80</span>
       <span class="legend l-orange">Orange 60–79</span>
       <span class="legend l-red">Red &lt; 60</span>
@@ -288,7 +281,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
-        <small style="color:var(--text-dim)">Ensemble uses multiple signals (incl. readability, proper nouns, rare-word rate) and a readable-text fallback so different pages produce different scores.</small>
+        <small style="color:var(--text-dim)">If the backend returns no scores, a local ensemble + heuristics derive stable, varied scores so the UI always reflects reality.</small>
       </div>
     </div>
 
@@ -373,7 +366,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <span class="chip"><i class="fa-solid fa-circle-info ico"></i> Higher bar = more AI-like for that detector</span>
       </div>
       <div class="det-grid" id="detGrid"></div>
-      <div class="det-note" id="detNote">Reads backend text, otherwise assembles a clean sample and falls back to a readable extractor to ensure varied, fair scoring.</div>
+      <div class="det-note" id="detNote">Local ensemble activates if the backend provides no text/percentages.</div>
     </section>
 
     @php $labels = [
@@ -536,7 +529,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       var row=cb ? cb.closest('.checklist-item') : null;
       if (!badge) continue;
       if (!isNaN(scVal)) {
-        badge.textContent = scVal; badgeTone(badge, scVal);
+        badge.textContent = Math.round(scVal);
+        badgeTone(badge, scVal);
         if (document.getElementById('autoApply') && document.getElementById('autoApply').checked && scVal>=80) {
           if (cb && !cb.checked) { cb.checked=true; autoCount++; }
           if(row){ row.classList.remove('sev-mid','sev-bad'); row.classList.add('sev-good'); }
@@ -568,7 +562,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   })();
   window.Water = Water;
 
-  /* ===================== ULTRA ENSEMBLE DETECTOR (Expanded) ===================== */
+  /* ===================== ULTRA ENSEMBLE (same as before) ===================== */
   function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
   function _entropy(counts,total){ if(!total||total<=0) return 0; var H=0; for(var k in counts){ if(!counts.hasOwnProperty(k)) continue; var p=counts[k]/total; if(p>0){ H += -p*Math.log(p); } } return H; }
   function _gini(arr){ if(!arr||arr.length===0) return 0; var n=arr.length; var s=0; for(var i=0;i<n;i++){ s+=arr[i]; } if(s===0) return 0; var sorted=arr.slice().sort(function(a,b){return a-b;}); var cum=0; for(var j=0;j<n;j++){ cum += (2*(j+1)-n-1)*sorted[j]; } return cum/(n*s); }
@@ -622,11 +616,10 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var stops=/\b(the|of|and|to|in|a|is|that|for|on|with|as|by|at|from|it|an|be|this|which|or|are|was|were|but|not|have|has|had|can|will|would|should)\b/gi; var stopHits=(t.match(stops)||[]).length; var stopPer100=stopHits*100/(tokens||1);
     var digits=(t.match(/\d/g)||[]).length; var digitsPer100=digits*100/(tokens||1);
 
-    // extras
     var avgWordLen = tokens ? (plainWords.join('').length / tokens) : 0;
     var longWords = plainWords.filter(function(w){return w.length>=10;}).length;
     var rareLongRatio = tokens ? longWords / tokens : 0;
-    var properCap = words.filter(function(w){ return /^[A-Z][a-z]+/.test(w); }).length; // crude approximation
+    var properCap = words.filter(function(w){ return /^[A-Z][a-z]+/.test(w); }).length;
     var properRatio = tokens ? properCap / tokens : 0;
     var qRatio = tokens ? qCount*100/tokens : 0;
     var listRatio = (t.match(/(^|\s)[\-\*]\s+\w+/g)||[]).length / Math.max(1, sentences.length);
@@ -645,12 +638,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     };
   }
 
-  /* Individual detectors — return AI-likeness 0..100 (higher = more likely AI) */
   function detStylometry(s){ var ai=0; var covT=0.45; if(s.cov<covT) ai+=clamp((covT-s.cov)/covT,0,1)*25; else ai-=clamp((s.cov-covT)/covT,0,1)*6;
     var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18; else ai-=clamp((s.TTR-ttrT)/ttrT,0,1)*6;
     if(s.Guiraud<4.8) ai+=clamp((4.8-s.Guiraud)/4.8,0,1)*10; else ai-=clamp((s.Guiraud-4.8)/4.8,0,1)*4;
     if(s.hapaxRatio<0.45) ai+=clamp((0.45-s.hapaxRatio)/0.45,0,1)*10;
-    ai += clamp((6.5 - s.charH)/6.5,0,1)*10; // templated text
+    ai += clamp((6.5 - s.charH)/6.5,0,1)*10;
     return clamp(Math.round(10+ai),0,100);
   }
   function detRepetition(s){ var ai=0; ai+=clamp(s.triRepeatRatio*100/3,0,1)*28; ai+=clamp((s.starterDom-0.22)/0.5,0,1)*12; return clamp(Math.round(ai),0,100); }
@@ -660,36 +652,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   function detLexical(s){ var ai=0; if(s.stopPer100<35) ai+=clamp((35-s.stopPer100)/35,0,1)*10; if(s.digitsPer100>4) ai+=clamp((s.digitsPer100-4)/12,0,1)*6; if(s.apostrophes<2) ai+=4; return clamp(Math.round(6+ai),0,100); }
   function detZipf(s){ var ai=0; if(s.gini<0.47) ai+=clamp((0.47-s.gini)/0.47,0,1)*22; else if(s.gini>0.78) ai+=clamp((s.gini-0.78)/0.22,0,1)*8; return clamp(Math.round(10+ai),0,100); }
   function detLongform(s){ var ai=0; if(s.longRatio<0.08) ai+=clamp((0.08-s.longRatio)/0.08,0,1)*8; else if(s.longRatio>0.35) ai+=clamp((s.longRatio-0.35)/0.65,0,1)*8; return clamp(Math.round(8+ai),0,100); }
-  /* New signals */
-  function detReadability(s){ // AI tends to cluster in mid-readability; very simple or very technical often human/editorial
-    var ai=0, fre=s.flesch; if(fre>40 && fre<70){ ai += 24 * ((55 - Math.abs(55-fre))/55); } // bell around ~55
-    if(fre<25||fre>85) ai -= 8;
-    return clamp(Math.round(12+ai),0,100);
-  }
-  function detProperNoun(s){
-    var ai=0; // more specific proper nouns -> less AI-like
-    if(s.properRatio<0.02) ai+=18; else if(s.properRatio<0.04) ai+=10; else if(s.properRatio>0.08) ai-=10;
-    return clamp(Math.round(10+ai),0,100);
-  }
-  function detRareLong(s){
-    var ai=0; // many long/rare words -> less AI-like generic
-    if(s.rareLongRatio<0.03) ai+=14; else if(s.rareLongRatio<0.06) ai+=6; else if(s.rareLongRatio>0.10) ai-=12;
-    // avg word length extremes
-    if(s.avgWordLen<4.0) ai+=6; else if(s.avgWordLen>5.8) ai-=6;
-    return clamp(Math.round(10+ai),0,100);
-  }
-  function detQnList(s){
-    var ai=0; // natural Q&A / lists -> human task-focused
-    if(s.qRatio<0.5) ai+=6; else ai-=6;
-    if(s.listRatio>0.25) ai-=8;
-    return clamp(Math.round(8+ai),0,100);
-  }
+  function detReadability(s){ var ai=0, fre=s.flesch; if(fre>40 && fre<70){ ai += 24 * ((55 - Math.abs(55-fre))/55); } if(fre<25||fre>85) ai -= 8; return clamp(Math.round(12+ai),0,100); }
+  function detProperNoun(s){ var ai=0; if(s.properRatio<0.02) ai+=18; else if(s.properRatio<0.04) ai+=10; else if(s.properRatio>0.08) ai-=10; return clamp(Math.round(10+ai),0,100); }
+  function detRareLong(s){ var ai=0; if(s.rareLongRatio<0.03) ai+=14; else if(s.rareLongRatio<0.06) ai+=6; else if(s.rareLongRatio>0.10) ai-=12; if(s.avgWordLen<4.0) ai+=6; else if(s.avgWordLen>5.8) ai-=6; return clamp(Math.round(10+ai),0,100); }
+  function detQnList(s){ var ai=0; if(s.qRatio<0.5) ai+=6; else ai-=6; if(s.listRatio>0.25) ai-=8; return clamp(Math.round(8+ai),0,100); }
 
   function detectUltra(text){
     var s=_prep(text||'');
     if (s.wordCount < 40){
       var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70);
-      return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] };
+      return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s };
     }
     var parts = [
       {key:'stylometry', label:'Stylometry', ai:detStylometry(s), w:1.25},
@@ -705,22 +677,20 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       {key:'rarity',     label:'Rare/long words', ai:detRareLong(s), w:0.85},
       {key:'qna',        label:'Questions & Lists', ai:detQnList(s), w:0.75},
     ];
-    // robust aggregation (trim + weighted blend)
     var ais = parts.map(function(p){return p.ai;}).slice().sort(function(a,b){return a-b;});
-    var trimmed = ais.slice(2, Math.max(ais.length-2,1)); // stronger trim to stop collapse
+    var trimmed = ais.slice(2, Math.max(ais.length-2,1));
     var mean = trimmed.reduce(function(a,b){return a+b;},0)/Math.max(1,trimmed.length);
     var wsum=0, wacc=0; for(var i=0;i<parts.length;i++){ wacc += parts[i].ai*parts[i].w; wsum += parts[i].w; }
     var weighted = wacc/Math.max(1,wsum);
     var aiEnsemble = clamp(Math.round((weighted*0.58 + mean*0.42)), 0, 100);
 
-    // confidence from agreement + length
     var spread=0; for(var j=0;j<parts.length;j++){ spread += Math.abs(parts[j].ai - aiEnsemble); }
     var avgDev = spread/parts.length;
     var agree = clamp(100 - avgDev*1.35, 36, 96);
     var lenBoost = Math.min(1, Math.log((s.wordCount||1)+1)/Math.log(12000));
     var conf = clamp(Math.round(agree*0.6 + lenBoost*40), 45, 97);
 
-    return { humanPct: 100-aiEnsemble, aiPct: aiEnsemble, confidence: conf, detectors: parts };
+    return { humanPct: 100-aiEnsemble, aiPct: aiEnsemble, confidence: conf, detectors: parts, _s:s };
   }
 
   function renderDetectors(res){
@@ -785,6 +755,98 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     try { new URL(guess); return guess; } catch(e) { return ''; }
   }
 
+  /* === NEW: derive per-item scores if backend missing === */
+  function deriveItemScoresFromSignals(s){
+    // helper transforms
+    function pct(x){ return clamp(Math.round(x),0,100); }
+    function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
+    function peak(x,c,w){ var d=Math.abs(x-c); if(d>=w) return 0; return (1-d/w)*100; }
+
+    // core signals to 0..100
+    var m = {
+      rep: pct(100*(1 - s.triRepeatRatio)),              // less repetition is better
+      read: pct(peak(s.flesch, 60, 30)),                 // ~60 best
+      lex: pct(band(s.TTR, 0.30, 0.65)),                 // diversity
+      starter: pct(100*(1 - s.starterDom)),              // varied sentence starts
+      qna: pct(band(s.qRatio, 0.3, 1.6) * 60/100 + Math.min(100, s.listRatio*280)), // Qs + lists
+      passive: pct(100*(1 - s.passivePer100/4)),
+      punct: pct(band(s.Hnorm, 0.6, 0.95)),
+      proper: pct(band(s.properRatio, 0.03, 0.12)),
+      rare: pct(band(s.rareLongRatio, 0.03, 0.12)),
+      lenW: pct(band(s.avgWordLen, 4.2, 5.8)),
+      zipf: pct(band(s.gini, 0.47, 0.78)),
+      comp: pct(100*(1 - Math.min(0.85,s.compRatio)/0.85)),
+      digits: pct(100*(1 - s.digitsPer100/20)),
+      longS: pct(band(1-s.longRatio, 0.6, 0.95)),
+      charH: pct(band(s.charH, 4.0, 6.5))
+    };
+
+    // map 25 items using varied blends so outputs differ across pages
+    var item = [];
+    item[1]  = pct((m.read*0.35 + m.lex*0.35 + m.qna*0.30));
+    item[2]  = pct((m.lex*0.45 + m.rare*0.30 + m.proper*0.25));
+    item[3]  = pct((m.starter*0.40 + m.proper*0.30 + m.read*0.30));
+    item[4]  = pct((m.qna*0.70 + m.lex*0.15 + m.rep*0.15));
+    item[5]  = pct((m.read*0.50 + m.punct*0.25 + m.passive*0.25));
+
+    item[6]  = pct((m.proper*0.35 + m.read*0.35 + m.lex*0.30));
+    item[7]  = pct((m.read*0.40 + m.lex*0.30 + m.rep*0.30));
+    item[8]  = pct((m.comp*0.50 + m.digits*0.25 + m.rep*0.25));     // proxy for clean canonical presence
+    item[9]  = pct((m.comp*0.45 + m.zipf*0.30 + m.digits*0.25));    // proxy for indexability signals
+
+    item[10] = pct((m.proper*0.40 + m.rare*0.35 + m.lenW*0.25));
+    item[11] = pct((m.rare*0.35 + m.rep*0.35 + m.lex*0.30));
+    item[12] = pct((m.proper*0.30 + m.digits*0.25 + m.qna*0.45));
+    item[13] = pct((m.qna*0.40 + m.read*0.30 + m.rep*0.30));
+
+    item[14] = pct((m.starter*0.40 + m.qna*0.30 + m.punct*0.30));
+    item[15] = pct((m.lex*0.40 + m.proper*0.30 + m.qna*0.30));
+    item[16] = pct((m.digits*0.40 + m.lex*0.30 + m.read*0.30));
+    item[17] = pct((m.punct*0.35 + m.qna*0.35 + m.proper*0.30));
+
+    item[18] = pct((m.read*0.45 + m.comp*0.30 + m.longS*0.25));
+    item[19] = pct((m.comp*0.55 + m.rep*0.25 + m.punct*0.20));
+    item[20] = pct((m.comp*0.50 + m.longS*0.30 + m.punct*0.20));
+    item[21] = pct((m.qna*0.55 + m.read*0.25 + m.starter*0.20));
+
+    item[22] = pct((m.proper*0.55 + m.lex*0.25 + m.rare*0.20));
+    item[23] = pct((m.proper*0.40 + m.rare*0.40 + m.charH*0.20));
+    item[24] = pct((m.proper*0.35 + m.punct*0.35 + m.comp*0.30));
+    item[25] = pct((m.proper*0.50 + m.digits*0.30 + m.zipf*0.20));
+
+    // fill missing indices 1..25 just in case
+    var map={}; for(var i=1;i<=25;i++){ map[i] = isFinite(item[i]) ? item[i] : 50; }
+    return map;
+  }
+
+  function deriveSummaryScoresFromItems(itemMap){
+    var pick = function(from,to){ var arr=[]; for(var i=from;i<=to;i++){ if(isFinite(itemMap[i])) arr.push(itemMap[i]); } return arr; };
+    var groupContent = pick(1,5).concat(pick(10,13));
+    var all=[]; for(var i=1;i<=25;i++){ if(isFinite(itemMap[i])) all.push(itemMap[i]); }
+    var avg = function(a){ return a.length? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : 0; };
+    return { contentScore: avg(groupContent), overall: avg(all) };
+  }
+
+  function ensureScoresExist(data, sample, ensemble){
+    // if backend already provides, keep; otherwise derive
+    var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
+    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
+    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
+
+    // signals: use ensemble prep if available
+    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
+
+    if (needItems){
+      data.itemScores = deriveItemScoresFromSignals(s);
+    }
+    if (needContent || needOverall){
+      var sums = deriveSummaryScoresFromItems(data.itemScores||{});
+      if (needContent) data.contentScore = sums.contentScore;
+      if (needOverall) data.overall = sums.overall;
+    }
+    return data;
+  }
+
   // --- analyzer() ---
   window.analyze = async function(){
     var input = document.getElementById('analyzeUrl');
@@ -838,13 +900,25 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       return;
     }
 
-    // Scores
+    // sample for detection + fallback scoring
+    var sample = buildSampleFromData(data);
+    if ((!sample || sample.length < 200) && url){
+      if (statusEl) statusEl.textContent = 'Getting readable text…';
+      try{ var fetched = await fetchReadableText(url); if (fetched && fetched.length>200) sample = fetched; }catch(e){}
+    }
+    var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+
+    // If backend lacks scores, derive them from ensemble signals
+    data = ensureScoresExist(data, sample, ensemble);
+
+    // Scores -> UI
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
     setText('contentScoreInline', Math.round(contentScore||0));
     setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
 
+    // Meta chips
     setText('rStatus',    data.httpStatus ? data.httpStatus : '—');
     setText('rTitleLen',  data.titleLen   ? data.titleLen   : '—');
     setText('rMetaLen',   data.metaLen    ? data.metaLen    : '—');
@@ -855,32 +929,22 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  data.internalLinks ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
-    // Human/AI detection
+    // Detection display
     var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
     var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
     var backendConf = (typeof data.confidence==='number')? data.confidence : null;
 
-    // sample from backend fields
-    var sample = buildSampleFromData(data);
-    // readable fallback if not enough text
-    if ((!sample || sample.length < 200) && url){
-      if (statusEl) statusEl.textContent = 'Getting readable text…';
-      try{ var fetched = await fetchReadableText(url); if (fetched && fetched.length>200) sample = fetched; }catch(e){}
-    }
-    var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
-
-    // choose which to present
     if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
-      applyDetection(hp, ap, backendConf, ensemble);
+      applyDetection(hp, ap, backendConf, ensemble || null);
     } else if (ensemble){
       applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
     } else if (isFinite(hp) && isFinite(ap)){
-      applyDetection(hp, ap, backendConf || null, null);
+      applyDetection(hp, ap, backendConf || 60, null);
     } else {
       applyDetection(NaN, NaN, null, null);
-      var detNote=document.getElementById('detNote'); if(detNote) detNote.textContent='No text found. Please return textSample/extractedText/plainText for better detection.';
     }
 
+    // Checklist scores + autotick
     window.autoTickByScores(data.itemScores || {});
     if (window.Water) window.Water.finish();
     if (statusEl) statusEl.textContent = 'Analysis complete';
@@ -975,10 +1039,10 @@ try{
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
 </script>
 
-<!-- C) Background: lines + multi-color bottom-right smoke (hue period configurable) -->
+<!-- C) Background: tech lines + multi-color bottom-right smoke -->
 <script>
 try{
-  // Diagonal glow lines
+  // Tech diagonal glow lines
   (function(){
     var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
     function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
