@@ -1,9 +1,6 @@
 <?php
-
 return [
-    // keep any existing service configs here...
-
-    'psi' => [
-        'key' => env('PSI_API_KEY'), // reads from your .env on Cloudways
-    ],
+  'google' => [
+    'page_speed_key' => env('GOOGLE_API_KEY'), // keep key only in .env
+  ],
 ];
