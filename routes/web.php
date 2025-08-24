@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AnalyzeController;
 
 Route::get('/', function () {
-    // renders resources/views/home.blade.php
-    return view('home');
+    return view('home'); // resources/views/home.blade.php
 })->name('home');
 
 /**
