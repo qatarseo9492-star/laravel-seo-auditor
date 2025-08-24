@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-24z2 (old design preserved; progress/timeout fixes; new ensemble UI) --}}
+{{-- resources/views/home.blade.php — v2025-08-24aa (responsive + colorful; Readability, Entities, Animated Human↔AI; PageSpeed Insights) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -9,7 +9,7 @@
 @php
   use Illuminate\Support\Facades\Route;
   $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
-  $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, and UX signals, with water-fill scoring, auto-checklist, and AI/Human signals.';
+  $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, UX and speed, with water-fill scoring, auto-checklist, and AI/Human signals.';
   $metaImage = asset('og-image.png');
   $canonical = url()->current();
   $analyzeJsonUrl = Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
@@ -33,13 +33,17 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet"/>
 
 <style>
-/* === Original theme tokens (kept) === */
-:root{--bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg}
+:root{
+  --bg:#07080e;--panel:#0f1022;--panel-2:#141433;--panel-3:#0b0d21;--text:#f0effa;--text-dim:#b6b3d6;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--accent2:#9b5cff;
+  --radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg
+}
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
-body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
+body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:
+  radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),
+  radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),
+  var(--bg);overflow-x:hidden}
 #linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-#linesCanvas{opacity:.55}
-#smokeCanvas{opacity:.9;mix-blend-mode:screen}
+#linesCanvas{opacity:.55}#smokeCanvas{opacity:.9;mix-blend-mode:screen}
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 header.site{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:14px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand{display:flex;align-items:center;gap:.8rem;min-width:0}
@@ -55,23 +59,28 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .btn-reset{background:linear-gradient(135deg,#f59e0b,#f97316);border-color:#f59e0b}
 .btn-export{background:linear-gradient(135deg,#a855f7,#ec4899);border-color:#c26cf2}
 .btn-ghost{background:rgba(255,255,255,.06)} .btn:disabled{opacity:.6;cursor:not-allowed}
+
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem}.section-subtitle{margin:0;color:var(--text-dim)}
+
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}.gauge-svg{width:100%;height:auto;display:block}
 .score-mask-rect{transition:all .6s cubic-bezier(.22,1,.36,1)}
 .score-wave1{animation:scoreWave 8s linear infinite}.score-wave2{animation:scoreWave 11s linear infinite reverse}
 @keyframes scoreWave{from{transform:translateX(0)}to{transform:translateX(-210px)}}
-.score-text{font-size:clamp(2.0rem,4.2vw,3.0rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
+.score-text{font-size:clamp(2.2rem,4.2vw,3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
 .multiHueFast{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
+
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)}.l-orange{background:rgba(245,158,11,.18)}.l-green{background:rgba(34,197,94,.18)}
+
 .chip-good{background:rgba(34,197,94,.18)!important;border-color:rgba(34,197,94,.45)!important}
 .chip-mid{background:rgba(245,158,11,.18)!important;border-color:rgba(245,158,11,.45)!important}
 .chip-bad{background:rgba(239,68,68,.18)!important;border-color:rgba(239,68,68,.5)!important}
 .ico{width:1.1em;text-align:center}.ico-green{color:var(--good)}.ico-orange{color:var(--warn)}.ico-red{color:var(--bad)}.ico-cyan{color:var(--accent)}.ico-purple{color:#9b5cff}
+
 .url-field{position:relative;border-radius:16px;background:#0b0d21;border:1px solid #1b1b35;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02),0 12px 32px rgba(0,0,0,.32);padding:10px 110px 10px 46px;transition:.25s;overflow:hidden;isolation:isolate}
 .url-field:focus-within{border-color:#5942ff;box-shadow:0 0 0 6px rgba(155,92,255,.15),inset 0 0 0 1px rgba(93,65,255,.28)}
 .url-field .url-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9aa0c3;font-size:1rem;opacity:.95}
@@ -80,6 +89,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .url-field .url-mini:hover{background:rgba(255,255,255,.12)}.url-field .url-clear{right:60px;width:36px;height:32px;display:grid;place-items:center}.url-field #pasteUrl{right:12px}
 .url-field .url-border{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,#3de2ff,#9b5cff,#ff2045,#f59e0b,#3de2ff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;pointer-events:none;filter:hue-rotate(var(--hue))}
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.6rem}
+
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{position:relative;height:64px;border-radius:18px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
@@ -89,11 +99,13 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .wave1{animation:waveX 7s linear infinite}.wave2{animation:waveX 10s linear infinite reverse;opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
+
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .comp-water{position:relative;height:52px;border-radius:16px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .comp-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}.comp-overlay{position:absolute;inset:0;background:radial-gradient(120px 50px at 15% -25%,rgba(255,255,255,.16),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.08),transparent 35%,rgba(255,255,255,.06));pointer-events:none;mix-blend-mode:screen;z-index:3}
 .comp-pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1rem;z-index:4;text-shadow:0 1px 0 rgba(0,0,0,.45)}
 .comp-wave1{animation:waveX 8s linear infinite}.comp-wave2{animation:waveX 12s linear infinite reverse}
+
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite;pointer-events:none;z-index:0}
@@ -107,19 +119,26 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .cat-wave1{animation:catWave 7s linear infinite}.cat-wave2{animation:catWave 10s linear infinite reverse}
 @keyframes catWave{from{transform:translateX(0)}to{transform:translateX(-640px)}}
 .cat-water-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:rgba(255,255,255,.9);text-shadow:0 1px 0 rgba(0,0,0,.55);pointer-events:none}
+
 .checklist{list-style:none;margin:10px 0 0;padding:0}
-.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s,background .25s,transform .12s}
+.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:
+  linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),
+  radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),
+  radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s,background .25s,transform .12s}
 .checklist-item+.checklist-item{margin-top:.28rem}.checklist-item:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.55rem}
+
 .sev-good{background:linear-gradient(180deg,rgba(34,197,94,.14),rgba(34,197,94,.08));border-color:rgba(34,197,94,.45)}
 .sev-mid{background:linear-gradient(180deg,rgba(245,158,11,.16),rgba(245,158,11,.08));border-color:rgba(245,158,11,.45)}
 .sev-bad{background:linear-gradient(180deg,rgba(239,68,68,.16),rgba(239,68,68,.10));border-color:rgba(239,68,68,.55)}
+
 .checklist-item input[type="checkbox"]{appearance:none;-webkit-appearance:none;outline:none;width:22px;height:22px;border-radius:8px;background:#0b1220;border:2px solid #2a2f4d;position:relative;display:inline-grid;place-items:center;transition:.18s;box-shadow:inset 0 0 0 0 rgba(99,102,241,.0)}
 .checklist-item input[type="checkbox"]:hover{border-color:#4c5399;box-shadow:0 0 0 4px rgba(99,102,241,.12)}
 .checklist-item input[type="checkbox"]::after{content:"";width:7px;height:12px;border:3px solid transparent;border-left:0;border-top:0;transform:rotate(45deg) scale(.7);transition:.18s}
 .checklist-item input[type="checkbox"]:checked{border-color:transparent;background:linear-gradient(135deg,#22c55e,#3de2ff,#9b5cff);background-size:200% 200%;animation:tickHue 2s linear infinite;box-shadow:0 6px 18px rgba(61,226,255,.25),inset 0 0 0 2px rgba(255,255,255,.25)}
 .checklist-item input[type="checkbox"]:checked::after{border-color:#fff;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));transform:rotate(45deg) scale(1)}
 @keyframes tickHue{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22);border-color:rgba(22,193,114,.45)}
 .score-mid{background:rgba(245,158,11,.22);border-color:rgba(245,158,11,.45)}
@@ -128,32 +147,67 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .improve-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.1)}
 .improve-btn::before{content:"";position:absolute;inset:-2px;border-radius:inherit;z-index:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.18) 45%,transparent 50%,transparent 100%);transform:translateX(-120%);animation:btnSheen 3.2s linear infinite}
 @keyframes btnSheen{0%{transform:translateX(-120%)}60%{transform:translateX(120%)}100%{transform:translateX(120%)}}
+
 .share-dock{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:85;background:rgba(10,12,28,.35);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.5rem;backdrop-filter:blur(8px)}
 .share-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;color:#fff;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
 .share-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
 .share-fb{background:linear-gradient(135deg,#1877F2,#1e90ff)}.share-x{background:linear-gradient(135deg,#111,#333)}.share-ln{background:linear-gradient(135deg,#0a66c2,#1a8cd8)}.share-wa{background:linear-gradient(135deg,#25D366,#128C7E)}.share-em{background:linear-gradient(135deg,#ef4444,#b91c1c)}
-/* === Detection Panel – New look === */
+
 .detector{margin-top:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
-.det-head{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.det-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
 .det-head h4{margin:0;font-size:1.05rem}
-.det-scale{display:flex;align-items:center;gap:.5rem;color:var(--text-dim);font-weight:800}
-.det-scale .sep{opacity:.45}
-.det-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
-.det-item{grid-column:span 6;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.6rem .7rem}
-.det-row{display:grid;grid-template-columns:auto 1fr auto;gap:.6rem;align-items:center}
-.det-label{font-weight:900}
+
+.det-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.5rem}
+.det-item{grid-column:span 6;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.55rem .6rem}
+.det-row{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:center}
+.det-label{font-weight:800;color:var(--text-dim)}
 .det-score{font-weight:1000}
-.det-bar{margin-top:.4rem;position:relative;height:16px;border-radius:10px;overflow:hidden;background:linear-gradient(90deg,rgba(34,197,94,.18),rgba(34,197,94,.1));border:1px solid rgba(255,255,255,.1)}
-.det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);transition:width .35s ease}
-.det-ends{display:flex;justify-content:space-between;margin-top:.35rem;color:var(--text-dim);font-size:.85rem;font-weight:800}
-.det-ends span{display:inline-flex;align-items:center;gap:.35rem}
-.det-ends i{opacity:.9}
+.det-bar{margin-top:.4rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
+.det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
 .det-note{margin-top:.35rem;color:var(--text-dim);font-size:.85rem}
+
+/* === New: Dual Human↔AI bar (animated, glossy) === */
+.dualbar{position:relative;height:22px;border-radius:12px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.12)}
+.dual-h{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#16a34a,#22c55e,#84cc16);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.dual-a{position:absolute;right:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#f59e0b,#ef4444,#b91c1c);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.dual-sheen{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.16),transparent);mix-blend-mode:screen;animation:shine 3.2s linear infinite}
+@keyframes shine{0%{transform:translateX(-120%)}60%,100%{transform:translateX(120%)}}
+
+/* === New: Readability cards === */
+.read-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
+.read-card{grid-column:span 6;background:linear-gradient(140deg,#0b0d21 0%,#12143a 100%);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.7rem}
+.read-row{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:center}
+.read-bar{margin-top:.4rem;height:14px;border-radius:10px;background:#0b0d21;border:1px solid rgba(255,255,255,.1);position:relative;overflow:hidden}
+.read-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#22d3ee,#a78bfa);}
+
+/* === New: Entities chips === */
+.entity-chip{display:flex;align-items:center;gap:.45rem;padding:.45rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(135deg,rgba(61,226,255,.12),rgba(155,92,255,.12))}
+.entity-chip .badge{font-weight:900;padding:.1rem .45rem;border-radius:6px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08)}
+
+/* === New: Speed panel === */
+.speed-wrap{margin-top:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+.speed-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
+.speed-card{grid-column:span 6;background:linear-gradient(140deg,#0b0d21,#191a3e);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+.speed-metric{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.45rem .55rem;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);margin:.25rem 0}
+.speed-score{font-weight:1000;font-size:1.05rem;padding:.2rem .5rem;border-radius:10px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06)}
+.badge-green{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.45)}
+.badge-orange{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.45)}
+.badge-red{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.55)}
+
+.speed-opp{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.6rem;margin-top:.4rem}
+.speed-opp h5{margin:.1rem 0 .4rem;font-size:1rem}
+.speed-opp ul{margin:.2rem 0 0.2rem 1rem}
+.speed-opp li{margin:.15rem 0}
+.speed-note{color:var(--text-dim);font-size:.9rem;margin-top:.4rem}
+
 footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
 #backTop:hover{background:rgba(255,255,255,.12)}
-@media (max-width:992px){.category-card{grid-column:span 12}.score-container{width:190px}.analyze-row{grid-template-columns:1fr auto auto}.det-item{grid-column:span 12}}
-@media (max-width:768px){.wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}.share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}.checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}}
+
+@media (max-width:992px){.category-card{grid-column:span 12}.score-container{width:190px}.analyze-row{grid-template-columns:1fr auto auto}.det-item{grid-column:span 12}.read-card{grid-column:span 12}.speed-card{grid-column:span 12}}
+@media (max-width:768px){.wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}
+ .share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}
+ .checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}}
 @media (max-width:480px){.score-container{width:150px}.category-icon{width:40px;height:40px}.category-title{font-size:1rem}}
 @media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
 @media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
@@ -166,22 +220,15 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 <canvas id="smokeCanvas"></canvas>
 
 <script>
-  /* ===== Stable globals to kill race conditions (no more "Analyzer not ready") ===== */
+  /* ===== Stable globals ===== */
   window.SEMSEO = window.SEMSEO || {};
   window.SEMSEO.ENDPOINTS = { analyzeJson: @json($analyzeJsonUrl), analyze: @json($analyzeUrl) };
   window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
-  window.SEMSEO.READY = false;
-  window.SEMSEO.BUSY = false;
-  window.SEMSEO.QUEUE = 0;
+  window.SEMSEO.READY = false; window.SEMSEO.BUSY = false; window.SEMSEO.QUEUE = 0;
 
   function SEMSEO_go(){
-    if (window.SEMSEO.READY && typeof analyze === 'function') {
-      analyze();
-    } else {
-      window.SEMSEO.QUEUE++;
-      const s=document.getElementById('analyzeStatus');
-      if(s) s.textContent='Initializing…';
-    }
+    if (window.SEMSEO.READY && typeof analyze === 'function') { analyze(); }
+    else { window.SEMSEO.QUEUE++; const s=document.getElementById('analyzeStatus'); if(s) s.textContent='Initializing…'; }
   }
 </script>
 
@@ -219,7 +266,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
     <div class="score-area">
       <div class="score-container">
-        <!-- Circular water score (kept) -->
+        <!-- Circular water score -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
@@ -261,9 +308,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
           <span class="chip" id="overallChip"><i class="fa-solid fa-gauge-high ico"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
           <span class="chip" id="contentScoreChip"><i class="fa-solid fa-file-lines ico"></i> Content: <b id="contentScoreInline">0</b>/100</span>
-          <span class="chip" id="aiBadge" title="Human/AI detection summary"><i class="fa-regular fa-user ico ico-green"></i> Writer: <b>—</b></span>
-          <button id="viewHumanBtn" class="btn btn-ghost"><i class="fa-regular fa-face-smile ico ico-green"></i> Human-like: <b id="humanPct">—</b>%</button>
-          <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-robot ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
+          <span class="chip" id="aiBadge" title="Content authoring signal"><i class="fa-regular fa-face-smile ico ico-green"></i> Human content: <b id="humanPct">—</b>%</span>
+          <span class="chip" title="AI-likeness"><i class="fa-solid fa-robot ico ico-red"></i> AI content: <b id="aiPct">—</b>%</span>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
         <small style="color:var(--text-dim)">If the backend returns no scores, a local ensemble + heuristics derive stable, varied scores so the UI always reflects reality.</small>
@@ -282,13 +328,15 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         </div>
 
         <div class="analyze-row">
-          <div style="display:flex;align-items:center;gap:.6rem">
+          <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
             <label style="display:inline-flex;align-items:center;gap:.45rem;cursor:pointer">
               <input id="autoApply" type="checkbox" checked style="accent-color:#9b5cff">
               <span>Auto-apply checkmarks (≥ 80)</span>
             </label>
+            <button class="btn btn-ghost" type="button" id="runSpeed"><i class="fa-solid fa-gauge-simple-high"></i> Run Speed Test</button>
           </div>
 
+          <!-- Keeps safe queue behavior -->
           <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
@@ -340,20 +388,122 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
-    <!-- Ultra Content Detection (Ensemble) — NEW LOOK -->
+    <!-- === Human vs AI Content (Ensemble) - New look === -->
     <section id="detectorPanel" class="detector" style="display:none">
       <div class="det-head">
-        <i class="fa-solid fa-wave-square ico ico-purple"></i>
-        <h4>Ultra Content Detection (Ensemble)</h4>
+        <i class="fa-solid fa-robot ico ico-red"></i>
+        <h4>Human vs AI Content (Ensemble)</h4>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem">
         <span class="chip"><i class="fa-solid fa-shield-halved ico"></i> Confidence: <b id="detConfidence">—</b>%</span>
-        <div class="det-scale">
-          <span><i class="fa-regular fa-face-smile ico-green"></i> Human content</span>
-          <span class="sep">•</span>
-          <span><i class="fa-solid fa-robot ico-red"></i> AI content</span>
+        <span class="chip"><i class="fa-regular fa-face-smile ico ico-green"></i> Higher green = more human-like</span>
+      </div>
+
+      <!-- Dual animated bar -->
+      <div class="det-item" style="grid-column:span 12">
+        <div class="det-row">
+          <div class="det-label"><i class="fa-regular fa-face-smile ico-green"></i> Human</div>
+          <div class="det-label"><i class="fa-solid fa-robot ico-red"></i> AI</div>
+        </div>
+        <div class="dualbar" aria-label="Human vs AI bar" title="Left fills: Human. Right fills: AI.">
+          <div id="dualHuman" class="dual-h" style="width:0%"></div>
+          <div id="dualAI" class="dual-a" style="width:0%"></div>
+          <div class="dual-sheen"></div>
+        </div>
+        <div class="det-row" style="margin-top:.3rem">
+          <div class="det-score"><span id="dualHumanPct">—</span>%</div>
+          <div class="det-score"><span id="dualAIPct">—</span>%</div>
         </div>
       </div>
+
+      <!-- Detector breakdown -->
       <div class="det-grid" id="detGrid"></div>
-      <div class="det-note" id="detNote">Bars trend from <strong>Human</strong> → <strong>AI</strong>. Local ensemble activates if the backend provides no text/percentages.</div>
+      <div class="det-note" id="detNote">Bars show detector-specific AI-likeness; higher right-side (red) means more AI-like for that detector.</div>
+    </section>
+
+    <!-- === Readability Insights (New) === -->
+    <section id="readPanel" class="detector" style="display:none">
+      <div class="det-head">
+        <i class="fa-solid fa-book-open ico ico-cyan"></i>
+        <h4>Readability Insights</h4>
+      </div>
+      <div class="read-grid">
+        <div class="read-card">
+          <div class="read-row"><div class="det-label">Flesch Reading Ease</div><div class="det-score" id="readFlesch">—</div></div>
+          <div class="read-bar" aria-label="Flesch Reading Ease"><div id="barFlesch" class="read-fill" style="width:0%"></div></div>
+          <div class="det-note">Higher is easier to read. Aim 60–80 for general audiences.</div>
+        </div>
+        <div class="read-card">
+          <div class="read-row"><div class="det-label">Flesch–Kincaid Grade</div><div class="det-score" id="readFK">—</div></div>
+          <div class="read-bar"><div id="barFK" class="read-fill" style="width:0%"></div></div>
+          <div class="det-note">Approximate grade level. Aim ≤ 8 for broad reach.</div>
+        </div>
+        <div class="read-card">
+          <div class="read-row"><div class="det-label">Avg Sentence Length</div><div class="det-score" id="readASL">—</div></div>
+          <div class="read-bar"><div id="barASL" class="read-fill" style="width:0%"></div></div>
+          <div class="det-note">Shorter sentences (≤ 20 words) boost clarity.</div>
+        </div>
+        <div class="read-card">
+          <div class="read-row"><div class="det-label">Lexical Variety (TTR)</div><div class="det-score" id="readTTR">—</div></div>
+          <div class="read-bar"><div id="barTTR" class="read-fill" style="width:0%"></div></div>
+          <div class="det-note">Balance variety with simplicity. 0.40–0.65 is healthy.</div>
+        </div>
+      </div>
+      <div class="speed-opp">
+        <h5><i class="fa-solid fa-wand-magic-sparkles"></i> How to improve readability</h5>
+        <ul id="readTips">
+          <li>Use shorter sentences and paragraphs.</li>
+          <li>Replace jargon with plain words.</li>
+          <li>Add headings, bullets, and examples.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- === Entities & Semantic Context (New) === -->
+    <section id="entitiesPanel" class="detector" style="display:none">
+      <div class="det-head">
+        <i class="fa-solid fa-database ico ico-purple"></i>
+        <h4>Entity Extraction (Semantic SEO)</h4>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem">
+        <span class="chip"><i class="fa-solid fa-tags ico"></i> Detected: <b id="entCount">—</b></span>
+        <span class="chip"><i class="fa-solid fa-layer-group ico"></i> Types: <b>Person, Organization, Place, Thing</b></span>
+      </div>
+      <div class="det-grid" id="entitiesGrid"></div>
+      <div class="det-note">Ensure high-salience entities appear in headings, body, and schema (sameAs, Organization, Article).</div>
+    </section>
+
+    <!-- === Site Speed & CWV (PageSpeed Insights) (New) === -->
+    <section id="speedPanel" class="speed-wrap" style="display:none">
+      <div class="det-head">
+        <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
+        <h4>Site Speed & Core Web Vitals (PageSpeed Insights)</h4>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem">
+        <span class="chip"><i class="fa-solid fa-mobile-screen-button"></i> Mobile score: <b id="psiPerfMobile">—</b></span>
+        <span class="chip"><i class="fa-solid fa-desktop"></i> Desktop score: <b id="psiPerfDesktop">—</b></span>
+        <span class="chip"><i class="fa-solid fa-clock"></i> LCP: <b id="psiLCP">—</b></span>
+        <span class="chip"><i class="fa-solid fa-hand"></i> INP/TBT: <b id="psiINP">—</b></span>
+        <span class="chip"><i class="fa-solid fa-vector-square"></i> CLS: <b id="psiCLS">—</b></span>
+      </div>
+
+      <div class="speed-grid">
+        <div class="speed-card" id="cardMobile">
+          <div class="det-row"><div class="det-label"><i class="fa-solid fa-mobile"></i> Mobile</div>
+            <div class="speed-score" id="scoreMobile">—</div></div>
+          <div id="metricsMobile"></div>
+          <div class="speed-opp"><h5>Opportunities</h5><ul id="oppMobile"></ul></div>
+          <div class="speed-opp"><h5>Diagnostics</h5><ul id="diagMobile"></ul></div>
+        </div>
+        <div class="speed-card" id="cardDesktop">
+          <div class="det-row"><div class="det-label"><i class="fa-solid fa-desktop"></i> Desktop</div>
+            <div class="speed-score" id="scoreDesktop">—</div></div>
+          <div id="metricsDesktop"></div>
+          <div class="speed-opp"><h5>Opportunities</h5><ul id="oppDesktop"></ul></div>
+          <div class="speed-opp"><h5>Diagnostics</h5><ul id="diagDesktop"></ul></div>
+        </div>
+      </div>
+      <div class="speed-note">Scores and suggestions powered by Google PageSpeed Insights. We map issues to practical fixes.</div>
     </section>
 
     @php $labels = [
@@ -455,9 +605,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- A) Analyze + core logic -->
+<!-- A) Analyze + core logic + NEW features -->
 <script>
 (function(){
+  const PSI_KEY = 'AIzaSyBNZHG5WVfoePPuxicWtIIuYUgu61rZ9J8'; // PageSpeed Insights API key (user-provided)
+
   var CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
   function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
@@ -532,20 +684,19 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   window.autoTickByScores = autoTickByScores;
 
-  /* === Water progress (with safety; prevents 88% lock) === */
+  /* === Water progress === */
   var Water=(function(){
     var wrapId=function(){ return document.getElementById('waterWrap'); };
     var clipId=function(){ return document.getElementById('waterClipRect'); };
     var pctId=function(){ return document.getElementById('waterPct'); };
-    var t=null, value=0, finished=false;
+    var t=null, value=0;
     function show(){ var w=wrapId(); if(w) w.style.display='block'; }
     function hide(){ var w=wrapId(); if(w) w.style.display='none'; }
     function set(v){ value=Math.max(0,Math.min(100,v)); var y=200 - (200*value/100); var clip=clipId(); if(clip) clip.setAttribute('y', String(y)); var p=pctId(); if(p) p.textContent = Math.round(value) + '%'; }
     return {
-      start:function(){ finished=false; show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
-      finish:function(){ if(finished) return; finished=true; if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
-      reset:function(){ if(t) clearInterval(t); finished=false; set(0); hide(); },
-      forceDone:function(){ this.finish(); }
+      start:function(){ show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
+      finish:function(){ if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
+      reset:function(){ if(t) clearInterval(t); set(0); hide(); }
     };
   })();
   window.Water = Water;
@@ -559,33 +710,24 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     try { new URL(guess); return guess; } catch(e) { return ''; }
   }
 
-  // --- Fetch with timeout helper (AbortController) ---
-  async function fetchWithTimeout(url, opts={}, ms=15000){
-    const ctl = new AbortController();
-    const t = setTimeout(()=>ctl.abort(new Error('Timeout')), ms);
-    try{
-      return await fetch(url, {...opts, signal: ctl.signal});
-    } finally { clearTimeout(t); }
-  }
-
   async function fetchBackend(url){
     let data=null, ok=false, status=0, text='';
     const qs=new URLSearchParams({url}).toString();
     try{
-      const r1=await fetchWithTimeout((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}},15000);
+      const r1=await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
       status=r1.status; text=await r1.text(); try{ data=JSON.parse(text);}catch(_){}
       if(r1.ok && data) ok=true;
     }catch(_){}
     if(!ok){
       try{
-        const r2=await fetchWithTimeout((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})},15000);
+        const r2=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})});
         status=r2.status; text=await r2.text(); try{ data=JSON.parse(text);}catch(_){}
         if(r2.ok && data) ok=true;
       }catch(_){}
     }
     if(!ok){
       try{
-        const r3=await fetchWithTimeout((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}},15000);
+        const r3=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
         status=r3.status; text=await r3.text(); try{ data=JSON.parse(text);}catch(_){}
         if(r3.ok && data) ok=true;
       }catch(_){}
@@ -596,7 +738,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   // Raw HTML via AllOrigins (CORS proxy)
   async function fetchRawHtml(url){
     try{
-      const r=await fetchWithTimeout('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'},12000);
+      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
       if(r.ok){ const html=await r.text(); if(html && html.length>200) return html; }
     }catch(_){}
     return '';
@@ -605,11 +747,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   // Readable text via Jina Reader
   async function fetchReadableText(url){
     try{
-      const httpsR = await fetchWithTimeout('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''),{},15000);
+      const httpsR = await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''));
       if(httpsR.ok){ const t = await httpsR.text(); if(t && t.length>200) return t; }
     }catch(e){}
     try{
-      const altR = await fetchWithTimeout('https://r.jina.ai/'+url,{},15000);
+      const altR = await fetch('https://r.jina.ai/'+url);
       if(altR.ok){ const t = await altR.text(); if(t && t.length>200) return t; }
     }catch(e){}
     return '';
@@ -658,6 +800,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var syll = 0; for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
     return clamp(206.835 - 1.015*(wN/sents) - 84.6*(syll/wN), -20, 120);
   }
+  function _fkGrade(text){
+    var sents = (text.match(/[.!?]+/g)||[]).length || 1;
+    var words = (text.match(/[A-Za-z\u00C0-\u024f']+/g)||[]); var wN = words.length||1;
+    var syll = 0; for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
+    return clamp(0.39*(wN/sents) + 11.8*(syll/wN) - 15.59, 0, 22);
+  }
   function _prep(text){
     text=(text||'')+''; text=text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
     var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(text.match(wordRe)||[]).map(function(w){return w.toLowerCase();});
@@ -673,7 +821,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var avgLen=tokens? (words.join('').length/tokens):0;
     var longRatio=(lens.filter(function(L){return L>=28;}).length)/(lens.length||1);
     var TTR=types/(tokens||1);
-    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits };
+    return { text, sents:sents.length||1, wordCount:tokens, flesch:_flesch(text), fk:_fkGrade(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, avgSentLen:mean||0, digitsPer100:digits };
   }
   function detectUltra(text){
     var s=_prep(text||'');
@@ -726,143 +874,310 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return data;
   }
 
+  /* ===== NEW: Detection UI helpers ===== */
   function renderDetectors(res){
     var panel = document.getElementById('detectorPanel'); if(!panel) return;
     var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
     if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
     panel.style.display = 'block'; if(!grid) return; grid.innerHTML = '';
 
-    // each detector ai% plotted; left=human (smile), right=AI (robot)
     (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
-      var id='det-'+d.key; var val=clamp(d.ai||0,0,100);
-      var wrap=document.createElement('div');
-      wrap.className='det-item';
+      var id='det-'+d.key; var wrap=document.createElement('div');
+      var ai=clamp(d.ai||0,0,100); var human=100-ai;
+      wrap.className='det-item'; wrap.style.gridColumn='span 6';
       wrap.innerHTML =
-        '<div class="det-row">'+
-          '<div class="det-label"><i class="fa-solid fa-chart-simple" style="opacity:.9"></i> '+d.label+'</div>'+
-          '<div class="det-score" id="'+id+'-score">'+val+'%</div>'+
-          '<div style="opacity:.75;font-weight:800">AI</div>'+
-        '</div>'+
-        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+val+'%"></div></div>'+
-        '<div class="det-ends"><span><i class="fa-regular fa-face-smile ico-green"></i> Human</span><span><i class="fa-solid fa-robot ico-red"></i> AI</span></div>';
+        '<div class="det-row"><div class="det-label"><i class="fa-solid fa-chart-simple" style="opacity:.9"></i> '+d.label+'</div><div class="det-score">'+ai+'%</div></div>'+
+        '<div class="dualbar" style="height:18px"><div style="width:'+human+'%" class="dual-h"></div><div style="width:'+ai+'%" class="dual-a"></div><div class="dual-sheen"></div></div>'+
+        '<div class="det-row" style="margin-top:.25rem"><div class="det-note"><i class="fa-regular fa-face-smile ico-green"></i> Human '+human+'%</div><div class="det-note"><i class="fa-solid fa-robot ico-red"></i> AI '+ai+'%</div></div>';
       grid.appendChild(wrap);
     });
   }
 
   function applyDetection(humanPct, aiPct, confidence, breakdown){
-    var writer = (isFinite(humanPct) && isFinite(aiPct) && humanPct>=aiPct) ? 'Likely Human' : 'AI-like';
-    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
+    var badge = document.getElementById('aiBadge'); if (badge){ badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
     var hp = document.getElementById('humanPct'), ap = document.getElementById('aiPct');
     if(hp) hp.textContent = isFinite(humanPct)? Math.round(humanPct) : '—';
     if(ap) ap.textContent = isFinite(aiPct)?    Math.round(aiPct)   : '—';
-    if (breakdown && breakdown.detectors){ renderDetectors(breakdown); } else { document.getElementById('detectorPanel').style.display='block'; }
+
+    // Animate dual bar
+    var dh=document.getElementById('dualHuman'), da=document.getElementById('dualAI'); var dhp=document.getElementById('dualHumanPct'), dap=document.getElementById('dualAIPct');
+    if(dh&&da){ dh.style.transition='width .5s ease'; da.style.transition='width .5s ease'; dh.style.width=(humanPct||0)+'%'; da.style.width=(aiPct||0)+'%'; }
+    if(dhp) dhp.textContent = isFinite(humanPct)? Math.round(humanPct):'—';
+    if(dap) dap.textContent = isFinite(aiPct)? Math.round(aiPct):'—';
+
+    if (breakdown && breakdown.detectors){ renderDetectors(breakdown); }
+    var panel = document.getElementById('detectorPanel'); if(panel) panel.style.display='block';
   }
 
-  /* === Main analyze flow (with watchdog + finally) === */
+  /* ===== NEW: Readability panel rendering ===== */
+  function renderReadability(s){
+    var panel=document.getElementById('readPanel'); if(!panel) return;
+    panel.style.display='block';
+    var flesch=Math.round(s.flesch), fk=s.fk.toFixed(1), asl=s.avgSentLen.toFixed(1), ttr=s.TTR.toFixed(2);
+    setText('readFlesch', flesch);
+    setText('readFK', fk);
+    setText('readASL', asl+' words');
+    setText('readTTR', ttr);
+
+    // Bars (normalized)
+    var wF=Math.max(0,Math.min(100, (flesch+20)*100/140)); // -20..120 → 0..100
+    var wFK = Math.max(0, Math.min(100, 100 - (s.fk*100/22))); // lower grade → better
+    var wASL= Math.max(0, Math.min(100, 100 - Math.min(40, s.avgSentLen)*2.5)); // 0-40 → 100-0
+    var wTTR= Math.max(0, Math.min(100, (s.TTR-0.25)* (100/(0.65-0.25)) )); // 0.25..0.65 → 0..100
+    var setW=(id,w)=>{ var el=document.getElementById(id); if(el) el.style.width = Math.round(w)+'%'; };
+    setW('barFlesch', wF); setW('barFK', wFK); setW('barASL', wASL); setW('barTTR', wTTR);
+
+    // Tips
+    var tips=document.getElementById('readTips');
+    if(tips){
+      var arr=[];
+      if(s.avgSentLen>22) arr.push('Split long sentences (> 22 words) into shorter ones.');
+      if(s.fk>10) arr.push('Lower grade level by using simpler words and active voice.');
+      if(s.TTR<0.35) arr.push('Increase lexical variety with synonyms and examples.');
+      if(s.triRepeatRatio>0.12) arr.push('Reduce repeated 3-word phrases; vary structure.');
+      tips.innerHTML = arr.map(t=>'<li>'+t+'</li>').join('') || '<li>Looks good. Fine-tune headings and transitions.</li>';
+    }
+  }
+
+  /* ===== NEW: Client-side Entity Extraction (heuristic) ===== */
+  function extractEntitiesLocal(text){
+    const ents = new Map();
+    const add=(name,type)=>{ name=name.trim(); if(!name||name.length<2) return; const k=name.toLowerCase(); const prev=ents.get(k)||{name,type,count:0}; prev.count++; prev.type=prev.type||type; ents.set(k,prev); };
+    // Proper noun sequences
+    const re=/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g; let m;
+    while((m=re.exec(text))!==null){ const n=m[1]; if(/^([A-Z][a-z]{1,2})$/.test(n)) continue; add(n, null); }
+    // Heuristics
+    const ORG_SUFFIXES=['Inc','LLC','Ltd','PLC','Corp','Company','University','Institute','Labs','Ltd.','Inc.','Corp.','Co.'];
+    const words=text.split(/\s+/);
+    for(let i=0;i<words.length-1;i++){
+      let two = (words[i]+' '+words[i+1]).replace(/[^A-Za-z.]/g,' ');
+      if(/^[A-Z][a-z]+\s[A-Z][a-z]+$/.test(two)) add(two,'Person');
+    }
+    for(const [k,ent] of ents){
+      if(!ent.type){
+        if(ORG_SUFFIXES.some(s=>new RegExp('\\b'+s+'\\.?$').test(ent.name))) ent.type='Organization';
+        else if(/\b(City|State|Country|River|Lake|Province|Park)\b/.test(ent.name)) ent.type='Place';
+        else ent.type='Thing';
+      }
+    }
+    // Convert to array with salience = count / total candidates
+    const arr=[...ents.values()];
+    const total=arr.reduce((a,b)=>a+b.count,0)||1;
+    arr.forEach(e=>{ e.salience = e.count/total; });
+    // sort by salience
+    arr.sort((a,b)=>b.salience-a.salience);
+    return arr.slice(0,30);
+  }
+  function renderEntities(arr){
+    const panel=document.getElementById('entitiesPanel'); if(!panel) return;
+    panel.style.display='block';
+    setText('entCount', (arr||[]).length||0);
+    const grid=document.getElementById('entitiesGrid'); grid.innerHTML='';
+    (arr||[]).forEach(ent=>{
+      const div=document.createElement('div'); div.className='det-item'; div.style.gridColumn='span 6';
+      const icon = ent.type==='Person' ? 'fa-user' : (ent.type==='Organization' ? 'fa-building' : (ent.type==='Place' ? 'fa-location-dot' : 'fa-tag'));
+      div.innerHTML =
+        `<div class="det-row"><div class="det-label"><i class="fa-solid ${icon}"></i> ${ent.name}</div>
+          <div class="det-score"><span class="entity-chip"><span class="badge">${Math.round(ent.salience*100)}%</span> ${ent.type}</span></div></div>`;
+      grid.appendChild(div);
+    });
+  }
+
+  /* ===== NEW: PageSpeed Insights ===== */
+  function toneScore(v){
+    if(!isFinite(v)) return '';
+    if(v>=90) return 'badge-green';
+    if(v>=50) return 'badge-orange';
+    return 'badge-red';
+  }
+  const PSI_TIPS = {
+    'render-blocking-resources':'Eliminate render-blocking resources (move CSS critical inline, defer non-critical JS).',
+    'uses-responsive-images':'Serve properly sized images (srcset/sizes, responsive formats).',
+    'uses-text-compression':'Enable text compression (Gzip/Brotli) for HTML, CSS, JS.',
+    'unminified-css':'Minify CSS; remove unused rules.',
+    'unminified-javascript':'Minify JavaScript; bundle wisely.',
+    'offscreen-images':'Lazy-load offscreen images (loading="lazy").',
+    'unused-css-rules':'Purge unused CSS with tools like PurgeCSS.',
+    'uses-optimized-images':'Compress images (AVIF/WebP) with quality ~70–80.',
+    'uses-long-cache-ttl':'Leverage caching with far-future TTL for static assets.',
+    'server-response-time':'Improve server TTFB (optimize DB queries, caching, CDN).',
+    'total-byte-weight':'Reduce page weight (code split, compress assets).',
+    'dom-size':'Limit DOM nodes; avoid deep nesting and huge tables.',
+    'uses-rel-preconnect':'Preconnect to critical origins (fonts, APIs).',
+    'font-display':'Use font-display: swap to avoid FOIT.',
+    'largest-contentful-paint-element':'Ensure LCP element loads early (preload hero image).',
+  };
+
+  async function fetchPSI(url, strategy){
+    const u = new URL('https://www.googleapis.com/pagespeedonline/v5/runPagespeed');
+    u.searchParams.set('url', url);
+    u.searchParams.set('strategy', strategy);
+    u.searchParams.set('category','PERFORMANCE');
+    u.searchParams.set('key', PSI_KEY);
+    const r = await fetch(u.toString());
+    if(!r.ok) throw new Error('PSI '+strategy+' failed');
+    return r.json();
+  }
+
+  function ms(v){ return isFinite(v)? (Math.round(v))+' ms':'—'; }
+  function sec(v){ return isFinite(v)? ( (v/1000).toFixed(2) +' s'):'—'; }
+
+  function renderPSI(json, targetPrefix){
+    const perf = Math.round((json?.lighthouseResult?.categories?.performance?.score||0)*100);
+    setText(targetPrefix==='Mobile'?'psiPerfMobile':'psiPerfDesktop', isFinite(perf)?perf:'—');
+    const scoreEl = document.getElementById(targetPrefix==='Mobile'?'scoreMobile':'scoreDesktop');
+    if(scoreEl){ scoreEl.textContent = isFinite(perf)? perf : '—'; scoreEl.classList.remove('badge-green','badge-orange','badge-red'); scoreEl.classList.add(toneScore(perf)); }
+
+    const audits = json?.lighthouseResult?.audits||{};
+    const LCP  = audits['largest-contentful-paint']?.numericValue;
+    const INP  = audits['interaction-to-next-paint']?.numericValue || audits['total-blocking-time']?.numericValue;
+    const CLS  = audits['cumulative-layout-shift']?.numericValue;
+    const FCP  = audits['first-contentful-paint']?.numericValue;
+    const SI   = audits['speed-index']?.numericValue;
+    if(targetPrefix==='Mobile'){ setText('psiLCP', sec(LCP)); setText('psiINP', (isFinite(INP)? (INP>10? ms(INP): sec(INP)):'—')); setText('psiCLS', isFinite(CLS)? CLS.toFixed(3):'—'); }
+
+    const metricsEl = document.getElementById('metrics'+targetPrefix);
+    if(metricsEl){
+      metricsEl.innerHTML = [
+        ['LCP', LCP, 'lower better', sec(LCP)],
+        ['FCP', FCP, 'lower better', sec(FCP)],
+        ['Speed Index', SI, 'lower better', sec(SI)],
+        ['INP/TBT', INP, 'lower better', (isFinite(INP)? (INP>10? ms(INP): sec(INP)):'—')],
+        ['CLS', CLS, 'lower better', isFinite(CLS)? CLS.toFixed(3):'—'],
+      ].map(([k,val,desc,fmt])=>`<div class="speed-metric"><div>${k} <small style="opacity:.7">(${desc})</small></div><div class="speed-score ${toneScore(k==='CLS' ? (100-(Math.min(0.25,val||0)*400)) : (100-(Math.min(6000,val||0)/60)))}">${fmt}</div></div>`).join('');
+    }
+
+    // Opportunities & Diagnostics
+    const oppList = document.getElementById('opp'+targetPrefix);
+    const diagList = document.getElementById('diag'+targetPrefix);
+    function li(t){ return `<li>${t}</li>`; }
+    const opp = Object.values(audits).filter(a=>a?.details?.type==='opportunity').sort((a,b)=>(b.details.overallSavingsMs||0)-(a.details.overallSavingsMs||0)).slice(0,8);
+    const diag = Object.values(audits).filter(a=>a?.scoreDisplayMode==='informative' && !a?.details?.type).slice(0,8);
+
+    if(oppList){
+      oppList.innerHTML = opp.length? opp.map(a=>{
+        const tip = PSI_TIPS[a.id] || 'Follow PSI guidance to optimize this.';
+        const save = a.details.overallSavingsMs ? ` • Save ~${ms(a.details.overallSavingsMs)}` : '';
+        return li(`<strong>${a.title}</strong>${save}<br><span class="speed-note">${tip}</span>`);
+      }).join('') : li('No major opportunities found.');
+    }
+    if(diagList){
+      diagList.innerHTML = diag.length? diag.map(a=>li(`<strong>${a.title}</strong><br><span class="speed-note">${PSI_TIPS[a.id]||'Review this diagnostic and optimize accordingly.'}</span>`)).join('') : li('No diagnostics to show.');
+    }
+  }
+
+  async function runPageSpeed(url){
+    const panel=document.getElementById('speedPanel'); if(panel) panel.style.display='block';
+    try{
+      const [m,d] = await Promise.allSettled([fetchPSI(url,'mobile'), fetchPSI(url,'desktop')]);
+      if(m.status==='fulfilled') renderPSI(m.value,'Mobile');
+      if(d.status==='fulfilled') renderPSI(d.value,'Desktop');
+    }catch(e){
+      const note=document.createElement('div'); note.className='speed-note'; note.textContent='PageSpeed Insights request failed.';
+      panel.appendChild(note);
+    }
+  }
+
+  /* ===== Analyze (orchestrator) ===== */
   async function analyze(){
     if (window.SEMSEO.BUSY) return;
     window.SEMSEO.BUSY = true;
 
-    const statusEl = document.getElementById('analyzeStatus');
-    const report   = document.getElementById('analyzeReport');
-    const detPanel = document.getElementById('detectorPanel');
+    var input = document.getElementById('analyzeUrl');
+    var url = normalizeUrl(input ? input.value : '');
+    if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
 
+    if (window.Water) window.Water.start();
+    var statusEl = document.getElementById('analyzeStatus');
+    if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
+    var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
+    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
+    document.getElementById('readPanel').style.display='none';
+    document.getElementById('entitiesPanel').style.display='none';
+    document.getElementById('speedPanel').style.display='none';
+
+    // 1) Backend (if present)
+    var {ok,data} = await fetchBackend(url);
+    if(!data) data = {};
+
+    // 2) Build sample (from backend)
+    var sample = buildSampleFromData(data);
+
+    // 3) AllOrigins raw HTML → chips/sample
     try{
-      var input = document.getElementById('analyzeUrl');
-      var url = normalizeUrl(input ? input.value : '');
-      if (!url) { if(input) input.focus(); return; }
+      var raw = await fetchRawHtml(url);
+      if(raw){
+        var meta = extractMetaFromHtml(raw, url);
+        data = mergeMeta(data, meta);
+        if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
+      }
+    }catch(_){}
 
-      if (window.Water) window.Water.start();
-      if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
-      if (report) report.style.display = 'none';
-      if (detPanel) detPanel.style.display='none';
-
-      // Watchdog: soft-complete if network stalls
-      const watchdog = setTimeout(()=>{
-        try{
-          if(statusEl) statusEl.textContent = 'Network slow; showing best‑effort results…';
-          window.setScoreWheel(0);
-          window.autoTickByScores({});
-          if (window.Water) window.Water.forceDone();
-        }catch(_){}
-      }, 18000);
-
-      // 1) Backend
-      var {ok,data} = await fetchBackend(url);
-      if(!data) data = {};
-
-      // 2) Sample from backend
-      var sample = buildSampleFromData(data);
-
-      // 3) AllOrigins (HTML → meta)
-      try{
-        var raw = await fetchRawHtml(url);
-        if(raw){
-          var meta = extractMetaFromHtml(raw, url);
-          data = mergeMeta(data, meta);
-          if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
-        }
+    // 4) Jina Reader fallback
+    if ((!sample || sample.length < 200)){
+      if (statusEl) statusEl.textContent = 'Getting readable text…';
+      try{ var read = await fetchReadableText(url);
+        if (read && read.length>200){ sample = read; }
       }catch(_){}
-
-      // 4) Jina fallback
-      if ((!sample || sample.length < 200)){
-        if (statusEl) statusEl.textContent = 'Getting readable text…';
-        try{ var read = await fetchReadableText(url);
-          if (read && read.length>200){ sample = read; }
-        }catch(_){}
-      }
-
-      // 5) Ensemble + guaranteed scores
-      var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
-      data = ensureScoresExist(data, sample, ensemble);
-
-      // 6) Scores → UI
-      var overall = Number(data.overall || 0);
-      var contentScore = Number(data.contentScore || 0);
-      window.setScoreWheel(overall||0);
-      setText('contentScoreInline', Math.round(contentScore||0));
-      setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
-
-      // Meta chips
-      setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
-      setText('rTitleLen',  (data.titleLen   !== undefined && data.titleLen !== null) ? data.titleLen   : '—');
-      setText('rMetaLen',   (data.metaLen    !== undefined && data.metaLen  !== null) ? data.metaLen    : '—');
-      setText('rCanonical', data.canonical  ? data.canonical  : '—');
-      setText('rRobots',    data.robots     ? data.robots     : '—');
-      setText('rViewport',  data.viewport   ? data.viewport   : '—');
-      setText('rHeadings',  data.headings   ? data.headings   : '—');
-      setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
-      setText('rSchema',    data.schema     ? data.schema     : '—');
-
-      // Detection
-      var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-      var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-      var backendConf = (typeof data.confidence==='number')? data.confidence : null;
-      if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
-        applyDetection(hp, ap, backendConf, ensemble || null);
-      } else if (ensemble){
-        applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-      } else if (isFinite(hp) && isFinite(ap)){
-        applyDetection(hp, ap, backendConf || 60, null);
-      } else {
-        applyDetection(NaN, NaN, null, null);
-      }
-
-      // Checklist
-      window.autoTickByScores(data.itemScores || {});
-
-      if (statusEl) statusEl.textContent = 'Analysis complete';
-      if (report) report.style.display = 'block';
-
-      clearTimeout(watchdog);
-    } catch(err){
-      if (statusEl) statusEl.textContent = 'Analysis error: ' + (err && err.message ? err.message : err);
-      try{ window.setScoreWheel(0); window.autoTickByScores({}); }catch(_){}
-    } finally {
-      if (window.Water) window.Water.finish();
-      window.SEMSEO.BUSY = false;
-      if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
     }
+
+    // 5) Local detection + guaranteed item scores
+    var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+    data = ensureScoresExist(data, sample, ensemble);
+
+    // 6) Scores -> UI
+    var overall = Number(data.overall || 0);
+    var contentScore = Number(data.contentScore || 0);
+    window.setScoreWheel(overall||0);
+    setText('contentScoreInline', Math.round(contentScore||0));
+    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
+
+    // Meta chips
+    setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
+    setText('rTitleLen',  (data.titleLen   !== undefined && data.titleLen !== null) ? data.titleLen   : '—');
+    setText('rMetaLen',   (data.metaLen    !== undefined && data.metaLen  !== null) ? data.metaLen    : '—');
+    setText('rCanonical', data.canonical  ? data.canonical  : '—');
+    setText('rRobots',    data.robots     ? data.robots     : '—');
+    setText('rViewport',  data.viewport   ? data.viewport   : '—');
+    setText('rHeadings',  data.headings   ? data.headings   : '—');
+    setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
+    setText('rSchema',    data.schema     ? data.schema     : '—');
+
+    // Detection display
+    var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+    var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+    var backendConf = (typeof data.confidence==='number')? data.confidence : null;
+    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
+      applyDetection(hp, ap, backendConf, ensemble || null);
+    } else if (ensemble){
+      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
+    } else if (isFinite(hp) && isFinite(ap)){
+      applyDetection(hp, ap, backendConf || 60, null);
+    } else {
+      applyDetection(NaN, NaN, null, null);
+    }
+
+    // Checklist scores + autotick
+    window.autoTickByScores(data.itemScores || {});
+
+    // === NEW: Readability insights
+    if(sample && sample.length>40){
+      const s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample);
+      renderReadability(s);
+      // Entities (local)
+      const ents = extractEntitiesLocal(sample);
+      renderEntities(ents);
+    }
+
+    if (window.Water) window.Water.finish();
+    if (statusEl) statusEl.textContent = 'Analysis complete';
+    if (report) report.style.display = 'block';
+
+    // Auto-run PSI
+    runPageSpeed(url).catch(()=>{});
+
+    window.SEMSEO.BUSY = false;
+    if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
   }
   window.analyze = analyze;
 
@@ -876,6 +1191,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
       var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
 
+      document.getElementById('runSpeed')?.addEventListener('click', function(){
+        const u = normalizeUrl(document.getElementById('analyzeUrl')?.value||''); if(!u) return;
+        runPageSpeed(u);
+      });
+
+      // mark ready and flush queued early clicks
       window.SEMSEO.READY = true;
       if (window.SEMSEO.QUEUE>0){ window.SEMSEO.QUEUE=0; analyze(); }
     }catch(err){
@@ -903,7 +1224,7 @@ try{
     if(em) em.href = 'mailto:?subject='+title+'&body='+url;
   })();
 
-  // Reset / Export / Import / Print / UI misc (kept)
+  // Reset / Export / Import / Print / UI misc
   (function(){
     function updateCategoryBars(){ if (window.updateCategoryBars) window.updateCategoryBars(); }
     var resetBtn=document.getElementById('resetChecklist');
@@ -917,8 +1238,11 @@ try{
       var chip=document.getElementById('contentScoreChip'); if(chip){ chip.classList.remove('chip-good','chip-mid','chip-bad'); chip.classList.add('chip-bad'); }
       el=document.getElementById('humanPct'); if(el) el.textContent='—';
       el=document.getElementById('aiPct'); if(el) el.textContent='—';
-      var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
+      var badge=document.getElementById('aiBadge'); if(badge){ badge.title=''; }
       var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
+      document.getElementById('readPanel').style.display='none';
+      document.getElementById('entitiesPanel').style.display='none';
+      document.getElementById('speedPanel').style.display='none';
       if (window.Water) window.Water.reset();
     });}
 
