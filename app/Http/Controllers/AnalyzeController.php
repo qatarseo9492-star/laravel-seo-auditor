@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class AnalyzeController extends Controller
 {
     /**
-     * Alias to POST/GET /analyze for GET /analyze-json
+     * Alias: GET /analyze-json -> analyze()
      */
     public function analyzeJson(Request $request)
     {
@@ -17,9 +18,7 @@ class AnalyzeController extends Controller
     }
 
     /**
-     * Core analyzer: fetches the target page, extracts basic meta,
-     * derives 25 checklist item scores, content/overall scores,
-     * and a heuristic Human vs AI percentage.
+     * Core analyzer (content/meta extraction + 25-item checklist + scores + Human vs AI).
      */
     public function analyze(Request $request)
     {
@@ -29,7 +28,6 @@ class AnalyzeController extends Controller
             return response()->json(['error' => 'Invalid or missing URL.'], 422);
         }
 
-        // Fetch the page HTML
         try {
             $res = Http::withHeaders([
                     'User-Agent' => 'SemanticSEO-Analyzer/1.0',
@@ -40,18 +38,17 @@ class AnalyzeController extends Controller
                 ->get($url);
         } catch (\Throwable $e) {
             return response()->json([
-                'error' => 'Request failed: ' . $e->getMessage(),
-                'overall' => 0,
+                'error'        => 'Request failed: ' . $e->getMessage(),
+                'overall'      => 0,
                 'contentScore' => 0,
-                'itemScores' => (object)[],
+                'itemScores'   => (object)[],
             ], 500);
         }
 
-        $status = $res->status();
-        $html   = $res->body() ?? '';
+        $status        = $res->status();
+        $html          = $res->body() ?? '';
         $headersRobots = $res->header('X-Robots-Tag');
 
-        // Parse HTML (very tolerant)
         $dom = new \DOMDocument();
         libxml_use_internal_errors(true);
         @$dom->loadHTML(mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8'));
@@ -77,15 +74,15 @@ class AnalyzeController extends Controller
         $robots    = $getAttr("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='robots']", 'content');
         $viewport  = $getAttr("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='viewport']", 'content');
 
-        $h1c = $count('//h1');
-        $h2c = $count('//h2');
-        $h3c = $count('//h3');
+        $h1c         = $count('//h1');
+        $h2c         = $count('//h2');
+        $h3c         = $count('//h3');
         $ldJsonCount = $count("//script[@type='application/ld+json']");
-        $imgs = $count('//img');
-        $vids = $count('//video');
+        $imgs        = $count('//img');
+        $vids        = $count('//video');
 
-        // Internal vs external links
-        $host = parse_url($url, PHP_URL_HOST) ?: '';
+        // Internal vs external link counts
+        $host     = parse_url($url, PHP_URL_HOST) ?: '';
         $allLinks = $xp->query('//a[@href]');
         $internal = 0;
         $external = 0;
@@ -96,84 +93,77 @@ class AnalyzeController extends Controller
                 if (!$href) continue;
                 if ($href[0] === '#' || str_starts_with($href, 'mailto:') || str_starts_with($href, 'tel:')) continue;
 
-                if (!preg_match('~^https?://~i', $href)) { // relative link
+                if (!preg_match('~^https?://~i', $href)) {
                     $internal++;
                     continue;
                 }
-                $h = parse_url($href, PHP_URL_HOST) ?: '';
+                $h    = parse_url($href, PHP_URL_HOST) ?: '';
                 $same = preg_replace('/^www\./i', '', $h) === preg_replace('/^www\./i', '', $host);
                 $same ? $internal++ : $external++;
             }
         }
 
-        // Text-only approximation
-        $textOnly = trim(preg_replace('/\s+/', ' ', strip_tags($html)));
+        $textOnly  = trim(preg_replace('/\s+/', ' ', strip_tags($html)));
         $wordCount = max(1, str_word_count($textOnly));
         $sentences = max(1, preg_match_all('/[\.!\?]+(\s|$)/u', $textOnly, $m));
-        $wps = $wordCount / $sentences; // words per sentence
+        $wps       = $wordCount / $sentences;
 
-        /**
-         * Checklist item scores (1..25)
-         * Lightweight heuristics; bounds to 0..100
-         */
-        $item = [];
-        $item[1] = 65;
-        $item[2] = min(90, 50 + min(40, $h2c * 4 + $h3c * 2));
-        $item[3] = $h1c >= 1 ? 85 : 40;
+        // 25-item checklist (bounded 0..100)
+        $item      = [];
+        $item[1]   = 65;
+        $item[2]   = min(90, 50 + min(40, $h2c * 4 + $h3c * 2));
+        $item[3]   = $h1c >= 1 ? 85 : 40;
+        $hasFAQ    = ($ldJsonCount && stripos($html, 'FAQPage') !== false) || preg_match('~\bFAQ\b~i', $textOnly);
+        $item[4]   = $hasFAQ ? 85 : 55;
+        $item[5]   = ($wps >= 12 && $wps <= 24) ? 85 : (($wps <= 30) ? 65 : 45);
 
-        $hasFAQ = ($ldJsonCount && stripos($html, 'FAQPage') !== false) || preg_match('~\bFAQ\b~i', $textOnly);
-        $item[4] = $hasFAQ ? 85 : 55;
+        $titleLen  = mb_strlen($title);
+        $item[6]   = ($titleLen >= 50 && $titleLen <= 60) ? 90 : (($titleLen >= 35 && $titleLen <= 70) ? 70 : 45);
 
-        $item[5] = ($wps >= 12 && $wps <= 24) ? 85 : (($wps <= 30) ? 65 : 45);
+        $metaLen   = mb_strlen($metaDesc);
+        $item[7]   = ($metaLen >= 140 && $metaLen <= 160) ? 90 : (($metaLen >= 90 && $metaLen <= 180) ? 70 : 45);
+        $item[8]   = $canonical ? 95 : 45;
 
-        $titleLen = mb_strlen($title);
-        $item[6] = ($titleLen >= 50 && $titleLen <= 60) ? 90 : (($titleLen >= 35 && $titleLen <= 70) ? 70 : 45);
-
-        $metaLen  = mb_strlen($metaDesc);
-        $item[7]  = ($metaLen >= 140 && $metaLen <= 160) ? 90 : (($metaLen >= 90 && $metaLen <= 180) ? 70 : 45);
-
-        $item[8] = $canonical ? 95 : 45;
-
-        $noindex = (stripos($robots, 'noindex') !== false) || (stripos((string)$headersRobots, 'noindex') !== false);
-        $item[9] = $noindex ? 10 : 80;
+        $noindex   = (stripos($robots, 'noindex') !== false) || (stripos((string)$headersRobots, 'noindex') !== false);
+        $item[9]   = $noindex ? 10 : 80;
 
         $hasAuthor = stripos($html, 'author') !== false || preg_match('~rel=["\']author["\']~i', $html);
         $hasDate   = preg_match('~<time[^>]*datetime=~i', $html) || preg_match('~\b\d{4}-\d{2}-\d{2}\b~', $html);
         $item[10]  = max(40, min(90, ($hasAuthor ? 20 : 0) + ($hasDate ? 20 : 0) + ($ldJsonCount ? 40 : 20)));
 
-        $item[11] = 60;
-        $item[12] = $external >= 3 ? 80 : ($external >= 1 ? 65 : 45);
-        $item[13] = ($imgs + $vids) >= 2 ? 85 : (($imgs + $vids) >= 1 ? 70 : 50);
+        $item[11]  = 60;
+        $item[12]  = $external >= 3 ? 80 : ($external >= 1 ? 65 : 45);
+        $item[13]  = ($imgs + $vids) >= 2 ? 85 : (($imgs + $vids) >= 1 ? 70 : 50);
 
-        $item[14] = ($h2c + $h3c) >= 3 ? 85 : (($h2c + $h3c) >= 1 ? 70 : 50);
-        $item[15] = $internal >= 8 ? 85 : ($internal >= 4 ? 70 : 45);
+        $item[14]  = ($h2c + $h3c) >= 3 ? 85 : (($h2c + $h3c) >= 1 ? 70 : 50);
+        $item[15]  = $internal >= 8 ? 85 : ($internal >= 4 ? 70 : 45);
 
-        $path    = parse_url($url, PHP_URL_PATH) ?: '/';
-        $hasQuery = parse_url($url, PHP_URL_QUERY) !== null;
-        $slugOk  = !$hasQuery && mb_strlen($path) <= 80 && !preg_match('~[A-Z _]~', $path);
-        $item[16] = $slugOk ? 85 : 55;
+        $path      = parse_url($url, PHP_URL_PATH) ?: '/';
+        $hasQuery  = parse_url($url, PHP_URL_QUERY) !== null;
+        $slugOk    = !$hasQuery && mb_strlen($path) <= 80 && !preg_match('~[A-Z _]~', $path);
+        $item[16]  = $slugOk ? 85 : 55;
 
         $hasBreadcrumb = stripos($html, 'BreadcrumbList') !== false || preg_match('~class=["\'][^"\']*breadcrumb~i', $html);
-        $item[17] = $hasBreadcrumb ? 90 : 55;
+        $item[17]      = $hasBreadcrumb ? 90 : 55;
 
-        $item[18] = $viewport ? 90 : 40;
-        $lazyCount = preg_match_all('~loading=["\']lazy["\']~i', $html, $m2);
-        $item[19] = $lazyCount ? 75 : 60;
-        $item[20] = 60;
+        $item[18]      = $viewport ? 90 : 40;
+        $lazyCount     = preg_match_all('~loading=["\']lazy["\']~i', $html, $m2);
+        $item[19]      = $lazyCount ? 75 : 60;
+        $item[20]      = 60;
 
-        $ctaCount = preg_match_all('~\b(get started|sign up|contact|buy now|learn more|try|subscribe)\b~i', $textOnly, $m3);
-        $item[21] = $ctaCount ? 80 : 60;
+        $ctaCount      = preg_match_all('~\b(get started|sign up|contact|buy now|learn more|try|subscribe)\b~i', $textOnly, $m3);
+        $item[21]      = $ctaCount ? 80 : 60;
 
-        $hasArticle = stripos($html, '"@type"') !== false
+        $hasArticle    = stripos($html, '"@type"') !== false
             && preg_match('~"@type"\s*:\s*"(Article|NewsArticle|Product|Organization|WebPage)"~i', $html);
-        $item[22] = $hasArticle ? 80 : 55;
+        $item[22]      = $hasArticle ? 80 : 55;
 
-        $item[23] = ($h2c + $h3c) >= 5 ? 75 : 60;
-        $item[24] = $ldJsonCount ? 85 : 40;
-        $item[25] = (stripos($html, '"sameAs"') !== false || stripos($html, '"@type":"Organization"') !== false) ? 85 : 55;
+        $item[23]      = ($h2c + $h3c) >= 5 ? 75 : 60;
+        $item[24]      = $ldJsonCount ? 85 : 40;
+        $item[25]      = (stripos($html, '"sameAs"') !== false || stripos($html, '"@type":"Organization"') !== false) ? 85 : 55;
 
         foreach ($item as $k => $v) {
-            $item[$k] = max(0, min(100, (int)round($v)));
+            $item[$k] = max(0, min(100, (int) round($v)));
         }
 
         $avg = fn($ids) => (int) round(array_sum(array_map(fn($i) => $item[$i] ?? 0, $ids)) / max(1, count($ids)));
@@ -190,7 +180,6 @@ class AnalyzeController extends Controller
             $structureCat * 0.17 + $uxCat * 0.12 + $entityCat * 0.10
         );
 
-        // Heuristic Human vs AI (just a signal for UI)
         $humanPct = max(20, min(95, 70 - abs(18 - $wps) + ($overall - 60) * 0.3));
         $aiPct    = max(5, 100 - $humanPct);
 
@@ -214,9 +203,8 @@ class AnalyzeController extends Controller
     }
 
     /**
-     * Secure PageSpeed Insights v5 proxy.
+     * Secure PageSpeed Insights v5 proxy with SSRF guard + 5-min cache.
      * GET /psi-proxy?u=https://example.com&strategy=mobile&category=performance&category=seo
-     * Keeps API key server-side (GOOGLE_API_KEY or PSI_API_KEY in .env).
      */
     public function psiProxy(Request $request)
     {
@@ -224,13 +212,15 @@ class AnalyzeController extends Controller
         if (!$pageUrl) {
             return response()->json(['ok' => false, 'error' => 'Missing ?u param'], 422);
         }
+        if ($this->isPrivateHost($pageUrl)) {
+            return response()->json(['ok' => false, 'error' => 'Blocked host'], 400);
+        }
 
         $strategy = $request->query('strategy', 'mobile');
         if (!in_array($strategy, ['mobile', 'desktop'], true)) {
             $strategy = 'mobile';
         }
 
-        // categories can repeat; keep only allowed & unique; ensure 'performance' present
         $allowed = ['performance', 'accessibility', 'best-practices', 'seo', 'pwa'];
         $catsIn  = Arr::wrap($request->query('category', []));
         $cats    = array_values(array_unique(array_intersect($catsIn, $allowed)));
@@ -242,7 +232,6 @@ class AnalyzeController extends Controller
 
         $locale = $request->query('locale', 'en');
 
-        // Read from config, then env (supports both names)
         $apiKey = config('services.google.page_speed_key')
                ?: env('GOOGLE_API_KEY')
                ?: env('PSI_API_KEY');
@@ -251,7 +240,6 @@ class AnalyzeController extends Controller
             return response()->json(['ok' => false, 'error' => 'PSI API key not configured'], 500);
         }
 
-        // Build query string (repeat &category=X per PSI spec)
         $baseParams = [
             'url'      => $pageUrl,
             'strategy' => $strategy,
@@ -265,12 +253,18 @@ class AnalyzeController extends Controller
 
         $endpoint = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
 
+        // 5-min cache to save quota
+        $cacheKey = 'psi:' . md5($qs);
+        if ($cached = Cache::get($cacheKey)) {
+            return response()->json($cached['body'], $cached['status']);
+        }
+
         try {
-            $resp = Http::timeout(18)->acceptJson()->get($endpoint . '?' . $qs);
+            $resp   = Http::timeout(18)->acceptJson()->get($endpoint . '?' . $qs);
             $status = $resp->status();
             $json   = $resp->json() ?? [];
 
-            // Normalize INP if Google uses experimental key
+            // Normalize INP name if Google sends the experimental key
             foreach (['loadingExperience', 'originLoadingExperience'] as $k) {
                 if (isset($json[$k]['metrics'])) {
                     $m = &$json[$k]['metrics'];
@@ -280,18 +274,40 @@ class AnalyzeController extends Controller
                 }
             }
 
+            Cache::put($cacheKey, ['body' => $json, 'status' => $status], now()->addMinutes(5));
+
             return response()->json($json, $status);
         } catch (\Throwable $e) {
             return response()->json([
-                'ok'    => false,
-                'error' => 'PSI upstream error',
-                'detail'=> $e->getMessage(),
+                'ok'     => false,
+                'error'  => 'PSI upstream error',
+                'detail' => $e->getMessage(),
             ], 502);
         }
     }
 
     /**
-     * Normalize user-provided URL to https://… and validate.
+     * Very basic SSRF guard: blocks localhost/private/reserved targets.
+     */
+    private function isPrivateHost(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        if (!$host) return true;
+
+        if (in_array($host, ['localhost', '127.0.0.1'], true) || $host === '::1') {
+            return true;
+        }
+        $ips = @gethostbynamel($host) ?: [];
+        foreach ($ips as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return true; // private/reserved IP
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Normalize user-provided URL.
      */
     private function normalizeUrl(?string $u): ?string
     {
@@ -308,5 +324,5 @@ class AnalyzeController extends Controller
         if (!in_array(strtolower($scheme), ['http', 'https'], true)) return null;
 
         return $u;
-        }
+    }
 }
