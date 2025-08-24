@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php --}}
+{{-- resources/views/home.blade.php  —  v2025-08-24a --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -13,7 +13,6 @@
   $metaImage = asset('og-image.png');
   $canonical = url()->current();
 
-  // Endpoints: prefer named routes if present, else fallbacks
   $analyzeJsonUrl = Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
   $analyzeUrl     = Route::has('analyze')      ? route('analyze')      : url('analyze');
 @endphp
@@ -32,21 +31,23 @@
 <meta name="twitter:description" content="{{ $metaDescription }}">
 <meta name="twitter:image" content="{{ $metaImage }}">
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet"/>
 
 <style>
 :root{--bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg}
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
-/* background canvases */
-#linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-#linesCanvas{opacity:.50} #smokeCanvas{opacity:.62}
-.wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
-/* header */
+/* background canvases (smoke made much more visible) */
+#linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+#linesCanvas{opacity:.55}
+#smokeCanvas{opacity:.88;mix-blend-mode:screen;}
+
+/* layout */
+.wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 header.site{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:14px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand{display:flex;align-items:center;gap:.8rem;min-width:0}
-.brand-badge{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(157,92,255,.25),rgba(61,226,255,.25));border:1px solid rgba(255,255,255,.14);color:#fff;font-size:1.05rem;box-shadow:0 8px 22px rgba(0,0,0,.28)}
+.brand-badge{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(157,92,255,.3),rgba(61,226,255,.3));border:1px solid rgba(255,255,255,.18);color:#fff;font-size:1.08rem;box-shadow:0 8px 22px rgba(0,0,0,.28)}
 .hero-heading{font-weight:1000;letter-spacing:.4px;font-size:clamp(1.4rem,3.2vw,2rem)}
 .hero-sub{color:var(--text-dim);font-size:.95rem}
 
@@ -96,7 +97,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 /* row */
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.6rem}
 
-/* water progress */
+/* water progress bar */
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{position:relative;height:64px;border-radius:18px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
@@ -123,7 +124,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
-
 .cat-water{grid-column:1/-1;margin-top:.55rem;position:relative;height:22px}
 .cat-svg{display:block;width:100%;height:22px}
 .cat-wave1{animation:catWave 7s linear infinite}.cat-wave2{animation:catWave 10s linear infinite reverse}
@@ -183,7 +183,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (max-width:992px){.category-card{grid-column:span 12}.score-container{width:190px}.analyze-row{grid-template-columns:1fr auto auto}.det-item{grid-column:span 12}}
 @media (max-width:768px){.wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}.share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}.checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}}
 @media (max-width:480px){.score-container{width:150px}.category-icon{width:40px;height:40px}.category-title{font-size:1rem}}
-@media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
+@media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue{filter:none!important}.multiHueFast{filter:none!important}}
 @media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
 </style>
 </head>
@@ -284,7 +284,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
-        <small style="color:var(--text-dim)">Note: no detector can be 100% certain—this shows high-confidence ensemble estimates.</small>
+        <small style="color:var(--text-dim)">Ensemble uses multiple signals; backend values are used when provided.</small>
       </div>
     </div>
 
@@ -368,11 +368,21 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <span class="chip"><i class="fa-solid fa-shield-halved ico"></i> Confidence: <b id="detConfidence">—</b>%</span>
         <span class="chip"><i class="fa-solid fa-circle-info ico"></i> Higher bar = more AI-like for that detector</span>
       </div>
-      <div class="det-grid" id="detGrid">
-        <!-- rows injected by JS -->
-      </div>
+      <div class="det-grid" id="detGrid"></div>
       <div class="det-note" id="detNote">Ensemble blends 8 detectors (stylometry, repetition, discourse, punctuation, compressibility, lexical signals, Zipf/Gini, longform). Backend values override when available.</div>
     </section>
+
+    @php $labels = [
+      1=>'Define search intent & primary topic', 2=>'Map target & related keywords (synonyms/PAA)', 3=>'H1 includes primary topic naturally',
+      4=>'Integrate FAQs / questions with answers', 5=>'Readable, NLP-friendly language', 6=>'Title tag (≈50–60 chars) w/ primary keyword',
+      7=>'Meta description (≈140–160 chars) + CTA', 8=>'Canonical tag set correctly', 9=>'Indexable & listed in XML sitemap',
+      10=>'E-E-A-T signals (author, date, expertise)', 11=>'Unique value vs. top competitors', 12=>'Facts & citations up to date',
+      13=>'Helpful media (images/video) w/ captions', 14=>'Logical H2/H3 headings & topic clusters', 15=>'Internal links to hub/related pages',
+      16=>'Clean, descriptive URL slug', 17=>'Breadcrumbs enabled (+ schema)', 18=>'Mobile-friendly, responsive layout',
+      19=>'Optimized speed (compression, lazy-load)', 20=>'Core Web Vitals passing (LCP/INP/CLS)', 21=>'Clear CTAs and next steps',
+      22=>'Primary entity clearly defined', 23=>'Related entities covered with context', 24=>'Valid schema markup (Article/FAQ/Product)',
+      25=>'sameAs/Organization details present'
+    ]; @endphp
 
     <div class="progress-wrap">
       <div class="comp-water" id="compWater" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -396,18 +406,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </div>
       <div id="progressCaption" class="progress-caption" style="color:var(--text-dim)">0 of 25 items completed</div>
     </div>
-
-    @php $labels = [
-      1=>'Define search intent & primary topic', 2=>'Map target & related keywords (synonyms/PAA)', 3=>'H1 includes primary topic naturally',
-      4=>'Integrate FAQs / questions with answers', 5=>'Readable, NLP-friendly language', 6=>'Title tag (≈50–60 chars) w/ primary keyword',
-      7=>'Meta description (≈140–160 chars) + CTA', 8=>'Canonical tag set correctly', 9=>'Indexable & listed in XML sitemap',
-      10=>'E-E-A-T signals (author, date, expertise)', 11=>'Unique value vs. top competitors', 12=>'Facts & citations up to date',
-      13=>'Helpful media (images/video) w/ captions', 14=>'Logical H2/H3 headings & topic clusters', 15=>'Internal links to hub/related pages',
-      16=>'Clean, descriptive URL slug', 17=>'Breadcrumbs enabled (+ schema)', 18=>'Mobile-friendly, responsive layout',
-      19=>'Optimized speed (compression, lazy-load)', 20=>'Core Web Vitals passing (LCP/INP/CLS)', 21=>'Clear CTAs and next steps',
-      22=>'Primary entity clearly defined', 23=>'Related entities covered with context', 24=>'Valid schema markup (Article/FAQ/Product)',
-      25=>'sameAs/Organization details present'
-    ]; @endphp
 
     <div class="analyzer-grid" id="checklistGrid">
       @foreach ([
@@ -473,10 +471,10 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- A) Analyze + core logic FIRST -->
+<!-- A) Analyze + core logic -->
 <script>
 (function(){
-  var CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+  var CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
   function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
   function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
@@ -571,166 +569,53 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
   function _entropy(counts,total){ if(!total||total<=0) return 0; var H=0; for(var k in counts){ if(!counts.hasOwnProperty(k)) continue; var p=counts[k]/total; if(p>0){ H += -p*Math.log(p); } } return H; }
   function _gini(arr){ if(!arr||arr.length===0) return 0; var n=arr.length; var s=0; for(var i=0;i<n;i++){ s+=arr[i]; } if(s===0) return 0; var sorted=arr.slice().sort(function(a,b){return a-b;}); var cum=0; for(var j=0;j<n;j++){ cum += (2*(j+1)-n-1)*sorted[j]; } return cum/(n*s); }
-
-  function _compressRatioLZW(str){
-    // tiny LZW-ish compressor just for a rough compressibility signal
-    var dict={}, data=str, out=[], currChar, phrase=data.charAt(0), code=256;
-    for(var i=1;i<data.length;i++){ currChar=data.charAt(i); if(dict[phrase+currChar]!==undefined){ phrase+=currChar; }else{ out.push(phrase.length>1?dict[phrase]:phrase.charCodeAt(0)); dict[phrase+currChar]=code; code++; phrase=currChar; } }
-    out.push(phrase.length>1?dict[phrase]:phrase.charCodeAt(0));
-    // estimate bytes (assuming 2 bytes per code ~ rough)
-    var original = str.length; var compressed = out.length*2;
-    if(original===0) return 1;
-    var ratio = compressed/original; // lower => more compressible
-    return clamp(ratio, 0.2, 3.0);
-  }
+  function _compressRatioLZW(str){ var dict={},data=str,out=[],currChar,phrase=data.charAt(0),code=256; for(var i=1;i<data.length;i++){ currChar=data.charAt(i); if(dict[phrase+currChar]!==undefined){ phrase+=currChar; }else{ out.push(phrase.length>1?dict[phrase]:phrase.charCodeAt(0)); dict[phrase+currChar]=code; code++; phrase=currChar; } } out.push(phrase.length>1?dict[phrase]:phrase.charCodeAt(0)); var original=str.length; var compressed=out.length*2; if(original===0) return 1; return clamp(compressed/original, 0.2, 3.0); }
 
   function _prep(text){
-    text = (text||'') + '';
-    if(text.length>80000) text = text.slice(0,80000);
-    var t = text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
-    var sentenceSplit = /(?<=[\.\!\?])\s+|\n+(?=\S)/g;
-    var sentences = t.split(sentenceSplit).filter(function(s){return s.trim().length>0;});
-    if (sentences.length<3){ sentences = t.split(/[\.!\?]+/g).filter(function(s){return s.trim().length>0;}); }
+    text=(text||'')+''; if(text.length>100000) text=text.slice(0,100000);
+    var t=text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
+    var sentenceSplit=/(?<=[\.\!\?])\s+|\n+(?=\S)/g; var sentences=t.split(sentenceSplit).filter(function(s){return s.trim().length>0;});
+    if(sentences.length<3){ sentences=t.split(/[\.!\?]+/g).filter(function(s){return s.trim().length>0;}); }
+    var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(t.match(wordRe)||[]).map(function(w){return w.toLowerCase();}); var tokens=words.length;
 
-    var wordRe = /[A-Za-z\u00C0-\u024f0-9']+/g;
-    var words = (t.match(wordRe)||[]).map(function(w){return w.toLowerCase();});
-    var tokens = words.length;
+    var freq=Object.create(null); for(var i=0;i<tokens;i++){ var w=words[i]; freq[w]=(freq[w]||0)+1; }
+    var types=0,hapax=0,arr=[]; for(var k in freq){ if(!freq.hasOwnProperty(k)) continue; types++; if(freq[k]===1) hapax++; arr.push(freq[k]); }
 
-    var freq = Object.create(null);
-    for(var i=0;i<tokens;i++){ var w=words[i]; freq[w]=(freq[w]||0)+1; }
+    var lens=[],sum=0; for(var s=0;s<sentences.length;s++){ var L=(sentences[s].match(wordRe)||[]).length; if(L>0){ lens.push(L); sum+=L; } }
+    var mean=lens.length?sum/lens.length:0; var variance=0; for(var j=0;j<lens.length;j++){ variance+=Math.pow(lens[j]-mean,2); } variance=lens.length?variance/lens.length:0; var std=Math.sqrt(variance); var cov=mean>0?(std/mean):0;
 
-    var types=0, hapax=0; var arr=[];
-    for(var k in freq){ if(!freq.hasOwnProperty(k)) continue; types++; if(freq[k]===1) hapax++; arr.push(freq[k]); }
+    var tri=Object.create(null),triTotal=0,triRepeats=0; for(var tdx=0;tdx<tokens-2;tdx++){ var g=words[tdx]+' '+words[tdx+1]+' '+words[tdx+2]; tri[g]=(tri[g]||0)+1; triTotal++; } for(var gk in tri){ if(tri[gk]>1) triRepeats+=tri[gk]-1; } var triRepeatRatio=triTotal?triRepeats/triTotal:0;
 
-    var lens=[], sum=0;
-    for(var s=0;s<sentences.length;s++){
-      var L = (sentences[s].match(wordRe)||[]).length;
-      if(L>0){ lens.push(L); sum+=L; }
-    }
-    var mean = lens.length? sum/lens.length : 0;
-    var variance=0; for(var j=0;j<lens.length;j++){ variance += Math.pow(lens[j]-mean,2); }
-    variance = lens.length? variance/lens.length : 0;
-    var std = Math.sqrt(variance);
-    var cov = mean>0 ? (std/mean) : 0;
+    var starters=Object.create(null),startersTotal=0,topStarter=0; for(var si=0;si<sentences.length;si++){ var w0=(sentences[si].match(wordRe)||[])[0]; if(!w0) continue; w0=w0.toLowerCase(); starters[w0]=(starters[w0]||0)+1; startersTotal++; } for(var k2 in starters){ if(starters[k2]>topStarter) topStarter=starters[k2]; } var starterDom=startersTotal?topStarter/startersTotal:0;
 
-    var tri = Object.create(null), triTotal=0, triRepeats=0;
-    for(var i3=0;i3<tokens-2;i3++){ var g=words[i3]+' '+words[i3+1]+' '+words[i3+2]; tri[g]=(tri[g]||0)+1; triTotal++; }
-    for(var gk in tri){ if(tri[gk]>1) triRepeats += tri[gk]-1; }
-    var triRepeatRatio = triTotal? triRepeats/triTotal : 0;
+    var pMap={'.':0, ',':0, ';':0, ':':0, '!':0, '?':0, '"':0, '\'':0, '(':0, ')':0}; var pTotal=0; for(var pi=0;pi<t.length;pi++){ var ch=t[pi]; if(pMap.hasOwnProperty(ch)){ pMap[ch]++; pTotal++; } } var H=_entropy(pMap,pTotal); var Hnorm=(pTotal>0)?(H/Math.log(10)):0;
 
-    var starters = Object.create(null), startersTotal=0, topStarter=0;
-    for(var si=0;si<sentences.length;si++){
-      var w0 = (sentences[si].match(wordRe)||[])[0];
-      if(!w0) continue; w0=w0.toLowerCase();
-      starters[w0]=(starters[w0]||0)+1; startersTotal++;
-    }
-    for(var k2 in starters){ if(starters[k2]>topStarter) topStarter=starters[k2]; }
-    var starterDom = startersTotal? topStarter/startersTotal : 0;
+    var connectors=/\b(however|moreover|furthermore|additionally|therefore|thus|consequently|in conclusion|overall|importantly|notwithstanding|nonetheless|nevertheless|hence|alternatively)\b/gi;
+    var connectorHits=(t.match(connectors)||[]).length; var connPer100=connectorHits*100/(tokens||1);
+    var contractionsRe=/\b(?:I'm|I've|I'd|I'll|we're|we've|we'd|we'll|you're|you've|you'd|you'll|they're|they've|they'd|they'll|it's|that's|there's|isn't|aren't|can't|won't|shouldn't|couldn't|don't|doesn't|didn't|let's|n't|'re|'ve|'ll)\b/gi;
+    var apostrophes=(t.match(/'/g)||[]).length; var contractions=(t.match(contractionsRe)||[]).length; var contrPer100=contractions*100/(tokens||1); var contrWeight=apostrophes>3?1.0:0.35;
+    var passive=(t.match(/\b(am|is|are|was|were|be|been|being)\s+\w+ed\b/gi)||[]).length; var passivePer100=passive*100/(tokens||1);
+    var stops=/\b(the|of|and|to|in|a|is|that|for|on|with|as|by|at|from|it|an|be|this|which|or|are|was|were|but|not|have|has|had|can|will|would|should)\b/gi; var stopHits=(t.match(stops)||[]).length; var stopPer100=stopHits*100/(tokens||1);
+    var digits=(t.match(/\d/g)||[]).length; var digitsPer100=digits*100/(tokens||1);
 
-    // punctuation entropy
-    var pMap={'.':0, ',':0, ';':0, ':':0, '!':0, '?':0, '"':0, '\'':0, '(':0, ')':0};
-    var pTotal=0; for(var pi=0;pi<t.length;pi++){ var ch=t[pi]; if(pMap.hasOwnProperty(ch)){ pMap[ch]++; pTotal++; } }
-    var H = _entropy(pMap, pTotal); var Hnorm = (pTotal>0) ? ( H / Math.log(10) ) : 0;
+    var TTR=types/(tokens||1); var Guiraud=types/Math.sqrt(tokens||1); var hapaxRatio=types?hapax/types:0;
+    var longCount=0; for(var li=0;li<lens.length;li++){ if(lens[li]>=28) longCount++; } var longRatio=lens.length?longCount/lens.length:0;
+    var gini=_gini(arr); var compRatio=_compressRatioLZW(t);
 
-    // markers
-    var connectors = /\b(however|moreover|furthermore|additionally|therefore|thus|consequently|in conclusion|overall|importantly|notwithstanding|nonetheless|nevertheless|hence|alternatively)\b/gi;
-    var connectorHits = (t.match(connectors)||[]).length;
-    var wordCount = tokens || 1;
-    var connPer100 = connectorHits*100/wordCount;
-
-    var contractionsRe = /\b(?:I'm|I've|I'd|I'll|we're|we've|we'd|we'll|you're|you've|you'd|you'll|they're|they've|they'd|they'll|it's|that's|there's|isn't|aren't|can't|won't|shouldn't|couldn't|don't|doesn't|didn't|let's|n't|'re|'ve|'ll)\b/gi;
-    var apostrophes = (t.match(/'/g)||[]).length;
-    var contractions = (t.match(contractionsRe)||[]).length;
-    var contrPer100 = contractions*100/wordCount;
-    var contrWeight = apostrophes>3 ? 1.0 : 0.35;
-
-    var passive = (t.match(/\b(am|is|are|was|were|be|been|being)\s+\w+ed\b/gi)||[]).length; // crude passive
-    var passivePer100 = passive*100/wordCount;
-
-    var stops = /\b(the|of|and|to|in|a|is|that|for|on|with|as|by|at|from|it|an|be|this|which|or|are|was|were|but|not|have|has|had|can|will|would|should)\b/gi;
-    var stopHits = (t.match(stops)||[]).length;
-    var stopPer100 = stopHits*100/wordCount;
-
-    var digits = (t.match(/\d/g)||[]).length; var digitsPer100 = digits*100/wordCount;
-
-    // vocab richness
-    var TTR = types/wordCount;
-    var Guiraud = types/Math.sqrt(wordCount);
-    var hapaxRatio = types? hapax/types : 0;
-
-    var longCount=0; for(var li=0; li<lens.length; li++){ if(lens[li]>=28) longCount++; }
-    var longRatio = lens.length? longCount/lens.length : 0;
-
-    var gini = _gini(arr);
-    var compRatio = _compressRatioLZW(t); // lower=>more compressible
-
-    return {
-      text:t, words:words, wordCount:wordCount, sentences:sentences, lens:lens,
-      mean:mean, cov:cov, std:std, longRatio:longRatio,
-      triRepeatRatio:triRepeatRatio, starterDom:starterDom,
-      Hnorm:Hnorm, connPer100:connPer100, contrPer100:contrPer100, contrWeight:contrWeight,
-      passivePer100:passivePer100, stopPer100:stopPer100, digitsPer100:digitsPer100,
-      TTR:TTR, Guiraud:Guiraud, hapaxRatio:hapaxRatio, gini:gini, compRatio:compRatio, apostrophes:apostrophes
-    };
+    return { text:t, words:words, wordCount:tokens, lens:lens, mean:mean, cov:cov, std:std, longRatio:longRatio, triRepeatRatio:triRepeatRatio, starterDom:starterDom, Hnorm:Hnorm, connPer100:connPer100, contrPer100:contrPer100, contrWeight:contrWeight, passivePer100:passivePer100, stopPer100:stopPer100, digitsPer100:digitsPer100, TTR:TTR, Guiraud:Guiraud, hapaxRatio:hapaxRatio, gini:gini, compRatio:compRatio, apostrophes:apostrophes };
   }
 
-  function detStylometry(s){
-    var ai=0;
-    var covTarget=0.45;
-    if (s.cov < covTarget) ai += clamp((covTarget - s.cov)/covTarget,0,1)*25; else ai -= clamp((s.cov - covTarget)/covTarget,0,1)*6;
-    var ttrTarget = 0.45;
-    if (s.TTR < ttrTarget) ai += clamp((ttrTarget - s.TTR)/ttrTarget,0,1)*18; else ai -= clamp((s.TTR - ttrTarget)/ttrTarget,0,1)*6;
-    if (s.Guiraud < 4.8) ai += clamp((4.8 - s.Guiraud)/4.8,0,1)*10; else ai -= clamp((s.Guiraud-4.8)/4.8,0,1)*4;
-    if (s.hapaxRatio < 0.45) ai += clamp((0.45 - s.hapaxRatio)/0.45,0,1)*10;
-    return clamp(Math.round(10+ai),0,100);
-  }
-  function detRepetition(s){
-    var ai=0;
-    ai += clamp(s.triRepeatRatio*100/3,0,1)*28;
-    ai += clamp((s.starterDom - 0.22)/0.5,0,1)*12;
-    return clamp(Math.round(ai),0,100);
-  }
-  function detDiscourse(s){
-    var ai=0;
-    ai += clamp((s.connPer100 - 0.9)/2.2,0,1)*16;
-    ai += s.contrWeight * clamp((1.0 - s.contrPer100/1.6),0,1)*12;
-    ai += clamp((s.passivePer100 - 0.9)/3.0,0,1)*8;
-    return clamp(Math.round(8+ai),0,100);
-  }
-  function detPunctuation(s){
-    var ai=0;
-    ai += clamp((0.85 - s.Hnorm),0,1)*18;
-    return clamp(Math.round(10+ai),0,100);
-  }
-  function detCompress(s){
-    // compRatio ~ 0.2..3.0; lower => more compressible => more templated => more AI
-    var ai = clamp((0.85 - Math.min(0.85, s.compRatio))/0.85,0,1)*26;
-    return clamp(Math.round(8+ai),0,100);
-  }
-  function detLexical(s){
-    var ai=0;
-    if (s.stopPer100 < 35) ai += clamp((35 - s.stopPer100)/35,0,1)*10;
-    if (s.digitsPer100 > 4) ai += clamp((s.digitsPer100-4)/12,0,1)*6;
-    if (s.apostrophes<2) ai += 4;
-    return clamp(Math.round(6+ai),0,100);
-  }
-  function detGiniZipf(s){
-    // human tends to have inequality (Zipf heavy-tail). Very low gini -> AI-ish.
-    var ai=0;
-    if (s.gini < 0.47) ai += clamp((0.47 - s.gini)/0.47,0,1)*22;
-    else if (s.gini > 0.78) ai += clamp((s.gini - 0.78)/0.22,0,1)*8; // extreme concentration also odd
-    return clamp(Math.round(10+ai),0,100);
-  }
-  function detLongform(s){
-    var ai=0;
-    if (s.longRatio < 0.08) ai += clamp((0.08 - s.longRatio)/0.08,0,1)*8;
-    else if (s.longRatio > 0.35) ai += clamp((s.longRatio - 0.35)/0.65,0,1)*8;
-    return clamp(Math.round(8+ai),0,100);
-  }
+  function detStylometry(s){ var ai=0; var covTarget=0.45; if(s.cov<covTarget) ai+=clamp((covTarget-s.cov)/covTarget,0,1)*25; else ai-=clamp((s.cov-covTarget)/covTarget,0,1)*6; var ttrTarget=0.45; if(s.TTR<ttrTarget) ai+=clamp((ttrTarget-s.TTR)/ttrTarget,0,1)*18; else ai-=clamp((s.TTR-ttrTarget)/ttrTarget,0,1)*6; if(s.Guiraud<4.8) ai+=clamp((4.8-s.Guiraud)/4.8,0,1)*10; else ai-=clamp((s.Guiraud-4.8)/4.8,0,1)*4; if(s.hapaxRatio<0.45) ai+=clamp((0.45-s.hapaxRatio)/0.45,0,1)*10; return clamp(Math.round(10+ai),0,100); }
+  function detRepetition(s){ var ai=0; ai+=clamp(s.triRepeatRatio*100/3,0,1)*28; ai+=clamp((s.starterDom-0.22)/0.5,0,1)*12; return clamp(Math.round(ai),0,100); }
+  function detDiscourse(s){ var ai=0; ai+=clamp((s.connPer100-0.9)/2.2,0,1)*16; ai+=s.contrWeight*clamp((1.0-s.contrPer100/1.6),0,1)*12; ai+=clamp((s.passivePer100-0.9)/3.0,0,1)*8; return clamp(Math.round(8+ai),0,100); }
+  function detPunctuation(s){ var ai=0; ai+=clamp((0.85-s.Hnorm),0,1)*18; return clamp(Math.round(10+ai),0,100); }
+  function detCompress(s){ var ai=clamp((0.85-Math.min(0.85,s.compRatio))/0.85,0,1)*26; return clamp(Math.round(8+ai),0,100); }
+  function detLexical(s){ var ai=0; if(s.stopPer100<35) ai+=clamp((35-s.stopPer100)/35,0,1)*10; if(s.digitsPer100>4) ai+=clamp((s.digitsPer100-4)/12,0,1)*6; if(s.apostrophes<2) ai+=4; return clamp(Math.round(6+ai),0,100); }
+  function detGiniZipf(s){ var ai=0; if(s.gini<0.47) ai+=clamp((0.47-s.gini)/0.47,0,1)*22; else if(s.gini>0.78) ai+=clamp((s.gini-0.78)/0.22,0,1)*8; return clamp(Math.round(10+ai),0,100); }
+  function detLongform(s){ var ai=0; if(s.longRatio<0.08) ai+=clamp((0.08-s.longRatio)/0.08,0,1)*8; else if(s.longRatio>0.35) ai+=clamp((s.longRatio-0.35)/0.65,0,1)*8; return clamp(Math.round(8+ai),0,100); }
 
   function detectUltra(text){
     var s=_prep(text||'');
-    // very short -> low confidence quick return
     if (s.wordCount < 40){
       var aiQuick = clamp(60 - s.wordCount*0.5, 15, 60);
       return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 45, detectors: [] };
@@ -746,48 +631,36 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       {key:'longform', label:'Longform', ai:detLongform(s), w:0.8}
     ];
     var ais = parts.map(function(p){return p.ai;}).slice().sort(function(a,b){return a-b;});
-    // trimmed mean (drop min/max)
     var trimmed = ais.slice(1, ais.length-1);
     var mean = trimmed.reduce(function(a,b){return a+b;},0)/Math.max(1,trimmed.length);
-    // weighted push toward robust center
-    var wsum=0, wacc=0;
-    for(var i=0;i<parts.length;i++){ wacc += parts[i].ai*parts[i].w; wsum += parts[i].w; }
+    var wsum=0, wacc=0; for(var i=0;i<parts.length;i++){ wacc += parts[i].ai*parts[i].w; wsum += parts[i].w; }
     var weighted = wacc/Math.max(1,wsum);
     var aiEnsemble = clamp(Math.round((weighted*0.55 + mean*0.45)), 0, 100);
 
-    // confidence by agreement + length
     var spread=0; for(var j=0;j<parts.length;j++){ spread += Math.abs(parts[j].ai - aiEnsemble); }
-    var avgDev = spread/parts.length; // lower is better agreement
+    var avgDev = spread/parts.length;
     var agree = clamp(100 - avgDev*1.2, 40, 96);
-    var lenBoost = Math.min(1, Math.log(s.wordCount+1)/Math.log(10000)); // 0..1
+    var lenBoost = Math.min(1, Math.log((s.wordCount||1)+1)/Math.log(10000));
     var conf = clamp(Math.round(agree*0.6 + lenBoost*40), 45, 97);
 
     return { humanPct: 100-aiEnsemble, aiPct: aiEnsemble, confidence: conf, detectors: parts };
   }
 
   function renderDetectors(res){
-    var panel = document.getElementById('detectorPanel');
-    if(!panel) return;
-    var grid = document.getElementById('detGrid');
-    var confEl = document.getElementById('detConfidence');
+    var panel = document.getElementById('detectorPanel'); if(!panel) return;
+    var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
     if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
     panel.style.display = 'block';
     if(!grid) return;
     grid.innerHTML = '';
     var list = res.detectors||[];
     for(var i=0;i<list.length;i++){
-      var d=list[i];
-      var id='det-'+d.key;
+      var d=list[i]; var id='det-'+d.key;
       var wrap=document.createElement('div'); wrap.className='det-item'; wrap.innerHTML =
         '<div class="det-row"><div class="det-label">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+d.ai+'</div></div>'+
         '<div class="det-bar"><div class="det-fill" id="'+id+'-fill"></div></div>';
       grid.appendChild(wrap);
-      (function(mid, mfill, val){
-        var scoreEl = document.getElementById(mid+'-score');
-        var fillEl  = document.getElementById(mid+'-fill');
-        if(scoreEl) scoreEl.textContent = val;
-        if(fillEl){ fillEl.style.width = clamp(val,0,100)+'%'; }
-      })(id,id,val=d.ai);
+      (function(mid, mfill, val){ var scoreEl=document.getElementById(mid+'-score'); var fillEl=document.getElementById(mid+'-fill'); if(scoreEl) scoreEl.textContent=val; if(fillEl){ fillEl.style.width=clamp(val,0,100)+'%'; } })(id,id,d.ai);
     }
   }
 
@@ -797,8 +670,24 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var hp = document.getElementById('humanPct'), ap = document.getElementById('aiPct');
     if(hp) hp.textContent = isFinite(humanPct)? Math.round(humanPct) : '—';
     if(ap) ap.textContent = isFinite(aiPct)?    Math.round(aiPct)   : '—';
-    // breakdown UI
     if (breakdown && breakdown.detectors){ renderDetectors(breakdown); }
+  }
+
+  // Build a best-effort sample if backend didn’t include one
+  function buildSampleFromData(data){
+    var parts = [];
+    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data[k]==='string' && data[k].length>0) parts.push(data[k]); });
+    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){ 
+      var v = data[k]; 
+      if (typeof v === 'string' && v.trim()) parts.push(v); 
+      if (Array.isArray(v)) parts.push(v.join('. ')); 
+    });
+    // de-dupe & cap
+    var txt = parts.join('\n\n'); 
+    // remove duplicate whitespace
+    txt = txt.replace(/\s{2,}/g,' ').trim();
+    if (txt.length>120000) txt = txt.slice(0,120000);
+    return txt;
   }
 
   function normalizeUrl(u) {
@@ -819,19 +708,20 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
+    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
 
     var data=null, ok=false, status=0, text='', lastErr='';
     var qs = new URLSearchParams({ url: url }).toString();
 
+    // try GET analyze-json
     try{
-      var res1 = await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json') + '?' + qs, {
-        method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' }
-      });
+      var res1 = await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json') + '?' + qs, { method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' } });
       status = res1.status; text = await res1.text();
       try{ data = JSON.parse(text); }catch(e){}
       if (res1.ok && data) ok = true;
     }catch(e){ lastErr = 'GET analyze-json failed: '+e.message; }
 
+    // fallback POST analyze
     if (!ok){
       try{
         var res2 = await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'), {
@@ -845,11 +735,10 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }catch(e){ lastErr = 'POST analyze failed: '+e.message; }
     }
 
+    // fallback GET analyze
     if (!ok){
       try{
-        var res3 = await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze') + '?' + qs, {
-          method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' }
-        });
+        var res3 = await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze') + '?' + qs, { method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' } });
         status = res3.status; text = await res3.text();
         try{ data = JSON.parse(text); }catch(e){}
         if (res3.ok && data) ok = true;
@@ -879,16 +768,27 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  data.internalLinks ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
-    // Human/AI detection: backend => else ensemble
+    // Human/AI detection
     var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
     var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+    var backendConf = (typeof data.confidence==='number')? data.confidence : null;
 
-    if (!isFinite(hp) && !isFinite(ap)) {
-      var sample = data.textSample || data.extractedText || data.body || data.sample || '';
-      var det = detectUltra(sample);
-      applyDetection(det.humanPct, det.aiPct, det.confidence, det);
+    // Build best-effort text sample from many possible fields
+    var sample = buildSampleFromData(data);
+
+    // If we have any text, compute ensemble too
+    var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+
+    // Decide which to show: prefer backend if it exists AND has confidence >= 65; else ensemble
+    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
+      applyDetection(hp, ap, backendConf, ensemble); // still show breakdown if we computed it
+    } else if (ensemble){
+      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
+    } else if (isFinite(hp) && isFinite(ap)){
+      applyDetection(hp, ap, backendConf || null, null);
     } else {
-      applyDetection(hp, ap, data.confidence || null, null);
+      applyDetection(NaN, NaN, null, null);
+      var detNote=document.getElementById('detNote'); if(detNote) detNote.textContent='No text content returned by backend; please include textSample/extractedText/plainText to enable ensemble detection.';
     }
 
     window.autoTickByScores(data.itemScores || {});
@@ -897,12 +797,14 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if (report) report.style.display = 'block';
   };
 
-  // Ensure click wiring even if later UI errors occur
+  // Events
   document.addEventListener('DOMContentLoaded', function(){
     var btn = document.getElementById('analyzeBtn');
     if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); window.analyze(); }); }
     var input = document.getElementById('analyzeUrl');
     if (input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); window.analyze(); }}); }
+    var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
+    var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
   });
 
 })();
@@ -983,39 +885,43 @@ try{
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
 </script>
 
-<!-- C) Background smoke — hardened -->
+<!-- C) Background smoke — much stronger and always-on -->
 <script>
 try{
-  // moving glow lines
+  // glowing lines
   (function(){
     var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
     function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
-    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=14,spacing=Math.max(56,h/rows);
+    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=16,spacing=Math.max(54,h/rows);
       for(var i=-2;i<rows+2;i++){ var y=i*spacing+((t*0.025)%spacing); var g=ctx.createLinearGradient(0,y,w,y+90);
-        g.addColorStop(0,'rgba(61,226,255,0.10)'); g.addColorStop(0.5,'rgba(155,92,255,0.12)'); g.addColorStop(1,'rgba(255,32,69,0.10)');
-        ctx.strokeStyle=g; ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(-100,y); ctx.lineTo(w+100,y+90); ctx.stroke(); }
+        g.addColorStop(0,'rgba(61,226,255,0.14)'); g.addColorStop(0.5,'rgba(155,92,255,0.16)'); g.addColorStop(1,'rgba(255,32,69,0.14)');
+        ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(-120,y); ctx.lineTo(w+120,y+90); ctx.stroke(); }
       requestAnimationFrame(draw);
     }
     window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
   })();
 
-  // drifting colored fog “smoke”
+  // smoke fog
   (function(){
     var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], rafId=0;
     function resize(){
       c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-      blobs=Array.apply(null,Array(56)).map(function(){ return {
-        x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight, r:80+Math.random()*180,
-        vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22, hue:160+Math.random()*180, a:.18+.12*Math.random()
+      blobs=Array.apply(null,Array(72)).map(function(){ return {
+        x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight,
+        r:120+Math.random()*220, vx:(Math.random()-.5)*.26, vy:(Math.random()-.5)*.26,
+        hue:150+Math.random()*180, a:.24+.18*Math.random()
       };});
     }
     function draw(){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); ctx.globalCompositeOperation='lighter';
       for(var i=0;i<blobs.length;i++){ var b=blobs[i]; b.x+=b.vx; b.y+=b.vy;
-        if(b.x<-260)b.x=window.innerWidth+260; if(b.x>window.innerWidth+260)b.x=-260; if(b.y<-260)b.y=window.innerHeight+260; if(b.y>window.innerHeight+260)b.y=-260;
+        if(b.x<-320)b.x=window.innerWidth+320; if(b.x>window.innerWidth+320)b.x=-320; if(b.y<-320)b.y=window.innerHeight+320; if(b.y>window.innerHeight+320)b.y=-320;
         var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
-        g.addColorStop(0,'hsla('+b.hue+',85%,65%,'+b.a+')'); g.addColorStop(1,'hsla('+((b.hue+70)%360)+',85%,50%,0)');
+        g.addColorStop(0,'hsla('+b.hue+',85%,68%,'+b.a+')');
+        g.addColorStop(1,'hsla('+((b.hue+70)%360)+',85%,50%,0)');
         ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
-      } requestAnimationFrame(draw); }
+      }
+      requestAnimationFrame(draw);
+    }
     window.addEventListener('resize',resize,{passive:true}); resize(); draw();
   })();
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
