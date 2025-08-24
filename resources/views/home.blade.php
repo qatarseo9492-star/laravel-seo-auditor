@@ -38,9 +38,11 @@
 :root{--bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg}
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
+
 /* cloud canvases behind everything, never block clicks */
 #linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-#linesCanvas{opacity:.38}#smokeCanvas{opacity:.42}
+#linesCanvas{opacity:.50} /* stronger */
+#smokeCanvas{opacity:.62} /* stronger */
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
 /* Header */
@@ -273,6 +275,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
+        <small style="color:var(--text-dim)">Note: no detector can be 100% certain—this shows high-confidence estimates.</small>
       </div>
     </div>
 
@@ -464,7 +467,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- A) Analyze + core logic FIRST (so it's always defined) -->
+<!-- A) Analyze + core logic FIRST -->
 <script>
 (function(){
   var CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
@@ -472,7 +475,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
   function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
 
-  // Gauge
+  /* ====== Gauge ====== */
   var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
   window.setScoreWheel = function(value){
     if(!GAUGE.rect){
@@ -493,6 +496,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
   };
 
+  /* ====== Category bars + completion ====== */
   function updateCategoryBars(){
     var cards=[].slice.call(document.querySelectorAll('.category-card'));
     var total=0, checked=0;
@@ -515,6 +519,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   window.updateCategoryBars = updateCategoryBars;
 
+  /* ====== Auto-tick by item scores ====== */
   function autoTickByScores(map){
     var autoCount=0;
     for(var i=1;i<=25;i++){
@@ -539,7 +544,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   window.autoTickByScores = autoTickByScores;
 
-  // Water progress
+  /* ====== Water progress ====== */
   var Water=(function(){
     var wrapId=function(){ return document.getElementById('waterWrap'); };
     var clipId=function(){ return document.getElementById('waterClipRect'); };
@@ -556,6 +561,68 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   })();
   window.Water = Water;
 
+  /* ====== Heuristic content detector (fallback if API gives no humanPct/aiPct) ====== */
+  function detectFromText(text){
+    if(!text || typeof text!=='string'){ return null; }
+    var t=text.trim().replace(/\s+/g,' ');
+    var sentences=t.split(/(?<=[\.\?\!])\s+/); if(sentences.length<3){ sentences=t.split(/[\.\?\!]+/); }
+    var words=t.toLowerCase().match(/[a-z\u00C0-\u024f']+/g)||[];
+    var uniq = Object.create(null); for(var i=0;i<words.length;i++){ uniq[words[i]]=(uniq[words[i]]||0)+1; }
+    var uniqCount=0, repeats3=0;
+    var tri = Object.create(null);
+    for(var j=0;j<words.length-2;j++){ var g=words[j]+' '+words[j+1]+' '+words[j+2]; tri[g]=(tri[g]||0)+1; }
+    for(var k in uniq){ if(uniq.hasOwnProperty(k)) uniqCount++; }
+    for(var gk in tri){ if(tri[gk]>2) repeats3+=tri[gk]; }
+
+    // stats
+    var lens=[], sum=0; for(var s=0;s<sentences.length;s++){ var L=sentences[s].trim().split(/\s+/).length; if(isFinite(L)&&L>0){ lens.push(L); sum+=L; } }
+    var avg = lens.length? (sum/lens.length):0;
+    var variance=0; for(var s2=0;s2<lens.length;s2++){ variance += Math.pow(lens[s2]-avg,2); }
+    variance = lens.length? variance/lens.length : 0;
+    var std = Math.sqrt(variance);
+
+    // markers
+    var clichés=(t.match(/\b(however|moreover|furthermore|in conclusion|additionally|overall|more importantly)\b/gi)||[]).length;
+    var contractions=(t.match(/\b(?:I'm|I've|we're|can't|don't|isn't|it's|that's|there's|won't|shouldn't|couldn't|they're|you're|let's|didn't)\b/gi)||[]).length;
+    var punctuationVar=(t.match(/[;:!?]/g)||[]).length;
+    var digits=(t.match(/\d/g)||[]).length;
+
+    // crude scores (0..100). Higher AI means more templated / uniform / cliché.
+    var aiScore = 0;
+    // steadier sentence length -> more AI
+    aiScore += Math.max(0, 30 - Math.min(30, std*2));
+    // many clichés -> more AI
+    aiScore += Math.min(20, clichés*3);
+    // low contractions -> more AI
+    aiScore += Math.max(0, 15 - Math.min(15, contractions*1.5));
+    // repeated 3-grams -> more AI
+    aiScore += Math.min(15, repeats3*2);
+    // low punctuation variety -> more AI
+    aiScore += Math.max(0, 10 - Math.min(10, punctuationVar));
+    // very uniform vocabulary -> more AI
+    var uniqRatio = words.length? (uniqCount/words.length):0;
+    aiScore += (uniqRatio<0.35)?10:(uniqRatio<0.45?5:0);
+    // digits don't matter much but add tiny noise
+    aiScore += Math.min(5, Math.max(0, 5 - digits*0.5));
+
+    aiScore = Math.max(0, Math.min(100, Math.round(aiScore)));
+    var humanScore = 100 - aiScore;
+    // crude confidence: more text + strong skew => higher confidence
+    var conf = Math.max(40, Math.min(95, Math.round( (Math.log(words.length+1)/Math.log(5000))*60 + Math.abs(humanScore-aiScore)*0.4 )));
+    return { humanPct: humanScore, aiPct: aiScore, confidence: conf };
+  }
+
+  function applyDetection(humanPct, aiPct, confidence){
+    var writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
+    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; }
+    setText('humanPct', isFinite(humanPct)? Math.round(humanPct):'—');
+    setText('aiPct',    isFinite(aiPct)?    Math.round(aiPct)   :'—');
+    // tone chip color by "human-ness"
+    setChipTone(document.getElementById('overallChip'), document.getElementById('overallScoreInline')? Number(document.getElementById('overallScoreInline').textContent||0):0);
+    // optionally append confidence to title attribute
+    if (badge){ badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
+  }
+
   function normalizeUrl(u) {
     if (!u) return '';
     u = u.trim();
@@ -564,13 +631,13 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     try { new URL(guess); return guess; } catch(e) { return ''; }
   }
 
-  // --- THE analyzer() FUNCTION (always defined) ---
+  // --- analyzer() ---
   window.analyze = async function(){
     var input = document.getElementById('analyzeUrl');
     var url = normalizeUrl(input ? input.value : '');
     if (!url) { if(input) input.focus(); return; }
 
-    Water.start();
+    if (window.Water) window.Water.start();
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
@@ -612,24 +679,17 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     }
 
     if (!ok || !data){
-      console.log('Analyze failed', status, lastErr, (text && text.slice ? text.slice(0,300) : ''));
-      Water.finish();
+      if (window.Water) window.Water.finish();
       if (statusEl) statusEl.textContent = (text && text.length < 400 ? text : ('Could not analyze this URL (status '+status+'). '+ (lastErr||'')));
       return;
     }
 
+    // --- Apply scores ---
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
-    var humanPct = Number(data.humanPct || 0);
-    var aiPct    = Number(data.aiPct || 0);
-    var writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
-
     window.setScoreWheel(overall||0);
     setText('contentScoreInline', Math.round(contentScore||0));
     setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
-    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; }
-    setText('humanPct', Math.round(humanPct||0));
-    setText('aiPct', Math.round(aiPct||0));
 
     setText('rStatus',    data.httpStatus ? data.httpStatus : '—');
     setText('rTitleLen',  data.titleLen   ? data.titleLen   : '—');
@@ -641,8 +701,21 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  data.internalLinks ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
+    // --- Human/AI detection: use API values if present, else fallback heuristic over textSample/extractedText/body/sample ---
+    var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+    var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+
+    if (!isFinite(hp) && !isFinite(ap)) {
+      var sample = data.textSample || data.extractedText || data.body || data.sample || '';
+      var est = detectFromText(sample);
+      if (est){ hp = est.humanPct; ap = est.aiPct; applyDetection(hp, ap, est.confidence); }
+      else { applyDetection(NaN, NaN, NaN); }
+    } else {
+      applyDetection(hp, ap, data.confidence || null);
+    }
+
     window.autoTickByScores(data.itemScores || {});
-    Water.finish();
+    if (window.Water) window.Water.finish();
     if (statusEl) statusEl.textContent = 'Analysis complete';
     if (report) report.style.display = 'block';
   };
@@ -658,7 +731,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 })();
 </script>
 
-<!-- B) Non-critical UI (wrapped so errors never block analyzer) -->
+<!-- B) Non-critical UI -->
 <script>
 try{
   // Hue drift for multi-color water
@@ -732,36 +805,52 @@ try{
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
 </script>
 
-<!-- C) Background smoke (isolated so failures never affect analyze) -->
+<!-- C) Background smoke — hardened & brighter -->
 <script>
 try{
-  // lines
+  // moving glow lines (brighter)
   (function(){
     var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
     function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
-    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=12,spacing=Math.max(60,h/rows);
-      for(var i=-2;i<rows+2;i++){ var y=i*spacing+((t*0.02)%spacing); var g=ctx.createLinearGradient(0,y,w,y+80);
-        g.addColorStop(0,'rgba(61,226,255,0.06)'); g.addColorStop(0.5,'rgba(155,92,255,0.08)'); g.addColorStop(1,'rgba(255,32,69,0.06)');
-        ctx.strokeStyle=g; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(-100,y); ctx.lineTo(w+100,y+80); ctx.stroke(); }
+    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=14,spacing=Math.max(56,h/rows);
+      for(var i=-2;i<rows+2;i++){ var y=i*spacing+((t*0.025)%spacing); var g=ctx.createLinearGradient(0,y,w,y+90);
+        g.addColorStop(0,'rgba(61,226,255,0.10)'); g.addColorStop(0.5,'rgba(155,92,255,0.12)'); g.addColorStop(1,'rgba(255,32,69,0.10)');
+        ctx.strokeStyle=g; ctx.lineWidth=1.4; ctx.beginPath(); ctx.moveTo(-100,y); ctx.lineTo(w+100,y+90); ctx.stroke(); }
       requestAnimationFrame(draw);
     }
     window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
   })();
 
-  // smoke blobs
+  // drifting colored fog “smoke” (more blobs & alpha)
   (function(){
-    var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[];
-    function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-      blobs=Array.apply(null,Array(42)).map(function(){ return {x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:60+Math.random()*160,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,hue:180+Math.random()*140,a:.12+.10*Math.random()}; });
+    var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], rafId=0;
+    function resize(){
+      c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+      blobs=Array.apply(null,Array(56)).map(function(){ return {
+        x:Math.random()*window.innerWidth,
+        y:Math.random()*window.innerHeight,
+        r:80+Math.random()*180,
+        vx:(Math.random()-.5)*.22,
+        vy:(Math.random()-.5)*.22,
+        hue:160+Math.random()*180,
+        a:.18+.12*Math.random()
+      };});
     }
-    function draw(){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); ctx.globalCompositeOperation='lighter';
-      for(var i=0;i<blobs.length;i++){ var b=blobs[i]; b.x+=b.vx; b.y+=b.vy;
-        if(b.x<-220)b.x=window.innerWidth+220; if(b.x>window.innerWidth+220)b.x=-220; if(b.y<-220)b.y=window.innerHeight+220; if(b.y>window.innerHeight+220)b.y=-220;
-        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r); g.addColorStop(0,'hsla('+b.hue+',85%,65%,'+b.a+')'); g.addColorStop(1,'hsla('+((b.hue+60)%360)+',85%,55%,0)');
+    function draw(){
+      ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+      ctx.globalCompositeOperation='lighter';
+      for(var i=0;i<blobs.length;i++){
+        var b=blobs[i]; b.x+=b.vx; b.y+=b.vy;
+        if(b.x<-260)b.x=window.innerWidth+260; if(b.x>window.innerWidth+260)b.x=-260; if(b.y<-260)b.y=window.innerHeight+260; if(b.y>window.innerHeight+260)b.y=-260;
+        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+        g.addColorStop(0,'hsla('+b.hue+',85%,65%,'+b.a+')');
+        g.addColorStop(1,'hsla('+((b.hue+70)%360)+',85%,50%,0)');
         ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
-      } requestAnimationFrame(draw);
+      }
+      rafId = requestAnimationFrame(draw);
     }
-    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+    window.addEventListener('resize',resize,{passive:true});
+    resize(); draw();
   })();
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
 </script>
