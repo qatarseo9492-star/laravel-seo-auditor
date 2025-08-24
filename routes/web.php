@@ -10,7 +10,7 @@ Route::get('/', function () {
 })->name('home');
 
 /**
- * Analyzer endpoints
+ * Analyzer endpoints (your existing flow)
  * - UI first tries GET /analyze-json
  * - then POST /analyze (CSRF)
  * - then GET /analyze as fallback
@@ -19,9 +19,7 @@ Route::get('/analyze-json', [AnalyzeController::class, 'analyzeJson'])->name('an
 Route::match(['POST', 'GET'], '/analyze', [AnalyzeController::class, 'analyze'])->name('analyze');
 
 /**
- * Performance APIs (keys are never exposed to the browser)
- * /api/crux  -> Chrome UX Report (fast CWV p75)
- * /api/psi   -> PageSpeed Insights (full Lighthouse)
+ * Performance proxy endpoints (hide Google API key server-side)
  */
 Route::middleware('throttle:60,1')->get('/api/crux', [CruxController::class, 'url'])->name('crux.url');
 Route::middleware('throttle:30,1')->get('/api/psi',  [PsiController::class, 'run'])->name('psi.run');
