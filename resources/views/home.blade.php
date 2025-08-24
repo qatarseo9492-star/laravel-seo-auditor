@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-24r (guaranteed scoring + tech lines + smoke) --}}
+{{-- resources/views/home.blade.php — v2025-08-24t (guaranteed item scores + meta extraction + ensemble fallback) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -195,7 +195,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 <script>
   window.SEMSEO = window.SEMSEO || {};
   window.SEMSEO.ENDPOINTS = { analyzeJson: @json($analyzeJsonUrl), analyze: @json($analyzeUrl) };
-  // Color period for smoke (ms). Keep slow by default; set to 1 for fast cycling.
+  // Slow hue by default; set to 1 for fast cycling.
   window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
   function SEMSEO_go(){ try { if (typeof analyze === 'function') { analyze(); } else { alert('Analyzer not ready — please wait a moment and click again.'); } } catch(e){ alert('JS error: '+ e.message); } }
 </script>
@@ -281,7 +281,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
-        <small style="color:var(--text-dim)">If the backend returns no scores, a local ensemble + heuristics derive stable, varied scores so the UI always reflects reality.</small>
+        <small style="color:var(--text-dim)">If the backend returns no scores, a local ensemble + heuristics derive stable, varied scores. When you see “Confidence” around 50–70%, that’s the local estimate.</small>
       </div>
     </div>
 
@@ -468,17 +468,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- A) Analyze + core logic (guaranteed scoring) -->
+<!-- A) Analyze + core logic (UPGRADED) -->
 <script>
-/* ======== CORE: analyze + guaranteed scoring render (v2025-08-24r) ======== */
 (function(){
   var CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
   function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
   function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
   function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
-  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
 
-  /* ------- Score wheel ------- */
+  /* === Score wheel === */
   var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
   window.setScoreWheel = function(value){
     if(!GAUGE.rect){
@@ -497,7 +496,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
   };
 
-  /* ------- Progress bars ------- */
+  /* === Category bars + completion === */
   function updateCategoryBars(){
     var cards=[].slice.call(document.querySelectorAll('.category-card'));
     var total=0, checked=0;
@@ -520,7 +519,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   window.updateCategoryBars = updateCategoryBars;
 
-  /* ------- Water loader ------- */
+  /* === Water progress === */
   var Water=(function(){
     var wrap, clip, pctEl, t=null, value=0, maxWhileWorking=95, visible=false;
     function find(){ if(!wrap){ wrap=document.getElementById('waterWrap'); clip=document.getElementById('waterClipRect'); pctEl=document.getElementById('waterPct'); } }
@@ -536,50 +535,46 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   })();
   window.Water = Water;
 
-  /* ------- Text prep + light detectors ------- */
+  /* === Light stylometry (for fallback detection + item scoring) === */
   function _countSyllables(word){ var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0; var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m); }
   function _flesch(text){ var sents=(text.match(/[.!?]+/g)||[]).length||1; var words=(text.match(/[A-Za-z\u00C0-\u024f']+/g)||[]); var wN=words.length||1;
     var syll=0; for(var i=0;i<words.length;i++){ syll+=_countSyllables(words[i]); } var ASL=wN/sents, ASW=syll/wN; return clamp(206.835-1.015*ASL-84.6*ASW,-20,120); }
   function _gini(arr){ if(!arr||arr.length===0) return 0; var n=arr.length,s=0; for(var i=0;i<n;i++) s+=arr[i]; if(s===0) return 0; var sorted=arr.slice().sort(function(a,b){return a-b;}); var cum=0; for(var j=0;j<sorted.length;j++) cum += (2*(j+1)-n-1)*sorted[j]; return cum/(n*s); }
-  function _charGramEntropy(t){ if(!t) return 0; var map={}, total=0; for(var i=0;i<t.length-2;i++){ var g=t[i]+t[i+1]+t[i+2]; map[g]=(map[g]||0)+1; total++; } var H=0; for(var k in map){ var p=map[k]/total; H += -p*Math.log2(p); } return clamp(H,0,10); }
   function _prep(text){
     text=(text||'')+''; if(text.length>150000) text=text.slice(0,150000);
     var t=text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
     var sentenceSplit=/(?<=[\.\!\?])\s+|\n+(?=\S)/g; var sentences=t.split(sentenceSplit).filter(function(s){return s.trim().length>0;});
     if(sentences.length<3){ sentences=t.split(/[\.!\?]+/g).filter(function(s){return s.trim().length>0;}); }
-    var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(t.match(wordRe)||[]).map(function(w){return w;}); var plainWords = words.map(function(w){return w.toLowerCase();});
-    var tokens=plainWords.length;
-    var freq=Object.create(null); for(var i=0;i<tokens;i++){ var w=plainWords[i]; freq[w]=(freq[w]||0)+1; }
-    var types=0,arr=[]; for(var k in freq){ if(!freq.hasOwnProperty(k)) continue; types++; arr.push(freq[k]); }
+    var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(t.match(wordRe)||[]).map(function(w){return w;}); var plain=words.map(function(w){return w.toLowerCase();});
+    var tokens=plain.length;
+
+    var freq=Object.create(null); for(var i=0;i<tokens;i++){ var w=plain[i]; freq[w]=(freq[w]||0)+1; }
+    var types=Object.keys(freq).length; var hapax=0; var arr=[]; for(var k in freq){ arr.push(freq[k]); if(freq[k]===1) hapax++; }
+
     var lens=[],sum=0; for(var s=0;s<sentences.length;s++){ var L=(sentences[s].match(wordRe)||[]).length; if(L>0){ lens.push(L); sum+=L; } }
     var mean=lens.length?sum/lens.length:0; var variance=0; for(var j=0;j<lens.length;j++){ variance+=Math.pow(lens[j]-mean,2); } variance=lens.length?variance/lens.length:0; var std=Math.sqrt(variance); var cov=mean>0?(std/mean):0;
-    var tri=Object.create(null),triTotal=0,triRepeats=0; for(var tdx=0;tdx<tokens-2;tdx++){ var g=plainWords[tdx]+' '+plainWords[tdx+1]+' '+plainWords[tdx+2]; tri[g]=(tri[g]||0)+1; triTotal++; } for(var gk in tri){ if(tri[gk]>1) triRepeats+=tri[gk]-1; } var triRepeatRatio=triTotal?triRepeats/triTotal:0;
-    var starters=Object.create(null),startersTotal=0,topStarter=0; for(var si=0;si<sentences.length;si++){ var w0=(sentences[si].match(wordRe)||[])[0]; if(!w0) continue; starters[w0.toLowerCase()]=(starters[w0.toLowerCase()]||0)+1; startersTotal++; } for(var k2 in starters){ if(starters[k2]>topStarter) topStarter=starters[k2]; } var starterDom=startersTotal?topStarter/startersTotal:0;
-    var Hmap={'.':0, ',':0, ';':0, ':':0, '!':0, '?':0, '"':0, '\'':0, '(':0, ')':0, '-':0, '*':0}, pTotal=0, qCount=0;
-    for(var pi=0;pi<t.length;pi++){ var ch=t[pi]; if(Hmap.hasOwnProperty(ch)){ Hmap[ch]++; pTotal++; if(ch==='?') qCount++; } }
-    var H=0; for(var hk in Hmap){ var p=Hmap[hk]/(pTotal||1); if(p>0) H += -p*Math.log(p); }
-    var Hnorm=(pTotal>0)?(H/Math.log(12)):0;
-    var connectors=/\b(however|moreover|furthermore|additionally|therefore|thus|consequently|in conclusion|overall|importantly|notwithstanding|nonetheless|nevertheless|hence|alternatively)\b/gi;
-    var connectorHits=(t.match(connectors)||[]).length; var connPer100=connectorHits*100/(tokens||1);
-    var contractionsRe=/\b(?:I'm|I've|I'd|I'll|we're|we've|we'd|we'll|you're|you've|you'd|you'll|they're|they've|they'd|they'll|it's|that's|there's|isn't|aren't|can't|won't|shouldn't|couldn't|don't|doesn't|didn't|let's|n't|'re|'ve|'ll)\b/gi;
-    var apostrophes=(t.match(/'/g)||[]).length; var contractions=(t.match(contractionsRe)||[]).length; var contrPer100=contractions*100/(tokens||1); var contrWeight=apostrophes>3?1.0:0.35;
-    var passive=(t.match(/\b(am|is|are|was|were|be|been|being)\s+\w+ed\b/gi)||[]).length; var passivePer100=passive*100/(tokens||1);
-    var stops=/\b(the|of|and|to|in|a|is|that|for|on|with|as|by|at|from|it|an|be|this|which|or|are|was|were|but|not|have|has|had|can|will|would|should)\b/gi; var stopPer100=(t.match(stops)||[]).length*100/(tokens||1);
+
+    var tri=Object.create(null),triTotal=0,triRepeats=0; for(var tdx=0;tdx<tokens-2;tdx++){ var g=plain[tdx]+' '+plain[tdx+1]+' '+plain[tdx+2]; tri[g]=(tri[g]||0)+1; triTotal++; } for(var gk in tri){ if(tri[gk]>1) triRepeats+=tri[gk]-1; } var triRepeatRatio=triTotal?triRepeats/triTotal:0;
+
+    var starters=Object.create(null),startersTotal=0,topStarter=0; var firstWordRe=/[A-Za-z\u00C0-\u024f0-9']+/;
+    for(var si=0;si<sentences.length;si++){ var m=(sentences[si].match(firstWordRe)||[])[0]; if(!m) continue; m=m.toLowerCase(); starters[m]=(starters[m]||0)+1; startersTotal++; if(starters[m]>topStarter) topStarter=starters[m]; }
+    var starterDom=startersTotal?topStarter/startersTotal:0;
+
     var digitsPer100=(t.match(/\d/g)||[]).length*100/(tokens||1);
-    var avgWordLen = tokens ? (plainWords.join('').length / tokens) : 0;
-    var longWords = plainWords.filter(function(w){return w.length>=10;}).length; var rareLongRatio = tokens ? longWords / tokens : 0;
+    var avgWordLen = tokens ? (plain.join('').length / tokens) : 0;
+    var longWords = plain.filter(function(w){return w.length>=10;}).length; var rareLongRatio = tokens ? longWords / tokens : 0;
     var properCap = words.filter(function(w){ return /^[A-Z][a-z]+/.test(w); }).length; var properRatio = tokens ? properCap / tokens : 0;
-    var qRatio = tokens ? qCount*100/tokens : 0;
+    var qRatio = tokens ? ((t.match(/\?/g)||[]).length*100/tokens) : 0;
     var listRatio = (t.match(/(^|\s)[\-\*]\s+\w+/g)||[]).length / Math.max(1, sentences.length);
     var flesch = _flesch(t);
-    var typesCount = Object.keys(freq).length; var hapax=0; for(var fk in freq){ if(freq[fk]===1) hapax++; }
-    var TTR=typesCount/(tokens||1); var Guiraud=typesCount/Math.sqrt(tokens||1); var hapaxRatio=typesCount?hapax/typesCount:0;
-    var longCount=0; for(var li=0;li<lens.length;li++){ if(lens[li]>=28) longCount++; } var longRatio=lens.length?longCount/lens.length:0;
-    var gini=_gini(arr); var compRatio=(function(str){ var dict={},data=str,out=[],currChar,phrase=data.charAt(0),code=256; for(var i=1;i<data.length;i++){ currChar=data.charAt(i); if(dict[phrase+currChar]!==undefined){ phrase+=currChar; }else{ out.push(phrase.length>1?dict[phrase]:phrase.charCodeAt(0)); dict[phrase+currChar]=code; code++; phrase=currChar; } } out.push(phrase.length>1?dict[phrase]:phrase.charCodeAt(0)); var original=str.length; var compressed=out.length*2; if(original===0) return 1; return clamp(compressed/original, 0.2, 3.0); })(t);
-    var charH = _charGramEntropy(t);
-    return { text:t, wordCount:tokens, lens:lens, mean:mean, cov:cov, longRatio:longRatio, triRepeatRatio:triRepeatRatio, starterDom:starterDom,
-      Hnorm:Hnorm, connPer100:connPer100, contrPer100:contrPer100, contrWeight:contrWeight, passivePer100:passivePer100, stopPer100:stopPer100,
-      digitsPer100:digitsPer100, TTR:TTR, Guiraud:Guiraud, hapaxRatio:hapaxRatio, gini:gini, compRatio:compRatio, charH:charH, avgWordLen:avgWordLen,
+
+    var TTR=types/(tokens||1); var Guiraud=types/Math.sqrt(tokens||1); var hapaxRatio=types?hapax/types:0;
+    var longCount=0; for(var li=0;li<liens=0, lens.length; li++){ } // noop guard
+    longCount=0; for(var li=0;li<lens.length;li++){ if(lens[li]>=28) longCount++; } var longRatio=lens.length?longCount/lens.length:0;
+    var gini=_gini(arr);
+
+    return { text:t, wordCount:tokens, lens:lens, cov:cov, longRatio:longRatio, triRepeatRatio:triRepeatRatio, starterDom:starterDom,
+      digitsPer100:digitsPer100, TTR:TTR, Guiraud:Guiraud, hapaxRatio:hapaxRatio, gini:gini, avgWordLen:avgWordLen,
       rareLongRatio:rareLongRatio, properRatio:properRatio, qRatio:qRatio, listRatio:listRatio, flesch:flesch
     };
   }
@@ -587,7 +582,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18; else ai-=clamp((s.TTR-ttrT)/ttrT,0,1)*6;
     if(s.Guiraud<4.8) ai+=clamp((4.8-s.Guiraud)/4.8,0,1)*10; else ai-=clamp((s.Guiraud-4.8)/4.8,0,1)*4;
     if(s.hapaxRatio<0.45) ai+=clamp((0.45-s.hapaxRatio)/0.45,0,1)*10;
-    ai += clamp((6.5 - s.charH)/6.5,0,1)*10;
     return clamp(Math.round(10+ai),0,100);
   }
   function detectUltra(text){
@@ -596,32 +590,123 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70);
       return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s };
     }
-    var parts = [
-      {key:'stylometry', label:'Stylometry', ai:detStylometry(s), w:1.25},
-    ];
-    var ai = parts[0].ai;
+    var ai = detStylometry(s);
     var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
-    return { humanPct: 100-ai, aiPct: ai, confidence: conf, detectors: parts, _s:s };
+    return { humanPct: 100-ai, aiPct: ai, confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai, w:1.25}], _s:s };
   }
 
+  /* === Item scores (1–25) === */
   function deriveItemScoresFromSignals(s){
     function pct(x){ return clamp(Math.round(x),0,100); }
     function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
-    var item = [];
-    item[1] = pct(band(s.TTR||0, 0.30, 0.65)*0.6 + band(s.flesch||0, 35, 75)*0.4);
-    item[2] = pct(band(s.rareLongRatio||0, 0.03, 0.12)*0.7 + band(s.properRatio||0, 0.03, 0.10)*0.3);
-    item[3] = pct(band(1-(s.starterDom||0), 0.55, 0.9));
-    item[4] = pct(band(s.qRatio||0, 0.3, 1.6));
-    item[5] = pct(band(s.flesch||0, 35, 75));
-    for(var i=6;i<=25;i++) item[i]=50; /* simple fill to ensure badges render */
-    var map={}; for(var k=1;k<=25;k++){ map[k]=isFinite(item[k])?item[k]:50; }
+    var rep = pct(100*(1 - s.triRepeatRatio));
+    var read = pct(band(s.flesch, 35, 75));
+    var lexical = pct(band(s.TTR, 0.30, 0.65));
+    var starter = pct(band(1-(s.starterDom||0), 0.55, 0.9));
+    var qna = pct(band(s.qRatio, 0.3, 1.6)*0.6 + Math.min(100, s.listRatio*280)*0.4);
+    var longS = pct(band(1-s.longRatio, 0.6, 0.95));
+    var rare = pct(band(s.rareLongRatio, 0.03, 0.12));
+    var proper = pct(band(s.properRatio, 0.03, 0.12));
+    var gini = pct(band(s.gini, 0.47, 0.78));
+    var avgLen = pct(band(s.avgWordLen, 4.2, 5.8));
+    var digits = pct(100*(1 - s.digitsPer100/20));
+
+    var i=[];
+    i[1]=pct(0.35*read+0.35*lexical+0.30*qna);
+    i[2]=pct(0.45*lexical+0.30*rare+0.25*proper);
+    i[3]=pct(0.40*starter+0.30*proper+0.30*read);
+    i[4]=pct(0.70*qna+0.15*lexical+0.15*rep);
+    i[5]=pct(0.50*read+0.25*avgLen+0.25*digits);
+    i[6]=pct(0.35*proper+0.35*read+0.30*lexical);
+    i[7]=pct(0.40*read+0.30*lexical+0.30*rep);
+    i[8]=pct(0.50*gini+0.25*digits+0.25*rep);
+    i[9]=pct(0.45*gini+0.30*avgLen+0.25*digits);
+    i[10]=pct(0.40*proper+0.35*rare+0.25*avgLen);
+    i[11]=pct(0.35*rare+0.35*rep+0.30*lexical);
+    i[12]=pct(0.30*proper+0.25*digits+0.45*qna);
+    i[13]=pct(0.40*qna+0.30*read+0.30*rep);
+    i[14]=pct(0.40*starter+0.30*qna+0.30*avgLen);
+    i[15]=pct(0.40*lexical+0.30*proper+0.30*qna);
+    i[16]=pct(0.40*digits+0.30*lexical+0.30*read);
+    i[17]=pct(0.35*avgLen+0.35*qna+0.30*proper);
+    i[18]=pct(0.45*read+0.30*gini+0.25*longS);
+    i[19]=pct(0.55*gini+0.25*rep+0.20*avgLen);
+    i[20]=pct(0.50*gini+0.30*longS+0.20*avgLen);
+    i[21]=pct(0.55*qna+0.25*read+0.20*starter);
+    i[22]=pct(0.55*proper+0.25*lexical+0.20*rare);
+    i[23]=pct(0.40*proper+0.40*rare+0.20*avgLen);
+    i[24]=pct(0.35*proper+0.35*avgLen+0.30*gini);
+    i[25]=pct(0.50*proper+0.30*digits+0.20*gini);
+    var map={}; for(var k=1;k<=25;k++){ map[k]=isFinite(i[k])?i[k]:50; }
     return map;
   }
   function deriveSummaryScoresFromItems(itemMap){
+    var pick=function(f,t){ var a=[]; for(var k=f;k<=t;k++){ if(isFinite(itemMap[k])) a.push(itemMap[k]); } return a; };
+    var groupContent = pick(1,5).concat(pick(10,13));
     var all=[]; for(var i=1;i<=25;i++){ if(isFinite(itemMap[i])) all.push(itemMap[i]); }
-    var avg = all.length? Math.round(all.reduce(function(a,b){return a+b;},0)/all.length) : 0;
-    return { contentScore: Math.round((itemMap[1]+itemMap[2]+itemMap[3]+itemMap[4]+itemMap[5])/5), overall: avg };
+    var avg=function(a){ return a.length? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : 0; };
+    return { contentScore: avg(groupContent), overall: avg(all) };
   }
+
+  /* === Build a sample from backend payload === */
+  function buildSampleFromData(data){
+    var parts = [];
+    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
+    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){
+      var v=data?.[k]; if(typeof v==='string'&&v.trim()) parts.push(v); if(Array.isArray(v)) parts.push(v.join('. '));
+    });
+    var txt = parts.join('\n\n').replace(/\s{2,}/g,' ').trim();
+    if (txt.length>140000) txt = txt.slice(0,140000);
+    return txt;
+  }
+
+  /* === Fetch readable HTML/text via CORS-safe proxy + extract basic meta === */
+  async function fetchReadable(url){
+    try{
+      const a = await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''));
+      if (a.ok) return { ok:true, html: await a.text() };
+    }catch(_){}
+    try{
+      const b = await fetch('https://r.jina.ai/'+url);
+      if (b.ok) return { ok:true, html: await b.text() };
+    }catch(_){}
+    return { ok:false, html:'' };
+  }
+  function extractMetaFromHtml(html, url){
+    var doc; try{ doc = new DOMParser().parseFromString(html,'text/html'); }catch(_){ return {}; }
+    var get=(sel,attr)=>{ var el=doc.querySelector(sel); return el ? (attr? (el.getAttribute(attr)||'') : (el.textContent||'')) : ''; };
+    var title = (get('title')||'').trim();
+    var metaDesc = (get('meta[name="description"]','content')||'').trim();
+    var canonical = (get('link[rel="canonical"]','href')||'').trim();
+    var robots = (get('meta[name="robots"]','content')||'').trim();
+    var viewport = (get('meta[name="viewport"]','content')||'').trim();
+    var h1 = doc.querySelectorAll('h1').length, h2=doc.querySelectorAll('h2').length, h3=doc.querySelectorAll('h3').length;
+    var origin; try{ origin = new URL(url).origin; }catch(_){ origin=''; }
+    var internal = 0; [].slice.call(doc.querySelectorAll('a[href]')).forEach(function(a){
+      var href=a.getAttribute('href')||''; try{ var u=new URL(href, url); if(!origin || u.origin===origin) internal++; }catch(_){}
+    });
+    var schema = !!(doc.querySelector('script[type="application/ld+json"]')||doc.querySelector('[itemscope],[itemtype*="schema.org"]'));
+
+    // Also try to derive a decent text sample for detectors
+    var sample = '';
+    var main = doc.querySelector('article,main,[role="main"]'); if(main) sample = main.textContent||'';
+    if(!sample){ var ps=[].slice.call(doc.querySelectorAll('p')); sample = ps.slice(0,12).map(function(p){return p.textContent;}).join('\n\n'); }
+    sample = (sample||'').replace(/\s{2,}/g,' ').trim();
+
+    return {
+      httpStatusGuess: html ? '200?' : '—',
+      titleLen: title ? title.length : null,
+      metaLen: metaDesc ? metaDesc.length : null,
+      canonical: canonical || (url || 'n/a'),
+      robots: robots || 'n/a',
+      viewport: viewport || 'n/a',
+      headings: (h1||0)+'/'+(h2||0)+'/'+(h3||0),
+      internalLinks: internal || 0,
+      schema: schema ? 'yes' : 'no',
+      sampleText: sample
+    };
+  }
+
   function ensureScoresExist(data, sample, ensemble){
     data = data || {};
     var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
@@ -661,43 +746,22 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     updateCategoryBars();
   }
 
-  function buildSampleFromData(data){
-    var parts = [];
-    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
-    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){
-      var v = data?.[k];
-      if (typeof v === 'string' && v.trim()) parts.push(v);
-      if (Array.isArray(v)) parts.push(v.join('. '));
-    });
-    var txt = parts.join('\n\n').replace(/\s{2,}/g,' ').trim();
-    if (txt.length>140000) txt = txt.slice(0,140000);
-    return txt;
-  }
-
-  async function fetchReadableText(url){
-    try{ const httpsR = await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,'')); if(httpsR.ok){ const t=await httpsR.text(); if(t && t.length>200) return t; } }catch(e){}
-    try{ const altR = await fetch('https://r.jina.ai/'+url); if(altR.ok){ const t=await altR.text(); if(t && t.length>200) return t; } }catch(e){}
-    try{ const raw = await fetch(url,{mode:'cors'}); if(raw.ok){ const html=await raw.text(); var div=document.createElement('div'); div.innerHTML=html; var txt=div.innerText || ''; if(txt && txt.length>200) return txt; } }catch(e){}
-    return '';
-  }
-
-  function applyDetection(humanPct, aiPct, confidence, breakdown){
+  function applyDetection(humanPct, aiPct, confidence){
     var writer = (isFinite(humanPct) && isFinite(aiPct) && humanPct>=aiPct) ? 'Likely Human' : 'AI-like';
     var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
     var hp = document.getElementById('humanPct'), ap = document.getElementById('aiPct');
     if(hp) hp.textContent = isFinite(humanPct)? Math.round(humanPct) : '—';
     if(ap) ap.textContent = isFinite(aiPct)?    Math.round(aiPct)   : '—';
 
-    var panel = document.getElementById('detectorPanel'), grid=document.getElementById('detGrid'), confEl=document.getElementById('detConfidence');
-    if(panel){ panel.style.display='block'; }
-    if(confEl){ confEl.textContent = isFinite(confidence)? Math.round(confidence): '—'; }
-    if(grid){
-      grid.innerHTML = '';
-      var v = isFinite(aiPct)? aiPct : 50;
+    var panel = document.getElementById('detectorPanel'); if(panel) panel.style.display='block';
+    var grid=document.getElementById('detGrid'); if(grid){
+      grid.innerHTML='';
+      var v=isFinite(aiPct)?aiPct:50;
       var wrap=document.createElement('div'); wrap.className='det-item';
-      wrap.innerHTML = '<div class="det-row"><div class="det-label">Stylometry</div><div class="det-score" id="det-sty-score">'+Math.round(v)+'</div></div><div class="det-bar"><div class="det-fill" id="det-sty-fill" style="width:'+clamp(v,0,100)+'%"></div></div>';
+      wrap.innerHTML='<div class="det-row"><div class="det-label">Stylometry</div><div class="det-score">'+Math.round(v)+'</div></div><div class="det-bar"><div class="det-fill" style="width:'+clamp(v,0,100)+'%"></div></div>';
       grid.appendChild(wrap);
     }
+    var confEl=document.getElementById('detConfidence'); if(confEl) confEl.textContent = isFinite(confidence)?Math.round(confidence):'—';
   }
 
   function normalizeUrl(u) {
@@ -708,127 +772,139 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     try { new URL(guess); return guess; } catch(e) { return ''; }
   }
 
-  function withTimeout(promise, ms, label){
-    return Promise.race([ promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error(label||('Timeout '+ms+'ms'))), ms)) ]);
-  }
-
-  /* ================= analyze() ================= */
+  // ---- MAIN analyze() ----
   window.analyze = async function(){
     var input = document.getElementById('analyzeUrl');
     var url = normalizeUrl(input ? input.value : '');
     if (!url) { if(input) input.focus(); return; }
 
     Water.start();
-    var finished = false;
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
     var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
 
-    var watchdog = setTimeout(function(){
-      if (!finished) {
-        if (statusEl) statusEl.textContent = 'Network slow or blocked — using local scoring.';
-        Water.fail();
-      }
-    }, 12000);
+    var data=null, ok=false, status=0, text='', lastErr='';
+    var qs = new URLSearchParams({ url: url }).toString();
 
+    // 1) Try backend (your Laravel endpoints)
     try{
-      var data=null, ok=false, status=0, text='', lastErr='';
-      var qs = new URLSearchParams({ url: url }).toString();
+      var res1 = await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json') + '?' + qs, { method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' } });
+      status = res1.status; text = await res1.text();
+      try{ data = JSON.parse(text); }catch(e){}
+      if (res1.ok && data) ok = true;
+    }catch(e){ lastErr = 'GET analyze-json failed: '+e.message; }
 
-      async function tryFetch(method, endpoint){
-        const opt = method==='POST'
-          ? { method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': CSRF}, body: JSON.stringify({ url, _token: CSRF }) }
-          : { method:'GET',  headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'} };
-        const res = await withTimeout(fetch(endpoint, opt), 7000, endpoint+' timeout');
-        const t = await res.text(); let j; try{ j=JSON.parse(t); }catch(_){}
-        return {ok:res.ok && !!j, status:res.status, text:t, json:j};
-      }
-
-      const epJson = (window.SEMSEO?.ENDPOINTS?.analyzeJson)||'analyze-json';
-      const epForm = (window.SEMSEO?.ENDPOINTS?.analyze)||'analyze';
-
-      try{ var r1 = await tryFetch('GET',  epJson + '?' + qs); if(r1.ok){ data=r1.json; ok=true; } else { status=r1.status; text=r1.text; } }catch(e){ lastErr=e.message; }
-      if(!ok){ try{ var r2 = await tryFetch('POST', epForm); if(r2.ok){ data=r2.json; ok=true; } else { status=r2.status; text=r2.text; } }catch(e){ lastErr=e.message; } }
-      if(!ok){ try{ var r3 = await tryFetch('GET',  epForm + '?' + qs); if(r3.ok){ data=r3.json; ok=true; } else { status=r3.status; text=r3.text; } }catch(e){ lastErr=e.message; } }
-
-      /* Build text sample no matter what */
-      var sample = buildSampleFromData(data||{});
-      if ((!sample || sample.length < 200) && url){
-        if (statusEl) statusEl.textContent = 'Getting readable text…';
-        try{ var fetched = await withTimeout(fetchReadableText(url), 7000, 'readable-text timeout'); if (fetched && fetched.length>200) sample = fetched; }catch(e){}
-      }
-      if (!sample || sample.replace(/\s+/g,'').length < 40){
-        sample = (data?.title||'') + ' ' + (data?.description||'') + ' ' + (data?.snippet||'');
-        if (!sample || sample.trim().length < 40) sample = 'Placeholder text used to ensure scoring when remote content is blocked.';
-      }
-
-      /* Ensemble + ensure scores */
-      var ensemble=null;
-      try{ ensemble = detectUltra(sample); }catch(e){ console.warn('detectUltra failed', e); }
-      try{ data = ensureScoresExist(data||{}, sample, ensemble); }catch(e){ console.warn('ensureScoresExist failed', e); data = { overall: 50, contentScore: 50, itemScores: {1:50,2:50,3:50,4:50,5:50} }; }
-
-      /* Render: ALWAYS render numbers */
-      var overall = Number(data.overall||0);
-      var contentScore = Number(data.contentScore||0);
-      window.setScoreWheel(isFinite(overall)?overall:0);
-      setText('contentScoreInline', Math.round(isFinite(contentScore)?contentScore:0));
-      setChipTone(document.getElementById('contentScoreChip'), isFinite(contentScore)?contentScore:0);
-
-      /* Meta chips */
-      setText('rStatus',    data?.httpStatus ?? '—');
-      setText('rTitleLen',  data?.titleLen   ?? '—');
-      setText('rMetaLen',   data?.metaLen    ?? '—');
-      setText('rCanonical', data?.canonical  ?? '—');
-      setText('rRobots',    data?.robots     ?? '—');
-      setText('rViewport',  data?.viewport   ?? '—');
-      setText('rHeadings',  data?.headings   ?? '—');
-      setText('rInternal',  data?.internalLinks ?? '—');
-      setText('rSchema',    data?.schema     ?? '—');
-
-      /* Detection */
-      var hp = Number(data?.humanPct), ap = Number(data?.aiPct), backendConf = Number(data?.confidence);
-      if (isFinite(hp) && isFinite(ap) && isFinite(backendConf) && backendConf>=65){
-        applyDetection(hp, ap, backendConf, ensemble||null);
-      } else if (ensemble){
-        applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-      } else {
-        applyDetection(50, 50, 50, null);
-      }
-
-      /* Checklist + completion */
-      autoTickByScores(data.itemScores || {});
-      if (statusEl) statusEl.textContent = ok ? 'Analysis complete' : 'Local analysis complete';
-      if (report) report.style.display = 'block';
-      var detPanel2 = document.getElementById('detectorPanel'); if (detPanel2) detPanel2.style.display='block';
-
-    } catch(err){
-      var statusEl2 = document.getElementById('analyzeStatus');
-      if (statusEl2) statusEl2.textContent = 'Error: ' + (err && err.message ? err.message : err);
-      window.setScoreWheel(50); setText('contentScoreInline',50); setChipTone(document.getElementById('contentScoreChip'),50);
-      autoTickByScores({1:50,2:50,3:50,4:50,5:50});
-      var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='block'; }
-      applyDetection(50,50,50,null);
-    } finally {
-      clearTimeout(watchdog);
-      Water.finish();
+    if (!ok){
+      try{
+        var res2 = await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'), {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': CSRF },
+          body: JSON.stringify({ url: url, _token: CSRF })
+        });
+        status = res2.status; text = await res2.text();
+        try{ data = JSON.parse(text); }catch(e){}
+        if (res2.ok && data) ok = true;
+      }catch(e){ lastErr = 'POST analyze failed: '+e.message; }
     }
+
+    if (!ok){
+      try{
+        var res3 = await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze') + '?' + qs, { method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' } });
+        status = res3.status; text = await res3.text();
+        try{ data = JSON.parse(text); }catch(e){}
+        if (res3.ok && data) ok = true;
+      }catch(e){ lastErr = 'GET analyze failed: '+e.message; }
+    }
+
+    // Ensure object
+    if (!data || typeof data!=='object') data = {};
+
+    // 2) Build sample text from backend (if provided)
+    var sample = buildSampleFromData(data);
+
+    // 3) If meta chips missing OR sample too small, fetch readable HTML and fill
+    var needMeta = !data.titleLen && !data.metaLen && !data.canonical && !data.headings;
+    if (needMeta || !sample || sample.length < 200){
+      if (statusEl) statusEl.textContent = 'Reading page (CORS-safe)…';
+      try{
+        var fetched = await fetchReadable(url);
+        if (fetched.ok && fetched.html){
+          var meta = extractMetaFromHtml(fetched.html, url);
+          // fill chips if backend didn’t provide
+          if (!data.httpStatus) data.httpStatus = meta.httpStatusGuess;
+          if (!data.titleLen)   data.titleLen   = meta.titleLen;
+          if (!data.metaLen)    data.metaLen    = meta.metaLen;
+          if (!data.canonical)  data.canonical  = meta.canonical;
+          if (!data.robots)     data.robots     = meta.robots;
+          if (!data.viewport)   data.viewport   = meta.viewport;
+          if (!data.headings)   data.headings   = meta.headings;
+          if (!data.internalLinks) data.internalLinks = meta.internalLinks;
+          if (!data.schema)     data.schema     = meta.schema ? 'yes' : 'no';
+          if ((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
+        }
+      }catch(e){}
+    }
+
+    // 4) Detection (server truth if high-confidence; else local)
+    var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+    var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+    var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+    var backendConf = (typeof data.confidence==='number')? data.confidence : null;
+
+    // 5) If backend lacks scores, derive them so checklist never stays blank
+    data = ensureScoresExist(data, sample, ensemble);
+
+    // 6) Push scores to UI
+    var overall = Number(data.overall || 0);
+    var contentScore = Number(data.contentScore || 0);
+    window.setScoreWheel(overall||0);
+    setText('contentScoreInline', Math.round(contentScore||0));
+    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
+
+    // Chips (meta)
+    setText('rStatus',    data.httpStatus ? data.httpStatus : (data.httpStatusGuess || '—'));
+    setText('rTitleLen',  (data.titleLen!==undefined && data.titleLen!==null) ? data.titleLen : '—');
+    setText('rMetaLen',   (data.metaLen!==undefined  && data.metaLen!==null)  ? data.metaLen  : '—');
+    setText('rCanonical', data.canonical  ? data.canonical  : '—');
+    setText('rRobots',    data.robots     ? data.robots     : '—');
+    setText('rViewport',  data.viewport   ? data.viewport   : '—');
+    setText('rHeadings',  data.headings   ? data.headings   : '—');
+    setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
+    setText('rSchema',    data.schema     ? data.schema     : '—');
+
+    // Detection display
+    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
+      applyDetection(hp, ap, backendConf);
+    } else if (ensemble){
+      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence);
+    } else if (isFinite(hp) && isFinite(ap)){
+      applyDetection(hp, ap, backendConf || 60);
+    } else {
+      applyDetection(NaN, NaN, null);
+    }
+
+    // Checklist scores + autotick
+    window.autoTickByScores(data.itemScores || {});
+    Water.finish();
+    if (statusEl) statusEl.textContent = 'Analysis complete';
+    if (report) report.style.display = 'block';
   };
 
-  /* UI events */
+  // Auto UI wiring
   document.addEventListener('DOMContentLoaded', function(){
     var btn = document.getElementById('analyzeBtn');
     if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); window.analyze(); }); }
     var input = document.getElementById('analyzeUrl');
     if (input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); window.analyze(); }}); }
+    var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
+    var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
   });
 
-  /* Expose for import JSON helper that calls badgeTone */
-  window.badgeTone = badgeTone;
 })();
 </script>
 
-<!-- B) Non-critical UI -->
+<!-- B) Non-critical UI (unchanged) -->
 <script>
 try{
   // Hue drift for multi-color water
