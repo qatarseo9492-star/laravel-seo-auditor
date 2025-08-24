@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Arr;
 
 class AnalyzeController extends Controller
 {
@@ -163,6 +164,78 @@ class AnalyzeController extends Controller
             'humanPct'     => (int) round($humanPct),
             'aiPct'        => (int) round($aiPct),
         ]);
+    }
+
+    /**
+     * Secure PageSpeed Insights v5 proxy
+     * GET /psi-proxy?u=https://example.com&strategy=mobile&category=performance&category=seo
+     */
+    public function psiProxy(Request $request)
+    {
+        $pageUrl = $request->query('u');
+        if (!$pageUrl) {
+            return response()->json(['ok' => false, 'error' => 'Missing ?u param'], 422);
+        }
+
+        $strategy = $request->query('strategy', 'mobile');
+        if (!in_array($strategy, ['mobile','desktop'], true)) {
+            $strategy = 'mobile';
+        }
+
+        // Accept one or many category params; ensure 'performance' is present.
+        $allowed = ['performance','accessibility','best-practices','seo','pwa'];
+        $catsIn  = Arr::wrap($request->query('category', []));
+        $cats    = array_values(array_unique(array_intersect($catsIn, $allowed)));
+        if (empty($cats)) {
+            $cats = ['performance'];
+        } elseif (!in_array('performance', $cats, true)) {
+            $cats[] = 'performance';
+        }
+
+        $locale = $request->query('locale', 'en');
+
+        $apiKey = config('services.google.page_speed_key') ?: env('GOOGLE_API_KEY');
+        if (!$apiKey) {
+            return response()->json(['ok' => false, 'error' => 'PSI API key not configured'], 500);
+        }
+
+        // Build query string (repeat &category=X per spec; avoid category[]= style)
+        $baseParams = [
+            'url'      => $pageUrl,
+            'strategy' => $strategy,
+            'locale'   => $locale,
+            'key'      => $apiKey,
+        ];
+        $qs = http_build_query($baseParams, '', '&', PHP_QUERY_RFC3986);
+        foreach ($cats as $c) {
+            $qs .= '&category=' . rawurlencode($c);
+        }
+
+        $endpoint = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+
+        try {
+            $resp = Http::timeout(18)->acceptJson()->get($endpoint.'?'.$qs);
+            $status = $resp->status();
+            $json   = $resp->json() ?? [];
+
+            // Normalize INP naming if Google moves keys
+            foreach (['loadingExperience','originLoadingExperience'] as $k) {
+                if (isset($json[$k]['metrics'])) {
+                    $m = &$json[$k]['metrics'];
+                    if (!isset($m['INTERACTION_TO_NEXT_PAINT']) && isset($m['EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT'])) {
+                        $m['INTERACTION_TO_NEXT_PAINT'] = $m['EXPERIMENTAL_INTERACTION_TO_NEXT_PAINT'];
+                    }
+                }
+            }
+
+            return response()->json($json, $status);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'ok' => false,
+                'error' => 'PSI upstream error',
+                'detail' => $e->getMessage(),
+            ], 502);
+        }
     }
 
     private function normalizeUrl(?string $u): ?string
