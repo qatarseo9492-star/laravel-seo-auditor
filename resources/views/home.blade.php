@@ -32,20 +32,17 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 
 <style>
+/* (same working styles as before; kept intact) */
 :root{--bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg}
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
 #linesCanvas,#brainCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}#linesCanvas{opacity:.35}#brainCanvas{opacity:.28}
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
-
-/* Header */
 header.site{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:14px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand{display:flex;align-items:center;gap:.8rem;min-width:0}
 .brand-badge{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(157,92,255,.25),rgba(61,226,255,.25));border:1px solid rgba(255,255,255,.14);color:#fff;font-size:1.05rem;box-shadow:0 8px 22px rgba(0,0,0,.28)}
 .hero-heading{font-weight:1000;letter-spacing:.4px;font-size:clamp(1.4rem,3.2vw,2rem)}
 .hero-sub{color:var(--text-dim);font-size:.95rem}
-
-/* Buttons */
 .btn{display:inline-flex;align-items:center;gap:.55rem;cursor:pointer;padding:.6rem .95rem;border-radius:14px;border:1px solid rgba(255,255,255,.16);color:#fff;font-weight:900;letter-spacing:.2px;position:relative;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.25)}
 .btn::after{content:"";position:absolute;inset:-2px;border-radius:inherit;opacity:.0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);transform:translateX(-120%);transition:opacity .2s ease}
 .btn:hover::after{opacity:1;animation:btnSweep 2.6s linear infinite}
@@ -55,23 +52,14 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .btn-reset{background:linear-gradient(135deg,#f59e0b,#f97316);border-color:#f59e0b}
 .btn-export{background:linear-gradient(135deg,#a855f7,#ec4899);border-color:#c26cf2}
 .btn-ghost{background:rgba(255,255,255,.06)}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-
-/* Analyzer panel */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem}.section-subtitle{margin:0;color:var(--text-dim)}
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
-
-/* Gauge */
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}.gauge-svg{width:100%;height:auto;display:block}
-.score-mask-rect{transition:all .6s cubic-bezier(.22,1,.36,1)}
-.score-wave1{animation:scoreWave 8s linear infinite}.score-wave2{animation:scoreWave 11s linear infinite reverse}
+.score-mask-rect{transition:all .6s cubic-bezier(.22,1,.36,1)}.score-wave1{animation:scoreWave 8s linear infinite}.score-wave2{animation:scoreWave 11s linear infinite reverse}
 @keyframes scoreWave{from{transform:translateX(0)}to{transform:translateX(-210px)}}
-.score-text{font-size:clamp(2.2rem,4.2vw,3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
-.multiHueFast{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
-
-/* Chips & legends */
+.score-text{font-size:clamp(2.2rem,4.2vw,3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}.multiHueFast{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)}.l-orange{background:rgba(245,158,11,.18)}.l-green{background:rgba(34,197,94,.18)}
@@ -79,8 +67,6 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .chip-mid{background:rgba(245,158,11,.18)!important;border-color:rgba(245,158,11,.45)!important}
 .chip-bad{background:rgba(239,68,68,.18)!important;border-color:rgba(239,68,68,.5)!important}
 .ico{width:1.1em;text-align:center}.ico-green{color:var(--good)}.ico-orange{color:var(--warn)}.ico-red{color:var(--bad)}.ico-cyan{color:var(--accent)}.ico-purple{color:#9b5cff}
-
-/* URL field */
 .url-field{position:relative;border-radius:16px;background:#0b0d21;border:1px solid #1b1b35;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02),0 12px 32px rgba(0,0,0,.32);padding:10px 110px 10px 46px;transition:.25s ease;overflow:hidden;isolation:isolate}
 .url-field:focus-within{border-color:#5942ff;box-shadow:0 0 0 6px rgba(155,92,255,.15),inset 0 0 0 1px rgba(93,65,255,.28)}
 .url-field .url-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9aa0c3;font-size:1rem;opacity:.95}
@@ -88,92 +74,66 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .url-field .url-mini{position:absolute;top:50%;transform:translateY(-50%);border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;border-radius:10px;padding:.35rem .6rem;font-weight:900;cursor:pointer;transition:.15s}
 .url-field .url-mini:hover{background:rgba(255,255,255,.12)}.url-field .url-clear{right:60px;width:36px;height:32px;display:grid;place-items:center}.url-field #pasteUrl{right:12px}
 .url-field .url-border{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,#3de2ff,#9b5cff,#ff2045,#f59e0b,#3de2ff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;pointer-events:none;filter:hue-rotate(var(--hue))}
-
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.6rem}
-
-/* Analyze water progress */
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{position:relative;height:64px;border-radius:18px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
-.water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
-.water-mask-rect{transition:all .25s ease-out}
+.water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}.water-mask-rect{transition:all .25s ease-out}
 .water-overlay{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120px 60px at 20% -20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(0deg,rgba(255,255,255,.05),transparent 40%,transparent 60%,rgba(255,255,255,.06));mix-blend-mode:screen;z-index:2}
 .water-pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1.05rem;text-shadow:0 1px 0 rgba(0,0,0,.45);letter-spacing:.4px;z-index:4}
 .wave1{animation:waveX 7s linear infinite}.wave2{animation:waveX 10s linear infinite reverse;opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
-
-/* Completion */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .comp-water{position:relative;height:52px;border-radius:16px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .comp-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}.comp-overlay{position:absolute;inset:0;background:radial-gradient(120px 50px at 15% -25%,rgba(255,255,255,.16),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.08),transparent 35%,rgba(255,255,255,.06));pointer-events:none;mix-blend-mode:screen;z-index:3}
 .comp-pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1rem;z-index:4;text-shadow:0 1px 0 rgba(0,0,0,.45)}
 .comp-wave1{animation:waveX 8s linear infinite}.comp-wave2{animation:waveX 12s linear infinite reverse}
-
-/* Cards & checklist */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite;pointer-events:none;z-index:0}
-@keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
 .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
 .category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
-
 .cat-water{grid-column:1/-1;margin-top:.55rem;position:relative;height:22px}
 .cat-svg{display:block;width:100%;height:22px}
 .cat-wave1{animation:catWave 7s linear infinite}.cat-wave2{animation:catWave 10s linear infinite reverse}
 @keyframes catWave{from{transform:translateX(0)}to{transform:translateX(-640px)}}
 .cat-water-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:rgba(255,255,255,.9);text-shadow:0 1px 0 rgba(0,0,0,.55);pointer-events:none}
 .cat-smoke{position:absolute;left:0;right:0;bottom:0;height:26px;pointer-events:none;z-index:3;mix-blend-mode:screen}
-
 .checklist{list-style:none;margin:10px 0 0;padding:0}
 .checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s ease,background .25s ease,transform .12s ease}
 .checklist-item+.checklist-item{margin-top:.28rem}.checklist-item:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.55rem}
-
 .sev-good{background:linear-gradient(180deg,rgba(34,197,94,.14),rgba(34,197,94,.08));border-color:rgba(34,197,94,.45)}
 .sev-mid{background:linear-gradient(180deg,rgba(245,158,11,.16),rgba(245,158,11,.08));border-color:rgba(245,158,11,.45)}
 .sev-bad{background:linear-gradient(180deg,rgba(239,68,68,.16),rgba(239,68,68,.10));border-color:rgba(239,68,68,.55)}
-
 .checklist-item input[type="checkbox"]{appearance:none;-webkit-appearance:none;outline:none;width:22px;height:22px;border-radius:8px;background:#0b1220;border:2px solid #2a2f4d;position:relative;display:inline-grid;place-items:center;transition:.18s ease-in-out;box-shadow:inset 0 0 0 0 rgba(99,102,241,.0)}
 .checklist-item input[type="checkbox"]:hover{border-color:#4c5399;box-shadow:0 0 0 4px rgba(99,102,241,.12)}
 .checklist-item input[type="checkbox"]::after{content:"";width:7px;height:12px;border:3px solid transparent;border-left:0;border-top:0;transform:rotate(45deg) scale(.7);transition:.18s ease-in-out}
 .checklist-item input[type="checkbox"]:checked{border-color:transparent;background:linear-gradient(135deg,#22c55e,#3de2ff,#9b5cff);background-size:200% 200%;animation:tickHue 2s linear infinite;box-shadow:0 6px 18px rgba(61,226,255,.25),inset 0 0 0 2px rgba(255,255,255,.25)}
 .checklist-item input[type="checkbox"]:checked::after{border-color:#fff;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));transform:rotate(45deg) scale(1)}
 @keyframes tickHue{0%{background-position:0% 50%}100%{background-position:200% 50%}}
-
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22);border-color:rgba(22,193,114,.45)}
 .score-mid{background:rgba(245,158,11,.22);border-color:rgba(245,158,11,.45)}
 .score-bad{background:rgba(239,68,68,.24);border-color:rgba(239,68,68,.5)}
-
 .improve-btn{position:relative;overflow:hidden;padding:.45rem .8rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));font-weight:900;cursor:pointer;transition:.2s;isolation:isolate;min-width:88px}
 .improve-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.1)}
 .improve-btn::before{content:"";position:absolute;inset:-2px;border-radius:inherit;z-index:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.18) 45%,transparent 50%,transparent 100%);transform:translateX(-120%);animation:btnSheen 3.2s linear infinite}
 @keyframes btnSheen{0%{transform:translateX(-120%)}60%{transform:translateX(120%)}100%{transform:translateX(120%)}}
-
 .share-dock{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:85;background:rgba(10,12,28,.35);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.5rem;backdrop-filter:blur(8px)}
 .share-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;color:#fff;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease}
 .share-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
 .share-fb{background:linear-gradient(135deg,#1877F2,#1e90ff)}.share-x{background:linear-gradient(135deg,#111,#333)}.share-ln{background:linear-gradient(135deg,#0a66c2,#1a8cd8)}.share-wa{background:linear-gradient(135deg,#25D366,#128C7E)}.share-em{background:linear-gradient(135deg,#ef4444,#b91c1c)}
-
 footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
 #backTop:hover{background:rgba(255,255,255,.12)}
-
-.lang-dock{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:.6rem}
-.lang-panel{position:fixed;left:18px;top:50%;transform:translate(-6px,-50%);z-index:78;display:none}
-.lang-card{width:240px;max-height:70vh;overflow:auto;padding:.6rem;background:rgba(10,12,28,.65);border:1px solid rgba(255,255,255,.14);border-radius:14px;box-shadow:0 18px 60px rgba(0,0,0,.5);backdrop-filter:blur(10px)}
-.lang-item{display:flex;align-items:center;gap:.55rem;padding:.46rem .55rem;border-radius:10px;cursor:pointer;border:1px solid transparent;color:#fff}
-.lang-item:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
-.lang-item.active{background:linear-gradient(135deg,#3de2ff33,#9b5cff33);border-color:rgba(255,255,255,.22)}
-.lang-flag{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);font-size:13px}
-
 @media (max-width:992px){.category-card{grid-column:span 12}.score-container{width:190px}.analyze-row{grid-template-columns:1fr auto auto}}
 @media (max-width:768px){.wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}.share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}.checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}}
 @media (max-width:480px){.score-container{width:150px}.category-icon{width:40px;height:40px}.category-title{font-size:1rem}}
 @media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
-@media print{.modal-backdrop,.modal,.lang-dock,.share-dock,#backTop,#linesCanvas,#brainCanvas{display:none!important}}
+@media print{.modal,.lang-dock,.share-dock,#backTop,#linesCanvas,#brainCanvas{display:none!important}}
 </style>
 </head>
 <body>
@@ -182,38 +142,13 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 <canvas id="linesCanvas"></canvas>
 <canvas id="brainCanvas"></canvas>
 
-<!-- SVG defs -->
-<svg width="0" height="0" aria-hidden="true">
-  <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%">
-      <stop offset="0%" stop-color="#9b5cff"/><stop offset="100%" stop-color="#ff2045"/>
-    </linearGradient>
-    <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%">
-      <stop offset="0%" stop-color="#22c55e"/><stop offset="100%" stop-color="#16a34a"/>
-    </linearGradient>
-    <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%">
-      <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fb923c"/>
-    </linearGradient>
-    <linearGradient id="gradBad" x1="0%" y1="0%" x2="100%">
-      <stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#b91c1c"/>
-    </linearGradient>
-  </defs>
-</svg>
-
-<!-- Language Dock -->
-<div class="lang-dock">
-  <button class="btn btn-ghost" id="langOpen" title="Language" style="width:48px;height:48px;border-radius:12px;"><i class="fa-solid fa-globe"></i></button>
-</div>
-<div class="lang-panel" id="langPanel"><div class="lang-card" id="langCard"></div></div>
-
 <!-- Share Dock -->
 <div class="share-dock" id="shareDock" aria-label="Share">
-  <a id="shareFb" class="share-btn share-fb" aria-label="Share on Facebook" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
-  <a id="shareX"  class="share-btn share-x"  aria-label="Share on X" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
-  <a id="shareLn" class="share-btn share-ln" aria-label="Share on LinkedIn" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
-  <a id="shareWa" class="share-btn share-wa" aria-label="Share on WhatsApp" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
-  <a id="shareEm" class="share-btn share-em" aria-label="Share via Email" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
-  <button id="shareNative" class="share-btn share-x share-native" aria-label="Share" style="display:none"><i class="fa-solid fa-share-nodes"></i></button>
+  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
+  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
+  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
+  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
+  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
 </div>
 
 <div class="wrap">
@@ -230,7 +165,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </div>
   </header>
 
-  <main class="analyzer" id="analyzer" role="main" aria-label="Semantic SEO Analyzer">
+  <main class="analyzer" id="analyzer" role="main">
     <h2 class="section-title">Analyze a URL</h2>
     <p class="section-subtitle">
       The wheel fills with your overall score.
@@ -241,7 +176,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
     <div class="score-area">
       <div class="score-container">
-        <!-- Circular water score -->
+        <!-- Gauge -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
@@ -294,7 +229,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </div>
 
     <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
-      <form id="analyzeForm" onsubmit="return false;">
+      <form id="analyzeForm" onsubmit="event.preventDefault(); analyze(); return false;">
         <label for="analyzeUrl" style="display:inline-block;font-weight:900;margin-bottom:.35rem">Page URL</label>
         <div class="url-field" id="urlField">
           <i class="fa-solid fa-globe url-icon"></i>
@@ -311,11 +246,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
               <span>Auto-apply checkmarks (≥ 80)</span>
             </label>
           </div>
-          <button id="analyzeBtn" class="btn btn-analyze"><i class="fa-solid fa-magnifying-glass"></i> Analyze</button>
-          <button class="btn btn-print" id="printChecklist"><i class="fa-solid fa-print"></i> Print</button>
-          <button class="btn btn-reset" id="resetChecklist"><i class="fa-solid fa-rotate"></i> Reset</button>
-          <button class="btn btn-export" id="exportChecklist" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
-          <button class="btn btn-export" id="importChecklist" title="Import checklist JSON"><i class="fa-solid fa-file-import"></i> Import</button>
+
+          <!-- Analyze button fixed -->
+          <button id="analyzeBtn" type="button" onclick="try{ analyze(); }catch(e){ console.error(e); }" class="btn btn-analyze">
+            <i class="fa-solid fa-magnifying-glass"></i> Analyze
+          </button>
+
+          <button class="btn btn-print" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> Print</button>
+          <button class="btn btn-reset" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
+          <button class="btn btn-export" id="exportChecklist" type="button" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
+          <button class="btn btn-export" id="importChecklist" type="button" title="Import checklist JSON"><i class="fa-solid fa-file-import"></i> Import</button>
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
@@ -459,7 +399,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
               <li class="checklist-item">
                 <label><input type="checkbox" id="ck-{{ $i }}"><span>{{ $labels[$i] }}</span></label>
                 <span class="score-badge" id="sc-{{ $i }}">—</span>
-                <button class="improve-btn" data-id="ck-{{ $i }}">Improve</button>
+                <button class="improve-btn" type="button" data-id="ck-{{ $i }}">Improve</button>
               </li>
             @endfor
           </ul>
@@ -469,7 +409,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   </main>
 </div>
 
-<footer class="site" role="contentinfo">
+<footer class="site">
   <div><strong>Semantic SEO Master</strong></div>
   <div class="footer-links">
     <a href="#analyzer">Analyzer</a>
@@ -480,82 +420,58 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
 <script>
-/* -------- Global hue drift for multi-color water -------- */
-(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ const angle=((now-start)/4)%360; root.style.setProperty('--hue', angle + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+/* Hue drift for multi-color water */
+(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ root.style.setProperty('--hue', ((now-start)/4)%360 + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
 
-/* -------- Helpers -------- */
+/* Helpers */
 function setText(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; return el; }
-function setChipTone(el, v){
-  if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad');
-  const n=Number(v)||0;
-  el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad'));
-}
-function badgeTone(el, v){
-  if(!el) return; el.classList.remove('score-good','score-mid','score-bad');
-  el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad'));
-}
+function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); const n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
+function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
 
-/* -------- Gauge (overall water circle) -------- */
+/* Gauge */
 const GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
 function setScoreWheel(value){
   if(!GAUGE.rect){
-    GAUGE.rect=document.getElementById('scoreClipRect');
-    GAUGE.stop1=document.getElementById('scoreStop1');
-    GAUGE.stop2=document.getElementById('scoreStop2');
-    GAUGE.r1=document.getElementById('ringStop1');
-    GAUGE.r2=document.getElementById('ringStop2');
-    GAUGE.arc=document.getElementById('ringArc');
-    GAUGE.text=document.getElementById('overallScore');
+    GAUGE.rect=document.getElementById('scoreClipRect'); GAUGE.stop1=document.getElementById('scoreStop1'); GAUGE.stop2=document.getElementById('scoreStop2');
+    GAUGE.r1=document.getElementById('ringStop1'); GAUGE.r2=document.getElementById('ringStop2');
+    GAUGE.arc=document.getElementById('ringArc'); GAUGE.text=document.getElementById('overallScore');
     if(GAUGE.arc){ GAUGE.arc.style.strokeDasharray=GAUGE.CIRC.toFixed(2); GAUGE.arc.style.strokeDashoffset=GAUGE.CIRC.toFixed(2); }
   }
   const v=Math.max(0,Math.min(100,Number(value)||0));
   const y=GAUGE.H-(GAUGE.H*(v/100));
-  GAUGE.rect && GAUGE.rect.setAttribute('y',String(y));
+  GAUGE.rect?.setAttribute('y',String(y));
   GAUGE.text && (GAUGE.text.textContent=Math.round(v)+'%');
 
   let c1,c2; if(v>=80){c1='#22c55e';c2='#16a34a'} else if(v>=60){c1='#f59e0b';c2='#fb923c'} else {c1='#ef4444';c2='#b91c1c'}
   GAUGE.stop1?.setAttribute('stop-color',c1); GAUGE.stop2?.setAttribute('stop-color',c2);
   GAUGE.r1?.setAttribute('stop-color',c1); GAUGE.r2?.setAttribute('stop-color',c2);
   if(GAUGE.arc){ const offset=GAUGE.CIRC*(1-(v/100)); GAUGE.arc.style.strokeDashoffset=offset.toFixed(2); }
-  setText('overallScoreInline',Math.round(v));
-  setChipTone(document.getElementById('overallChip'),v);
+  setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
 }
 
-/* -------- Category bars + completion -------- */
+/* Category bars + completion */
 function updateCategoryBars(){
   const cards=[...document.querySelectorAll('.category-card')];
   let total=0, checked=0;
   cards.forEach((card,idx)=>{
     const items=[...card.querySelectorAll('.checklist-item')];
-    const t=items.length;
-    const done=items.filter(li=>li.querySelector('input')?.checked).length;
-    total += t; checked += done;
-
+    const t=items.length, done=items.filter(li=>li.querySelector('input')?.checked).length;
+    total+=t; checked+=done;
     const pct=t?Math.round(done*100/t):0;
-    const fill=document.getElementById(`catFillRect-${idx}`);
-    const pctEl=document.getElementById(`catPct-${idx}`);
-    const sub=card.querySelector('.category-sub');
-    const cnt=card.querySelector('.checked-count');
-
-    fill?.setAttribute('width', String(6*pct)); // 600px width → 6*pct
-    pctEl && (pctEl.textContent = `${done}/${t} • ${pct}%`);
-    sub && (sub.textContent = pct>=80?'Great progress':'Keep improving');
-    cnt && (cnt.textContent = done);
-
+    document.getElementById(`catFillRect-${idx}`)?.setAttribute('width', String(6*pct));
+    const pctEl=document.getElementById(`catPct-${idx}`); pctEl && (pctEl.textContent = `${done}/${t} • ${pct}%`);
+    const sub=card.querySelector('.category-sub'); sub && (sub.textContent = pct>=80?'Great progress':'Keep improving');
+    const cnt=card.querySelector('.checked-count'); cnt && (cnt.textContent = done);
     const stop1=document.getElementById(`catStop1-${idx}`), stop2=document.getElementById(`catStop2-${idx}`);
-    const c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444');
-    const c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
-    stop1?.setAttribute('stop-color', c1); stop2?.setAttribute('stop-color', c2);
+    const c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444'); const c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
+    stop1?.setAttribute('stop-color',c1); stop2?.setAttribute('stop-color',c2);
   });
-
-  // completion bar
   const pctAll = total? Math.round(checked*100/total) : 0;
   document.getElementById('compClipRect')?.setAttribute('width', String(6*pctAll));
-  setText('compPct', pctAll + '%');
-  setText('progressCaption', `${checked} of ${total} items completed`);
+  setText('compPct', pctAll + '%'); setText('progressCaption', `${checked} of ${total} items completed`);
 }
 
-/* -------- Auto check from item scores -------- */
+/* Auto check from item scores */
 function autoTickByScores(map){
   let autoCount=0;
   for(let i=1;i<=25;i++){
@@ -563,13 +479,10 @@ function autoTickByScores(map){
     const badge=document.getElementById(`sc-${i}`);
     const row=document.getElementById(`ck-${i}`)?.closest('.checklist-item');
     if (!badge) continue;
-
     if (Number.isFinite(scVal)) {
-      badge.textContent = scVal;
-      badgeTone(badge, scVal);
+      badge.textContent = scVal; badgeTone(badge, scVal);
       if (document.getElementById('autoApply').checked && scVal>=80) {
-        const cb=document.getElementById(`ck-${i}`);
-        if (cb && !cb.checked) { cb.checked=true; autoCount++; }
+        const cb=document.getElementById(`ck-${i}`); if (cb && !cb.checked) { cb.checked=true; autoCount++; }
         row?.classList.add('flash-row'); setTimeout(()=>row?.classList.remove('flash-row'), 900);
         row?.classList.remove('sev-mid','sev-bad'); row?.classList.add('sev-good');
       } else if (scVal>=60) {
@@ -578,15 +491,14 @@ function autoTickByScores(map){
         row?.classList.remove('sev-mid','sev-good'); row?.classList.add('sev-bad');
       }
     } else {
-      badge.textContent = '—';
-      badge.classList.remove('score-good','score-mid','score-bad');
+      badge.textContent = '—'; badge.classList.remove('score-good','score-mid','score-bad');
     }
   }
   setText('rAutoCount', autoCount);
   updateCategoryBars();
 }
 
-/* -------- Water progress controller -------- */
+/* Water progress */
 const Water=(function(){
   const wrap=()=>document.getElementById('waterWrap');
   const clip=()=>document.getElementById('waterClipRect');
@@ -602,40 +514,29 @@ const Water=(function(){
   };
 })();
 
-/* -------- Share + UX helpers -------- */
+/* Share + UX helpers */
 (function(){
-  const url = encodeURIComponent(location.href);
-  const title = encodeURIComponent(document.title);
-  const fb = document.getElementById('shareFb');
-  const x  = document.getElementById('shareX');
-  const ln = document.getElementById('shareLn');
-  const wa = document.getElementById('shareWa');
-  const em = document.getElementById('shareEm');
+  const url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
+  const fb = document.getElementById('shareFb'), x = document.getElementById('shareX'),
+        ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'),
+        em = document.getElementById('shareEm');
   fb.href = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
   x.href  = `https://twitter.com/intent/tweet?text=${title}&url=${url}`;
   ln.href = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
   wa.href = `https://wa.me/?text=${title}%20${url}`;
   em.href = `mailto:?subject=${title}&body=${url}`;
-  if (navigator.share) {
-    const n=document.getElementById('shareNative'); n.style.display='grid';
-    n.addEventListener('click', ()=>navigator.share({title:document.title, url:location.href}).catch(()=>{}));
-  }
 })();
-(function(){ const btn=document.getElementById('backTop'); addEventListener('scroll',()=>{ btn.style.display = (scrollY>500)?'grid':'none'; }); btn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'})); document.getElementById('toTopLink').addEventListener('click',e=>{e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});});})();
+(function(){ const btn=document.getElementById('backTop'); addEventListener('scroll',()=>{ btn.style.display = (scrollY>500)?'grid':'none'; }); document.getElementById('toTopLink')?.addEventListener('click',e=>{e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});});})();
 
-/* -------- Analyze (uses ABSOLUTE named routes) -------- */
+/* Analyze (absolute named routes) */
 const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
 function normalizeUrl(u) {
   if (!u) return '';
   u = u.trim();
-
-  // If it already has scheme, validate directly
   if (/^https?:\/\//i.test(u)) {
     try { new URL(u); return u; } catch { return ''; }
   }
-
-  // Allow plain domains like example.com or sub.domain/path
   const guess = 'https://' + u.replace(/^\/+/, '');
   try { new URL(guess); return guess; } catch { return ''; }
 }
@@ -652,7 +553,7 @@ async function analyze(){
   let data=null, ok=false, status=0, text='', lastErr='';
   const qs = new URLSearchParams({ url }).toString();
 
-  // 1) GET /analyze-json (absolute)
+  // 1) GET /analyze-json
   try{
     const res = await fetch(@json(route('analyze.json')).concat('?'+qs), {
       method:'GET',
@@ -663,7 +564,7 @@ async function analyze(){
     if (res.ok && data) ok = true;
   }catch(e){ lastErr = 'GET analyze.json failed'; }
 
-  // 2) POST /analyze (absolute) with CSRF
+  // 2) POST /analyze (CSRF)
   if (!ok){
     try{
       const res = await fetch(@json(route('analyze')), {
@@ -682,7 +583,7 @@ async function analyze(){
     }catch(e){ lastErr = 'POST analyze failed'; }
   }
 
-  // 3) GET /analyze fallback (absolute)
+  // 3) GET /analyze fallback
   if (!ok){
     try{
       const res = await fetch(@json(route('analyze')).concat('?'+qs), {
@@ -703,7 +604,6 @@ async function analyze(){
     return;
   }
 
-  // Update UI from payload
   const overall = Number(data.overall ?? 0);
   const contentScore = Number(data.contentScore ?? 0);
   const humanPct = Number(data.humanPct ?? 0);
@@ -728,85 +628,80 @@ async function analyze(){
   setText('rSchema', data.schema ?? '—');
 
   autoTickByScores(data.itemScores || {});
-
   Water.finish();
   document.getElementById('analyzeStatus').textContent = 'Analysis complete';
   document.getElementById('analyzeReport').style.display = 'block';
 }
 
-/* -------- Wire up controls -------- */
+/* Wire up controls (robust) */
 (function(){
   const input = document.getElementById('analyzeUrl');
   const pasteBtn = document.getElementById('pasteUrl');
   const clearBtn = document.getElementById('clearUrl');
-  pasteBtn.addEventListener('click', async ()=>{ try{ const txt = await navigator.clipboard.readText(); if (txt){ input.value = txt.trim(); input.dispatchEvent(new Event('input')); } }catch(e){} });
-  clearBtn.addEventListener('click', ()=>{ input.value=''; input.focus(); input.dispatchEvent(new Event('input')); });
-  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); analyze(); }});
-  document.getElementById('analyzeBtn').addEventListener('click', analyze);
+  const analyzeBtn = document.getElementById('analyzeBtn');
 
-  document.getElementById('resetChecklist').addEventListener('click', ()=>{
+  pasteBtn?.addEventListener('click', async ()=>{ try{ const txt = await navigator.clipboard.readText(); if (txt){ input.value = txt.trim(); input.dispatchEvent(new Event('input')); } }catch(e){} });
+  clearBtn?.addEventListener('click', ()=>{ input.value=''; input.focus(); input.dispatchEvent(new Event('input')); });
+  input?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); analyze(); }});
+  analyzeBtn?.addEventListener('click', (e)=>{ e.preventDefault(); analyze(); });
+
+  document.getElementById('resetChecklist')?.addEventListener('click', ()=>{
     document.querySelectorAll('.checklist input[type="checkbox"]').forEach(cb=> cb.checked=false);
     document.querySelectorAll('.score-badge').forEach(b=>{ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
-    updateCategoryBars();
-    setScoreWheel(0);
+    updateCategoryBars(); setScoreWheel(0);
     setText('contentScoreInline', 0); setChipTone(document.getElementById('contentScoreChip'), 0);
     setText('humanPct','—'); setText('aiPct','—'); document.getElementById('aiBadge')?.querySelector('b')?.textContent='—';
     Water.reset();
   });
 
-  // Export / Import
-  const exportBtn = document.getElementById('exportChecklist');
-  const importBtn = document.getElementById('importChecklist');
-  const importFile= document.getElementById('importFile');
-  exportBtn.addEventListener('click', ()=>{
+  const exportBtn=document.getElementById('exportChecklist'), importBtn=document.getElementById('importChecklist'), importFile=document.getElementById('importFile');
+  exportBtn?.addEventListener('click', ()=>{
     const payload = { checked:[], scores:{} };
     for(let i=1;i<=25;i++){
-      const cb = document.getElementById(`ck-${i}`);
-      const sc = document.getElementById(`sc-${i}`);
+      const cb=document.getElementById(`ck-${i}`); const sc=document.getElementById(`sc-${i}`);
       if (cb?.checked) payload.checked.push(i);
-      const s = parseInt(sc?.textContent||'NaN',10);
-      if (!Number.isNaN(s)) payload.scores[i]=s;
+      const s = parseInt(sc?.textContent||'NaN',10); if (!Number.isNaN(s)) payload.scores[i]=s;
     }
-    const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'checklist.json'; a.click();
-    URL.revokeObjectURL(a.href);
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
   });
-  importBtn.addEventListener('click', ()=> importFile.click());
-  importFile.addEventListener('change', async ()=>{
+  importBtn?.addEventListener('click', ()=> importFile.click());
+  importFile?.addEventListener('change', async ()=>{
     const file = importFile.files[0]; if (!file) return;
     try{
-      const txt = await file.text();
-      const data = JSON.parse(txt);
+      const txt = await file.text(), data = JSON.parse(txt);
       for(let i=1;i<=25;i++){
-        const cb = document.getElementById(`ck-${i}`); if (cb) cb.checked = (data.checked||[]).includes(i);
-        const sc = document.getElementById(`sc-${i}`); const val = data.scores?.[i];
-        if (sc && typeof val==='number'){ sc.textContent = val; badgeTone(sc, val); }
+        const cb=document.getElementById(`ck-${i}`); if (cb) cb.checked=(data.checked||[]).includes(i);
+        const sc=document.getElementById(`sc-${i}`); const val=data.scores?.[i];
+        if (sc && typeof val==='number'){ sc.textContent=val; badgeTone(sc,val); }
       }
       updateCategoryBars();
     }catch(e){ alert('Invalid JSON'); }
   });
 
-  document.getElementById('printTop').addEventListener('click', ()=> window.print());
-  document.getElementById('printChecklist').addEventListener('click', ()=> window.print());
+  document.getElementById('printTop')?.addEventListener('click', ()=> window.print());
+  document.getElementById('printChecklist')?.addEventListener('click', ()=> window.print());
+
+  // Show JS errors under progress bar for quick diagnosis
+  window.addEventListener('error', e=>{
+    const s=document.getElementById('analyzeStatus');
+    if (s) s.textContent = 'JavaScript error: ' + (e?.message || e);
+  });
 
   updateCategoryBars();
 })();
 
-/* -------- Cloud-like background layers -------- */
-(function(){ // lines layer
-  const c=document.getElementById('linesCanvas'); if(!c) return; const ctx=c.getContext('2d');
-  let dpr=Math.min(2,devicePixelRatio||1);
+/* Cloud-like background layers */
+(function(){ const c=document.getElementById('linesCanvas'); if(!c) return; const ctx=c.getContext('2d'); let dpr=Math.min(2,devicePixelRatio||1);
   function resize(){ c.width=Math.floor(innerWidth*dpr); c.height=Math.floor(innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
   function draw(t){ ctx.clearRect(0,0,innerWidth,innerHeight); const w=innerWidth,h=innerHeight,rows=12,spacing=Math.max(60,h/rows);
     for(let i=-2;i<rows+2;i++){ const y=i*spacing+(t*0.02%spacing); const g=ctx.createLinearGradient(0,y,w,y+80);
       g.addColorStop(0,'rgba(61,226,255,0.03)'); g.addColorStop(0.5,'rgba(155,92,255,0.05)'); g.addColorStop(1,'rgba(255,32,69,0.03)');
       ctx.strokeStyle=g; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(-100,y); ctx.lineTo(w+100,y+80); ctx.stroke(); }
     requestAnimationFrame(draw);
-  }
-  addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+  } addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
 })();
-(function(){ // fog blobs
-  const c=document.getElementById('brainCanvas'); if(!c) return; const ctx=c.getContext('2d'); let dpr=Math.min(2,devicePixelRatio||1); let blobs=[];
+(function(){ const c=document.getElementById('brainCanvas'); if(!c) return; const ctx=c.getContext('2d'); let dpr=Math.min(2,devicePixelRatio||1); let blobs=[];
   function resize(){ c.width=Math.floor(innerWidth*dpr); c.height=Math.floor(innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
     blobs=Array.from({length:36}).map(()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:40+Math.random()*120,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2,hue:180+Math.random()*140,a:.08+.08*Math.random()}));
   }
@@ -816,8 +711,7 @@ async function analyze(){
       const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r); g.addColorStop(0,`hsla(${b.hue},85%,65%,${b.a})`); g.addColorStop(1,`hsla(${(b.hue+60)%360},85%,55%,0)`);
       ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
     } requestAnimationFrame(draw);
-  }
-  addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+  } addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
 })();
 </script>
 </body>
