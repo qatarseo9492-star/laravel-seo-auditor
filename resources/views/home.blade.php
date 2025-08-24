@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-24zz (complete UI; auto PSI/CrUX; colorful sections) --}}
+{{-- resources/views/home.blade.php — v2025-08-24aa --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -9,14 +9,12 @@
 @php
   use Illuminate\Support\Facades\Route;
   $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
-  $metaDescription = 'Analyze any URL for content quality, entities, readability, technical SEO, and performance (CrUX + PSI).';
+  $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, UX signals, and site speed with stylish, responsive insights.';
   $metaImage = asset('og-image.png');
   $canonical = url()->current();
-
   $analyzeJsonUrl = Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
   $analyzeUrl     = Route::has('analyze')      ? route('analyze')      : url('analyze');
-  $cruxUrl        = Route::has('crux.url')     ? route('crux.url')     : url('/api/crux');
-  $psiUrl         = Route::has('psi.run')      ? route('psi.run')      : url('/api/psi');
+  $psiProxyUrl    = Route::has('pagespeed.proxy') ? route('pagespeed.proxy') : url('api/pagespeed');
 @endphp
 
 <title>{{ $metaTitle }}</title>
@@ -33,19 +31,25 @@
 <meta name="twitter:description" content="{{ $metaDescription }}">
 <meta name="twitter:image" content="{{ $metaImage }}">
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=3" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet"/>
 
 <style>
+/* === Theme === */
 :root{
   --bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;
   --good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--accent-2:#9b5cff;
   --radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg
 }
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
-body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
+body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:
+radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),
+radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),
+var(--bg);overflow-x:hidden}
+
+a{color:#8ad4ff}
+
 #linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-#linesCanvas{opacity:.55}
-#smokeCanvas{opacity:.9;mix-blend-mode:screen}
+#linesCanvas{opacity:.45}#smokeCanvas{opacity:.9;mix-blend-mode:screen}
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 header.site{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:14px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand{display:flex;align-items:center;gap:.8rem;min-width:0}
@@ -60,11 +64,15 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .btn-print{background:linear-gradient(135deg,#3b82f6,#6366f1);border-color:#5b77ef}
 .btn-reset{background:linear-gradient(135deg,#f59e0b,#f97316);border-color:#f59e0b}
 .btn-export{background:linear-gradient(135deg,#a855f7,#ec4899);border-color:#c26cf2}
-.btn-ghost{background:rgba(255,255,255,.06)}
-.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn-ghost{background:rgba(255,255,255,.06)} .btn:disabled{opacity:.6;cursor:not-allowed}
+
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
-.section-title{font-size:1.6rem;margin:0 0 .3rem}
-.section-subtitle{margin:0;color:var(--text-dim)}
+.section-title{font-size:1.6rem;margin:0 0 .3rem}.section-subtitle{margin:0;color:var(--text-dim)}
+
+.legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
+.l-red{background:rgba(239,68,68,.18)}.l-orange{background:rgba(245,158,11,.18)}.l-green{background:rgba(34,197,94,.18)}
+
+/* Score gauge + chips (unchanged core) */
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}.gauge-svg{width:100%;height:auto;display:block}
@@ -74,13 +82,9 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .score-text{font-size:clamp(2.2rem,4.2vw,3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
 .multiHueFast{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
-.legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
-.l-red{background:rgba(239,68,68,.18)}.l-orange{background:rgba(245,158,11,.18)}.l-green{background:rgba(34,197,94,.18)}
-.chip-good{background:rgba(34,197,94,.18)!important;border-color:rgba(34,197,94,.45)!important}
-.chip-mid{background:rgba(245,158,11,.18)!important;border-color:rgba(245,158,11,.45)!important}
-.chip-bad{background:rgba(239,68,68,.18)!important;border-color:rgba(239,68,68,.5)!important}
 .ico{width:1.1em;text-align:center}.ico-green{color:var(--good)}.ico-orange{color:var(--warn)}.ico-red{color:var(--bad)}.ico-cyan{color:var(--accent)}.ico-purple{color:#9b5cff}
 
+/* URL field */
 .url-field{position:relative;border-radius:16px;background:#0b0d21;border:1px solid #1b1b35;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02),0 12px 32px rgba(0,0,0,.32);padding:10px 110px 10px 46px;transition:.25s;overflow:hidden;isolation:isolate}
 .url-field:focus-within{border-color:#5942ff;box-shadow:0 0 0 6px rgba(155,92,255,.15),inset 0 0 0 1px rgba(93,65,255,.28)}
 .url-field .url-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9aa0c3;font-size:1rem;opacity:.95}
@@ -88,8 +92,8 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .url-field .url-mini{position:absolute;top:50%;transform:translateY(-50%);border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#fff;border-radius:10px;padding:.35rem .6rem;font-weight:900;cursor:pointer;transition:.15s}
 .url-field .url-mini:hover{background:rgba(255,255,255,.12)}.url-field .url-clear{right:60px;width:36px;height:32px;display:grid;place-items:center}.url-field #pasteUrl{right:12px}
 .url-field .url-border{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,#3de2ff,#9b5cff,#ff2045,#f59e0b,#3de2ff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;pointer-events:none;filter:hue-rotate(var(--hue))}
-.analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.6rem}
 
+/* Waterbars + comp bar (unchanged core visuals) */
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{position:relative;height:64px;border-radius:18px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
@@ -99,13 +103,9 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .wave1{animation:waveX 7s linear infinite}.wave2{animation:waveX 10s linear infinite reverse;opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
-
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
-.comp-water{position:relative;height:52px;border-radius:16px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
-.comp-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}.comp-overlay{position:absolute;inset:0;background:radial-gradient(120px 50px at 15% -25%,rgba(255,255,255,.16),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.08),transparent 35%,rgba(255,255,255,.06));pointer-events:none;mix-blend-mode:screen;z-index:3}
-.comp-pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1rem;z-index:4;text-shadow:0 1px 0 rgba(0,0,0,.45)}
-.comp-wave1{animation:waveX 8s linear infinite}.comp-wave2{animation:waveX 12s linear infinite reverse}
 
+/* Category cards (checklist area) */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite;pointer-events:none;z-index:0}
@@ -114,13 +114,13 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
 .category-sub{margin:.15rem 0 0;color:var(--text-dim);font-size:.96rem}
-.cat-water{grid-column:1/-1;margin-top:.55rem;position:relative;height:22px}
-.cat-svg{display:block;width:100%;height:22px}
-.cat-wave1{animation:catWave 7s linear infinite}.cat-wave2{animation:catWave 10s linear infinite reverse}
-@keyframes catWave{from{transform:translateX(0)}to{transform:translateX(-640px)}}
-.cat-water-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:rgba(255,255,255,.9);text-shadow:0 1px 0 rgba(0,0,0,.55);pointer-events:none}
+
+/* Checklist rows */
 .checklist{list-style:none;margin:10px 0 0;padding:0}
-.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s,background .25s,transform .12s}
+.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:
+linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),
+radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),
+radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s,background .25s,transform .12s}
 .checklist-item+.checklist-item{margin-top:.28rem}.checklist-item:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.55rem}
 .sev-good{background:linear-gradient(180deg,rgba(34,197,94,.14),rgba(34,197,94,.08));border-color:rgba(34,197,94,.45)}
@@ -140,108 +140,84 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .improve-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.1)}
 .improve-btn::before{content:"";position:absolute;inset:-2px;border-radius:inherit;z-index:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.18) 45%,transparent 50%,transparent 100%);transform:translateX(-120%);animation:btnSheen 3.2s linear infinite}
 @keyframes btnSheen{0%{transform:translateX(-120%)}60%{transform:translateX(120%)}100%{transform:translateX(120%)}}
-.share-dock{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:85;background:rgba(10,12,28,.35);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.5rem;backdrop-filter:blur(8px)}
-.share-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;color:#fff;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
-.share-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
-.share-fb{background:linear-gradient(135deg,#1877F2,#1e90ff)}.share-x{background:linear-gradient(135deg,#111,#333)}.share-ln{background:linear-gradient(135deg,#0a66c2,#1a8cd8)}.share-wa{background:linear-gradient(135deg,#25D366,#128C7E)}.share-em{background:linear-gradient(135deg,#ef4444,#b91c1c)}
 
-footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
-#backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
-#backTop:hover{background:rgba(255,255,255,.12)}
+/* Panels below analyzer — colorful section shells */
+.panel{margin-top:16px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:var(--shadow)}
+.panel-header{display:flex;align-items:center;gap:.65rem;margin-bottom:.5rem}
+.panel-title{margin:0;font-size:1.15rem;font-weight:1000;background:linear-gradient(90deg,#3de2ff,#a78bfa,#ff58a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 
-/* === NEW: Human vs AI animated bar === */
-.hai-wrap{margin-top:8px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);border-radius:16px;padding:12px}
-.hai-bar{position:relative;height:28px;border-radius:999px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.12)}
-.hai-human,.hai-ai{position:absolute;top:0;bottom:0;transition:width .6s cubic-bezier(.22,1,.36,1)}
-.hai-human{left:0;background:linear-gradient(90deg,#22c55e,#3de2ff)}
-.hai-ai{right:0;background:linear-gradient(90deg,#ff2045,#a855f7)}
-.hai-split{position:absolute;top:-6px;bottom:-6px;width:2px;background:rgba(255,255,255,.35);left:50%;transform:translateX(-50%);box-shadow:0 0 18px rgba(255,255,255,.25)}
-.hai-legend{display:flex;justify-content:space-between;margin-top:.4rem;color:var(--text-dim);font-weight:800}
-.hai-legend span i{margin-right:.35rem}
+/* Human vs AI (animated dual bar) */
+.hvai-wrap{display:grid;grid-template-columns:repeat(12,1fr);gap:.75rem}
+.hvai-card{grid-column:span 12;background:linear-gradient(145deg,rgba(61,226,255,.08),rgba(155,92,255,.08));border:1px dashed rgba(255,255,255,.14);border-radius:14px;padding:12px}
+.hvai-meter{position:relative;height:20px;border-radius:999px;background:#0b0d21;border:1px solid rgba(255,255,255,.12);overflow:hidden}
+.hvai-human,.hvai-ai{position:absolute;left:0;top:0;bottom:0;width:50%;transition:width .6s cubic-bezier(.22,1,.36,1)}
+.hvai-human{background:linear-gradient(90deg,#22c55e,#3de2ff)}
+.hvai-ai{right:0;left:auto;background:linear-gradient(90deg,#ef4444,#f59e0b)}
+.hvai-labels{display:flex;justify-content:space-between;font-weight:900;margin-top:.35rem}
+.det-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.5rem;margin-top:.5rem}
+.det-item{grid-column:span 6;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.55rem .6rem}
+.det-row{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:center}
+.det-label{font-weight:800;color:var(--text-dim)}
+.det-score{font-weight:1000}
+.det-bar{margin-top:.35rem;height:12px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1);position:relative}
+.det-fill-human{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#22c55e,#3de2ff);transition:width .35s ease}
+.det-fill-ai{position:absolute;right:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b);transition:width .35s ease}
 
-/* === NEW: Readability & Entities cards === */
-.grid-12{display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
-.card{background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-.card::after{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.25),rgba(155,92,255,.25),rgba(255,32,69,.25));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.3;pointer-events:none}
-.card h4{margin:.1rem 0 .35rem;font-size:1.05rem}
-.meta-list{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
-.meta-row{display:flex;justify-content:space-between;gap:.8rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.5rem .6rem}
-.tag-bucket{display:flex;flex-wrap:wrap;gap:.4rem}
-.tag{padding:.28rem .55rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04))}
-.tag.badge{background:linear-gradient(135deg,#22c55e33,#3de2ff33)}
-.bucket-title{font-weight:900;color:var(--text-dim);margin:.2rem 0 .45rem}
+/* Readability Insights */
+.read-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.75rem}
+.read-card{grid-column:span 6;background:linear-gradient(160deg,rgba(56,189,248,.10),rgba(168,85,247,.08));border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.75rem}
+.read-row{display:grid;grid-template-columns:auto 1fr auto;gap:.5rem;align-items:center}
+.read-bar{height:12px;border-radius:999px;background:#0b0d21;border:1px solid rgba(255,255,255,.12);overflow:hidden}
+.read-fill{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#3de2ff);transition:width .4s ease}
+.badge-mini{font-weight:900;padding:.18rem .45rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);font-size:.8rem}
 
-/* === NEW: Speed panel === */
-.speed-panel{margin-top:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
-.badge-score{font-weight:900;padding:.28rem .55rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06)}
-.badge-green{background:rgba(34,197,94,.22);border-color:rgba(34,197,94,.45)}
-.badge-orange{background:rgba(245,158,11,.22);border-color:rgba(245,158,11,.45)}
-.badge-red{background:rgba(239,68,68,.24);border-color:rgba(239,68,68,.5)}
-.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.5rem}
-.kpi{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.55rem .6rem}
-.kpi .label{color:var(--text-dim);font-weight:900}
-.kpi .val{font-weight:1000;font-size:1.05rem}
-.sugg-list{list-style:none;margin:.5rem 0 0;padding:0}
-.sugg-item{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.55rem .6rem;display:flex;justify-content:space-between;gap:.6rem;margin-top:.35rem}
-.sugg-item small{color:var(--text-dim)}
-.speed-note{margin-top:.35rem;color:var(--text-dim)}
+/* Entities & Topics */
+.ent-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.75rem}
+.ent-card{grid-column:span 6;background:linear-gradient(160deg,rgba(250,204,21,.10),rgba(99,102,241,.10));border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.75rem}
+.tag{display:inline-flex;align-items:center;gap:.35rem;margin:.24rem;padding:.35rem .55rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.06);font-weight:800;white-space:nowrap}
 
-@media (max-width:992px){
-  .category-card{grid-column:span 12}.score-container{width:190px}.analyze-row{grid-template-columns:1fr auto auto}.kpi-row{grid-template-columns:1fr 1fr 1fr}
-}
+/* Site Speed & CWV */
+.speed-wrap{display:grid;grid-template-columns:repeat(12,1fr);gap:.75rem}
+.speed-card{grid-column:span 6;background:linear-gradient(145deg,rgba(34,197,94,.08),rgba(59,130,246,.08));border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.75rem}
+.kpi{display:flex;align-items:center;justify-content:space-between;padding:.5rem;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);margin:.35rem 0}
+.kpi .left{display:flex;align-items:center;gap:.45rem}
+.kpi i{font-size:1rem}
+.kpi.good{border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.12)}
+.kpi.mid{border-color:rgba(245,158,11,.45);background:rgba(245,158,11,.12)}
+.kpi.bad{border-color:rgba(239,68,68,.55);background:rgba(239,68,68,.12)}
+.skel{height:12px;border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06));animation:sk 1.2s infinite;background-size:200% 100%}
+@keyframes sk{0%{background-position:0 0}100%{background-position:200% 0}}
+
+/* Responsive tweaks */
+@media (max-width:992px){.category-card{grid-column:span 12}.score-container{width:190px}}
 @media (max-width:768px){
-  .wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}
-  .score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}
-  .share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}
-  .checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}
-  .meta-list{grid-template-columns:1fr}.kpi-row{grid-template-columns:1fr 1fr}
-}
-@media (max-width:480px){
-  .score-container{width:150px}.category-icon{width:40px;height:40px}.category-title{font-size:1rem}.kpi-row{grid-template-columns:1fr}
+  .wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}
+  .score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}
+  .hvai-card,.read-card,.ent-card,.speed-card{grid-column:span 12}
 }
 @media (prefers-reduced-motion: reduce){
-  .score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}
+  .score-wave1,.score-wave2,.wave1,.wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}
 }
-@media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
+@media print{#linesCanvas,#smokeCanvas,.share-dock,#backTop{display:none!important}}
 </style>
 </head>
 <body>
 
-<canvas id="linesCanvas"></canvas>
-<canvas id="smokeCanvas"></canvas>
+<!-- Background canvases -->
+<canvas id="linesCanvas"></canvas><canvas id="smokeCanvas"></canvas>
 
 <script>
-  // ===== Globals (now include PSI/CrUX endpoints) =====
+  /* Global init */
   window.SEMSEO = window.SEMSEO || {};
   window.SEMSEO.ENDPOINTS = {
     analyzeJson: @json($analyzeJsonUrl),
-    analyze:     @json($analyzeUrl),
-    crux:        @json($cruxUrl),
-    psi:         @json($psiUrl)
+    analyze: @json($analyzeUrl),
+    psi: @json($psiProxyUrl)
   };
-  window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
   window.SEMSEO.READY = false;
   window.SEMSEO.BUSY = false;
   window.SEMSEO.QUEUE = 0;
-
-  function SEMSEO_go(){
-    if (window.SEMSEO.READY && typeof analyze === 'function') {
-      analyze();
-    } else {
-      window.SEMSEO.QUEUE++;
-      const s=document.getElementById('analyzeStatus');
-      if(s) s.textContent='Initializing…';
-    }
-  }
 </script>
-
-<div class="share-dock" aria-label="Share">
-  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
-  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
-  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
-  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
-  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
-</div>
 
 <div class="wrap">
   <header class="site">
@@ -249,7 +225,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
       <div>
         <div class="hero-heading">Semantic SEO Master Analyzer</div>
-        <div class="hero-sub">Analyze URLs, get scores & suggestions</div>
+        <div class="hero-sub">Analyze URLs with stylish insights (Human vs AI → Readability → Entities → Site Speed)</div>
       </div>
     </div>
     <div class="header-actions">
@@ -274,17 +250,9 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             <defs>
               <clipPath id="scoreCircleClip"><circle cx="100" cy="100" r="88"/></clipPath>
               <clipPath id="scoreFillClip"><rect id="scoreClipRect" class="score-mask-rect" x="0" y="200" width="200" height="200"/></clipPath>
-              <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop id="scoreStop1" offset="0%" stop-color="#22c55e"/>
-                <stop id="scoreStop2" offset="100%" stop-color="#16a34a"/>
-              </linearGradient>
-              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop id="ringStop1" offset="0%" stop-color="#22c55e"/>
-                <stop id="ringStop2" offset="100%" stop-color="#16a34a"/>
-              </linearGradient>
-              <filter id="ringGlow" x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-              </filter>
+              <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1"><stop id="scoreStop1" offset="0%" stop-color="#22c55e"/><stop id="scoreStop2" offset="100%" stop-color="#16a34a"/></linearGradient>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop id="ringStop1" offset="0%" stop-color="#22c55e"/><stop id="ringStop2" offset="100%" stop-color="#16a34a"/></linearGradient>
+              <filter id="ringGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
               <path id="scoreWavePath" d="M0 110 Q 15 90 30 110 T 60 110 T 90 110 T 120 110 T 150 110 T 180 110 T 210 110 V 220 H 0 Z"/>
             </defs>
             <circle cx="100" cy="100" r="96" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
@@ -293,12 +261,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             <g clip-path="url(#scoreCircleClip)">
               <rect x="0" y="0" width="200" height="200" fill="#0b0d21"/>
               <g clip-path="url(#scoreFillClip)">
-                <g class="score-wave1 multiHueFast">
-                  <use href="#scoreWavePath" x="0" fill="url(#scoreGrad)"/><use href="#scoreWavePath" x="210" fill="url(#scoreGrad)"/>
-                </g>
-                <g class="score-wave2 multiHueFast" opacity=".85">
-                  <use href="#scoreWavePath" x="0" y="6" fill="url(#scoreGrad)"/><use href="#scoreWavePath" x="210" y="6" fill="url(#scoreGrad)"/>
-                </g>
+                <g class="score-wave1 multiHueFast"><use href="#scoreWavePath" x="0" fill="url(#scoreGrad)"/><use href="#scoreWavePath" x="210" fill="url(#scoreGrad)"/></g>
+                <g class="score-wave2 multiHueFast" opacity=".85"><use href="#scoreWavePath" x="0" y="6" fill="url(#scoreGrad)"/><use href="#scoreWavePath" x="210" y="6" fill="url(#scoreGrad)"/></g>
               </g>
             </g>
             <text id="overallScore" x="100" y="106" text-anchor="middle" dominant-baseline="middle" class="score-text">0%</text>
@@ -310,7 +274,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
           <span class="chip" id="overallChip"><i class="fa-solid fa-gauge-high ico"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
           <span class="chip" id="contentScoreChip"><i class="fa-solid fa-file-lines ico"></i> Content: <b id="contentScoreInline">0</b>/100</span>
-          <span class="chip" id="aiBadge" title="Human vs AI detection"><i class="fa-solid fa-user-pen ico ico-green"></i> Human-like: <b id="humanPct">—</b>%</span>
+          <span class="chip" id="aiBadge" title="Content signature"><i class="fa-solid fa-user-astronaut ico ico-green"></i> Writer: <b>—</b></span>
+          <button id="viewHumanBtn" class="btn btn-ghost"><i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%</button>
           <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-robot ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
@@ -318,7 +283,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </div>
     </div>
 
-    <!-- URL form & actions -->
     <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
       <form id="analyzeForm" onsubmit="event.preventDefault(); analyze(); return false;">
         <label for="analyzeUrl" style="display:inline-block;font-weight:900;margin-bottom:.35rem">Page URL</label>
@@ -330,16 +294,14 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <span class="url-border" aria-hidden="true"></span>
         </div>
 
-        <div class="analyze-row">
+        <div class="analyze-row" style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.6rem">
           <div style="display:flex;align-items:center;gap:.6rem">
             <label style="display:inline-flex;align-items:center;gap:.45rem;cursor:pointer">
               <input id="autoApply" type="checkbox" checked style="accent-color:#9b5cff">
               <span>Auto-apply checkmarks (≥ 80)</span>
             </label>
           </div>
-          <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
-            <i class="fa-solid fa-magnifying-glass"></i> Analyze
-          </button>
+          <button id="analyzeBtn" type="button" class="btn btn-analyze"><i class="fa-solid fa-magnifying-glass"></i> Analyze</button>
           <button class="btn btn-print" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> Print</button>
           <button class="btn btn-reset" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
           <button class="btn btn-export" id="exportChecklist" type="button" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
@@ -347,7 +309,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
-        <!-- Top progress -->
+        <!-- Progress (water) -->
         <div class="water-wrap" id="waterWrap" aria-hidden="true">
           <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
@@ -371,7 +333,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
         </div>
 
-        <!-- Meta chips -->
+        <!-- Meta chips recap -->
         <div id="analyzeReport" style="margin-top:.9rem;display:none">
           <div style="display:flex;flex-wrap:wrap;gap:.5rem">
             <span class="chip">HTTP: <b id="rStatus">—</b></span>
@@ -389,29 +351,63 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
-    <!-- Human vs AI Content (Ensemble) -->
-    <section id="detectorPanel" class="hai-wrap" style="display:none">
-      <div class="det-head" style="display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem">
-        <i class="fa-solid fa-wave-square ico ico-purple"></i>
-        <h4 style="margin:0">Human vs AI Content (Ensemble)</h4>
+    <!-- ===== ORDERED PANELS ===== -->
+
+    <!-- 1) Human vs AI Panel -->
+    <section id="hvaiPanel" class="panel">
+      <div class="panel-header">
+        <i class="fa-solid fa-scale-balanced ico ico-purple"></i>
+        <h3 class="panel-title">Human vs AI Content Signals</h3>
       </div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem">
-        <span class="chip"><i class="fa-solid fa-shield-halved ico"></i> Confidence: <b id="detConfidence">—</b>%</span>
-        <span class="chip"><i class="fa-solid fa-circle-info ico"></i> Split bar = relative likelihood</span>
+      <div class="hvai-wrap">
+        <div class="hvai-card">
+          <div class="hvai-meter" aria-label="Human vs AI bar">
+            <div id="hvaiHuman" class="hvai-human" style="width:50%"></div>
+            <div id="hvaiAI" class="hvai-ai" style="width:50%"></div>
+          </div>
+          <div class="hvai-labels">
+            <span><i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="hvaiHumanPct">—</b>%</span>
+            <span><i class="fa-solid fa-robot ico ico-red"></i> AI-like: <b id="hvaiAIPct">—</b>%</span>
+          </div>
+        </div>
       </div>
-      <div class="hai-bar">
-        <div id="haiHuman" class="hai-human" style="width:50%"></div>
-        <div id="haiAI" class="hai-ai" style="width:50%"></div>
-        <div class="hai-split" id="haiSplit" style="left:50%"></div>
-      </div>
-      <div class="hai-legend">
-        <span><i class="fa-solid fa-user-pen"></i> Human <b id="haiHumanPct">—</b>%</span>
-        <span><i class="fa-solid fa-robot"></i> AI <b id="haiAIPct">—</b>%</span>
-      </div>
-      <div id="detGrid" class="det-grid" style="display:grid;grid-template-columns:repeat(12,1fr);gap:.5rem;margin-top:.6rem"></div>
-      <div class="det-note" id="detNote" style="margin-top:.35rem;color:var(--text-dim)">Higher bar in a detector = more AI-like for that signal.</div>
+
+      <div class="chip" style="margin-top:.5rem"><i class="fa-solid fa-shield-halved ico"></i> Confidence: <b id="detConfidence">—</b>%</div>
+      <div class="chip" style="margin-top:.5rem"><i class="fa-solid fa-circle-info ico"></i> Bars show <b>Human-leaning</b> vs <b>AI-leaning</b> per detector</div>
+
+      <div class="det-grid" id="detGrid"></div>
+      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
     </section>
 
+    <!-- 2) Readability Insights -->
+    <section id="readPanel" class="panel">
+      <div class="panel-header">
+        <i class="fa-solid fa-book-open-reader ico ico-cyan"></i>
+        <h3 class="panel-title">Readability Insights</h3>
+      </div>
+      <div class="read-grid" id="readGrid">
+        <!-- cards injected -->
+      </div>
+      <div style="margin-top:.5rem;color:var(--text-dim)">
+        Tips adapt to your content. Aim for clear sentences, varied vocabulary, and limited repetition.
+      </div>
+    </section>
+
+    <!-- 3) Entities & Topics -->
+    <section id="entitiesPanel" class="panel">
+      <div class="panel-header">
+        <i class="fa-solid fa-tags ico" style="color:#f59e0b"></i>
+        <h3 class="panel-title">Entities & Topics</h3>
+      </div>
+      <div class="ent-grid" id="entitiesGrid">
+        <!-- entity buckets injected -->
+      </div>
+      <div style="margin-top:.5rem;color:var(--text-dim)">
+        Click a tag to open a search in a new tab (Google / Wikipedia).
+      </div>
+    </section>
+
+    <!-- Checklist (unchanged placement inside main analyzer, not part of the four panels) -->
     @php $labels = [
       1=>'Define search intent & primary topic', 2=>'Map target & related keywords (synonyms/PAA)', 3=>'H1 includes primary topic naturally',
       4=>'Integrate FAQs / questions with answers', 5=>'Readable, NLP-friendly language', 6=>'Title tag (≈50–60 chars) w/ primary keyword',
@@ -425,8 +421,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     ]; @endphp
 
     <div class="progress-wrap">
-      <div class="comp-water" id="compWater" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-        <svg class="comp-svg" viewBox="0 0 600 140" preserveAspectRatio="none">
+      <div class="comp-water" id="compWater" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" style="position:relative;height:52px;border-radius:16px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)">
+        <svg class="comp-svg" viewBox="0 0 600 140" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;z-index:1">
           <defs>
             <clipPath id="compRound"><rect x="1" y="1" width="598" height="138" rx="14" ry="14"/></clipPath>
             <clipPath id="compFillClip"><rect id="compClipRect" x="0" y="0" width="0" height="140"/></clipPath>
@@ -441,13 +437,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             </g>
           </g>
         </svg>
-        <div class="comp-overlay"></div>
-        <div class="comp-pct"><span id="compPct">0%</span></div>
+        <div class="comp-overlay" style="position:absolute;inset:0;background:radial-gradient(120px 50px at 15% -25%,rgba(255,255,255,.16),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.08),transparent 35%,rgba(255,255,255,.06));pointer-events:none;mix-blend-mode:screen;z-index:3"></div>
+        <div class="comp-pct" style="position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1rem;z-index:4;text-shadow:0 1px 0 rgba(0,0,0,.45)"><span id="compPct">0%</span></div>
       </div>
       <div id="progressCaption" class="progress-caption" style="color:var(--text-dim)">0 of 25 items completed</div>
     </div>
 
-    <!-- Checklist grid -->
     <div class="analyzer-grid" id="checklistGrid">
       @foreach ([
         ['Content & Keywords',1,5,'fa-pen-nib','linear-gradient(135deg,#22d3ee33,#a78bfa33)'],
@@ -463,27 +458,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             <div>
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
-              <div class="cat-water" id="catWater-{{ $loop->index }}">
-                <svg class="cat-svg" viewBox="0 0 600 24" preserveAspectRatio="none">
-                  <defs>
-                    <clipPath id="catClip-{{ $loop->index }}"><rect x="0" y="0" width="600" height="24" rx="10" ry="10"/></clipPath>
-                    <clipPath id="catFillClip-{{ $loop->index }}"><rect id="catFillRect-{{ $loop->index }}" x="0" y="0" width="0" height="24"/></clipPath>
-                    <linearGradient id="catGrad-{{ $loop->index }}" x1="0" y1="0" x2="1" y2="1">
-                      <stop id="catStop1-{{ $loop->index }}" offset="0%" stop-color="#22d3ee"/>
-                      <stop id="catStop2-{{ $loop->index }}" offset="100%" stop-color="#a78bfa"/>
-                    </linearGradient>
-                    <path id="catWave-{{ $loop->index }}" d="M0 12 Q 40 6 80 12 T 160 12 T 240 12 T 320 12 T 400 12 T 480 12 T 560 12 T 640 12 V 30 H 0 Z"/>
-                  </defs>
-                  <g clip-path="url(#catClip-{{ $loop->index }})">
-                    <rect x="0" y="0" width="600" height="24" fill="#0b0d21"/>
-                    <g clip-path="url(#catFillClip-{{ $loop->index }})">
-                      <g class="cat-wave1"><use href="#catWave-{{ $loop->index }}" x="0" fill="url(#catGrad-{{ $loop->index }})"/><use href="#catWave-{{ $loop->index }}" x="640" fill="url(#catGrad-{{ $loop->index }})"/></g>
-                      <g class="cat-wave2" opacity=".85"><use href="#catWave-{{ $loop->index }}" x="0" y="3" fill="url(#catGrad-{{ $loop->index }})"/><use href="#catWave-{{ $loop->index }}" x="640" y="3" fill="url(#catGrad-{{ $loop->index }})"/></g>
-                    </g>
-                  </g>
-                </svg>
-                <div class="cat-water-pct" id="catPct-{{ $loop->index }}">0/0 • 0%</div>
-              </div>
             </div>
             <span class="chip"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
           </header>
@@ -500,107 +474,68 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       @endforeach
     </div>
 
-    <!-- ===== NEW: Readability Insights + Entities ===== -->
-    <section style="margin-top:14px">
-      <div class="grid-12">
-        <div class="card" style="grid-column:span 6">
-          <h4><i class="fa-solid fa-book-open ico"></i> Readability Insights</h4>
-          <p class="section-subtitle">Friendly metrics that show how easy your content is to understand.</p>
-          <div class="meta-list" style="margin-top:.55rem">
-            <div class="meta-row"><span class="label">Flesch Reading Ease</span><span class="val"><b id="rbFlesch">—</b></span></div>
-            <div class="meta-row"><span class="label">Words</span><span class="val"><b id="rbWords">—</b></span></div>
-            <div class="meta-row"><span class="label">Avg. sentence length</span><span class="val"><b id="rbSentLen">—</b></span></div>
-            <div class="meta-row"><span class="label">Vocabulary richness (TTR)</span><span class="val"><b id="rbTTR">—</b></span></div>
-            <div class="meta-row"><span class="label">Long sentence ratio</span><span class="val"><b id="rbLong">—</b></span></div>
-            <div class="meta-row"><span class="label">Digits per 100 words</span><span class="val"><b id="rbDigits">—</b></span></div>
-          </div>
-          <div style="margin-top:.6rem">
-            <span class="chip" id="rbVerdict"><i class="fa-solid fa-face-smile ico ico-green"></i> Verdict: <b>—</b></span>
-          </div>
+    <!-- 4) Site Speed & Core Web Vitals (END) -->
+    <section id="speedPanel" class="panel">
+      <div class="panel-header">
+        <i class="fa-solid fa-gauge-high ico" style="color:#22c55e"></i>
+        <h3 class="panel-title">Site Speed & Core Web Vitals</h3>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem">
+        <button id="runMobile" class="btn btn-ghost"><i class="fa-solid fa-mobile-screen-button"></i> Run Mobile</button>
+        <button id="runDesktop" class="btn btn-ghost"><i class="fa-solid fa-desktop"></i> Run Desktop</button>
+        <button id="runBoth" class="btn btn-ghost"><i class="fa-solid fa-repeat"></i> Re-test Both</button>
+        <span class="chip"><i class="fa-regular fa-clock ico"></i> Last test: <b id="psiTime">—</b></span>
+      </div>
+      <div class="speed-wrap">
+        <div class="speed-card">
+          <div class="chip"><i class="fa-solid fa-mobile-screen-button"></i> Mobile</div>
+          <div id="mobilePerf" class="kpi"><div class="left"><i class="fa-solid fa-bolt"></i> Performance</div><b>—</b></div>
+          <div id="mobileLCP" class="kpi"><div class="left"><i class="fa-regular fa-image"></i> LCP</div><b>—</b></div>
+          <div id="mobileINP" class="kpi"><div class="left"><i class="fa-solid fa-hand-pointer"></i> INP</div><b>—</b></div>
+          <div id="mobileCLS" class="kpi"><div class="left"><i class="fa-solid fa-border-all"></i> CLS</div><b>—</b></div>
+          <div id="mobileHints" style="margin-top:.4rem"></div>
         </div>
-
-        <div class="card" style="grid-column:span 6">
-          <h4><i class="fa-solid fa-database ico"></i> Entities & Topics (Semantic SEO)</h4>
-          <p class="section-subtitle">Primary + related entities and topical hints.</p>
-          <div class="bucket">
-            <div class="bucket-title"><i class="fa-solid fa-bullseye"></i> Primary Entities</div>
-            <div id="entPrimary" class="tag-bucket"></div>
-          </div>
-          <div class="bucket">
-            <div class="bucket-title"><i class="fa-solid fa-people-group"></i> People</div>
-            <div id="entPeople" class="tag-bucket"></div>
-          </div>
-          <div class="bucket">
-            <div class="bucket-title"><i class="fa-solid fa-building"></i> Organizations</div>
-            <div id="entOrg" class="tag-bucket"></div>
-          </div>
-          <div class="bucket">
-            <div class="bucket-title"><i class="fa-solid fa-location-dot"></i> Places</div>
-            <div id="entPlace" class="tag-bucket"></div>
-          </div>
-          <div class="bucket">
-            <div class="bucket-title"><i class="fa-solid fa-microchip"></i> Software / APK / Games</div>
-            <div id="entSoft" class="tag-bucket"></div>
-          </div>
-          <div class="bucket">
-            <div class="bucket-title"><i class="fa-solid fa-lightbulb"></i> Concepts</div>
-            <div id="entConcept" class="tag-bucket"></div>
-          </div>
+        <div class="speed-card">
+          <div class="chip"><i class="fa-solid fa-desktop"></i> Desktop</div>
+          <div id="desktopPerf" class="kpi"><div class="left"><i class="fa-solid fa-bolt"></i> Performance</div><b>—</b></div>
+          <div id="desktopLCP" class="kpi"><div class="left"><i class="fa-regular fa-image"></i> LCP</div><b>—</b></div>
+          <div id="desktopINP" class="kpi"><div class="left"><i class="fa-solid fa-hand-pointer"></i> INP</div><b>—</b></div>
+          <div id="desktopCLS" class="kpi"><div class="left"><i class="fa-solid fa-border-all"></i> CLS</div><b>—</b></div>
+          <div id="desktopHints" style="margin-top:.4rem"></div>
         </div>
       </div>
-    </section>
-
-    <!-- ===== NEW: Site Speed & Core Web Vitals (after Readability) ===== -->
-    <section id="speedPanel" class="speed-panel" style="display:none">
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-        <h4 style="margin:0"><i class="fa-solid fa-gauge-high ico"></i> Site Speed & Core Web Vitals</h4>
-        <span class="chip"><i class="fa-regular fa-clock ico"></i> Last analyzed: <b id="psiTime">—</b></span>
+      <div style="margin-top:.6rem;color:var(--text-dim)">
+        Suggestions are derived from Lighthouse audits. Optimize images, defer non-critical JS, use HTTP/2, enable compression, and reduce layout shifts.
       </div>
-
-      <div style="margin-top:.6rem;display:flex;gap:.5rem;flex-wrap:wrap">
-        <span class="badge-score" id="scoreMobile">Mobile: —</span>
-        <span class="badge-score" id="scoreDesktop">Desktop: —</span>
-        <span class="chip"><i class="fa-solid fa-database ico"></i> CrUX p75 LCP: <b id="cruxLcp">—</b> • INP: <b id="cruxInp">—</b> • CLS: <b id="cruxCls">—</b></span>
-      </div>
-
-      <div class="kpi-row">
-        <div class="kpi"><div class="label">LCP</div><div class="val" id="kLCP">—</div></div>
-        <div class="kpi"><div class="label">INP</div><div class="val" id="kINP">—</div></div>
-        <div class="kpi"><div class="label">CLS</div><div class="val" id="kCLS">—</div></div>
-      </div>
-
-      <h4 style="margin:.8rem 0 .35rem">Top Opportunities</h4>
-      <ul id="psiOpp" class="sugg-list"></ul>
-
-      <h4 style="margin:.8rem 0 .35rem">Diagnostics & Passed Audits</h4>
-      <ul id="psiDiag" class="sugg-list"></ul>
-
-      <div class="speed-note" id="psiNote">Tips are powered by Lighthouse via the PageSpeed Insights API.</div>
     </section>
 
   </main>
 </div>
 
-<footer class="site">
+<footer class="site" style="margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)">
   <div><strong>Semantic SEO Master</strong></div>
   <div class="footer-links">
     <a href="#analyzer">Analyzer</a>
-    <a href="#" id="toTopLink">Back to top</a>
+    <a href="#hvaiPanel">Human vs AI</a>
+    <a href="#readPanel">Readability</a>
+    <a href="#entitiesPanel">Entities</a>
+    <a href="#speedPanel">Speed</a>
   </div>
 </footer>
 
-<button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+<button id="backTop" title="Back to top" aria-label="Back to top" style="position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- ===== JS: Core Logic + New Panels ===== -->
+<!-- ======== SCRIPTS ======== -->
 <script>
 (function(){
   var CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
   function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
-  function setHtml(id,val){ var el=document.getElementById(id); if(el){ el.innerHTML=val; } return el; }
-  function setTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
+  function setHTML(id,html){ var el=document.getElementById(id); if(el){ el.innerHTML = html; } return el; }
+  function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
   function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
+  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
 
-  // ==== Gauge ====
+  /* ===== Score wheel ===== */
   var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
   window.setScoreWheel = function(value){
     if(!GAUGE.rect){
@@ -617,10 +552,10 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if(GAUGE.stop1) GAUGE.stop1.setAttribute('stop-color',c1); if(GAUGE.stop2) GAUGE.stop2.setAttribute('stop-color',c2);
     if(GAUGE.r1) GAUGE.r1.setAttribute('stop-color',c1); if(GAUGE.r2) GAUGE.r2.setAttribute('stop-color',c2);
     if(GAUGE.arc){ var offset=GAUGE.CIRC*(1-(v/100)); GAUGE.arc.style.strokeDashoffset=offset.toFixed(2); }
-    setText('overallScoreInline',Math.round(v)); setTone(document.getElementById('overallChip'),v);
+    setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
   };
 
-  // ==== Category bars + completion ====
+  /* ===== Category bars + completion ===== */
   function updateCategoryBars(){
     var cards=[].slice.call(document.querySelectorAll('.category-card'));
     var total=0, checked=0;
@@ -628,14 +563,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       var items=[].slice.call(card.querySelectorAll('.checklist-item'));
       var t=items.length, done=items.filter(function(li){ var c=li.querySelector('input'); return c && c.checked; }).length;
       total+=t; checked+=done;
-      var pct=t?Math.round(done*100/t):0;
-      var fill=document.getElementById('catFillRect-'+idx); if(fill) fill.setAttribute('width', String(6*pct));
-      var pctEl=document.getElementById('catPct-'+idx); if(pctEl) pctEl.textContent = done+'/'+t+' • '+pct+'%';
-      var sub=card.querySelector('.category-sub'); if(sub) sub.textContent = pct>=80?'Great progress':'Keep improving';
-      var cnt=card.querySelector('.checked-count'); if(cnt) cnt.textContent = done;
-      var stop1=document.getElementById('catStop1-'+idx), stop2=document.getElementById('catStop2-'+idx);
-      var c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444'); var c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
-      if(stop1) stop1.setAttribute('stop-color',c1); if(stop2) stop2.setAttribute('stop-color',c2);
     });
     var pctAll = total? Math.round(checked*100/total) : 0;
     var comp=document.getElementById('compClipRect'); if(comp) comp.setAttribute('width', String(6*pctAll));
@@ -643,33 +570,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   window.updateCategoryBars = updateCategoryBars;
 
-  // ==== Auto-tick by item scores ====
-  function autoTickByScores(map){
-    var autoCount=0;
-    for(var i=1;i<=25;i++){
-      var scVal=Number((map && map[i]!==undefined)? map[i] : NaN);
-      var badge=document.getElementById('sc-'+i);
-      var cb=document.getElementById('ck-'+i);
-      var row=cb ? cb.closest('.checklist-item') : null;
-      if (!badge) continue;
-      if (!isNaN(scVal)) {
-        badge.textContent = Math.round(scVal);
-        badgeTone(badge, scVal);
-        if (document.getElementById('autoApply') && document.getElementById('autoApply').checked && scVal>=80) {
-          if (cb && !cb.checked) { cb.checked=true; autoCount++; }
-          if(row){ row.classList.remove('sev-mid','sev-bad'); row.classList.add('sev-good'); }
-        } else if (scVal>=60) { if(row){ row.classList.remove('sev-bad','sev-good'); row.classList.add('sev-mid'); } }
-        else { if(row){ row.classList.remove('sev-mid','sev-good'); row.classList.add('sev-bad'); } }
-      } else {
-        badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad');
-      }
-    }
-    setText('rAutoCount', autoCount);
-    updateCategoryBars();
-  }
-  window.autoTickByScores = autoTickByScores;
-
-  // ==== Water progress ====
+  /* ===== Water progress ===== */
   var Water=(function(){
     var wrapId=function(){ return document.getElementById('waterWrap'); };
     var clipId=function(){ return document.getElementById('waterClipRect'); };
@@ -686,8 +587,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   })();
   window.Water = Water;
 
-  // ==== Text prep & signals ====
-  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
+  /* ===== Text prep + stylometry ===== */
   function _countSyllables(word){
     var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0;
     var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m);
@@ -713,9 +613,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var avgLen=tokens? (words.join('').length/tokens):0;
     var longRatio=(lens.filter(function(L){return L>=28;}).length)/(lens.length||1);
     var TTR=types/(tokens||1);
-    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, avgSent:mean||0 };
+    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits };
   }
-
   function detectUltra(text){
     var s=_prep(text||'');
     if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
@@ -723,235 +622,205 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
     return { humanPct: 100-clamp(Math.round(ai),0,100), aiPct: clamp(Math.round(ai),0,100), confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai:clamp(Math.round(ai),0,100),w:1}], _s:s };
   }
-  function deriveItemScoresFromSignals(s){
-    function pct(x){ return clamp(Math.round(x),0,100); }
-    function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
-    var read=pct(band(s.flesch,35,75)), rep=pct(100*(1 - s.triRepeatRatio)), ttr=pct(band(s.TTR,0.30,0.65)), longS=pct(band(1-s.longRatio, 0.6, 0.95)), avgLen=pct(band(s.avgWordLen,4.2,5.8)), digits=pct(100*(1 - s.digitsPer100/20));
-    var i=[];
-    i[1]=pct(.5*read+.5*ttr); i[2]=pct(.6*ttr+.4*avgLen); i[3]=pct(.4*ttr+.6*read); i[4]=pct(.7*read+.3*rep); i[5]=pct(.5*read+.5*avgLen);
-    i[6]=pct(.4*ttr+.6*read); i[7]=pct(.4*read+.6*rep); i[8]=pct(.6*rep+.4*digits); i[9]=pct(.6*avgLen+.4*digits); i[10]=pct(.6*avgLen+.4*ttr);
-    i[11]=pct(.5*ttr+.5*rep); i[12]=pct(.6*rep+.4*digits); i[13]=pct(.6*read+.4*rep); i[14]=pct(.6*read+.4*ttr); i[15]=pct(.5*ttr+.5*read);
-    i[16]=pct(.6*digits+.4*read); i[17]=pct(.5*avgLen+.5*ttr); i[18]=pct(.5*read+.5*longS); i[19]=pct(.6*rep+.4*avgLen); i[20]=pct(.5*longS+.5*avgLen);
-    i[21]=pct(.7*read+.3*ttr); i[22]=pct(.6*ttr+.4*avgLen); i[23]=pct(.6*ttr+.4*avgLen); i[24]=pct(.6*avgLen+.4*ttr); i[25]=pct(.6*ttr+.4*digits);
-    var map={}; for(var k=1;k<=25;k++){ map[k]=i[k]; } return map;
-  }
-  function deriveSummaryScoresFromItems(itemMap){
-    var all=[]; for(var i=1;i<=25;i++){ if(isFinite(itemMap[i])) all.push(itemMap[i]); }
-    var avg = function(a){ return a.length? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : 0; };
-    return { contentScore: avg(all.slice(0,13)), overall: avg(all) };
-  }
-  function buildSampleFromData(data){
-    var parts = [];
-    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
-    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){
-      var v = data?.[k];
-      if (typeof v === 'string' && v.trim()) parts.push(v);
-      if (Array.isArray(v)) parts.push(v.join('. '));
+
+  /* ===== Feature: Entities extraction (simple + category guesses) ===== */
+  function extractEntities(sample){
+    var text = (sample||'').replace(/\s+/g,' ').trim();
+    var result = { People:[], Orgs:[], Places:[], Software:[], Games:[], Other:[] };
+    if(!text) return result;
+    // naive caps terms
+    var caps = text.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || [];
+    var freq = {}; caps.forEach(t => { freq[t]= (freq[t]||0)+1; });
+    var top = Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).slice(0,80);
+    top.forEach(t=>{
+      var low = t.toLowerCase();
+      if (/\b(inc|ltd|corp|llc|gmbh|company|studio)\b/i.test(t)) result.Orgs.push(t);
+      else if (/\b(city|town|province|state|country|park|river|lake)\b/i.test(t)) result.Places.push(t);
+      else if (/\b(software|suite|editor|studio|cloud|api|sdk|framework|wordpress|laravel|android|ios|windows|linux|mac)\b/i.test(t)) result.Software.push(t);
+      else if (/\b(game|games|studios)\b/i.test(t)) result.Games.push(t);
+      else if (/\s/.test(t)) result.People.push(t);
+      else result.Other.push(t);
     });
-    var txt = parts.join('\n\n').replace(/\s{2,}/g,' ').trim();
-    return txt.length>140000 ? txt.slice(0,140000) : txt;
-  }
-  function ensureScoresExist(data, sample, ensemble){
-    var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
-    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
-    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
-    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
-    if (needItems) data.itemScores = deriveItemScoresFromSignals(s);
-    if (needContent || needOverall){
-      var sums = deriveSummaryScoresFromItems(data.itemScores||{});
-      if (needContent) data.contentScore = sums.contentScore;
-      if (needOverall) data.overall = sums.overall;
-    }
-    return data;
+    // APK / download hints
+    var apkHits = (text.match(/\bapk\b|\b\.apk\b/ig)||[]).length;
+    if (apkHits>0 && !result.Software.includes('APK')) result.Software.unshift('APK');
+
+    // dedupe and trim counts
+    function uniq(arr){ var s=new Set(); var out=[]; arr.forEach(v=>{var k=v.trim(); if(!s.has(k) && k.length>1){ s.add(k); out.push(k); }}); return out.slice(0,20); }
+    Object.keys(result).forEach(k=>{ result[k]=uniq(result[k]); });
+    return result;
   }
 
-  function renderDetectors(res){
-    var grid = document.getElementById('detGrid'); if(!grid) return; grid.innerHTML='';
-    (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
-      var id='det-'+d.key; var wrap=document.createElement('div');
-      wrap.className='det-item'; wrap.style.gridColumn='span 6';
-      wrap.innerHTML =
-        '<div class="det-row"><div class="det-label" style="font-weight:900;color:var(--text-dim)">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+(d.ai||0)+'</div></div>'+
-        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+(clamp(d.ai||0,0,100))+'%"></div></div>';
-      grid.appendChild(wrap);
+  /* ===== Readability UI ===== */
+  function gradeFromFlesch(f){
+    if (f>=90) return {label:'Very Easy', hint:'Great for all audiences', pct:100};
+    if (f>=70) return {label:'Easy', hint:'Good web reading', pct:88};
+    if (f>=60) return {label:'Fairly Easy', hint:'Still fine', pct:78};
+    if (f>=50) return {label:'Plain', hint:'OK. Keep sentences short', pct:66};
+    if (f>=30) return {label:'Fairly Difficult', hint:'Use simpler words', pct:48};
+    return {label:'Difficult', hint:'Shorten sentences, simplify vocab', pct:34};
+  }
+  function pctBand(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return Math.round((x-l)*100/(h-l)); }
+
+  function renderReadability(s){
+    var grid = document.getElementById('readGrid'); if(!grid) return;
+    grid.innerHTML = '';
+    var items = [];
+
+    var g = gradeFromFlesch(s.flesch);
+    items.push({ icon:'fa-book', label:'Flesch Score', value: Math.round(s.flesch), badge:g.label, pct: clamp(g.pct,0,100), hint:g.hint });
+
+    items.push({ icon:'fa-random', label:'Sentence Variation (CoV inverse)', value: (1-s.cov).toFixed(2), pct: clamp(Math.round((1-s.cov)*100),0,100), hint:'Aim for balanced sentence lengths' });
+
+    items.push({ icon:'fa-font', label:'Type-Token Ratio (TTR)', value: s.TTR.toFixed(2), pct: pctBand(s.TTR,0.30,0.65), hint:'Varied vocabulary improves clarity' });
+
+    items.push({ icon:'fa-align-left', label:'Long Sentences (lower is better)', value: Math.round(s.longRatio*100)+'%', pct: clamp(Math.round((1-s.longRatio)*100),0,100), hint:'Split long sentences (≥28 words)' });
+
+    items.push({ icon:'fa-text-height', label:'Avg Word Length', value: s.avgWordLen.toFixed(2), pct: pctBand(6 - s.avgWordLen, 0.2, 2.0), hint:'Prefer shorter words where possible' });
+
+    items.push({ icon:'fa-hashtag', label:'Digits per 100 words', value: s.digitsPer100.toFixed(1), pct: clamp(Math.round(100 - s.digitsPer100*5),0,100), hint:'Reduce numeric noise if excessive' });
+
+    items.push({ icon:'fa-layer-group', label:'Trigram Repetition (lower is better)', value: (s.triRepeatRatio*100).toFixed(1)+'%', pct: clamp(Math.round(100 - s.triRepeatRatio*100),0,100), hint:'Avoid repetitive phrasing' });
+
+    items.push({ icon:'fa-file-alt', label:'Word Count', value: s.wordCount, pct: clamp(Math.round(Math.min(1, s.wordCount/1200)*100),0,100), hint:'For depth, target 800–1500 words (topic dependent)' });
+
+    items.forEach(function(it){
+      var card = document.createElement('div'); card.className='read-card';
+      card.innerHTML =
+        '<div class="read-row">'+
+          '<div class="left"><i class="fa '+it.icon+'"></i> <b>'+it.label+'</b></div>'+
+          '<div class="read-bar"><div class="read-fill" style="width:'+it.pct+'%"></div></div>'+
+          '<div class="badge-mini">'+it.value+'</div>'+
+        '</div>'+
+        '<div style="color:var(--text-dim);margin-top:.3rem"><i class="fa-regular fa-lightbulb"></i> '+it.hint+'</div>';
+      grid.appendChild(card);
     });
   }
 
-  function applyDetection(humanPct, aiPct, confidence, breakdown){
-    var panel = document.getElementById('detectorPanel');
-    if(!panel) return; panel.style.display='block';
-    var hp = isFinite(humanPct)? Math.round(humanPct) : NaN;
-    var ap = isFinite(aiPct)? Math.round(aiPct) : NaN;
-    var conf = isFinite(confidence)? Math.round(confidence) : null;
-
-    setText('detConfidence', conf ?? '—');
-    setText('haiHumanPct', isFinite(hp)? hp : '—'); setText('haiAIPct', isFinite(ap)? ap : '—');
-
-    var total = (isFinite(hp)?hp:0) + (isFinite(ap)?ap:0); if(total===0){ hp=50; ap=50; total=100; }
-    var hW = (hp/total)*100, aW = (ap/total)*100;
-    var H=document.getElementById('haiHuman'); var A=document.getElementById('haiAI'); var S=document.getElementById('haiSplit');
-    if(H) H.style.width = hW+'%';
-    if(A) A.style.width = aW+'%';
-    if(S) S.style.left = hW+'%';
-
-    if (breakdown && breakdown.detectors){ renderDetectors(breakdown); }
+  /* ===== Entities UI ===== */
+  function tagHTML(txt){
+    var g = encodeURIComponent(txt);
+    var w = encodeURIComponent(txt.replace(/\s+/g,'_'));
+    return '<span class="tag"><i class="fa-solid fa-tag"></i>'+txt+
+      ' <a href="https://www.google.com/search?q='+g+'" target="_blank" rel="noopener" title="Google"><i class="fa-brands fa-google"></i></a>'+
+      ' <a href="https://en.wikipedia.org/wiki/'+w+'" target="_blank" rel="noopener" title="Wikipedia"><i class="fa-brands fa-wikipedia-w"></i></a>'+
+    '</span>';
   }
-
-  // ==== Entities extraction (heuristic) ====
-  var STOP = new Set(['the','a','an','and','or','of','in','on','for','with','to','from','by','at','as','is','are','was','were','be','this','that','these','those','it','its']);
-  function extractEntities(text){
-    text = (text||'').replace(/\u00A0/g,' ');
-    var words = text.split(/\s+/);
-    var entities = [];
-    for (var i=0;i<words.length;i++){
-      var w = words[i].replace(/[^A-Za-z0-9\-.'()]/g,'');
-      if (!w) continue;
-      var isCap = /^[A-Z][A-Za-z0-9\-.()]*$/.test(w);
-      if(isCap && !STOP.has(w.toLowerCase())){
-        var phrase = [w];
-        var j=i+1;
-        while(j<words.length){
-          var nx = words[j].replace(/[^A-Za-z0-9\-.'()]/g,'');
-          if(/^(of|and|for|&)$/.test(nx) || /^[A-Z][A-Za-z0-9\-.()]*$/.test(nx)){
-            phrase.push(nx); j++;
-          } else break;
-        }
-        entities.push(phrase.join(' ')); i=j-1;
-      }
-    }
-    // categorize
-    var cats = { primary:[], people:[], org:[], place:[], soft:[], concept:[] };
-    entities.forEach(function(e){
-      if(/\b(Inc\.?|LLC|Ltd|Company|Corporation|Corp\.?)\b/i.test(e) || /\b(Studio|Labs|Technologies|Systems|Software)\b/i.test(e)) cats.org.push(e);
-      else if(/\b(Mr|Ms|Mrs|Dr|Prof)\.?\s+[A-Z]/.test(e) || /\s[A-Z][a-z]+$/.test(e)) cats.people.push(e);
-      else if(/\b(University|College|Hospital|Bank|Council)\b/i.test(e)) cats.org.push(e);
-      else if(/\b(Street|Road|Avenue|City|Country|Park|Bay|Valley|Mountain|River)\b/i.test(e)) cats.place.push(e);
-      else if(/\b(Windows|Android|iOS|APK|\.apk|Photoshop|WordPress|Chrome|Firefox|Unreal|Unity|Game|Studio|Launcher)\b/i.test(e)) cats.soft.push(e);
-      else cats.concept.push(e);
+  function renderEntities(ents){
+    var grid = document.getElementById('entitiesGrid'); if(!grid) return;
+    grid.innerHTML = '';
+    var groups = [
+      {k:'People', icon:'fa-user', color:'#22c55e'},
+      {k:'Orgs', icon:'fa-building', color:'#60a5fa'},
+      {k:'Places', icon:'fa-location-dot', color:'#f59e0b'},
+      {k:'Software', icon:'fa-code', color:'#a78bfa'},
+      {k:'Games', icon:'fa-gamepad', color:'#fb7185'},
+      {k:'Other', icon:'fa-shapes', color:'#94a3b8'}
+    ];
+    groups.forEach(function(g){
+      var list = ents[g.k]||[];
+      if (!list.length) return;
+      var card = document.createElement('div'); card.className='ent-card';
+      card.innerHTML = '<div class="chip" style="border-color:'+g.color+';background:color-mix(in srgb,'+g.color+' 18%, transparent)"><i class="fa '+g.icon+'"></i> '+g.k+'</div>';
+      var wrap = document.createElement('div');
+      list.forEach(function(t){ wrap.innerHTML += tagHTML(t); });
+      card.appendChild(wrap);
+      grid.appendChild(card);
     });
-    // primary = top 5 frequent
-    var freq={}; entities.forEach(e=>freq[e]=(freq[e]||0)+1);
-    var primary = Object.keys(freq).sort((a,b)=>freq[b]-freq[a]).slice(0,5);
-    cats.primary = primary;
-    // dedupe small lists
-    function uniq(a){ return Array.from(new Set(a)).slice(0,30); }
-    Object.keys(cats).forEach(k=>cats[k]=uniq(cats[k]));
-    return cats;
   }
 
-  // ==== Readability verdict ====
-  function readabilityVerdict(flesch){
-    if(flesch>=90) return {label:'Very easy (5th grade)', tone:'good'};
-    if(flesch>=80) return {label:'Easy (6th grade)', tone:'good'};
-    if(flesch>=70) return {label:'Fairly easy (7th grade)', tone:'good'};
-    if(flesch>=60) return {label:'Plain English (8–9th grade)', tone:'mid'};
-    if(flesch>=50) return {label:'Fairly difficult (10–12th)', tone:'mid'};
-    if(flesch>=30) return {label:'Difficult (college)', tone:'bad'};
-    return {label:'Very difficult', tone:'bad'};
+  /* ===== PSI helpers ===== */
+  function kpiTone(el, val, type){
+    // thresholds: LCP(ms) good<2500 mid<4000 bad>=4000 ; INP(ms) good<200 mid<500 ; CLS good<0.1 mid<0.25
+    var good=false, mid=false;
+    if(type==='perf'){ good=val>=90; mid=val>=50 && val<90; }
+    if(type==='lcp'){ good=val<2500; mid=val<4000 && val>=2500; }
+    if(type==='inp'){ good=val<200; mid=val<500 && val>=200; }
+    if(type==='cls'){ good=val<0.1; mid=val<0.25 && val>=0.1; }
+    el.classList.remove('good','mid','bad');
+    el.classList.add(good?'good':(mid?'mid':'bad'));
   }
+  function fmtMs(x){ return Math.round(x) + ' ms'; }
+  function fmtScore(x){ return Math.round((x||0)*100); }
 
-  // ==== PSI + CrUX =====
-  function toneBadge(el, score100){
-    if(!el) return;
-    el.classList.remove('badge-green','badge-orange','badge-red');
-    if(score100>=90) el.classList.add('badge-green');
-    else if(score100>=50) el.classList.add('badge-orange');
-    else el.classList.add('badge-red');
-    el.textContent = el.textContent.replace(/:.*$/, '') + ': ' + score100;
-  }
-  function ms(v){ if(v==null) return '—'; return Math.round(v)+' ms'; }
-  function sec(v){ if(v==null) return '—'; return (Math.round(v)/1000).toFixed(2)+' s'; }
-  function cls(v){ if(v==null) return '—'; return (Math.round(v*1000)/1000).toFixed(3); }
-
-  async function runCrux(url){
-    var panel=document.getElementById('speedPanel'); if(panel) panel.style.display='block';
+  async function runPSI(url, strategy){
+    var ep = (window.SEMSEO.ENDPOINTS.psi||'api/pagespeed') + '?url='+encodeURIComponent(url)+'&strategy='+encodeURIComponent(strategy||'mobile');
     try{
-      const r=await fetch(window.SEMSEO.ENDPOINTS.crux+'?url='+encodeURIComponent(url), {headers:{'Accept':'application/json'}});
-      const j=await r.json();
-      if(j && j.ok){
-        setText('cruxLcp', j.p75 && j.p75.LCP!=null ? sec(j.p75.LCP) : '—');
-        setText('cruxInp', j.p75 && j.p75.INP!=null ? sec(j.p75.INP) : '—');
-        setText('cruxCls', j.p75 && j.p75.CLS!=null ? cls(j.p75.CLS) : '—');
-      } else {
-        setText('cruxLcp','n/a'); setText('cruxInp','n/a'); setText('cruxCls','n/a');
-      }
-    }catch(_){ setText('cruxLcp','err'); setText('cruxInp','err'); setText('cruxCls','err'); }
-  }
-
-  function shapePsi(lhr){
-    if(!lhr) return null;
-    const cat = lhr.categories?.performance;
-    const audits = lhr.audits || {};
-    const score100 = Math.round((cat?.score ?? 0)*100);
-
-    const getNum = k => audits[k]?.numericValue;
-    const kpis = {
-      LCP: getNum('largest-contentful-paint'),
-      INP: getNum('interaction-to-next-paint') ?? getNum('total-blocking-time'),
-      CLS: audits['cumulative-layout-shift']?.numericValue
-    };
-
-    // Opportunities
-    const opp = Object.values(audits)
-      .filter(a => a.details && a.details.type==='opportunity')
-      .map(a => ({
-        id:a.id, title:a.title, savings:a.details.overallSavingsMs||a.numericValue||0,
-        desc:a.description||''
-      }))
-      .sort((a,b)=> (b.savings||0) - (a.savings||0))
-      .slice(0,6);
-
-    // Diagnostics (informational, non-opportunity, not passed)
-    const diag = Object.values(audits)
-      .filter(a => !a.details || a.details.type!=='opportunity')
-      .filter(a => a.score !== 1 && a.scoreDisplayMode!=='notApplicable' && a.scoreDisplayMode!=='manual')
-      .slice(0,8)
-      .map(a => ({title:a.title, desc:a.description||'', score:a.score}));
-
-    return { score100, kpis, opp, diag, time: lhr.fetchTime || null };
-  }
-
-  async function runPsi(url){
-    var panel=document.getElementById('speedPanel'); if(panel) panel.style.display='block';
-    const mobileEl=document.getElementById('scoreMobile');
-    const desktopEl=document.getElementById('scoreDesktop');
-
-    async function one(strategy, badgeEl){
-      try{
-        const r = await fetch(window.SEMSEO.ENDPOINTS.psi + '?url=' + encodeURIComponent(url) + '&strategy=' + strategy, {headers:{'Accept':'application/json'}});
-        const j = await r.json();
-        if(!j || !j.ok){ badgeEl.textContent = strategy.charAt(0).toUpperCase()+strategy.slice(1)+': n/a'; return; }
-        const shaped = shapePsi(j.lighthouseResult);
-        if(!shaped){ badgeEl.textContent = strategy+': n/a'; return; }
-        toneBadge(badgeEl, shaped.score100);
-        if(strategy==='mobile'){
-          setText('psiTime', shaped.time ? new Date(shaped.time).toLocaleString() : '—');
-          setText('kLCP', shaped.kpis.LCP!=null ? sec(shaped.kpis.LCP) : '—');
-          setText('kINP', shaped.kpis.INP!=null ? sec(shaped.kpis.INP) : '—');
-          setText('kCLS', shaped.kpis.CLS!=null ? cls(shaped.kpis.CLS) : '—');
-
-          var oppUl=document.getElementById('psiOpp'); oppUl.innerHTML='';
-          shaped.opp.forEach(function(o){
-            var li=document.createElement('li'); li.className='sugg-item';
-            li.innerHTML='<div><b>'+o.title+'</b><br><small>'+ (o.desc||'') +'</small></div><div><span class="badge-score">'+ (o.savings? ('~'+sec(o.savings)):'') +'</span></div>';
-            oppUl.appendChild(li);
-          });
-          var diagUl=document.getElementById('psiDiag'); diagUl.innerHTML='';
-          shaped.diag.forEach(function(d){
-            var li=document.createElement('li'); li.className='sugg-item';
-            li.innerHTML='<div><b>'+d.title+'</b><br><small>'+ (d.desc||'') +'</small></div>';
-            diagUl.appendChild(li);
-          });
-        }
-      }catch(_){
-        badgeEl.textContent = strategy.charAt(0).toUpperCase()+strategy.slice(1)+': err';
-      }
+      var r = await fetch(ep, {headers:{'Accept':'application/json'}});
+      var j = await r.json();
+      if(!r.ok){ throw new Error((j && j.error)? j.error : 'PSI failed'); }
+      return j;
+    }catch(e){
+      return { error: e.message||String(e) };
     }
-
-    await Promise.all([ one('mobile', mobileEl), one('desktop', desktopEl) ]);
   }
 
-  // ==== Analyze pipeline ====
+  function applyPSIToSide(j, side){
+    // Elements
+    var perf = document.getElementById(side+'Perf');
+    var lcp  = document.getElementById(side+'LCP');
+    var inp  = document.getElementById(side+'INP');
+    var cls  = document.getElementById(side+'CLS');
+    var hints= document.getElementById(side+'Hints');
+
+    // Clear skeleton if any
+    [perf,lcp,inp,cls].forEach(function(el){ if(!el) return; el.querySelector('b').textContent='—'; el.classList.remove('good','mid','bad'); });
+
+    if(!j || j.error){ setHTML(side+'Hints', '<div class="chip" style="border-color:#ef4444;background:rgba(239,68,68,.15)"><i class="fa-solid fa-circle-exclamation"></i> '+(j?.error||'Error')+'</div>'); return; }
+
+    var lh = j.lighthouseResult || {};
+    var score = (lh.categories && lh.categories.performance && lh.categories.performance.score) || 0;
+    var audits = lh.audits || {};
+    var LCP = (audits['largest-contentful-paint'] && audits['largest-contentful-paint'].numericValue) || null;
+    var INP = (audits['interaction-to-next-paint'] && audits['interaction-to-next-paint'].numericValue) || null;
+    var CLS = (audits['cumulative-layout-shift'] && audits['cumulative-layout-shift'].numericValue) || null;
+
+    // Field data (CrUX) if present
+    var le = j.loadingExperience || j.originLoadingExperience || {};
+    var m = le.metrics || {};
+    if(!LCP && m.LARGEST_CONTENTFUL_PAINT_MS){ LCP = m.LARGEST_CONTENTFUL_PAINT_MS.percentile; }
+    if(!INP && (m.INTERACTION_TO_NEXT_PAINT || m.FIRST_INPUT_DELAY_MS)){
+      INP = (m.INTERACTION_TO_NEXT_PAINT && m.INTERACTION_TO_NEXT_PAINT.percentile) || (m.FIRST_INPUT_DELAY_MS && m.FIRST_INPUT_DELAY_MS.percentile) || null;
+    }
+    if(!CLS && m.CUMULATIVE_LAYOUT_SHIFT_SCORE){ CLS = m.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile/100; } // percentile*100
+
+    // Apply UI
+    perf.querySelector('b').textContent = fmtScore(score);
+    kpiTone(perf, Math.round(score*100), 'perf');
+
+    if (LCP!=null){ lcp.querySelector('b').textContent = fmtMs(LCP); kpiTone(lcp, LCP, 'lcp'); }
+    if (INP!=null){ inp.querySelector('b').textContent = fmtMs(INP); kpiTone(inp, INP, 'inp'); }
+    if (CLS!=null){ cls.querySelector('b').textContent = (Math.round(CLS*1000)/1000).toFixed(3); kpiTone(cls, CLS, 'cls'); }
+
+    // Suggestions (pick a few heavy hitters)
+    var tips = [];
+    function pushIf(code, label, suggest){
+      var a = audits[code]; if(a && a.score < 0.9){ tips.push('<div class="chip"><i class="fa-regular fa-lightbulb"></i> '+label+': <b>'+suggest+'</b></div>'); }
+    }
+    pushIf('unused-javascript', 'Reduce JS', 'Code-split & remove unused JS');
+    pushIf('render-blocking-resources', 'Eliminate render-blocking', 'Preload critical CSS/JS');
+    pushIf('uses-optimized-images', 'Optimize images', 'Use AVIF/WebP + proper sizes');
+    pushIf('server-response-time', 'Server response', 'Cache + faster hosting');
+    pushIf('total-blocking-time', 'Blocking time', 'Defer non-critical scripts');
+    pushIf('cumulative-layout-shift', 'Layout shifts', 'Reserve media space & avoid late ads');
+
+    hints.innerHTML = tips.join(' ') || '<div class="chip"><i class="fa-solid fa-circle-check" style="color:#22c55e"></i> No major suggestions from Lighthouse.</div>';
+  }
+
+  async function runPageSpeedBoth(url){
+    setText('psiTime', new Date().toLocaleTimeString());
+    // Skeletons while loading
+    ['mobile','desktop'].forEach(side=>{
+      ['Perf','LCP','INP','CLS'].forEach(k=>{
+        var el=document.getElementById(side+k); if(el){ el.querySelector('b').innerHTML='<span class="skel" style="display:inline-block;min-width:80px"></span>'; }
+      });
+      setHTML(side+'Hints','<div class="skel" style="height:16px;width:70%;border-radius:10px"></div>');
+    });
+    var [m,d] = await Promise.all([runPSI(url,'mobile'), runPSI(url,'desktop')]);
+    applyPSIToSide(m, 'mobile'); applyPSIToSide(d, 'desktop');
+  }
+
+  /* ===== Backend fetchers ===== */
   function normalizeUrl(u) {
     if (!u) return '';
     u = u.trim();
@@ -994,13 +863,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   async function fetchReadableText(url){
     try{
-      const httpsR = await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''));
-      if(httpsR.ok){ const t = await httpsR.text(); if(t && t.length>200) return t; }
-    }catch(e){}
+      const httpsR=await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,'')); if(httpsR.ok){ const t=await httpsR.text(); if(t && t.length>200) return t; }
+    }catch(_){}
     try{
-      const altR = await fetch('https://r.jina.ai/'+url);
-      if(altR.ok){ const t = await altR.text(); if(t && t.length>200) return t; }
-    }catch(e){}
+      const altR=await fetch('https://r.jina.ai/'+url); if(altR.ok){ const t=await altR.text(); if(t && t.length>200) return t; }
+    }catch(_){}
     return '';
   }
 
@@ -1034,28 +901,103 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return into;
   }
 
-  function paintReadability(s){
-    setText('rbFlesch', Math.round(s.flesch));
-    setText('rbWords', s.wordCount);
-    setText('rbSentLen', (s.avgSent||0).toFixed(1));
-    setText('rbTTR', (s.TTR*100).toFixed(1)+'%');
-    setText('rbLong', (s.longRatio*100).toFixed(1)+'%');
-    setText('rbDigits', s.digitsPer100.toFixed(1));
-    var v = readabilityVerdict(s.flesch);
-    var chip = document.getElementById('rbVerdict');
-    if(chip){ var b=chip.querySelector('b'); if(b) b.textContent=v.label; chip.classList.remove('chip-good','chip-mid','chip-bad'); chip.classList.add('chip-'+v.tone); }
+  function deriveItemScoresFromSignals(s){
+    function pct(x){ return clamp(Math.round(x),0,100); }
+    function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
+    var read=pct(band(s.flesch,35,75)), rep=pct(100*(1 - s.triRepeatRatio)), ttr=pct(band(s.TTR,0.30,0.65)), longS=pct(band(1-s.longRatio, 0.6, 0.95)), avgLen=pct(band(s.avgWordLen,4.2,5.8)), digits=pct(100*(1 - s.digitsPer100/20));
+    var i=[];
+    i[1]=pct(.5*read+.5*ttr); i[2]=pct(.6*ttr+.4*avgLen); i[3]=pct(.4*ttr+.6*read); i[4]=pct(.7*read+.3*rep); i[5]=pct(.5*read+.5*avgLen);
+    i[6]=pct(.4*ttr+.6*read); i[7]=pct(.4*read+.6*rep); i[8]=pct(.6*rep+.4*digits); i[9]=pct(.6*avgLen+.4*digits); i[10]=pct(.6*avgLen+.4*ttr);
+    i[11]=pct(.5*ttr+.5*rep); i[12]=pct(.6*rep+.4*digits); i[13]=pct(.6*read+.4*rep); i[14]=pct(.6*read+.4*ttr); i[15]=pct(.5*ttr+.5*read);
+    i[16]=pct(.6*digits+.4*read); i[17]=pct(.5*avgLen+.5*ttr); i[18]=pct(.5*read+.5*longS); i[19]=pct(.6*rep+.4*avgLen); i[20]=pct(.5*longS+.5*avgLen);
+    i[21]=pct(.7*read+.3*ttr); i[22]=pct(.6*ttr+.4*avgLen); i[23]=pct(.6*ttr+.4*avgLen); i[24]=pct(.6*avgLen+.4*ttr); i[25]=pct(.6*ttr+.4*digits);
+    var map={}; for(var k=1;k<=25;k++){ map[k]=i[k]; } return map;
+  }
+  function deriveSummaryScoresFromItems(itemMap){
+    var all=[]; for(var i=1;i<=25;i++){ if(isFinite(itemMap[i])) all.push(itemMap[i]); }
+    var avg = function(a){ return a.length? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : 0; };
+    return { contentScore: avg(all.slice(0,13)), overall: avg(all) };
+  }
+  function buildSampleFromData(data){
+    var parts = [];
+    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
+    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){
+      var v = data?.[k];
+      if (typeof v === 'string' && v.trim()) parts.push(v);
+      if (Array.isArray(v)) parts.push(v.join('. '));
+    });
+    var txt = parts.join('\n\n').replace(/\s{2,}/g,' ').trim();
+    return txt.length>140000 ? txt.slice(0,140000) : txt;
+  }
+  function ensureScoresExist(data, sample, ensemble){
+    var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
+    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
+    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
+    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
+    if (needItems) data.itemScores = deriveItemScoresFromSignals(s);
+    if (needContent || needOverall){
+      var sums = deriveSummaryScoresFromItems(data.itemScores||{});
+      if (needContent) data.contentScore = sums.contentScore;
+      if (needOverall) data.overall = sums.overall;
+    }
+    return data;
   }
 
-  function paintEntities(ent){
-    function addTags(elId, arr){ var el=document.getElementById(elId); if(!el) return; el.innerHTML=''; (arr||[]).forEach(function(t){ var s=document.createElement('span'); s.className='tag'; s.textContent=t; el.appendChild(s); }); if(!arr || arr.length===0){ el.innerHTML='<span class="tag badge">—</span>'; } }
-    addTags('entPrimary', ent.primary);
-    addTags('entPeople',  ent.people);
-    addTags('entOrg',     ent.org);
-    addTags('entPlace',   ent.place);
-    addTags('entSoft',    ent.soft);
-    addTags('entConcept', ent.concept);
+  /* ===== Human vs AI rendering ===== */
+  function renderDetectors(res){
+    var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
+    if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
+    if(!grid) return; grid.innerHTML = '';
+    (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
+      var id='det-'+d.key; var wrap=document.createElement('div');
+      wrap.className='det-item'; 
+      var ai = clamp(d.ai||0,0,100); var human = clamp(100-ai,0,100);
+      wrap.innerHTML =
+        '<div class="det-row"><div class="det-label"><i class="fa-solid fa-wave-square"></i> '+d.label+'</div><div class="det-score">'+human+'% H / '+ai+'% AI</div></div>'+
+        '<div class="det-bar">'+
+          '<div class="det-fill-human" style="width:'+human+'%"></div>'+
+          '<div class="det-fill-ai" style="width:'+ai+'%"></div>'+
+        '</div>';
+      grid.appendChild(wrap);
+    });
+  }
+  function applyDetection(humanPct, aiPct, confidence, breakdown){
+    var hp = isFinite(humanPct)? Math.round(humanPct) : NaN;
+    var ap = isFinite(aiPct)? Math.round(aiPct) : NaN;
+    if (isFinite(hp)) { setText('humanPct', hp); setText('hvaiHumanPct', hp); document.getElementById('hvaiHuman').style.width = hp+'%'; }
+    if (isFinite(ap)) { setText('aiPct', ap); setText('hvaiAIPct', ap); document.getElementById('hvaiAI').style.width = ap+'%'; }
+    var writer = (isFinite(hp) && isFinite(ap) && hp>=ap) ? 'Likely Human' : 'AI-like';
+    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
+    if (breakdown && breakdown.detectors){ renderDetectors(breakdown); } else { document.getElementById('detGrid').innerHTML=''; }
   }
 
+  /* ===== Checklist auto tick ===== */
+  function autoTickByScores(map){
+    var autoCount=0;
+    for(var i=1;i<=25;i++){
+      var scVal=Number((map && map[i]!==undefined)? map[i] : NaN);
+      var badge=document.getElementById('sc-'+i);
+      var cb=document.getElementById('ck-'+i);
+      var row=cb ? cb.closest('.checklist-item') : null;
+      if (!badge) continue;
+      if (!isNaN(scVal)) {
+        badge.textContent = Math.round(scVal);
+        badgeTone(badge, scVal);
+        if (document.getElementById('autoApply') && document.getElementById('autoApply').checked && scVal>=80) {
+          if (cb && !cb.checked) { cb.checked=true; autoCount++; }
+          if(row){ row.classList.remove('sev-mid','sev-bad'); row.classList.add('sev-good'); }
+        } else if (scVal>=60) { if(row){ row.classList.remove('sev-bad','sev-good'); row.classList.add('sev-mid'); } }
+        else { if(row){ row.classList.remove('sev-mid','sev-good'); row.classList.add('sev-bad'); } }
+      } else {
+        badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad');
+      }
+    }
+    setText('rAutoCount', autoCount);
+    updateCategoryBars();
+  }
+  window.autoTickByScores = autoTickByScores;
+
+  /* ===== Analyze main ===== */
   async function analyze(){
     if (window.SEMSEO.BUSY) return;
     window.SEMSEO.BUSY = true;
@@ -1064,24 +1006,22 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var url = normalizeUrl(input ? input.value : '');
     if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
 
+    // Remember URL
+    try{ localStorage.setItem('last_url', url); }catch(_){}
+
     if (window.Water) window.Water.start();
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
-    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
 
-    // AUTO-START: Site speed & CrUX (don't block content pipeline)
-    runCrux(url);
-    runPsi(url);
-
-    // 1) Backend (if present)
+    // 1) Backend
     var {ok,data} = await fetchBackend(url);
     if(!data) data = {};
 
     // 2) Build sample
     var sample = buildSampleFromData(data);
 
-    // 3) AllOrigins raw HTML => meta + better sample
+    // 3) AllOrigins meta + sample fallback
     try{
       var raw = await fetchRawHtml(url);
       if(raw){
@@ -1091,9 +1031,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }
     }catch(_){}
 
-    // 4) Jina Reader fallback
+    // 4) Readable reader fallback
     if ((!sample || sample.length < 200)){
-      if (statusEl) statusEl.textContent = 'Getting readable text…';
       try{ var read = await fetchReadableText(url);
         if (read && read.length>200){ sample = read; }
       }catch(_){}
@@ -1103,12 +1042,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
     data = ensureScoresExist(data, sample, ensemble);
 
-    // 6) Scores -> UI
+    // Scores → UI
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
     setText('contentScoreInline', Math.round(contentScore||0));
-    setTone(document.getElementById('contentScoreChip'), contentScore||0);
+    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
 
     // Meta chips
     setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
@@ -1121,7 +1060,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
-    // Detection display (new animated bar)
+    // Human vs AI
     var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
     var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
     var backendConf = (typeof data.confidence==='number')? data.confidence : null;
@@ -1131,38 +1070,113 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
     } else if (isFinite(hp) && isFinite(ap)){
       applyDetection(hp, ap, backendConf || 60, null);
+    } else {
+      applyDetection(NaN, NaN, null, null);
     }
+
+    // Readability insights
+    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
+    renderReadability(s);
+
+    // Entities & topics
+    var ents = extractEntities(sample||'');
+    renderEntities(ents);
 
     // Checklist scores + autotick
     window.autoTickByScores(data.itemScores || {});
-
-    // Readability + Entities
-    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
-    paintReadability(s);
-    paintEntities(extractEntities((sample||'').slice(0,60000)));
 
     if (window.Water) window.Water.finish();
     if (statusEl) statusEl.textContent = 'Analysis complete';
     if (report) report.style.display = 'block';
 
+    // ===== AUTO-RUN PSI after analyze =====
+    runPageSpeedBoth(url);
+
     window.SEMSEO.BUSY = false;
-    if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
   }
   window.analyze = analyze;
 
-  // Events
+  /* ===== Events & UX ===== */
   document.addEventListener('DOMContentLoaded', function(){
     try{
-      var btn = document.getElementById('analyzeBtn');
-      if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); analyze(); }); }
+      // Buttons
+      document.getElementById('analyzeBtn')?.addEventListener('click', function(e){ e.preventDefault(); analyze(); });
       var input = document.getElementById('analyzeUrl');
-      if (input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); analyze(); }}); }
-      var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
-      var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
+      input?.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); analyze(); }});
 
-      // mark ready and flush queued early clicks
+      document.getElementById('clearUrl')?.addEventListener('click', function(){ if(input){ input.value=''; input.focus(); } });
+      if (navigator.clipboard){
+        document.getElementById('pasteUrl')?.addEventListener('click', async function(){ try{ var t=await navigator.clipboard.readText(); if(t && input){ input.value=t.trim(); } }catch(e){} });
+      }
+
+      // Site speed controls
+      document.getElementById('runMobile')?.addEventListener('click', async function(){
+        var u = normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return;
+        setText('psiTime', new Date().toLocaleTimeString());
+        var m = await runPSI(u,'mobile'); applyPSIToSide(m,'mobile');
+      });
+      document.getElementById('runDesktop')?.addEventListener('click', async function(){
+        var u = normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return;
+        setText('psiTime', new Date().toLocaleTimeString());
+        var d = await runPSI(u,'desktop'); applyPSIToSide(d,'desktop');
+      });
+      document.getElementById('runBoth')?.addEventListener('click', async function(){
+        var u = normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return;
+        runPageSpeedBoth(u);
+      });
+
+      // Reset/Export/Import/Print
+      document.getElementById('resetChecklist')?.addEventListener('click', function(){
+        Array.prototype.forEach.call(document.querySelectorAll('.checklist input[type="checkbox"]'), function(cb){ cb.checked=false; });
+        Array.prototype.forEach.call(document.querySelectorAll('.score-badge'), function(b){ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
+        updateCategoryBars();
+        window.setScoreWheel?.(0);
+        ['contentScoreInline','humanPct','aiPct'].forEach(id=>{ var el=document.getElementById(id); if(el) el.textContent='—'; });
+        document.getElementById('aiBadge')?.querySelector('b') && (document.getElementById('aiBadge').querySelector('b').textContent='—');
+        document.getElementById('detGrid').innerHTML='';
+        document.getElementById('readGrid').innerHTML='';
+        document.getElementById('entitiesGrid').innerHTML='';
+        if (window.Water) window.Water.reset();
+      });
+      document.getElementById('exportChecklist')?.addEventListener('click', function(){
+        var payload = { checked:[], scores:{} };
+        for(var i=1;i<=25;i++){
+          var cb=document.getElementById('ck-'+i), sc=document.getElementById('sc-'+i);
+          if (cb && cb.checked) payload.checked.push(i);
+          var s = parseInt(sc ? sc.textContent : 'NaN',10); if (!isNaN(s)) payload.scores[i]=s;
+        }
+        var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+        var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
+      });
+      document.getElementById('importChecklist')?.addEventListener('click', function(){ document.getElementById('importFile')?.click(); });
+      document.getElementById('importFile')?.addEventListener('change', function(){
+        var file = this.files?.[0]; if (!file) return;
+        var fr = new FileReader();
+        fr.onload = function(){ try{
+          var data = JSON.parse(fr.result);
+          for(var i=1;i<=25;i++){
+            var cb=document.getElementById('ck-'+i); if (cb) cb.checked=(data.checked||[]).includes(i);
+            var sc=document.getElementById('sc-'+i); var val=data.scores ? data.scores[i] : undefined;
+            if (sc && typeof val==='number'){ sc.textContent=val; (window.badgeTone||function(){ })(sc,val); }
+          }
+          updateCategoryBars();
+        }catch(e){ alert('Invalid JSON'); } };
+        fr.readAsText(file);
+      });
+
+      // Print buttons
+      document.getElementById('printTop')?.addEventListener('click', function(){ window.print(); });
+      document.getElementById('printChecklist')?.addEventListener('click', function(){ window.print(); });
+
+      // Back to top
+      var backTop=document.getElementById('backTop');
+      window.addEventListener('scroll', function(){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
+      backTop?.addEventListener('click', function(){ window.scrollTo({top:0,behavior:'smooth'}); });
+
+      // Restore last URL if any
+      try{ var last = localStorage.getItem('last_url'); if(last && document.getElementById('analyzeUrl')) document.getElementById('analyzeUrl').value=last; }catch(_){}
+
       window.SEMSEO.READY = true;
-      if (window.SEMSEO.QUEUE>0){ window.SEMSEO.QUEUE=0; analyze(); }
     }catch(err){
       var s=document.getElementById('analyzeStatus'); if(s) s.textContent='Boot error: '+err.message;
     }
@@ -1171,85 +1185,10 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 })();
 </script>
 
-<!-- UI utilities + share & print & back-to-top -->
-<script>
-try{
-  // Hue drift
-  (function(){ var root=document.documentElement; var start=performance.now(); function frame(now){ root.style.setProperty('--hue', (((now-start)/4)%360) + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
-
-  // Share links
-  (function(){
-    var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
-    var fb = document.getElementById('shareFb'), x = document.getElementById('shareX'), ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'), em = document.getElementById('shareEm');
-    if(fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?u='+url;
-    if(x)  x.href  = 'https://twitter.com/intent/tweet?text='+title+'&url='+url;
-    if(ln) ln.href = 'https://www.linkedin.com/sharing/share-offsite/?url='+url;
-    if(wa) wa.href = 'https://wa.me/?text='+title+'%20'+url;
-    if(em) em.href = 'mailto:?subject='+title+'&body='+url;
-  })();
-
-  // Reset / Export / Import / Print / UI misc
-  (function(){
-    function updateCategoryBars(){ if (window.updateCategoryBars) window.updateCategoryBars(); }
-    var resetBtn=document.getElementById('resetChecklist');
-    if(resetBtn){ resetBtn.addEventListener('click', function(){
-      Array.prototype.forEach.call(document.querySelectorAll('.checklist input[type="checkbox"]'), function(cb){ cb.checked=false; });
-      Array.prototype.forEach.call(document.querySelectorAll('.score-badge'), function(b){ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
-      updateCategoryBars();
-      if (window.setScoreWheel) window.setScoreWheel(0);
-      var el;
-      el=document.getElementById('contentScoreInline'); if(el) el.textContent='0';
-      var chip=document.getElementById('contentScoreChip'); ifchip: { if(!chip) break ifchip; chip.classList.remove('chip-good','chip-mid','chip-bad'); chip.classList.add('chip-bad'); }
-      el=document.getElementById('humanPct'); if(el) el.textContent='—';
-      el=document.getElementById('aiPct'); if(el) el.textContent='—';
-      var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
-      var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
-      var sp=document.getElementById('speedPanel'); if(sp) sp.style.display='none';
-      if (window.Water) window.Water.reset();
-    });}
-
-    var exportBtn=document.getElementById('exportChecklist'), importBtn=document.getElementById('importChecklist'), importFile=document.getElementById('importFile');
-    if(exportBtn){ exportBtn.addEventListener('click', function(){
-      var payload = { checked:[], scores:{} };
-      for(var i=1;i<=25;i++){
-        var cb=document.getElementById('ck-'+i), sc=document.getElementById('sc-'+i);
-        if (cb && cb.checked) payload.checked.push(i);
-        var s = parseInt(sc ? sc.textContent : 'NaN',10); if (!isNaN(s)) payload.scores[i]=s;
-      }
-      var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-      var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
-    });}
-    if(importBtn){ importBtn.addEventListener('click', function(){ if(importFile) importFile.click(); }); }
-    if(importFile){ importFile.addEventListener('change', function(){
-      var file = importFile.files[0]; if (!file) return;
-      var fr = new FileReader();
-      fr.onload = function(){ try{
-        var data = JSON.parse(fr.result);
-        for(var i=1;i<=25;i++){
-          var cb=document.getElementById('ck-'+i); if (cb) cb.checked=(data.checked||[]).includes(i);
-          var sc=document.getElementById('sc-'+i); var val=data.scores ? data.scores[i] : undefined;
-          if (sc && typeof val==='number'){ sc.textContent=val; (window.badgeTone||function(){ })(sc,val); }
-        }
-        updateCategoryBars();
-      }catch(e){ alert('Invalid JSON'); } };
-      fr.readAsText(file);
-    });}
-
-    var printTop=document.getElementById('printTop'), printChecklist=document.getElementById('printChecklist');
-    if(printTop) printTop.addEventListener('click', function(){ window.print(); });
-    if(printChecklist) printChecklist.addEventListener('click', function(){ window.print(); });
-
-    var toTop=document.getElementById('toTopLink'), backTop=document.getElementById('backTop');
-    if(toTop){ toTop.addEventListener('click', function(e){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});}); }
-    window.addEventListener('scroll', function(){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
-  })();
-
-} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
-</script>
-
 <!-- Background FX -->
 <script>
 try{
+  // Tech lines
   (function(){
     var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
     function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
@@ -1262,17 +1201,27 @@ try{
     window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
   })();
 
+  // Colorful smoke
   (function(){
     var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d');
     var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], last=performance.now();
-    var PERIOD = window.SEMSEO && window.SEMSEO.SMOKE_HUE_PERIOD_MS ? window.SEMSEO.SMOKE_HUE_PERIOD_MS : 1000000000;
+    var PERIOD = 1000000000;
     function resize(){
       c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-      var W=window.innerWidth, H=window.innerHeight; var N = 76;
+      var W=window.innerWidth, H=window.innerHeight;
+      var N = 64;
       blobs=new Array(N).fill(0).map(function(_,i){
-        var px = W*0.65 + Math.random()*W*0.45; var py = H*0.65 + Math.random()*H*0.45;
-        var r  = 120 + Math.random()*260; var speed = 0.18 + Math.random()*0.22;
-        return { x:px, y:py, r:r, vx: -speed*(0.6+Math.random()*0.8), vy: -speed*(0.6+Math.random()*0.8), baseHue: (i*37)%360, alpha: .26 + .20*Math.random() };
+        var px = W*0.65 + Math.random()*W*0.45;
+        var py = H*0.65 + Math.random()*H*0.45;
+        var r  = 120 + Math.random()*260;
+        var speed = 0.18 + Math.random()*0.22;
+        return {
+          x:px, y:py, r:r,
+          vx: -speed*(0.6+Math.random()*0.8),
+          vy: -speed*(0.6+Math.random()*0.8),
+          baseHue: (i*37)%360,
+          alpha: .22 + .22*Math.random()
+        };
       });
       last=performance.now();
     }
@@ -1282,7 +1231,8 @@ try{
       ctx.globalCompositeOperation='screen';
       var dt = now - last; last = now;
       for(var i=0;i<blobs.length;i++){
-        var b=blobs[i]; b.x += b.vx * dt; b.y += b.vy * dt;
+        var b=blobs[i];
+        b.x += b.vx * dt; b.y += b.vy * dt;
         if(b.x < -360 || b.y < -360){ b.x = W + Math.random()*260; b.y = H + Math.random()*260; }
         var hue = (b.baseHue + (now % PERIOD) * (360/PERIOD)) % 360;
         var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
@@ -1294,7 +1244,7 @@ try{
     }
     window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
   })();
-} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
+} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='FX error: '+e.message; }
 </script>
 
 <!-- Error sink -->
@@ -1304,6 +1254,5 @@ window.addEventListener('error', function(e){
   if (s) s.textContent = 'JavaScript error: ' + (e && e.message ? e.message : e);
 });
 </script>
-
 </body>
 </html>
