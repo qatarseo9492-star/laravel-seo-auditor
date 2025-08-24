@@ -13,7 +13,7 @@
   $metaImage = asset('og-image.png');
   $canonical = url()->current();
 
-  // Endpoints: use named routes if present, else safe fallbacks
+  // Endpoints: prefer named routes if present, else fallbacks
   $analyzeJsonUrl = Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
   $analyzeUrl     = Route::has('analyze')      ? route('analyze')      : url('analyze');
 @endphp
@@ -38,38 +38,35 @@
 :root{--bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg}
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
-
-/* cloud canvases behind everything, never block clicks */
+/* background canvases */
 #linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-#linesCanvas{opacity:.50} /* stronger */
-#smokeCanvas{opacity:.62} /* stronger */
+#linesCanvas{opacity:.50} #smokeCanvas{opacity:.62}
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 
-/* Header */
+/* header */
 header.site{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:14px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand{display:flex;align-items:center;gap:.8rem;min-width:0}
 .brand-badge{width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(157,92,255,.25),rgba(61,226,255,.25));border:1px solid rgba(255,255,255,.14);color:#fff;font-size:1.05rem;box-shadow:0 8px 22px rgba(0,0,0,.28)}
 .hero-heading{font-weight:1000;letter-spacing:.4px;font-size:clamp(1.4rem,3.2vw,2rem)}
 .hero-sub{color:var(--text-dim);font-size:.95rem}
 
-/* Buttons */
+/* buttons */
 .btn{display:inline-flex;align-items:center;gap:.55rem;cursor:pointer;padding:.6rem .95rem;border-radius:14px;border:1px solid rgba(255,255,255,.16);color:#fff;font-weight:900;letter-spacing:.2px;position:relative;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.25)}
-.btn::after{content:"";position:absolute;inset:-2px;border-radius:inherit;opacity:.0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);transform:translateX(-120%);transition:opacity .2s ease}
+.btn::after{content:"";position:absolute;inset:-2px;border-radius:inherit;opacity:.0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);transform:translateX(-120%);transition:opacity .2s}
 .btn:hover::after{opacity:1;animation:btnSweep 2.6s linear infinite}
 @keyframes btnSweep{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 .btn-analyze{background:linear-gradient(135deg,#10b981,#22c55e);border-color:#20d391}
 .btn-print{background:linear-gradient(135deg,#3b82f6,#6366f1);border-color:#5b77ef}
 .btn-reset{background:linear-gradient(135deg,#f59e0b,#f97316);border-color:#f59e0b}
 .btn-export{background:linear-gradient(135deg,#a855f7,#ec4899);border-color:#c26cf2}
-.btn-ghost{background:rgba(255,255,255,.06)}
-.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn-ghost{background:rgba(255,255,255,.06)} .btn:disabled{opacity:.6;cursor:not-allowed}
 
-/* Analyzer panel */
+/* analyzer shell */
 .analyzer{margin-top:24px;background:var(--panel);border:1px solid rgba(255,255,255,.08);border-radius:22px;box-shadow:var(--shadow);padding:24px}
 .section-title{font-size:1.6rem;margin:0 0 .3rem}.section-subtitle{margin:0;color:var(--text-dim)}
 .score-area{display:flex;gap:1.2rem;align-items:center;margin:.6rem 0 0;flex-wrap:wrap}
 
-/* Gauge */
+/* score wheel */
 .score-container{width:220px}
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}.gauge-svg{width:100%;height:auto;display:block}
 .score-mask-rect{transition:all .6s cubic-bezier(.22,1,.36,1)}
@@ -78,7 +75,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .score-text{font-size:clamp(2.2rem,4.2vw,3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
 .multiHueFast{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
 
-/* Chips & legends */
+/* chips */
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
 .l-red{background:rgba(239,68,68,.18)}.l-orange{background:rgba(245,158,11,.18)}.l-green{background:rgba(34,197,94,.18)}
@@ -87,8 +84,8 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .chip-bad{background:rgba(239,68,68,.18)!important;border-color:rgba(239,68,68,.5)!important}
 .ico{width:1.1em;text-align:center}.ico-green{color:var(--good)}.ico-orange{color:var(--warn)}.ico-red{color:var(--bad)}.ico-cyan{color:var(--accent)}.ico-purple{color:#9b5cff}
 
-/* URL field */
-.url-field{position:relative;border-radius:16px;background:#0b0d21;border:1px solid #1b1b35;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02),0 12px 32px rgba(0,0,0,.32);padding:10px 110px 10px 46px;transition:.25s ease;overflow:hidden;isolation:isolate}
+/* url input */
+.url-field{position:relative;border-radius:16px;background:#0b0d21;border:1px solid #1b1b35;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02),0 12px 32px rgba(0,0,0,.32);padding:10px 110px 10px 46px;transition:.25s;overflow:hidden;isolation:isolate}
 .url-field:focus-within{border-color:#5942ff;box-shadow:0 0 0 6px rgba(155,92,255,.15),inset 0 0 0 1px rgba(93,65,255,.28)}
 .url-field .url-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#9aa0c3;font-size:1rem;opacity:.95}
 .url-field input{all:unset;color:var(--text);width:100%;font-size:1rem;letter-spacing:.2px}
@@ -96,9 +93,10 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .url-field .url-mini:hover{background:rgba(255,255,255,.12)}.url-field .url-clear{right:60px;width:36px;height:32px;display:grid;place-items:center}.url-field #pasteUrl{right:12px}
 .url-field .url-border{content:"";position:absolute;inset:-2px;border-radius:inherit;padding:2px;background:conic-gradient(from 0deg,#3de2ff,#9b5cff,#ff2045,#f59e0b,#3de2ff);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.55;pointer-events:none;filter:hue-rotate(var(--hue))}
 
+/* row */
 .analyze-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:.6rem;align-items:center;margin-top:.6rem}
 
-/* Analyze water progress */
+/* water progress */
 .water-wrap{margin-top:.8rem;display:none}
 .waterbar{position:relative;height:64px;border-radius:18px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
@@ -109,14 +107,14 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
 
-/* Completion */
+/* completion */
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .comp-water{position:relative;height:52px;border-radius:16px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .comp-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}.comp-overlay{position:absolute;inset:0;background:radial-gradient(120px 50px at 15% -25%,rgba(255,255,255,.16),transparent 55%),linear-gradient(180deg,rgba(255,255,255,.08),transparent 35%,rgba(255,255,255,.06));pointer-events:none;mix-blend-mode:screen;z-index:3}
 .comp-pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1rem;z-index:4;text-shadow:0 1px 0 rgba(0,0,0,.45)}
 .comp-wave1{animation:waveX 8s linear infinite}.comp-wave2{animation:waveX 12s linear infinite reverse}
 
-/* Cards & checklist */
+/* cards + checklist */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite;pointer-events:none;z-index:0}
@@ -133,7 +131,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .cat-water-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:rgba(255,255,255,.9);text-shadow:0 1px 0 rgba(0,0,0,.55);pointer-events:none}
 
 .checklist{list-style:none;margin:10px 0 0;padding:0}
-.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s ease,background .25s ease,transform .12s ease}
+.checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s,background .25s,transform .12s}
 .checklist-item+.checklist-item{margin-top:.28rem}.checklist-item:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.25)}
 .checklist-item label{cursor:pointer;display:inline-flex;align-items:center;gap:.55rem}
 
@@ -141,9 +139,9 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .sev-mid{background:linear-gradient(180deg,rgba(245,158,11,.16),rgba(245,158,11,.08));border-color:rgba(245,158,11,.45)}
 .sev-bad{background:linear-gradient(180deg,rgba(239,68,68,.16),rgba(239,68,68,.10));border-color:rgba(239,68,68,.55)}
 
-.checklist-item input[type="checkbox"]{appearance:none;-webkit-appearance:none;outline:none;width:22px;height:22px;border-radius:8px;background:#0b1220;border:2px solid #2a2f4d;position:relative;display:inline-grid;place-items:center;transition:.18s ease-in-out;box-shadow:inset 0 0 0 0 rgba(99,102,241,.0)}
+.checklist-item input[type="checkbox"]{appearance:none;-webkit-appearance:none;outline:none;width:22px;height:22px;border-radius:8px;background:#0b1220;border:2px solid #2a2f4d;position:relative;display:inline-grid;place-items:center;transition:.18s;box-shadow:inset 0 0 0 0 rgba(99,102,241,.0)}
 .checklist-item input[type="checkbox"]:hover{border-color:#4c5399;box-shadow:0 0 0 4px rgba(99,102,241,.12)}
-.checklist-item input[type="checkbox"]::after{content:"";width:7px;height:12px;border:3px solid transparent;border-left:0;border-top:0;transform:rotate(45deg) scale(.7);transition:.18s ease-in-out}
+.checklist-item input[type="checkbox"]::after{content:"";width:7px;height:12px;border:3px solid transparent;border-left:0;border-top:0;transform:rotate(45deg) scale(.7);transition:.18s}
 .checklist-item input[type="checkbox"]:checked{border-color:transparent;background:linear-gradient(135deg,#22c55e,#3de2ff,#9b5cff);background-size:200% 200%;animation:tickHue 2s linear infinite;box-shadow:0 6px 18px rgba(61,226,255,.25),inset 0 0 0 2px rgba(255,255,255,.25)}
 .checklist-item input[type="checkbox"]:checked::after{border-color:#fff;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));transform:rotate(45deg) scale(1)}
 @keyframes tickHue{0%{background-position:0% 50%}100%{background-position:200% 50%}}
@@ -158,18 +156,31 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .improve-btn::before{content:"";position:absolute;inset:-2px;border-radius:inherit;z-index:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.18) 45%,transparent 50%,transparent 100%);transform:translateX(-120%);animation:btnSheen 3.2s linear infinite}
 @keyframes btnSheen{0%{transform:translateX(-120%)}60%{transform:translateX(120%)}100%{transform:translateX(120%)}}
 
-/* Social dock */
+/* social dock */
 .share-dock{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:85;background:rgba(10,12,28,.35);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.5rem;backdrop-filter:blur(8px)}
-.share-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;color:#fff;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease}
+.share-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;color:#fff;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
 .share-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
 .share-fb{background:linear-gradient(135deg,#1877F2,#1e90ff)}.share-x{background:linear-gradient(135deg,#111,#333)}.share-ln{background:linear-gradient(135deg,#0a66c2,#1a8cd8)}.share-wa{background:linear-gradient(135deg,#25D366,#128C7E)}.share-em{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+
+/* detector panel */
+.detector{margin-top:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+.det-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.det-head h4{margin:0;font-size:1.05rem}
+.det-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.5rem}
+.det-item{grid-column:span 6;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.55rem .6rem}
+.det-row{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:center}
+.det-label{font-weight:800;color:var(--text-dim)}
+.det-score{font-weight:1000}
+.det-bar{margin-top:.4rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
+.det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
+.det-note{margin-top:.35rem;color:var(--text-dim);font-size:.85rem}
 
 footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
 #backTop:hover{background:rgba(255,255,255,.12)}
 
-/* Responsive */
-@media (max-width:992px){.category-card{grid-column:span 12}.score-container{width:190px}.analyze-row{grid-template-columns:1fr auto auto}}
+/* responsive */
+@media (max-width:992px){.category-card{grid-column:span 12}.score-container{width:190px}.analyze-row{grid-template-columns:1fr auto auto}.det-item{grid-column:span 12}}
 @media (max-width:768px){.wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}.share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}.checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}}
 @media (max-width:480px){.score-container{width:150px}.category-icon{width:40px;height:40px}.category-title{font-size:1rem}}
 @media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
@@ -182,7 +193,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 <canvas id="linesCanvas"></canvas>
 <canvas id="smokeCanvas"></canvas>
 
-<!-- SAFETY: expose endpoints & a minimal fallback click handler EARLY -->
+<!-- Endpoints + safe click handler -->
 <script>
   window.SEMSEO = window.SEMSEO || {};
   window.SEMSEO.ENDPOINTS = {
@@ -247,17 +258,15 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             </defs>
             <circle cx="100" cy="100" r="96" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
             <circle id="ringTrack" cx="100" cy="100" r="95" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="6" transform="rotate(-90 100 100)"/>
-            <circle id="ringArc" cx="100" cy="100" r="95" fill="none" stroke="url(#ringGrad)" stroke-width="6" stroke-linecap="round" filter="url(#ringGlow)" opacity=".95" transform="rotate(-90 100 100)" />
+            <circle id="ringArc" cx="100" cy="100" r="95" fill="none" stroke="url(#ringGrad)" stroke-width="6" stroke-linecap="round" filter="url(#ringGlow)" opacity=".95" transform="rotate(-90 100 100)"/>
             <g clip-path="url(#scoreCircleClip)">
               <rect x="0" y="0" width="200" height="200" fill="#0b0d21"/>
               <g clip-path="url(#scoreFillClip)">
                 <g class="score-wave1 multiHueFast">
-                  <use href="#scoreWavePath" x="0" fill="url(#scoreGrad)"/>
-                  <use href="#scoreWavePath" x="210" fill="url(#scoreGrad)"/>
+                  <use href="#scoreWavePath" x="0" fill="url(#scoreGrad)"/><use href="#scoreWavePath" x="210" fill="url(#scoreGrad)"/>
                 </g>
                 <g class="score-wave2 multiHueFast" opacity=".85">
-                  <use href="#scoreWavePath" x="0" y="6" fill="url(#scoreGrad)"/>
-                  <use href="#scoreWavePath" x="210" y="6" fill="url(#scoreGrad)"/>
+                  <use href="#scoreWavePath" x="0" y="6" fill="url(#scoreGrad)"/><use href="#scoreWavePath" x="210" y="6" fill="url(#scoreGrad)"/>
                 </g>
               </g>
             </g>
@@ -275,7 +284,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
-        <small style="color:var(--text-dim)">Note: no detector can be 100% certain—this shows high-confidence estimates.</small>
+        <small style="color:var(--text-dim)">Note: no detector can be 100% certain—this shows high-confidence ensemble estimates.</small>
       </div>
     </div>
 
@@ -298,7 +307,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             </label>
           </div>
 
-          <!-- Safe inline fallback -->
           <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
@@ -314,9 +322,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
               <defs>
-                <linearGradient id="waterGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stop-color="#3de2ff"/><stop offset="100%" stop-color="#9b5cff"/>
-                </linearGradient>
+                <linearGradient id="waterGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3de2ff"/><stop offset="100%" stop-color="#9b5cff"/></linearGradient>
                 <clipPath id="roundClip"><rect x="1" y="1" width="598" height="198" rx="18" ry="18"/></clipPath>
                 <clipPath id="fillClip"><rect id="waterClipRect" class="water-mask-rect" x="0" y="200" width="600" height="200"/></clipPath>
                 <path id="wave" d="M0 120 Q 50 90 100 120 T 200 120 T 300 120 T 400 120 T 500 120 T 600 120 V 220 H 0 Z"/>
@@ -324,12 +330,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
               <g clip-path="url(#roundClip)">
                 <rect x="0" y="0" width="600" height="200" fill="#0b0d21"/>
                 <g clip-path="url(#fillClip)">
-                  <g class="wave1 multiHue">
-                    <use href="#wave" x="0" fill="url(#waterGrad)"/><use href="#wave" x="600" fill="url(#waterGrad)"/>
-                  </g>
-                  <g class="wave2 multiHue" opacity=".65">
-                    <use href="#wave" x="0" y="8" fill="url(#waterGrad)"/><use href="#wave" x="600" y="8" fill="url(#waterGrad)"/>
-                  </g>
+                  <g class="wave1 multiHue"><use href="#wave" x="0" fill="url(#waterGrad)"/><use href="#wave" x="600" fill="url(#waterGrad)"/></g>
+                  <g class="wave2 multiHue" opacity=".65"><use href="#wave" x="0" y="8" fill="url(#waterGrad)"/><use href="#wave" x="600" y="8" fill="url(#waterGrad)"/></g>
                 </g>
               </g>
             </svg>
@@ -356,26 +358,36 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
+    <!-- Ultra Content Detection (Ensemble) -->
+    <section id="detectorPanel" class="detector" style="display:none">
+      <div class="det-head">
+        <i class="fa-solid fa-wave-square ico ico-purple"></i>
+        <h4>Ultra Content Detection (Ensemble)</h4>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem">
+        <span class="chip"><i class="fa-solid fa-shield-halved ico"></i> Confidence: <b id="detConfidence">—</b>%</span>
+        <span class="chip"><i class="fa-solid fa-circle-info ico"></i> Higher bar = more AI-like for that detector</span>
+      </div>
+      <div class="det-grid" id="detGrid">
+        <!-- rows injected by JS -->
+      </div>
+      <div class="det-note" id="detNote">Ensemble blends 8 detectors (stylometry, repetition, discourse, punctuation, compressibility, lexical signals, Zipf/Gini, longform). Backend values override when available.</div>
+    </section>
+
     <div class="progress-wrap">
       <div class="comp-water" id="compWater" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
         <svg class="comp-svg" viewBox="0 0 600 140" preserveAspectRatio="none">
           <defs>
             <clipPath id="compRound"><rect x="1" y="1" width="598" height="138" rx="14" ry="14"/></clipPath>
             <clipPath id="compFillClip"><rect id="compClipRect" x="0" y="0" width="0" height="140"/></clipPath>
-            <linearGradient id="compGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop id="compStop1" offset="0%" stop-color="#3de2ff"/><stop id="compStop2" offset="100%" stop-color="#9b5cff"/>
-            </linearGradient>
+            <linearGradient id="compGrad" x1="0" y1="0" x2="1" y2="1"><stop id="compStop1" offset="0%" stop-color="#3de2ff"/><stop id="compStop2" offset="100%" stop-color="#9b5cff"/></linearGradient>
             <path id="compWave" d="M0 80 Q 50 60 100 80 T 200 80 T 300 80 T 400 80 T 500 80 T 600 80 V 160 H 0 Z"/>
           </defs>
           <g clip-path="url(#compRound)">
             <rect x="0" y="0" width="600" height="140" fill="#0b0d21"/>
             <g clip-path="url(#compFillClip)">
-              <g class="comp-wave1 multiHue">
-                <use href="#compWave" x="0" fill="url(#compGrad)"/><use href="#compWave" x="600" fill="url(#compGrad)"/>
-              </g>
-              <g class="comp-wave2 multiHue" opacity=".75">
-                <use href="#compWave" x="0" y="6" fill="url(#compGrad)"/><use href="#compWave" x="600" y="6" fill="url(#compGrad)"/>
-              </g>
+              <g class="comp-wave1 multiHue"><use href="#compWave" x="0" fill="url(#compGrad)"/><use href="#compWave" x="600" fill="url(#compGrad)"/></g>
+              <g class="comp-wave2 multiHue" opacity=".75"><use href="#compWave" x="0" y="6" fill="url(#compGrad)"/><use href="#compWave" x="600" y="6" fill="url(#compGrad)"/></g>
             </g>
           </g>
         </svg>
@@ -426,14 +438,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
                   <g clip-path="url(#catClip-{{ $loop->index }})">
                     <rect x="0" y="0" width="600" height="24" fill="#0b0d21"/>
                     <g clip-path="url(#catFillClip-{{ $loop->index }})">
-                      <g class="cat-wave1">
-                        <use href="#catWave-{{ $loop->index }}" x="0" fill="url(#catGrad-{{ $loop->index }})"/>
-                        <use href="#catWave-{{ $loop->index }}" x="640" fill="url(#catGrad-{{ $loop->index }})"/>
-                      </g>
-                      <g class="cat-wave2" opacity=".85">
-                        <use href="#catWave-{{ $loop->index }}" x="0" y="3" fill="url(#catGrad-{{ $loop->index }})"/>
-                        <use href="#catWave-{{ $loop->index }}" x="640" y="3" fill="url(#catGrad-{{ $loop->index }})"/>
-                      </g>
+                      <g class="cat-wave1"><use href="#catWave-{{ $loop->index }}" x="0" fill="url(#catGrad-{{ $loop->index }})"/><use href="#catWave-{{ $loop->index }}" x="640" fill="url(#catGrad-{{ $loop->index }})"/></g>
+                      <g class="cat-wave2" opacity=".85"><use href="#catWave-{{ $loop->index }}" x="0" y="3" fill="url(#catGrad-{{ $loop->index }})"/><use href="#catWave-{{ $loop->index }}" x="640" y="3" fill="url(#catGrad-{{ $loop->index }})"/></g>
                     </g>
                   </g>
                 </svg>
@@ -475,7 +481,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
   function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
 
-  /* ====== Gauge ====== */
+  /* === Score wheel === */
   var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
   window.setScoreWheel = function(value){
     if(!GAUGE.rect){
@@ -496,7 +502,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
   };
 
-  /* ====== Category bars + completion ====== */
+  /* === Category bars + completion === */
   function updateCategoryBars(){
     var cards=[].slice.call(document.querySelectorAll('.category-card'));
     var total=0, checked=0;
@@ -519,7 +525,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   window.updateCategoryBars = updateCategoryBars;
 
-  /* ====== Auto-tick by item scores ====== */
+  /* === Auto-tick by item scores === */
   function autoTickByScores(map){
     var autoCount=0;
     for(var i=1;i<=25;i++){
@@ -544,7 +550,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   window.autoTickByScores = autoTickByScores;
 
-  /* ====== Water progress ====== */
+  /* === Water progress === */
   var Water=(function(){
     var wrapId=function(){ return document.getElementById('waterWrap'); };
     var clipId=function(){ return document.getElementById('waterClipRect'); };
@@ -561,66 +567,238 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   })();
   window.Water = Water;
 
-  /* ====== Heuristic content detector (fallback if API gives no humanPct/aiPct) ====== */
-  function detectFromText(text){
-    if(!text || typeof text!=='string'){ return null; }
-    var t=text.trim().replace(/\s+/g,' ');
-    var sentences=t.split(/(?<=[\.\?\!])\s+/); if(sentences.length<3){ sentences=t.split(/[\.\?\!]+/); }
-    var words=t.toLowerCase().match(/[a-z\u00C0-\u024f']+/g)||[];
-    var uniq = Object.create(null); for(var i=0;i<words.length;i++){ uniq[words[i]]=(uniq[words[i]]||0)+1; }
-    var uniqCount=0, repeats3=0;
-    var tri = Object.create(null);
-    for(var j=0;j<words.length-2;j++){ var g=words[j]+' '+words[j+1]+' '+words[j+2]; tri[g]=(tri[g]||0)+1; }
-    for(var k in uniq){ if(uniq.hasOwnProperty(k)) uniqCount++; }
-    for(var gk in tri){ if(tri[gk]>2) repeats3+=tri[gk]; }
+  /* ===================== ULTRA ENSEMBLE DETECTOR ===================== */
+  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
+  function _entropy(counts,total){ if(!total||total<=0) return 0; var H=0; for(var k in counts){ if(!counts.hasOwnProperty(k)) continue; var p=counts[k]/total; if(p>0){ H += -p*Math.log(p); } } return H; }
+  function _gini(arr){ if(!arr||arr.length===0) return 0; var n=arr.length; var s=0; for(var i=0;i<n;i++){ s+=arr[i]; } if(s===0) return 0; var sorted=arr.slice().sort(function(a,b){return a-b;}); var cum=0; for(var j=0;j<n;j++){ cum += (2*(j+1)-n-1)*sorted[j]; } return cum/(n*s); }
 
-    // stats
-    var lens=[], sum=0; for(var s=0;s<sentences.length;s++){ var L=sentences[s].trim().split(/\s+/).length; if(isFinite(L)&&L>0){ lens.push(L); sum+=L; } }
-    var avg = lens.length? (sum/lens.length):0;
-    var variance=0; for(var s2=0;s2<lens.length;s2++){ variance += Math.pow(lens[s2]-avg,2); }
-    variance = lens.length? variance/lens.length : 0;
-    var std = Math.sqrt(variance);
-
-    // markers
-    var clichés=(t.match(/\b(however|moreover|furthermore|in conclusion|additionally|overall|more importantly)\b/gi)||[]).length;
-    var contractions=(t.match(/\b(?:I'm|I've|we're|can't|don't|isn't|it's|that's|there's|won't|shouldn't|couldn't|they're|you're|let's|didn't)\b/gi)||[]).length;
-    var punctuationVar=(t.match(/[;:!?]/g)||[]).length;
-    var digits=(t.match(/\d/g)||[]).length;
-
-    // crude scores (0..100). Higher AI means more templated / uniform / cliché.
-    var aiScore = 0;
-    // steadier sentence length -> more AI
-    aiScore += Math.max(0, 30 - Math.min(30, std*2));
-    // many clichés -> more AI
-    aiScore += Math.min(20, clichés*3);
-    // low contractions -> more AI
-    aiScore += Math.max(0, 15 - Math.min(15, contractions*1.5));
-    // repeated 3-grams -> more AI
-    aiScore += Math.min(15, repeats3*2);
-    // low punctuation variety -> more AI
-    aiScore += Math.max(0, 10 - Math.min(10, punctuationVar));
-    // very uniform vocabulary -> more AI
-    var uniqRatio = words.length? (uniqCount/words.length):0;
-    aiScore += (uniqRatio<0.35)?10:(uniqRatio<0.45?5:0);
-    // digits don't matter much but add tiny noise
-    aiScore += Math.min(5, Math.max(0, 5 - digits*0.5));
-
-    aiScore = Math.max(0, Math.min(100, Math.round(aiScore)));
-    var humanScore = 100 - aiScore;
-    // crude confidence: more text + strong skew => higher confidence
-    var conf = Math.max(40, Math.min(95, Math.round( (Math.log(words.length+1)/Math.log(5000))*60 + Math.abs(humanScore-aiScore)*0.4 )));
-    return { humanPct: humanScore, aiPct: aiScore, confidence: conf };
+  function _compressRatioLZW(str){
+    // tiny LZW-ish compressor just for a rough compressibility signal
+    var dict={}, data=str, out=[], currChar, phrase=data.charAt(0), code=256;
+    for(var i=1;i<data.length;i++){ currChar=data.charAt(i); if(dict[phrase+currChar]!==undefined){ phrase+=currChar; }else{ out.push(phrase.length>1?dict[phrase]:phrase.charCodeAt(0)); dict[phrase+currChar]=code; code++; phrase=currChar; } }
+    out.push(phrase.length>1?dict[phrase]:phrase.charCodeAt(0));
+    // estimate bytes (assuming 2 bytes per code ~ rough)
+    var original = str.length; var compressed = out.length*2;
+    if(original===0) return 1;
+    var ratio = compressed/original; // lower => more compressible
+    return clamp(ratio, 0.2, 3.0);
   }
 
-  function applyDetection(humanPct, aiPct, confidence){
-    var writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
-    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; }
-    setText('humanPct', isFinite(humanPct)? Math.round(humanPct):'—');
-    setText('aiPct',    isFinite(aiPct)?    Math.round(aiPct)   :'—');
-    // tone chip color by "human-ness"
-    setChipTone(document.getElementById('overallChip'), document.getElementById('overallScoreInline')? Number(document.getElementById('overallScoreInline').textContent||0):0);
-    // optionally append confidence to title attribute
-    if (badge){ badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
+  function _prep(text){
+    text = (text||'') + '';
+    if(text.length>80000) text = text.slice(0,80000);
+    var t = text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
+    var sentenceSplit = /(?<=[\.\!\?])\s+|\n+(?=\S)/g;
+    var sentences = t.split(sentenceSplit).filter(function(s){return s.trim().length>0;});
+    if (sentences.length<3){ sentences = t.split(/[\.!\?]+/g).filter(function(s){return s.trim().length>0;}); }
+
+    var wordRe = /[A-Za-z\u00C0-\u024f0-9']+/g;
+    var words = (t.match(wordRe)||[]).map(function(w){return w.toLowerCase();});
+    var tokens = words.length;
+
+    var freq = Object.create(null);
+    for(var i=0;i<tokens;i++){ var w=words[i]; freq[w]=(freq[w]||0)+1; }
+
+    var types=0, hapax=0; var arr=[];
+    for(var k in freq){ if(!freq.hasOwnProperty(k)) continue; types++; if(freq[k]===1) hapax++; arr.push(freq[k]); }
+
+    var lens=[], sum=0;
+    for(var s=0;s<sentences.length;s++){
+      var L = (sentences[s].match(wordRe)||[]).length;
+      if(L>0){ lens.push(L); sum+=L; }
+    }
+    var mean = lens.length? sum/lens.length : 0;
+    var variance=0; for(var j=0;j<lens.length;j++){ variance += Math.pow(lens[j]-mean,2); }
+    variance = lens.length? variance/lens.length : 0;
+    var std = Math.sqrt(variance);
+    var cov = mean>0 ? (std/mean) : 0;
+
+    var tri = Object.create(null), triTotal=0, triRepeats=0;
+    for(var i3=0;i3<tokens-2;i3++){ var g=words[i3]+' '+words[i3+1]+' '+words[i3+2]; tri[g]=(tri[g]||0)+1; triTotal++; }
+    for(var gk in tri){ if(tri[gk]>1) triRepeats += tri[gk]-1; }
+    var triRepeatRatio = triTotal? triRepeats/triTotal : 0;
+
+    var starters = Object.create(null), startersTotal=0, topStarter=0;
+    for(var si=0;si<sentences.length;si++){
+      var w0 = (sentences[si].match(wordRe)||[])[0];
+      if(!w0) continue; w0=w0.toLowerCase();
+      starters[w0]=(starters[w0]||0)+1; startersTotal++;
+    }
+    for(var k2 in starters){ if(starters[k2]>topStarter) topStarter=starters[k2]; }
+    var starterDom = startersTotal? topStarter/startersTotal : 0;
+
+    // punctuation entropy
+    var pMap={'.':0, ',':0, ';':0, ':':0, '!':0, '?':0, '"':0, '\'':0, '(':0, ')':0};
+    var pTotal=0; for(var pi=0;pi<t.length;pi++){ var ch=t[pi]; if(pMap.hasOwnProperty(ch)){ pMap[ch]++; pTotal++; } }
+    var H = _entropy(pMap, pTotal); var Hnorm = (pTotal>0) ? ( H / Math.log(10) ) : 0;
+
+    // markers
+    var connectors = /\b(however|moreover|furthermore|additionally|therefore|thus|consequently|in conclusion|overall|importantly|notwithstanding|nonetheless|nevertheless|hence|alternatively)\b/gi;
+    var connectorHits = (t.match(connectors)||[]).length;
+    var wordCount = tokens || 1;
+    var connPer100 = connectorHits*100/wordCount;
+
+    var contractionsRe = /\b(?:I'm|I've|I'd|I'll|we're|we've|we'd|we'll|you're|you've|you'd|you'll|they're|they've|they'd|they'll|it's|that's|there's|isn't|aren't|can't|won't|shouldn't|couldn't|don't|doesn't|didn't|let's|n't|'re|'ve|'ll)\b/gi;
+    var apostrophes = (t.match(/'/g)||[]).length;
+    var contractions = (t.match(contractionsRe)||[]).length;
+    var contrPer100 = contractions*100/wordCount;
+    var contrWeight = apostrophes>3 ? 1.0 : 0.35;
+
+    var passive = (t.match(/\b(am|is|are|was|were|be|been|being)\s+\w+ed\b/gi)||[]).length; // crude passive
+    var passivePer100 = passive*100/wordCount;
+
+    var stops = /\b(the|of|and|to|in|a|is|that|for|on|with|as|by|at|from|it|an|be|this|which|or|are|was|were|but|not|have|has|had|can|will|would|should)\b/gi;
+    var stopHits = (t.match(stops)||[]).length;
+    var stopPer100 = stopHits*100/wordCount;
+
+    var digits = (t.match(/\d/g)||[]).length; var digitsPer100 = digits*100/wordCount;
+
+    // vocab richness
+    var TTR = types/wordCount;
+    var Guiraud = types/Math.sqrt(wordCount);
+    var hapaxRatio = types? hapax/types : 0;
+
+    var longCount=0; for(var li=0; li<lens.length; li++){ if(lens[li]>=28) longCount++; }
+    var longRatio = lens.length? longCount/lens.length : 0;
+
+    var gini = _gini(arr);
+    var compRatio = _compressRatioLZW(t); // lower=>more compressible
+
+    return {
+      text:t, words:words, wordCount:wordCount, sentences:sentences, lens:lens,
+      mean:mean, cov:cov, std:std, longRatio:longRatio,
+      triRepeatRatio:triRepeatRatio, starterDom:starterDom,
+      Hnorm:Hnorm, connPer100:connPer100, contrPer100:contrPer100, contrWeight:contrWeight,
+      passivePer100:passivePer100, stopPer100:stopPer100, digitsPer100:digitsPer100,
+      TTR:TTR, Guiraud:Guiraud, hapaxRatio:hapaxRatio, gini:gini, compRatio:compRatio, apostrophes:apostrophes
+    };
+  }
+
+  function detStylometry(s){
+    var ai=0;
+    var covTarget=0.45;
+    if (s.cov < covTarget) ai += clamp((covTarget - s.cov)/covTarget,0,1)*25; else ai -= clamp((s.cov - covTarget)/covTarget,0,1)*6;
+    var ttrTarget = 0.45;
+    if (s.TTR < ttrTarget) ai += clamp((ttrTarget - s.TTR)/ttrTarget,0,1)*18; else ai -= clamp((s.TTR - ttrTarget)/ttrTarget,0,1)*6;
+    if (s.Guiraud < 4.8) ai += clamp((4.8 - s.Guiraud)/4.8,0,1)*10; else ai -= clamp((s.Guiraud-4.8)/4.8,0,1)*4;
+    if (s.hapaxRatio < 0.45) ai += clamp((0.45 - s.hapaxRatio)/0.45,0,1)*10;
+    return clamp(Math.round(10+ai),0,100);
+  }
+  function detRepetition(s){
+    var ai=0;
+    ai += clamp(s.triRepeatRatio*100/3,0,1)*28;
+    ai += clamp((s.starterDom - 0.22)/0.5,0,1)*12;
+    return clamp(Math.round(ai),0,100);
+  }
+  function detDiscourse(s){
+    var ai=0;
+    ai += clamp((s.connPer100 - 0.9)/2.2,0,1)*16;
+    ai += s.contrWeight * clamp((1.0 - s.contrPer100/1.6),0,1)*12;
+    ai += clamp((s.passivePer100 - 0.9)/3.0,0,1)*8;
+    return clamp(Math.round(8+ai),0,100);
+  }
+  function detPunctuation(s){
+    var ai=0;
+    ai += clamp((0.85 - s.Hnorm),0,1)*18;
+    return clamp(Math.round(10+ai),0,100);
+  }
+  function detCompress(s){
+    // compRatio ~ 0.2..3.0; lower => more compressible => more templated => more AI
+    var ai = clamp((0.85 - Math.min(0.85, s.compRatio))/0.85,0,1)*26;
+    return clamp(Math.round(8+ai),0,100);
+  }
+  function detLexical(s){
+    var ai=0;
+    if (s.stopPer100 < 35) ai += clamp((35 - s.stopPer100)/35,0,1)*10;
+    if (s.digitsPer100 > 4) ai += clamp((s.digitsPer100-4)/12,0,1)*6;
+    if (s.apostrophes<2) ai += 4;
+    return clamp(Math.round(6+ai),0,100);
+  }
+  function detGiniZipf(s){
+    // human tends to have inequality (Zipf heavy-tail). Very low gini -> AI-ish.
+    var ai=0;
+    if (s.gini < 0.47) ai += clamp((0.47 - s.gini)/0.47,0,1)*22;
+    else if (s.gini > 0.78) ai += clamp((s.gini - 0.78)/0.22,0,1)*8; // extreme concentration also odd
+    return clamp(Math.round(10+ai),0,100);
+  }
+  function detLongform(s){
+    var ai=0;
+    if (s.longRatio < 0.08) ai += clamp((0.08 - s.longRatio)/0.08,0,1)*8;
+    else if (s.longRatio > 0.35) ai += clamp((s.longRatio - 0.35)/0.65,0,1)*8;
+    return clamp(Math.round(8+ai),0,100);
+  }
+
+  function detectUltra(text){
+    var s=_prep(text||'');
+    // very short -> low confidence quick return
+    if (s.wordCount < 40){
+      var aiQuick = clamp(60 - s.wordCount*0.5, 15, 60);
+      return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 45, detectors: [] };
+    }
+    var parts = [
+      {key:'stylometry', label:'Stylometry', ai:detStylometry(s), w:1.2},
+      {key:'repetition', label:'Repetition', ai:detRepetition(s), w:1.2},
+      {key:'discourse', label:'Discourse', ai:detDiscourse(s), w:1.0},
+      {key:'punct', label:'Punctuation', ai:detPunctuation(s), w:0.9},
+      {key:'compress', label:'Compressibility', ai:detCompress(s), w:1.0},
+      {key:'lexical', label:'Lexical', ai:detLexical(s), w:0.8},
+      {key:'zipf', label:'Zipf/Gini', ai:detGiniZipf(s), w:1.0},
+      {key:'longform', label:'Longform', ai:detLongform(s), w:0.8}
+    ];
+    var ais = parts.map(function(p){return p.ai;}).slice().sort(function(a,b){return a-b;});
+    // trimmed mean (drop min/max)
+    var trimmed = ais.slice(1, ais.length-1);
+    var mean = trimmed.reduce(function(a,b){return a+b;},0)/Math.max(1,trimmed.length);
+    // weighted push toward robust center
+    var wsum=0, wacc=0;
+    for(var i=0;i<parts.length;i++){ wacc += parts[i].ai*parts[i].w; wsum += parts[i].w; }
+    var weighted = wacc/Math.max(1,wsum);
+    var aiEnsemble = clamp(Math.round((weighted*0.55 + mean*0.45)), 0, 100);
+
+    // confidence by agreement + length
+    var spread=0; for(var j=0;j<parts.length;j++){ spread += Math.abs(parts[j].ai - aiEnsemble); }
+    var avgDev = spread/parts.length; // lower is better agreement
+    var agree = clamp(100 - avgDev*1.2, 40, 96);
+    var lenBoost = Math.min(1, Math.log(s.wordCount+1)/Math.log(10000)); // 0..1
+    var conf = clamp(Math.round(agree*0.6 + lenBoost*40), 45, 97);
+
+    return { humanPct: 100-aiEnsemble, aiPct: aiEnsemble, confidence: conf, detectors: parts };
+  }
+
+  function renderDetectors(res){
+    var panel = document.getElementById('detectorPanel');
+    if(!panel) return;
+    var grid = document.getElementById('detGrid');
+    var confEl = document.getElementById('detConfidence');
+    if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
+    panel.style.display = 'block';
+    if(!grid) return;
+    grid.innerHTML = '';
+    var list = res.detectors||[];
+    for(var i=0;i<list.length;i++){
+      var d=list[i];
+      var id='det-'+d.key;
+      var wrap=document.createElement('div'); wrap.className='det-item'; wrap.innerHTML =
+        '<div class="det-row"><div class="det-label">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+d.ai+'</div></div>'+
+        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill"></div></div>';
+      grid.appendChild(wrap);
+      (function(mid, mfill, val){
+        var scoreEl = document.getElementById(mid+'-score');
+        var fillEl  = document.getElementById(mid+'-fill');
+        if(scoreEl) scoreEl.textContent = val;
+        if(fillEl){ fillEl.style.width = clamp(val,0,100)+'%'; }
+      })(id,id,val=d.ai);
+    }
+  }
+
+  function applyDetection(humanPct, aiPct, confidence, breakdown){
+    var writer = (isFinite(humanPct) && isFinite(aiPct) && humanPct>=aiPct) ? 'Likely Human' : 'AI-like';
+    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
+    var hp = document.getElementById('humanPct'), ap = document.getElementById('aiPct');
+    if(hp) hp.textContent = isFinite(humanPct)? Math.round(humanPct) : '—';
+    if(ap) ap.textContent = isFinite(aiPct)?    Math.round(aiPct)   : '—';
+    // breakdown UI
+    if (breakdown && breakdown.detectors){ renderDetectors(breakdown); }
   }
 
   function normalizeUrl(u) {
@@ -684,7 +862,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       return;
     }
 
-    // --- Apply scores ---
+    // Scores
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
@@ -701,17 +879,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  data.internalLinks ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
-    // --- Human/AI detection: use API values if present, else fallback heuristic over textSample/extractedText/body/sample ---
+    // Human/AI detection: backend => else ensemble
     var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
     var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
 
     if (!isFinite(hp) && !isFinite(ap)) {
       var sample = data.textSample || data.extractedText || data.body || data.sample || '';
-      var est = detectFromText(sample);
-      if (est){ hp = est.humanPct; ap = est.aiPct; applyDetection(hp, ap, est.confidence); }
-      else { applyDetection(NaN, NaN, NaN); }
+      var det = detectUltra(sample);
+      applyDetection(det.humanPct, det.aiPct, det.confidence, det);
     } else {
-      applyDetection(hp, ap, data.confidence || null);
+      applyDetection(hp, ap, data.confidence || null, null);
     }
 
     window.autoTickByScores(data.itemScores || {});
@@ -720,7 +897,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if (report) report.style.display = 'block';
   };
 
-  // Minimal wire-up so the button works even if later scripts fail
+  // Ensure click wiring even if later UI errors occur
   document.addEventListener('DOMContentLoaded', function(){
     var btn = document.getElementById('analyzeBtn');
     if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); window.analyze(); }); }
@@ -737,7 +914,7 @@ try{
   // Hue drift for multi-color water
   (function(){ var root=document.documentElement; var start=performance.now(); function frame(now){ root.style.setProperty('--hue', (((now-start)/4)%360) + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
 
-  // Share links + UX
+  // Share links
   (function(){
     var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
     var fb = document.getElementById('shareFb'), x = document.getElementById('shareX'), ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'), em = document.getElementById('shareEm');
@@ -763,6 +940,7 @@ try{
       el=document.getElementById('humanPct'); if(el) el.textContent='—';
       el=document.getElementById('aiPct'); if(el) el.textContent='—';
       var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
+      var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
       if (window.Water) window.Water.reset();
     });}
 
@@ -805,10 +983,10 @@ try{
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
 </script>
 
-<!-- C) Background smoke — hardened & brighter -->
+<!-- C) Background smoke — hardened -->
 <script>
 try{
-  // moving glow lines (brighter)
+  // moving glow lines
   (function(){
     var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
     function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
@@ -821,41 +999,29 @@ try{
     window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
   })();
 
-  // drifting colored fog “smoke” (more blobs & alpha)
+  // drifting colored fog “smoke”
   (function(){
     var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], rafId=0;
     function resize(){
       c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
       blobs=Array.apply(null,Array(56)).map(function(){ return {
-        x:Math.random()*window.innerWidth,
-        y:Math.random()*window.innerHeight,
-        r:80+Math.random()*180,
-        vx:(Math.random()-.5)*.22,
-        vy:(Math.random()-.5)*.22,
-        hue:160+Math.random()*180,
-        a:.18+.12*Math.random()
+        x:Math.random()*window.innerWidth, y:Math.random()*window.innerHeight, r:80+Math.random()*180,
+        vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22, hue:160+Math.random()*180, a:.18+.12*Math.random()
       };});
     }
-    function draw(){
-      ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-      ctx.globalCompositeOperation='lighter';
-      for(var i=0;i<blobs.length;i++){
-        var b=blobs[i]; b.x+=b.vx; b.y+=b.vy;
+    function draw(){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); ctx.globalCompositeOperation='lighter';
+      for(var i=0;i<blobs.length;i++){ var b=blobs[i]; b.x+=b.vx; b.y+=b.vy;
         if(b.x<-260)b.x=window.innerWidth+260; if(b.x>window.innerWidth+260)b.x=-260; if(b.y<-260)b.y=window.innerHeight+260; if(b.y>window.innerHeight+260)b.y=-260;
         var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
-        g.addColorStop(0,'hsla('+b.hue+',85%,65%,'+b.a+')');
-        g.addColorStop(1,'hsla('+((b.hue+70)%360)+',85%,50%,0)');
+        g.addColorStop(0,'hsla('+b.hue+',85%,65%,'+b.a+')'); g.addColorStop(1,'hsla('+((b.hue+70)%360)+',85%,50%,0)');
         ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
-      }
-      rafId = requestAnimationFrame(draw);
-    }
-    window.addEventListener('resize',resize,{passive:true});
-    resize(); draw();
+      } requestAnimationFrame(draw); }
+    window.addEventListener('resize',resize,{passive:true}); resize(); draw();
   })();
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
 </script>
 
-<!-- D) Final tiny error sink -->
+<!-- D) Error sink -->
 <script>
 window.addEventListener('error', function(e){
   var s=document.getElementById('analyzeStatus');
