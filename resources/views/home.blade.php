@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-24z (old design preserved; race-free init; real meta fill; guaranteed checklist scores; multi-source fetch) --}}
+{{-- resources/views/home.blade.php — v2025-08-24z2 (old design preserved; progress/timeout fixes; new ensemble UI) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -33,7 +33,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet"/>
 
 <style>
-/* === Your original styles (unchanged) === */
+/* === Original theme tokens (kept) === */
 :root{--bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;--good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg}
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
@@ -63,7 +63,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .score-mask-rect{transition:all .6s cubic-bezier(.22,1,.36,1)}
 .score-wave1{animation:scoreWave 8s linear infinite}.score-wave2{animation:scoreWave 11s linear infinite reverse}
 @keyframes scoreWave{from{transform:translateX(0)}to{transform:translateX(-210px)}}
-.score-text{font-size:clamp(2.2rem,4.2vw,3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
+.score-text{font-size:clamp(2.0rem,4.2vw,3.0rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
 .multiHueFast{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .legend{padding:.25rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.16);font-weight:800}
@@ -132,16 +132,22 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .share-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;color:#fff;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
 .share-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
 .share-fb{background:linear-gradient(135deg,#1877F2,#1e90ff)}.share-x{background:linear-gradient(135deg,#111,#333)}.share-ln{background:linear-gradient(135deg,#0a66c2,#1a8cd8)}.share-wa{background:linear-gradient(135deg,#25D366,#128C7E)}.share-em{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+/* === Detection Panel – New look === */
 .detector{margin-top:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
-.det-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.det-head{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin-bottom:.4rem}
 .det-head h4{margin:0;font-size:1.05rem}
-.det-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.5rem}
-.det-item{grid-column:span 6;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.55rem .6rem}
-.det-row{display:grid;grid-template-columns:1fr auto;gap:.5rem;align-items:center}
-.det-label{font-weight:800;color:var(--text-dim)}
+.det-scale{display:flex;align-items:center;gap:.5rem;color:var(--text-dim);font-weight:800}
+.det-scale .sep{opacity:.45}
+.det-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
+.det-item{grid-column:span 6;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.6rem .7rem}
+.det-row{display:grid;grid-template-columns:auto 1fr auto;gap:.6rem;align-items:center}
+.det-label{font-weight:900}
 .det-score{font-weight:1000}
-.det-bar{margin-top:.4rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
-.det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
+.det-bar{margin-top:.4rem;position:relative;height:16px;border-radius:10px;overflow:hidden;background:linear-gradient(90deg,rgba(34,197,94,.18),rgba(34,197,94,.1));border:1px solid rgba(255,255,255,.1)}
+.det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);transition:width .35s ease}
+.det-ends{display:flex;justify-content:space-between;margin-top:.35rem;color:var(--text-dim);font-size:.85rem;font-weight:800}
+.det-ends span{display:inline-flex;align-items:center;gap:.35rem}
+.det-ends i{opacity:.9}
 .det-note{margin-top:.35rem;color:var(--text-dim);font-size:.85rem}
 footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);border-top:1px solid rgba(255,255,255,.12);display:flex;align-items:center;justify-content:space-between;gap:1rem;backdrop-filter:blur(6px)}
 #backTop{position:fixed;right:18px;bottom:18px;z-index:90;width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.07);display:grid;place-items:center;color:#fff;cursor:pointer;display:none}
@@ -168,7 +174,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   window.SEMSEO.BUSY = false;
   window.SEMSEO.QUEUE = 0;
 
-  // lightweight queueer; will run once ready without spamming alerts
   function SEMSEO_go(){
     if (window.SEMSEO.READY && typeof analyze === 'function') {
       analyze();
@@ -214,7 +219,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
     <div class="score-area">
       <div class="score-container">
-        <!-- Circular water score (unchanged) -->
+        <!-- Circular water score (kept) -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
@@ -256,9 +261,9 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
           <span class="chip" id="overallChip"><i class="fa-solid fa-gauge-high ico"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
           <span class="chip" id="contentScoreChip"><i class="fa-solid fa-file-lines ico"></i> Content: <b id="contentScoreInline">0</b>/100</span>
-          <span class="chip" id="aiBadge" title="AI/Human detection summary"><i class="fa-solid fa-user-check ico ico-green"></i> Writer: <b>—</b></span>
-          <button id="viewHumanBtn" class="btn btn-ghost"><i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%</button>
-          <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-microchip ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
+          <span class="chip" id="aiBadge" title="Human/AI detection summary"><i class="fa-regular fa-user ico ico-green"></i> Writer: <b>—</b></span>
+          <button id="viewHumanBtn" class="btn btn-ghost"><i class="fa-regular fa-face-smile ico ico-green"></i> Human-like: <b id="humanPct">—</b>%</button>
+          <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-robot ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
           <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
         <small style="color:var(--text-dim)">If the backend returns no scores, a local ensemble + heuristics derive stable, varied scores so the UI always reflects reality.</small>
@@ -284,7 +289,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             </label>
           </div>
 
-          <!-- Keep the inline handler; SEMSEO_go() now queues safely until ready -->
           <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
@@ -336,18 +340,20 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
-    <!-- Ultra Content Detection (Ensemble) -->
+    <!-- Ultra Content Detection (Ensemble) — NEW LOOK -->
     <section id="detectorPanel" class="detector" style="display:none">
       <div class="det-head">
         <i class="fa-solid fa-wave-square ico ico-purple"></i>
         <h4>Ultra Content Detection (Ensemble)</h4>
-      </div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem">
         <span class="chip"><i class="fa-solid fa-shield-halved ico"></i> Confidence: <b id="detConfidence">—</b>%</span>
-        <span class="chip"><i class="fa-solid fa-circle-info ico"></i> Higher bar = more AI-like for that detector</span>
+        <div class="det-scale">
+          <span><i class="fa-regular fa-face-smile ico-green"></i> Human content</span>
+          <span class="sep">•</span>
+          <span><i class="fa-solid fa-robot ico-red"></i> AI content</span>
+        </div>
       </div>
       <div class="det-grid" id="detGrid"></div>
-      <div class="det-note" id="detNote">Local ensemble activates if the backend provides no text/percentages.</div>
+      <div class="det-note" id="detNote">Bars trend from <strong>Human</strong> → <strong>AI</strong>. Local ensemble activates if the backend provides no text/percentages.</div>
     </section>
 
     @php $labels = [
@@ -526,19 +532,20 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
   window.autoTickByScores = autoTickByScores;
 
-  /* === Water progress === */
+  /* === Water progress (with safety; prevents 88% lock) === */
   var Water=(function(){
     var wrapId=function(){ return document.getElementById('waterWrap'); };
     var clipId=function(){ return document.getElementById('waterClipRect'); };
     var pctId=function(){ return document.getElementById('waterPct'); };
-    var t=null, value=0;
+    var t=null, value=0, finished=false;
     function show(){ var w=wrapId(); if(w) w.style.display='block'; }
     function hide(){ var w=wrapId(); if(w) w.style.display='none'; }
     function set(v){ value=Math.max(0,Math.min(100,v)); var y=200 - (200*value/100); var clip=clipId(); if(clip) clip.setAttribute('y', String(y)); var p=pctId(); if(p) p.textContent = Math.round(value) + '%'; }
     return {
-      start:function(){ show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
-      finish:function(){ if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
-      reset:function(){ if(t) clearInterval(t); set(0); hide(); }
+      start:function(){ finished=false; show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
+      finish:function(){ if(finished) return; finished=true; if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
+      reset:function(){ if(t) clearInterval(t); finished=false; set(0); hide(); },
+      forceDone:function(){ this.finish(); }
     };
   })();
   window.Water = Water;
@@ -552,24 +559,33 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     try { new URL(guess); return guess; } catch(e) { return ''; }
   }
 
+  // --- Fetch with timeout helper (AbortController) ---
+  async function fetchWithTimeout(url, opts={}, ms=15000){
+    const ctl = new AbortController();
+    const t = setTimeout(()=>ctl.abort(new Error('Timeout')), ms);
+    try{
+      return await fetch(url, {...opts, signal: ctl.signal});
+    } finally { clearTimeout(t); }
+  }
+
   async function fetchBackend(url){
     let data=null, ok=false, status=0, text='';
     const qs=new URLSearchParams({url}).toString();
     try{
-      const r1=await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+      const r1=await fetchWithTimeout((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}},15000);
       status=r1.status; text=await r1.text(); try{ data=JSON.parse(text);}catch(_){}
       if(r1.ok && data) ok=true;
     }catch(_){}
     if(!ok){
       try{
-        const r2=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})});
+        const r2=await fetchWithTimeout((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})},15000);
         status=r2.status; text=await r2.text(); try{ data=JSON.parse(text);}catch(_){}
         if(r2.ok && data) ok=true;
       }catch(_){}
     }
     if(!ok){
       try{
-        const r3=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+        const r3=await fetchWithTimeout((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}},15000);
         status=r3.status; text=await r3.text(); try{ data=JSON.parse(text);}catch(_){}
         if(r3.ok && data) ok=true;
       }catch(_){}
@@ -580,7 +596,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   // Raw HTML via AllOrigins (CORS proxy)
   async function fetchRawHtml(url){
     try{
-      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
+      const r=await fetchWithTimeout('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'},12000);
       if(r.ok){ const html=await r.text(); if(html && html.length>200) return html; }
     }catch(_){}
     return '';
@@ -589,11 +605,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   // Readable text via Jina Reader
   async function fetchReadableText(url){
     try{
-      const httpsR = await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''));
+      const httpsR = await fetchWithTimeout('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''),{},15000);
       if(httpsR.ok){ const t = await httpsR.text(); if(t && t.length>200) return t; }
     }catch(e){}
     try{
-      const altR = await fetch('https://r.jina.ai/'+url);
+      const altR = await fetchWithTimeout('https://r.jina.ai/'+url,{},15000);
       if(altR.ok){ const t = await altR.text(); if(t && t.length>200) return t; }
     }catch(e){}
     return '';
@@ -612,7 +628,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       var origin=''; try{ origin=new URL(baseUrl).origin; }catch(_){}
       var internal=0; d.querySelectorAll('a[href]').forEach(function(a){ try{ var u=new URL(a.getAttribute('href'), baseUrl); if(!origin || u.origin===origin) internal++; }catch(_){} });
       var schema = !!(d.querySelector('script[type="application/ld+json"]') || d.querySelector('[itemscope],[itemtype*="schema.org"]'));
-      // sample text
       var main=d.querySelector('article,main,[role="main"]'); var sample=main? (main.textContent||''): '';
       if(!sample){ sample=[].slice.call(d.querySelectorAll('p')).slice(0,12).map(function(p){return p.textContent;}).join('\n\n'); }
       sample=(sample||'').replace(/\s{2,}/g,' ').trim();
@@ -631,7 +646,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return into;
   }
 
-  /* ===================== ULTRA ENSEMBLE + SCORING (same logic, trimmed) ===================== */
+  /* ===================== ULTRA ENSEMBLE + SCORING (same logic) ===================== */
   function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
   function _countSyllables(word){
     var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0;
@@ -716,11 +731,20 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
     if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
     panel.style.display = 'block'; if(!grid) return; grid.innerHTML = '';
+
+    // each detector ai% plotted; left=human (smile), right=AI (robot)
     (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
-      var id='det-'+d.key; var wrap=document.createElement('div');
-      wrap.className='det-item'; wrap.innerHTML =
-        '<div class="det-row"><div class="det-label">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+(d.ai||0)+'</div></div>'+
-        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+(clamp(d.ai||0,0,100))+'%"></div></div>';
+      var id='det-'+d.key; var val=clamp(d.ai||0,0,100);
+      var wrap=document.createElement('div');
+      wrap.className='det-item';
+      wrap.innerHTML =
+        '<div class="det-row">'+
+          '<div class="det-label"><i class="fa-solid fa-chart-simple" style="opacity:.9"></i> '+d.label+'</div>'+
+          '<div class="det-score" id="'+id+'-score">'+val+'%</div>'+
+          '<div style="opacity:.75;font-weight:800">AI</div>'+
+        '</div>'+
+        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+val+'%"></div></div>'+
+        '<div class="det-ends"><span><i class="fa-regular fa-face-smile ico-green"></i> Human</span><span><i class="fa-solid fa-robot ico-red"></i> AI</span></div>';
       grid.appendChild(wrap);
     });
   }
@@ -734,97 +758,113 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if (breakdown && breakdown.detectors){ renderDetectors(breakdown); } else { document.getElementById('detectorPanel').style.display='block'; }
   }
 
+  /* === Main analyze flow (with watchdog + finally) === */
   async function analyze(){
     if (window.SEMSEO.BUSY) return;
     window.SEMSEO.BUSY = true;
 
-    var input = document.getElementById('analyzeUrl');
-    var url = normalizeUrl(input ? input.value : '');
-    if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
+    const statusEl = document.getElementById('analyzeStatus');
+    const report   = document.getElementById('analyzeReport');
+    const detPanel = document.getElementById('detectorPanel');
 
-    if (window.Water) window.Water.start();
-    var statusEl = document.getElementById('analyzeStatus');
-    if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
-    var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
-    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
-
-    // 1) Backend (if present)
-    var {ok,data} = await fetchBackend(url);
-    if(!data) data = {};
-
-    // 2) Build sample (from backend)
-    var sample = buildSampleFromData(data);
-
-    // 3) Try AllOrigins raw HTML (fills meta chips + better sample if needed)
     try{
-      var raw = await fetchRawHtml(url);
-      if(raw){
-        var meta = extractMetaFromHtml(raw, url);
-        data = mergeMeta(data, meta);
-        if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
-      }
-    }catch(_){}
+      var input = document.getElementById('analyzeUrl');
+      var url = normalizeUrl(input ? input.value : '');
+      if (!url) { if(input) input.focus(); return; }
 
-    // 4) Jina Reader as final fallback for text sample
-    if ((!sample || sample.length < 200)){
-      if (statusEl) statusEl.textContent = 'Getting readable text…';
-      try{ var read = await fetchReadableText(url);
-        if (read && read.length>200){
-          // We may not get full HTML here, but adopt as sample
-          sample = read;
+      if (window.Water) window.Water.start();
+      if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
+      if (report) report.style.display = 'none';
+      if (detPanel) detPanel.style.display='none';
+
+      // Watchdog: soft-complete if network stalls
+      const watchdog = setTimeout(()=>{
+        try{
+          if(statusEl) statusEl.textContent = 'Network slow; showing best‑effort results…';
+          window.setScoreWheel(0);
+          window.autoTickByScores({});
+          if (window.Water) window.Water.forceDone();
+        }catch(_){}
+      }, 18000);
+
+      // 1) Backend
+      var {ok,data} = await fetchBackend(url);
+      if(!data) data = {};
+
+      // 2) Sample from backend
+      var sample = buildSampleFromData(data);
+
+      // 3) AllOrigins (HTML → meta)
+      try{
+        var raw = await fetchRawHtml(url);
+        if(raw){
+          var meta = extractMetaFromHtml(raw, url);
+          data = mergeMeta(data, meta);
+          if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
         }
       }catch(_){}
+
+      // 4) Jina fallback
+      if ((!sample || sample.length < 200)){
+        if (statusEl) statusEl.textContent = 'Getting readable text…';
+        try{ var read = await fetchReadableText(url);
+          if (read && read.length>200){ sample = read; }
+        }catch(_){}
+      }
+
+      // 5) Ensemble + guaranteed scores
+      var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+      data = ensureScoresExist(data, sample, ensemble);
+
+      // 6) Scores → UI
+      var overall = Number(data.overall || 0);
+      var contentScore = Number(data.contentScore || 0);
+      window.setScoreWheel(overall||0);
+      setText('contentScoreInline', Math.round(contentScore||0));
+      setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
+
+      // Meta chips
+      setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
+      setText('rTitleLen',  (data.titleLen   !== undefined && data.titleLen !== null) ? data.titleLen   : '—');
+      setText('rMetaLen',   (data.metaLen    !== undefined && data.metaLen  !== null) ? data.metaLen    : '—');
+      setText('rCanonical', data.canonical  ? data.canonical  : '—');
+      setText('rRobots',    data.robots     ? data.robots     : '—');
+      setText('rViewport',  data.viewport   ? data.viewport   : '—');
+      setText('rHeadings',  data.headings   ? data.headings   : '—');
+      setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
+      setText('rSchema',    data.schema     ? data.schema     : '—');
+
+      // Detection
+      var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+      var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+      var backendConf = (typeof data.confidence==='number')? data.confidence : null;
+      if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
+        applyDetection(hp, ap, backendConf, ensemble || null);
+      } else if (ensemble){
+        applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
+      } else if (isFinite(hp) && isFinite(ap)){
+        applyDetection(hp, ap, backendConf || 60, null);
+      } else {
+        applyDetection(NaN, NaN, null, null);
+      }
+
+      // Checklist
+      window.autoTickByScores(data.itemScores || {});
+
+      if (statusEl) statusEl.textContent = 'Analysis complete';
+      if (report) report.style.display = 'block';
+
+      clearTimeout(watchdog);
+    } catch(err){
+      if (statusEl) statusEl.textContent = 'Analysis error: ' + (err && err.message ? err.message : err);
+      try{ window.setScoreWheel(0); window.autoTickByScores({}); }catch(_){}
+    } finally {
+      if (window.Water) window.Water.finish();
+      window.SEMSEO.BUSY = false;
+      if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
     }
-
-    // 5) Local detection + guaranteed item scores
-    var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
-    data = ensureScoresExist(data, sample, ensemble);
-
-    // 6) Scores -> UI
-    var overall = Number(data.overall || 0);
-    var contentScore = Number(data.contentScore || 0);
-    window.setScoreWheel(overall||0);
-    setText('contentScoreInline', Math.round(contentScore||0));
-    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
-
-    // Meta chips (now guaranteed best-effort filled)
-    setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
-    setText('rTitleLen',  (data.titleLen   !== undefined && data.titleLen !== null) ? data.titleLen   : '—');
-    setText('rMetaLen',   (data.metaLen    !== undefined && data.metaLen  !== null) ? data.metaLen    : '—');
-    setText('rCanonical', data.canonical  ? data.canonical  : '—');
-    setText('rRobots',    data.robots     ? data.robots     : '—');
-    setText('rViewport',  data.viewport   ? data.viewport   : '—');
-    setText('rHeadings',  data.headings   ? data.headings   : '—');
-    setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
-    setText('rSchema',    data.schema     ? data.schema     : '—');
-
-    // Detection display
-    var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-    var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-    var backendConf = (typeof data.confidence==='number')? data.confidence : null;
-    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
-      applyDetection(hp, ap, backendConf, ensemble || null);
-    } else if (ensemble){
-      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-    } else if (isFinite(hp) && isFinite(ap)){
-      applyDetection(hp, ap, backendConf || 60, null);
-    } else {
-      applyDetection(NaN, NaN, null, null);
-    }
-
-    // Checklist scores + autotick
-    window.autoTickByScores(data.itemScores || {});
-
-    if (window.Water) window.Water.finish();
-    if (statusEl) statusEl.textContent = 'Analysis complete';
-    if (report) report.style.display = 'block';
-
-    window.SEMSEO.BUSY = false;
-
-    // If user clicked Analyze before init finished, we queued it. Empty the queue now.
-    if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
   }
-  window.analyze = analyze; // available immediately (even before DOMContentLoaded)
+  window.analyze = analyze;
 
   // Events
   document.addEventListener('DOMContentLoaded', function(){
@@ -836,7 +876,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
       var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
 
-      // mark ready and flush queued early clicks
       window.SEMSEO.READY = true;
       if (window.SEMSEO.QUEUE>0){ window.SEMSEO.QUEUE=0; analyze(); }
     }catch(err){
@@ -864,7 +903,7 @@ try{
     if(em) em.href = 'mailto:?subject='+title+'&body='+url;
   })();
 
-  // Reset / Export / Import / Print / UI misc (unchanged)
+  // Reset / Export / Import / Print / UI misc (kept)
   (function(){
     function updateCategoryBars(){ if (window.updateCategoryBars) window.updateCategoryBars(); }
     var resetBtn=document.getElementById('resetChecklist');
