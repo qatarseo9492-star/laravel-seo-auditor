@@ -7,10 +7,15 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @php
+  use Illuminate\Support\Facades\Route;
   $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
   $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, and UX signals, with water-fill scoring, auto-checklist, and AI/Human signals.';
   $metaImage = asset('og-image.png');
   $canonical = url()->current();
+
+  // Endpoints: use named routes if present, else safe fallbacks
+  $analyzeJsonUrl = Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
+  $analyzeUrl     = Route::has('analyze')      ? route('analyze')      : url('analyze');
 @endphp
 
 <title>{{ $metaTitle }}</title>
@@ -175,6 +180,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 <canvas id="linesCanvas"></canvas>
 <canvas id="smokeCanvas"></canvas>
 
+<!-- SAFETY: expose endpoints & a minimal fallback click handler EARLY -->
+<script>
+  window.SEMSEO = window.SEMSEO || {};
+  window.SEMSEO.ENDPOINTS = {
+    analyzeJson: @json($analyzeJsonUrl),
+    analyze: @json($analyzeUrl)
+  };
+  function SEMSEO_go(){ try { if (typeof analyze === 'function') { analyze(); } else { alert('Analyzer not ready — please wait a moment and click again.'); } } catch(e){ alert('JS error: '+ e.message); } }
+</script>
+
 <!-- Share dock -->
 <div class="share-dock" aria-label="Share">
   <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
@@ -209,7 +224,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
     <div class="score-area">
       <div class="score-container">
-        <!-- Circular water gauge -->
+        <!-- Circular water score -->
         <div class="score-gauge">
           <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
             <defs>
@@ -280,7 +295,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             </label>
           </div>
 
-          <!-- Triple-safe Analyze button -->
+          <!-- Safe inline fallback -->
           <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
@@ -449,291 +464,315 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
-<!-- 0) Tiny safety script so the button always does something -->
+<!-- A) Analyze + core logic FIRST (so it's always defined) -->
 <script>
-  function SEMSEO_go(){ try { if (typeof analyze === 'function') { analyze(); } else { console.warn('Analyzer not ready'); alert('Analyzer not ready — please wait a moment and click again.'); } } catch(e){ console.error(e); alert('JS error: '+ e.message); } }
-</script>
-
-<script>
-/* 1) Show any JS errors near the progress area */
-window.addEventListener('error', e=>{
-  const s=document.getElementById('analyzeStatus');
-  if (s) s.textContent = 'JavaScript error: ' + (e?.message || e);
-});
-
-/* 2) Hue drift for multi-color water */
-(function(){ const root=document.documentElement; let start=performance.now(); function frame(now){ root.style.setProperty('--hue', ((now-start)/4)%360 + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
-
-/* 3) Helper utilities */
-function setText(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; return el; }
-function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); const n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
-function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
-
-/* 4) Overall gauge */
-const GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
-function setScoreWheel(value){
-  if(!GAUGE.rect){
-    GAUGE.rect=document.getElementById('scoreClipRect'); GAUGE.stop1=document.getElementById('scoreStop1'); GAUGE.stop2=document.getElementById('scoreStop2');
-    GAUGE.r1=document.getElementById('ringStop1'); GAUGE.r2=document.getElementById('ringStop2');
-    GAUGE.arc=document.getElementById('ringArc'); GAUGE.text=document.getElementById('overallScore');
-    if(GAUGE.arc){ GAUGE.arc.style.strokeDasharray=GAUGE.CIRC.toFixed(2); GAUGE.arc.style.strokeDashoffset=GAUGE.CIRC.toFixed(2); }
-  }
-  const v=Math.max(0,Math.min(100,Number(value)||0));
-  const y=GAUGE.H-(GAUGE.H*(v/100));
-  GAUGE.rect?.setAttribute('y',String(y));
-  GAUGE.text && (GAUGE.text.textContent=Math.round(v)+'%');
-
-  let c1,c2; if(v>=80){c1='#22c55e';c2='#16a34a'} else if(v>=60){c1='#f59e0b';c2='#fb923c'} else {c1='#ef4444';c2='#b91c1c'}
-  GAUGE.stop1?.setAttribute('stop-color',c1); GAUGE.stop2?.setAttribute('stop-color',c2);
-  GAUGE.r1?.setAttribute('stop-color',c1); GAUGE.r2?.setAttribute('stop-color',c2);
-  if(GAUGE.arc){ const offset=GAUGE.CIRC*(1-(v/100)); GAUGE.arc.style.strokeDashoffset=offset.toFixed(2); }
-  setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
-}
-
-/* 5) Category bars + completion */
-function updateCategoryBars(){
-  const cards=[...document.querySelectorAll('.category-card')];
-  let total=0, checked=0;
-  cards.forEach((card,idx)=>{
-    const items=[...card.querySelectorAll('.checklist-item')];
-    const t=items.length, done=items.filter(li=>li.querySelector('input')?.checked).length;
-    total+=t; checked+=done;
-    const pct=t?Math.round(done*100/t):0;
-    document.getElementById(`catFillRect-${idx}`)?.setAttribute('width', String(6*pct));
-    const pctEl=document.getElementById(`catPct-${idx}`); pctEl && (pctEl.textContent = `${done}/${t} • ${pct}%`);
-    const sub=card.querySelector('.category-sub'); sub && (sub.textContent = pct>=80?'Great progress':'Keep improving');
-    const cnt=card.querySelector('.checked-count'); cnt && (cnt.textContent = done);
-    const stop1=document.getElementById(`catStop1-${idx}`), stop2=document.getElementById(`catStop2-${idx}`);
-    const c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444'); const c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
-    stop1?.setAttribute('stop-color',c1); stop2?.setAttribute('stop-color',c2);
-  });
-  const pctAll = total? Math.round(checked*100/total) : 0;
-  document.getElementById('compClipRect')?.setAttribute('width', String(6*pctAll));
-  setText('compPct', pctAll + '%'); setText('progressCaption', `${checked} of ${total} items completed`);
-}
-
-/* 6) Auto-tick by item scores */
-function autoTickByScores(map){
-  let autoCount=0;
-  for(let i=1;i<=25;i++){
-    const scVal=Number(map?.[i] ?? NaN);
-    const badge=document.getElementById(`sc-${i}`);
-    const row=document.getElementById(`ck-${i}`)?.closest('.checklist-item');
-    if (!badge) continue;
-    if (Number.isFinite(scVal)) {
-      badge.textContent = scVal; badgeTone(badge, scVal);
-      if (document.getElementById('autoApply').checked && scVal>=80) {
-        const cb=document.getElementById(`ck-${i}`); if (cb && !cb.checked) { cb.checked=true; autoCount++; }
-        row?.classList.remove('sev-mid','sev-bad'); row?.classList.add('sev-good');
-      } else if (scVal>=60) { row?.classList.remove('sev-bad','sev-good'); row?.classList.add('sev-mid'); }
-      else { row?.classList.remove('sev-mid','sev-good'); row?.classList.add('sev-bad'); }
-    } else { badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad'); }
-  }
-  setText('rAutoCount', autoCount);
-  updateCategoryBars();
-}
-
-/* 7) Water progress controller */
-const Water=(function(){
-  const wrap=()=>document.getElementById('waterWrap');
-  const clip=()=>document.getElementById('waterClipRect');
-  const pctEl=()=>document.getElementById('waterPct');
-  let t=null, value=0;
-  function show(){ wrap().style.display='block'; }
-  function hide(){ wrap().style.display='none'; }
-  function set(v){ value=Math.max(0,Math.min(100,v)); const y=200 - (200*value/100); clip()?.setAttribute('y', String(y)); pctEl().textContent = Math.round(value) + '%'; }
-  return {
-    start(){ show(); set(0); clearInterval(t); t=setInterval(()=>{ if(value<88) set(value+2); }, 80); },
-    finish(){ clearInterval(t); setTimeout(()=>set(100), 150); setTimeout(()=>hide(), 800); },
-    reset(){ clearInterval(t); set(0); hide(); }
-  };
-})();
-
-/* 8) Share & UX helpers */
 (function(){
-  const url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
-  const fb = document.getElementById('shareFb'), x = document.getElementById('shareX'),
-        ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'),
-        em = document.getElementById('shareEm');
-  fb && (fb.href = `https://www.facebook.com/sharer/sharer.php?u=${url}`);
-  x  && (x.href  = `https://twitter.com/intent/tweet?text=${title}&url=${url}`);
-  ln && (ln.href = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`);
-  wa && (wa.href = `https://wa.me/?text=${title}%20${url}`);
-  em && (em.href = `mailto:?subject=${title}&body=${url}`);
-})();
-(function(){ const btn=document.getElementById('backTop'); addEventListener('scroll',()=>{ btn && (btn.style.display = (scrollY>500)?'grid':'none'); }); document.getElementById('toTopLink')?.addEventListener('click',e=>{e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});});})();
+  var CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+  function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
+  function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
+  function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
 
-/* 9) Analyze logic (ABSOLUTE routes, resilient) */
-const CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  // Gauge
+  var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
+  window.setScoreWheel = function(value){
+    if(!GAUGE.rect){
+      GAUGE.rect=document.getElementById('scoreClipRect'); GAUGE.stop1=document.getElementById('scoreStop1'); GAUGE.stop2=document.getElementById('scoreStop2');
+      GAUGE.r1=document.getElementById('ringStop1'); GAUGE.r2=document.getElementById('ringStop2');
+      GAUGE.arc=document.getElementById('ringArc'); GAUGE.text=document.getElementById('overallScore');
+      if(GAUGE.arc){ GAUGE.arc.style.strokeDasharray=GAUGE.CIRC.toFixed(2); GAUGE.arc.style.strokeDashoffset=GAUGE.CIRC.toFixed(2); }
+    }
+    var v=Math.max(0,Math.min(100,Number(value)||0));
+    var y=GAUGE.H-(GAUGE.H*(v/100));
+    if(GAUGE.rect) GAUGE.rect.setAttribute('y',String(y));
+    if(GAUGE.text) GAUGE.text.textContent=Math.round(v)+'%';
 
-function normalizeUrl(u) {
-  if (!u) return '';
-  u = u.trim();
-  if (/^https?:\/\//i.test(u)) { try { new URL(u); return u; } catch { return ''; } }
-  const guess = 'https://' + u.replace(/^\/+/, '');
-  try { new URL(guess); return guess; } catch { return ''; }
-}
+    var c1,c2; if(v>=80){c1='#22c55e';c2='#16a34a'} else if(v>=60){c1='#f59e0b';c2='#fb923c'} else {c1='#ef4444';c2='#b91c1c'}
+    if(GAUGE.stop1) GAUGE.stop1.setAttribute('stop-color',c1); if(GAUGE.stop2) GAUGE.stop2.setAttribute('stop-color',c2);
+    if(GAUGE.r1) GAUGE.r1.setAttribute('stop-color',c1); if(GAUGE.r2) GAUGE.r2.setAttribute('stop-color',c2);
+    if(GAUGE.arc){ var offset=GAUGE.CIRC*(1-(v/100)); GAUGE.arc.style.strokeDashoffset=offset.toFixed(2); }
+    setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
+  };
 
-async function analyze(){
-  const input = document.getElementById('analyzeUrl');
-  let url = normalizeUrl(input?.value || '');
-  if (!url) { input && input.focus(); return; }
-
-  Water.start();
-  const statusEl = document.getElementById('analyzeStatus');
-  statusEl && (statusEl.textContent = 'Fetching & analyzing…');
-  document.getElementById('analyzeReport').style.display = 'none';
-
-  let data=null, ok=false, status=0, text='', lastErr='';
-  const qs = new URLSearchParams({ url }).toString();
-
-  try{
-    const res = await fetch(@json(route('analyze.json')).concat('?'+qs), {
-      method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' }
+  function updateCategoryBars(){
+    var cards=[].slice.call(document.querySelectorAll('.category-card'));
+    var total=0, checked=0;
+    cards.forEach(function(card,idx){
+      var items=[].slice.call(card.querySelectorAll('.checklist-item'));
+      var t=items.length, done=items.filter(function(li){ var c=li.querySelector('input'); return c && c.checked; }).length;
+      total+=t; checked+=done;
+      var pct=t?Math.round(done*100/t):0;
+      var fill=document.getElementById('catFillRect-'+idx); if(fill) fill.setAttribute('width', String(6*pct));
+      var pctEl=document.getElementById('catPct-'+idx); if(pctEl) pctEl.textContent = done+'/'+t+' • '+pct+'%';
+      var sub=card.querySelector('.category-sub'); if(sub) sub.textContent = pct>=80?'Great progress':'Keep improving';
+      var cnt=card.querySelector('.checked-count'); if(cnt) cnt.textContent = done;
+      var stop1=document.getElementById('catStop1-'+idx), stop2=document.getElementById('catStop2-'+idx);
+      var c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444'); var c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
+      if(stop1) stop1.setAttribute('stop-color',c1); if(stop2) stop2.setAttribute('stop-color',c2);
     });
-    status = res.status; text = await res.text();
-    try{ data = JSON.parse(text); }catch{}
-    if (res.ok && data) ok = true;
-  }catch(e){ lastErr = 'GET analyze.json failed: '+e.message; }
+    var pctAll = total? Math.round(checked*100/total) : 0;
+    var comp=document.getElementById('compClipRect'); if(comp) comp.setAttribute('width', String(6*pctAll));
+    setText('compPct', pctAll + '%'); setText('progressCaption', checked+' of '+total+' items completed');
+  }
+  window.updateCategoryBars = updateCategoryBars;
 
-  if (!ok){
-    try{
-      const res = await fetch(@json(route('analyze')), {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': CSRF },
-        body: JSON.stringify({ url, _token: CSRF })
-      });
-      status = res.status; text = await res.text();
-      try{ data = JSON.parse(text); }catch{}
-      if (res.ok && data) ok = true;
-    }catch(e){ lastErr = 'POST analyze failed: '+e.message; }
+  function autoTickByScores(map){
+    var autoCount=0;
+    for(var i=1;i<=25;i++){
+      var scVal=Number((map && map[i]!==undefined)? map[i] : NaN);
+      var badge=document.getElementById('sc-'+i);
+      var cb=document.getElementById('ck-'+i);
+      var row=cb ? cb.closest('.checklist-item') : null;
+      if (!badge) continue;
+      if (!isNaN(scVal)) {
+        badge.textContent = scVal; badgeTone(badge, scVal);
+        if (document.getElementById('autoApply') && document.getElementById('autoApply').checked && scVal>=80) {
+          if (cb && !cb.checked) { cb.checked=true; autoCount++; }
+          if(row){ row.classList.remove('sev-mid','sev-bad'); row.classList.add('sev-good'); }
+        } else if (scVal>=60) { if(row){ row.classList.remove('sev-bad','sev-good'); row.classList.add('sev-mid'); } }
+        else { if(row){ row.classList.remove('sev-mid','sev-good'); row.classList.add('sev-bad'); } }
+      } else {
+        badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad');
+      }
+    }
+    setText('rAutoCount', autoCount);
+    updateCategoryBars();
+  }
+  window.autoTickByScores = autoTickByScores;
+
+  // Water progress
+  var Water=(function(){
+    var wrapId=function(){ return document.getElementById('waterWrap'); };
+    var clipId=function(){ return document.getElementById('waterClipRect'); };
+    var pctId=function(){ return document.getElementById('waterPct'); };
+    var t=null, value=0;
+    function show(){ var w=wrapId(); if(w) w.style.display='block'; }
+    function hide(){ var w=wrapId(); if(w) w.style.display='none'; }
+    function set(v){ value=Math.max(0,Math.min(100,v)); var y=200 - (200*value/100); var clip=clipId(); if(clip) clip.setAttribute('y', String(y)); var p=pctId(); if(p) p.textContent = Math.round(value) + '%'; }
+    return {
+      start:function(){ show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
+      finish:function(){ if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
+      reset:function(){ if(t) clearInterval(t); set(0); hide(); }
+    };
+  })();
+  window.Water = Water;
+
+  function normalizeUrl(u) {
+    if (!u) return '';
+    u = u.trim();
+    if (/^https?:\/\//i.test(u)) { try { new URL(u); return u; } catch(e) { return ''; } }
+    var guess = 'https://' + u.replace(/^\/+/, '');
+    try { new URL(guess); return guess; } catch(e) { return ''; }
   }
 
-  if (!ok){
+  // --- THE analyzer() FUNCTION (always defined) ---
+  window.analyze = async function(){
+    var input = document.getElementById('analyzeUrl');
+    var url = normalizeUrl(input ? input.value : '');
+    if (!url) { if(input) input.focus(); return; }
+
+    Water.start();
+    var statusEl = document.getElementById('analyzeStatus');
+    if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
+    var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
+
+    var data=null, ok=false, status=0, text='', lastErr='';
+    var qs = new URLSearchParams({ url: url }).toString();
+
     try{
-      const res = await fetch(@json(route('analyze')).concat('?'+qs), {
+      var res1 = await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json') + '?' + qs, {
         method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' }
       });
-      status = res.status; text = await res.text();
-      try{ data = JSON.parse(text); }catch{}
-      if (res.ok && data) ok = true;
-    }catch(e){ lastErr = 'GET analyze failed: '+e.message; }
-  }
+      status = res1.status; text = await res1.text();
+      try{ data = JSON.parse(text); }catch(e){}
+      if (res1.ok && data) ok = true;
+    }catch(e){ lastErr = 'GET analyze-json failed: '+e.message; }
 
-  if (!ok || !data){
-    console.error('Analyze failed', status, lastErr, text?.slice?.(0,300));
-    Water.finish();
-    statusEl && (statusEl.textContent = (text && text.length < 400 ? text : `Could not analyze this URL (status ${status}). ${lastErr || ''}`));
-    return;
-  }
-
-  const overall = Number(data.overall ?? 0);
-  const contentScore = Number(data.contentScore ?? 0);
-  const humanPct = Number(data.humanPct ?? 0);
-  const aiPct    = Number(data.aiPct ?? 0);
-  const writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
-
-  setScoreWheel(overall||0);
-  setText('contentScoreInline', Math.round(contentScore||0));
-  setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
-  const badge = document.getElementById('aiBadge'); if (badge){ badge.querySelector('b').textContent = writer; }
-  setText('humanPct', Math.round(humanPct||0));
-  setText('aiPct', Math.round(aiPct||0));
-
-  setText('rStatus', data.httpStatus ?? '—');
-  setText('rTitleLen', data.titleLen ?? '—');
-  setText('rMetaLen', data.metaLen ?? '—');
-  setText('rCanonical', data.canonical ?? '—');
-  setText('rRobots', data.robots ?? '—');
-  setText('rViewport', data.viewport ?? '—');
-  setText('rHeadings', data.headings ?? '—');
-  setText('rInternal', data.internalLinks ?? '—');
-  setText('rSchema', data.schema ?? '—');
-
-  autoTickByScores(data.itemScores || {});
-  Water.finish();
-  statusEl && (statusEl.textContent = 'Analysis complete');
-  document.getElementById('analyzeReport').style.display = 'block';
-}
-
-/* 10) Wire up controls (also keeps inline fallback on button) */
-(function(){
-  const input = document.getElementById('analyzeUrl');
-  const pasteBtn = document.getElementById('pasteUrl');
-  const clearBtn = document.getElementById('clearUrl');
-  const analyzeBtn = document.getElementById('analyzeBtn');
-
-  pasteBtn?.addEventListener('click', async ()=>{ try{ const txt = await navigator.clipboard.readText(); if (txt){ input.value = txt.trim(); input.dispatchEvent(new Event('input')); } }catch(e){} });
-  clearBtn?.addEventListener('click', ()=>{ input.value=''; input.focus(); input.dispatchEvent(new Event('input')); });
-  input?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); analyze(); }});
-  analyzeBtn?.addEventListener('click', (e)=>{ e.preventDefault(); analyze(); });
-
-  document.getElementById('resetChecklist')?.addEventListener('click', ()=>{
-    document.querySelectorAll('.checklist input[type="checkbox"]').forEach(cb=> cb.checked=false);
-    document.querySelectorAll('.score-badge').forEach(b=>{ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
-    updateCategoryBars(); setScoreWheel(0);
-    setText('contentScoreInline', 0); setChipTone(document.getElementById('contentScoreChip'), 0);
-    setText('humanPct','—'); setText('aiPct','—'); document.getElementById('aiBadge')?.querySelector('b')?.textContent='—';
-    Water.reset();
-  });
-
-  const exportBtn=document.getElementById('exportChecklist'), importBtn=document.getElementById('importChecklist'), importFile=document.getElementById('importFile');
-  exportBtn?.addEventListener('click', ()=>{
-    const payload = { checked:[], scores:{} };
-    for(let i=1;i<=25;i++){
-      const cb=document.getElementById(`ck-${i}`); const sc=document.getElementById(`sc-${i}`);
-      if (cb?.checked) payload.checked.push(i);
-      const s = parseInt(sc?.textContent||'NaN',10); if (!Number.isNaN(s)) payload.scores[i]=s;
+    if (!ok){
+      try{
+        var res2 = await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'), {
+          method:'POST',
+          headers:{ 'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': CSRF },
+          body: JSON.stringify({ url: url, _token: CSRF })
+        });
+        status = res2.status; text = await res2.text();
+        try{ data = JSON.parse(text); }catch(e){}
+        if (res2.ok && data) ok = true;
+      }catch(e){ lastErr = 'POST analyze failed: '+e.message; }
     }
-    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
+
+    if (!ok){
+      try{
+        var res3 = await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze') + '?' + qs, {
+          method:'GET', headers:{ 'Accept':'application/json','X-Requested-With':'XMLHttpRequest' }
+        });
+        status = res3.status; text = await res3.text();
+        try{ data = JSON.parse(text); }catch(e){}
+        if (res3.ok && data) ok = true;
+      }catch(e){ lastErr = 'GET analyze failed: '+e.message; }
+    }
+
+    if (!ok || !data){
+      console.log('Analyze failed', status, lastErr, (text && text.slice ? text.slice(0,300) : ''));
+      Water.finish();
+      if (statusEl) statusEl.textContent = (text && text.length < 400 ? text : ('Could not analyze this URL (status '+status+'). '+ (lastErr||'')));
+      return;
+    }
+
+    var overall = Number(data.overall || 0);
+    var contentScore = Number(data.contentScore || 0);
+    var humanPct = Number(data.humanPct || 0);
+    var aiPct    = Number(data.aiPct || 0);
+    var writer = humanPct>=aiPct ? 'Likely Human' : 'AI-like';
+
+    window.setScoreWheel(overall||0);
+    setText('contentScoreInline', Math.round(contentScore||0));
+    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
+    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; }
+    setText('humanPct', Math.round(humanPct||0));
+    setText('aiPct', Math.round(aiPct||0));
+
+    setText('rStatus',    data.httpStatus ? data.httpStatus : '—');
+    setText('rTitleLen',  data.titleLen   ? data.titleLen   : '—');
+    setText('rMetaLen',   data.metaLen    ? data.metaLen    : '—');
+    setText('rCanonical', data.canonical  ? data.canonical  : '—');
+    setText('rRobots',    data.robots     ? data.robots     : '—');
+    setText('rViewport',  data.viewport   ? data.viewport   : '—');
+    setText('rHeadings',  data.headings   ? data.headings   : '—');
+    setText('rInternal',  data.internalLinks ? data.internalLinks : '—');
+    setText('rSchema',    data.schema     ? data.schema     : '—');
+
+    window.autoTickByScores(data.itemScores || {});
+    Water.finish();
+    if (statusEl) statusEl.textContent = 'Analysis complete';
+    if (report) report.style.display = 'block';
+  };
+
+  // Minimal wire-up so the button works even if later scripts fail
+  document.addEventListener('DOMContentLoaded', function(){
+    var btn = document.getElementById('analyzeBtn');
+    if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); window.analyze(); }); }
+    var input = document.getElementById('analyzeUrl');
+    if (input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); window.analyze(); }}); }
   });
-  importBtn?.addEventListener('click', ()=> importFile.click());
-  importFile?.addEventListener('change', async ()=>{
-    const file = importFile.files[0]; if (!file) return;
-    try{
-      const txt = await file.text(), data = JSON.parse(txt);
-      for(let i=1;i<=25;i++){
-        const cb=document.getElementById(`ck-${i}`); if (cb) cb.checked=(data.checked||[]).includes(i);
-        const sc=document.getElementById(`sc-${i}`); const val=data.scores?.[i];
-        if (sc && typeof val==='number'){ sc.textContent=val; badgeTone(sc,val); }
-      }
-      updateCategoryBars();
-    }catch(e){ alert('Invalid JSON'); }
-  });
 
-  document.getElementById('printTop')?.addEventListener('click', ()=> window.print());
-  document.getElementById('printChecklist')?.addEventListener('click', ()=> window.print());
-
-  updateCategoryBars();
-})();
-
-/* 11) Background “cloud smoke” (two independent canvases) */
-(function(){ // moving diagonal glow lines
-  const c=document.getElementById('linesCanvas'); if(!c) return; const ctx=c.getContext('2d'); let dpr=Math.min(2,window.devicePixelRatio||1);
-  function resize(){ c.width=Math.floor(innerWidth*dpr); c.height=Math.floor(innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
-  function draw(t){ ctx.clearRect(0,0,innerWidth,innerHeight); const w=innerWidth,h=innerHeight,rows=12,spacing=Math.max(60,h/rows);
-    for(let i=-2;i<rows+2;i++){ const y=i*spacing+(t*0.02%spacing); const g=ctx.createLinearGradient(0,y,w,y+80);
-      g.addColorStop(0,'rgba(61,226,255,0.06)'); g.addColorStop(0.5,'rgba(155,92,255,0.08)'); g.addColorStop(1,'rgba(255,32,69,0.06)');
-      ctx.strokeStyle=g; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(-100,y); ctx.lineTo(w+100,y+80); ctx.stroke(); }
-    requestAnimationFrame(draw);
-  }
-  addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
-})();
-(function(){ // drifting colored fog “smoke”
-  const c=document.getElementById('smokeCanvas'); if(!c) return; const ctx=c.getContext('2d'); let dpr=Math.min(2,window.devicePixelRatio||1), blobs=[];
-  function resize(){ c.width=Math.floor(innerWidth*dpr); c.height=Math.floor(innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-    blobs=Array.from({length:42}).map(()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:60+Math.random()*160,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,hue:180+Math.random()*140,a:.12+.10*Math.random()}));
-  }
-  function draw(){ ctx.clearRect(0,0,innerWidth,innerHeight); ctx.globalCompositeOperation='lighter';
-    for(const b of blobs){ b.x+=b.vx; b.y+=b.vy;
-      if(b.x<-220)b.x=innerWidth+220; if(b.x>innerWidth+220)b.x=-220; if(b.y<-220)b.y=innerHeight+220; if(b.y>innerHeight+220)b.y=-220;
-      const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r); g.addColorStop(0,`hsla(${b.hue},85%,65%,${b.a})`); g.addColorStop(1,`hsla(${(b.hue+60)%360},85%,55%,0)`);
-      ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
-    } requestAnimationFrame(draw);
-  }
-  addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
 })();
 </script>
+
+<!-- B) Non-critical UI (wrapped so errors never block analyzer) -->
+<script>
+try{
+  // Hue drift for multi-color water
+  (function(){ var root=document.documentElement; var start=performance.now(); function frame(now){ root.style.setProperty('--hue', (((now-start)/4)%360) + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+
+  // Share links + UX
+  (function(){
+    var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
+    var fb = document.getElementById('shareFb'), x = document.getElementById('shareX'), ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'), em = document.getElementById('shareEm');
+    if(fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?u='+url;
+    if(x)  x.href  = 'https://twitter.com/intent/tweet?text='+title+'&url='+url;
+    if(ln) ln.href = 'https://www.linkedin.com/sharing/share-offsite/?url='+url;
+    if(wa) wa.href = 'https://wa.me/?text='+title+'%20'+url;
+    if(em) em.href = 'mailto:?subject='+title+'&body='+url;
+  })();
+
+  // Reset / Export / Import / Print
+  (function(){
+    function updateCategoryBars(){ if (window.updateCategoryBars) window.updateCategoryBars(); }
+    var resetBtn=document.getElementById('resetChecklist');
+    if(resetBtn){ resetBtn.addEventListener('click', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.checklist input[type="checkbox"]'), function(cb){ cb.checked=false; });
+      Array.prototype.forEach.call(document.querySelectorAll('.score-badge'), function(b){ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
+      updateCategoryBars();
+      if (window.setScoreWheel) window.setScoreWheel(0);
+      var el;
+      el=document.getElementById('contentScoreInline'); if(el) el.textContent='0';
+      var chip=document.getElementById('contentScoreChip'); if(chip){ chip.classList.remove('chip-good','chip-mid','chip-bad'); chip.classList.add('chip-bad'); }
+      el=document.getElementById('humanPct'); if(el) el.textContent='—';
+      el=document.getElementById('aiPct'); if(el) el.textContent='—';
+      var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
+      if (window.Water) window.Water.reset();
+    });}
+
+    var exportBtn=document.getElementById('exportChecklist'), importBtn=document.getElementById('importChecklist'), importFile=document.getElementById('importFile');
+    if(exportBtn){ exportBtn.addEventListener('click', function(){
+      var payload = { checked:[], scores:{} };
+      for(var i=1;i<=25;i++){
+        var cb=document.getElementById('ck-'+i), sc=document.getElementById('sc-'+i);
+        if (cb && cb.checked) payload.checked.push(i);
+        var s = parseInt(sc ? sc.textContent : 'NaN',10); if (!isNaN(s)) payload.scores[i]=s;
+      }
+      var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
+    });}
+    if(importBtn){ importBtn.addEventListener('click', function(){ if(importFile) importFile.click(); }); }
+    if(importFile){ importFile.addEventListener('change', function(){
+      var file = importFile.files[0]; if (!file) return;
+      var fr = new FileReader();
+      fr.onload = function(){ try{
+        var data = JSON.parse(fr.result);
+        for(var i=1;i<=25;i++){
+          var cb=document.getElementById('ck-'+i); if (cb) cb.checked=(data.checked||[]).includes(i);
+          var sc=document.getElementById('sc-'+i); var val=data.scores ? data.scores[i] : undefined;
+          if (sc && typeof val==='number'){ sc.textContent=val; (window.badgeTone||function(){ })(sc,val); }
+        }
+        updateCategoryBars();
+      }catch(e){ alert('Invalid JSON'); } };
+      fr.readAsText(file);
+    });}
+
+    var printTop=document.getElementById('printTop'), printChecklist=document.getElementById('printChecklist');
+    if(printTop) printTop.addEventListener('click', function(){ window.print(); });
+    if(printChecklist) printChecklist.addEventListener('click', function(){ window.print(); });
+
+    var toTop=document.getElementById('toTopLink'), backTop=document.getElementById('backTop');
+    if(toTop){ toTop.addEventListener('click', function(e){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});}); }
+    window.addEventListener('scroll', function(){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
+  })();
+
+} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
+</script>
+
+<!-- C) Background smoke (isolated so failures never affect analyze) -->
+<script>
+try{
+  // lines
+  (function(){
+    var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
+    function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
+    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=12,spacing=Math.max(60,h/rows);
+      for(var i=-2;i<rows+2;i++){ var y=i*spacing+((t*0.02)%spacing); var g=ctx.createLinearGradient(0,y,w,y+80);
+        g.addColorStop(0,'rgba(61,226,255,0.06)'); g.addColorStop(0.5,'rgba(155,92,255,0.08)'); g.addColorStop(1,'rgba(255,32,69,0.06)');
+        ctx.strokeStyle=g; ctx.lineWidth=1.2; ctx.beginPath(); ctx.moveTo(-100,y); ctx.lineTo(w+100,y+80); ctx.stroke(); }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+  })();
+
+  // smoke blobs
+  (function(){
+    var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[];
+    function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+      blobs=Array.apply(null,Array(42)).map(function(){ return {x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,r:60+Math.random()*160,vx:(Math.random()-.5)*.18,vy:(Math.random()-.5)*.18,hue:180+Math.random()*140,a:.12+.10*Math.random()}; });
+    }
+    function draw(){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); ctx.globalCompositeOperation='lighter';
+      for(var i=0;i<blobs.length;i++){ var b=blobs[i]; b.x+=b.vx; b.y+=b.vy;
+        if(b.x<-220)b.x=window.innerWidth+220; if(b.x>window.innerWidth+220)b.x=-220; if(b.y<-220)b.y=window.innerHeight+220; if(b.y>window.innerHeight+220)b.y=-220;
+        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r); g.addColorStop(0,'hsla('+b.hue+',85%,65%,'+b.a+')'); g.addColorStop(1,'hsla('+((b.hue+60)%360)+',85%,55%,0)');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+      } requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+  })();
+} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
+</script>
+
+<!-- D) Final tiny error sink -->
+<script>
+window.addEventListener('error', function(e){
+  var s=document.getElementById('analyzeStatus');
+  if (s) s.textContent = 'JavaScript error: ' + (e && e.message ? e.message : e);
+});
+</script>
+
 </body>
 </html>
