@@ -36,9 +36,7 @@ Route::get('/api/pagespeed', function (Request $request) {
         return response()->json(['error' => 'Missing url'], 422);
     }
 
-    // Prefer config/services.php; fallback to .env if config is not set
     $apiKey = config('services.google.pagespeed.key') ?: env('GOOGLE_PAGESPEED_API_KEY');
-
     if (!$apiKey) {
         return response()->json(['error' => 'PageSpeed API key missing on server'], 500);
     }
@@ -47,17 +45,17 @@ Route::get('/api/pagespeed', function (Request $request) {
 
     try {
         $resp = Http::timeout(30)->get($endpoint, [
-            'url' => $url,
+            'url'      => $url,
             'strategy' => $strategy, // 'mobile' or 'desktop'
             'category' => ['performance', 'accessibility', 'best-practices', 'seo'],
-            'key' => $apiKey,
+            'key'      => $apiKey,
         ]);
 
         if (!$resp->ok()) {
             return response()->json([
-                'error' => 'PSI error',
+                'error'  => 'PSI error',
                 'status' => $resp->status(),
-                'body' => $resp->json(),
+                'body'   => $resp->json(),
             ], $resp->status());
         }
 
