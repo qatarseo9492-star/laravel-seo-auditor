@@ -1251,5 +1251,53 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 </script>
 
+
+<script>
+// Final hardening of Analyze + Page URL controls
+(function(){
+  function expose(){
+    try{
+      // If SEMSEO_go exists, wrap to ensure PSI always runs as fallback
+      const prior = window.SEMSEO_go;
+      window.SEMSEO_go = function(){
+        try{ if (typeof prior === 'function') prior(); }catch(e){}
+        try{
+          const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+          const val = (input && input.value) ? input.value.trim() : '';
+          if (typeof window.runPSI === 'function'){ window.runPSI(val); }
+        }catch(_){}
+      };
+    }catch(_){}
+
+    // Paste button: use clipboard; fallback to location.href
+    try{
+      const pasteBtn = document.getElementById('pasteUrl');
+      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+      if (pasteBtn && input){
+        pasteBtn.addEventListener('click', async function(e){
+          e.preventDefault();
+          let txt = '';
+          try{ txt = await navigator.clipboard.readText(); }catch(_){}
+          if (!txt){ try{ txt = window.location.href || ''; }catch(_){}
+          if (!/^https?:\/\//i.test(txt) && txt){ txt = 'https://' + txt.replace(/^\/*/, ''); }
+          if (txt){ input.value = txt; input.focus(); }
+        });
+      }
+    }catch(_){}
+
+    // Bonus: clicking the Performance chip runs PSI
+    try{
+      const perf = document.getElementById('psiPerf');
+      if (perf){ perf.addEventListener('click', function(){ 
+        const input = document.getElementById('analyzeUrl'); 
+        if (typeof window.runPSI === 'function') window.runPSI((input && input.value)||''); 
+      });}
+    }catch(_){}
+  }
+  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', expose); } else { expose(); }
+  window.addEventListener('load', expose);
+})();
+</script>
+
 </body>
 </html>
