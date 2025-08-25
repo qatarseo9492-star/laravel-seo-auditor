@@ -1221,20 +1221,44 @@ document.addEventListener('DOMContentLoaded', function(){
   const endpoint = (panel && panel.dataset && panel.dataset.psiEndpoint) ? panel.dataset.psiEndpoint : "/api/psi";
   const strategyEl = document.getElementById('psiStrategy');
 
-  async function runPSI(targetUrl){
-    const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-    const raw = (targetUrl || (input && input.value) || "").trim();
-    if (!raw) return;
-    const strategy = (strategyEl && (strategyEl.textContent||"").trim().toLowerCase()) || "mobile";
-    const qs = `url=${encodeURIComponent(raw)}&strategy=${encodeURIComponent(strategy)}&category[]=performance&category[]=accessibility&category[]=seo&category[]=best-practices`;
+  async 
+function runPSI(targetUrl){
+  const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+  const raw = (targetUrl || (input && input.value) || "").trim();
+  const strategy = (strategyEl && (strategyEl.textContent||"").trim().toLowerCase()) || "mobile";
+  const status = document.getElementById('psiStatus') || (function(){ const s=document.createElement('div'); s.id='psiStatus'; s.style.cssText='margin:.25rem 0 0;color:#a6f7ff;font-weight:700;font-size:.85rem;'; const panel=document.getElementById('psiPanel'); if(panel) panel.insertBefore(s, panel.firstChild); return s; })();
+  if (!raw){ status.textContent = "Please enter a URL."; return; }
+  const qs = `url=${encodeURIComponent(raw)}&strategy=${encodeURIComponent(strategy)}&category[]=performance&category[]=accessibility&category[]=seo&category[]=best-practices`;
 
-    let res = null;
-    try{ const r = await fetch(`${endpoint}?${qs}`, {credentials:'same-origin'}); if (r.ok) res = await r.json(); }catch(_){}
-    if (!res){ try{ const r2 = await fetch(`${apiPublic}?${qs}`); res = await r2.json(); }catch(_){} }
-    if (panel) panel.setAttribute('data-last-url', raw);
-    renderPSI(res || {});
+  async function tryProxy(){
+    try{
+      const r = await fetch(`${endpoint}?${qs}`, {credentials:'same-origin'});
+      if (!r.ok) return { proxy_error: true, status: r.status, body: await r.text() };
+      return await r.json();
+    }catch(e){ return { proxy_error: true, message: String(e) }; }
   }
-  window.runPSI = runPSI;
+  async function tryPublic(){
+    try{
+      const r = await fetch(`${apiPublic}?${qs}`);
+      if (!r.ok) return { proxy_error: true, status: r.status, body: await r.text() };
+      return await r.json();
+    }catch(e){ return { proxy_error: true, message: String(e) }; }
+  }
+
+  (async ()=>{
+    status.textContent = "Running PageSpeed…";
+    let data = await tryProxy();
+    if (data && (data.ok === false || data.proxy_error || data.error) ){ data = await tryPublic(); }
+    if (!data || (!data.lighthouseResult && !data.loadingExperience)){
+      status.textContent = "PSI request failed.";
+      renderPSI({}); return;
+    }
+    status.textContent = "";
+    renderPSI(data);
+  })();
+}
+window.runPSI = runPSI;
+
 
   function renderPSI(json){
     try{
