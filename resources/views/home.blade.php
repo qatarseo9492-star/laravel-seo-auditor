@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
+{{-- resources/views/home.blade.php — v2025-08-25 + P0 Semantic SEO (Topic Coverage, Schema, Links, E-E-A-T, Snippet, Answer Target, Image ALT, Guardrails) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -7,17 +7,18 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @php
-  $metaTitle       = 'Semantic SEO Master • Ultra Tech Global';
+  $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
   $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, UX, speed, and Core Web Vitals with colorful, clear insights.';
-  $metaImage       = asset('og-image.png');
-  $canonical       = url()->current();
+  $metaImage = asset('og-image.png');
+  $canonical = url()->current();
 
-  // Use fully-qualified facade in Blade to avoid "use ... inside function" fatal error
-  $analyzeJsonUrl  = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
-  $analyzeUrl      = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
-  $psiProxyUrl     = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
-  // NEW: backend detector endpoint or fallback
-  $detectUrl       = \Illuminate\Support\Facades\Route::has('detect')       ? route('detect')       : url('api/detect');
+  $analyzeJsonUrl = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
+  $analyzeUrl     = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
+  $psiProxyUrl    = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi');
+
+  // Detector backend (supports either name)
+  $detectUrl = \Illuminate\Support\Facades\Route::has('detect')      ? route('detect')
+             : (\Illuminate\Support\Facades\Route::has('api.detect') ? route('api.detect') : url('api/detect'));
 @endphp
 
 <title>{{ $metaTitle }}</title>
@@ -155,7 +156,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .hvai-head h4{margin:0;font-size:1.08rem}
 .hvai-meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem}
 .hvai-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-weight:900;background:rgba(255,255,255,.05)}
-
 .hvai-bar{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem}
 .hvai-track{position:relative;height:18px;border-radius:999px;background:#0b0d21;border:1px solid rgba(255,255,255,.12);overflow:hidden}
 .hvai-fill{position:absolute;top:0;bottom:0;width:0;transition:width .6s cubic-bezier(.22,1,.36,1)}
@@ -171,206 +171,29 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .det-bar{margin-top:.35rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
 
-/* ==== Readability (ULTRA PRO restyle) ==== */
-:root{
-  --read-ac1:#22c55e; /* emerald */
-  --read-ac2:#3de2ff; /* cyan */
-  --read-ac3:#9b5cff; /* purple */
-  --read-warn:#f59e0b; /* amber */
-  --read-bad:#ef4444;  /* red  */
-  --read-surface:rgba(255,255,255,.06);
-  --read-border:rgba(255,255,255,.14);
-  --read-soft:rgba(255,255,255,.08);
-  --read-dim:rgba(255,255,255,.62);
-}
-
-/* container with animated halo + soft particles */
-.readability{
-  margin-top:14px; position:relative; isolation:isolate; overflow:hidden;
-  background:
-    radial-gradient(1200px 300px at -10% 0%, rgba(157,78,221,.18), transparent 40%),
-    radial-gradient(900px 320px at 110% 20%, rgba(45,212,191,.16), transparent 50%),
-    linear-gradient(135deg, rgba(16,24,48,.55), rgba(18,20,40,.72));
-  border:1px solid var(--read-border);
-  border-radius:18px; padding:18px;
-  box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
-  backdrop-filter:blur(8px);
-}
-.readability::before{
-  /* conic glow border sweep */
-  content:""; position:absolute; inset:-1px; border-radius:20px; padding:1px;
-  background:conic-gradient(from 0deg, #3de2ff, #22c55e, #9b5cff, #f59e0b, #ff2045, #3de2ff);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude;
-  opacity:.25; pointer-events:none; animation:readGlow 16s linear infinite;
-}
-.readability::after{
-  /* tiny floating sparkles */
-  content:""; position:absolute; inset:-20%;
-  background:
-    radial-gradient(2px 2px at 10% 30%, rgba(255,255,255,.35) 40%, transparent 45%),
-    radial-gradient(2px 2px at 30% 70%, rgba(255,255,255,.30) 40%, transparent 45%),
-    radial-gradient(2px 2px at 70% 20%, rgba(255,255,255,.28) 40%, transparent 45%),
-    radial-gradient(2px 2px at 85% 80%, rgba(255,255,255,.32) 40%, transparent 45%),
-    radial-gradient(2px 2px at 55% 45%, rgba(255,255,255,.26) 40%, transparent 45%);
-  filter:blur(.2px); opacity:.45; animation:floatDots 28s linear infinite;
-  pointer-events:none;
-}
-@keyframes readGlow{to{transform:rotate(360deg)}}
-@keyframes floatDots{to{transform:translate3d(-8%, -6%, 0)}}
-
-.read-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem}
-.read-head h4{margin:0;font-size:1.18rem;letter-spacing:.2px}
-.read-head .ico{
-  width:34px;height:34px; border-radius:12px; display:grid;place-items:center;
-  background:linear-gradient(135deg,var(--read-ac1),var(--read-ac2));
-  color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.35);
-  box-shadow:0 8px 18px rgba(61,226,255,.3), inset 0 0 0 1px rgba(255,255,255,.12);
-}
-
-.read-summary{
-  display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:center;
-  margin:.35rem 0 .7rem;
-}
-.read-caption{color:var(--read-dim)}
-
-/* status chip with gentle pulse */
-.read-chip{
-  display:inline-flex;align-items:center;gap:.55rem;
-  padding:.46rem .9rem;border-radius:999px;border:1px solid rgba(255,255,255,.22);
-  font-weight:900; letter-spacing:.2px;
-  background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18));
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), 0 8px 20px rgba(0,0,0,.25);
-  position:relative; overflow:hidden;
-}
-.read-chip::after{
-  content:""; position:absolute; inset:0; mix-blend-mode:screen;
-  background:radial-gradient(120px 40px at 0% 0%, rgba(255,255,255,.18), transparent 60%);
-  animation:chipShine 6s ease-in-out infinite;
-}
-@keyframes chipShine{50%{transform:translateX(40%)}}
-
-/* bad & mid variants without touching your JS/HTML */
-.read-chip.bad{background:linear-gradient(135deg, rgba(239,68,68,.22), rgba(245,158,11,.20))}
-.read-chip.mid{background:linear-gradient(135deg, rgba(245,158,11,.22), rgba(61,226,255,.20))}
-
-/* responsive, masonry-like grid */
-.read-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
-  gap:.8rem; perspective:1000px;
-}
-.read-card{
-  background:linear-gradient(180deg,var(--read-surface),rgba(255,255,255,.03));
-  border:1px solid var(--read-border);
-  border-radius:16px; padding:.85rem;
-  box-shadow:0 12px 36px rgba(0,0,0,.32);
-  backdrop-filter:blur(6px);
-  transform-style:preserve-3d;
-  transition:transform .2s ease, box-shadow .25s ease, border-color .2s ease;
-}
-.read-card:hover{
-  transform:translateY(-3px) rotateX(.6deg);
-  box-shadow:0 18px 48px rgba(0,0,0,.42);
-  border-color:rgba(255,255,255,.22);
-}
-
-/* metric row with animated icon pills */
+/* ==== Readability (upgraded) ==== */
+.readability{margin-top:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
+.read-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
+.read-head h4{margin:0;font-size:1.1rem}
+.read-summary{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;margin:.35rem 0 .6rem}
+.read-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-weight:900;background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(61,226,255,.18))}
+.read-chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(245,158,11,.18))}
+.read-chip.mid{background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(61,226,255,.18))}
+.read-caption{color:var(--text-dim)}
+.read-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
+.read-card{grid-column:span 6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.7rem}
 .read-card .metric{display:flex;align-items:center;justify-content:space-between;font-weight:900}
-.read-card .metric i{
-  display:inline-grid;place-items:center;
-  width:38px;height:38px;border-radius:12px;margin-right:.55rem;color:#fff;
-  text-shadow:0 1px 0 rgba(0,0,0,.45);
-  background:conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
-  animation:spinGrad 10s linear infinite;
-  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
-  transition:transform .18s ease;
-}
-.read-card:hover .metric i{ transform:translateZ(12px) scale(1.06) }
-@keyframes spinGrad{to{transform:rotate(360deg)}}
+.read-card .metric i{opacity:.95}
+.meter{margin-top:.45rem;height:12px;border-radius:10px;background:#0b0d21;border:1px solid rgba(255,255,255,.12);overflow:hidden;position:relative}
+.meter > span{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#3de2ff,#9b5cff);transition:width .45s ease}
+.read-suggest{margin-top:.6rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.6rem}
+.read-suggest .title{font-weight:900;margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem}
+.read-suggest ul{margin:.2rem 0 0;padding-left:1rem}
+.read-suggest li{margin:.22rem 0}
+.read-plain{margin-top:.6rem;background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(61,226,255,.12));border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.7rem}
+.read-plain .title{font-weight:900;margin-bottom:.25rem;display:flex;align-items:center;gap:.4rem}
+@media (max-width:768px){.read-card{grid-column:span 12}.read-summary{grid-template-columns:1fr}}
 
-/* per-card palettes (no HTML change) */
-.read-grid .read-card:nth-child(2) .metric i{filter:hue-rotate(40deg)}
-.read-grid .read-card:nth-child(3) .metric i{filter:hue-rotate(90deg)}
-.read-grid .read-card:nth-child(4) .metric i{filter:hue-rotate(150deg)}
-.read-grid .read-card:nth-child(5) .metric i{filter:hue-rotate(200deg)}
-.read-grid .read-card:nth-child(6) .metric i{filter:hue-rotate(260deg)}
-.read-grid .read-card:nth-child(7) .metric i{filter:hue-rotate(310deg)}
-
-/* progress meter with glossy sweep + end bubble */
-.meter{
-  margin-top:.55rem;height:12px;border-radius:10px; position:relative; overflow:hidden;
-  background:linear-gradient(180deg,#0b0d21,#0b0d21);
-  border:1px solid var(--read-border);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
-}
-.meter::before{
-  /* subtle stripes in the track */
-  content:""; position:absolute; inset:0; opacity:.35;
-  background:repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 10px, transparent 10px 20px);
-  pointer-events:none;
-}
-.meter > span{
-  position:absolute;left:0;top:0;bottom:0;width:0%;
-  background:linear-gradient(90deg, var(--read-ac1), var(--read-ac2), var(--read-ac3));
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 10px 26px rgba(61,226,255,.28);
-  transition:width .55s cubic-bezier(.22,1,.36,1);
-}
-.meter > span::after{
-  /* glossy sweep */
-  content:""; position:absolute; inset:0;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,.18),transparent 60%);
-  mix-blend-mode:screen; transform:translateX(-120%); animation:meterSheen 3s linear infinite;
-}
-.meter > span::before{
-  /* glowing end bubble that tracks width (no JS needed) */
-  content:""; position:absolute; top:50%; right:-7px; transform:translateY(-50%);
-  width:18px;height:18px;border-radius:50%;
-  background:radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.1) 45%);
-  box-shadow:0 0 0 3px rgba(61,226,255,.25), 0 0 30px rgba(61,226,255,.45);
-}
-@keyframes meterSheen{to{transform:translateX(120%)}}
-
-/* suggestions with neon ticks and connecting stems */
-.read-suggest{
-  margin-top:.8rem;background:rgba(255,255,255,.05);
-  border:1px solid var(--read-border);border-radius:14px;padding:.8rem;
-  box-shadow:0 10px 28px rgba(0,0,0,.28);
-}
-.read-suggest .title{font-weight:900;margin-bottom:.4rem;display:flex;align-items:center;gap:.45rem}
-.read-suggest ul{margin:.2rem 0 0;padding-left:1.1rem}
-.read-suggest li{
-  margin:.28rem 0; list-style:none; position:relative; padding-left:1.2rem; color:rgba(255,255,255,.9);
-}
-.read-suggest li::before{
-  content:""; position:absolute; left:0; top:.12rem; width:18px;height:18px;border-radius:6px;
-  background:linear-gradient(135deg,var(--read-ac1),var(--read-ac2));
-  box-shadow:0 6px 14px rgba(0,0,0,.25);
-}
-.read-suggest li::after{
-  content:"\f00c"; /* Font Awesome check */
-  font-family:"Font Awesome 6 Free"; font-weight:900;
-  position:absolute; left:3px; top:-1px; font-size:.76rem; color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.35);
-}
-
-/* plain info block with lively gradient */
-.read-plain{
-  margin-top:.8rem;border:1px solid var(--read-border);border-radius:14px;padding:.8rem;
-  background:linear-gradient(135deg, rgba(34,197,94,.14), rgba(61,226,255,.14));
-  box-shadow:0 10px 28px rgba(0,0,0,.24);
-}
-.read-plain .title{font-weight:900;margin-bottom:.3rem;display:flex;align-items:center;gap:.45rem}
-
-/* prefers-reduced-motion friendly */
-@media (prefers-reduced-motion:reduce){
-  .readability::before,.readability::after,.read-card .metric i,
-  .meter > span::after{animation:none}
-}
-
-/* small screens */
-@media (max-width:900px){
-  .read-summary{grid-template-columns:1fr}
-}
 /* ==== Entities & Topics (colorful) ==== */
 .entities{margin-top:14px;background:linear-gradient(135deg,rgba(76,29,149,.18),rgba(14,165,233,.18));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
 .entities-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
@@ -387,6 +210,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .echip.org{background:linear-gradient(135deg,#3de2ff,#22c55e)}
 .echip.place{background:linear-gradient(135deg,#fde047,#60a5fa)}
 .echip.misc{background:linear-gradient(135deg,#94a3b8,#64748b)}
+.echip .sal{opacity:.9;font-weight:900}
 @media (max-width:768px){.entity-card{grid-column:span 12}}
 
 /* ==== Site Speed & CWV (colorful, end) ==== */
@@ -405,6 +229,47 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .psi-issues ul{margin:.2rem 0 0;padding-left:1rem}
 .psi-issues li{margin:.22rem 0}
 @media (max-width:768px){.psi-card{grid-column:span 12}}
+
+/* ==== P0: Topic Coverage (minimal, matches style) ==== */
+.topics{margin-top:14px;background:linear-gradient(135deg,rgba(59,130,246,.10),rgba(34,197,94,.10));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
+.topics-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.topics-head h4{margin:0;font-size:1.08rem}
+.topics-meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem}
+.topics-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-weight:900;background:rgba(255,255,255,.05)}
+.topics-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
+.topics-card{grid-column:span 6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.7rem}
+.topics-list{display:flex;flex-wrap:wrap;gap:.4rem}
+.tchip{display:inline-flex;align-items:center;gap:.35rem;padding:.32rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:800}
+
+/* ==== P0: Schema Builder ==== */
+.schema{margin-top:14px;background:linear-gradient(135deg,rgba(155,92,255,.10),rgba(61,226,255,.10));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
+.schema-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.schema-head h4{margin:0;font-size:1.08rem}
+.schema-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
+.schema-card{grid-column:span 6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.7rem}
+.schema-card header{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem}
+.schema-code{max-height:220px;overflow:auto;background:#0b0d21;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem;font:12px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;white-space:pre}
+.copy-btn{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);border-radius:10px;padding:.35rem .6rem;font-weight:900;cursor:pointer}
+.copy-btn:hover{background:rgba(255,255,255,.12)}
+@media (max-width:768px){.schema-card{grid-column:span 12}}
+
+/* ==== P0: Internal Link Suggestions ==== */
+.links{margin-top:14px;background:linear-gradient(135deg,rgba(96,165,250,.10),rgba(236,72,153,.10));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
+.links-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.links-head h4{margin:0;font-size:1.08rem}
+.links-table{width:100%;border-collapse:separate;border-spacing:0 .5rem}
+.links-table th{font-weight:900;text-align:left;color:var(--text-dim)}
+.links-row{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden}
+.links-row td{padding:.55rem .6rem}
+
+/* ==== Snippet preview ==== */
+.snippet{margin-top:.6rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.6rem}
+.snip-title{color:#8ab4f8;font-weight:900;margin:0 0 .15rem}
+.snip-url{color:#93c18c;font-size:.9rem;margin:0 0 .25rem}
+.snip-desc{color:#c8cbd9}
+
+/* Small helpers */
+.hide{display:none!important}
 </style>
 </head>
 <body>
@@ -418,9 +283,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   window.SEMSEO.ENDPOINTS = {
     analyzeJson: @json($analyzeJsonUrl),
     analyze: @json($analyzeUrl),
-    psi: @json($psiProxyUrl), // server proxy; API key stays hidden
-    // NEW: backend detector endpoint (works even with no API keys; local server ensemble)
-    detect: @json($detectUrl)
+    psi: @json($psiProxyUrl),        // server proxy keeps API key hidden
+    detect: @json($detectUrl)        // backend detector (optional)
   };
   window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
   window.SEMSEO.READY = false;
@@ -573,15 +437,27 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <div id="analyzeReport" style="margin-top:.9rem;display:none">
           <div style="display:flex;flex-wrap:wrap;gap:.5rem">
             <span class="chip">HTTP: <b id="rStatus">—</b></span>
-            <span class="chip">Title: <b id="rTitleLen">—</b></span>
-            <span class="chip">Meta desc: <b id="rMetaLen">—</b></span>
+            <span class="chip">Title: <b id="rTitleLen">—</b> <small id="rTitlePx" style="opacity:.8;margin-left:.25rem"></small></span>
+            <span class="chip">Meta desc: <b id="rMetaLen">—</b> <small id="rMetaPx" style="opacity:.8;margin-left:.25rem"></small></span>
             <span class="chip">Canonical: <b id="rCanonical">—</b></span>
             <span class="chip">Robots: <b id="rRobots">—</b></span>
             <span class="chip">Viewport: <b id="rViewport">—</b></span>
             <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
             <span class="chip">Internal links: <b id="rInternal">—</b></span>
             <span class="chip">Schema: <b id="rSchema">—</b></span>
+            <span class="chip">Images ALT: <b id="rAltCov">—</b></span>
             <span class="chip">Auto-checked: <b id="rAutoCount">—</b></span>
+          </div>
+
+          <div class="snippet" id="serpPreview" style="display:none">
+            <div class="snip-title" id="snipTitle">Example Title</div>
+            <div class="snip-url" id="snipUrl">example.com/page</div>
+            <div class="snip-desc" id="snipDesc">Example description</div>
+          </div>
+
+          <div id="guardrails" class="read-suggest" style="display:none;margin-top:.6rem">
+            <div class="title"><i class="fa-solid fa-shield-halved"></i> Indexability & Canonical Guardrails</div>
+            <ul id="guardrailsList"></ul>
           </div>
         </div>
       </form>
@@ -597,8 +473,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
         <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
       </div>
-
-      <!-- Animated Human vs AI bars -->
       <div class="hvai-bar">
         <div>
           <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
@@ -609,13 +483,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
         </div>
       </div>
-
-      <!-- Detectors grid -->
       <div class="det-grid" id="detGrid"></div>
       <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
     </section>
 
-    <!-- 2) READABILITY INSIGHTS (Upgraded) -->
+    <!-- 2) READABILITY -->
     <section class="readability" id="readabilityPanel" style="display:none">
       <div class="read-head">
         <i class="fa-solid fa-book-open-reader ico ico-cyan"></i>
@@ -666,12 +538,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </div>
 
       <div class="read-plain">
-        <div class="title"><i class="fa-solid fa-child-reaching"></i> Easy to read (Grade 7)</div>
-        <div id="readPlain">We’ll write a friendly one-line summary here.</div>
+        <div class="title"><i class="fa-solid fa-child-reaching"></i> Answer Target (45–55 words)</div>
+        <div id="readPlain">We’ll place a snippet-friendly paragraph here if found.</div>
       </div>
     </section>
 
-    <!-- 3) ENTITIES & TOPICS (Upgraded) -->
+    <!-- 3) ENTITIES -->
     <section class="entities" id="entitiesPanel" style="display:none">
       <div class="entities-head">
         <i class="fa-solid fa-database ico ico-cyan"></i>
@@ -705,7 +577,72 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </div>
     </section>
 
-    <!-- 4) SITE SPEED & CORE WEB VITALS (End) -->
+    <!-- 4) TOPIC COVERAGE (P0) -->
+    <section class="topics" id="topicsPanel" style="display:none">
+      <div class="topics-head">
+        <i class="fa-solid fa-layer-group ico ico-cyan"></i>
+        <h4>Topic Coverage</h4>
+      </div>
+      <div class="topics-meta">
+        <span class="topics-chip"><i class="fa-solid fa-bullseye"></i> Primary: <b id="topicPrimary">—</b></span>
+        <span class="topics-chip"><i class="fa-solid fa-list-check"></i> Coverage: <b id="topicCoveragePct">—%</b></span>
+        <span class="topics-chip"><i class="fa-solid fa-circle-info"></i> Based on H1/H2/H3 + body</span>
+      </div>
+      <div class="topics-grid">
+        <div class="topics-card">
+          <div class="metric" style="display:flex;align-items:center;justify-content:space-between;font-weight:900"><span><i class="fa-solid fa-check"></i> Covered subtopics</span><b id="topicCoveredCount">0</b></div>
+          <div class="topics-list" id="topicsCovered"></div>
+        </div>
+        <div class="topics-card">
+          <div class="metric" style="display:flex;align-items:center;justify-content:space-between;font-weight:900"><span><i class="fa-solid fa-circle-exclamation"></i> Missing subtopics</span><b id="topicMissingCount">0</b></div>
+          <div class="topics-list" id="topicsMissing"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5) SCHEMA BUILDER (P0) -->
+    <section class="schema" id="schemaPanel" style="display:none">
+      <div class="schema-head">
+        <i class="fa-solid fa-code ico ico-cyan"></i>
+        <h4>Schema Builder (JSON-LD)</h4>
+      </div>
+      <div class="schema-grid">
+        <article class="schema-card">
+          <header><strong>Article</strong><button class="copy-btn" data-copy="schemaArticle"><i class="fa-regular fa-copy"></i> Copy</button></header>
+          <pre id="schemaArticle" class="schema-code">{}</pre>
+        </article>
+        <article class="schema-card">
+          <header><strong>FAQ</strong><button class="copy-btn" data-copy="schemaFAQ"><i class="fa-regular fa-copy"></i> Copy</button></header>
+          <pre id="schemaFAQ" class="schema-code">{}</pre>
+        </article>
+        <article class="schema-card">
+          <header><strong>Breadcrumbs</strong><button class="copy-btn" data-copy="schemaBreadcrumbs"><i class="fa-regular fa-copy"></i> Copy</button></header>
+          <pre id="schemaBreadcrumbs" class="schema-code">{}</pre>
+        </article>
+        <article class="schema-card">
+          <header><strong>Organization</strong><button class="copy-btn" data-copy="schemaOrg"><i class="fa-regular fa-copy"></i> Copy</button></header>
+          <pre id="schemaOrg" class="schema-code">{}</pre>
+        </article>
+        <article class="schema-card">
+          <header><strong>WebSite + SearchAction</strong><button class="copy-btn" data-copy="schemaSearch"><i class="fa-regular fa-copy"></i> Copy</button></header>
+          <pre id="schemaSearch" class="schema-code">{}</pre>
+        </article>
+      </div>
+    </section>
+
+    <!-- 6) INTERNAL LINK SUGGESTIONS (P0) -->
+    <section class="links" id="linksPanel" style="display:none">
+      <div class="links-head">
+        <i class="fa-solid fa-link ico ico-cyan"></i>
+        <h4>Internal Link Suggestions</h4>
+      </div>
+      <table class="links-table" id="linksTable">
+        <thead><tr><th>Suggested anchor</th><th>Target (guess)</th><th>Reason</th></tr></thead>
+        <tbody id="linksBody"></tbody>
+      </table>
+    </section>
+
+    <!-- 7) PSI (unchanged panel, runs last) -->
     <section class="psi" id="psiPanel" style="display:none">
       <div class="psi-head">
         <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
@@ -849,6 +786,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
   function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
   function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
+  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
 
   /* === Score wheel === */
   var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
@@ -970,25 +908,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return {ok,data,status};
   }
 
-  // NEW: backend multi-detector (works with or without API keys; server may compute local ensemble)
-  async function fetchDetect(text, url){
-    try{
-      const r = await fetch((window.SEMSEO.ENDPOINTS.detect || '/api/detect'),{
-        method:'POST',
-        headers:{
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'X-Requested-With':'XMLHttpRequest',
-          'X-CSRF-TOKEN': CSRF
-        },
-        body: JSON.stringify({ text, url })
-      });
-      if(!r.ok) return null;
-      const j = await r.json();
-      return (j && j.ok) ? j : null;
-    }catch(_){ return null; }
-  }
-
   async function fetchRawHtml(url){
     try{
       const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
@@ -1025,13 +944,23 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       var main=d.querySelector('article,main,[role="main"]'); var sample=main? (main.textContent||''): '';
       if(!sample){ sample=[].slice.call(d.querySelectorAll('p')).slice(0,12).map(function(p){return p.textContent;}).join('\n\n'); }
       sample=(sample||'').replace(/\s{2,}/g,' ').trim();
-      return { titleLen: title?title.length:null, metaLen: metaDesc?metaDesc.length:null, canonical, robots, viewport, headings:(h1+'/'+h2+'/'+h3), internalLinks:internal, schema: schema?'yes':'no', sampleText: sample };
+
+      // extractions for P0
+      var imgs=[].slice.call(d.querySelectorAll('img'));
+      var altOk=imgs.filter(img=> (img.getAttribute('alt')||'').trim().length>=3).length;
+      var altCov=imgs.length? Math.round(altOk*100/imgs.length) : null;
+
+      var author = q('meta[name="author"]','content') || q('[itemprop="author"]','content') || q('.author') || '';
+      var datePub = q('meta[property="article:published_time"]','content') || q('time[datetime]','datetime') || q('meta[name="date"]','content') || '';
+      var externalLinks = [].slice.call(d.querySelectorAll('a[href]')).filter(a=>{ try{ var u=new URL(a.getAttribute('href'),baseUrl); return u.origin!==origin; }catch(e){ return false; } }).length;
+
+      return { title, metaDesc, titleLen: title?title.length:null, metaLen: metaDesc?metaDesc.length:null, canonical, robots, viewport, headings:(h1+'/'+h2+'/'+h3), internalLinks:internal, schema: schema?'yes':'no', sampleText: sample, altCov, author, datePub, externalLinks, doc: d };
     }catch(_){ return {}; }
   }
 
   function mergeMeta(into, add){
     if(!into) into={};
-    var keys=['titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText'];
+    var keys=['title','metaDesc','titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText','altCov','author','datePub','externalLinks','doc'];
     keys.forEach(function(k){
       if((into[k]===undefined || into[k]===null || into[k]==='—' || into[k]==='' ) && add && add[k]!==undefined && add[k]!==null){
         into[k]=add[k];
@@ -1041,7 +970,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
 
   /* ===================== Stylometry & Readability ===================== */
-  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
   function _countSyllables(word){
     var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0;
     var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m);
@@ -1083,7 +1011,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var longRatio=(lens.filter(function(L){return L>=28;}).length)/(lens.length||1);
     var TTR=types/(tokens||1);
     var asl=mean||0;
-    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl };
+    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl, sentences: sents };
   }
 
   function detectUltra(text){
@@ -1168,7 +1096,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     renderDetectors(res);
   }
 
-  /* === Readability rendering === */
+  /* === Readability rendering + Answer Target === */
   function renderReadability(s){
     var p = document.getElementById('readabilityPanel'); if(!p) return;
     var text = s.text || '';
@@ -1200,6 +1128,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     bar('mRepBar', Math.max(0, 1 - (s.triRepeatRatio||0)), 1);
     bar('mDigitsBar', Math.max(0, Math.min(20, 20 - (s.digitsPer100||0))), 20);
     bar('mSPWBar', Math.max(0, Math.min(1.8, 1.8 - (syl.spw||0))), 1.8);
+
+    // Simple fixes
     var fixes = [];
     if ((s.asl||0) > 20) fixes.push('Break long sentences into 12–16 words.');
     if ((syl.spw||0) > 1.60) fixes.push('Prefer shorter words (use simpler synonyms).');
@@ -1209,31 +1139,42 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if (ease < 60 && fixes.length === 0) fixes.push('Aim for shorter sentences and simpler vocabulary to improve readability.');
     var list = document.getElementById('readSuggest');
     if (list){ list.innerHTML = fixes.length ? fixes.map(f=>`<li>${f}</li>`).join('') : '<li>Looks good! Keep sentences concise and headings clear.</li>'; }
-    var plain = document.getElementById('readPlain');
-    if (plain){
-      if (gradeInt <= 7){
-        plain.textContent = 'This page is easy to read for a Grade-7 reader: short sentences, common words, and clear ideas.';
-      } else if (gradeInt <= 9){
-        plain.textContent = 'Almost Grade-7 friendly. To make it easier, use shorter sentences and everyday words.';
-      } else {
-        plain.textContent = 'Currently above Grade-7 level. Try smaller sentences, simpler words, and fewer complex clauses.';
-      }
+
+    // Answer Target (45–55 words)
+    var best = ''; (s.sentences||[]).forEach(function(sent){
+      var wc = (sent.match(/[A-Za-z\u00C0-\u024f0-9']+/g)||[]).length;
+      if (wc>=40 && wc<=60 && (!best || wc>best.split(' ').length)) best=sent.trim();
+    });
+    if (!best && s.sentences && s.sentences.length){
+      best = s.sentences.sort((a,b)=>Math.abs(48-(a.split(' ').length))-Math.abs(48-(b.split(' ').length)))[0] || '';
     }
+    var plain = document.getElementById('readPlain'); if (plain) plain.textContent = best || 'No snippet-length paragraph detected. Try a 45–55 word definition/answer paragraph near the top.';
     p.style.display='block';
   }
 
-  /* === Entities & Topics extraction === */
-  function extractEntities(text){
-    var res = {people:[], orgs:[], places:[], topics:[], software:[], games:[]};
+  /* === Entities salience & rendering === */
+  function extractEntities(text, htmlDoc){
+    var res = {people:[], orgs:[], places:[], topics:[], software:[], games:[], salience:{}};
     var clean=(text||'').replace(/\s+/g,' ');
-    // naive capitalized tokens as candidates
     var cand = (clean.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || []).slice(0, 800);
     var stop = new Set(['The','A','An','This','That','And','Or','Of','In','On','To','For','By','With','Your','Our','You','We','It','At','From','As','Be','Is','Are','Was','Were','Not']);
     var uniq={};
-    cand.forEach(function(c){ if(stop.has(c)) return; var k=c.trim(); if(k.length<2||k.length>48) return; uniq[k]=1; });
+    cand.forEach(function(c){ if(stop.has(c)) return; var k=c.trim(); if(k.length<2||k.length>48) return; uniq[k]=(uniq[k]||0)+1; });
     var uniqList = Object.keys(uniq).slice(0,120);
 
-    // very light heuristics
+    // proximity weights
+    var weights={}; if (htmlDoc){
+      var h1 = htmlDoc.querySelector('h1')?.textContent||'';
+      var headers = [].slice.call(htmlDoc.querySelectorAll('h1,h2,h3'));
+      uniqList.forEach(function(n){
+        var w = 0;
+        if (h1.includes(n)) w += 3;
+        headers.forEach(function(h){ if((h.textContent||'').includes(n)) w += 1; });
+        if (htmlDoc.querySelector('a[href*="'+(n.split(' ')[0]||'')+'"]')) w += 0.5;
+        weights[n] = w;
+      });
+    }
+
     uniqList.forEach(function(n){
       if (/\b(Inc|LLC|Ltd|Corporation|Company|Corp|Studio|Labs|University|College)\b/.test(n)) res.orgs.push(n);
       else if (/\b(City|Town|Province|State|Country|Park|River|Lake|Valley|Mountain)\b/.test(n)) res.places.push(n);
@@ -1241,94 +1182,257 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       else res.topics.push(n);
     });
 
-    // software / apk / games (keyword probes)
+    // software / apk / games
     var low = clean.toLowerCase();
-    var swTerms = (low.match(/\b(software|app|application|android|ios|windows|mac|linux|apk|exe|download|install|update|version)\b/g) || []);
-    if (swTerms.length){ // pick key tokens with dots or version-like
-      var soft = (clean.match(/\b([A-Z][A-Za-z0-9\.\-\+]{2,})\b/g) || []).filter(x=>/\b(Android|iOS|Windows|Mac|Linux|Pro|Studio|Editor|App|SDK|Tool)\b/.test(x) || /v?\d+\.\d+/.test(x));
-      res.software = Array.from(new Set(soft)).slice(0,20);
-    }
-    if (/\bapk\b/i.test(low) || /\.apk\b/i.test(low)){ res.software.push('APK'); }
+    var soft = (clean.match(/\b([A-Z][A-Za-z0-9\.\-\+]{2,})\b/g) || []).filter(x=>/\b(Android|iOS|Windows|Mac|Linux|Pro|Studio|Editor|App|SDK|Tool)\b/.test(x) || /v?\d+\.\d+/.test(x));
+    if (/\bapk\b/i.test(low) || /\.apk\b/i.test(low)){ soft.push('APK'); }
     var games = (clean.match(/\b([A-Z][A-Za-z0-9\-\s]{2,} (?:Game|Games|Edition|Remastered|Online))\b/g) || []);
-    if (games.length) res.games = Array.from(new Set(games)).slice(0,20);
 
-    // clamp lists
+    res.software = Array.from(new Set(soft)).slice(0,20);
+    res.games = Array.from(new Set(games)).slice(0,20);
     res.people = res.people.slice(0,20);
     res.orgs = res.orgs.slice(0,20);
     res.places = res.places.slice(0,20);
     res.topics = res.topics.slice(0,24);
+
+    // salience score (freq + proximity emphasis)
+    var sal = {};
+    [].concat(res.people,res.orgs,res.places,res.topics).forEach(function(n){
+      var f = uniq[n]||0, w = weights[n]||0;
+      sal[n] = f*1 + w*2;
+    });
+    // normalize 0-100
+    var vals = Object.values(sal); var max = vals.length? Math.max.apply(null, vals) : 0;
+    var norm={}; Object.keys(sal).forEach(k=>{ norm[k] = max? Math.round((sal[k]/max)*100) : 0; });
+    res.salience = norm;
     return res;
   }
-  function chipify(list, cls){
+  function chipifyWithSal(list, cls, sal){
     if(!list || !list.length) return '<span class="echip misc"><i class="fa-solid fa-circle-minus"></i> none</span>';
-    return list.map(v=>`<span class="echip ${cls||'misc'}"><i class="fa-solid fa-tag"></i> ${v}</span>`).join(' ');
+    var primary = list.slice().sort((a,b)=>(sal[b]||0)-(sal[a]||0))[0];
+    return list.map(v=>{
+      var crown = v===primary ? ' <i class="fa-solid fa-crown"></i>' : '';
+      var s = sal && isFinite(sal[v]) ? `<span class="sal">${sal[v]}%</span>` : '';
+      return `<span class="echip ${cls||'misc'}"><i class="fa-solid fa-tag"></i> ${v}${crown} ${s}</span>`;
+    }).join(' ');
   }
-  function renderEntitiesTopics(sample){
+  function renderEntitiesTopics(sample, htmlDoc){
     var p = document.getElementById('entitiesPanel'); if(!p) return;
-    var ex = extractEntities(sample||'');
+    var ex = extractEntities(sample||'', htmlDoc||null);
     var m = (id, html)=>{ var el=document.getElementById(id); if(el) el.innerHTML=html; };
-    m('entPeople', chipify(ex.people,'person'));
-    m('entOrgs', chipify(ex.orgs,'org'));
-    m('entPlaces', chipify(ex.places,'place'));
-    m('entTopics', chipify(ex.topics,'misc'));
-    m('entSoftware', chipify(ex.software,'sw'));
-    m('entGames', chipify(ex.games,'game'));
+    m('entPeople', chipifyWithSal(ex.people,'person',ex.salience));
+    m('entOrgs', chipifyWithSal(ex.orgs,'org',ex.salience));
+    m('entPlaces', chipifyWithSal(ex.places,'place',ex.salience));
+    m('entTopics', chipifyWithSal(ex.topics,'misc',ex.salience));
+    m('entSoftware', chipifyWithSal(ex.software,'sw',ex.salience));
+    m('entGames', chipifyWithSal(ex.games,'game',ex.salience));
+    p.style.display='block';
+    return ex;
+  }
+
+  /* === Topic Coverage === */
+  function buildTopicCoverage(htmlDoc, sample){
+    var res = { primary:'—', covered:[], missing:[], coveragePct:0 };
+    if (!htmlDoc && !sample) return res;
+    var h1 = (htmlDoc?.querySelector('h1')?.textContent||'').trim();
+    var seeds = [];
+    if (h1) seeds.push(h1);
+    [].slice.call(htmlDoc?.querySelectorAll('h2,h3')||[]).forEach(h=>{ var t=(h.textContent||'').trim(); if(t) seeds.push(t);});
+    if (!seeds.length && sample){ seeds = (sample.match(/[^\n]{14,80}/g)||[]).slice(0,8); }
+    var primary = h1 || (seeds[0]||'').split(/[|–\-:•]/)[0].trim();
+    var text = (sample||'').toLowerCase();
+    var candidates = Array.from(new Set(seeds
+      .map(s=> s.replace(/[#?«»"“”'()]+/g,'').trim())
+      .filter(Boolean)
+      .slice(0,18)));
+
+    var covered=[], missing=[];
+    candidates.forEach(function(c){
+      var token = c.toLowerCase().split(/[|–\-:•]/)[0].trim();
+      if (!token || token.length<3) return;
+      if (text.indexOf(token) !== -1) covered.push(c);
+      else missing.push(c);
+    });
+    var pct = candidates.length? Math.round(covered.length*100/candidates.length) : 0;
+    res.primary= primary||'—'; res.covered=covered; res.missing=missing; res.coveragePct=pct;
+    return res;
+  }
+  function renderTopicCoverage(tc){
+    var p=document.getElementById('topicsPanel'); if(!p) return;
+    setText('topicPrimary', tc.primary || '—');
+    setText('topicCoveragePct', isFinite(tc.coveragePct)? tc.coveragePct : '—');
+    setText('topicCoveredCount', tc.covered.length);
+    setText('topicMissingCount', tc.missing.length);
+    var fill = (arr)=> arr.length? arr.map(t=>`<span class="tchip"><i class="fa-solid fa-check"></i> ${t}</span>`).join(' ') : '<span class="tchip">—</span>';
+    var miss = (arr)=> arr.length? arr.map(t=>`<span class="tchip"><i class="fa-solid fa-plus"></i> ${t}</span>`).join(' ') : '<span class="tchip">none</span>';
+    var c=document.getElementById('topicsCovered'); if(c) c.innerHTML = fill(tc.covered);
+    var m=document.getElementById('topicsMissing'); if(m) m.innerHTML = miss(tc.missing);
     p.style.display='block';
   }
 
-  /* === PSI (Site Speed) via server proxy === */
-  async function startSiteSpeed(url, strategy='mobile'){
-    var panel = document.getElementById('psiPanel'); if(!panel) return;
-    panel.style.display='block';
-    setText('psiStrategy', strategy);
-    setText('psiPerf','—'); setText('psiLcp','—'); setText('psiInp','—'); setText('psiCls','—'); setText('psiTtfb','—');
-    ['psiLcpBar','psiInpBar','psiClsBar','psiTtfbBar'].forEach(id=>{ var el=document.getElementById(id); if(el) el.style.width='0%'; });
-    var note = document.getElementById('psiNote'); if(note) note.textContent='Running PageSpeed Insights…';
-    var advice = document.getElementById('psiAdvice'); if(advice) advice.innerHTML='';
-
+  /* === Snippet width & preview (px measurement) === */
+  function measurePx(txt, sizePx, family){
     try{
-      const q = new URLSearchParams({url, strategy}).toString();
-      const r = await fetch((window.SEMSEO.ENDPOINTS.psi||'/api/psi')+'?'+q, {headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
-      const j = await r.json();
-      if(!j || j.ok===false){ throw new Error(j && j.error ? j.error : 'PSI proxy error'); }
-      const lhr = j.data?.lighthouseResult || {};
-      const audits = lhr.audits || {};
-      const catPerf = lhr.categories?.performance?.score;
-      const perfScore = typeof catPerf==='number' ? Math.round(catPerf*100) : '—';
-      setText('psiPerf', perfScore);
+      var canvas = measurePx._c || (measurePx._c=document.createElement('canvas'));
+      var ctx = canvas.getContext('2d');
+      ctx.font = sizePx + 'px ' + (family||'Arial, Helvetica, sans-serif');
+      return Math.round(ctx.measureText(txt||'').width);
+    }catch(_){ return 0; }
+  }
+  function renderSnippetPreview(url, meta){
+    var t = meta.title||'', d = meta.metaDesc||'';
+    var tPx = measurePx(t, 18, 'Arial');
+    var dPx = measurePx(d, 14, 'Arial');
+    setText('rTitlePx', t ? `• ~${tPx}px` : '');
+    setText('rMetaPx',  d ? `• ~${dPx}px` : '');
+    var p = document.getElementById('serpPreview');
+    if(!p) return;
+    var host = ''; try{ host=new URL(url).host; }catch(_){}
+    setText('snipTitle', t || 'No title found');
+    setText('snipUrl', host || url);
+    setText('snipDesc', d || 'No meta description found.');
+    p.style.display='block';
+  }
 
-      function barPct(id, val, goodMax, clampMax){
-        var el=document.getElementById(id); if(!el) return;
-        var v = Math.max(0, Math.min(clampMax, val||0));
-        var pct = Math.max(0, Math.min(100, (v/goodMax)*100));
-        el.style.width = pct + '%';
-      }
-      // LCP in seconds
-      var lcp = audits['largest-contentful-paint']?.numericValue; // ms
-      var inp = audits['interactive']?.numericValue; // ms (fallback), or 'experimental-interaction-to-next-paint'
-      var inpAlt = audits['experimental-interaction-to-next-paint']?.numericValue;
-      if (inpAlt) inp = inpAlt;
-      var cls = audits['cumulative-layout-shift']?.numericValue;
-      var ttfb = audits['server-response-time']?.numericValue || audits['time-to-first-byte']?.numericValue;
-
-      if (typeof lcp==='number'){ setText('psiLcp', (lcp/1000).toFixed(2)); barPct('psiLcpBar', (lcp/1000), 2.5, 6); }
-      if (typeof inp==='number'){ setText('psiInp', Math.round(inp)); barPct('psiInpBar', inp, 200, 600); }
-      if (typeof cls==='number'){ setText('psiCls', cls.toFixed(3)); barPct('psiClsBar', cls, 0.1, 0.4); }
-      if (typeof ttfb==='number'){ setText('psiTtfb', Math.round(ttfb)); barPct('psiTtfbBar', ttfb, 800, 2500); }
-
-      // Advice list (simple heuristics)
-      var tips=[];
-      if (lcp>2500) tips.push('Optimize hero image (compress, proper size, lazy-load below-the-fold).');
-      if (inp>200) tips.push('Reduce main-thread work (code-split, defer non-critical JS).');
-      if (cls>0.1) tips.push('Reserve space for images/ads; avoid late-loading fonts without fallback.');
-      if (ttfb>800) tips.push('Improve server response (caching, CDN, database/index tuning).');
-      if (!tips.length) tips.push('Looks good! Keep images optimized, JS lean, and layout stable.');
-      if (advice) advice.innerHTML = tips.map(t=>`<li>${t}</li>`).join('');
-
-      if (note) note.textContent = 'Results from Google PageSpeed Insights (via secure server proxy).';
+  /* === Guardrails (canonical/robots/indexability) === */
+  function guardrails(meta, url){
+    var issues=[];
+    var canon = meta.canonical||'';
+    try{
+      var u = new URL(url), c = new URL(canon, url);
+      if (c.origin+c.pathname !== u.origin+u.pathname) issues.push('Canonical not self-referencing (check if correct).');
     }catch(e){
-      if (note) note.textContent = 'PSI error: ' + (e && e.message ? e.message : e);
+      if (!canon) issues.push('Missing canonical tag.');
     }
+    var robots = (meta.robots||'').toLowerCase();
+    if (robots.includes('noindex')) issues.push('Robots meta contains noindex (page won’t be indexed).');
+    if (robots.includes('nofollow')) issues.push('Robots meta contains nofollow (links won’t be followed).');
+    if (!/width=device-width/i.test(meta.viewport||'')) issues.push('Viewport missing or not mobile friendly.');
+    if ((meta.titleLen||0) > 65) issues.push('Title may truncate in SERP; aim ~50–60 chars / ~580px.');
+    if ((meta.metaLen||0) > 165) issues.push('Meta description may truncate; aim ~140–160 chars.');
+    return issues;
+  }
+  function renderGuardrails(issues){
+    var box=document.getElementById('guardrails'), list=document.getElementById('guardrailsList');
+    if(!box||!list) return; if(!issues || !issues.length){ box.style.display='none'; return; }
+    list.innerHTML = issues.map(i=>`<li>${i}</li>`).join('');
+    box.style.display='block';
+  }
+
+  /* === FAQ extractor + Schema === */
+  function extractFAQ(htmlDoc, sample){
+    var qas=[];
+    if (htmlDoc){
+      var blocks=[].slice.call(htmlDoc.querySelectorAll('h2,h3,strong'));
+      blocks.forEach(function(b){
+        var t=(b.textContent||'').trim();
+        if(/\?$/.test(t)){
+          var ans = b.nextElementSibling && /p|div|li/i.test(b.nextElementSibling.tagName) ? (b.nextElementSibling.textContent||'').trim() : '';
+          if (t && ans) qas.push({q:t, a:ans});
+        }
+      });
+    }
+    if (!qas.length && sample){
+      var lines = sample.split(/\n+/).filter(Boolean);
+      for(var i=0;i<lines.length-1;i++){
+        if (/\?$/.test(lines[i]) && lines[i+1] && lines[i+1].length>20){ qas.push({q:lines[i].trim(), a:lines[i+1].trim()}); }
+        if (qas.length>=8) break;
+      }
+    }
+    // dedupe & clamp
+    var seen={}; qas = qas.filter(x=>{ var k=x.q.toLowerCase(); if(seen[k]) return false; seen[k]=1; return true; }).slice(0,10);
+    return qas;
+  }
+  function schemaJSON(meta, url, faqList){
+    var now = new Date().toISOString();
+    var host=''; try{ host=(new URL(url)).origin; }catch(_){}
+    var article = {
+      "@context":"https://schema.org",
+      "@type":"Article",
+      "headline": meta.title || "",
+      "description": meta.metaDesc || "",
+      "datePublished": meta.datePub || now,
+      "dateModified": now,
+      "author": meta.author ? {"@type":"Person","name":meta.author} : undefined,
+      "mainEntityOfPage": {"@type":"WebPage","@id": url}
+    };
+    var faqs = faqList && faqList.length ? {
+      "@context":"https://schema.org",
+      "@type":"FAQPage",
+      "mainEntity": faqList.map(x=>({"@type":"Question","name":x.q,"acceptedAnswer":{"@type":"Answer","text":x.a}}))
+    } : {};
+    var crumbs = {
+      "@context":"https://schema.org",
+      "@type":"BreadcrumbList",
+      "itemListElement":[
+        {"@type":"ListItem","position":1,"name":host.replace(/^https?:\/\//,''),"item":host},
+        {"@type":"ListItem","position":2,"name":(meta.title||'Page'),"item":url}
+      ]
+    };
+    var org = {
+      "@context":"https://schema.org",
+      "@type":"Organization",
+      "name": host.replace(/^https?:\/\//,''),
+      "url": host,
+      "sameAs":[]
+    };
+    var search = {
+      "@context":"https://schema.org",
+      "@type":"WebSite",
+      "url": host,
+      "potentialAction":{
+        "@type":"SearchAction",
+        "target": host+"/?s={search_term_string}",
+        "query-input":"required name=search_term_string"
+      }
+    };
+    function tidy(o){ // remove empty keys
+      if (!o || typeof o!=='object') return o;
+      Object.keys(o).forEach(k=>{ if(o[k]===undefined || o[k]==='' || (Array.isArray(o[k]) && !o[k].length)) delete o[k]; });
+      return o;
+    }
+    return {
+      article: JSON.stringify(tidy(article), null, 2),
+      faq: Object.keys(faqs).length? JSON.stringify(faqs,null,2) : '{}',
+      breadcrumbs: JSON.stringify(crumbs, null, 2),
+      org: JSON.stringify(org, null, 2),
+      search: JSON.stringify(search, null, 2)
+    };
+  }
+  function renderSchemaBlocks(jsons){
+    setText('schemaArticle', jsons.article||'{}');
+    setText('schemaFAQ', jsons.faq||'{}');
+    setText('schemaBreadcrumbs', jsons.breadcrumbs||'{}');
+    setText('schemaOrg', jsons.org||'{}');
+    setText('schemaSearch', jsons.search||'{}');
+    var p = document.getElementById('schemaPanel'); if(p) p.style.display='block';
+  }
+
+  /* === Internal Link Suggestions === */
+  function suggestInternalLinks(htmlDoc, ex, url){
+    var items=[];
+    if (!htmlDoc) return items;
+    var origin=''; try{ origin=new URL(url).origin; }catch(_){}
+    var anchors=[].slice.call(htmlDoc.querySelectorAll('a[href]')).map(a=>{
+      try{ var u = new URL(a.getAttribute('href'), url); return u.origin===origin? u.pathname : null; }catch(e){ return null; }
+    }).filter(Boolean);
+    var uniqPaths = Array.from(new Set(anchors)).filter(p=>p!=='/' && p.length<120).slice(0,80);
+
+    // Build candidate anchors from entities/topics
+    var cands = [].concat(ex.topics||[], ex.orgs||[], ex.people||[]).slice(0,20);
+    uniqPaths.slice(0,20).forEach(function(pth, i){
+      var anchor = cands[i % cands.length] || pth.split('/').pop().replace(/[-_]/g,' ');
+      var reason = 'Topical match via entities/topics';
+      items.push({anchor: anchor, target: pth, reason: reason});
+    });
+    return items.slice(0,10);
+  }
+  function renderInternalLinks(items){
+    var panel=document.getElementById('linksPanel'); var body=document.getElementById('linksBody');
+    if(!panel||!body) return;
+    if(!items || !items.length){ panel.style.display='none'; return; }
+    body.innerHTML = items.map(x=>`<tr class="links-row"><td>${x.anchor}</td><td>${x.target}</td><td>${x.reason}</td></tr>`).join('');
+    panel.style.display='block';
   }
 
   /* ===================== ANALYZE ===================== */
@@ -1344,10 +1448,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
-    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
-    var readPanel = document.getElementById('readabilityPanel'); if(readPanel) readPanel.style.display='none';
-    var entPanel = document.getElementById('entitiesPanel'); if(entPanel) entPanel.style.display='none';
-    var psiPanel = document.getElementById('psiPanel'); if(psiPanel) psiPanel.style.display='none';
+    ['detectorPanel','readabilityPanel','entitiesPanel','topicsPanel','schemaPanel','linksPanel','psiPanel'].forEach(id=>{ var el=document.getElementById(id); if(el) el.style.display='none'; });
 
     // 1) Backend (if present)
     var {ok,data} = await fetchBackend(url);
@@ -1357,12 +1458,14 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var sample = buildSampleFromData(data);
 
     // 3) Try AllOrigins raw HTML (fills meta chips + better sample if needed)
+    var meta={}; var raw=''; var htmlDoc=null;
     try{
-      var raw = await fetchRawHtml(url);
+      raw = await fetchRawHtml(url);
       if(raw){
-        var meta = extractMetaFromHtml(raw, url);
-        data = mergeMeta(data, meta);
-        if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
+        var mx = extractMetaFromHtml(raw, url);
+        meta = mx; data = mergeMeta(data, mx);
+        htmlDoc = mx.doc || null;
+        if((!sample || sample.length<200) && mx.sampleText) sample = mx.sampleText;
       }
     }catch(_){}
 
@@ -1374,16 +1477,20 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }catch(_){}
     }
 
-    // 5) Local detection (prep) + try backend detector FIRST
+    // 5) Local detection + guaranteed item scores
     var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
-    var backendDetect = null;
-    if (sample && sample.length > 30) {
-      backendDetect = await fetchDetect(sample, url);
-    }
-
-    // 6) Scores -> guarantee + UI
     data = ensureScoresExist(data, sample, ensemble);
 
+    // === E-E-A-T heuristics boost (auto-score 10,12,24,25 a bit if detected)
+    var eatBoost = 0;
+    if ((meta.author||'').trim()) eatBoost += 8;         // Author found
+    if ((meta.datePub||'').trim()) eatBoost += 6;        // Date found
+    if ((meta.externalLinks||0) > 2) eatBoost += 6;      // Citations / outbound
+    if ((meta.schema||'')==='yes') eatBoost += 6;        // Some schema present
+    data.itemScores = data.itemScores || {};
+    [10,12,24,25].forEach(k=>{ var base=Number(data.itemScores[k]||60); data.itemScores[k] = clamp(base + eatBoost, 0, 100); });
+
+    // 6) Scores -> UI
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
@@ -1400,29 +1507,39 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rHeadings',  data.headings   ? data.headings   : '—');
     setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
+    setText('rAltCov',    (data.altCov!==undefined && data.altCov!==null) ? (data.altCov+'%') : '—');
 
-    // Detection (prefer backend multi-detector; fallback to local)
-    var detNote = document.getElementById('detNote');
-    if (backendDetect) {
-      applyDetection(backendDetect.humanPct, backendDetect.aiPct, backendDetect.confidence, backendDetect);
-      if (detNote) detNote.textContent = 'Source: backend multi-detector (ZeroGPT/GPTZero/OriginalityAI if configured; otherwise local on server).';
-    } else if (ensemble) {
+    // Snippet simulator preview
+    renderSnippetPreview(url, data);
+
+    // Guardrails
+    renderGuardrails(guardrails(data, url));
+
+    // Detection
+    var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+    var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+    var backendConf = (typeof data.confidence==='number')? data.confidence : null;
+    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
+      applyDetection(hp, ap, backendConf, ensemble || null);
+    } else if (ensemble){
       applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-      if (detNote) detNote.textContent = 'Source: local ensemble (no external APIs).';
-    } else {
-      var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-      var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-      var backendConf = (typeof data.confidence==='number')? data.confidence : 60;
-      if (isFinite(hp) && isFinite(ap)) {
-        applyDetection(hp, ap, backendConf, null);
-        if (detNote) detNote.textContent = 'Source: backend (partial)'; 
-      }
+    } else if (isFinite(hp) && isFinite(ap)){
+      applyDetection(hp, ap, backendConf || 60, null);
     }
 
-    // Readability + Entities
+    // Readability + Answer Target
     var S = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
     renderReadability(S);
-    renderEntitiesTopics(sample||'');
+
+    // Entities (with salience) + Topic Coverage + Internal Links
+    var ex = renderEntitiesTopics(sample||'', htmlDoc||null);
+    var tc = buildTopicCoverage(htmlDoc||null, sample||''); renderTopicCoverage(tc);
+    var links = suggestInternalLinks(htmlDoc||null, ex||{}, url); renderInternalLinks(links);
+
+    // FAQ + Schema
+    var faqList = extractFAQ(htmlDoc||null, sample||'');
+    var jsons = schemaJSON(data||{}, url, faqList);
+    renderSchemaBlocks(jsons);
 
     // Checklist scores + autotick
     window.autoTickByScores(data.itemScores || {});
@@ -1438,6 +1555,14 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
   }
   window.analyze = analyze;
+
+  // Copy buttons (schema + quick)
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-copy]'); if(!t) return;
+    var id = t.getAttribute('data-copy'); var el = document.getElementById(id); if(!el) return;
+    var txt = el.innerText || el.textContent || '';
+    navigator.clipboard?.writeText(txt).then(()=>{ t.textContent='Copied!'; setTimeout(()=>{ t.innerHTML='<i class="fa-regular fa-copy"></i> Copy'; },1200); });
+  });
 
   // Events
   document.addEventListener('DOMContentLoaded', function(){
@@ -1491,10 +1616,9 @@ try{
       el=document.getElementById('humanPct'); if(el) el.textContent='—';
       el=document.getElementById('aiPct'); if(el) el.textContent='—';
       var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
-      var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
-      var readPanel=document.getElementById('readabilityPanel'); if(readPanel){ readPanel.style.display='none'; }
-      var entPanel=document.getElementById('entitiesPanel'); if(entPanel){ entPanel.style.display='none'; }
-      var psiPanel=document.getElementById('psiPanel'); if(psiPanel){ psiPanel.style.display='none'; }
+      ['detectorPanel','readabilityPanel','entitiesPanel','topicsPanel','schemaPanel','linksPanel','psiPanel'].forEach(id=>{ var p=document.getElementById(id); if(p) p.style.display='none'; });
+      var sPrev=document.getElementById('serpPreview'); if(sPrev) sPrev.style.display='none';
+      var g=document.getElementById('guardrails'); if(g) g.style.display='none';
       if (window.Water) window.Water.reset();
     });}
 
