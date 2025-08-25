@@ -222,6 +222,75 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
 }
 /* --- /FIX --- */
+
+/* === HVAI Neo Theme (with Multilingual) ================================= */
+:root{
+  --hvai-bg: radial-gradient(1200px 600px at 85% -10%, rgba(155,92,255,.25), transparent 60%),
+             radial-gradient(1000px 480px at 10% -20%, rgba(2,204,255,.20), transparent 60%);
+  --hvai-card: rgba(17, 20, 31, .66);
+  --hvai-border: rgba(255,255,255,.08);
+  --hvai-head: #e2ccff;
+  --hvai-sub: #96f0ff;
+  --hvai-human: #22c55e;  /* green */
+  --hvai-ai: #ff7a59;     /* orange */
+  --hvai-neutral: #a7b0c0;
+  --hvai-chip: rgba(255,255,255,.06);
+}
+
+.hvai{
+  border:1px solid var(--hvai-border);
+  background: var(--hvai-bg);
+  border-radius: 18px;
+  padding: 14px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 24px rgba(0,0,0,.25) inset, 0 8px 24px rgba(0,0,0,.25);
+}
+.hvai-head{
+  display:flex; align-items:center; gap:.6rem;
+  color:var(--hvai-head); font-weight:900; letter-spacing:.2px;
+  font-size: clamp(1.05rem, 1vw + .9rem, 1.35rem);
+}
+.hvai-head .icon{
+  width:22px; height:22px; opacity:.95; flex:0 0 auto;
+  filter: drop-shadow(0 0 10px rgba(226,204,255,.25));
+}
+.hvai-sub{ color:var(--hvai-sub); font-size:.85rem; opacity:.9; margin:.2rem 0 .3rem; display:inline-block; }
+
+.hvai-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:.6rem 1rem; margin-top:.5rem; }
+.hvai-chip{ display:inline-flex; align-items:center; gap:.45rem; padding:.35rem .6rem; border-radius:999px; background:var(--hvai-chip);
+  border:1px solid var(--hvai-border); color:#e7eef7; font-weight:700; }
+.hvai-chip .icon{ width:16px; height:16px; opacity:.9; }
+
+/* Bars keep your existing classes but refresh colors */
+.hvai-fill.human{ background: linear-gradient(90deg, var(--hvai-human), #29f59d); box-shadow: 0 0 28px rgba(34,197,94,.35); }
+.hvai-fill.ai{ background: linear-gradient(270deg, #ff7a59, #ffb15e); box-shadow: 0 0 28px rgba(255,122,89,.35); }
+
+.hvai-label{ display:flex; align-items:center; justify-content:space-between; gap:1rem; font-weight:800; color:#eaf2ff; }
+.hvai-label .lab{ display:flex; align-items:center; gap:.5rem; }
+.hvai-label .lab .icon{ width:18px; height:18px; }
+
+.hvai .ring .ai-arc{ stroke:var(--hvai-ai) !important; }
+.hvai .ring .human-arc{ stroke:var(--hvai-human) !important; }
+.hvai .ring text{ fill:#eaf2ff !important; font-weight:900; }
+
+/* Language row */
+.hvai .lang-row{ display:flex; align-items:center; gap:.6rem; margin:.6rem 0 .2rem; }
+.hvai .lang-row select{
+  background:var(--hvai-card); color:#eaf2ff; border:1px solid var(--hvai-border);
+  padding:.4rem .6rem; border-radius:10px; font-weight:700;
+}
+.hvai .lang-row .icon{ width:18px; height:18px; }
+
+/* RTL helper for AR/UR */
+.hvai[dir="rtl"] .hvai-label{ flex-direction: row-reverse; }
+.hvai[dir="rtl"] .hvai-label .lab{ flex-direction: row-reverse; }
+.hvai[dir="rtl"] .hvai-meta{ justify-content:flex-end; }
+
+/* small badge */
+.badge-beta{ display:inline-flex; align-items:center; gap:.35rem; padding:.2rem .5rem; border-radius:10px;
+  background:rgba(2,204,255,.12); border:1px solid var(--hvai-border); color:#aaf7ff; font-weight:800; font-size:.72rem; }
+/* ====================================================================== */
+
 /* ==== Readability (ULTRA PRO restyle) ==== */
 :root{
   --read-ac1:#22c55e; /* emerald */
@@ -641,24 +710,40 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     <!-- 1) HUMAN vs AI (Ensemble) -->
     <section id="detectorPanel" class="hvai" style="display:none">
       <div class="hvai-head">
-        <i class="fa-solid fa-users-gear ico ico-purple"></i>
-        <h4>Human vs AI Content (Ensemble)</h4>
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11a5 5 0 1 1 10 0v2h1a2 2 0 0 1 2 2v2h-5v-2H9v2H4v-2a2 2 0 0 1 2-2h1v-2Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="8.5" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg><h4>Human vs AI Content (Ensemble)</h4>
       </div>
+<span class="hvai-sub">Ensemble signals</span> <span class="badge-beta">⚡ Multilingual Beta</span>
       <div class="hvai-meta">
         <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
         <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
+      
+      <div class="lang-row" id="hvaiLangRow">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 12h18M12 3v18M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+        <strong>Language:</strong>
+        <select id="hvaiLang">
+          <option value="en" selected>English</option>
+          <option value="ur">Urdu / اردو</option>
+          <option value="ar">العربية</option>
+          <option value="de">Deutsch</option>
+          <option value="es">Español</option>
+          <option value="pt">Português</option>
+        </select>
       </div>
+    
+</div>
         <div id="hvaiBanner" class="hvai-banner" aria-live="polite" style="display:none"></div>
 
 
       <!-- Animated Human vs AI bars -->
       <div class="hvai-bar">
         <div>
-          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+          <div class="hvai-label"><span class="lab"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12c2.8 0 5-2.2 5-5s-2.2-5-5-5-5 2.2-5 5 2.2 5 5 5Z" stroke="currentColor" stroke-width="1.5"/><path d="M21 22a8.9 8.9 0 0 0-18 0" stroke="currentColor" stroke-width="1.5"/></svg></span> Human-like</span><b id="hvaiHumanVal">—%</b></div>
           <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
         </div>
         <div>
-          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
+          <div class="hvai-label"><span class="lab"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" ry="3" stroke="currentColor" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5"/></svg></span> AI-like</span><b id="hvaiAIVal">—%</b></div>
           <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
         </div>
       </div>
@@ -1675,6 +1760,73 @@ window.addEventListener('error', function(e){
   var s=document.getElementById('analyzeStatus');
   if (s) s.textContent = 'JavaScript error: ' + (e && e.message ? e.message : e);
 });
+</script>
+
+
+<script>
+/* HVAI Multilingual (Beta) */
+(function(){
+  const i18n = {
+    en: { human:"Human-like", ai:"AI-like", conf:"Confidence", langLabel:"Language:", mixed:"Mixed — Signals disagree — review content variety and structure." },
+    ur: { human:"انسانی انداز", ai:"اے آئی انداز", conf:"اعتماد", langLabel:"زبان:", mixed:"Mixed — سگنلز میں اختلاف ہے — مواد کی تنوع اور ساخت دیکھیں۔" },
+    ar: { human:"بِشري", ai:"ذكاء اصطناعي", conf:"الثقة", langLabel:"اللغة:", mixed:"مختلط — الإشارات متباينة — راجع تنوع المحتوى وبنيته." },
+    de: { human:"Menschlich", ai:"KI-ähnlich", conf:"Vertrauen", langLabel:"Sprache:", mixed:"Gemischt — Signale weichen ab — Vielfalt & Struktur prüfen." },
+    es: { human:"Humano", ai:"Parecido a IA", conf:"Confianza", langLabel:"Idioma:", mixed:"Mixto — Señales en desacuerdo — revisa variedad y estructura." },
+    pt: { human:"Humano", ai:"Semelhante à IA", conf:"Confiança", langLabel:"Idioma:", mixed:"Misto — Sinais divergentes — reveja a variedade e a estrutura do conteúdo." }
+  };
+  const langSel = document.getElementById('hvaiLang');
+  const hvai = document.getElementById('detectorPanel');
+
+  function seedKeys(){
+    // tag labels so we can swap reliably
+    document.querySelectorAll('#detectorPanel .hvai-label .lab').forEach(el => {
+      const t = (el.textContent||'').toLowerCase();
+      if (t.includes('human')) el.dataset.i18nKey = 'human';
+      else if (t.includes('ai')) el.dataset.i18nKey = 'ai';
+    });
+    const confChip = document.querySelector('#detectorPanel .hvai-chip');
+    if (confChip && !confChip.dataset.i18nKey && /confidence/i.test(confChip.textContent)) confChip.dataset.i18nKey = 'conf';
+    const row = document.getElementById('hvaiLangRow');
+    if (row){ const strong = row.querySelector('strong'); if (strong) strong.dataset.i18nKey = 'langLabel'; }
+  }
+
+  function applyLang(code){
+    const t = i18n[code] || i18n.en;
+    document.querySelectorAll('#detectorPanel .hvai-label .lab').forEach(el => {
+      const key = el.dataset.i18nKey;
+      if (key && t[key]){
+        // keep icon, replace text node
+        let tn = Array.from(el.childNodes).reverse().find(n => n.nodeType === 3);
+        if (!tn){ tn = document.createTextNode(''); el.appendChild(tn); }
+        tn.nodeValue = ' ' + t[key];
+      }
+    });
+    const confChip = document.querySelector('#detectorPanel .hvai-chip[data-i18n-key="conf"], #detectorPanel .hvai-chip[data-i18nKey="conf"]');
+    if (confChip){
+      confChip.innerHTML = confChip.innerHTML.replace(/Confidence[^:<]*/i, t.conf);
+    }
+    const row = document.getElementById('hvaiLangRow');
+    if (row){
+      const strong = row.querySelector('strong');
+      if (strong) strong.textContent = t.langLabel;
+    }
+    // RTL for AR/UR
+    if (hvai){ hvai.setAttribute('dir', (code==='ar' || code==='ur') ? 'rtl' : 'ltr'); }
+    // Update banner text if present
+    const banner = document.getElementById('hvaiBanner');
+    if (banner && banner.textContent.trim().length){
+      banner.innerHTML = t.mixed;
+      banner.classList.add('show');
+      banner.style.display = 'block';
+    }
+  }
+
+  if (langSel){
+    seedKeys();
+    langSel.addEventListener('change', e => applyLang(e.target.value));
+    applyLang(langSel.value);
+  }
+})();
 </script>
 
 </body>
