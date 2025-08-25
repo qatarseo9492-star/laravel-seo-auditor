@@ -1311,5 +1311,57 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 </script>
 
+
+<script>
+// Ultra-robust Analyze wiring (capture phase + form submit + keydown)
+(function(){
+  function getUrlVal(){
+    var el = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+    return (el && el.value ? el.value.trim() : '');
+  }
+  function doAnalyze(){
+    try{ if (typeof window.analyze === 'function') { try{ window.analyze.__patched__ = true; }catch(e){} } }catch(e){}
+    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(e){}
+    try{ if (typeof window.runPSI === 'function') window.runPSI(getUrlVal()); }catch(e){}
+    return false;
+  }
+
+  // 1) Capture click on button by id (works even if other handlers stop propagation)
+  window.addEventListener('click', function(e){
+    var t = e.target;
+    // walk up to button
+    while (t && t !== document){
+      if (t.id === 'analyzeBtn'){
+        e.preventDefault();
+        doAnalyze();
+        break;
+      }
+      t = t.parentNode;
+    }
+  }, true); // capture!
+
+  // 2) Enter key on URL input
+  document.addEventListener('keydown', function(e){
+    if ((e.key === 'Enter' || e.keyCode === 13)){
+      var a = e.target;
+      if (a && (a.id === 'analyzeUrl' || (a.closest && a.closest('#urlField')))){
+        e.preventDefault();
+        doAnalyze();
+      }
+    }
+  }, true);
+
+  // 3) Form submit (if any) — always run our flow
+  var f = document.getElementById('analyzeForm') || document.querySelector('form[id*="analy"]');
+  if (f){
+    f.addEventListener('submit', function(e){ e.preventDefault(); doAnalyze(); return false; }, true);
+  }
+
+  // 4) Ensure button is enabled
+  var btn = document.getElementById('analyzeBtn');
+  if (btn){ btn.removeAttribute('disabled'); btn.style.pointerEvents = 'auto'; btn.setAttribute('role','button'); btn.setAttribute('tabindex','0'); }
+})();
+</script>
+
 </body>
 </html>
