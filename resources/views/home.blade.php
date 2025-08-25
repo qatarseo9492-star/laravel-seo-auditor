@@ -755,7 +755,7 @@ body::after{
             </label>
           </div>
 
-          <button id="analyzeBtn" type="button" onclick="try{SEMSEO_go()}catch(e){}; if(window.runPSI){runPSI((document.getElementById('analyzeUrl')&&document.getElementById('analyzeUrl').value)||'');} return false;" class="btn btn-analyze">
+          <button id="analyzeBtn" type="button" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
 
@@ -1360,6 +1360,29 @@ document.addEventListener('DOMContentLoaded', function(){
   // 4) Ensure button is enabled
   var btn = document.getElementById('analyzeBtn');
   if (btn){ btn.removeAttribute('disabled'); btn.style.pointerEvents = 'auto'; btn.setAttribute('role','button'); btn.setAttribute('tabindex','0'); }
+})();
+</script>
+
+
+<script>
+(function(){
+  function wire(){
+    var btn = document.getElementById('analyzeBtn');
+    var input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+    if(!btn) return;
+    btn.addEventListener('click', function(e){
+      try{ e.preventDefault(); }catch(_){}
+      try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
+      try{ if (typeof window.runPSI === 'function') window.runPSI((input && input.value) || ''); }catch(_){}
+      return false;
+    });
+    if (input){
+      input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter'){ e.preventDefault(); btn.click(); }
+      });
+    }
+  }
+  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', wire); } else { wire(); }
 })();
 </script>
 
