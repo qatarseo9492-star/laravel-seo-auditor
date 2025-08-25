@@ -7,18 +7,18 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @php
-  use Illuminate\Support\Facades\Route;
   $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
   $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, UX, speed, and Core Web Vitals with colorful, clear insights.';
   $metaImage = asset('og-image.png');
   $canonical = url()->current();
-  $analyzeJsonUrl = Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
-  $analyzeUrl     = Route::has('analyze')      ? route('analyze')      : url('analyze');
-  $psiProxyUrl    = Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
 
-  /* NEW: backend detector route (ZeroGPT or aggregator); safe fallbacks to avoid "Undefined variable $detectUrl" */
-  $detectUrl = Route::has('detect') ? route('detect')
-              : (Route::has('api.detect') ? route('api.detect') : url('api/detect'));
+  $analyzeJsonUrl = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
+  $analyzeUrl     = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
+  $psiProxyUrl    = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi');
+
+  // NEW: backend detector route (supports either name)
+  $detectUrl = \Illuminate\Support\Facades\Route::has('detect')      ? route('detect')
+             : (\Illuminate\Support\Facades\Route::has('api.detect') ? route('api.detect') : url('api/detect'));
 @endphp
 
 <title>{{ $metaTitle }}</title>
