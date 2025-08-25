@@ -861,7 +861,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </div>
 
     <!-- 1) HUMAN vs AI (Ensemble) -->
-    \1
+    
 
   <!-- HVAI Verdict Badge -->
   <div id="hvaiBadge" class="hvai-badge" hidden>
