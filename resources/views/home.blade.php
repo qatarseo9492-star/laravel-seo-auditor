@@ -2080,5 +2080,77 @@ window.addEventListener('error', function(e){
 })();
 </script>
 
+
+<script>
+/* === Guardrails: severity mapping + all-clear badge + chip coloring === */
+(function(){
+  const panel = document.getElementById('guardrails');
+  const list  = document.getElementById('guardrailsList');
+  const badge = document.getElementById('guardBadge');
+  if (!panel || !list || !badge) return;
+
+  function classify(li){
+    const t = (li.textContent || "").toLowerCase();
+    // Heuristic keywords — adjust as needed
+    const bad  = /(noindex|blocked by robots|disallow(ed)?|multiple canonical|duplicate|canonical loop|redirect chain|soft 404|broken|4\d\d|5\d\d)/i;
+    const warn = /(missing canonical|no canonical|meta robots missing|redirect|non-200|mixed|inconsistent)/i;
+    const ok   = /(self-referencing|indexable|200 ok|valid|present|ok)/i;
+
+    if (bad.test(t))   li.dataset.sev = "error";
+    else if (warn.test(t)) li.dataset.sev = "warn";
+    else if (ok.test(t))   li.dataset.sev = "ok";
+    else li.dataset.sev = "warn"; // default cautious
+  }
+
+  function refresh(){
+    const items = Array.from(list.querySelectorAll('li'));
+    items.forEach(classify);
+
+    const hasError = items.some(li => li.dataset.sev === 'error');
+    const hasWarn  = items.some(li => li.dataset.sev === 'warn');
+    const visible  = panel.style.display !== 'none' && (panel.offsetParent !== null);
+    const shouldShow = visible && items.length === 0; // show when no items => clean
+
+    badge.hidden = !(shouldShow);
+    badge.classList.toggle('show', shouldShow);
+  }
+
+  // Initial if already rendered
+  refresh();
+
+  // Observe list changes
+  const obs = new MutationObserver(refresh);
+  obs.observe(list, { childList:true, subtree:true, characterData:true });
+
+  // Canonical/Robots chip coloring
+  const canonB = document.getElementById('rCanonical');
+  const robotsB = document.getElementById('rRobots');
+  const canonChip = canonB && canonB.closest('.chip');
+  const robotsChip = robotsB && robotsB.closest('.chip');
+
+  function colorChip(el, val){
+    if(!el) return;
+    el.classList.remove('ok','warn','bad');
+    const s = (val||"").toLowerCase();
+    if (/noindex|nofollow|disallow|blocked/.test(s)) el.classList.add('bad');
+    else if (/^https?:\/\//.test(s) || /self/.test(s) || /present|ok/.test(s)) el.classList.add('ok');
+    else el.classList.add('warn');
+  }
+
+  function tick(){
+    colorChip(canonChip, canonB && canonB.textContent);
+    colorChip(robotsChip, robotsB && robotsB.textContent);
+  }
+  tick();
+
+  const obs2 = new MutationObserver(tick);
+  if (canonB) obs2.observe(canonB, { childList:true, characterData:true, subtree:true });
+  if (robotsB) obs2.observe(robotsB, { childList:true, characterData:true, subtree:true });
+
+  // Expose manual refresh if needed
+  window.refreshGuardrailsUI = refresh;
+})();
+</script>
+
 </body>
 </html>
