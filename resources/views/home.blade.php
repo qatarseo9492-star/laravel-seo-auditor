@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI dynamic; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
+{{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI: multi-model + multilingual; layouts unchanged) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -15,6 +15,8 @@
   $analyzeJsonUrl = Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
   $analyzeUrl     = Route::has('analyze')      ? route('analyze')      : url('analyze');
   $psiProxyUrl    = Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
+  // NEW: optional backend multi-detector endpoint (older model aggregator)
+  $detectUrl      = Route::has('detect')       ? route('detect')       : url('api/detect');
 @endphp
 
 <title>{{ $metaTitle }}</title>
@@ -146,7 +148,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
 @media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
 
-/* ==== Human vs AI (Ensemble) — dynamic ==== */
+/* ==== Human vs AI (Ensemble or Multi-Model) — unchanged look, multilingual chip added ==== */
 .hvai{margin-top:14px;background:linear-gradient(135deg,rgba(60,220,255,.06),rgba(155,92,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px}
 .hvai-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
 .hvai-head h4{margin:0;font-size:1.08rem}
@@ -238,7 +240,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   window.SEMSEO.ENDPOINTS = {
     analyzeJson: @json($analyzeJsonUrl),
     analyze: @json($analyzeUrl),
-    psi: @json($psiProxyUrl) // server proxy; API key stays hidden
+    psi: @json($psiProxyUrl), // server proxy; API key stays hidden
+    detect: @json($detectUrl) // NEW: multi-detector backend (older model aggregator)
   };
   window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
   window.SEMSEO.READY = false;
@@ -405,13 +408,14 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
-    <!-- 1) HUMAN vs AI (Ensemble) -->
+    <!-- 1) HUMAN vs AI (Multi-Model preferred; ensemble fallback) -->
     <section id="detectorPanel" class="hvai" style="display:none">
       <div class="hvai-head">
         <i class="fa-solid fa-users-gear ico ico-purple"></i>
         <h4>Human vs AI Content (Ensemble)</h4>
       </div>
       <div class="hvai-meta">
+        <span class="hvai-chip"><i class="fa-solid fa-language"></i> Language: <b id="detLanguage">—</b></span>
         <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
         <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
       </div>
@@ -430,7 +434,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
       <!-- Detectors grid -->
       <div class="det-grid" id="detGrid"></div>
-      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no or placeholder percentages.</div>
+      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Backend multi-detector (ZeroGPT/GPTZero/OriginalityAI…) preferred. Local ensemble activates only if backend is unavailable.</div>
     </section>
 
     <!-- 2) READABILITY INSIGHTS (Upgraded) -->
@@ -582,7 +586,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             <linearGradient id="compGrad" x1="0" y1="0" x2="1" y2="1"><stop id="compStop1" offset="0%" stop-color="#3de2ff"/><stop id="compStop2" offset="100%" stop-color="#9b5cff"/></linearGradient>
             <path id="compWave" d="M0 80 Q 50 60 100 80 T 200 80 T 300 80 T 400 80 T 500 80 T 600 80 V 160 H 0 Z"/>
           </defs>
-          <g clip-path="compRound)">
+          <g clip-path="url(#compRound)">
             <rect x="0" y="0" width="600" height="140" fill="#0b0d21"/>
             <g clip-path="url(#compFillClip)">
               <g class="comp-wave1 multiHue"><use href="#compWave" x="0" fill="url(#compGrad)"/><use href="#compWave" x="600" fill="url(#compGrad)"/></g>
@@ -788,6 +792,23 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return {ok,data,status};
   }
 
+  // NEW: backend multi-detector fetch (older model aggregator). Falls back safely.
+  async function fetchDetections(url, sample, lang){
+    try{
+      const payload = { url, sample: (sample||'').slice(0,140000), language: lang||'' , _token: CSRF };
+      const r = await fetch((window.SEMSEO.ENDPOINTS.detect||'/api/detect'), {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},
+        body: JSON.stringify(payload)
+      });
+      const j = await r.json();
+      if (!j || j.ok===false) throw new Error(j && j.error ? j.error : 'detect error');
+      return { ok:true, data:j };
+    }catch(e){
+      return { ok:false, error:e && e.message ? e.message : String(e) };
+    }
+  }
+
   async function fetchRawHtml(url){
     try{
       const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
@@ -885,56 +906,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl };
   }
 
-  // NEW: richer, dynamic ensemble detector to avoid "fixed" scores
   function detectUltra(text){
     var s=_prep(text||'');
-    // Short text fallback
-    if (s.wordCount < 40){
-      var aiQuick = clamp(72 - Math.min(40, s.wordCount)*1.1, 22, 72);
-      return {
-        humanPct: clamp(100-aiQuick,0,100),
-        aiPct: clamp(aiQuick,0,100),
-        confidence: clamp(42 + Math.log((s.wordCount||1)+1)*8, 45, 70),
-        detectors: [{key:'short',label:'Short Text Heuristic',ai:Math.round(aiQuick)}],
-        _s:s
-      };
-    }
-
-    // Helper mapping to 0..100 where 100 = more AI-like
-    function score(x, low, high, invert){
-      var t = (x - low) / (high - low);
-      t = clamp(t, 0, 1);
-      if (invert) t = 1 - t;
-      return Math.round(t*100);
-    }
-
-    // Individual detectors
-    var d_ttr    = score(s.TTR,       0.30, 0.65, true);  // lower variety -> more AI
-    var d_cov    = score(s.cov,       0.30, 0.65, true);  // less sentence length variance -> more AI
-    var d_rep    = score(s.triRepeatRatio, 0.02, 0.20, false); // more repetition -> more AI
-    var d_awl    = score(s.avgWordLen,4.6,  6.2,  false); // longer words -> more AI
-    var d_hapax  = score(s.hapaxRatio,0.35, 0.70, true);  // fewer unique singletons -> more AI
-    var d_asl    = score(s.asl,       14,   28,   false); // longer sentences -> more AI
-
-    var parts = [
-      {key:'ttr',   label:'Lexical Variety (TTR)', ai:d_ttr, w:24},
-      {key:'cov',   label:'Sentence Variability',  ai:d_cov, w:18},
-      {key:'rep',   label:'N-gram Repetition',     ai:d_rep, w:20},
-      {key:'awl',   label:'Avg Word Length',       ai:d_awl, w:12},
-      {key:'hapax', label:'Unique-word Ratio',     ai:d_hapax,w:12},
-      {key:'asl',   label:'Sentence Length',       ai:d_asl, w:14},
-    ];
-    var totalW = parts.reduce(function(a,b){return a+b.w;},0) || 1;
-    var ai = Math.round(parts.reduce(function(a,b){return a + b.ai*b.w;},0)/totalW);
-    var conf = clamp(50 + Math.log((s.wordCount||1)+1)*10 + (s.wordCount>500?6:0) - (s.wordCount<120?4:0), 55, 96);
-
-    return {
-      humanPct: clamp(100-ai,0,100),
-      aiPct: clamp(ai,0,100),
-      confidence: conf,
-      detectors: parts,
-      _s:s
-    };
+    if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
+    var ai=10; var covT=0.45; if(s.cov<covT) ai+=clamp((covT-s.cov)/covT,0,1)*25; var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18;
+    var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
+    return { humanPct: 100-clamp(Math.round(ai),0,100), aiPct: clamp(Math.round(ai),0,100), confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai:clamp(Math.round(ai),0,100),w:1}], _s:s };
   }
 
   function deriveItemScoresFromSignals(s){
@@ -980,16 +957,28 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return data;
   }
 
-  /* === Human vs AI rendering === */
-  function resetHVAI(){
-    var hv = document.getElementById('hvaiHumanVal'), av=document.getElementById('hvaiAIVal');
-    var hf = document.getElementById('hvaiHumanFill'), af=document.getElementById('hvaiAIFill');
-    if(hv) hv.textContent='—%'; if(av) av.textContent='—%';
-    if(hf) hf.style.width='0%'; if(af) af.style.width='0%';
-    var grid=document.getElementById('detGrid'); if(grid) grid.innerHTML='';
-    var conf=document.getElementById('detConfidence'); if(conf) conf.textContent='—';
+  /* === Language detection (backend preferred; light heuristics fallback) === */
+  function prettyLang(code){
+    if(!code) return '—';
+    var map={en:'English',es:'Spanish',fr:'French',de:'German',it:'Italian',pt:'Portuguese',ru:'Russian',uk:'Ukrainian',ar:'Arabic',fa:'Persian',tr:'Turkish',hi:'Hindi',bn:'Bengali',ur:'Urdu',zh:'Chinese',ja:'Japanese',ko:'Korean',vi:'Vietnamese',th:'Thai',id:'Indonesian',ms:'Malay',ta:'Tamil'};
+    return (map[code.toLowerCase()]||code.toUpperCase());
+  }
+  function guessLangQuick(text){
+    var t=(text||'').slice(0,4000);
+    if (/[一-龯ぁ-ゔァ-ヴー々〆〤]/.test(t)) return 'ja';
+    if (/[가-힣]/.test(t)) return 'ko';
+    if (/[\u4e00-\u9fff]/.test(t)) return 'zh';
+    if (/[А-Яа-яЁё]/.test(t)) return 'ru';
+    if (/[ء-ي]/.test(t)) return 'ar';
+    if (/[ก-๙]/.test(t)) return 'th';
+    if (/[א-ת]/.test(t)) return 'he';
+    if (/[ह-ॿ]/.test(t)) return 'hi';
+    if (/[ა-ჰ]/.test(t)) return 'ka';
+    // Latin default
+    return 'en';
   }
 
+  /* === Human vs AI rendering === */
   function renderDetectors(res){
     var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
     if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
@@ -1004,37 +993,22 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if(!grid) return; grid.innerHTML = '';
     (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
       var id='det-'+d.key; var wrap=document.createElement('div');
-      wrap.className='det-item'; wrap.innerHTML =
-        '<div class="det-row"><div class="det-label">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+(Math.round(d.ai)||0)+'</div></div>'+
-        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+(clamp(d.ai||0,0,100))+'%"></div></div>';
+      wrap.className='det-item'; 
+      var aiVal = clamp(Number(d.ai)||0,0,100);
+      wrap.innerHTML =
+        '<div class="det-row"><div class="det-label">'+(d.label||d.key)+'</div><div class="det-score" id="'+id+'-score">'+aiVal+'</div></div>'+
+        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+aiVal+'%"></div></div>';
       grid.appendChild(wrap);
     });
   }
-
-  function applyDetection(humanPct, aiPct, confidence, detectors){
+  function applyDetection(humanPct, aiPct, confidence, breakdown){
     var writer = (isFinite(humanPct) && isFinite(aiPct) && humanPct>=aiPct) ? 'Likely Human' : 'AI-like';
     var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
     var hp = document.getElementById('humanPct'), ap = document.getElementById('aiPct');
     if(hp) hp.textContent = isFinite(humanPct)? Math.round(humanPct) : '—';
     if(ap) ap.textContent = isFinite(aiPct)?    Math.round(aiPct)   : '—';
-    renderDetectors({humanPct, aiPct, confidence, detectors});
-  }
-
-  // NEW: choose backend vs. local to avoid "fixed" backend scores
-  function pickDetection(backend, ensemble){
-    var hasBackend = isFinite(backend?.humanPct) && isFinite(backend?.aiPct) &&
-                     backend.humanPct>=0 && backend.humanPct<=100 && backend.aiPct>=0 && backend.aiPct<=100;
-    var bConf = isFinite(backend?.confidence) ? backend.confidence : 0;
-    var looksPlaceholder = false;
-    if (hasBackend){
-      var bh=Math.round(backend.humanPct), ba=Math.round(backend.aiPct);
-      looksPlaceholder = (bh===ba) || (bh===0 && ba===0);
-    }
-    if (!hasBackend || bConf<65 || looksPlaceholder){
-      return {humanPct: ensemble.humanPct, aiPct: ensemble.aiPct, confidence: ensemble.confidence, detectors: ensemble.detectors};
-    }
-    // Use backend headline but show local breakdown so the grid isn't static
-    return {humanPct: backend.humanPct, aiPct: backend.aiPct, confidence: bConf, detectors: ensemble.detectors};
+    var res = {humanPct:humanPct, aiPct:aiPct, confidence:confidence, detectors:(breakdown && breakdown.detectors)||[{key:'stylometry',label:'Stylometry',ai:aiPct||0}]};
+    renderDetectors(res);
   }
 
   /* === Readability rendering === */
@@ -1095,26 +1069,33 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   function extractEntities(text){
     var res = {people:[], orgs:[], places:[], topics:[], software:[], games:[]};
     var clean=(text||'').replace(/\s+/g,' ');
+    // naive capitalized tokens as candidates
     var cand = (clean.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || []).slice(0, 800);
     var stop = new Set(['The','A','An','This','That','And','Or','Of','In','On','To','For','By','With','Your','Our','You','We','It','At','From','As','Be','Is','Are','Was','Were','Not']);
     var uniq={};
     cand.forEach(function(c){ if(stop.has(c)) return; var k=c.trim(); if(k.length<2||k.length>48) return; uniq[k]=1; });
     var uniqList = Object.keys(uniq).slice(0,120);
+
+    // very light heuristics
     uniqList.forEach(function(n){
       if (/\b(Inc|LLC|Ltd|Corporation|Company|Corp|Studio|Labs|University|College)\b/.test(n)) res.orgs.push(n);
       else if (/\b(City|Town|Province|State|Country|Park|River|Lake|Valley|Mountain)\b/.test(n)) res.places.push(n);
       else if (/\b(Mr|Mrs|Ms|Dr|Prof)\b/.test(n) || n.split(' ').length>=2) res.people.push(n);
       else res.topics.push(n);
     });
+
+    // software / apk / games (keyword probes)
     var low = clean.toLowerCase();
     var swTerms = (low.match(/\b(software|app|application|android|ios|windows|mac|linux|apk|exe|download|install|update|version)\b/g) || []);
-    if (swTerms.length){
+    if (swTerms.length){ // pick key tokens with dots or version-like
       var soft = (clean.match(/\b([A-Z][A-Za-z0-9\.\-\+]{2,})\b/g) || []).filter(x=>/\b(Android|iOS|Windows|Mac|Linux|Pro|Studio|Editor|App|SDK|Tool)\b/.test(x) || /v?\d+\.\d+/.test(x));
       res.software = Array.from(new Set(soft)).slice(0,20);
     }
     if (/\bapk\b/i.test(low) || /\.apk\b/i.test(low)){ res.software.push('APK'); }
     var games = (clean.match(/\b([A-Z][A-Za-z0-9\-\s]{2,} (?:Game|Games|Edition|Remastered|Online))\b/g) || []);
     if (games.length) res.games = Array.from(new Set(games)).slice(0,20);
+
+    // clamp lists
     res.people = res.people.slice(0,20);
     res.orgs = res.orgs.slice(0,20);
     res.places = res.places.slice(0,20);
@@ -1178,6 +1159,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       if (typeof cls==='number'){ setText('psiCls', cls.toFixed(3)); barPct('psiClsBar', cls, 0.1, 0.4); }
       if (typeof ttfb==='number'){ setText('psiTtfb', Math.round(ttfb)); barPct('psiTtfbBar', ttfb, 800, 2500); }
 
+      // Advice list (simple heuristics)
       var tips=[];
       if (lcp>2500) tips.push('Optimize hero image (compress, proper size, lazy-load below-the-fold).');
       if (inp>200) tips.push('Reduce main-thread work (code-split, defer non-critical JS).');
@@ -1190,6 +1172,14 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     }catch(e){
       if (note) note.textContent = 'PSI error: ' + (e && e.message ? e.message : e);
     }
+  }
+
+  /* ===================== PICK DETECTION (Backend multi-model preferred) ===================== */
+  function pickDetection(backend, ensemble){
+    // Accept backend if it supplies multiple detectors or sensible scores
+    if (backend && (Array.isArray(backend.detectors) && backend.detectors.length >= 2)) return backend;
+    if (backend && isFinite(backend.aiPct) && isFinite(backend.humanPct) && (backend.confidence||0) >= 60) return backend;
+    return ensemble ? { humanPct: ensemble.humanPct, aiPct: ensemble.aiPct, confidence: ensemble.confidence, detectors: ensemble.detectors } : null;
   }
 
   /* ===================== ANALYZE ===================== */
@@ -1205,10 +1195,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
-    var detPanel = document.getElementById('detectorPanel'); if(detPanel) { detPanel.style.display='none'; resetHVAI(); }
+    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
     var readPanel = document.getElementById('readabilityPanel'); if(readPanel) readPanel.style.display='none';
     var entPanel = document.getElementById('entitiesPanel'); if(entPanel) entPanel.style.display='none';
     var psiPanel = document.getElementById('psiPanel'); if(psiPanel) psiPanel.style.display='none';
+    var langChip = document.getElementById('detLanguage'); if (langChip) langChip.textContent='—';
 
     // 1) Backend (if present)
     var {ok,data} = await fetchBackend(url);
@@ -1227,7 +1218,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }
     }catch(_){}
 
-    // 4) Jina Reader fallback
+    // 4) Readability-safe readable text fallback
     if ((!sample || sample.length < 200)){
       if (statusEl) statusEl.textContent = 'Getting readable text…';
       try{ var read = await fetchReadableText(url);
@@ -1235,11 +1226,38 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }catch(_){}
     }
 
-    // 5) Local detection + guaranteed item scores
+    // 5) Light language detection (backend may override)
+    var lang = guessLangQuick(sample||'');
+    if (langChip) langChip.textContent = prettyLang(lang);
+
+    // 6) Local detection (always computed for fallback + UI)
     var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+
+    // 7) Ask backend multi-detector (older model aggregator) if available
+    var backendDet = null;
+    try{
+      if (statusEl) statusEl.textContent = 'Checking Human vs AI (multi-model)…';
+      const detRes = await fetchDetections(url, sample||'', lang||'');
+      if (detRes.ok && detRes.data){
+        const j = detRes.data;
+        // normalize expected shape
+        backendDet = {
+          humanPct: (typeof j.humanPct==='number') ? j.humanPct : (isFinite(j.aiPct) ? 100 - Number(j.aiPct) : undefined),
+          aiPct:    (typeof j.aiPct==='number')    ? j.aiPct    : undefined,
+          confidence: (typeof j.confidence==='number') ? j.confidence : (j.language && j.language.confidence ? Math.round(Number(j.language.confidence)*100) : 65),
+          detectors: Array.isArray(j.detectors) ? j.detectors.map(function(d){
+            return { key: d.key || (d.label||'det').toLowerCase(), label: d.label || (d.key||'Detector'), ai: Number(d.ai)||0 };
+          }) : []
+        };
+        // language from backend if provided
+        if (j.language && j.language.code && langChip){ lang = j.language.code; langChip.textContent = prettyLang(lang); }
+      }
+    }catch(e){ /* silent fallback */ }
+
+    // 8) Ensure checklist + scores exist
     data = ensureScoresExist(data, sample, ensemble);
 
-    // 6) Scores -> UI
+    // 9) Scores -> UI
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
@@ -1257,24 +1275,18 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
-    // Pick detection to avoid fixed/placeholder values
-    var chosen;
-    if (ensemble){
-      chosen = pickDetection(
-        (isFinite(data.humanPct) && isFinite(data.aiPct)) ? {humanPct:data.humanPct, aiPct:data.aiPct, confidence:Number(data.confidence)||0} : null,
-        ensemble
-      );
-      applyDetection(chosen.humanPct, chosen.aiPct, chosen.confidence, chosen.detectors);
-    } else if (isFinite(data.humanPct) && isFinite(data.aiPct)) {
-      applyDetection(data.humanPct, data.aiPct, Number(data.confidence)||60, null);
+    // 10) Detection (backend multi-model preferred)
+    var chosen = pickDetection(backendDet, ensemble);
+    if (chosen){
+      applyDetection(chosen.humanPct, chosen.aiPct, chosen.confidence, chosen);
     }
 
-    // Readability + Entities
+    // 11) Readability + Entities
     var S = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
     renderReadability(S);
     renderEntitiesTopics(sample||'');
 
-    // Checklist scores + autotick
+    // 12) Checklist scores + autotick
     window.autoTickByScores(data.itemScores || {});
 
     if (window.Water) window.Water.finish();
@@ -1298,12 +1310,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       if (input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); analyze(); }}); }
       var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
       var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
-
-      // Scroll helpers for HVAI buttons
-      var vH=document.getElementById('viewHumanBtn'), vA=document.getElementById('viewAIBtn');
-      function focusHVAI(){ var p=document.getElementById('detectorPanel'); if(p){ p.style.display='block'; p.scrollIntoView({behavior:'smooth', block:'center'}); } }
-      if(vH) vH.addEventListener('click', function(e){ e.preventDefault(); focusHVAI(); });
-      if(vA) vA.addEventListener('click', function(e){ e.preventDefault(); focusHVAI(); });
 
       window.SEMSEO.READY = true;
       if (window.SEMSEO.QUEUE>0){ window.SEMSEO.QUEUE=0; analyze(); }
@@ -1348,7 +1354,6 @@ try{
       el=document.getElementById('aiPct'); if(el) el.textContent='—';
       var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
       var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
-      if (window.resetHVAI) resetHVAI();
       var readPanel=document.getElementById('readabilityPanel'); if(readPanel){ readPanel.style.display='none'; }
       var entPanel=document.getElementById('entitiesPanel'); if(entPanel){ entPanel.style.display='none'; }
       var psiPanel=document.getElementById('psiPanel'); if(psiPanel){ psiPanel.style.display='none'; }
