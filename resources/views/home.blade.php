@@ -171,6 +171,57 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .det-bar{margin-top:.35rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
 
+
+/* --- FIX: Prevent HVAI banner/toast or gauge from overlapping content (2025-08-25) --- */
+.hvai{ 
+  display:grid; 
+  grid-template-areas:
+    "head"
+    "meta"
+    "banner"
+    "bars"
+    "grid"
+    "note";
+}
+.hvai-head{ grid-area: head; }
+.hvai-meta{ grid-area: meta; }
+.hvai-banner{ grid-area: banner; }
+.hvai-bar{ grid-area: bars; }
+.det-grid{ grid-area: grid; }
+#detNote{ grid-area: note; }
+
+.hvai-banner{
+  display:none;
+  margin:.4rem 0 .6rem;
+  padding:.6rem .8rem;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:linear-gradient(135deg, rgba(61,226,255,.10), rgba(155,92,255,.10));
+  font-weight:900;
+}
+.hvai-banner.show{ display:block; }
+
+/* If external detector injects .toast/.banner as absolute overlay, normalize it into flow */
+.hvai > .toast, .hvai > .banner, .hvai [data-toast], .hvai [data-banner]{
+  position: static !important;
+  inset: auto !important;
+  display:block !important;
+  margin:.4rem 0 .6rem !important;
+  z-index:auto !important;
+}
+
+/* If a donut/ring gauge exists on the right, ensure it wraps instead of overlapping */
+.hvai .gauge, .hvai .ring, .hvai .donut, .hvai svg[viewBox*="200 200"]{
+  max-width:320px;
+  width:100%;
+  margin-left:auto;
+}
+@media (max-width:900px){
+  .hvai .gauge, .hvai .ring, .hvai .donut, .hvai svg[viewBox*="200 200"]{
+    margin:0 auto;
+  }
+}
+/* --- /FIX --- */
 /* ==== Readability (ULTRA PRO restyle) ==== */
 :root{
   --read-ac1:#22c55e; /* emerald */
@@ -597,6 +648,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
         <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
       </div>
+        <div id="hvaiBanner" class="hvai-banner" aria-live="polite" style="display:none"></div>
+
 
       <!-- Animated Human vs AI bars -->
       <div class="hvai-bar">
@@ -1148,7 +1201,26 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if(hf) hf.style.width = Math.max(0, Math.min(100, res.humanPct||0)) + '%';
     if(af) af.style.width = Math.max(0, Math.min(100, res.aiPct||0)) + '%';
 
-    var panel = document.getElementById('detectorPanel'); if(panel) panel.style.display='block';
+    var panel = document.getElementById('detectorPanel');
+    // Fix overlap: move any injected toast/banner into the reserved banner slot
+    try{
+      var banner = document.getElementById('hvaiBanner');
+      if (panel && banner){
+        var stray = panel.querySelector('.toast, .banner, [data-toast], [data-banner]');
+        if (stray && stray !== banner){
+          banner.innerHTML = '';
+          banner.appendChild(stray);
+          banner.classList.add('show');
+          stray.style.position = 'static';
+          stray.style.margin = '0';
+        } else {
+          // If nothing to host, hide the slot (keeps layout tidy)
+          banner.classList.remove('show');
+          if (!banner.textContent.trim()) banner.style.display = 'none'; else banner.style.display = 'block';
+        }
+      }
+    }catch(_){};
+ if(panel) panel.style.display='block';
     if(!grid) return; grid.innerHTML = '';
     (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
       var id='det-'+d.key; var wrap=document.createElement('div');
