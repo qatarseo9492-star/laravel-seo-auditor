@@ -1,14 +1,6 @@
-<?php
-
-return [
-
-    // ...your other services...
-
-    'zerogpt' => [
-        'key'    => env('ZERO_GPT_API_KEY'),
-        // "business" (api.zerogpt.com) or "rapidapi" (zerogpt.p.rapidapi.com)
-        'flavor' => env('ZERO_GPT_API_FLAVOR', 'business'),
-        'base'   => env('ZERO_GPT_API_BASE', 'https://api.zerogpt.com'),
-    ],
-
-];
+'pagespeed' => [
+    'key'       => env('PAGESPEED_API_KEY'),
+    'endpoint'  => env('PAGESPEED_ENDPOINT', 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'),
+    'timeout'   => env('PAGESPEED_TIMEOUT', 20),
+    'cache_ttl' => env('PAGESPEED_CACHE_TTL', 60),
+],
