@@ -876,7 +876,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </section>
 
     <!-- 4) SITE SPEED & CORE WEB VITALS (End) -->
-    <section class="psi" id="psiPanel" style="display:none" data-psi-endpoint="/api/psi">
+    <section class="psi" id="psiPanel" data-psi-endpoint="/api/psi">
       <div class="psi-head">
         <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
         <h4>Site Speed & Core Web Vitals</h4>
@@ -1016,15 +1016,23 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 
 
+
+
+
 <script>
 (function(){
   const apiPublic = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
-  const section = document.getElementById('psiPanel') || document.querySelector('section.psi');
-  const endpoint = section && section.dataset ? section.dataset.psiEndpoint : null;
-  // Use the REAL input id used in your markup
+  const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
+  if (!panel) return;
+  const endpoint = panel.dataset ? panel.dataset.psiEndpoint : null;
   const urlInput = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
   const runBtn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
-  const strategyEl = document.getElementById('psiStrategy'); // this is a <b> in your UI (mobile/desktop)
+  const strategyEl = document.getElementById('psiStrategy'); // "mobile" / "desktop"
+
+  function ensureVisible(){
+    if (panel.style && panel.style.display === 'none'){ panel.style.display = ''; }
+    panel.classList.add('psi-ready');
+  }
 
   function badge(metric, value){
     if (metric==='LCP'){ if (value<=2500) return ['fast','Good']; if (value<=4000) return ['ok','Needs improv.']; return ['slow','Poor']; }
@@ -1034,13 +1042,9 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
 
   async function runPSI(targetUrl){
+    ensureVisible();
     const raw = (targetUrl || (urlInput && urlInput.value) || '').trim();
-    if (!raw){
-      // Try to pull from any previously analyzed value stored on the page
-      const stash = section && section.getAttribute('data-last-url');
-      if (stash){ return runPSI(stash); }
-      return; // silent fail instead of alert to avoid UX interruption
-    }
+    if (!raw){ return; } // don't alert; keep UX quiet
     const strategy = (strategyEl && (strategyEl.textContent||'').trim().toLowerCase()) || 'mobile';
     const qs = `url=${encodeURIComponent(raw)}&strategy=${encodeURIComponent(strategy)}&category=performance&category=accessibility&category=seo&category=best-practices`;
 
@@ -1056,26 +1060,25 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       const r = await fetch(`${apiPublic}?${qs}`);
       res = await r.json();
     }
-    section && section.setAttribute('data-last-url', raw);
+    panel.setAttribute('data-last-url', raw);
     renderPSI(res);
   }
 
   function renderPSI(json){
     try{
       const perfEl = document.getElementById('psiPerf');
-      const perf = json && json.lighthouseResult && json.lighthouseResult.categories && json.lighthouseResult.categories.performance ? Math.round(json.lighthouseResult.categories.performance.score*100) : null;
-      if (perfEl && perf!=null){ perfEl.textContent = perf + ' / 100'; }
+      const perf = json?.lighthouseResult?.categories?.performance?.score;
+      if (perfEl && typeof perf === 'number'){ perfEl.textContent = Math.round(perf*100) + ' / 100'; }
 
-      // Prefer field data
-      const fx = json.loadingExperience && json.loadingExperience.metrics || {};
-      const LCPf = fx.LARGEST_CONTENTFUL_PAINT_MS && fx.LARGEST_CONTENTFUL_PAINT_MS.percentile || null;
-      const CLSf = fx.CUMULATIVE_LAYOUT_SHIFT_SCORE && fx.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile/100 || null;
-      const INPf = fx.INTERACTION_TO_NEXT_PAINT && fx.INTERACTION_TO_NEXT_PAINT.percentile || null;
+      const fx = json.loadingExperience?.metrics || {};
+      const LCPf = fx.LARGEST_CONTENTFUL_PAINT_MS?.percentile ?? null;
+      const CLSf = (fx.CUMULATIVE_LAYOUT_SHIFT_SCORE?.percentile ?? null) / 100;
+      const INPf = fx.INTERACTION_TO_NEXT_PAINT?.percentile ?? null;
 
-      const audits = json.lighthouseResult && json.lighthouseResult.audits || {};
-      const LCPlab = audits['largest-contentful-paint'] && audits['largest-contentful-paint'].numericValue || null;
-      const CLSlab = audits['cumulative-layout-shift'] && audits['cumulative-layout-shift'].numericValue || null;
-      const INPlab = audits['interaction-to-next-paint'] && audits['interaction-to-next-paint'].numericValue || null;
+      const audits = json.lighthouseResult?.audits || {};
+      const LCPlab = audits['largest-contentful-paint']?.numericValue ?? null;
+      const CLSlab = audits['cumulative-layout-shift']?.numericValue ?? null;
+      const INPlab = audits['interaction-to-next-paint']?.numericValue ?? null;
 
       const LCP = LCPf || LCPlab || 0;
       const CLS = (CLSf!=null ? CLSf : CLSlab) || 0;
@@ -1103,23 +1106,28 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     }catch(e){ console.error('PSI render error', e, json); }
   }
 
-  // Hook the existing app button
+  // 1) Bind the visible Analyze button
   if (runBtn){
-    runBtn.addEventListener('click', function(ev){
-      // do not block existing SEMSEO_go(); let it run first
-      setTimeout(()=>runPSI(), 50);
+    runBtn.addEventListener('click', function(){
+      setTimeout(()=>runPSI(), 60);
     });
   }
-  // Also hook into SEMSEO_go directly
+
+  // 2) Patch SEMSEO_go to also run PSI after app analysis
   const originalSEMSEO = window.SEMSEO_go;
   window.SEMSEO_go = function(){
     try{ if (typeof originalSEMSEO === 'function') originalSEMSEO(); }catch(e){}
-    runPSI();
+    setTimeout(()=>runPSI(), 150);
   };
+  // Enter key runs PSI
+  if (urlInput){
+    urlInput.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){ e.preventDefault(); ensureVisible(); setTimeout(()=>runPSI(), 60); }
+    });
+  }
 
-  // Auto-run if an URL is already filled
-  const pre = urlInput && urlInput.value && urlInput.value.trim();
-  if (pre){ setTimeout(()=>runPSI(pre), 200); }
+  // 3) Auto-show section if URL is prefilled
+  if (urlInput && urlInput.value && urlInput.value.trim()){ ensureVisible(); }
 })();
 </script>
 
