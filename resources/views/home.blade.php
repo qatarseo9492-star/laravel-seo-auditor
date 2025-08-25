@@ -7,17 +7,18 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @php
-  $metaTitle       = 'Semantic SEO Master • Ultra Tech Global';
+  use Illuminate\Support\Facades\Route;
+  $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
   $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, UX, speed, and Core Web Vitals with colorful, clear insights.';
-  $metaImage       = asset('og-image.png');
-  $canonical       = url()->current();
+  $metaImage = asset('og-image.png');
+  $canonical = url()->current();
+  $analyzeJsonUrl = Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
+  $analyzeUrl     = Route::has('analyze')      ? route('analyze')      : url('analyze');
+  $psiProxyUrl    = Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
 
-  // Use fully-qualified facade in Blade to avoid "use ... inside function" fatal error
-  $analyzeJsonUrl  = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
-  $analyzeUrl      = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
-  $psiProxyUrl     = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
-  // NEW: backend detector endpoint or fallback
-  $detectUrl       = \Illuminate\Support\Facades\Route::has('detect')       ? route('detect')       : url('api/detect');
+  /* NEW: backend detector route (ZeroGPT or aggregator); safe fallbacks to avoid "Undefined variable $detectUrl" */
+  $detectUrl = Route::has('detect') ? route('detect')
+              : (Route::has('api.detect') ? route('api.detect') : url('api/detect'));
 @endphp
 
 <title>{{ $metaTitle }}</title>
@@ -242,8 +243,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     analyzeJson: @json($analyzeJsonUrl),
     analyze: @json($analyzeUrl),
     psi: @json($psiProxyUrl), // server proxy; API key stays hidden
-    // NEW: backend detector endpoint (works even with no API keys; local server ensemble)
-    detect: @json($detectUrl)
+    detect: @json($detectUrl) // NEW: backend detector endpoint
   };
   window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
   window.SEMSEO.READY = false;
@@ -793,25 +793,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return {ok,data,status};
   }
 
-  // NEW: backend multi-detector (works with or without API keys; server may compute local ensemble)
-  async function fetchDetect(text, url){
-    try{
-      const r = await fetch((window.SEMSEO.ENDPOINTS.detect || '/api/detect'),{
-        method:'POST',
-        headers:{
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'X-Requested-With':'XMLHttpRequest',
-          'X-CSRF-TOKEN': CSRF
-        },
-        body: JSON.stringify({ text, url })
-      });
-      if(!r.ok) return null;
-      const j = await r.json();
-      return (j && j.ok) ? j : null;
-    }catch(_){ return null; }
-  }
-
   async function fetchRawHtml(url){
     try{
       const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
@@ -861,6 +842,27 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }
     });
     return into;
+  }
+
+  /* ============ NEW: backend detector helper (ZeroGPT or aggregator) ============ */
+  async function detectTextBackend(text, url){
+    if (!window.SEMSEO.ENDPOINTS.detect) return { ok:false, error:'No detect endpoint' };
+    try{
+      const r = await fetch(window.SEMSEO.ENDPOINTS.detect, {
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'Accept':'application/json',
+          'X-Requested-With':'XMLHttpRequest',
+          'X-CSRF-TOKEN': CSRF
+        },
+        body: JSON.stringify({ text: String(text||'').slice(0,48000), url })
+      });
+      const j = await r.json().catch(()=>null);
+      return j || { ok:false, error:'Bad JSON' };
+    }catch(e){
+      return { ok:false, error:String(e) };
+    }
   }
 
   /* ===================== Stylometry & Readability ===================== */
@@ -1197,16 +1199,13 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }catch(_){}
     }
 
-    // 5) Local detection (prep) + try backend detector FIRST
+    // 5) Local detection candidate (for fallback)
     var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
-    var backendDetect = null;
-    if (sample && sample.length > 30) {
-      backendDetect = await fetchDetect(sample, url);
-    }
 
-    // 6) Scores -> guarantee + UI
+    // 6) Guarantee item scores even if backend missing
     data = ensureScoresExist(data, sample, ensemble);
 
+    // 7) Scores -> UI
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
@@ -1224,30 +1223,33 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
-    // Detection (prefer backend multi-detector; fallback to local)
-    var detNote = document.getElementById('detNote');
-    if (backendDetect) {
-      applyDetection(backendDetect.humanPct, backendDetect.aiPct, backendDetect.confidence, backendDetect);
-      if (detNote) detNote.textContent = 'Source: backend multi-detector (ZeroGPT/GPTZero/OriginalityAI if configured; otherwise local on server).';
-    } else if (ensemble) {
-      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-      if (detNote) detNote.textContent = 'Source: local ensemble (no external APIs).';
+    /* 8) Detection — backend preferred; fallback to local ensemble to avoid fixed/empty UI */
+    let detResp = null;
+    if (window.SEMSEO.ENDPOINTS.detect && sample && sample.length > 120) {
+      detResp = await detectTextBackend(sample, url);
+    }
+
+    if (detResp && detResp.ok) {
+      applyDetection(detResp.humanPct, detResp.aiPct, detResp.confidence, { detectors: detResp.detectors||[] });
     } else {
-      var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-      var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-      var backendConf = (typeof data.confidence==='number')? data.confidence : 60;
-      if (isFinite(hp) && isFinite(ap)) {
+      const hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+      const ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+      const backendConf = (typeof data.confidence==='number')? data.confidence : null;
+      if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
         applyDetection(hp, ap, backendConf, null);
-        if (detNote) detNote.textContent = 'Source: backend (partial)'; 
+      } else if (ensemble){
+        applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
+      } else if (isFinite(hp) && isFinite(ap)){
+        applyDetection(hp, ap, backendConf || 60, null);
       }
     }
 
-    // Readability + Entities
+    // 9) Readability + Entities
     var S = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
     renderReadability(S);
     renderEntitiesTopics(sample||'');
 
-    // Checklist scores + autotick
+    // 10) Checklist scores + autotick
     window.autoTickByScores(data.itemScores || {});
 
     if (window.Water) window.Water.finish();
