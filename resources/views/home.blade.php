@@ -496,6 +496,82 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     radial-gradient(2px 2px at 35% 80%, rgba(34,197,94,.9), transparent 55%);
   animation:confettiFall 1.1s ease-out 1;
 }
+
+/* ==== Readability: Icon Luxe upgrade (overrides) ==== */
+.read-head .ico{
+  position:relative; overflow:hidden;
+  background:conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
+  animation:spinGradHead 14s linear infinite;
+}
+.read-head .ico::after{
+  content:""; position:absolute; inset:0; border-radius:12px; pointer-events:none;
+  background:radial-gradient(60% 80% at 30% 20%, rgba(255,255,255,.22), transparent 60%);
+  mix-blend-mode:screen;
+}
+@keyframes spinGradHead{to{transform:rotate(360deg)}}
+
+/* Icon pill: layered gradient, glow ring, micro-particles */
+.read-card .metric i{
+  position:relative; isolation:isolate; overflow:hidden;
+  width:42px; height:42px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+             conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
+  animation:spinGrad 9s linear infinite;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.35),
+    inset 0 0 0 1px rgba(255,255,255,.14),
+    0 0 0 3px rgba(61,226,255,.08);
+  text-shadow:0 1px 0 rgba(0,0,0,.5);
+}
+.read-card .metric i::before{
+  /* glow ring */
+  content:""; position:absolute; inset:-1px; border-radius:16px;
+  background:conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  padding:1px; opacity:.55; filter:blur(.2px);
+  animation:iconRing 6s linear infinite;
+}
+.read-card .metric i::after{
+  /* sparkles */
+  content:""; position:absolute; inset:-20%; pointer-events:none;
+  background:
+    radial-gradient(1.5px 1.5px at 25% 35%, rgba(255,255,255,.9), transparent 55%),
+    radial-gradient(1.5px 1.5px at 65% 20%, rgba(255,255,255,.8), transparent 55%),
+    radial-gradient(1.5px 1.5px at 40% 75%, rgba(255,255,255,.75), transparent 55%);
+  opacity:.5; animation:iconDust 18s linear infinite;
+}
+@keyframes iconRing{to{transform:rotate(360deg)}}
+@keyframes iconDust{to{transform:translate3d(-6%, -5%,0)}}
+
+.read-card:hover .metric i{ transform:translateZ(14px) scale(1.08) rotate(0.5deg) }
+.read-card:hover .metric i::before{ opacity:.85 }
+
+/* Per-card thematic hue tweaks for variety */
+.read-grid .read-card:nth-child(1) .metric i{filter:hue-rotate(0deg) saturate(115%)}
+.read-grid .read-card:nth-child(2) .metric i{filter:hue-rotate(35deg) saturate(120%)}
+.read-grid .read-card:nth-child(3) .metric i{filter:hue-rotate(85deg) saturate(120%)}
+.read-grid .read-card:nth-child(4) .metric i{filter:hue-rotate(145deg) saturate(120%)}
+.read-grid .read-card:nth-child(5) .metric i{filter:hue-rotate(195deg) saturate(120%)}
+.read-grid .read-card:nth-child(6) .metric i{filter:hue-rotate(255deg) saturate(120%)}
+.read-grid .read-card:nth-child(7) .metric i{filter:hue-rotate(305deg) saturate(120%)}
+
+/* Optional: subtle pulse when value > 80% (CSS-only heuristic with data-value attr if present) */
+.read-card[data-value^="8"], .read-card[data-value^="9"], .read-card[data-value="100"]{
+  animation:cardPulse 2.4s ease-in-out infinite;
+}
+@keyframes cardPulse{
+  0%,100%{box-shadow:0 12px 36px rgba(0,0,0,.32)}
+  50%{box-shadow:0 16px 42px rgba(0,0,0,.38), 0 0 0 6px rgba(61,226,255,.08)}
+}
+
+/* Reduced motion safety */
+@media (prefers-reduced-motion: reduce){
+  .read-card .metric i,
+  .read-head .ico,
+  .read-card .metric i::before,
+  .read-card .metric i::after{animation:none}
+}
 </style>
 </head>
 <body>
