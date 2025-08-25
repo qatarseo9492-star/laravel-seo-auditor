@@ -7,18 +7,17 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @php
-  $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
+  $metaTitle       = 'Semantic SEO Master • Ultra Tech Global';
   $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, UX, speed, and Core Web Vitals with colorful, clear insights.';
-  $metaImage = asset('og-image.png');
-  $canonical = url()->current();
+  $metaImage       = asset('og-image.png');
+  $canonical       = url()->current();
 
-  $analyzeJsonUrl = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
-  $analyzeUrl     = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
-  $psiProxyUrl    = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi');
-
-  // NEW: backend detector route (supports either name)
-  $detectUrl = \Illuminate\Support\Facades\Route::has('detect')      ? route('detect')
-             : (\Illuminate\Support\Facades\Route::has('api.detect') ? route('api.detect') : url('api/detect'));
+  // Use fully-qualified facade in Blade to avoid "use ... inside function" fatal error
+  $analyzeJsonUrl  = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
+  $analyzeUrl      = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
+  $psiProxyUrl     = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
+  // NEW: backend detector endpoint or fallback
+  $detectUrl       = \Illuminate\Support\Facades\Route::has('detect')       ? route('detect')       : url('api/detect');
 @endphp
 
 <title>{{ $metaTitle }}</title>
@@ -172,28 +171,133 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .det-bar{margin-top:.35rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
 
-/* ==== Readability (upgraded) ==== */
-.readability{margin-top:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
-.read-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
-.read-head h4{margin:0;font-size:1.1rem}
-.read-summary{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;margin:.35rem 0 .6rem}
-.read-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-weight:900;background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(61,226,255,.18))}
-.read-chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(245,158,11,.18))}
-.read-chip.mid{background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(61,226,255,.18))}
+
+/* ==== Readability (PRO restyle) ==== */
+.readability{
+  margin-top:14px;
+  background:linear-gradient(135deg,rgba(255,255,255,.04),rgba(16,24,48,.35));
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(8px);
+  position:relative;
+  overflow:hidden;
+  isolation:isolate;
+}
+.readability::before{
+  /* soft animated border glow */
+  content:"";
+  position:absolute; inset:-1px;
+  border-radius:18px; padding:1px;
+  background:conic-gradient(from 0deg, #3de2ff, #9b5cff, #ff2045, #f59e0b, #22c55e, #3de2ff);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  opacity:.25; pointer-events:none;
+  animation:readGlow 14s linear infinite;
+}
+@keyframes readGlow{to{transform:rotate(360deg)}}
+
+.read-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.7rem}
+.read-head h4{margin:0;font-size:1.12rem;letter-spacing:.2px}
+.read-head .ico{font-size:1rem}
+.read-summary{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;margin:.35rem 0 .65rem}
+
+.read-chip{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.42rem .8rem;border-radius:999px;
+  border:1px solid rgba(255,255,255,.22);
+  font-weight:900;
+  background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(61,226,255,.18));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.read-chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.22),rgba(245,158,11,.20))}
+.read-chip.mid{background:linear-gradient(135deg,rgba(245,158,11,.22),rgba(61,226,255,.20))}
 .read-caption{color:var(--text-dim)}
-.read-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
-.read-card{grid-column:span 6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.7rem}
-.read-card .metric{display:flex;align-items:center;justify-content:space-between;font-weight:900}
-.read-card .metric i{opacity:.95}
-.meter{margin-top:.45rem;height:12px;border-radius:10px;background:#0b0d21;border:1px solid rgba(255,255,255,.12);overflow:hidden;position:relative}
-.meter > span{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#3de2ff,#9b5cff);transition:width .45s ease}
-.read-suggest{margin-top:.6rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.6rem}
-.read-suggest .title{font-weight:900;margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem}
+
+.read-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.7rem}
+.read-card{
+  grid-column:span 6;
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;padding:.75rem;
+  box-shadow:0 10px 32px rgba(0,0,0,.28);
+  backdrop-filter:blur(6px);
+  transition:transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.read-card:hover{transform:translateY(-2px); box-shadow:0 16px 40px rgba(0,0,0,.35); border-color:rgba(255,255,255,.22)}
+
+.read-card .metric{
+  display:flex;align-items:center;justify-content:space-between;font-weight:900
+}
+.read-card .metric i{
+  /* colorful icon pill */
+  display:inline-grid;place-items:center;
+  width:36px;height:36px;border-radius:12px;margin-right:.5rem;
+  color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.35);
+  box-shadow:0 6px 16px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.12);
+}
+/* per-card icon palettes (keeps your HTML untouched) */
+.read-grid .read-card:nth-child(1) .metric i{background:linear-gradient(135deg,#22c55e,#3de2ff)}
+.read-grid .read-card:nth-child(2) .metric i{background:linear-gradient(135deg,#f59e0b,#fde047)}
+.read-grid .read-card:nth-child(3) .metric i{background:linear-gradient(135deg,#6366f1,#22d3ee)}
+.read-grid .read-card:nth-child(4) .metric i{background:linear-gradient(135deg,#9b5cff,#ec4899)}
+.read-grid .read-card:nth-child(5) .metric i{background:linear-gradient(135deg,#06b6d4,#60a5fa)}
+.read-grid .read-card:nth-child(6) .metric i{background:linear-gradient(135deg,#ef4444,#f59e0b)}
+.read-grid .read-card:nth-child(7) .metric i{background:linear-gradient(135deg,#0ea5e9,#84cc16)}
+
+.meter{
+  margin-top:.5rem;height:12px;border-radius:10px;
+  background:linear-gradient(180deg,#0b0d21,#0b0d21);
+  border:1px solid rgba(255,255,255,.14); overflow:hidden; position:relative;
+}
+.meter::before{
+  /* subtle diagonal stripes on the track */
+  content:""; position:absolute; inset:0;
+  background:repeating-linear-gradient(45deg, rgba(255,255,255,.055) 0 10px, transparent 10px 20px);
+  pointer-events:none;
+}
+.meter > span{
+  position:absolute;left:0;top:0;bottom:0;width:0;
+  background:linear-gradient(90deg,#22c55e,#3de2ff,#9b5cff);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.15), 0 8px 22px rgba(61,226,255,.28);
+  transition:width .5s cubic-bezier(.22,1,.36,1);
+}
+.meter > span::after{
+  /* glossy sweep */
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.18),transparent 60%);
+  mix-blend-mode:screen; transform:translateX(-120%); animation:meterSheen 3s linear infinite;
+}
+@keyframes meterSheen{to{transform:translateX(120%)}}
+
+.read-suggest{
+  margin-top:.7rem;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.7rem
+}
+.read-suggest .title{font-weight:900;margin-bottom:.35rem;display:flex;align-items:center;gap:.45rem}
 .read-suggest ul{margin:.2rem 0 0;padding-left:1rem}
-.read-suggest li{margin:.22rem 0}
-.read-plain{margin-top:.6rem;background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(61,226,255,.12));border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.7rem}
-.read-plain .title{font-weight:900;margin-bottom:.25rem;display:flex;align-items:center;gap:.4rem}
-@media (max-width:768px){.read-card{grid-column:span 12}.read-summary{grid-template-columns:1fr}}
+.read-suggest li{
+  margin:.26rem 0; position:relative; list-style:none; padding-left:1.2rem
+}
+.read-suggest li::before{
+  content:"\f00c"; /* fa-check */
+  font-family:"Font Awesome 6 Free"; font-weight:900;
+  position:absolute; left:0; top:0;
+  width:18px;height:18px;border-radius:6px; display:grid;place-items:center;
+  font-size:.7rem; color:#fff;
+  background:linear-gradient(135deg,#22c55e,#3de2ff);
+  box-shadow:0 4px 10px rgba(0,0,0,.25);
+}
+
+.read-plain{
+  margin-top:.7rem;
+  background:linear-gradient(135deg,rgba(34,197,94,.14),rgba(61,226,255,.14));
+  border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:.75rem
+}
+.read-plain .title{font-weight:900;margin-bottom:.25rem;display:flex;align-items:center;gap:.45rem}
+
+@media (max-width:900px){ .read-card{grid-column:span 12} .read-summary{grid-template-columns:1fr} }
 
 /* ==== Entities & Topics (colorful) ==== */
 .entities{margin-top:14px;background:linear-gradient(135deg,rgba(76,29,149,.18),rgba(14,165,233,.18));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
@@ -243,7 +347,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     analyzeJson: @json($analyzeJsonUrl),
     analyze: @json($analyzeUrl),
     psi: @json($psiProxyUrl), // server proxy; API key stays hidden
-    detect: @json($detectUrl) // NEW: backend detector endpoint
+    // NEW: backend detector endpoint (works even with no API keys; local server ensemble)
+    detect: @json($detectUrl)
   };
   window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
   window.SEMSEO.READY = false;
@@ -793,6 +898,25 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return {ok,data,status};
   }
 
+  // NEW: backend multi-detector (works with or without API keys; server may compute local ensemble)
+  async function fetchDetect(text, url){
+    try{
+      const r = await fetch((window.SEMSEO.ENDPOINTS.detect || '/api/detect'),{
+        method:'POST',
+        headers:{
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'X-Requested-With':'XMLHttpRequest',
+          'X-CSRF-TOKEN': CSRF
+        },
+        body: JSON.stringify({ text, url })
+      });
+      if(!r.ok) return null;
+      const j = await r.json();
+      return (j && j.ok) ? j : null;
+    }catch(_){ return null; }
+  }
+
   async function fetchRawHtml(url){
     try{
       const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
@@ -842,27 +966,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }
     });
     return into;
-  }
-
-  /* ============ NEW: backend detector helper (ZeroGPT or aggregator) ============ */
-  async function detectTextBackend(text, url){
-    if (!window.SEMSEO.ENDPOINTS.detect) return { ok:false, error:'No detect endpoint' };
-    try{
-      const r = await fetch(window.SEMSEO.ENDPOINTS.detect, {
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'Accept':'application/json',
-          'X-Requested-With':'XMLHttpRequest',
-          'X-CSRF-TOKEN': CSRF
-        },
-        body: JSON.stringify({ text: String(text||'').slice(0,48000), url })
-      });
-      const j = await r.json().catch(()=>null);
-      return j || { ok:false, error:'Bad JSON' };
-    }catch(e){
-      return { ok:false, error:String(e) };
-    }
   }
 
   /* ===================== Stylometry & Readability ===================== */
@@ -1199,13 +1302,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }catch(_){}
     }
 
-    // 5) Local detection candidate (for fallback)
+    // 5) Local detection (prep) + try backend detector FIRST
     var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+    var backendDetect = null;
+    if (sample && sample.length > 30) {
+      backendDetect = await fetchDetect(sample, url);
+    }
 
-    // 6) Guarantee item scores even if backend missing
+    // 6) Scores -> guarantee + UI
     data = ensureScoresExist(data, sample, ensemble);
 
-    // 7) Scores -> UI
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
@@ -1223,33 +1329,30 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
-    /* 8) Detection — backend preferred; fallback to local ensemble to avoid fixed/empty UI */
-    let detResp = null;
-    if (window.SEMSEO.ENDPOINTS.detect && sample && sample.length > 120) {
-      detResp = await detectTextBackend(sample, url);
-    }
-
-    if (detResp && detResp.ok) {
-      applyDetection(detResp.humanPct, detResp.aiPct, detResp.confidence, { detectors: detResp.detectors||[] });
+    // Detection (prefer backend multi-detector; fallback to local)
+    var detNote = document.getElementById('detNote');
+    if (backendDetect) {
+      applyDetection(backendDetect.humanPct, backendDetect.aiPct, backendDetect.confidence, backendDetect);
+      if (detNote) detNote.textContent = 'Source: backend multi-detector (ZeroGPT/GPTZero/OriginalityAI if configured; otherwise local on server).';
+    } else if (ensemble) {
+      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
+      if (detNote) detNote.textContent = 'Source: local ensemble (no external APIs).';
     } else {
-      const hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-      const ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-      const backendConf = (typeof data.confidence==='number')? data.confidence : null;
-      if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
+      var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+      var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+      var backendConf = (typeof data.confidence==='number')? data.confidence : 60;
+      if (isFinite(hp) && isFinite(ap)) {
         applyDetection(hp, ap, backendConf, null);
-      } else if (ensemble){
-        applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-      } else if (isFinite(hp) && isFinite(ap)){
-        applyDetection(hp, ap, backendConf || 60, null);
+        if (detNote) detNote.textContent = 'Source: backend (partial)'; 
       }
     }
 
-    // 9) Readability + Entities
+    // Readability + Entities
     var S = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
     renderReadability(S);
     renderEntitiesTopics(sample||'');
 
-    // 10) Checklist scores + autotick
+    // Checklist scores + autotick
     window.autoTickByScores(data.itemScores || {});
 
     if (window.Water) window.Water.finish();
