@@ -171,29 +171,207 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .det-bar{margin-top:.35rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
 
-/* ==== Readability (upgraded) ==== */
-.readability{margin-top:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
-.read-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
-.read-head h4{margin:0;font-size:1.1rem}
-.read-summary{display:grid;grid-template-columns:auto 1fr;gap:.6rem;align-items:center;margin:.35rem 0 .6rem}
-.read-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-weight:900;background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(61,226,255,.18))}
-.read-chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.18),rgba(245,158,11,.18))}
-.read-chip.mid{background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(61,226,255,.18))}
-.read-caption{color:var(--text-dim)}
-.read-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
-.read-card{grid-column:span 6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.7rem}
-.read-card .metric{display:flex;align-items:center;justify-content:space-between;font-weight:900}
-.read-card .metric i{opacity:.95}
-.meter{margin-top:.45rem;height:12px;border-radius:10px;background:#0b0d21;border:1px solid rgba(255,255,255,.12);overflow:hidden;position:relative}
-.meter > span{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#3de2ff,#9b5cff);transition:width .45s ease}
-.read-suggest{margin-top:.6rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.6rem}
-.read-suggest .title{font-weight:900;margin-bottom:.3rem;display:flex;align-items:center;gap:.4rem}
-.read-suggest ul{margin:.2rem 0 0;padding-left:1rem}
-.read-suggest li{margin:.22rem 0}
-.read-plain{margin-top:.6rem;background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(61,226,255,.12));border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:.7rem}
-.read-plain .title{font-weight:900;margin-bottom:.25rem;display:flex;align-items:center;gap:.4rem}
-@media (max-width:768px){.read-card{grid-column:span 12}.read-summary{grid-template-columns:1fr}}
 
+/* ==== Readability (ULTRA PRO restyle) ==== */
+:root{
+  --read-ac1:#22c55e; /* emerald */
+  --read-ac2:#3de2ff; /* cyan */
+  --read-ac3:#9b5cff; /* purple */
+  --read-warn:#f59e0b; /* amber */
+  --read-bad:#ef4444;  /* red  */
+  --read-surface:rgba(255,255,255,.06);
+  --read-border:rgba(255,255,255,.14);
+  --read-soft:rgba(255,255,255,.08);
+  --read-dim:rgba(255,255,255,.62);
+}
+
+/* container with animated halo + soft particles */
+.readability{
+  margin-top:14px; position:relative; isolation:isolate; overflow:hidden;
+  background:
+    radial-gradient(1200px 300px at -10% 0%, rgba(157,78,221,.18), transparent 40%),
+    radial-gradient(900px 320px at 110% 20%, rgba(45,212,191,.16), transparent 50%),
+    linear-gradient(135deg, rgba(16,24,48,.55), rgba(18,20,40,.72));
+  border:1px solid var(--read-border);
+  border-radius:18px; padding:18px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(8px);
+}
+.readability::before{
+  /* conic glow border sweep */
+  content:""; position:absolute; inset:-1px; border-radius:20px; padding:1px;
+  background:conic-gradient(from 0deg, #3de2ff, #22c55e, #9b5cff, #f59e0b, #ff2045, #3de2ff);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  opacity:.25; pointer-events:none; animation:readGlow 16s linear infinite;
+}
+.readability::after{
+  /* tiny floating sparkles */
+  content:""; position:absolute; inset:-20%;
+  background:
+    radial-gradient(2px 2px at 10% 30%, rgba(255,255,255,.35) 40%, transparent 45%),
+    radial-gradient(2px 2px at 30% 70%, rgba(255,255,255,.30) 40%, transparent 45%),
+    radial-gradient(2px 2px at 70% 20%, rgba(255,255,255,.28) 40%, transparent 45%),
+    radial-gradient(2px 2px at 85% 80%, rgba(255,255,255,.32) 40%, transparent 45%),
+    radial-gradient(2px 2px at 55% 45%, rgba(255,255,255,.26) 40%, transparent 45%);
+  filter:blur(.2px); opacity:.45; animation:floatDots 28s linear infinite;
+  pointer-events:none;
+}
+@keyframes readGlow{to{transform:rotate(360deg)}}
+@keyframes floatDots{to{transform:translate3d(-8%, -6%, 0)}}
+
+.read-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem}
+.read-head h4{margin:0;font-size:1.18rem;letter-spacing:.2px}
+.read-head .ico{
+  width:34px;height:34px; border-radius:12px; display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--read-ac1),var(--read-ac2));
+  color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.35);
+  box-shadow:0 8px 18px rgba(61,226,255,.3), inset 0 0 0 1px rgba(255,255,255,.12);
+}
+
+.read-summary{
+  display:grid;grid-template-columns:auto 1fr;gap:.65rem;align-items:center;
+  margin:.35rem 0 .7rem;
+}
+.read-caption{color:var(--read-dim)}
+
+/* status chip with gentle pulse */
+.read-chip{
+  display:inline-flex;align-items:center;gap:.55rem;
+  padding:.46rem .9rem;border-radius:999px;border:1px solid rgba(255,255,255,.22);
+  font-weight:900; letter-spacing:.2px;
+  background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06), 0 8px 20px rgba(0,0,0,.25);
+  position:relative; overflow:hidden;
+}
+.read-chip::after{
+  content:""; position:absolute; inset:0; mix-blend-mode:screen;
+  background:radial-gradient(120px 40px at 0% 0%, rgba(255,255,255,.18), transparent 60%);
+  animation:chipShine 6s ease-in-out infinite;
+}
+@keyframes chipShine{50%{transform:translateX(40%)}}
+
+/* bad & mid variants without touching your JS/HTML */
+.read-chip.bad{background:linear-gradient(135deg, rgba(239,68,68,.22), rgba(245,158,11,.20))}
+.read-chip.mid{background:linear-gradient(135deg, rgba(245,158,11,.22), rgba(61,226,255,.20))}
+
+/* responsive, masonry-like grid */
+.read-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(260px,1fr));
+  gap:.8rem; perspective:1000px;
+}
+.read-card{
+  background:linear-gradient(180deg,var(--read-surface),rgba(255,255,255,.03));
+  border:1px solid var(--read-border);
+  border-radius:16px; padding:.85rem;
+  box-shadow:0 12px 36px rgba(0,0,0,.32);
+  backdrop-filter:blur(6px);
+  transform-style:preserve-3d;
+  transition:transform .2s ease, box-shadow .25s ease, border-color .2s ease;
+}
+.read-card:hover{
+  transform:translateY(-3px) rotateX(.6deg);
+  box-shadow:0 18px 48px rgba(0,0,0,.42);
+  border-color:rgba(255,255,255,.22);
+}
+
+/* metric row with animated icon pills */
+.read-card .metric{display:flex;align-items:center;justify-content:space-between;font-weight:900}
+.read-card .metric i{
+  display:inline-grid;place-items:center;
+  width:38px;height:38px;border-radius:12px;margin-right:.55rem;color:#fff;
+  text-shadow:0 1px 0 rgba(0,0,0,.45);
+  background:conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
+  animation:spinGrad 10s linear infinite;
+  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
+  transition:transform .18s ease;
+}
+.read-card:hover .metric i{ transform:translateZ(12px) scale(1.06) }
+@keyframes spinGrad{to{transform:rotate(360deg)}}
+
+/* per-card palettes (no HTML change) */
+.read-grid .read-card:nth-child(2) .metric i{filter:hue-rotate(40deg)}
+.read-grid .read-card:nth-child(3) .metric i{filter:hue-rotate(90deg)}
+.read-grid .read-card:nth-child(4) .metric i{filter:hue-rotate(150deg)}
+.read-grid .read-card:nth-child(5) .metric i{filter:hue-rotate(200deg)}
+.read-grid .read-card:nth-child(6) .metric i{filter:hue-rotate(260deg)}
+.read-grid .read-card:nth-child(7) .metric i{filter:hue-rotate(310deg)}
+
+/* progress meter with glossy sweep + end bubble */
+.meter{
+  margin-top:.55rem;height:12px;border-radius:10px; position:relative; overflow:hidden;
+  background:linear-gradient(180deg,#0b0d21,#0b0d21);
+  border:1px solid var(--read-border);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.meter::before{
+  /* subtle stripes in the track */
+  content:""; position:absolute; inset:0; opacity:.35;
+  background:repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 10px, transparent 10px 20px);
+  pointer-events:none;
+}
+.meter > span{
+  position:absolute;left:0;top:0;bottom:0;width:0%;
+  background:linear-gradient(90deg, var(--read-ac1), var(--read-ac2), var(--read-ac3));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 10px 26px rgba(61,226,255,.28);
+  transition:width .55s cubic-bezier(.22,1,.36,1);
+}
+.meter > span::after{
+  /* glossy sweep */
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.18),transparent 60%);
+  mix-blend-mode:screen; transform:translateX(-120%); animation:meterSheen 3s linear infinite;
+}
+.meter > span::before{
+  /* glowing end bubble that tracks width (no JS needed) */
+  content:""; position:absolute; top:50%; right:-7px; transform:translateY(-50%);
+  width:18px;height:18px;border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.1) 45%);
+  box-shadow:0 0 0 3px rgba(61,226,255,.25), 0 0 30px rgba(61,226,255,.45);
+}
+@keyframes meterSheen{to{transform:translateX(120%)}}
+
+/* suggestions with neon ticks and connecting stems */
+.read-suggest{
+  margin-top:.8rem;background:rgba(255,255,255,.05);
+  border:1px solid var(--read-border);border-radius:14px;padding:.8rem;
+  box-shadow:0 10px 28px rgba(0,0,0,.28);
+}
+.read-suggest .title{font-weight:900;margin-bottom:.4rem;display:flex;align-items:center;gap:.45rem}
+.read-suggest ul{margin:.2rem 0 0;padding-left:1.1rem}
+.read-suggest li{
+  margin:.28rem 0; list-style:none; position:relative; padding-left:1.2rem; color:rgba(255,255,255,.9);
+}
+.read-suggest li::before{
+  content:""; position:absolute; left:0; top:.12rem; width:18px;height:18px;border-radius:6px;
+  background:linear-gradient(135deg,var(--read-ac1),var(--read-ac2));
+  box-shadow:0 6px 14px rgba(0,0,0,.25);
+}
+.read-suggest li::after{
+  content:"00c"; /* Font Awesome check */
+  font-family:"Font Awesome 6 Free"; font-weight:900;
+  position:absolute; left:3px; top:-1px; font-size:.76rem; color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.35);
+}
+
+/* plain info block with lively gradient */
+.read-plain{
+  margin-top:.8rem;border:1px solid var(--read-border);border-radius:14px;padding:.8rem;
+  background:linear-gradient(135deg, rgba(34,197,94,.14), rgba(61,226,255,.14));
+  box-shadow:0 10px 28px rgba(0,0,0,.24);
+}
+.read-plain .title{font-weight:900;margin-bottom:.3rem;display:flex;align-items:center;gap:.45rem}
+
+/* prefers-reduced-motion friendly */
+@media (prefers-reduced-motion:reduce){
+  .readability::before,.readability::after,.read-card .metric i,
+  .meter > span::after{animation:none}
+}
+
+/* small screens */
+@media (max-width:900px){
+  .read-summary{grid-template-columns:1fr}
+}
 /* ==== Entities & Topics (colorful) ==== */
 .entities{margin-top:14px;background:linear-gradient(135deg,rgba(76,29,149,.18),rgba(14,165,233,.18));border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px}
 .entities-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
@@ -270,6 +448,54 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 /* Small helpers */
 .hide{display:none!important}
+
+/* ==== Readability: Good Badge ==== */
+.read-good-badge{
+  position:absolute; top:10px; right:10px; z-index:3;
+  display:flex; align-items:center; gap:.6rem;
+  padding:.6rem .9rem; border-radius:14px;
+  background:linear-gradient(135deg, rgba(34,197,94,.22), rgba(61,226,255,.22));
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 18px 40px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.08);
+  color:#fff; backdrop-filter:blur(6px);
+  transform:translateY(-8px) scale(.98); opacity:0; pointer-events:none;
+  transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+}
+.read-good-badge.show{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
+.read-good-badge i{
+  width:36px;height:36px;border-radius:12px; display:grid; place-items:center;
+  background:conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
+  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
+  text-shadow:0 1px 0 rgba(0,0,0,.45);
+}
+.read-good-badge .txt{display:flex; flex-direction:column; line-height:1.05}
+.read-good-badge .txt strong{font-weight:900; font-size:.96rem; letter-spacing:.2px}
+.read-good-badge .txt span{opacity:.9; font-size:.82rem}
+
+/* sparkly diagonal shine that loops */
+.read-good-badge .badge-shine{
+  position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,.22), transparent 60%);
+  transform:translateX(-120%); animation:badgeSheen 4.5s linear infinite;
+  border-radius:14px;
+}
+@keyframes badgeSheen{to{transform:translateX(120%)}}
+
+/* Confetti burst on first show */
+@keyframes confettiFall{
+  0%{transform:translateY(-10px) rotate(0deg); opacity:0}
+  30%{opacity:1}
+  100%{transform:translateY(24px) rotate(360deg); opacity:0}
+}
+.read-good-badge.show::after{
+  content:""; position:absolute; inset:-8px; pointer-events:none;
+  background:
+    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.9), transparent 55%),
+    radial-gradient(2px 2px at 60% 10%, rgba(255,215,0,.9), transparent 55%),
+    radial-gradient(2px 2px at 80% 60%, rgba(61,226,255,.9), transparent 55%),
+    radial-gradient(2px 2px at 35% 80%, rgba(34,197,94,.9), transparent 55%);
+  animation:confettiFall 1.1s ease-out 1;
+}
 </style>
 </head>
 <body>
@@ -489,6 +715,17 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
     <!-- 2) READABILITY -->
     <section class="readability" id="readabilityPanel" style="display:none">
+
+  <!-- Special Good Readability Badge -->
+  <div id="readGoodBadge" class="read-good-badge" hidden>
+    <div class="badge-shine"></div>
+    <i class="fa-solid fa-trophy"></i>
+    <div class="txt">
+      <strong>Excellent Readability</strong>
+      <span>Great job! Your content is clear and easy to read — appreciate the hard work.</span>
+    </div>
+  </div>
+
       <div class="read-head">
         <i class="fa-solid fa-book-open-reader ico ico-cyan"></i>
         <h4>Readability Insights</h4>
@@ -1107,6 +1344,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var chipText = document.getElementById('readGradeChip');
     if (chipText) chipText.textContent = 'Grade ' + gradeInt;
     if (chip){ chip.classList.remove('bad','mid'); if (gradeInt<=8){} else if (gradeInt<=10) chip.classList.add('mid'); else chip.classList.add('bad'); }
+    // annotate state for the badge observer
+    if (chip) {
+      chip.setAttribute('data-state', (gradeInt <= 8) ? 'good' : ((gradeInt <= 10) ? 'mid' : 'bad'));
+    }
+
     var sum = document.getElementById('readSummary');
     if (sum){
       if (gradeInt <= 8) sum.textContent = 'Easy for most readers (middle school). Great for broad audiences.';
@@ -1727,6 +1969,39 @@ window.addEventListener('error', function(e){
   var s=document.getElementById('analyzeStatus');
   if (s) s.textContent = 'JavaScript error: ' + (e && e.message ? e.message : e);
 });
+</script>
+
+
+<script>
+/* === Readability "Good" Trophy Badge Toggle === */
+(function(){
+  const container = document.getElementById('readabilityPanel');
+  const chip = container && container.querySelector('#readChip');
+  const badge = container && container.querySelector('#readGoodBadge');
+  if(!container || !chip || !badge) return;
+
+  const isGood = () => (chip.getAttribute('data-state') || '').toLowerCase() === 'good';
+
+  const render = () => {
+    const good = isGood();
+    badge.hidden = !good;
+    badge.classList.toggle('show', good);
+  };
+
+  // Initial render
+  render();
+
+  // Watch for changes to the chip
+  const obs = new MutationObserver(render);
+  obs.observe(chip, { attributes:true, attributeFilter:['class','data-state'], characterData:true, childList:true, subtree:true });
+
+  // Optional helper for manual control
+  window.showReadabilityCongrats = function(force){
+    const good = (typeof force === 'boolean') ? force : isGood();
+    badge.hidden = !good;
+    badge.classList.toggle('show', good);
+  };
+})();
 </script>
 
 </body>
