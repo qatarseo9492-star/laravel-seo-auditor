@@ -755,6 +755,103 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 }
 .hvai-detectors .det.ok{ background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18)) }
 .hvai-detectors .det.err{ background:linear-gradient(135deg, rgba(239,68,68,.22), rgba(249,115,22,.18)) }
+
+/* ==== Google Site Speed (PSI) — ULTRA STYLISH restyle ==== */
+#psiPanel{
+  position:relative; isolation:isolate; overflow:hidden;
+  border:1px solid var(--read-border);
+  border-radius:18px; padding:16px;
+  background:
+    radial-gradient(1000px 260px at -10% -10%, rgba(14,165,233,.16), transparent 55%),
+    radial-gradient(900px 320px at 110% 20%, rgba(99,102,241,.14), transparent 60%),
+    linear-gradient(135deg, rgba(16,24,48,.55), rgba(18,20,40,.72));
+  box-shadow:0 20px 60px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(8px);
+}
+#psiPanel::before{
+  content:""; position:absolute; inset:-1px; border-radius:20px; padding:1px;
+  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#ef4444,#f97316,#22c55e);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude; opacity:.22; pointer-events:none;
+  animation:readGlow 18s linear infinite;
+}
+
+.psi-head{ display:flex; align-items:center; gap:.6rem; margin-bottom:.6rem }
+.psi-head i{
+  width:36px; height:36px; border-radius:12px; display:grid; place-items:center; color:#fff;
+  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
+  box-shadow:0 10px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+  animation:spinGrad 16s linear infinite;
+}
+
+.psi-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:.8rem }
+.psi-card{
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+  border:1px solid var(--read-border);
+  border-radius:14px; padding:.8rem;
+  box-shadow:0 12px 36px rgba(0,0,0,.32);
+  backdrop-filter:blur(6px);
+  transition:transform .2s ease, box-shadow .25s ease, border-color .2s ease;
+}
+.psi-card:hover{ transform:translateY(-3px); box-shadow:0 18px 48px rgba(0,0,0,.42); border-color:rgba(255,255,255,.22) }
+
+.psi-label{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.25rem; font-weight:900 }
+.psi-label .ico{
+  width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;
+  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
+  box-shadow:0 8px 18px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
+}
+
+.psi-track{ position:relative; height:14px; border-radius:12px; overflow:hidden;
+  background:linear-gradient(180deg,#0b0d21,#0b0d21);
+  border:1px solid var(--read-border); box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.psi-track::before{
+  content:""; position:absolute; inset:0; opacity:.35; pointer-events:none;
+  background:repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 10px, transparent 10px 20px);
+}
+.psi-fill{
+  position:absolute; left:0; top:0; bottom:0; width:0%;
+  transition:width .55s cubic-bezier(.22,1,.36,1);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 12px 28px rgba(0,0,0,.28);
+  background:linear-gradient(90deg,#22c55e,#3de2ff); /* default good */
+}
+.psi-fill.warn{ background:linear-gradient(90deg,#f59e0b,#fde047) }
+.psi-fill.bad{  background:linear-gradient(90deg,#ef4444,#f97316) }
+
+/* Badge for high performance */
+.psi-badge{
+  position:absolute; top:12px; right:12px; z-index:3;
+  display:flex; align-items:center; gap:.6rem;
+  padding:.6rem .9rem; border-radius:14px; color:#fff;
+  background:linear-gradient(135deg, rgba(34,197,94,.24), rgba(61,226,255,.22));
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 18px 44px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.08);
+  transform:translateY(-8px) scale(.98); opacity:0; pointer-events:none;
+  transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+  backdrop-filter:blur(6px);
+}
+.psi-badge.show{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
+.psi-badge i{
+  width:36px;height:36px;border-radius:12px; display:grid; place-items:center;
+  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
+  text-shadow:0 1px 0 rgba(0,0,0,.45);
+  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
+}
+.psi-badge .txt{display:flex;flex-direction:column;line-height:1.05}
+.psi-badge .txt strong{font-weight:900;font-size:.96rem;letter-spacing:.2px}
+.psi-badge .txt span{opacity:.92;font-size:.82rem}
+.psi-badge .badge-sheen{
+  position:absolute; inset:0; border-radius:14px; pointer-events:none; mix-blend-mode:screen;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);
+  transform:translateX(-120%); animation:badgeSheen 4.5s linear infinite;
+}
+
+/* Chips for strategy and labels */
+#psiPanel .chip{ border:1px solid rgba(255,255,255,.22) }
+#psiPanel .chip.ok{   background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18)) }
+#psiPanel .chip.warn{ background:linear-gradient(135deg, rgba(245,158,11,.22), rgba(61,226,255,.18)) }
+#psiPanel .chip.bad{  background:linear-gradient(135deg, rgba(239,68,68,.25), rgba(249,115,22,.22)) }
 </style>
 </head>
 <body>
@@ -1151,6 +1248,17 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
     <!-- 7) PSI (unchanged panel, runs last) -->
     <section class="psi" id="psiPanel" style="display:none">
+
+  <!-- PSI Fast Site Badge -->
+  <div id="psiBadge" class="psi-badge" hidden>
+    <div class="badge-sheen"></div>
+    <i class="fa-solid fa-gauge-high"></i>
+    <div class="txt">
+      <strong>Fast Site</strong>
+      <span>Lighthouse score looks great — smooth performance!</span>
+    </div>
+  </div>
+
       <div class="psi-head">
         <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
         <h4>Site Speed & Core Web Vitals</h4>
@@ -2671,6 +2779,87 @@ window.addEventListener('load', function(){
   if(window.__hvaiBootstrap){
     try{ window.updateHvai(window.__hvaiBootstrap); }catch(e){}
   }
+})();
+</script>
+
+
+<script>
+/* === PSI Ultra UI: bar animation + severity coloring + badge === */
+(function(){
+  const panel = document.getElementById('psiPanel');
+  if(!panel) return;
+  const badge = document.getElementById('psiBadge');
+
+  const el = id => document.getElementById(id);
+  const perf = el('psiPerf');     // 0-100
+  const lcp  = el('psiLcp');      // seconds
+  const inp  = el('psiInp');      // ms
+  const cls  = el('psiCls');      // unitless
+  const ttfb = el('psiTtfb');     // ms
+
+  const lcpBar  = el('psiLcpBar');
+  const inpBar  = el('psiInpBar');
+  const clsBar  = el('psiClsBar');
+  const ttfbBar = el('psiTtfbBar');
+
+  function getNum(el){ if(!el) return null; const s=(el.textContent||'').replace(/[^\d\.]/g,''); return s? Number(s): null; }
+  function pct(x, min, max){ if(x==null) return 0; return Math.max(0, Math.min(100, Math.round((x-min)/(max-min)*100))); }
+
+  // Severity helpers (Web Vitals-ish thresholds)
+  function sevPerf(val){ if(val==null) return 'warn'; return val>=90? 'ok': (val>=50? 'warn':'bad'); }
+  function sevLcp(sec){ if(sec==null) return 'warn'; return sec<=2.5? 'ok': (sec<=4.0? 'warn':'bad'); }
+  function sevInp(ms){ if(ms==null) return 'warn'; return ms<=200? 'ok': (ms<=500? 'warn':'bad'); }
+  function sevCls(x){ if(x==null) return 'warn'; return x<=0.1? 'ok': (x<=0.25? 'warn':'bad'); }
+  function sevTtfb(ms){ if(ms==null) return 'warn'; return ms<=800? 'ok': (ms<=1800? 'warn':'bad'); }
+
+  function paint(bar, pctVal, sev){
+    if(!bar) return;
+    bar.style.width = (pctVal||0) + '%';
+    bar.classList.remove('ok','warn','bad');
+    bar.classList.add(sev);
+    // set gradient by class via CSS; default is ok (green->cyan)
+    if(sev==='bad'){ bar.classList.add('bad'); }
+    else if(sev==='warn'){ bar.classList.add('warn'); }
+  }
+
+  function update(){
+    const p  = getNum(perf);
+    const l  = getNum(lcp);
+    const i  = getNum(inp);
+    const c  = getNum(cls);
+    const t  = getNum(ttfb);
+
+    // Map values to bar % scales (ok zone ~70–100% visual)
+    paint(lcpBar, 100 - pct(l, 0.5, 6.0), sevLcp(l));
+    paint(inpBar, 100 - pct(i, 50, 1500), sevInp(i));
+    paint(clsBar, 100 - pct(c, 0.01, 0.5), sevCls(c));
+    paint(ttfbBar,100 - pct(t, 200, 2500), sevTtfb(t));
+
+    // Badge for fast sites
+    const showBadge = (p!=null && p>=90);
+    if(badge){
+      badge.hidden = !showBadge;
+      badge.classList.toggle('show', !!showBadge);
+    }
+
+    // Strategy chip color if present
+    const strat = document.getElementById('psiStrategy');
+    if(strat){
+      const chip = strat.closest('.chip');
+      if(chip){
+        chip.classList.remove('ok','warn','bad');
+        chip.classList.add(p>=90? 'ok' : (p>=50? 'warn' : 'bad'));
+      }
+    }
+  }
+
+  // Initial + observer so it reacts when your PSI data arrives
+  update();
+  const obs = new MutationObserver(update);
+  obs.observe(panel, { subtree:true, childList:true, characterData:true });
+
+  // Expose manual refresh
+  window.refreshPSIUI = update;
 })();
 </script>
 
