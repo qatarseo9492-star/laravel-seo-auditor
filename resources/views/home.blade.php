@@ -92,7 +92,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .waterbar{position:relative;height:64px;border-radius:18px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
 .water-mask-rect{transition:all .25s ease-out}
-.water-overlay{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120px 60px at 20% -20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(0deg,rgba(255,255,255,.05),transparent 40%,transparent 60%,rgba(255,255,255,.06));mix-blend-mode:screen;z-index:2}
+.water-overlay{ pointer-events:none; /* global non-blocking overlays */position:absolute;inset:0;pointer-events:none;background:radial-gradient(120px 60px at 20% -20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(0deg,rgba(255,255,255,.05),transparent 40%,transparent 60%,rgba(255,255,255,.06));mix-blend-mode:screen;z-index:2}
 .water-pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1.05rem;text-shadow:0 1px 0 rgba(0,0,0,.45);letter-spacing:.4px;z-index:4}
 .wave1{animation:waveX 7s linear infinite}.wave2{animation:waveX 10s linear infinite reverse;opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
@@ -564,9 +564,69 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   z-index: 0;
 }
 
+
+/* Heavy multicolor smoke + tech lines */
+.page-bg{
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+/* layered 'smoke' using multiple radial gradients */
+body::before, body::after{
+  content: "";
+  position: fixed;
+  inset: -10% -10% auto -10%;
+  height: 80%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(600px 300px at 10% 10%, rgba(155,92,255,.30), transparent 60%),
+    radial-gradient(650px 320px at 90% 15%, rgba(2,204,255,.26), transparent 60%),
+    radial-gradient(700px 340px at 50% -10%, rgba(0,255,171,.22), transparent 60%),
+    radial-gradient(500px 260px at 20% 80%, rgba(255,165,0,.12), transparent 70%);
+  filter: blur(10px);
+}
+body::after{
+  inset: auto -10% -10% -10%;
+  height: 70%;
+  background:
+    radial-gradient(700px 340px at 80% 80%, rgba(155,92,255,.22), transparent 60%),
+    radial-gradient(600px 300px at 20% 70%, rgba(2,204,255,.18), transparent 60%),
+    radial-gradient(650px 320px at 60% 90%, rgba(0,255,171,.18), transparent 60%);
+  filter: blur(12px);
+}
+/* subtle tech lines overlay */
+.bg-lines{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: .35;
+  mix-blend-mode: screen;
+}
+
 </style>
 </head>
 <body>
+
+<div class="page-bg" aria-hidden="true">
+  <svg class="bg-lines" viewBox="0 0 1200 600" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="glow" x1="0" x2="1" y1="0" y2="1">
+        <stop offset="0%" stop-color="#9b5cff" stop-opacity="0.35"/>
+        <stop offset="50%" stop-color="#02ccff" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#00ffab" stop-opacity="0.25"/>
+      </linearGradient>
+    </defs>
+    <g stroke="url(#glow)" stroke-width="1">
+      <path d="M0,520 C250,420 450,580 700,480 C950,380 1000,560 1200,480" fill="none"/>
+      <path d="M0,420 C250,320 450,480 700,380 C950,280 1000,460 1200,380" fill="none"/>
+      <path d="M0,320 C250,220 450,380 700,280 C950,180 1000,360 1200,280" fill="none"/>
+    </g>
+  </svg>
+</div>
+
 
 <!-- Background canvases -->
 <canvas id="linesCanvas"></canvas>
@@ -1153,6 +1213,42 @@ document.addEventListener('DOMContentLoaded', function(){
     if (urlInput){ urlInput.addEventListener('keydown', function(e){ if (e.key==='Enter'){ e.preventDefault(); safeClick(); } }); }
   })();
 });
+</script>
+
+
+<script>
+(function(){
+  function wirePSI(){
+    try{
+      const btn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
+      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+      if (!btn || !input) return;
+      // Ensure visible
+      const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
+      if (panel && panel.style.display==='none') panel.style.display='';
+      btn.style.pointerEvents='auto';
+      btn.addEventListener('click', function(ev){
+        try{ ev.preventDefault(); }catch(_){}
+        // Prefer app's analyze, then PSI
+        if (typeof window.SEMSEO_go === 'function'){ try{ window.SEMSEO_go(); }catch(_){ } }
+        if (typeof window.runPSI === 'function'){ setTimeout(()=>window.runPSI(input.value||''), 120); }
+      }, { once:false });
+      input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter'){
+          e.preventDefault();
+          if (typeof window.SEMSEO_go === 'function'){ try{ window.SEMSEO_go(); }catch(_){ } }
+          if (typeof window.runPSI === 'function'){ setTimeout(()=>window.runPSI(input.value||''), 120); }
+        }
+      });
+    }catch(e){ console.error('PSI wire error', e); }
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', wirePSI);
+  }else{
+    wirePSI();
+  }
+  window.addEventListener('load', wirePSI);
+})();
 </script>
 
 </body>
