@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
+{{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI dynamic; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -146,7 +146,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
 @media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
 
-/* ==== Human vs AI (Ensemble) — upgraded (old .hvai styles left intact but unused) ==== */
+/* ==== Human vs AI (Ensemble) — dynamic ==== */
 .hvai{margin-top:14px;background:linear-gradient(135deg,rgba(60,220,255,.06),rgba(155,92,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px}
 .hvai-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
 .hvai-head h4{margin:0;font-size:1.08rem}
@@ -405,394 +405,32 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
-    <!-- 1) HUMAN vs AI (Ensemble) — replaced with scoped stylish block -->
-    <section id="ai-ensemble"
-             class="ai-ensemble"
-             data-endpoint="{{ $analyzeJsonUrl }}"
-             data-url="{{ request('url') }}">
-
-      <!-- local SVG sprite (no external icon CSS) -->
-      <svg aria-hidden="true" width="0" height="0" style="position:absolute; left:-9999px; top:-9999px;">
-        <symbol id="i-robot" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a1 1 0 0 1 1 1v1.06a8.004 8.004 0 0 1 7 7.94V18a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-6a8.004 8.004 0 0 1 7-7.94V3a1 1 0 0 1 1-1Zm-4 9a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3Zm8 0a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3Z"/></symbol>
-        <symbol id="i-user" viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a5 5 0 1 0-5-5a5 5 0 0 0 5 5Zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5Z"/></symbol>
-        <symbol id="i-info" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></symbol>
-        <symbol id="i-brain" viewBox="0 0 24 24"><path fill="currentColor" d="M9 3a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h1V3Zm5 0h-1v16h1a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3Z"/></symbol>
-        <symbol id="i-scale" viewBox="0 0 24 24"><path fill="currentColor" d="M19 6h-4V4h-2v2H5v2h2.1l-3.9 7A4 4 0 0 0 7 21a4 4 0 0 0 3.8-4.99L8.2 8H12v11h-2v2h8v-2h-2V8h3zm-10.9 4h3.8l-1.9 3.5z"/></symbol>
-        <symbol id="i-comment" viewBox="0 0 24 24"><path fill="currentColor" d="M20 2H4a2 2 0 0 0-2 2v14l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/></symbol>
-        <symbol id="i-shield" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l7 4v6c0 5-3.5 9-7 10c-3.5-1-7-5-7-10V6z"/></symbol>
-        <symbol id="i-seed" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2c3 3 6 5 6 9a6 6 0 0 1-12 0c0-4 3-6 6-9z"/></symbol>
-        <symbol id="i-pen" viewBox="0 0 24 24"><path fill="currentColor" d="M14.06 9l1.94 1.94L7 20H5v-2zM17.66 3a1.99 1.99 0 0 0-2.83 0l-1.83 1.83l4.24 4.24l1.83-1.83a2 2 0 0 0 0-2.83z"/></symbol>
-        <symbol id="i-gauge" viewBox="0 0 24 24"><path fill="currentColor" d="M12 5a9 9 0 0 0-9 9h2a7 7 0 1 1 14 0h2a9 9 0 0 0-9-9Zm0 4l-3 6h6z"/></symbol>
-        <symbol id="i-half" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20z"/></symbol>
-      </svg>
-
-      <div class="ai-head">
-        <div class="ai-title">
-          <span class="icon-bubble grad-yellow"><svg><use href="#i-scale"/></svg></span>
-          <h3>Human vs AI Content (Ensemble)</h3>
-        </div>
-        <span class="chip tip">
-          <svg class="chip-ico"><use href="#i-info"/></svg>
-          How it works
-          <span class="tip-box">Blends multiple detector signals into an ensemble verdict.</span>
-        </span>
+    <!-- 1) HUMAN vs AI (Ensemble) -->
+    <section id="detectorPanel" class="hvai" style="display:none">
+      <div class="hvai-head">
+        <i class="fa-solid fa-users-gear ico ico-purple"></i>
+        <h4>Human vs AI Content (Ensemble)</h4>
+      </div>
+      <div class="hvai-meta">
+        <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
+        <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
       </div>
 
-      <div class="ai-body">
-        <!-- verdict line -->
-        <div class="ai-verdict">
-          <div class="left">
-            <span class="icon-bubble" id="verdictIcon"><svg><use href="#i-half"/></svg></span>
-            <div class="v-wrap">
-              <span class="verdict-chip" id="verdictChip">
-                <svg class="chip-ico"><use href="#i-half"/></svg>
-                <span id="verdictLabel">Analyzing…</span>
-              </span>
-              <div class="muted" id="verdictNote">Combines model outputs; treat as one signal among many.</div>
-            </div>
-          </div>
-          <div class="legend">
-            <span class="chip soft-green"><svg class="chip-ico"><use href="#i-user"/></svg>Human</span>
-            <span class="chip soft-red"><svg class="chip-ico"><use href="#i-robot"/></svg>AI</span>
-            <span class="chip soft-violet"><svg class="chip-ico"><use href="#i-brain"/></svg>Ensemble</span>
-          </div>
+      <!-- Animated Human vs AI bars -->
+      <div class="hvai-bar">
+        <div>
+          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
         </div>
-
-        <!-- rings -->
-        <div class="cards">
-          <div class="card">
-            <div class="ring" id="ringHuman" style="--val:0; --color: var(--green)">
-              <div class="inner">
-                <div class="pct" id="pctHuman">0%</div>
-                <div class="lbl">Human probability</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="ring" id="ringAI" style="--val:0; --color: var(--red)">
-              <div class="inner">
-                <div class="pct" id="pctAI">0%</div>
-                <div class="lbl">AI probability</div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="ring" id="ringEnsemble" style="--val:0; --color: var(--violet)">
-              <div class="inner">
-                <div class="pct" id="pctEnsemble">0</div>
-                <div class="lbl">Ensemble score</div>
-              </div>
-            </div>
-          </div>
+        <div>
+          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
         </div>
-
-        <!-- detectors -->
-        <div class="detectors-wrap">
-          <div class="title-row">
-            <div class="tr-left">
-              <span class="icon-bubble grad-blue"><svg><use href="#i-shield"/></svg></span>
-              <div>
-                <strong>Detectors</strong>
-                <div class="muted">Individual model signals feeding the ensemble</div>
-              </div>
-            </div>
-            <span class="chip"><svg class="chip-ico"><use href="#i-brain"/></svg>Models</span>
-          </div>
-          <div class="detectors" id="detectorsList"></div>
-        </div>
-
-        <!-- rationale -->
-        <details class="accordion" id="rationaleBox">
-          <summary><svg class="sum-ico"><use href="#i-comment"/></svg> Rationale & caveats</summary>
-          <div class="content" id="rationaleContent">
-            Detectors can be noisy on short or highly edited text. Use alongside citations, author history, and fact checks.
-          </div>
-        </details>
       </div>
 
-      <style>
-        /* ======= SCOPED THEME (only inside #ai-ensemble) ======= */
-        #ai-ensemble{
-          --panel: #121226;
-          --card: #151633;
-          --muted: #9aa5b3;
-          --text: #f2f5f9;
-          --ring-track: #23243f;
-          --green:  #2ee59d;
-          --red:    #ff6b9a;
-          --orange: #ff9f40;
-          --blue:   #4cc9f0;
-          --violet: #a78bfa;
-          --y: #ffd166;
-          --shadow: 0 10px 30px rgba(0,0,0,.35);
-          --border: 1px solid rgba(255,255,255,.08);
-          color: var(--text);
-          background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-          border: var(--border);
-          border-radius: 16px;
-          box-shadow: var(--shadow);
-          overflow: hidden;
-          margin: 14px 0;
-        }
-        #ai-ensemble * { box-sizing: border-box }
-
-        #ai-ensemble .ai-head{
-          display:flex; align-items:center; justify-content:space-between; gap:10px;
-          padding:16px 16px 12px; border-bottom: 1px dashed rgba(255,255,255,.08);
-          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
-        }
-        #ai-ensemble .ai-title{ display:flex; align-items:center; gap:10px }
-        #ai-ensemble h3{ margin:0; font-size:18px }
-
-        #ai-ensemble .ai-body{ padding:14px }
-
-        /* icon bubbles + gradients */
-        #ai-ensemble .icon-bubble{
-          width:40px; height:40px; border-radius:12px; display:grid; place-items:center; color:#fff; box-shadow: var(--shadow);
-        }
-        #ai-ensemble .icon-bubble svg{ width:20px; height:20px }
-        #ai-ensemble .grad-yellow{ background: linear-gradient(135deg,#ffcf66,#ff9f40) }
-        #ai-ensemble .grad-blue{ background: linear-gradient(135deg,#00d2ff,#3a7bd5) }
-
-        /* chips & text */
-        #ai-ensemble .muted{ color:var(--muted); font-size:12.5px }
-        #ai-ensemble .chip{
-          display:inline-flex; align-items:center; gap:8px; padding:7px 10px; border-radius:999px;
-          font-weight:700; font-size:12px; border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); color:var(--text)
-        }
-        #ai-ensemble .soft-green{ background:rgba(46,229,157,.15); border-color:rgba(46,229,157,.35); color:#caffea }
-        #ai-ensemble .soft-red{ background:rgba(255,107,154,.15); border-color:rgba(255,107,154,.35); color:#ffd8e6 }
-        #ai-ensemble .soft-violet{ background:rgba(167,139,250,.15); border-color:rgba(167,139,250,.35); color:#efe6ff }
-        #ai-ensemble .chip-ico{ width:14px; height:14px }
-
-        /* verdict row */
-        #ai-ensemble .ai-verdict{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap }
-        #ai-ensemble .ai-verdict .left{ display:flex; gap:12px; align-items:center }
-        #ai-ensemble .verdict-chip{
-          display:inline-flex; align-items:center; gap:8px; padding:9px 12px; border-radius:12px;
-          background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-          border: var(--border); font-weight:800;
-        }
-
-        /* rings */
-        #ai-ensemble .cards{ display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-top:10px }
-        #ai-ensemble .card{
-          background: var(--card); border: var(--border); border-radius:14px; padding:16px; display:grid; place-items:center;
-        }
-        #ai-ensemble .ring{
-          --val: 0; --color: var(--violet);
-          width:120px; aspect-ratio:1/1; border-radius:999px;
-          background: conic-gradient(var(--color) calc(var(--val)*1%), var(--ring-track) 0);
-          display:grid; place-items:center; position:relative; transition: .5s ease;
-        }
-        #ai-ensemble .ring::before{
-          content:""; position:absolute; inset:8px; border-radius:999px; background: var(--card);
-        }
-        #ai-ensemble .ring .inner{ position:relative; text-align:center }
-        #ai-ensemble .pct{ font-size:20px; font-weight:800 }
-        #ai-ensemble .lbl{ font-size:12px; color:var(--muted) }
-
-        /* detectors */
-        #ai-ensemble .detectors-wrap{ background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)); border: var(--border); border-radius:14px; margin-top:12px; padding:12px }
-        #ai-ensemble .title-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap }
-        #ai-ensemble .tr-left{ display:flex; align-items:center; gap:10px }
-        #ai-ensemble .detectors{ display:grid; grid-template-columns: repeat(12, 1fr); gap:10px; margin-top:10px }
-        #ai-ensemble .det{
-          grid-column: span 12; background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
-          border:var(--border); border-radius:12px; padding:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;
-        }
-        @media(min-width:720px){ #ai-ensemble .det{ grid-column: span 6 } }
-        @media(min-width:1040px){ #ai-ensemble .det{ grid-column: span 4 } }
-        #ai-ensemble .det .left{ display:flex; align-items:center; gap:10px }
-        #ai-ensemble .det .right{ display:flex; align-items:center; gap:8px }
-        #ai-ensemble .badge{
-          padding:6px 9px; border-radius:999px; font-weight:800; font-size:12px; letter-spacing:.2px; border:1px solid rgba(255,255,255,.12)
-        }
-        #ai-ensemble .badge.green{ background:rgba(46,229,157,.15); color:#baffde; border-color: rgba(46,229,157,.35) }
-        #ai-ensemble .badge.red{ background:rgba(255,107,154,.15); color:#ffd2e0; border-color: rgba(255,107,154,.35) }
-        #ai-ensemble .badge.orange{ background:rgba(255,159,64,.15); color:#ffe0c2; border-color: rgba(255,159,64,.35) }
-        #ai-ensemble .badge.blue{ background:rgba(76,201,240,.15); color:#c7efff; border-color: rgba(76,201,240,.35) }
-
-        /* accordion */
-        #ai-ensemble .accordion{ border-top:1px dashed rgba(255,255,255,.08); margin-top:12px; padding-top:8px }
-        #ai-ensemble .accordion summary{
-          list-style:none; cursor:pointer; user-select:none; display:flex; align-items:center; gap:8px; padding:6px 0; color:var(--muted);
-        }
-        #ai-ensemble .accordion summary::-webkit-details-marker{ display:none }
-        #ai-ensemble .accordion[open] summary{ color:#dfe6ff }
-        #ai-ensemble .sum-ico{ width:16px; height:16px }
-        #ai-ensemble .content{ color:#c8cbe0; padding:6px 0 2px }
-        /* tooltip */
-        #ai-ensemble .tip{ position:relative }
-        #ai-ensemble .tip:hover .tip-box{ opacity:1; transform: translateY(-6px); pointer-events:auto }
-        #ai-ensemble .tip-box{
-          position:absolute; bottom: calc(100% + 8px); left:50%; transform: translate(-50%, 0);
-          background:#121123; color:#e7e7ff; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.08);
-          white-space:nowrap; opacity:0; transition:.2s; pointer-events:none; font-size:12px; z-index:20
-        }
-        #ai-ensemble .tip-box::after{
-          content:""; position:absolute; top:100%; left:50%; transform: translateX(-50%);
-          border:7px solid transparent; border-top-color:#121123;
-        }
-      </style>
-
-      <script>
-        (() => {
-          const root = document.getElementById('ai-ensemble');
-          if (!root) return;
-
-          const clamp = v => Math.max(0, Math.min(100, Math.round(Number(v)||0)));
-          const pct = v => clamp(v) + '%';
-
-          const ringHuman    = root.querySelector('#ringHuman');
-          const ringAI       = root.querySelector('#ringAI');
-          const ringEnsemble = root.querySelector('#ringEnsemble');
-          const pctHuman     = root.querySelector('#pctHuman');
-          const pctAI        = root.querySelector('#pctAI');
-          const pctEns       = root.querySelector('#pctEnsemble');
-          const detList      = root.querySelector('#detectorsList');
-          const rationaleBox = root.querySelector('#rationaleBox');
-          const rationaleEl  = root.querySelector('#rationaleContent');
-          const verdictIcon  = root.querySelector('#verdictIcon');
-          const verdictChip  = root.querySelector('#verdictChip');
-          const verdictLab   = root.querySelector('#verdictLabel');
-
-          const endpoint = root.dataset.endpoint || '';
-          const urlParam = (root.dataset.url || '').trim() || (new URLSearchParams(location.search).get('url') || '').trim();
-
-          function setRing(el, val){
-            if (!el) return;
-            const v = clamp(val);
-            el.style.setProperty('--val', v);
-            const num = el.querySelector('.pct');
-            if (num) num.textContent = pct(v);
-          }
-
-          function verdictFrom(human, ai){
-            if (human >= 80 && ai <= 20) return {label:'Likely Human',   color:'linear-gradient(135deg,#17c964,#2ee59d)', icon:'#i-user'};
-            if (ai >= 80 && human <= 20) return {label:'Likely AI',      color:'linear-gradient(135deg,#ff6b9a,#ff99ac)', icon:'#i-robot'};
-            if (human >= 60 && ai <= 40) return {label:'Leaning Human',  color:'linear-gradient(135deg,#1fd39c,#75f0c9)', icon:'#i-user'};
-            if (ai >= 60 && human <= 40) return {label:'Leaning AI',     color:'linear-gradient(135deg,#ff7aa8,#ffb5c8)', icon:'#i-robot'};
-            return {label:'Mixed / Uncertain', color:'linear-gradient(135deg,#ffcf66,#ff9f40)', icon:'#i-half'};
-          }
-
-          function badgeTone(ai){
-            if (ai >= 80) return 'red';
-            if (ai >= 60) return 'orange';
-            return 'blue';
-          }
-
-          function detectorIcon(name=''){
-            const n = (name||'').toLowerCase();
-            if (n.includes('zero')) return '#i-gauge';
-            if (n.includes('original')) return '#i-shield';
-            if (n.includes('sapling')) return '#i-seed';
-            if (n.includes('writer')) return '#i-pen';
-            if (n.includes('cross') || n.includes('ensemble')) return '#i-scale';
-            return '#i-brain';
-          }
-
-          function addDetectorRow(item){
-            const name = item.name || item.model || 'Detector';
-            const ai   = ('ai_pct' in item) ? clamp(item.ai_pct)
-                       : ('ai' in item)     ? clamp(item.ai)
-                       : ('score' in item)  ? clamp(item.score)
-                       : 0;
-            const human = ('human_pct' in item) ? clamp(item.human_pct) : clamp(100 - ai);
-            const tone = badgeTone(ai);
-
-            const row = document.createElement('div');
-            row.className = 'det';
-            row.innerHTML = `
-              <div class="left">
-                <span class="icon-bubble grad-blue"><svg><use href="${detectorIcon(name)}"/></svg></span>
-                <div>
-                  <div style="font-weight:800">${name}</div>
-                  <div class="muted" style="font-size:12px">AI: ${ai}% • Human: ${human}%</div>
-                </div>
-              </div>
-              <div class="right">
-                <span class="badge ${tone}">AI ${ai}%</span>
-                <span class="badge green">Human ${human}%</span>
-              </div>
-            `;
-            detList.appendChild(row);
-          }
-
-          function parseEnsemble(data){
-            const root = data?.ai_human_ensemble || data?.ensemble || data || {};
-            let ai   = root.ai_pct   ?? root.ai_probability   ?? root.ai      ?? root.ai_score;
-            let hum  = root.human_pct?? root.human_probability?? root.human   ?? root.human_score;
-            if (ai == null && hum != null) ai = 100 - Number(hum);
-            if (hum == null && ai != null) hum = 100 - Number(ai);
-            const ensemble   = root.ensemble_score ?? root.score ?? Math.max(ai||0, hum||0);
-            const rationale  = root.rationale || root.explanation || '';
-            const classifiers= Array.isArray(root.classifiers) ? root.classifiers
-                               : Array.isArray(root.models)     ? root.models
-                               : Array.isArray(root.detectors)  ? root.detectors
-                               : [];
-            return { ai: clamp(ai||0), human: clamp(hum||0), ensemble: clamp(ensemble||0), rationale, classifiers };
-          }
-
-          function apply(parsed){
-            setRing(ringHuman, parsed.human);
-            setRing(ringAI, parsed.ai);
-            setRing(ringEnsemble, parsed.ensemble);
-            if (pctHuman) pctHuman.textContent = pct(parsed.human);
-            if (pctAI)    pctAI.textContent    = pct(parsed.ai);
-            if (pctEns)   pctEns.textContent   = parsed.ensemble;
-
-            const v = verdictFrom(parsed.human, parsed.ai);
-            if (verdictLab) verdictLab.textContent = v.label;
-            if (verdictIcon){ verdictIcon.style.background = v.color; verdictIcon.querySelector('use').setAttribute('href', v.icon); }
-            if (verdictChip){ verdictChip.querySelector('use').setAttribute('href', v.icon); }
-
-            detList.innerHTML = '';
-            (parsed.classifiers||[]).forEach(addDetectorRow);
-            if (!parsed.classifiers?.length) addDetectorRow({name:'Cross-Vote Ensemble', ai_pct: parsed.ai});
-
-            if (parsed.rationale){
-              rationaleEl.textContent = parsed.rationale;
-              rationaleBox.style.display = '';
-            }else{
-              rationaleBox.style.display = 'none';
-            }
-          }
-
-          async function hydrate(){
-            // demo fallback if no endpoint or URL
-            const demo = {
-              ai_human_ensemble:{
-                ai_pct: 34, human_pct: 66, ensemble_score: 71,
-                rationale: 'Signals suggest a human-led draft with light AI edits.',
-                classifiers: [
-                  {name:'GPTZero', ai_pct: 28},
-                  {name:'Originality AI', ai_pct: 42},
-                  {name:'Sapling', ai_pct: 24},
-                  {name:'Ensemble Cross-Vote', ai_pct: 34}
-                ]
-              }
-            };
-
-            if (!endpoint || !urlParam){
-              apply(parseEnsemble(demo));
-              return;
-            }
-
-            try{
-              const res = await fetch(endpoint + '?url=' + encodeURIComponent(urlParam), { headers:{'X-Requested-With':'XMLHttpRequest'} });
-              if (!res.ok) throw new Error('HTTP ' + res.status);
-              const json = await res.json();
-              if (!json || !Object.keys(json).length) { apply(parseEnsemble(demo)); return; }
-              apply(parseEnsemble(json));
-            }catch(e){
-              apply(parseEnsemble(demo));
-            }
-          }
-
-          document.addEventListener('DOMContentLoaded', hydrate);
-        })();
-      </script>
+      <!-- Detectors grid -->
+      <div class="det-grid" id="detGrid"></div>
+      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no or placeholder percentages.</div>
     </section>
 
     <!-- 2) READABILITY INSIGHTS (Upgraded) -->
@@ -944,7 +582,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
             <linearGradient id="compGrad" x1="0" y1="0" x2="1" y2="1"><stop id="compStop1" offset="0%" stop-color="#3de2ff"/><stop id="compStop2" offset="100%" stop-color="#9b5cff"/></linearGradient>
             <path id="compWave" d="M0 80 Q 50 60 100 80 T 200 80 T 300 80 T 400 80 T 500 80 T 600 80 V 160 H 0 Z"/>
           </defs>
-          <g clip-path="url(#compRound)">
+          <g clip-path="compRound)">
             <rect x="0" y="0" width="600" height="140" fill="#0b0d21"/>
             <g clip-path="url(#compFillClip)">
               <g class="comp-wave1 multiHue"><use href="#compWave" x="0" fill="url(#compGrad)"/><use href="#compWave" x="600" fill="url(#compGrad)"/></g>
@@ -1247,12 +885,56 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl };
   }
 
+  // NEW: richer, dynamic ensemble detector to avoid "fixed" scores
   function detectUltra(text){
     var s=_prep(text||'');
-    if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
-    var ai=10; var covT=0.45; if(s.cov<covT) ai+=clamp((covT-s.cov)/covT,0,1)*25; var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18;
-    var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
-    return { humanPct: 100-clamp(Math.round(ai),0,100), aiPct: clamp(Math.round(ai),0,100), confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai:clamp(Math.round(ai),0,100),w:1}], _s:s };
+    // Short text fallback
+    if (s.wordCount < 40){
+      var aiQuick = clamp(72 - Math.min(40, s.wordCount)*1.1, 22, 72);
+      return {
+        humanPct: clamp(100-aiQuick,0,100),
+        aiPct: clamp(aiQuick,0,100),
+        confidence: clamp(42 + Math.log((s.wordCount||1)+1)*8, 45, 70),
+        detectors: [{key:'short',label:'Short Text Heuristic',ai:Math.round(aiQuick)}],
+        _s:s
+      };
+    }
+
+    // Helper mapping to 0..100 where 100 = more AI-like
+    function score(x, low, high, invert){
+      var t = (x - low) / (high - low);
+      t = clamp(t, 0, 1);
+      if (invert) t = 1 - t;
+      return Math.round(t*100);
+    }
+
+    // Individual detectors
+    var d_ttr    = score(s.TTR,       0.30, 0.65, true);  // lower variety -> more AI
+    var d_cov    = score(s.cov,       0.30, 0.65, true);  // less sentence length variance -> more AI
+    var d_rep    = score(s.triRepeatRatio, 0.02, 0.20, false); // more repetition -> more AI
+    var d_awl    = score(s.avgWordLen,4.6,  6.2,  false); // longer words -> more AI
+    var d_hapax  = score(s.hapaxRatio,0.35, 0.70, true);  // fewer unique singletons -> more AI
+    var d_asl    = score(s.asl,       14,   28,   false); // longer sentences -> more AI
+
+    var parts = [
+      {key:'ttr',   label:'Lexical Variety (TTR)', ai:d_ttr, w:24},
+      {key:'cov',   label:'Sentence Variability',  ai:d_cov, w:18},
+      {key:'rep',   label:'N-gram Repetition',     ai:d_rep, w:20},
+      {key:'awl',   label:'Avg Word Length',       ai:d_awl, w:12},
+      {key:'hapax', label:'Unique-word Ratio',     ai:d_hapax,w:12},
+      {key:'asl',   label:'Sentence Length',       ai:d_asl, w:14},
+    ];
+    var totalW = parts.reduce(function(a,b){return a+b.w;},0) || 1;
+    var ai = Math.round(parts.reduce(function(a,b){return a + b.ai*b.w;},0)/totalW);
+    var conf = clamp(50 + Math.log((s.wordCount||1)+1)*10 + (s.wordCount>500?6:0) - (s.wordCount<120?4:0), 55, 96);
+
+    return {
+      humanPct: clamp(100-ai,0,100),
+      aiPct: clamp(ai,0,100),
+      confidence: conf,
+      detectors: parts,
+      _s:s
+    };
   }
 
   function deriveItemScoresFromSignals(s){
@@ -1298,7 +980,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return data;
   }
 
-  /* === Human vs AI rendering (legacy chips + optional old panel) === */
+  /* === Human vs AI rendering === */
+  function resetHVAI(){
+    var hv = document.getElementById('hvaiHumanVal'), av=document.getElementById('hvaiAIVal');
+    var hf = document.getElementById('hvaiHumanFill'), af=document.getElementById('hvaiAIFill');
+    if(hv) hv.textContent='—%'; if(av) av.textContent='—%';
+    if(hf) hf.style.width='0%'; if(af) af.style.width='0%';
+    var grid=document.getElementById('detGrid'); if(grid) grid.innerHTML='';
+    var conf=document.getElementById('detConfidence'); if(conf) conf.textContent='—';
+  }
+
   function renderDetectors(res){
     var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
     if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
@@ -1314,19 +1005,36 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
       var id='det-'+d.key; var wrap=document.createElement('div');
       wrap.className='det-item'; wrap.innerHTML =
-        '<div class="det-row"><div class="det-label">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+(d.ai||0)+'</div></div>'+
-        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+(Math.max(0,Math.min(100,d.ai||0)))+'%"></div></div>';
+        '<div class="det-row"><div class="det-label">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+(Math.round(d.ai)||0)+'</div></div>'+
+        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+(clamp(d.ai||0,0,100))+'%"></div></div>';
       grid.appendChild(wrap);
     });
   }
-  function applyDetection(humanPct, aiPct, confidence, breakdown){
+
+  function applyDetection(humanPct, aiPct, confidence, detectors){
     var writer = (isFinite(humanPct) && isFinite(aiPct) && humanPct>=aiPct) ? 'Likely Human' : 'AI-like';
     var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
     var hp = document.getElementById('humanPct'), ap = document.getElementById('aiPct');
     if(hp) hp.textContent = isFinite(humanPct)? Math.round(humanPct) : '—';
     if(ap) ap.textContent = isFinite(aiPct)?    Math.round(aiPct)   : '—';
-    var res = {humanPct:humanPct, aiPct:aiPct, confidence:confidence, detectors:(breakdown && breakdown.detectors)||[{key:'stylometry',label:'Stylometry',ai:aiPct||0}]};
-    renderDetectors(res);
+    renderDetectors({humanPct, aiPct, confidence, detectors});
+  }
+
+  // NEW: choose backend vs. local to avoid "fixed" backend scores
+  function pickDetection(backend, ensemble){
+    var hasBackend = isFinite(backend?.humanPct) && isFinite(backend?.aiPct) &&
+                     backend.humanPct>=0 && backend.humanPct<=100 && backend.aiPct>=0 && backend.aiPct<=100;
+    var bConf = isFinite(backend?.confidence) ? backend.confidence : 0;
+    var looksPlaceholder = false;
+    if (hasBackend){
+      var bh=Math.round(backend.humanPct), ba=Math.round(backend.aiPct);
+      looksPlaceholder = (bh===ba) || (bh===0 && ba===0);
+    }
+    if (!hasBackend || bConf<65 || looksPlaceholder){
+      return {humanPct: ensemble.humanPct, aiPct: ensemble.aiPct, confidence: ensemble.confidence, detectors: ensemble.detectors};
+    }
+    // Use backend headline but show local breakdown so the grid isn't static
+    return {humanPct: backend.humanPct, aiPct: backend.aiPct, confidence: bConf, detectors: ensemble.detectors};
   }
 
   /* === Readability rendering === */
@@ -1387,33 +1095,26 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   function extractEntities(text){
     var res = {people:[], orgs:[], places:[], topics:[], software:[], games:[]};
     var clean=(text||'').replace(/\s+/g,' ');
-    // naive capitalized tokens as candidates
     var cand = (clean.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || []).slice(0, 800);
     var stop = new Set(['The','A','An','This','That','And','Or','Of','In','On','To','For','By','With','Your','Our','You','We','It','At','From','As','Be','Is','Are','Was','Were','Not']);
     var uniq={};
     cand.forEach(function(c){ if(stop.has(c)) return; var k=c.trim(); if(k.length<2||k.length>48) return; uniq[k]=1; });
     var uniqList = Object.keys(uniq).slice(0,120);
-
-    // very light heuristics
     uniqList.forEach(function(n){
       if (/\b(Inc|LLC|Ltd|Corporation|Company|Corp|Studio|Labs|University|College)\b/.test(n)) res.orgs.push(n);
       else if (/\b(City|Town|Province|State|Country|Park|River|Lake|Valley|Mountain)\b/.test(n)) res.places.push(n);
       else if (/\b(Mr|Mrs|Ms|Dr|Prof)\b/.test(n) || n.split(' ').length>=2) res.people.push(n);
       else res.topics.push(n);
     });
-
-    // software / apk / games (keyword probes)
     var low = clean.toLowerCase();
     var swTerms = (low.match(/\b(software|app|application|android|ios|windows|mac|linux|apk|exe|download|install|update|version)\b/g) || []);
-    if (swTerms.length){ // pick key tokens with dots or version-like
+    if (swTerms.length){
       var soft = (clean.match(/\b([A-Z][A-Za-z0-9\.\-\+]{2,})\b/g) || []).filter(x=>/\b(Android|iOS|Windows|Mac|Linux|Pro|Studio|Editor|App|SDK|Tool)\b/.test(x) || /v?\d+\.\d+/.test(x));
       res.software = Array.from(new Set(soft)).slice(0,20);
     }
     if (/\bapk\b/i.test(low) || /\.apk\b/i.test(low)){ res.software.push('APK'); }
     var games = (clean.match(/\b([A-Z][A-Za-z0-9\-\s]{2,} (?:Game|Games|Edition|Remastered|Online))\b/g) || []);
     if (games.length) res.games = Array.from(new Set(games)).slice(0,20);
-
-    // clamp lists
     res.people = res.people.slice(0,20);
     res.orgs = res.orgs.slice(0,20);
     res.places = res.places.slice(0,20);
@@ -1477,7 +1178,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       if (typeof cls==='number'){ setText('psiCls', cls.toFixed(3)); barPct('psiClsBar', cls, 0.1, 0.4); }
       if (typeof ttfb==='number'){ setText('psiTtfb', Math.round(ttfb)); barPct('psiTtfbBar', ttfb, 800, 2500); }
 
-      // Advice list (simple heuristics)
       var tips=[];
       if (lcp>2500) tips.push('Optimize hero image (compress, proper size, lazy-load below-the-fold).');
       if (inp>200) tips.push('Reduce main-thread work (code-split, defer non-critical JS).');
@@ -1505,7 +1205,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
-    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
+    var detPanel = document.getElementById('detectorPanel'); if(detPanel) { detPanel.style.display='none'; resetHVAI(); }
     var readPanel = document.getElementById('readabilityPanel'); if(readPanel) readPanel.style.display='none';
     var entPanel = document.getElementById('entitiesPanel'); if(entPanel) entPanel.style.display='none';
     var psiPanel = document.getElementById('psiPanel'); if(psiPanel) psiPanel.style.display='none';
@@ -1557,16 +1257,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
 
-    // Detection
-    var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-    var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-    var backendConf = (typeof data.confidence==='number')? data.confidence : null;
-    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
-      applyDetection(hp, ap, backendConf, ensemble || null);
-    } else if (ensemble){
-      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-    } else if (isFinite(hp) && isFinite(ap)){
-      applyDetection(hp, ap, backendConf || 60, null);
+    // Pick detection to avoid fixed/placeholder values
+    var chosen;
+    if (ensemble){
+      chosen = pickDetection(
+        (isFinite(data.humanPct) && isFinite(data.aiPct)) ? {humanPct:data.humanPct, aiPct:data.aiPct, confidence:Number(data.confidence)||0} : null,
+        ensemble
+      );
+      applyDetection(chosen.humanPct, chosen.aiPct, chosen.confidence, chosen.detectors);
+    } else if (isFinite(data.humanPct) && isFinite(data.aiPct)) {
+      applyDetection(data.humanPct, data.aiPct, Number(data.confidence)||60, null);
     }
 
     // Readability + Entities
@@ -1598,6 +1298,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       if (input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); analyze(); }}); }
       var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
       var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
+
+      // Scroll helpers for HVAI buttons
+      var vH=document.getElementById('viewHumanBtn'), vA=document.getElementById('viewAIBtn');
+      function focusHVAI(){ var p=document.getElementById('detectorPanel'); if(p){ p.style.display='block'; p.scrollIntoView({behavior:'smooth', block:'center'}); } }
+      if(vH) vH.addEventListener('click', function(e){ e.preventDefault(); focusHVAI(); });
+      if(vA) vA.addEventListener('click', function(e){ e.preventDefault(); focusHVAI(); });
 
       window.SEMSEO.READY = true;
       if (window.SEMSEO.QUEUE>0){ window.SEMSEO.QUEUE=0; analyze(); }
@@ -1642,6 +1348,7 @@ try{
       el=document.getElementById('aiPct'); if(el) el.textContent='—';
       var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
       var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
+      if (window.resetHVAI) resetHVAI();
       var readPanel=document.getElementById('readabilityPanel'); if(readPanel){ readPanel.style.display='none'; }
       var entPanel=document.getElementById('entitiesPanel'); if(entPanel){ entPanel.style.display='none'; }
       var psiPanel=document.getElementById('psiPanel'); if(psiPanel){ psiPanel.style.display='none'; }
