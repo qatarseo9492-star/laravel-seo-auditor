@@ -525,6 +525,36 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .psi-issues ul{margin:.2rem 0 0;padding-left:1rem}
 .psi-issues li{margin:.22rem 0}
 @media (max-width:768px){.psi-card{grid-column:span 12}}
+
+/* === Site Speed & Core Web Vitals — Neo Card ============================== */
+.speed-card{
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px; padding:16px;
+  background: radial-gradient(900px 420px at 90% -10%, rgba(0,255,171,.14), transparent 60%),
+              radial-gradient(900px 420px at 0% -20%, rgba(2,204,255,.10), transparent 55%);
+  box-shadow: 0 8px 24px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.04);
+  backdrop-filter: blur(6px);
+}
+.speed-head{ display:flex; align-items:center; gap:.6rem; color:#bdffe7; font-weight:900; font-size: clamp(1.05rem, 1vw + .9rem, 1.35rem); }
+.speed-head .icon{ width:22px; height:22px; filter: drop-shadow(0 0 10px rgba(0,255,171,.25)); }
+.speed-sub{ color:#a6f7ff; font-size:.86rem; opacity:.9; }
+
+.speed-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:12px; margin-top:10px; }
+.metric{ border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; background: rgba(15,18,30,.55); }
+.metric .top{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+.metric .lab{ display:flex; align-items:center; gap:.5rem; font-weight:800; color:#eaf2ff; }
+.metric .lab .icon{ width:18px; height:18px; }
+.metric .val{ font-weight:900; font-size:1.1rem; color:#fff; }
+.badge{ padding:.2rem .45rem; border-radius:8px; font-weight:800; font-size:.72rem; }
+.badge.fast{ background:rgba(0,255,171,.16); color:#b2ffe9; border:1px solid rgba(0,255,171,.28); }
+.badge.ok{ background:rgba(255,196,0,.12); color:#ffe8a3; border:1px solid rgba(255,196,0,.25); }
+.badge.slow{ background:rgba(255,95,95,.12); color:#ffc9c9; border:1px solid rgba(255,95,95,.25); }
+
+/* tiny bar for each metric */
+.mini{ height:10px; border-radius:10px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px; }
+.mini > i{ display:block; height:100%; border-radius:10px; background:linear-gradient(90deg, #00ffaa, #02ccff); }
+/* ======================================================================== */
+
 </style>
 </head>
 <body>
@@ -844,7 +874,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </section>
 
     <!-- 4) SITE SPEED & CORE WEB VITALS (End) -->
-    <section class="psi" id="psiPanel" style="display:none">
+    <section class="psi" id="psiPanel" style="display:none" data-psi-endpoint="/api/psi">
       <div class="psi-head">
         <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
         <h4>Site Speed & Core Web Vitals</h4>
@@ -878,7 +908,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <ul id="psiAdvice"></ul>
       </div>
       <div id="psiNote" style="color:var(--text-dim);margin-top:.4rem"></div>
-    </section>
+    </div><!--/speed-card--></section>
 
     <!-- Checklist categories (unchanged) -->
     @php $labels = [
@@ -1626,7 +1656,7 @@ try{
   (function(){
     var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
     var fb = document.getElementById('shareFb'), x = document.getElementById('shareX'), ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'), em = document.getElementById('shareEm');
-    if(fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?u='+url;
+    if(fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?url='+url;
     if(x)  x.href  = 'https://twitter.com/intent/tweet?text='+title+'&url='+url;
     if(ln) ln.href = 'https://www.linkedin.com/sharing/share-offsite/?url='+url;
     if(wa) wa.href = 'https://wa.me/?text='+title+'%20'+url;
@@ -1826,6 +1856,99 @@ window.addEventListener('error', function(e){
     langSel.addEventListener('change', e => applyLang(e.target.value));
     applyLang(langSel.value);
   }
+})();
+</script>
+
+
+<script>
+(function(){
+  const apiPublic = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
+  const section = document.querySelector('section[id*="psi"], section[id*="pagespeed"], section[id*="siteSpeed"]');
+  const endpoint = (section && section.dataset && section.dataset.psiEndpoint) ? section.dataset.psiEndpoint : null;
+  const urlInput = document.getElementById('urlField') || document.querySelector('input[type="url"], input[name*="url"]');
+  const runBtn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
+  const strategySel = document.getElementById('psiStrategy') || { value: 'mobile' };
+
+  function $(sel){ return document.querySelector(sel); }
+  function setText(sel, txt){ const el=$(sel); if(el){ el.textContent = txt; } }
+
+  function badge(metric, value){
+    if (metric==='LCP'){ if (value<=2500) return ['fast','Good']; if (value<=4000) return ['ok','Needs improv.']; return ['slow','Poor']; }
+    if (metric==='INP'){ if (value<=200) return ['fast','Good']; if (value<=500) return ['ok','Needs improv.']; return ['slow','Poor']; }
+    if (metric==='CLS'){ if (value<=0.1) return ['fast','Good']; if (value<=0.25) return ['ok','Needs improv.']; return ['slow','Poor']; }
+    return ['ok','Info'];
+  }
+
+  async function runPSI(){
+    const raw = (urlInput && urlInput.value || '').trim();
+    if (!raw){ alert("Enter a URL to analyze."); return; }
+    const target = encodeURIComponent(raw);
+    const qs = `url=${target}&strategy=${encodeURIComponent(strategySel.value||'mobile')}&category=performance&category=accessibility&category=seo&category=best-practices`;
+
+    let res;
+    try{
+      if (endpoint){
+        const r = await fetch(`${endpoint}?${qs}`, {credentials:'same-origin'});
+        if (r.ok) res = await r.json();
+      }
+    }catch(_){ /* fallback to public */ }
+
+    if (!res){
+      const r = await fetch(`${apiPublic}?${qs}`);
+      res = await r.json();
+    }
+    renderPSI(res);
+  }
+
+  function renderPSI(json){
+    try{
+      const perf = Math.round((json.lighthouseResult.categories.performance.score||0)*100);
+      setText('#psiPerf', perf + ' / 100');
+
+      const fx = json.loadingExperience && json.loadingExperience.metrics || {};
+      const LCPf = fx.LARGEST_CONTENTFUL_PAINT_MS && fx.LARGEST_CONTENTFUL_PAINT_MS.percentile || null;
+      const CLSf = fx.CUMULATIVE_LAYOUT_SHIFT_SCORE && fx.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile/100 || null;
+      const INPf = (fx.INTERACTION_TO_NEXT_PAINT && fx.INTERACTION_TO_NEXT_PAINT.percentile) || null;
+
+      const audits = json.lighthouseResult.audits || {};
+      const LCPlab = audits['largest-contentful-paint'] && audits['largest-contentful-paint'].numericValue || null;
+      const CLSlab = audits['cumulative-layout-shift'] && audits['cumulative-layout-shift'].numericValue || null;
+      const INPlab = (audits['interaction-to-next-paint'] && audits['interaction-to-next-paint'].numericValue) || null;
+
+      const LCP = LCPf || LCPlab || 0;
+      const CLS = (CLSf!=null ? CLSf : CLSlab) || 0;
+      const INP = INPf || INPlab || 0;
+
+      const LCPs = (LCP/1000).toFixed(2) + 's';
+      const INPs = Math.round(INP) + 'ms';
+      const CLSs = (Math.round(CLS*1000)/1000).toFixed(3);
+
+      const [bLCP, tLCP] = badge('LCP', LCP);
+      const [bINP, tINP] = badge('INP', INP);
+      const [bCLS, tCLS] = badge('CLS', CLS);
+
+      const lcpEl = document.getElementById('metricLCP');
+      const inpEl = document.getElementById('metricINP');
+      const clsEl = document.getElementById('metricCLS');
+
+      function fill(el, txt, badgeClass, badgeText, frac){
+        if (!el) return;
+        const val = el.querySelector('.val'); if (val) val.textContent = txt;
+        const b = el.querySelector('.badge'); if (b){ b.className = 'badge ' + badgeClass; b.textContent = badgeText; }
+        const bar = el.querySelector('.mini > i'); if (bar){ bar.style.width = Math.min(100, Math.max(5, Math.round(frac*100))) + '%'; }
+      }
+
+      fill(lcpEl, LCPs, bLCP, tLCP, Math.min(LCP/4000, 1));
+      fill(inpEl, INPs, bINP, tINP, Math.min(INP/500, 1));
+      fill(clsEl, CLSs, bCLS, tCLS, Math.min(CLS/0.25, 1));
+
+    }catch(e){
+      console.error('PSI render error', e, json);
+    }
+  }
+
+  if (runBtn){ runBtn.addEventListener('click', function(e){ e.preventDefault(); runPSI(); }); }
+  if (urlInput && urlInput.value && urlInput.value.startsWith('http')){ setTimeout(runPSI, 300); }
 })();
 </script>
 
