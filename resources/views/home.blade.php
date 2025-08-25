@@ -557,6 +557,13 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 /* ======================================================================== */
 
 
+
+/* Keep background overlays visible (but non-interactive) */
+.water-overlay, .water-svg, .comp-overlay{
+  pointer-events: none;
+  z-index: 0;
+}
+
 </style>
 </head>
 <body>
@@ -909,8 +916,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <div class="title"><i class="fa-solid fa-screwdriver-wrench"></i> How to Improve</div>
         <ul id="psiAdvice"></ul>
       </div>
-      <div id="psiNote" style="color:var(--text-dim);margin-top:.4rem"></div>
-    </div><!--/speed-card--></section>
+      <div id="psiNote" style="color:var(--text-dim);margin-top:.4rem"></div></section>
 
     <!-- Checklist categories (unchanged) -->
     @php $labels = [
@@ -1061,10 +1067,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       res = await r.json();
     }
     panel.setAttribute('data-last-url', raw);
-    renderPSI(res);
+    window.runPSI = runPSI;
+  renderPSI(res);
   }
 
-  function renderPSI(json){
+  function window.runPSI = runPSI;
+  renderPSI(json){
     try{
       const perfEl = document.getElementById('psiPerf');
       const perf = json?.lighthouseResult?.categories?.performance?.score;
