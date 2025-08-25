@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-24ab (Speed panel moved right below Entities; PSI auto-start fix; Analyze onclick + invalid URL status) --}}
+{{-- resources/views/home.blade.php — v2025-08-24ab+fixes (PSI u/url auto, chip tones, FA6 icons) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -84,6 +84,11 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
 .ico{width:1.1em;text-align:center}.ico-green{color:var(--good)}.ico-orange{color:var(--warn)}.ico-red{color:var(--bad)}.ico-cyan{color:var(--accent)}.ico-purple{color:#9b5cff}
 
+/* NEW: chip tone classes so chips actually recolor */
+.chip-good{background:rgba(34,197,94,.18)!important;border-color:rgba(34,197,94,.45)!important}
+.chip-mid{background:rgba(245,158,11,.18)!important;border-color:rgba(245,158,11,.45)!important}
+.chip-bad{background:rgba(239,68,68,.18)!important;border-color:rgba(239,68,68,.5)!important}
+
 /* URL field */
 .url-field{position:relative;border-radius:16px;background:#0b0d21;border:1px solid #1b1b35;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02),0 12px 32px rgba(0,0,0,.32);padding:10px 110px 10px 46px;transition:.25s;overflow:hidden;isolation:isolate}
 .url-field:focus-within{border-color:#5942ff;box-shadow:0 0 0 6px rgba(155,92,255,.15),inset 0 0 0 1px rgba(93,65,255,.28)}
@@ -152,7 +157,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .skel{height:12px;border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06));animation:sk 1.2s infinite;background-size:200% 100%}
 @keyframes sk{0%{background-position:0 0}100%{background-position:200% 0}}
 
-/* Checklist (unchanged) */
+/* Checklist */
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite;pointer-events:none;z-index:0}
@@ -395,7 +400,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       <div style="margin-top:.5rem;color:var(--text-dim)">Click a tag to open a search (Google / Wikipedia).</div>
     </section>
 
-    <!-- 4) Site Speed & Core Web Vitals (NOW directly below Entities) -->
+    <!-- 4) Site Speed & Core Web Vitals -->
     <section id="speedPanel" class="panel">
       <div class="panel-header">
         <i class="fa-solid fa-gauge-high ico" style="color:#22c55e"></i>
@@ -430,7 +435,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       </div>
     </section>
 
-    <!-- Checklist is now AFTER Speed panel -->
+    <!-- Checklist AFTER Speed panel -->
     @php $labels = [
       1=>'Define search intent & primary topic', 2=>'Map target & related keywords (synonyms/PAA)', 3=>'H1 includes primary topic naturally',
       4=>'Integrate FAQs / questions with answers', 5=>'Readable, NLP-friendly language', 6=>'Title tag (≈50–60 chars) w/ primary keyword',
@@ -622,13 +627,13 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
     var grid = document.getElementById('readGrid'); if(!grid) return; grid.innerHTML='';
     var items=[];
     var g=gradeFromFlesch(s.flesch); items.push({ icon:'fa-book', label:'Flesch Score', value: Math.round(s.flesch), badge:g.label, pct: clamp(g.pct,0,100), hint:g.hint });
-    items.push({ icon:'fa-random', label:'Sentence Variation (CoV inverse)', value: (1-s.cov).toFixed(2), pct: clamp(Math.round((1-s.cov)*100),0,100), hint:'Balance sentence lengths' });
+    items.push({ icon:'fa-shuffle', label:'Sentence Variation (CoV inverse)', value: (1-s.cov).toFixed(2), pct: clamp(Math.round((1-s.cov)*100),0,100), hint:'Balance sentence lengths' });
     items.push({ icon:'fa-font', label:'Type-Token Ratio (TTR)', value: s.TTR.toFixed(2), pct: pctBand(s.TTR,0.30,0.65), hint:'Vary vocabulary' });
     items.push({ icon:'fa-align-left', label:'Long Sentences', value: Math.round(s.longRatio*100)+'%', pct: clamp(Math.round((1-s.longRatio)*100),0,100), hint:'Split sentences ≥28 words' });
     items.push({ icon:'fa-text-height', label:'Avg Word Length', value: s.avgWordLen.toFixed(2), pct: pctBand(6 - s.avgWordLen, 0.2, 2.0), hint:'Prefer shorter words' });
     items.push({ icon:'fa-hashtag', label:'Digits per 100 words', value: s.digitsPer100.toFixed(1), pct: clamp(Math.round(100 - s.digitsPer100*5),0,100), hint:'Reduce numeric noise' });
     items.push({ icon:'fa-layer-group', label:'Trigram Repetition', value: (s.triRepeatRatio*100).toFixed(1)+'%', pct: clamp(Math.round(100 - s.triRepeatRatio*100),0,100), hint:'Avoid repetitive phrasing' });
-    items.push({ icon:'fa-file-alt', label:'Word Count', value: s.wordCount, pct: clamp(Math.round(Math.min(1, s.wordCount/1200)*100),0,100), hint:'Target 800–1500 words (topic dependent)' });
+    items.push({ icon:'fa-file-lines', label:'Word Count', value: s.wordCount, pct: clamp(Math.round(Math.min(1, s.wordCount/1200)*100),0,100), hint:'Target 800–1500 words (topic dependent)' });
     items.forEach(function(it){
       var card=document.createElement('div'); card.className='read-card';
       card.innerHTML='<div class="read-row"><div class="left"><i class="fa '+it.icon+'"></i> <b>'+it.label+'</b></div><div class="read-bar"><div class="read-fill" style="width:'+it.pct+'%"></div></div><div class="badge-mini">'+it.value+'</div></div><div style="color:var(--text-dim);margin-top:.3rem"><i class="fa-regular fa-lightbulb"></i> '+it.hint+'</div>';
@@ -667,8 +672,18 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   function fmtMs(x){ return Math.round(x) + ' ms'; }
   function fmtScore(x){ return Math.round((x||0)*100); }
 
+  // Build PSI URL that works with either ?u= (psi-proxy) or ?url= (api/pagespeed)
+  function buildPSIEndpoint(base, url, strategy){
+    var hasQ = base.includes('?');
+    var sep  = hasQ ? '&' : '?';
+    var needsU = /psi-proxy/i.test(base) || /[?&]u=/.test(base);
+    var key = needsU ? 'u' : 'url';
+    return base + sep + key + '=' + encodeURIComponent(url) + '&strategy=' + encodeURIComponent(strategy||'mobile');
+  }
+
   async function runPSI(url, strategy){
-    var ep=(window.SEMSEO.ENDPOINTS.psi||'/api/pagespeed')+'?url='+encodeURIComponent(url)+'&strategy='+encodeURIComponent(strategy||'mobile');
+    var base=(window.SEMSEO.ENDPOINTS.psi||'/api/pagespeed');
+    var ep=buildPSIEndpoint(base,url,strategy||'mobile');
     try{
       var r=await fetch(ep,{headers:{'Accept':'application/json'}});
       var j=await r.json(); if(!r.ok){ throw new Error((j && j.error)? j.error : 'PSI failed'); }
@@ -830,7 +845,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   }
   window.autoTickByScores = autoTickByScores;
 
-  /* Analyze (SAFE VERSION with URL feedback) */
+  /* Analyze */
   async function analyze(){
     if (window.SEMSEO.BUSY) return;
     window.SEMSEO.BUSY = true;
@@ -914,7 +929,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       statusEl && (statusEl.textContent='Analysis complete');
       var rep = document.getElementById('analyzeReport'); if(rep) rep.style.display='block';
 
-      // PSI auto-run
+      // PSI auto-run (works with both ?u= and ?url= proxies)
       setTimeout(function(){
         var ep = window.SEMSEO.ENDPOINTS.psi || '/api/pagespeed';
         if (ep && url) { runPageSpeedBoth(url); }
@@ -924,7 +939,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       statusEl && (statusEl.textContent = 'Analyze error: ' + (err && err.message ? err.message : err));
       try{ window.Water?.reset(); }catch(_){}
     } finally {
-      window.SEMSEO.BUSY = false; // always release the lock
+      window.SEMSEO.BUSY = false; // release the lock
     }
   }
   window.analyze = analyze;
@@ -940,6 +955,10 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       document.getElementById('runMobile')?.addEventListener('click', async function(){ var u=normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return; setText('psiTime', new Date().toLocaleTimeString()); var m=await runPSI(u,'mobile'); applyPSIToSide(m,'mobile'); });
       document.getElementById('runDesktop')?.addEventListener('click', async function(){ var u=normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return; setText('psiTime', new Date().toLocaleTimeString()); var d=await runPSI(u,'desktop'); applyPSIToSide(d,'desktop'); });
       document.getElementById('runBoth')?.addEventListener('click', async function(){ var u=normalizeUrl(document.getElementById('analyzeUrl').value||''); if(!u) return; runPageSpeedBoth(u); });
+
+      // quick scroll to Human/AI panel
+      document.getElementById('viewHumanBtn')?.addEventListener('click', ()=>{ document.getElementById('hvaiPanel')?.scrollIntoView({behavior:'smooth'}); });
+      document.getElementById('viewAIBtn')?.addEventListener('click', ()=>{ document.getElementById('hvaiPanel')?.scrollIntoView({behavior:'smooth'}); });
 
       document.getElementById('resetChecklist')?.addEventListener('click', function(){
         Array.prototype.forEach.call(document.querySelectorAll('.checklist input[type="checkbox"]'), cb=>cb.checked=false);
