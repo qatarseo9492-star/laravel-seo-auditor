@@ -2865,50 +2865,66 @@ window.addEventListener('load', function(){
 
 
 <script>
-/* === Layout Order: Readability -> Topic Coverage -> PSI -> Checklist -> Others === */
-(function(){
-  const byId = id => document.getElementById(id);
-  const read = byId('readabilityPanel');
-  const topics = byId('topicsPanel');
-  const psi = byId('psiPanel');
 
-  // Try to detect checklist root by climbing from #checklistGrid until we see toolbar buttons
-  function findChecklistRoot(){
-    const grid = byId('checklistGrid');
-    if(!grid) return null;
-    let root = grid;
-    const hasToolbar = (el) => el && el.querySelector && el.querySelector('#exportChecklist, #importChecklist, #resetChecklist, #printChecklist');
-    while(root && root.parentElement){
-      root = root.closest('section, div');
-      if(!root) break;
-      if(hasToolbar(root)) return root;
-      root = root.parentElement;
+<script>
+/* === Layout Order (SAFE): Readability -> Topic Coverage -> PSI -> Checklist -> Others === */
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    // closest() polyfill for older browsers
+    if (!Element.prototype.closest) {
+      Element.prototype.closest = function(s) {
+        var el = this;
+        if (!document.documentElement.contains(el)) return null;
+        do { if (el.matches && el.matches(s)) return el; el = el.parentElement || el.parentNode; } while (el !== null && el.nodeType === 1);
+        return null;
+      };
     }
-    return grid.closest('section, div') || grid;
+
+    var read   = document.getElementById('readabilityPanel');
+    var topics = document.getElementById('topicsPanel');
+    var psi    = document.getElementById('psiPanel');
+
+    function findChecklistRoot(){
+      var grid = document.getElementById('checklistGrid');
+      if(!grid) return null;
+      var el = grid;
+      function hasToolbar(node){
+        if(!node || !node.querySelector) return false;
+        return node.querySelector('#exportChecklist, #importChecklist, #resetChecklist, #printChecklist');
+      }
+      while(el){
+        var root = el.closest('section, div');
+        if(!root) break;
+        if(hasToolbar(root)) return root;
+        el = root.parentElement;
+      }
+      return grid.closest ? (grid.closest('section, div') || grid) : grid;
+    }
+    var checklist = findChecklistRoot();
+
+    // choose a parent that exists and contains at least one of the targets
+    var parent = (read && read.parentElement) || (topics && topics.parentElement) || (psi && psi.parentElement) || (checklist && checklist.parentElement);
+    if(!parent) return;
+
+    function inDoc(el){ return el && el.nodeType===1 && el.parentElement; }
+
+    var order = [read, topics, psi, checklist].filter(inDoc);
+
+    // Append in order only if they share the same parent; otherwise skip to avoid DOM detach bugs.
+    order.forEach(function(el){
+      try{
+        if(!el) return;
+        if(el.parentElement === parent){
+          parent.appendChild(el); // move to the end to enforce order
+        }
+      }catch(e){ /* swallow safely */ }
+    });
+  }catch(err){
+    console && console.warn && console.warn('Layout order script skipped:', err);
   }
-  const checklist = findChecklistRoot();
-
-  // Choose a common parent: the parent of the Readability section (usually the main content column)
-  const parent = read && read.parentElement;
-  if(!parent) return;
-
-  const inDoc = el => el && el.nodeType === 1 && el.parentElement;
-
-  const order = [read, topics, psi, checklist].filter(inDoc);
-
-  // Append in desired order; this moves nodes without cloning
-  order.forEach(el => {
-    if(el && el.parentElement !== parent){
-      try{ el.parentElement.removeChild(el); }catch(e){}
-      parent.appendChild(el);
-    }else if(el){
-      parent.appendChild(el); // move to the end in correct order
-    }
-  });
-
-  // Optional: scroll anchors remain functional; no changes to IDs/classes/JS hooks.
-})();
+});
 </script>
+
 
 </body>
 </html>
