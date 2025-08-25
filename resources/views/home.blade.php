@@ -58,7 +58,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .btn::after{content:"";position:absolute;inset:-2px;border-radius:inherit;opacity:.0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);transform:translateX(-120%);transition:opacity .2s}
 .btn:hover::after{opacity:1;animation:btnSweep 2.6s linear infinite}
 @keyframes btnSweep{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
-.btn-analyze{background:linear-gradient(135deg,#10b981,#22c55e);border-color:#20d391}
+.btn-analyze{ position:relative; z-index:99; background:linear-gradient(135deg,#10b981,#22c55e);border-color:#20d391}
 .btn-print{background:linear-gradient(135deg,#3b82f6,#6366f1);border-color:#5b77ef}
 .btn-reset{background:linear-gradient(135deg,#f59e0b,#f97316);border-color:#f59e0b}
 .btn-export{background:linear-gradient(135deg,#a855f7,#ec4899);border-color:#c26cf2}
@@ -1129,6 +1129,22 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   // 3) Auto-show section if URL is prefilled
   if (urlInput && urlInput.value && urlInput.value.trim()){ ensureVisible(); }
 })();
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  (function(){
+    const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
+    const urlInput = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+    const runBtn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
+    if (!panel) return;
+    function ensureVisible(){ if (panel.style.display==='none') panel.style.display=''; panel.classList.add('psi-ready'); }
+    function safeClick(){ ensureVisible(); if (typeof window.runPSI==='function') setTimeout(()=>window.runPSI(), 60); else if (typeof window.SEMSEO_go==='function'){ try{ window.SEMSEO_go(); }catch(e){} } }
+    if (runBtn){ runBtn.addEventListener('click', function(e){ e.preventDefault(); safeClick(); }); runBtn.style.pointerEvents='auto'; }
+    if (urlInput){ urlInput.addEventListener('keydown', function(e){ if (e.key==='Enter'){ e.preventDefault(); safeClick(); } }); }
+  })();
+});
 </script>
 
 </body>
