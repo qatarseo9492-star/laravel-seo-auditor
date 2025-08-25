@@ -1048,9 +1048,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
-    <!-- 1) HUMAN vs AI (Ensemble) -->
-    \1
-
+<!-- 1) HUMAN vs AI (Ensemble) -->
+<section class="hvai" id="detectorPanel" style="display:none">
   <!-- HVAI Verdict Badge -->
   <div id="hvaiBadge" class="hvai-badge" hidden>
     <div class="badge-sheen"></div>
@@ -1061,27 +1060,56 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </div>
   </div>
 
-      <div class="hvai-head">
-        <i class="fa-solid fa-users-gear ico ico-purple"></i>
-        <h4>Human vs AI Content (Ensemble)</h4>
-      </div>
-      <div class="hvai-meta">
-        <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
-        <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
-      </div>
-      <div class="hvai-bar">
-        <div>
-          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
-          <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
-        </div>
-        <div>
-          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
-          <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
-        </div>
-      </div>
-      <div class="det-grid" id="detGrid"></div>
-      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
-    </section>
+  <div class="hvai-head">
+    <i class="fa-solid fa-users-gear ico ico-purple"></i>
+    <h4>Human vs AI Content (Ensemble)</h4>
+  </div>
+
+  <div class="hvai-meta">
+    <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
+    <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
+  </div>
+
+  <!-- Stylish circular gauge (used by the v2.3 script) -->
+  <div class="hvai-gauge">
+    <svg class="g-svg" viewBox="0 0 200 200" aria-label="HVAI gauge">
+      <defs>
+        <linearGradient id="gradHuman" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#22c55e"/>
+          <stop offset="100%" stop-color="#3de2ff"/>
+        </linearGradient>
+        <linearGradient id="gradAI" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#ef4444"/>
+          <stop offset="100%" stop-color="#f59e0b"/>
+        </linearGradient>
+      </defs>
+      <circle class="g-track human" cx="100" cy="100" r="66"></circle>
+      <circle class="g-track ai"    cx="100" cy="100" r="86"></circle>
+      <circle id="hvaiHumanArc" class="g-arc human" cx="100" cy="100" r="66"></circle>
+      <circle id="hvaiAIArc"    class="g-arc ai"    cx="100" cy="100" r="86"></circle>
+    </svg>
+    <div class="g-center">
+      <div class="g-title">AI likelihood</div>
+      <div id="hvaiScoreBig" class="g-score">0%</div>
+    </div>
+  </div>
+
+  <div class="hvai-bar">
+    <div>
+      <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+      <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+    </div>
+    <div>
+      <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
+      <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="det-grid" id="detGrid"></div>
+  <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">
+    Local ensemble activates if the backend provides no text/percentages.
+  </div>
+</section>
 
     <!-- 2) READABILITY -->
     <section class="readability" id="readabilityPanel" style="display:none">
