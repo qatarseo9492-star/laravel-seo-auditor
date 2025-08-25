@@ -2863,5 +2863,52 @@ window.addEventListener('load', function(){
 })();
 </script>
 
+
+<script>
+/* === Layout Order: Readability -> Topic Coverage -> PSI -> Checklist -> Others === */
+(function(){
+  const byId = id => document.getElementById(id);
+  const read = byId('readabilityPanel');
+  const topics = byId('topicsPanel');
+  const psi = byId('psiPanel');
+
+  // Try to detect checklist root by climbing from #checklistGrid until we see toolbar buttons
+  function findChecklistRoot(){
+    const grid = byId('checklistGrid');
+    if(!grid) return null;
+    let root = grid;
+    const hasToolbar = (el) => el && el.querySelector && el.querySelector('#exportChecklist, #importChecklist, #resetChecklist, #printChecklist');
+    while(root && root.parentElement){
+      root = root.closest('section, div');
+      if(!root) break;
+      if(hasToolbar(root)) return root;
+      root = root.parentElement;
+    }
+    return grid.closest('section, div') || grid;
+  }
+  const checklist = findChecklistRoot();
+
+  // Choose a common parent: the parent of the Readability section (usually the main content column)
+  const parent = read && read.parentElement;
+  if(!parent) return;
+
+  const inDoc = el => el && el.nodeType === 1 && el.parentElement;
+
+  const order = [read, topics, psi, checklist].filter(inDoc);
+
+  // Append in desired order; this moves nodes without cloning
+  order.forEach(el => {
+    if(el && el.parentElement !== parent){
+      try{ el.parentElement.removeChild(el); }catch(e){}
+      parent.appendChild(el);
+    }else if(el){
+      parent.appendChild(el); // move to the end in correct order
+    }
+  });
+
+  // Optional: scroll anchors remain functional; no changes to IDs/classes/JS hooks.
+})();
+</script>
+
 </body>
 </html>
