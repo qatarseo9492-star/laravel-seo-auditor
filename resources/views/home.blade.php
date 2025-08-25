@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-24ab (Speed panel moved right below Entities; PSI auto-start fix) --}}
+{{-- resources/views/home.blade.php — v2025-08-24ab (Speed panel moved right below Entities; PSI auto-start fix; Analyze onclick + invalid URL status) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -295,7 +295,11 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
               <span>Auto-apply checkmarks (≥ 80)</span>
             </label>
           </div>
-          <button id="analyzeBtn" type="button" class="btn btn-analyze"><i class="fa-solid fa-magnifying-glass"></i> Analyze</button>
+          <!-- INLINE onclick guarantees the action fires -->
+          <button id="analyzeBtn" type="button" class="btn btn-analyze"
+                  onclick="try{ analyze(); }catch(e){ var s=document.getElementById('analyzeStatus'); if(s){ s.textContent='Analyze error: '+(e && e.message ? e.message : e); } }">
+            <i class="fa-solid fa-magnifying-glass"></i> Analyze
+          </button>
           <button class="btn btn-print" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> Print</button>
           <button class="btn btn-reset" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
           <button class="btn btn-export" id="exportChecklist" type="button" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
@@ -826,7 +830,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
   }
   window.autoTickByScores = autoTickByScores;
 
-  /* Analyze (SAFE VERSION) */
+  /* Analyze (SAFE VERSION with URL feedback) */
   async function analyze(){
     if (window.SEMSEO.BUSY) return;
     window.SEMSEO.BUSY = true;
@@ -835,7 +839,11 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
     try{
       var input = document.getElementById('analyzeUrl');
       var url   = normalizeUrl(input ? input.value : '');
-      if(!url){ input?.focus(); return; }
+      if(!url){
+        if (statusEl) statusEl.textContent = 'Please enter a valid URL (include http/https).';
+        if (input) input.focus();
+        return;
+      }
 
       try{ localStorage.setItem('last_url', url); }catch(_){}
       window.Water?.start();
@@ -906,7 +914,7 @@ radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);trans
       statusEl && (statusEl.textContent='Analysis complete');
       var rep = document.getElementById('analyzeReport'); if(rep) rep.style.display='block';
 
-      // PSI auto-run (unchanged)
+      // PSI auto-run
       setTimeout(function(){
         var ep = window.SEMSEO.ENDPOINTS.psi || '/api/pagespeed';
         if (ep && url) { runPageSpeedBoth(url); }
