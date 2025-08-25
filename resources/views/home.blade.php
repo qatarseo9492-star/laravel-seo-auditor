@@ -668,6 +668,58 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   #detectorPanel .hvai-head i, .hvai-badge .badge-sheen { animation:none }
 }
 
+/* ==== HVAI Grid Layout (fixes overlapping UI) ==== */
+.hvai-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.2rem;
+  align-items: start;
+}
+
+.hvai-content {
+  min-width: 0; /* prevents grid overflow */
+}
+
+.hvai-gauge-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 220px;
+}
+
+.hvai-badge-inline {
+  position: static !important;
+  transform: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  margin-bottom: 0.5rem;
+}
+
+.hvai-gauge {
+  position: static !important;
+  width: 200px !important;
+  height: 200px !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 900px) {
+  .hvai-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .hvai-gauge-column {
+    order: -1; /* Show gauge first on mobile */
+    min-width: auto;
+  }
+  
+  .hvai-gauge {
+    width: 180px !important;
+    height: 180px !important;
+  }
+}
+
 /* ==== HVAI ULTRA NEON (gauge + panel) ==== */
 #detectorPanel{
   position:relative; isolation:isolate; overflow:hidden;
@@ -1049,65 +1101,72 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </div>
 
 <!-- 1) HUMAN vs AI (Ensemble) -->
-<section class="hvai" id="detectorPanel" style="display:none">
-  <!-- HVAI Verdict Badge -->
-  <div id="hvaiBadge" class="hvai-badge" hidden>
-    <div class="badge-sheen"></div>
-    <i class="fa-solid fa-hexagon-nodes"></i>
-    <div class="txt">
-      <strong id="hvaiVerdictText">Ensemble Verdict</strong>
-      <span id="hvaiVerdictHint">—</span>
+<section class="hvai hvai-grid" id="detectorPanel" style="display:none">
+  
+  <!-- Content Column -->
+  <div class="hvai-content">
+    <div class="hvai-head">
+      <i class="fa-solid fa-users-gear ico ico-purple"></i>
+      <h4>Human vs AI Content (Ensemble)</h4>
+    </div>
+
+    <div class="hvai-meta">
+      <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
+      <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
+    </div>
+
+    <div class="hvai-bar">
+      <div>
+        <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+        <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+      </div>
+      <div>
+        <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
+        <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="det-grid" id="detGrid"></div>
+    <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">
+      Local ensemble activates if the backend provides no text/percentages.
     </div>
   </div>
 
-  <div class="hvai-head">
-    <i class="fa-solid fa-users-gear ico ico-purple"></i>
-    <h4>Human vs AI Content (Ensemble)</h4>
-  </div>
-
-  <div class="hvai-meta">
-    <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
-    <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
-  </div>
-
-  <!-- Stylish circular gauge (used by the v2.3 script) -->
-  <div class="hvai-gauge">
-    <svg class="g-svg" viewBox="0 0 200 200" aria-label="HVAI gauge">
-      <defs>
-        <linearGradient id="gradHuman" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#22c55e"/>
-          <stop offset="100%" stop-color="#3de2ff"/>
-        </linearGradient>
-        <linearGradient id="gradAI" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#ef4444"/>
-          <stop offset="100%" stop-color="#f59e0b"/>
-        </linearGradient>
-      </defs>
-      <circle class="g-track human" cx="100" cy="100" r="66"></circle>
-      <circle class="g-track ai"    cx="100" cy="100" r="86"></circle>
-      <circle id="hvaiHumanArc" class="g-arc human" cx="100" cy="100" r="66"></circle>
-      <circle id="hvaiAIArc"    class="g-arc ai"    cx="100" cy="100" r="86"></circle>
-    </svg>
-    <div class="g-center">
-      <div class="g-title">AI likelihood</div>
-      <div id="hvaiScoreBig" class="g-score">0%</div>
+  <!-- Gauge Column -->
+  <div class="hvai-gauge-column">
+    <!-- HVAI Verdict Badge -->
+    <div id="hvaiBadge" class="hvai-badge hvai-badge-inline" hidden>
+      <div class="badge-sheen"></div>
+      <i class="fa-solid fa-hexagon-nodes"></i>
+      <div class="txt">
+        <strong id="hvaiVerdictText">Ensemble Verdict</strong>
+        <span id="hvaiVerdictHint">—</span>
+      </div>
     </div>
-  </div>
 
-  <div class="hvai-bar">
-    <div>
-      <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
-      <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+    <!-- Stylish circular gauge (used by the v2.3 script) -->
+    <div class="hvai-gauge">
+      <svg class="g-svg" viewBox="0 0 200 200" aria-label="HVAI gauge">
+        <defs>
+          <linearGradient id="gradHuman" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#22c55e"/>
+            <stop offset="100%" stop-color="#3de2ff"/>
+          </linearGradient>
+          <linearGradient id="gradAI" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ef4444"/>
+            <stop offset="100%" stop-color="#f59e0b"/>
+          </linearGradient>
+        </defs>
+        <circle class="g-track human" cx="100" cy="100" r="66"></circle>
+        <circle class="g-track ai"    cx="100" cy="100" r="86"></circle>
+        <circle id="hvaiHumanArc" class="g-arc human" cx="100" cy="100" r="66"></circle>
+        <circle id="hvaiAIArc"    class="g-arc ai"    cx="100" cy="100" r="86"></circle>
+      </svg>
+      <div class="g-center">
+        <div class="g-title">AI likelihood</div>
+        <div id="hvaiScoreBig" class="g-score">0%</div>
+      </div>
     </div>
-    <div>
-      <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
-      <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
-    </div>
-  </div>
-
-  <div class="det-grid" id="detGrid"></div>
-  <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">
-    Local ensemble activates if the backend provides no text/percentages.
   </div>
 </section>
 
@@ -2485,159 +2544,6 @@ window.addEventListener('error', function(e){
 })();
 </script>
 
-
-<script>
-/* === Human vs AI Ensemble v2.2 — trimmed, weighted, calibrated === */
-(function(){
-  const panel = document.getElementById('detectorPanel');
-  if(!panel) return;
-
-  const humanVal = document.getElementById('hvaiHumanVal');
-  const aiVal    = document.getElementById('hvaiAIVal');
-  const humanFill= document.getElementById('hvaiHumanFill');
-  const aiFill   = document.getElementById('hvaiAIFill');
-  const conf     = document.getElementById('detConfidence');
-  const badge    = document.getElementById('hvaiBadge');
-  const verdictText = document.getElementById('hvaiVerdictText');
-  const verdictHint = document.getElementById('hvaiVerdictHint');
-
-  // Optional per-detector chips if present
-  function upsertDetectorsRow(){
-    let row = panel.querySelector('.hvai-detectors');
-    if(!row){
-      row = document.createElement('div');
-      row.className = 'hvai-detectors';
-      const meta = panel.querySelector('.hvai-meta') || panel;
-      meta.appendChild(row);
-    }
-    return row;
-  }
-  const detRow = upsertDetectorsRow();
-
-  // Helper: robust stats
-  const clamp01 = x => Math.min(1, Math.max(0, x));
-  function median(arr){ const a=[...arr].sort((x,y)=>x-y); const m=Math.floor(a.length/2); return a.length%2? a[m] : (a[m-1]+a[m])/2; }
-  function trimmedMean(arr, p=0.15){
-    if(arr.length===0) return 0;
-    const a=[...arr].sort((x,y)=>x-y);
-    const k=Math.floor(p*a.length);
-    const b=a.slice(k, a.length-k || a.length);
-    return b.reduce((s,v)=>s+v,0)/b.length;
-  }
-  function weightedMedian(values, weights){
-    const arr = values.map((v,i)=>({v, w:weights[i]||1})).sort((a,b)=>a.v-b.v);
-    const total = arr.reduce((s,o)=>s+o.w,0);
-    let acc=0;
-    for(const o of arr){ acc+=o.w; if(acc >= total/2) return o.v; }
-    return arr.length? arr[arr.length-1].v : 0;
-  }
-  // Simple calibration: compress extremes a bit to reduce false 100%/0% flips
-  function calibrateAI(p){
-    // logistic-style squashing around 0.5; adjust gain for smoothness
-    const gain = 0.8;
-    return clamp01( 1/(1+Math.exp(-((p-0.5)*6*gain))) );
-  }
-
-  // Render UI with final probabilities [0..1]
-  function render(finalAI, detectors){
-    const aiPct = Math.round(finalAI*100);
-    const humanPct = 100 - aiPct;
-    aiVal && (aiVal.textContent = aiPct + '%');
-    humanVal && (humanVal.textContent = humanPct + '%');
-    aiFill && (aiFill.style.width = aiPct + '%');
-    humanFill && (humanFill.style.width = humanPct + '%');
-
-    // Confidence ~ agreement + number of sources
-    const vals = detectors.map(d=>d.ai);
-    const spread = (vals.length>1)? (Math.max(...vals)-Math.min(...vals)) : 0.5;
-    const srcBonus = Math.min(1, detectors.length/4);
-    const confScore = clamp01(1 - spread) * 0.7 + srcBonus * 0.3;
-    conf && (conf.textContent = Math.round(confScore*100));
-
-    // Verdict + badge
-    let verdict='Mixed';
-    let hint='Signals disagree — review content variety and structure.';
-    let cls='hvai-verdict--mixed';
-    if(finalAI <= 0.35){ verdict='Likely Human'; hint='High variation, natural phrasing, diverse sentence patterns.'; cls='hvai-verdict--human'; }
-    else if(finalAI >= 0.65){ verdict='Likely AI'; hint='Low burstiness, uniform phrasing, detector agreement skewed to AI.'; cls='hvai-verdict--ai'; }
-    verdictText && (verdictText.textContent = verdict);
-    verdictHint && (verdictHint.textContent = hint);
-    badge && (badge.hidden = false, badge.classList.add('show'));
-    panel.classList.remove('hvai-verdict--human','hvai-verdict--ai','hvai-verdict--mixed');
-    panel.classList.add(cls);
-
-    // detector chips
-    if(detRow){
-      detRow.innerHTML = '';
-      detectors.forEach(d=>{
-        const el = document.createElement('span');
-        el.className = 'det ' + (d.ok? 'ok': 'err');
-        el.innerHTML = `<i class="fa-solid ${d.icon||'fa-wave-square'}"></i>${d.name}: <b>${Math.round(d.ai*100)}%</b>`;
-        detRow.appendChild(el);
-      });
-    }
-  }
-
-  // Local heuristic fallback (no API): quick & noisy but better than nothing
-  function localHeuristicAI(text){
-    if(!text) return 0.5;
-    const tokens = text.split(/\s+/).filter(Boolean);
-    const sents = text.split(/[.!?]+\s+/);
-    const avgLen = tokens.length / Math.max(1,sents.length);
-    const uniqueFrac = new Set(tokens.map(t=>t.toLowerCase())).size / Math.max(1,tokens.length);
-    const digitFrac = (text.match(/\d/g) || []).length / Math.max(1,text.length);
-    const repeatPenalty = (text.match(/\b(\w+)\b(?=[\s\S]*\b\1\b)/gi) || []).length;
-
-    let ai = 0.5;
-    if(avgLen<14) ai -= 0.08; else if(avgLen>22) ai += 0.08;
-    ai += (0.20 - uniqueFrac)*0.8; // lower uniqueness -> more AI-like
-    ai += Math.max(0, 0.12 - digitFrac); // very few digits -> slightly AI-like
-    ai += Math.min(0.12, repeatPenalty*0.01);
-    return clamp01(ai);
-  }
-
-  // Compute ensemble from available detectors [{name, ai:[0..1], weight?, ok?}]
-  function computeEnsemble(detectors){
-    if(!detectors || detectors.length===0) return 0.5;
-    const vals = detectors.map(d=>clamp01(d.ai));
-    const weights = detectors.map(d=>Math.max(0.1, d.weight || 1));
-    const tmean = trimmedMean(vals, 0.15);
-    const wmed  = weightedMedian(vals, weights);
-    const mix   = (tmean*0.55 + wmed*0.45);
-    return calibrateAI(mix);
-  }
-
-  // Public hook others can call: window.updateHvai({ text, detectors: [{name, ai, weight, icon, ok}], preferLocal })
-  window.updateHvai = function(input){
-    const text = (input && input.text) || '';
-    let detectors = (input && input.detectors) || [];
-    const preferLocal = !!(input && input.preferLocal);
-
-    // If no detectors or preferLocal, add heuristic
-    if(preferLocal || detectors.length===0){
-      detectors = detectors.filter(d=>!d || typeof d.ai!=='number' ? false : true);
-      detectors.push({ name:'Local Heuristic', ai: localHeuristicAI(text), weight: 0.9, icon:'fa-wave-square', ok:true });
-    }
-
-    // normalize to [0..1], coerce
-    detectors = detectors.map(d=>({ 
-      name: d.name || 'Detector', 
-      ai: clamp01(Number(d.ai||0.5)), 
-      weight: Number(d.weight||1), 
-      icon: d.icon, 
-      ok: d.ok!==false 
-    }));
-
-    const finalAI = computeEnsemble(detectors);
-    render(finalAI, detectors);
-  };
-
-  // If your backend writes to these globals, auto-render
-  if(window.__hvaiBootstrap){
-    try{ window.updateHvai(window.__hvaiBootstrap); }catch(e){}
-  }
-})();
-</script>
 
 
 <script>
