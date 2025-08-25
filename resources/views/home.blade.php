@@ -1291,5 +1291,25 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
+
+<script>
+(function(){
+  // Provide a safe global analyze() that preserves any original implementation
+  const __origAnalyze = window.analyze;
+  window.analyze = function(){
+    // 1) Call the app's original analyze() if it exists
+    try{ if (typeof __origAnalyze === 'function') __origAnalyze(); }catch(_){}
+    // 2) Call SEMSEO_go() if available
+    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
+    // 3) Always try PSI
+    try{
+      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+      if (typeof window.runPSI === 'function'){ window.runPSI((input && input.value) || ''); }
+    }catch(_){}
+    return false;
+  };
+})();
+</script>
+
 </body>
 </html>
