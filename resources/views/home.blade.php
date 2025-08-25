@@ -1,4 +1,4 @@
-{{-- resources/views/home.blade.php — v2025-08-25 + P0 Semantic SEO (Topic Coverage, Schema, Links, E-E-A-T, Snippet, Answer Target, Image ALT, Guardrails) --}}
+{{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
@@ -7,18 +7,17 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @php
-  $metaTitle = 'Semantic SEO Master • Ultra Tech Global';
+  $metaTitle       = 'Semantic SEO Master • Ultra Tech Global';
   $metaDescription = 'Analyze any URL for content quality, entities, technical SEO, UX, speed, and Core Web Vitals with colorful, clear insights.';
-  $metaImage = asset('og-image.png');
-  $canonical = url()->current();
+  $metaImage       = asset('og-image.png');
+  $canonical       = url()->current();
 
-  $analyzeJsonUrl = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
-  $analyzeUrl     = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
-  $psiProxyUrl    = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi');
-
-  // Detector backend (supports either name)
-  $detectUrl = \Illuminate\Support\Facades\Route::has('detect')      ? route('detect')
-             : (\Illuminate\Support\Facades\Route::has('api.detect') ? route('api.detect') : url('api/detect'));
+  // Use fully-qualified facade in Blade to avoid "use ... inside function" fatal error
+  $analyzeJsonUrl  = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
+  $analyzeUrl      = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
+  $psiProxyUrl     = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
+  // NEW: backend detector endpoint or fallback
+  $detectUrl       = \Illuminate\Support\Facades\Route::has('detect')       ? route('detect')       : url('api/detect');
 @endphp
 
 <title>{{ $metaTitle }}</title>
@@ -156,6 +155,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .hvai-head h4{margin:0;font-size:1.08rem}
 .hvai-meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.6rem}
 .hvai-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-weight:900;background:rgba(255,255,255,.05)}
+
 .hvai-bar{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:.6rem}
 .hvai-track{position:relative;height:18px;border-radius:999px;background:#0b0d21;border:1px solid rgba(255,255,255,.12);overflow:hidden}
 .hvai-fill{position:absolute;top:0;bottom:0;width:0;transition:width .6s cubic-bezier(.22,1,.36,1)}
@@ -170,7 +170,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .det-score{font-weight:1000}
 .det-bar{margin-top:.35rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
-
 
 /* ==== Readability (ULTRA PRO restyle) ==== */
 :root{
@@ -349,7 +348,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   box-shadow:0 6px 14px rgba(0,0,0,.25);
 }
 .read-suggest li::after{
-  content:"00c"; /* Font Awesome check */
+  content:"\f00c"; /* Font Awesome check */
   font-family:"Font Awesome 6 Free"; font-weight:900;
   position:absolute; left:3px; top:-1px; font-size:.76rem; color:#fff; text-shadow:0 1px 0 rgba(0,0,0,.35);
 }
@@ -388,7 +387,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .echip.org{background:linear-gradient(135deg,#3de2ff,#22c55e)}
 .echip.place{background:linear-gradient(135deg,#fde047,#60a5fa)}
 .echip.misc{background:linear-gradient(135deg,#94a3b8,#64748b)}
-.echip .sal{opacity:.9;font-weight:900}
 @media (max-width:768px){.entity-card{grid-column:span 12}}
 
 /* ==== Site Speed & CWV (colorful, end) ==== */
@@ -407,454 +405,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .psi-issues ul{margin:.2rem 0 0;padding-left:1rem}
 .psi-issues li{margin:.22rem 0}
 @media (max-width:768px){.psi-card{grid-column:span 12}}
-
-/* ==== P0: Topic Coverage (minimal, matches style) ==== */
-.topics{margin-top:14px;background:linear-gradient(135deg,rgba(59,130,246,.10),rgba(34,197,94,.10));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
-.topics-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
-.topics-head h4{margin:0;font-size:1.08rem}
-.topics-meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem}
-.topics-chip{display:inline-flex;align-items:center;gap:.45rem;padding:.35rem .7rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);font-weight:900;background:rgba(255,255,255,.05)}
-.topics-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
-.topics-card{grid-column:span 6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.7rem}
-.topics-list{display:flex;flex-wrap:wrap;gap:.4rem}
-.tchip{display:inline-flex;align-items:center;gap:.35rem;padding:.32rem .6rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);font-weight:800}
-
-/* ==== P0: Schema Builder ==== */
-.schema{margin-top:14px;background:linear-gradient(135deg,rgba(155,92,255,.10),rgba(61,226,255,.10));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
-.schema-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
-.schema-head h4{margin:0;font-size:1.08rem}
-.schema-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:.6rem}
-.schema-card{grid-column:span 6;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:.7rem}
-.schema-card header{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.4rem}
-.schema-code{max-height:220px;overflow:auto;background:#0b0d21;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:.6rem;font:12px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;white-space:pre}
-.copy-btn{border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.06);border-radius:10px;padding:.35rem .6rem;font-weight:900;cursor:pointer}
-.copy-btn:hover{background:rgba(255,255,255,.12)}
-@media (max-width:768px){.schema-card{grid-column:span 12}}
-
-/* ==== P0: Internal Link Suggestions ==== */
-.links{margin-top:14px;background:linear-gradient(135deg,rgba(96,165,250,.10),rgba(236,72,153,.10));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px}
-.links-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
-.links-head h4{margin:0;font-size:1.08rem}
-.links-table{width:100%;border-collapse:separate;border-spacing:0 .5rem}
-.links-table th{font-weight:900;text-align:left;color:var(--text-dim)}
-.links-row{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden}
-.links-row td{padding:.55rem .6rem}
-
-/* ==== Snippet preview ==== */
-.snippet{margin-top:.6rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:.6rem}
-.snip-title{color:#8ab4f8;font-weight:900;margin:0 0 .15rem}
-.snip-url{color:#93c18c;font-size:.9rem;margin:0 0 .25rem}
-.snip-desc{color:#c8cbd9}
-
-/* Small helpers */
-.hide{display:none!important}
-
-/* ==== Readability: Good Badge ==== */
-.read-good-badge{
-  position:absolute; top:10px; right:10px; z-index:3;
-  display:flex; align-items:center; gap:.6rem;
-  padding:.6rem .9rem; border-radius:14px;
-  background:linear-gradient(135deg, rgba(34,197,94,.22), rgba(61,226,255,.22));
-  border:1px solid rgba(255,255,255,.22);
-  box-shadow:0 18px 40px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.08);
-  color:#fff; backdrop-filter:blur(6px);
-  transform:translateY(-8px) scale(.98); opacity:0; pointer-events:none;
-  transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease;
-}
-.read-good-badge.show{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
-.read-good-badge i{
-  width:36px;height:36px;border-radius:12px; display:grid; place-items:center;
-  background:conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
-  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
-  text-shadow:0 1px 0 rgba(0,0,0,.45);
-}
-.read-good-badge .txt{display:flex; flex-direction:column; line-height:1.05}
-.read-good-badge .txt strong{font-weight:900; font-size:.96rem; letter-spacing:.2px}
-.read-good-badge .txt span{opacity:.9; font-size:.82rem}
-
-/* sparkly diagonal shine that loops */
-.read-good-badge .badge-shine{
-  position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
-  background:linear-gradient(120deg, transparent, rgba(255,255,255,.22), transparent 60%);
-  transform:translateX(-120%); animation:badgeSheen 4.5s linear infinite;
-  border-radius:14px;
-}
-@keyframes badgeSheen{to{transform:translateX(120%)}}
-
-/* Confetti burst on first show */
-@keyframes confettiFall{
-  0%{transform:translateY(-10px) rotate(0deg); opacity:0}
-  30%{opacity:1}
-  100%{transform:translateY(24px) rotate(360deg); opacity:0}
-}
-.read-good-badge.show::after{
-  content:""; position:absolute; inset:-8px; pointer-events:none;
-  background:
-    radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.9), transparent 55%),
-    radial-gradient(2px 2px at 60% 10%, rgba(255,215,0,.9), transparent 55%),
-    radial-gradient(2px 2px at 80% 60%, rgba(61,226,255,.9), transparent 55%),
-    radial-gradient(2px 2px at 35% 80%, rgba(34,197,94,.9), transparent 55%);
-  animation:confettiFall 1.1s ease-out 1;
-}
-
-/* ==== Readability: Icon Luxe upgrade (overrides) ==== */
-.read-head .ico{
-  position:relative; overflow:hidden;
-  background:conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
-  animation:spinGradHead 14s linear infinite;
-}
-.read-head .ico::after{
-  content:""; position:absolute; inset:0; border-radius:12px; pointer-events:none;
-  background:radial-gradient(60% 80% at 30% 20%, rgba(255,255,255,.22), transparent 60%);
-  mix-blend-mode:screen;
-}
-@keyframes spinGradHead{to{transform:rotate(360deg)}}
-
-/* Icon pill: layered gradient, glow ring, micro-particles */
-.read-card .metric i{
-  position:relative; isolation:isolate; overflow:hidden;
-  width:42px; height:42px; border-radius:14px;
-  background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
-             conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
-  animation:spinGrad 9s linear infinite;
-  box-shadow:
-    0 10px 24px rgba(0,0,0,.35),
-    inset 0 0 0 1px rgba(255,255,255,.14),
-    0 0 0 3px rgba(61,226,255,.08);
-  text-shadow:0 1px 0 rgba(0,0,0,.5);
-}
-.read-card .metric i::before{
-  /* glow ring */
-  content:""; position:absolute; inset:-1px; border-radius:16px;
-  background:conic-gradient(from 0deg, var(--read-ac1), var(--read-ac2), var(--read-ac3), var(--read-ac1));
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude;
-  padding:1px; opacity:.55; filter:blur(.2px);
-  animation:iconRing 6s linear infinite;
-}
-.read-card .metric i::after{
-  /* sparkles */
-  content:""; position:absolute; inset:-20%; pointer-events:none;
-  background:
-    radial-gradient(1.5px 1.5px at 25% 35%, rgba(255,255,255,.9), transparent 55%),
-    radial-gradient(1.5px 1.5px at 65% 20%, rgba(255,255,255,.8), transparent 55%),
-    radial-gradient(1.5px 1.5px at 40% 75%, rgba(255,255,255,.75), transparent 55%);
-  opacity:.5; animation:iconDust 18s linear infinite;
-}
-@keyframes iconRing{to{transform:rotate(360deg)}}
-@keyframes iconDust{to{transform:translate3d(-6%, -5%,0)}}
-
-.read-card:hover .metric i{ transform:translateZ(14px) scale(1.08) rotate(0.5deg) }
-.read-card:hover .metric i::before{ opacity:.85 }
-
-/* Per-card thematic hue tweaks for variety */
-.read-grid .read-card:nth-child(1) .metric i{filter:hue-rotate(0deg) saturate(115%)}
-.read-grid .read-card:nth-child(2) .metric i{filter:hue-rotate(35deg) saturate(120%)}
-.read-grid .read-card:nth-child(3) .metric i{filter:hue-rotate(85deg) saturate(120%)}
-.read-grid .read-card:nth-child(4) .metric i{filter:hue-rotate(145deg) saturate(120%)}
-.read-grid .read-card:nth-child(5) .metric i{filter:hue-rotate(195deg) saturate(120%)}
-.read-grid .read-card:nth-child(6) .metric i{filter:hue-rotate(255deg) saturate(120%)}
-.read-grid .read-card:nth-child(7) .metric i{filter:hue-rotate(305deg) saturate(120%)}
-
-/* Optional: subtle pulse when value > 80% (CSS-only heuristic with data-value attr if present) */
-.read-card[data-value^="8"], .read-card[data-value^="9"], .read-card[data-value="100"]{
-  animation:cardPulse 2.4s ease-in-out infinite;
-}
-@keyframes cardPulse{
-  0%,100%{box-shadow:0 12px 36px rgba(0,0,0,.32)}
-  50%{box-shadow:0 16px 42px rgba(0,0,0,.38), 0 0 0 6px rgba(61,226,255,.08)}
-}
-
-/* Reduced motion safety */
-@media (prefers-reduced-motion: reduce){
-  .read-card .metric i,
-  .read-head .ico,
-  .read-card .metric i::before,
-  .read-card .metric i::after{animation:none}
-}
-
-/* ==== Human vs AI Content (Ensemble) — ULTRA PRO restyle ==== */
-#detectorPanel{
-  position:relative; isolation:isolate; overflow:hidden;
-  border:1px solid var(--read-border);
-  border-radius:18px; padding:16px;
-  background:
-    radial-gradient(1000px 260px at -10% 0%, rgba(99,102,241,.16), transparent 55%),
-    radial-gradient(900px 320px at 110% 20%, rgba(45,212,191,.14), transparent 60%),
-    linear-gradient(135deg, rgba(16,24,48,.55), rgba(18,20,40,.72));
-  box-shadow:0 20px 60px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.06);
-  backdrop-filter:blur(8px);
-}
-#detectorPanel .hvai-head{
-  display:flex; align-items:center; gap:.6rem; margin-bottom:.6rem;
-}
-#detectorPanel .hvai-head i{
-  width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;
-  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
-  box-shadow:0 8px 18px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
-  animation:spinGrad 14s linear infinite;
-}
-.hvai-meta{display:flex;flex-wrap:wrap;gap:.5rem;margin:.4rem 0 .5rem}
-.hvai-chip{
-  display:inline-flex;align-items:center;gap:.45rem;
-  padding:.4rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.22);
-  background:linear-gradient(135deg, rgba(99,102,241,.18), rgba(61,226,255,.18));
-  font-weight:700;color:#fff;
-}
-.hvai-chip i{opacity:.9}
-
-.hvai-bar{display:grid;grid-template-columns:1fr 1fr; gap:.75rem}
-.hvai-label{display:flex;align-items:center;gap:.4rem;justify-content:space-between;margin-bottom:.2rem}
-.hvai-track{
-  position:relative;height:14px;border-radius:12px;overflow:hidden;
-  background:linear-gradient(180deg,#0b0d21,#0b0d21);
-  border:1px solid var(--read-border); box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
-}
-.hvai-track::before{
-  content:""; position:absolute; inset:0; pointer-events:none; opacity:.35;
-  background:repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 10px, transparent 10px 20px);
-}
-.hvai-fill{
-  position:absolute; left:0; top:0; bottom:0; width:0%;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 12px 28px rgba(0,0,0,.28);
-  transition:width .55s cubic-bezier(.22,1,.36,1);
-}
-.hvai-fill.human{background:linear-gradient(90deg,#22c55e,#3de2ff)}
-.hvai-fill.ai{background:linear-gradient(90deg,#ef4444,#f97316)}
-
-.hvai-badge{
-  position:absolute; top:10px; right:10px; z-index:3;
-  display:flex; align-items:center; gap:.6rem;
-  padding:.6rem .9rem; border-radius:14px; color:#fff;
-  background:linear-gradient(135deg, rgba(34,197,94,.22), rgba(61,226,255,.22));
-  border:1px solid rgba(255,255,255,.22);
-  box-shadow:0 18px 40px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.08);
-  transform:translateY(-8px) scale(.98); opacity:0; pointer-events:none;
-  transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease;
-  backdrop-filter:blur(6px);
-}
-.hvai-badge.show{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
-.hvai-badge i{
-  width:36px;height:36px;border-radius:12px; display:grid; place-items:center;
-  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
-  text-shadow:0 1px 0 rgba(0,0,0,.45);
-  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
-}
-.hvai-badge .txt{display:flex;flex-direction:column;line-height:1.05}
-.hvai-badge .txt strong{font-weight:900;font-size:.96rem;letter-spacing:.2px}
-.hvai-badge .txt span{opacity:.92;font-size:.82rem}
-.hvai-badge .badge-sheen{
-  position:absolute; inset:0; border-radius:14px; pointer-events:none; mix-blend-mode:screen;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);
-  transform:translateX(-120%); animation:badgeSheen 4.5s linear infinite;
-}
-
-.hvai-verdict--human  .hvai-badge{ background:linear-gradient(135deg, rgba(34,197,94,.24), rgba(61,226,255,.22)); }
-.hvai-verdict--mixed  .hvai-badge{ background:linear-gradient(135deg, rgba(99,102,241,.24), rgba(61,226,255,.22)); }
-.hvai-verdict--ai     .hvai-badge{ background:linear-gradient(135deg, rgba(239,68,68,.26), rgba(249,115,22,.22));  }
-
-/* tiny detector chips row */
-.hvai-detectors{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.45rem }
-.hvai-detectors .det{
-  display:inline-flex; align-items:center; gap:.35rem;
-  padding:.28rem .5rem; border-radius:999px; font-size:.82rem;
-  border:1px solid rgba(255,255,255,.22);
-  background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-}
-.hvai-detectors .det.ok{ background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18)) }
-.hvai-detectors .det.err{ background:linear-gradient(135deg, rgba(239,68,68,.22), rgba(249,115,22,.18)) }
-
-@media (prefers-reduced-motion:reduce){
-  #detectorPanel .hvai-head i, .hvai-badge .badge-sheen { animation:none }
-}
-
-/* ==== HVAI ULTRA NEON (gauge + panel) ==== */
-#detectorPanel{
-  position:relative; isolation:isolate; overflow:hidden;
-  border:1px solid var(--read-border); border-radius:20px; padding:18px;
-  background:
-    radial-gradient(1200px 340px at -10% 0%, rgba(147,51,234,.18), transparent 55%),
-    radial-gradient(1000px 360px at 110% 20%, rgba(14,165,233,.16), transparent 60%),
-    linear-gradient(135deg, rgba(15,23,42,.78), rgba(10,12,26,.86));
-  box-shadow:0 24px 70px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.06);
-  backdrop-filter:blur(10px);
-}
-#detectorPanel::before{
-  content:""; position:absolute; inset:-1px; border-radius:22px; padding:1px;
-  background:conic-gradient(from 0deg, #22c55e, #3de2ff, #9b5cff, #ef4444, #f97316, #22c55e);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude; opacity:.22; pointer-events:none;
-  animation:readGlow 18s linear infinite;
-}
-
-#detectorPanel .hvai-head i{
-  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;
-  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
-  box-shadow:0 10px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
-  animation:spinGrad 16s linear infinite;
-}
-
-.hvai-gauge{
-  position:absolute; top:10px; right:12px; width:210px; height:210px;
-  filter:drop-shadow(0 20px 40px rgba(0,0,0,.45));
-}
-@media (max-width:900px){
-  .hvai-gauge{ position:relative; margin:8px auto 10px; top:auto; right:auto; }
-}
-
-.g-svg{ width:100%; height:100%; transform:rotate(-90deg) }
-.g-track{ fill:none; stroke:rgba(255,255,255,.10); stroke-width:14; }
-.g-track.human{ stroke-width:12 }
-.g-arc{
-  fill:none; stroke-linecap:round; stroke-dasharray:0 999; stroke-dashoffset:0;
-  filter:drop-shadow(0 4px 16px rgba(0,0,0,.35));
-}
-.g-arc.human{ stroke:url(#gradHuman); stroke-width:12 }
-.g-arc.ai{ stroke:url(#gradAI); stroke-width:14 }
-
-.g-center{
-  position:absolute; inset:0; display:grid; place-items:center; pointer-events:none;
-  font-variant-numeric:tabular-nums;
-}
-.g-title{ font-size:.82rem; opacity:.8; letter-spacing:.3px; margin-top:6px }
-.g-score{ font-size:1.8rem; font-weight:900; margin-top:-4px; text-shadow:0 1px 0 rgba(0,0,0,.45) }
-
-/* Verdict badge: glassy prism */
-.hvai-badge{
-  position:absolute; left:12px; top:12px; z-index:3;
-  display:flex; align-items:center; gap:.6rem; padding:.6rem .9rem; border-radius:14px; color:#fff;
-  background:linear-gradient(135deg, rgba(34,197,94,.22), rgba(61,226,255,.22));
-  border:1px solid rgba(255,255,255,.22);
-  box-shadow:0 18px 44px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.08);
-  transform:translateY(-8px) scale(.98); opacity:0; pointer-events:none;
-  transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease;
-  backdrop-filter:blur(6px);
-}
-.hvai-badge.show{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
-.hvai-badge i{
-  width:36px;height:36px;border-radius:12px; display:grid; place-items:center;
-  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
-  text-shadow:0 1px 0 rgba(0,0,0,.45);
-  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
-}
-
-.hvai-verdict--human  .hvai-badge{ background:linear-gradient(135deg, rgba(34,197,94,.24), rgba(61,226,255,.22)); }
-.hvai-verdict--mixed  .hvai-badge{ background:linear-gradient(135deg, rgba(99,102,241,.26), rgba(61,226,255,.22)); }
-.hvai-verdict--ai     .hvai-badge{ background:linear-gradient(135deg, rgba(239,68,68,.26), rgba(249,115,22,.24)); }
-
-/* Bars remain for detail, but look sleeker */
-.hvai-track{ height:14px; border-radius:12px; }
-.hvai-fill.human{ background:linear-gradient(90deg,#22c55e,#3de2ff) }
-.hvai-fill.ai{ background:linear-gradient(90deg,#ef4444,#f97316) }
-
-/* mini detector chips */
-.hvai-detectors .det{
-  background:linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
-  border:1px solid rgba(255,255,255,.22);
-  border-radius:999px; padding:.3rem .6rem;
-}
-.hvai-detectors .det.ok{ background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18)) }
-.hvai-detectors .det.err{ background:linear-gradient(135deg, rgba(239,68,68,.22), rgba(249,115,22,.18)) }
-
-/* ==== Google Site Speed (PSI) — ULTRA STYLISH restyle ==== */
-#psiPanel{
-  position:relative; isolation:isolate; overflow:hidden;
-  border:1px solid var(--read-border);
-  border-radius:18px; padding:16px;
-  background:
-    radial-gradient(1000px 260px at -10% -10%, rgba(14,165,233,.16), transparent 55%),
-    radial-gradient(900px 320px at 110% 20%, rgba(99,102,241,.14), transparent 60%),
-    linear-gradient(135deg, rgba(16,24,48,.55), rgba(18,20,40,.72));
-  box-shadow:0 20px 60px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.06);
-  backdrop-filter:blur(8px);
-}
-#psiPanel::before{
-  content:""; position:absolute; inset:-1px; border-radius:20px; padding:1px;
-  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#ef4444,#f97316,#22c55e);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude; opacity:.22; pointer-events:none;
-  animation:readGlow 18s linear infinite;
-}
-
-.psi-head{ display:flex; align-items:center; gap:.6rem; margin-bottom:.6rem }
-.psi-head i{
-  width:36px; height:36px; border-radius:12px; display:grid; place-items:center; color:#fff;
-  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
-  box-shadow:0 10px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
-  animation:spinGrad 16s linear infinite;
-}
-
-.psi-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:.8rem }
-.psi-card{
-  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-  border:1px solid var(--read-border);
-  border-radius:14px; padding:.8rem;
-  box-shadow:0 12px 36px rgba(0,0,0,.32);
-  backdrop-filter:blur(6px);
-  transition:transform .2s ease, box-shadow .25s ease, border-color .2s ease;
-}
-.psi-card:hover{ transform:translateY(-3px); box-shadow:0 18px 48px rgba(0,0,0,.42); border-color:rgba(255,255,255,.22) }
-
-.psi-label{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.25rem; font-weight:900 }
-.psi-label .ico{
-  width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;
-  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
-  box-shadow:0 8px 18px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
-}
-
-.psi-track{ position:relative; height:14px; border-radius:12px; overflow:hidden;
-  background:linear-gradient(180deg,#0b0d21,#0b0d21);
-  border:1px solid var(--read-border); box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
-}
-.psi-track::before{
-  content:""; position:absolute; inset:0; opacity:.35; pointer-events:none;
-  background:repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 10px, transparent 10px 20px);
-}
-.psi-fill{
-  position:absolute; left:0; top:0; bottom:0; width:0%;
-  transition:width .55s cubic-bezier(.22,1,.36,1);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12), 0 12px 28px rgba(0,0,0,.28);
-  background:linear-gradient(90deg,#22c55e,#3de2ff); /* default good */
-}
-.psi-fill.warn{ background:linear-gradient(90deg,#f59e0b,#fde047) }
-.psi-fill.bad{  background:linear-gradient(90deg,#ef4444,#f97316) }
-
-/* Badge for high performance */
-.psi-badge{
-  position:absolute; top:12px; right:12px; z-index:3;
-  display:flex; align-items:center; gap:.6rem;
-  padding:.6rem .9rem; border-radius:14px; color:#fff;
-  background:linear-gradient(135deg, rgba(34,197,94,.24), rgba(61,226,255,.22));
-  border:1px solid rgba(255,255,255,.22);
-  box-shadow:0 18px 44px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.08);
-  transform:translateY(-8px) scale(.98); opacity:0; pointer-events:none;
-  transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease;
-  backdrop-filter:blur(6px);
-}
-.psi-badge.show{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
-.psi-badge i{
-  width:36px;height:36px;border-radius:12px; display:grid; place-items:center;
-  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
-  text-shadow:0 1px 0 rgba(0,0,0,.45);
-  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
-}
-.psi-badge .txt{display:flex;flex-direction:column;line-height:1.05}
-.psi-badge .txt strong{font-weight:900;font-size:.96rem;letter-spacing:.2px}
-.psi-badge .txt span{opacity:.92;font-size:.82rem}
-.psi-badge .badge-sheen{
-  position:absolute; inset:0; border-radius:14px; pointer-events:none; mix-blend-mode:screen;
-  background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);
-  transform:translateX(-120%); animation:badgeSheen 4.5s linear infinite;
-}
-
-/* Chips for strategy and labels */
-#psiPanel .chip{ border:1px solid rgba(255,255,255,.22) }
-#psiPanel .chip.ok{   background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18)) }
-#psiPanel .chip.warn{ background:linear-gradient(135deg, rgba(245,158,11,.22), rgba(61,226,255,.18)) }
-#psiPanel .chip.bad{  background:linear-gradient(135deg, rgba(239,68,68,.25), rgba(249,115,22,.22)) }
-
-/* Panel stack layout container */
-#panelStack.panel-stack{ display:grid; gap:14px; }
 </style>
 </head>
 <body>
@@ -868,8 +418,9 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   window.SEMSEO.ENDPOINTS = {
     analyzeJson: @json($analyzeJsonUrl),
     analyze: @json($analyzeUrl),
-    psi: @json($psiProxyUrl),        // server proxy keeps API key hidden
-    detect: @json($detectUrl)        // backend detector (optional)
+    psi: @json($psiProxyUrl), // server proxy; API key stays hidden
+    // NEW: backend detector endpoint (works even with no API keys; local server ensemble)
+    detect: @json($detectUrl)
   };
   window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
   window.SEMSEO.READY = false;
@@ -1022,108 +573,50 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         <div id="analyzeReport" style="margin-top:.9rem;display:none">
           <div style="display:flex;flex-wrap:wrap;gap:.5rem">
             <span class="chip">HTTP: <b id="rStatus">—</b></span>
-            <span class="chip">Title: <b id="rTitleLen">—</b> <small id="rTitlePx" style="opacity:.8;margin-left:.25rem"></small></span>
-            <span class="chip">Meta desc: <b id="rMetaLen">—</b> <small id="rMetaPx" style="opacity:.8;margin-left:.25rem"></small></span>
+            <span class="chip">Title: <b id="rTitleLen">—</b></span>
+            <span class="chip">Meta desc: <b id="rMetaLen">—</b></span>
             <span class="chip">Canonical: <b id="rCanonical">—</b></span>
             <span class="chip">Robots: <b id="rRobots">—</b></span>
             <span class="chip">Viewport: <b id="rViewport">—</b></span>
             <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
             <span class="chip">Internal links: <b id="rInternal">—</b></span>
             <span class="chip">Schema: <b id="rSchema">—</b></span>
-            <span class="chip">Images ALT: <b id="rAltCov">—</b></span>
             <span class="chip">Auto-checked: <b id="rAutoCount">—</b></span>
-          </div>
-
-          <div class="snippet" id="serpPreview" style="display:none">
-            <div class="snip-title" id="snipTitle">Example Title</div>
-            <div class="snip-url" id="snipUrl">example.com/page</div>
-            <div class="snip-desc" id="snipDesc">Example description</div>
-          </div>
-
-          <div id="guardrails" class="read-suggest" style="display:none;margin-top:.6rem">
-            <div class="title"><i class="fa-solid fa-shield-halved"></i> Indexability & Canonical Guardrails</div>
-            <ul id="guardrailsList"></ul>
           </div>
         </div>
       </form>
     </div>
 
-<!-- 1) HUMAN vs AI (Ensemble) -->
-<section class="hvai" id="detectorPanel" style="display:none">
-  <!-- HVAI Verdict Badge -->
-  <div id="hvaiBadge" class="hvai-badge" hidden>
-    <div class="badge-sheen"></div>
-    <i class="fa-solid fa-hexagon-nodes"></i>
-    <div class="txt">
-      <strong id="hvaiVerdictText">Ensemble Verdict</strong>
-      <span id="hvaiVerdictHint">—</span>
-    </div>
-  </div>
+    <!-- 1) HUMAN vs AI (Ensemble) -->
+    <section id="detectorPanel" class="hvai" style="display:none">
+      <div class="hvai-head">
+        <i class="fa-solid fa-users-gear ico ico-purple"></i>
+        <h4>Human vs AI Content (Ensemble)</h4>
+      </div>
+      <div class="hvai-meta">
+        <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
+        <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
+      </div>
 
-  <div class="hvai-head">
-    <i class="fa-solid fa-users-gear ico ico-purple"></i>
-    <h4>Human vs AI Content (Ensemble)</h4>
-  </div>
+      <!-- Animated Human vs AI bars -->
+      <div class="hvai-bar">
+        <div>
+          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
+        </div>
+      </div>
 
-  <div class="hvai-meta">
-    <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
-    <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
-  </div>
+      <!-- Detectors grid -->
+      <div class="det-grid" id="detGrid"></div>
+      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
+    </section>
 
-  <!-- Stylish circular gauge (used by the v2.3 script) -->
-  <div class="hvai-gauge">
-    <svg class="g-svg" viewBox="0 0 200 200" aria-label="HVAI gauge">
-      <defs>
-        <linearGradient id="gradHuman" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#22c55e"/>
-          <stop offset="100%" stop-color="#3de2ff"/>
-        </linearGradient>
-        <linearGradient id="gradAI" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#ef4444"/>
-          <stop offset="100%" stop-color="#f59e0b"/>
-        </linearGradient>
-      </defs>
-      <circle class="g-track human" cx="100" cy="100" r="66"></circle>
-      <circle class="g-track ai"    cx="100" cy="100" r="86"></circle>
-      <circle id="hvaiHumanArc" class="g-arc human" cx="100" cy="100" r="66"></circle>
-      <circle id="hvaiAIArc"    class="g-arc ai"    cx="100" cy="100" r="86"></circle>
-    </svg>
-    <div class="g-center">
-      <div class="g-title">AI likelihood</div>
-      <div id="hvaiScoreBig" class="g-score">0%</div>
-    </div>
-  </div>
-
-  <div class="hvai-bar">
-    <div>
-      <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
-      <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
-    </div>
-    <div>
-      <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
-      <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
-    </div>
-  </div>
-
-  <div class="det-grid" id="detGrid"></div>
-  <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">
-    Local ensemble activates if the backend provides no text/percentages.
-  </div>
-</section>
-
-    <!-- 2) READABILITY -->
+    <!-- 2) READABILITY INSIGHTS (Upgraded) -->
     <section class="readability" id="readabilityPanel" style="display:none">
-
-  <!-- Special Good Readability Badge -->
-  <div id="readGoodBadge" class="read-good-badge" hidden>
-    <div class="badge-shine"></div>
-    <i class="fa-solid fa-trophy"></i>
-    <div class="txt">
-      <strong>Excellent Readability</strong>
-      <span>Great job! Your content is clear and easy to read — appreciate the hard work.</span>
-    </div>
-  </div>
-
       <div class="read-head">
         <i class="fa-solid fa-book-open-reader ico ico-cyan"></i>
         <h4>Readability Insights</h4>
@@ -1173,12 +666,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </div>
 
       <div class="read-plain">
-        <div class="title"><i class="fa-solid fa-child-reaching"></i> Answer Target (45–55 words)</div>
-        <div id="readPlain">We’ll place a snippet-friendly paragraph here if found.</div>
+        <div class="title"><i class="fa-solid fa-child-reaching"></i> Easy to read (Grade 7)</div>
+        <div id="readPlain">We’ll write a friendly one-line summary here.</div>
       </div>
     </section>
 
-    <!-- 3) ENTITIES -->
+    <!-- 3) ENTITIES & TOPICS (Upgraded) -->
     <section class="entities" id="entitiesPanel" style="display:none">
       <div class="entities-head">
         <i class="fa-solid fa-database ico ico-cyan"></i>
@@ -1212,84 +705,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </div>
     </section>
 
-    <!-- 4) TOPIC COVERAGE (P0) -->
-    <section class="topics" id="topicsPanel" style="display:none">
-      <div class="topics-head">
-        <i class="fa-solid fa-layer-group ico ico-cyan"></i>
-        <h4>Topic Coverage</h4>
-      </div>
-      <div class="topics-meta">
-        <span class="topics-chip"><i class="fa-solid fa-bullseye"></i> Primary: <b id="topicPrimary">—</b></span>
-        <span class="topics-chip"><i class="fa-solid fa-list-check"></i> Coverage: <b id="topicCoveragePct">—%</b></span>
-        <span class="topics-chip"><i class="fa-solid fa-circle-info"></i> Based on H1/H2/H3 + body</span>
-      </div>
-      <div class="topics-grid">
-        <div class="topics-card">
-          <div class="metric" style="display:flex;align-items:center;justify-content:space-between;font-weight:900"><span><i class="fa-solid fa-check"></i> Covered subtopics</span><b id="topicCoveredCount">0</b></div>
-          <div class="topics-list" id="topicsCovered"></div>
-        </div>
-        <div class="topics-card">
-          <div class="metric" style="display:flex;align-items:center;justify-content:space-between;font-weight:900"><span><i class="fa-solid fa-circle-exclamation"></i> Missing subtopics</span><b id="topicMissingCount">0</b></div>
-          <div class="topics-list" id="topicsMissing"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 5) SCHEMA BUILDER (P0) -->
-    <section class="schema" id="schemaPanel" style="display:none">
-      <div class="schema-head">
-        <i class="fa-solid fa-code ico ico-cyan"></i>
-        <h4>Schema Builder (JSON-LD)</h4>
-      </div>
-      <div class="schema-grid">
-        <article class="schema-card">
-          <header><strong>Article</strong><button class="copy-btn" data-copy="schemaArticle"><i class="fa-regular fa-copy"></i> Copy</button></header>
-          <pre id="schemaArticle" class="schema-code">{}</pre>
-        </article>
-        <article class="schema-card">
-          <header><strong>FAQ</strong><button class="copy-btn" data-copy="schemaFAQ"><i class="fa-regular fa-copy"></i> Copy</button></header>
-          <pre id="schemaFAQ" class="schema-code">{}</pre>
-        </article>
-        <article class="schema-card">
-          <header><strong>Breadcrumbs</strong><button class="copy-btn" data-copy="schemaBreadcrumbs"><i class="fa-regular fa-copy"></i> Copy</button></header>
-          <pre id="schemaBreadcrumbs" class="schema-code">{}</pre>
-        </article>
-        <article class="schema-card">
-          <header><strong>Organization</strong><button class="copy-btn" data-copy="schemaOrg"><i class="fa-regular fa-copy"></i> Copy</button></header>
-          <pre id="schemaOrg" class="schema-code">{}</pre>
-        </article>
-        <article class="schema-card">
-          <header><strong>WebSite + SearchAction</strong><button class="copy-btn" data-copy="schemaSearch"><i class="fa-regular fa-copy"></i> Copy</button></header>
-          <pre id="schemaSearch" class="schema-code">{}</pre>
-        </article>
-      </div>
-    </section>
-
-    <!-- 6) INTERNAL LINK SUGGESTIONS (P0) -->
-    <section class="links" id="linksPanel" style="display:none">
-      <div class="links-head">
-        <i class="fa-solid fa-link ico ico-cyan"></i>
-        <h4>Internal Link Suggestions</h4>
-      </div>
-      <table class="links-table" id="linksTable">
-        <thead><tr><th>Suggested anchor</th><th>Target (guess)</th><th>Reason</th></tr></thead>
-        <tbody id="linksBody"></tbody>
-      </table>
-    </section>
-
-    <!-- 7) PSI (unchanged panel, runs last) -->
+    <!-- 4) SITE SPEED & CORE WEB VITALS (End) -->
     <section class="psi" id="psiPanel" style="display:none">
-
-  <!-- PSI Fast Site Badge -->
-  <div id="psiBadge" class="psi-badge" hidden>
-    <div class="badge-sheen"></div>
-    <i class="fa-solid fa-gauge-high"></i>
-    <div class="txt">
-      <strong>Fast Site</strong>
-      <span>Lighthouse score looks great — smooth performance!</span>
-    </div>
-  </div>
-
       <div class="psi-head">
         <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
         <h4>Site Speed & Core Web Vitals</h4>
@@ -1432,7 +849,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
   function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
   function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
-  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
 
   /* === Score wheel === */
   var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
@@ -1554,6 +970,25 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return {ok,data,status};
   }
 
+  // NEW: backend multi-detector (works with or without API keys; server may compute local ensemble)
+  async function fetchDetect(text, url){
+    try{
+      const r = await fetch((window.SEMSEO.ENDPOINTS.detect || '/api/detect'),{
+        method:'POST',
+        headers:{
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'X-Requested-With':'XMLHttpRequest',
+          'X-CSRF-TOKEN': CSRF
+        },
+        body: JSON.stringify({ text, url })
+      });
+      if(!r.ok) return null;
+      const j = await r.json();
+      return (j && j.ok) ? j : null;
+    }catch(_){ return null; }
+  }
+
   async function fetchRawHtml(url){
     try{
       const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
@@ -1590,23 +1025,13 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       var main=d.querySelector('article,main,[role="main"]'); var sample=main? (main.textContent||''): '';
       if(!sample){ sample=[].slice.call(d.querySelectorAll('p')).slice(0,12).map(function(p){return p.textContent;}).join('\n\n'); }
       sample=(sample||'').replace(/\s{2,}/g,' ').trim();
-
-      // extractions for P0
-      var imgs=[].slice.call(d.querySelectorAll('img'));
-      var altOk=imgs.filter(img=> (img.getAttribute('alt')||'').trim().length>=3).length;
-      var altCov=imgs.length? Math.round(altOk*100/imgs.length) : null;
-
-      var author = q('meta[name="author"]','content') || q('[itemprop="author"]','content') || q('.author') || '';
-      var datePub = q('meta[property="article:published_time"]','content') || q('time[datetime]','datetime') || q('meta[name="date"]','content') || '';
-      var externalLinks = [].slice.call(d.querySelectorAll('a[href]')).filter(a=>{ try{ var u=new URL(a.getAttribute('href'),baseUrl); return u.origin!==origin; }catch(e){ return false; } }).length;
-
-      return { title, metaDesc, titleLen: title?title.length:null, metaLen: metaDesc?metaDesc.length:null, canonical, robots, viewport, headings:(h1+'/'+h2+'/'+h3), internalLinks:internal, schema: schema?'yes':'no', sampleText: sample, altCov, author, datePub, externalLinks, doc: d };
+      return { titleLen: title?title.length:null, metaLen: metaDesc?metaDesc.length:null, canonical, robots, viewport, headings:(h1+'/'+h2+'/'+h3), internalLinks:internal, schema: schema?'yes':'no', sampleText: sample };
     }catch(_){ return {}; }
   }
 
   function mergeMeta(into, add){
     if(!into) into={};
-    var keys=['title','metaDesc','titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText','altCov','author','datePub','externalLinks','doc'];
+    var keys=['titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText'];
     keys.forEach(function(k){
       if((into[k]===undefined || into[k]===null || into[k]==='—' || into[k]==='' ) && add && add[k]!==undefined && add[k]!==null){
         into[k]=add[k];
@@ -1616,6 +1041,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
 
   /* ===================== Stylometry & Readability ===================== */
+  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
   function _countSyllables(word){
     var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0;
     var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m);
@@ -1657,7 +1083,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var longRatio=(lens.filter(function(L){return L>=28;}).length)/(lens.length||1);
     var TTR=types/(tokens||1);
     var asl=mean||0;
-    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl, sentences: sents };
+    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl };
   }
 
   function detectUltra(text){
@@ -1742,7 +1168,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     renderDetectors(res);
   }
 
-  /* === Readability rendering + Answer Target === */
+  /* === Readability rendering === */
   function renderReadability(s){
     var p = document.getElementById('readabilityPanel'); if(!p) return;
     var text = s.text || '';
@@ -1753,11 +1179,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var chipText = document.getElementById('readGradeChip');
     if (chipText) chipText.textContent = 'Grade ' + gradeInt;
     if (chip){ chip.classList.remove('bad','mid'); if (gradeInt<=8){} else if (gradeInt<=10) chip.classList.add('mid'); else chip.classList.add('bad'); }
-    // annotate state for the badge observer
-    if (chip) {
-      chip.setAttribute('data-state', (gradeInt <= 8) ? 'good' : ((gradeInt <= 10) ? 'mid' : 'bad'));
-    }
-
     var sum = document.getElementById('readSummary');
     if (sum){
       if (gradeInt <= 8) sum.textContent = 'Easy for most readers (middle school). Great for broad audiences.';
@@ -1779,8 +1200,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     bar('mRepBar', Math.max(0, 1 - (s.triRepeatRatio||0)), 1);
     bar('mDigitsBar', Math.max(0, Math.min(20, 20 - (s.digitsPer100||0))), 20);
     bar('mSPWBar', Math.max(0, Math.min(1.8, 1.8 - (syl.spw||0))), 1.8);
-
-    // Simple fixes
     var fixes = [];
     if ((s.asl||0) > 20) fixes.push('Break long sentences into 12–16 words.');
     if ((syl.spw||0) > 1.60) fixes.push('Prefer shorter words (use simpler synonyms).');
@@ -1790,42 +1209,31 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if (ease < 60 && fixes.length === 0) fixes.push('Aim for shorter sentences and simpler vocabulary to improve readability.');
     var list = document.getElementById('readSuggest');
     if (list){ list.innerHTML = fixes.length ? fixes.map(f=>`<li>${f}</li>`).join('') : '<li>Looks good! Keep sentences concise and headings clear.</li>'; }
-
-    // Answer Target (45–55 words)
-    var best = ''; (s.sentences||[]).forEach(function(sent){
-      var wc = (sent.match(/[A-Za-z\u00C0-\u024f0-9']+/g)||[]).length;
-      if (wc>=40 && wc<=60 && (!best || wc>best.split(' ').length)) best=sent.trim();
-    });
-    if (!best && s.sentences && s.sentences.length){
-      best = s.sentences.sort((a,b)=>Math.abs(48-(a.split(' ').length))-Math.abs(48-(b.split(' ').length)))[0] || '';
+    var plain = document.getElementById('readPlain');
+    if (plain){
+      if (gradeInt <= 7){
+        plain.textContent = 'This page is easy to read for a Grade-7 reader: short sentences, common words, and clear ideas.';
+      } else if (gradeInt <= 9){
+        plain.textContent = 'Almost Grade-7 friendly. To make it easier, use shorter sentences and everyday words.';
+      } else {
+        plain.textContent = 'Currently above Grade-7 level. Try smaller sentences, simpler words, and fewer complex clauses.';
+      }
     }
-    var plain = document.getElementById('readPlain'); if (plain) plain.textContent = best || 'No snippet-length paragraph detected. Try a 45–55 word definition/answer paragraph near the top.';
     p.style.display='block';
   }
 
-  /* === Entities salience & rendering === */
-  function extractEntities(text, htmlDoc){
-    var res = {people:[], orgs:[], places:[], topics:[], software:[], games:[], salience:{}};
+  /* === Entities & Topics extraction === */
+  function extractEntities(text){
+    var res = {people:[], orgs:[], places:[], topics:[], software:[], games:[]};
     var clean=(text||'').replace(/\s+/g,' ');
+    // naive capitalized tokens as candidates
     var cand = (clean.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || []).slice(0, 800);
     var stop = new Set(['The','A','An','This','That','And','Or','Of','In','On','To','For','By','With','Your','Our','You','We','It','At','From','As','Be','Is','Are','Was','Were','Not']);
     var uniq={};
-    cand.forEach(function(c){ if(stop.has(c)) return; var k=c.trim(); if(k.length<2||k.length>48) return; uniq[k]=(uniq[k]||0)+1; });
+    cand.forEach(function(c){ if(stop.has(c)) return; var k=c.trim(); if(k.length<2||k.length>48) return; uniq[k]=1; });
     var uniqList = Object.keys(uniq).slice(0,120);
 
-    // proximity weights
-    var weights={}; if (htmlDoc){
-      var h1 = htmlDoc.querySelector('h1')?.textContent||'';
-      var headers = [].slice.call(htmlDoc.querySelectorAll('h1,h2,h3'));
-      uniqList.forEach(function(n){
-        var w = 0;
-        if (h1.includes(n)) w += 3;
-        headers.forEach(function(h){ if((h.textContent||'').includes(n)) w += 1; });
-        if (htmlDoc.querySelector('a[href*="'+(n.split(' ')[0]||'')+'"]')) w += 0.5;
-        weights[n] = w;
-      });
-    }
-
+    // very light heuristics
     uniqList.forEach(function(n){
       if (/\b(Inc|LLC|Ltd|Corporation|Company|Corp|Studio|Labs|University|College)\b/.test(n)) res.orgs.push(n);
       else if (/\b(City|Town|Province|State|Country|Park|River|Lake|Valley|Mountain)\b/.test(n)) res.places.push(n);
@@ -1833,257 +1241,94 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       else res.topics.push(n);
     });
 
-    // software / apk / games
+    // software / apk / games (keyword probes)
     var low = clean.toLowerCase();
-    var soft = (clean.match(/\b([A-Z][A-Za-z0-9\.\-\+]{2,})\b/g) || []).filter(x=>/\b(Android|iOS|Windows|Mac|Linux|Pro|Studio|Editor|App|SDK|Tool)\b/.test(x) || /v?\d+\.\d+/.test(x));
-    if (/\bapk\b/i.test(low) || /\.apk\b/i.test(low)){ soft.push('APK'); }
+    var swTerms = (low.match(/\b(software|app|application|android|ios|windows|mac|linux|apk|exe|download|install|update|version)\b/g) || []);
+    if (swTerms.length){ // pick key tokens with dots or version-like
+      var soft = (clean.match(/\b([A-Z][A-Za-z0-9\.\-\+]{2,})\b/g) || []).filter(x=>/\b(Android|iOS|Windows|Mac|Linux|Pro|Studio|Editor|App|SDK|Tool)\b/.test(x) || /v?\d+\.\d+/.test(x));
+      res.software = Array.from(new Set(soft)).slice(0,20);
+    }
+    if (/\bapk\b/i.test(low) || /\.apk\b/i.test(low)){ res.software.push('APK'); }
     var games = (clean.match(/\b([A-Z][A-Za-z0-9\-\s]{2,} (?:Game|Games|Edition|Remastered|Online))\b/g) || []);
+    if (games.length) res.games = Array.from(new Set(games)).slice(0,20);
 
-    res.software = Array.from(new Set(soft)).slice(0,20);
-    res.games = Array.from(new Set(games)).slice(0,20);
+    // clamp lists
     res.people = res.people.slice(0,20);
     res.orgs = res.orgs.slice(0,20);
     res.places = res.places.slice(0,20);
     res.topics = res.topics.slice(0,24);
-
-    // salience score (freq + proximity emphasis)
-    var sal = {};
-    [].concat(res.people,res.orgs,res.places,res.topics).forEach(function(n){
-      var f = uniq[n]||0, w = weights[n]||0;
-      sal[n] = f*1 + w*2;
-    });
-    // normalize 0-100
-    var vals = Object.values(sal); var max = vals.length? Math.max.apply(null, vals) : 0;
-    var norm={}; Object.keys(sal).forEach(k=>{ norm[k] = max? Math.round((sal[k]/max)*100) : 0; });
-    res.salience = norm;
     return res;
   }
-  function chipifyWithSal(list, cls, sal){
+  function chipify(list, cls){
     if(!list || !list.length) return '<span class="echip misc"><i class="fa-solid fa-circle-minus"></i> none</span>';
-    var primary = list.slice().sort((a,b)=>(sal[b]||0)-(sal[a]||0))[0];
-    return list.map(v=>{
-      var crown = v===primary ? ' <i class="fa-solid fa-crown"></i>' : '';
-      var s = sal && isFinite(sal[v]) ? `<span class="sal">${sal[v]}%</span>` : '';
-      return `<span class="echip ${cls||'misc'}"><i class="fa-solid fa-tag"></i> ${v}${crown} ${s}</span>`;
-    }).join(' ');
+    return list.map(v=>`<span class="echip ${cls||'misc'}"><i class="fa-solid fa-tag"></i> ${v}</span>`).join(' ');
   }
-  function renderEntitiesTopics(sample, htmlDoc){
+  function renderEntitiesTopics(sample){
     var p = document.getElementById('entitiesPanel'); if(!p) return;
-    var ex = extractEntities(sample||'', htmlDoc||null);
+    var ex = extractEntities(sample||'');
     var m = (id, html)=>{ var el=document.getElementById(id); if(el) el.innerHTML=html; };
-    m('entPeople', chipifyWithSal(ex.people,'person',ex.salience));
-    m('entOrgs', chipifyWithSal(ex.orgs,'org',ex.salience));
-    m('entPlaces', chipifyWithSal(ex.places,'place',ex.salience));
-    m('entTopics', chipifyWithSal(ex.topics,'misc',ex.salience));
-    m('entSoftware', chipifyWithSal(ex.software,'sw',ex.salience));
-    m('entGames', chipifyWithSal(ex.games,'game',ex.salience));
-    p.style.display='block';
-    return ex;
-  }
-
-  /* === Topic Coverage === */
-  function buildTopicCoverage(htmlDoc, sample){
-    var res = { primary:'—', covered:[], missing:[], coveragePct:0 };
-    if (!htmlDoc && !sample) return res;
-    var h1 = (htmlDoc?.querySelector('h1')?.textContent||'').trim();
-    var seeds = [];
-    if (h1) seeds.push(h1);
-    [].slice.call(htmlDoc?.querySelectorAll('h2,h3')||[]).forEach(h=>{ var t=(h.textContent||'').trim(); if(t) seeds.push(t);});
-    if (!seeds.length && sample){ seeds = (sample.match(/[^\n]{14,80}/g)||[]).slice(0,8); }
-    var primary = h1 || (seeds[0]||'').split(/[|–\-:•]/)[0].trim();
-    var text = (sample||'').toLowerCase();
-    var candidates = Array.from(new Set(seeds
-      .map(s=> s.replace(/[#?«»"“”'()]+/g,'').trim())
-      .filter(Boolean)
-      .slice(0,18)));
-
-    var covered=[], missing=[];
-    candidates.forEach(function(c){
-      var token = c.toLowerCase().split(/[|–\-:•]/)[0].trim();
-      if (!token || token.length<3) return;
-      if (text.indexOf(token) !== -1) covered.push(c);
-      else missing.push(c);
-    });
-    var pct = candidates.length? Math.round(covered.length*100/candidates.length) : 0;
-    res.primary= primary||'—'; res.covered=covered; res.missing=missing; res.coveragePct=pct;
-    return res;
-  }
-  function renderTopicCoverage(tc){
-    var p=document.getElementById('topicsPanel'); if(!p) return;
-    setText('topicPrimary', tc.primary || '—');
-    setText('topicCoveragePct', isFinite(tc.coveragePct)? tc.coveragePct : '—');
-    setText('topicCoveredCount', tc.covered.length);
-    setText('topicMissingCount', tc.missing.length);
-    var fill = (arr)=> arr.length? arr.map(t=>`<span class="tchip"><i class="fa-solid fa-check"></i> ${t}</span>`).join(' ') : '<span class="tchip">—</span>';
-    var miss = (arr)=> arr.length? arr.map(t=>`<span class="tchip"><i class="fa-solid fa-plus"></i> ${t}</span>`).join(' ') : '<span class="tchip">none</span>';
-    var c=document.getElementById('topicsCovered'); if(c) c.innerHTML = fill(tc.covered);
-    var m=document.getElementById('topicsMissing'); if(m) m.innerHTML = miss(tc.missing);
+    m('entPeople', chipify(ex.people,'person'));
+    m('entOrgs', chipify(ex.orgs,'org'));
+    m('entPlaces', chipify(ex.places,'place'));
+    m('entTopics', chipify(ex.topics,'misc'));
+    m('entSoftware', chipify(ex.software,'sw'));
+    m('entGames', chipify(ex.games,'game'));
     p.style.display='block';
   }
 
-  /* === Snippet width & preview (px measurement) === */
-  function measurePx(txt, sizePx, family){
-    try{
-      var canvas = measurePx._c || (measurePx._c=document.createElement('canvas'));
-      var ctx = canvas.getContext('2d');
-      ctx.font = sizePx + 'px ' + (family||'Arial, Helvetica, sans-serif');
-      return Math.round(ctx.measureText(txt||'').width);
-    }catch(_){ return 0; }
-  }
-  function renderSnippetPreview(url, meta){
-    var t = meta.title||'', d = meta.metaDesc||'';
-    var tPx = measurePx(t, 18, 'Arial');
-    var dPx = measurePx(d, 14, 'Arial');
-    setText('rTitlePx', t ? `• ~${tPx}px` : '');
-    setText('rMetaPx',  d ? `• ~${dPx}px` : '');
-    var p = document.getElementById('serpPreview');
-    if(!p) return;
-    var host = ''; try{ host=new URL(url).host; }catch(_){}
-    setText('snipTitle', t || 'No title found');
-    setText('snipUrl', host || url);
-    setText('snipDesc', d || 'No meta description found.');
-    p.style.display='block';
-  }
-
-  /* === Guardrails (canonical/robots/indexability) === */
-  function guardrails(meta, url){
-    var issues=[];
-    var canon = meta.canonical||'';
-    try{
-      var u = new URL(url), c = new URL(canon, url);
-      if (c.origin+c.pathname !== u.origin+u.pathname) issues.push('Canonical not self-referencing (check if correct).');
-    }catch(e){
-      if (!canon) issues.push('Missing canonical tag.');
-    }
-    var robots = (meta.robots||'').toLowerCase();
-    if (robots.includes('noindex')) issues.push('Robots meta contains noindex (page won’t be indexed).');
-    if (robots.includes('nofollow')) issues.push('Robots meta contains nofollow (links won’t be followed).');
-    if (!/width=device-width/i.test(meta.viewport||'')) issues.push('Viewport missing or not mobile friendly.');
-    if ((meta.titleLen||0) > 65) issues.push('Title may truncate in SERP; aim ~50–60 chars / ~580px.');
-    if ((meta.metaLen||0) > 165) issues.push('Meta description may truncate; aim ~140–160 chars.');
-    return issues;
-  }
-  function renderGuardrails(issues){
-    var box=document.getElementById('guardrails'), list=document.getElementById('guardrailsList');
-    if(!box||!list) return; if(!issues || !issues.length){ box.style.display='none'; return; }
-    list.innerHTML = issues.map(i=>`<li>${i}</li>`).join('');
-    box.style.display='block';
-  }
-
-  /* === FAQ extractor + Schema === */
-  function extractFAQ(htmlDoc, sample){
-    var qas=[];
-    if (htmlDoc){
-      var blocks=[].slice.call(htmlDoc.querySelectorAll('h2,h3,strong'));
-      blocks.forEach(function(b){
-        var t=(b.textContent||'').trim();
-        if(/\?$/.test(t)){
-          var ans = b.nextElementSibling && /p|div|li/i.test(b.nextElementSibling.tagName) ? (b.nextElementSibling.textContent||'').trim() : '';
-          if (t && ans) qas.push({q:t, a:ans});
-        }
-      });
-    }
-    if (!qas.length && sample){
-      var lines = sample.split(/\n+/).filter(Boolean);
-      for(var i=0;i<lines.length-1;i++){
-        if (/\?$/.test(lines[i]) && lines[i+1] && lines[i+1].length>20){ qas.push({q:lines[i].trim(), a:lines[i+1].trim()}); }
-        if (qas.length>=8) break;
-      }
-    }
-    // dedupe & clamp
-    var seen={}; qas = qas.filter(x=>{ var k=x.q.toLowerCase(); if(seen[k]) return false; seen[k]=1; return true; }).slice(0,10);
-    return qas;
-  }
-  function schemaJSON(meta, url, faqList){
-    var now = new Date().toISOString();
-    var host=''; try{ host=(new URL(url)).origin; }catch(_){}
-    var article = {
-      "@context":"https://schema.org",
-      "@type":"Article",
-      "headline": meta.title || "",
-      "description": meta.metaDesc || "",
-      "datePublished": meta.datePub || now,
-      "dateModified": now,
-      "author": meta.author ? {"@type":"Person","name":meta.author} : undefined,
-      "mainEntityOfPage": {"@type":"WebPage","@id": url}
-    };
-    var faqs = faqList && faqList.length ? {
-      "@context":"https://schema.org",
-      "@type":"FAQPage",
-      "mainEntity": faqList.map(x=>({"@type":"Question","name":x.q,"acceptedAnswer":{"@type":"Answer","text":x.a}}))
-    } : {};
-    var crumbs = {
-      "@context":"https://schema.org",
-      "@type":"BreadcrumbList",
-      "itemListElement":[
-        {"@type":"ListItem","position":1,"name":host.replace(/^https?:\/\//,''),"item":host},
-        {"@type":"ListItem","position":2,"name":(meta.title||'Page'),"item":url}
-      ]
-    };
-    var org = {
-      "@context":"https://schema.org",
-      "@type":"Organization",
-      "name": host.replace(/^https?:\/\//,''),
-      "url": host,
-      "sameAs":[]
-    };
-    var search = {
-      "@context":"https://schema.org",
-      "@type":"WebSite",
-      "url": host,
-      "potentialAction":{
-        "@type":"SearchAction",
-        "target": host+"/?s={search_term_string}",
-        "query-input":"required name=search_term_string"
-      }
-    };
-    function tidy(o){ // remove empty keys
-      if (!o || typeof o!=='object') return o;
-      Object.keys(o).forEach(k=>{ if(o[k]===undefined || o[k]==='' || (Array.isArray(o[k]) && !o[k].length)) delete o[k]; });
-      return o;
-    }
-    return {
-      article: JSON.stringify(tidy(article), null, 2),
-      faq: Object.keys(faqs).length? JSON.stringify(faqs,null,2) : '{}',
-      breadcrumbs: JSON.stringify(crumbs, null, 2),
-      org: JSON.stringify(org, null, 2),
-      search: JSON.stringify(search, null, 2)
-    };
-  }
-  function renderSchemaBlocks(jsons){
-    setText('schemaArticle', jsons.article||'{}');
-    setText('schemaFAQ', jsons.faq||'{}');
-    setText('schemaBreadcrumbs', jsons.breadcrumbs||'{}');
-    setText('schemaOrg', jsons.org||'{}');
-    setText('schemaSearch', jsons.search||'{}');
-    var p = document.getElementById('schemaPanel'); if(p) p.style.display='block';
-  }
-
-  /* === Internal Link Suggestions === */
-  function suggestInternalLinks(htmlDoc, ex, url){
-    var items=[];
-    if (!htmlDoc) return items;
-    var origin=''; try{ origin=new URL(url).origin; }catch(_){}
-    var anchors=[].slice.call(htmlDoc.querySelectorAll('a[href]')).map(a=>{
-      try{ var u = new URL(a.getAttribute('href'), url); return u.origin===origin? u.pathname : null; }catch(e){ return null; }
-    }).filter(Boolean);
-    var uniqPaths = Array.from(new Set(anchors)).filter(p=>p!=='/' && p.length<120).slice(0,80);
-
-    // Build candidate anchors from entities/topics
-    var cands = [].concat(ex.topics||[], ex.orgs||[], ex.people||[]).slice(0,20);
-    uniqPaths.slice(0,20).forEach(function(pth, i){
-      var anchor = cands[i % cands.length] || pth.split('/').pop().replace(/[-_]/g,' ');
-      var reason = 'Topical match via entities/topics';
-      items.push({anchor: anchor, target: pth, reason: reason});
-    });
-    return items.slice(0,10);
-  }
-  function renderInternalLinks(items){
-    var panel=document.getElementById('linksPanel'); var body=document.getElementById('linksBody');
-    if(!panel||!body) return;
-    if(!items || !items.length){ panel.style.display='none'; return; }
-    body.innerHTML = items.map(x=>`<tr class="links-row"><td>${x.anchor}</td><td>${x.target}</td><td>${x.reason}</td></tr>`).join('');
+  /* === PSI (Site Speed) via server proxy === */
+  async function startSiteSpeed(url, strategy='mobile'){
+    var panel = document.getElementById('psiPanel'); if(!panel) return;
     panel.style.display='block';
+    setText('psiStrategy', strategy);
+    setText('psiPerf','—'); setText('psiLcp','—'); setText('psiInp','—'); setText('psiCls','—'); setText('psiTtfb','—');
+    ['psiLcpBar','psiInpBar','psiClsBar','psiTtfbBar'].forEach(id=>{ var el=document.getElementById(id); if(el) el.style.width='0%'; });
+    var note = document.getElementById('psiNote'); if(note) note.textContent='Running PageSpeed Insights…';
+    var advice = document.getElementById('psiAdvice'); if(advice) advice.innerHTML='';
+
+    try{
+      const q = new URLSearchParams({url, strategy}).toString();
+      const r = await fetch((window.SEMSEO.ENDPOINTS.psi||'/api/psi')+'?'+q, {headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+      const j = await r.json();
+      if(!j || j.ok===false){ throw new Error(j && j.error ? j.error : 'PSI proxy error'); }
+      const lhr = j.data?.lighthouseResult || {};
+      const audits = lhr.audits || {};
+      const catPerf = lhr.categories?.performance?.score;
+      const perfScore = typeof catPerf==='number' ? Math.round(catPerf*100) : '—';
+      setText('psiPerf', perfScore);
+
+      function barPct(id, val, goodMax, clampMax){
+        var el=document.getElementById(id); if(!el) return;
+        var v = Math.max(0, Math.min(clampMax, val||0));
+        var pct = Math.max(0, Math.min(100, (v/goodMax)*100));
+        el.style.width = pct + '%';
+      }
+      // LCP in seconds
+      var lcp = audits['largest-contentful-paint']?.numericValue; // ms
+      var inp = audits['interactive']?.numericValue; // ms (fallback), or 'experimental-interaction-to-next-paint'
+      var inpAlt = audits['experimental-interaction-to-next-paint']?.numericValue;
+      if (inpAlt) inp = inpAlt;
+      var cls = audits['cumulative-layout-shift']?.numericValue;
+      var ttfb = audits['server-response-time']?.numericValue || audits['time-to-first-byte']?.numericValue;
+
+      if (typeof lcp==='number'){ setText('psiLcp', (lcp/1000).toFixed(2)); barPct('psiLcpBar', (lcp/1000), 2.5, 6); }
+      if (typeof inp==='number'){ setText('psiInp', Math.round(inp)); barPct('psiInpBar', inp, 200, 600); }
+      if (typeof cls==='number'){ setText('psiCls', cls.toFixed(3)); barPct('psiClsBar', cls, 0.1, 0.4); }
+      if (typeof ttfb==='number'){ setText('psiTtfb', Math.round(ttfb)); barPct('psiTtfbBar', ttfb, 800, 2500); }
+
+      // Advice list (simple heuristics)
+      var tips=[];
+      if (lcp>2500) tips.push('Optimize hero image (compress, proper size, lazy-load below-the-fold).');
+      if (inp>200) tips.push('Reduce main-thread work (code-split, defer non-critical JS).');
+      if (cls>0.1) tips.push('Reserve space for images/ads; avoid late-loading fonts without fallback.');
+      if (ttfb>800) tips.push('Improve server response (caching, CDN, database/index tuning).');
+      if (!tips.length) tips.push('Looks good! Keep images optimized, JS lean, and layout stable.');
+      if (advice) advice.innerHTML = tips.map(t=>`<li>${t}</li>`).join('');
+
+      if (note) note.textContent = 'Results from Google PageSpeed Insights (via secure server proxy).';
+    }catch(e){
+      if (note) note.textContent = 'PSI error: ' + (e && e.message ? e.message : e);
+    }
   }
 
   /* ===================== ANALYZE ===================== */
@@ -2099,7 +1344,10 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
-    ['detectorPanel','readabilityPanel','entitiesPanel','topicsPanel','schemaPanel','linksPanel','psiPanel'].forEach(id=>{ var el=document.getElementById(id); if(el) el.style.display='none'; });
+    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
+    var readPanel = document.getElementById('readabilityPanel'); if(readPanel) readPanel.style.display='none';
+    var entPanel = document.getElementById('entitiesPanel'); if(entPanel) entPanel.style.display='none';
+    var psiPanel = document.getElementById('psiPanel'); if(psiPanel) psiPanel.style.display='none';
 
     // 1) Backend (if present)
     var {ok,data} = await fetchBackend(url);
@@ -2109,14 +1357,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     var sample = buildSampleFromData(data);
 
     // 3) Try AllOrigins raw HTML (fills meta chips + better sample if needed)
-    var meta={}; var raw=''; var htmlDoc=null;
     try{
-      raw = await fetchRawHtml(url);
+      var raw = await fetchRawHtml(url);
       if(raw){
-        var mx = extractMetaFromHtml(raw, url);
-        meta = mx; data = mergeMeta(data, mx);
-        htmlDoc = mx.doc || null;
-        if((!sample || sample.length<200) && mx.sampleText) sample = mx.sampleText;
+        var meta = extractMetaFromHtml(raw, url);
+        data = mergeMeta(data, meta);
+        if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
       }
     }catch(_){}
 
@@ -2128,20 +1374,16 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       }catch(_){}
     }
 
-    // 5) Local detection + guaranteed item scores
+    // 5) Local detection (prep) + try backend detector FIRST
     var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+    var backendDetect = null;
+    if (sample && sample.length > 30) {
+      backendDetect = await fetchDetect(sample, url);
+    }
+
+    // 6) Scores -> guarantee + UI
     data = ensureScoresExist(data, sample, ensemble);
 
-    // === E-E-A-T heuristics boost (auto-score 10,12,24,25 a bit if detected)
-    var eatBoost = 0;
-    if ((meta.author||'').trim()) eatBoost += 8;         // Author found
-    if ((meta.datePub||'').trim()) eatBoost += 6;        // Date found
-    if ((meta.externalLinks||0) > 2) eatBoost += 6;      // Citations / outbound
-    if ((meta.schema||'')==='yes') eatBoost += 6;        // Some schema present
-    data.itemScores = data.itemScores || {};
-    [10,12,24,25].forEach(k=>{ var base=Number(data.itemScores[k]||60); data.itemScores[k] = clamp(base + eatBoost, 0, 100); });
-
-    // 6) Scores -> UI
     var overall = Number(data.overall || 0);
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
@@ -2158,39 +1400,29 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     setText('rHeadings',  data.headings   ? data.headings   : '—');
     setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
     setText('rSchema',    data.schema     ? data.schema     : '—');
-    setText('rAltCov',    (data.altCov!==undefined && data.altCov!==null) ? (data.altCov+'%') : '—');
 
-    // Snippet simulator preview
-    renderSnippetPreview(url, data);
-
-    // Guardrails
-    renderGuardrails(guardrails(data, url));
-
-    // Detection
-    var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-    var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-    var backendConf = (typeof data.confidence==='number')? data.confidence : null;
-    if (isFinite(hp) && isFinite(ap) && backendConf && backendConf>=65){
-      applyDetection(hp, ap, backendConf, ensemble || null);
-    } else if (ensemble){
+    // Detection (prefer backend multi-detector; fallback to local)
+    var detNote = document.getElementById('detNote');
+    if (backendDetect) {
+      applyDetection(backendDetect.humanPct, backendDetect.aiPct, backendDetect.confidence, backendDetect);
+      if (detNote) detNote.textContent = 'Source: backend multi-detector (ZeroGPT/GPTZero/OriginalityAI if configured; otherwise local on server).';
+    } else if (ensemble) {
       applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-    } else if (isFinite(hp) && isFinite(ap)){
-      applyDetection(hp, ap, backendConf || 60, null);
+      if (detNote) detNote.textContent = 'Source: local ensemble (no external APIs).';
+    } else {
+      var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+      var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+      var backendConf = (typeof data.confidence==='number')? data.confidence : 60;
+      if (isFinite(hp) && isFinite(ap)) {
+        applyDetection(hp, ap, backendConf, null);
+        if (detNote) detNote.textContent = 'Source: backend (partial)'; 
+      }
     }
 
-    // Readability + Answer Target
+    // Readability + Entities
     var S = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
     renderReadability(S);
-
-    // Entities (with salience) + Topic Coverage + Internal Links
-    var ex = renderEntitiesTopics(sample||'', htmlDoc||null);
-    var tc = buildTopicCoverage(htmlDoc||null, sample||''); renderTopicCoverage(tc);
-    var links = suggestInternalLinks(htmlDoc||null, ex||{}, url); renderInternalLinks(links);
-
-    // FAQ + Schema
-    var faqList = extractFAQ(htmlDoc||null, sample||'');
-    var jsons = schemaJSON(data||{}, url, faqList);
-    renderSchemaBlocks(jsons);
+    renderEntitiesTopics(sample||'');
 
     // Checklist scores + autotick
     window.autoTickByScores(data.itemScores || {});
@@ -2206,14 +1438,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
   }
   window.analyze = analyze;
-
-  // Copy buttons (schema + quick)
-  document.addEventListener('click', function(e){
-    var t = e.target.closest('[data-copy]'); if(!t) return;
-    var id = t.getAttribute('data-copy'); var el = document.getElementById(id); if(!el) return;
-    var txt = el.innerText || el.textContent || '';
-    navigator.clipboard?.writeText(txt).then(()=>{ t.textContent='Copied!'; setTimeout(()=>{ t.innerHTML='<i class="fa-regular fa-copy"></i> Copy'; },1200); });
-  });
 
   // Events
   document.addEventListener('DOMContentLoaded', function(){
@@ -2267,9 +1491,10 @@ try{
       el=document.getElementById('humanPct'); if(el) el.textContent='—';
       el=document.getElementById('aiPct'); if(el) el.textContent='—';
       var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
-      ['detectorPanel','readabilityPanel','entitiesPanel','topicsPanel','schemaPanel','linksPanel','psiPanel'].forEach(id=>{ var p=document.getElementById(id); if(p) p.style.display='none'; });
-      var sPrev=document.getElementById('serpPreview'); if(sPrev) sPrev.style.display='none';
-      var g=document.getElementById('guardrails'); if(g) g.style.display='none';
+      var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
+      var readPanel=document.getElementById('readabilityPanel'); if(readPanel){ readPanel.style.display='none'; }
+      var entPanel=document.getElementById('entitiesPanel'); if(entPanel){ entPanel.style.display='none'; }
+      var psiPanel=document.getElementById('psiPanel'); if(psiPanel){ psiPanel.style.display='none'; }
       if (window.Water) window.Water.reset();
     });}
 
@@ -2377,585 +1602,6 @@ try{
 window.addEventListener('error', function(e){
   var s=document.getElementById('analyzeStatus');
   if (s) s.textContent = 'JavaScript error: ' + (e && e.message ? e.message : e);
-});
-</script>
-
-
-<script>
-/* === Readability "Good" Trophy Badge Toggle === */
-(function(){
-  const container = document.getElementById('readabilityPanel');
-  const chip = container && container.querySelector('#readChip');
-  const badge = container && container.querySelector('#readGoodBadge');
-  if(!container || !chip || !badge) return;
-
-  const isGood = () => (chip.getAttribute('data-state') || '').toLowerCase() === 'good';
-
-  const render = () => {
-    const good = isGood();
-    badge.hidden = !good;
-    badge.classList.toggle('show', good);
-  };
-
-  // Initial render
-  render();
-
-  // Watch for changes to the chip
-  const obs = new MutationObserver(render);
-  obs.observe(chip, { attributes:true, attributeFilter:['class','data-state'], characterData:true, childList:true, subtree:true });
-
-  // Optional helper for manual control
-  window.showReadabilityCongrats = function(force){
-    const good = (typeof force === 'boolean') ? force : isGood();
-    badge.hidden = !good;
-    badge.classList.toggle('show', good);
-  };
-})();
-</script>
-
-
-<script>
-/* === Guardrails: severity mapping + all-clear badge + chip coloring === */
-(function(){
-  const panel = document.getElementById('guardrails');
-  const list  = document.getElementById('guardrailsList');
-  const badge = document.getElementById('guardBadge');
-  if (!panel || !list || !badge) return;
-
-  function classify(li){
-    const t = (li.textContent || "").toLowerCase();
-    // Heuristic keywords — adjust as needed
-    const bad  = /(noindex|blocked by robots|disallow(ed)?|multiple canonical|duplicate|canonical loop|redirect chain|soft 404|broken|4\d\d|5\d\d)/i;
-    const warn = /(missing canonical|no canonical|meta robots missing|redirect|non-200|mixed|inconsistent)/i;
-    const ok   = /(self-referencing|indexable|200 ok|valid|present|ok)/i;
-
-    if (bad.test(t))   li.dataset.sev = "error";
-    else if (warn.test(t)) li.dataset.sev = "warn";
-    else if (ok.test(t))   li.dataset.sev = "ok";
-    else li.dataset.sev = "warn"; // default cautious
-  }
-
-  function refresh(){
-    const items = Array.from(list.querySelectorAll('li'));
-    items.forEach(classify);
-
-    const hasError = items.some(li => li.dataset.sev === 'error');
-    const hasWarn  = items.some(li => li.dataset.sev === 'warn');
-    const visible  = panel.style.display !== 'none' && (panel.offsetParent !== null);
-    const shouldShow = visible && items.length === 0; // show when no items => clean
-
-    badge.hidden = !(shouldShow);
-    badge.classList.toggle('show', shouldShow);
-  }
-
-  // Initial if already rendered
-  refresh();
-
-  // Observe list changes
-  const obs = new MutationObserver(refresh);
-  obs.observe(list, { childList:true, subtree:true, characterData:true });
-
-  // Canonical/Robots chip coloring
-  const canonB = document.getElementById('rCanonical');
-  const robotsB = document.getElementById('rRobots');
-  const canonChip = canonB && canonB.closest('.chip');
-  const robotsChip = robotsB && robotsB.closest('.chip');
-
-  function colorChip(el, val){
-    if(!el) return;
-    el.classList.remove('ok','warn','bad');
-    const s = (val||"").toLowerCase();
-    if (/noindex|nofollow|disallow|blocked/.test(s)) el.classList.add('bad');
-    else if (/^https?:\/\//.test(s) || /self/.test(s) || /present|ok/.test(s)) el.classList.add('ok');
-    else el.classList.add('warn');
-  }
-
-  function tick(){
-    colorChip(canonChip, canonB && canonB.textContent);
-    colorChip(robotsChip, robotsB && robotsB.textContent);
-  }
-  tick();
-
-  const obs2 = new MutationObserver(tick);
-  if (canonB) obs2.observe(canonB, { childList:true, characterData:true, subtree:true });
-  if (robotsB) obs2.observe(robotsB, { childList:true, characterData:true, subtree:true });
-
-  // Expose manual refresh if needed
-  window.refreshGuardrailsUI = refresh;
-})();
-</script>
-
-
-<script>
-/* === Human vs AI Ensemble v2.2 — trimmed, weighted, calibrated === */
-(function(){
-  const panel = document.getElementById('detectorPanel');
-  if(!panel) return;
-
-  const humanVal = document.getElementById('hvaiHumanVal');
-  const aiVal    = document.getElementById('hvaiAIVal');
-  const humanFill= document.getElementById('hvaiHumanFill');
-  const aiFill   = document.getElementById('hvaiAIFill');
-  const conf     = document.getElementById('detConfidence');
-  const badge    = document.getElementById('hvaiBadge');
-  const verdictText = document.getElementById('hvaiVerdictText');
-  const verdictHint = document.getElementById('hvaiVerdictHint');
-
-  // Optional per-detector chips if present
-  function upsertDetectorsRow(){
-    let row = panel.querySelector('.hvai-detectors');
-    if(!row){
-      row = document.createElement('div');
-      row.className = 'hvai-detectors';
-      const meta = panel.querySelector('.hvai-meta') || panel;
-      meta.appendChild(row);
-    }
-    return row;
-  }
-  const detRow = upsertDetectorsRow();
-
-  // Helper: robust stats
-  const clamp01 = x => Math.min(1, Math.max(0, x));
-  function median(arr){ const a=[...arr].sort((x,y)=>x-y); const m=Math.floor(a.length/2); return a.length%2? a[m] : (a[m-1]+a[m])/2; }
-  function trimmedMean(arr, p=0.15){
-    if(arr.length===0) return 0;
-    const a=[...arr].sort((x,y)=>x-y);
-    const k=Math.floor(p*a.length);
-    const b=a.slice(k, a.length-k || a.length);
-    return b.reduce((s,v)=>s+v,0)/b.length;
-  }
-  function weightedMedian(values, weights){
-    const arr = values.map((v,i)=>({v, w:weights[i]||1})).sort((a,b)=>a.v-b.v);
-    const total = arr.reduce((s,o)=>s+o.w,0);
-    let acc=0;
-    for(const o of arr){ acc+=o.w; if(acc >= total/2) return o.v; }
-    return arr.length? arr[arr.length-1].v : 0;
-  }
-  // Simple calibration: compress extremes a bit to reduce false 100%/0% flips
-  function calibrateAI(p){
-    // logistic-style squashing around 0.5; adjust gain for smoothness
-    const gain = 0.8;
-    return clamp01( 1/(1+Math.exp(-((p-0.5)*6*gain))) );
-  }
-
-  // Render UI with final probabilities [0..1]
-  function render(finalAI, detectors){
-    const aiPct = Math.round(finalAI*100);
-    const humanPct = 100 - aiPct;
-    aiVal && (aiVal.textContent = aiPct + '%');
-    humanVal && (humanVal.textContent = humanPct + '%');
-    aiFill && (aiFill.style.width = aiPct + '%');
-    humanFill && (humanFill.style.width = humanPct + '%');
-
-    // Confidence ~ agreement + number of sources
-    const vals = detectors.map(d=>d.ai);
-    const spread = (vals.length>1)? (Math.max(...vals)-Math.min(...vals)) : 0.5;
-    const srcBonus = Math.min(1, detectors.length/4);
-    const confScore = clamp01(1 - spread) * 0.7 + srcBonus * 0.3;
-    conf && (conf.textContent = Math.round(confScore*100));
-
-    // Verdict + badge
-    let verdict='Mixed';
-    let hint='Signals disagree — review content variety and structure.';
-    let cls='hvai-verdict--mixed';
-    if(finalAI <= 0.35){ verdict='Likely Human'; hint='High variation, natural phrasing, diverse sentence patterns.'; cls='hvai-verdict--human'; }
-    else if(finalAI >= 0.65){ verdict='Likely AI'; hint='Low burstiness, uniform phrasing, detector agreement skewed to AI.'; cls='hvai-verdict--ai'; }
-    verdictText && (verdictText.textContent = verdict);
-    verdictHint && (verdictHint.textContent = hint);
-    badge && (badge.hidden = false, badge.classList.add('show'));
-    panel.classList.remove('hvai-verdict--human','hvai-verdict--ai','hvai-verdict--mixed');
-    panel.classList.add(cls);
-
-    // detector chips
-    if(detRow){
-      detRow.innerHTML = '';
-      detectors.forEach(d=>{
-        const el = document.createElement('span');
-        el.className = 'det ' + (d.ok? 'ok': 'err');
-        el.innerHTML = `<i class="fa-solid ${d.icon||'fa-wave-square'}"></i>${d.name}: <b>${Math.round(d.ai*100)}%</b>`;
-        detRow.appendChild(el);
-      });
-    }
-  }
-
-  // Local heuristic fallback (no API): quick & noisy but better than nothing
-  function localHeuristicAI(text){
-    if(!text) return 0.5;
-    const tokens = text.split(/\s+/).filter(Boolean);
-    const sents = text.split(/[.!?]+\s+/);
-    const avgLen = tokens.length / Math.max(1,sents.length);
-    const uniqueFrac = new Set(tokens.map(t=>t.toLowerCase())).size / Math.max(1,tokens.length);
-    const digitFrac = (text.match(/\d/g) || []).length / Math.max(1,text.length);
-    const repeatPenalty = (text.match(/\b(\w+)\b(?=[\s\S]*\b\1\b)/gi) || []).length;
-
-    let ai = 0.5;
-    if(avgLen<14) ai -= 0.08; else if(avgLen>22) ai += 0.08;
-    ai += (0.20 - uniqueFrac)*0.8; // lower uniqueness -> more AI-like
-    ai += Math.max(0, 0.12 - digitFrac); // very few digits -> slightly AI-like
-    ai += Math.min(0.12, repeatPenalty*0.01);
-    return clamp01(ai);
-  }
-
-  // Compute ensemble from available detectors [{name, ai:[0..1], weight?, ok?}]
-  function computeEnsemble(detectors){
-    if(!detectors || detectors.length===0) return 0.5;
-    const vals = detectors.map(d=>clamp01(d.ai));
-    const weights = detectors.map(d=>Math.max(0.1, d.weight || 1));
-    const tmean = trimmedMean(vals, 0.15);
-    const wmed  = weightedMedian(vals, weights);
-    const mix   = (tmean*0.55 + wmed*0.45);
-    return calibrateAI(mix);
-  }
-
-  // Public hook others can call: window.updateHvai({ text, detectors: [{name, ai, weight, icon, ok}], preferLocal })
-  window.updateHvai = function(input){
-    const text = (input && input.text) || '';
-    let detectors = (input && input.detectors) || [];
-    const preferLocal = !!(input && input.preferLocal);
-
-    // If no detectors or preferLocal, add heuristic
-    if(preferLocal || detectors.length===0){
-      detectors = detectors.filter(d=>!d || typeof d.ai!=='number' ? false : true);
-      detectors.push({ name:'Local Heuristic', ai: localHeuristicAI(text), weight: 0.9, icon:'fa-wave-square', ok:true });
-    }
-
-    // normalize to [0..1], coerce
-    detectors = detectors.map(d=>({ 
-      name: d.name || 'Detector', 
-      ai: clamp01(Number(d.ai||0.5)), 
-      weight: Number(d.weight||1), 
-      icon: d.icon, 
-      ok: d.ok!==false 
-    }));
-
-    const finalAI = computeEnsemble(detectors);
-    render(finalAI, detectors);
-  };
-
-  // If your backend writes to these globals, auto-render
-  if(window.__hvaiBootstrap){
-    try{ window.updateHvai(window.__hvaiBootstrap); }catch(e){}
-  }
-})();
-</script>
-
-
-<script>
-// Back-compat bootstrap: if no one called updateHvai yet, try to infer from any existing numbers on page after load.
-window.addEventListener('load', function(){
-  if(typeof window.updateHvai !== 'function') return;
-  const txt = (document.getElementById('contentRaw') || {}).textContent || '';
-  // If bars are still zero, nudge with heuristic so UI isn’t empty
-  const human = document.getElementById('hvaiHumanFill');
-  const ai    = document.getElementById('hvaiAIFill');
-  if(human && ai && human.style.width==='0%' && ai.style.width==='0%'){
-    window.updateHvai({ text: txt, detectors: [], preferLocal: true });
-  }
-});
-</script>
-
-
-<script>
-/* === Human vs AI Ensemble v2.3 — ultra-stylish + robust math + gauge === */
-(function(){
-  const panel = document.getElementById('detectorPanel');
-  if(!panel) return;
-
-  const sel = id => document.getElementById(id);
-  const humanVal = sel('hvaiHumanVal');
-  const aiVal    = sel('hvaiAIVal');
-  const humanFill= sel('hvaiHumanFill');
-  const aiFill   = sel('hvaiAIFill');
-  const conf     = sel('detConfidence');
-  const badge    = sel('hvaiBadge');
-  const verdictText = sel('hvaiVerdictText');
-  const verdictHint = sel('hvaiVerdictHint');
-
-  // gauge elements
-  const arcHuman = sel('hvaiHumanArc');
-  const arcAI    = sel('hvaiAIArc');
-  const scoreBig = sel('hvaiScoreBig');
-
-  // ensure detector chips row exists
-  function upsertDetectorsRow(){
-    let row = panel.querySelector('.hvai-detectors');
-    if(!row){
-      row = document.createElement('div');
-      row.className = 'hvai-detectors';
-      const meta = panel.querySelector('.hvai-meta') || panel;
-      meta.appendChild(row);
-    }
-    return row;
-  }
-  const detRow = upsertDetectorsRow();
-
-  const clamp01 = x => Math.min(1, Math.max(0, x));
-  const sum = arr => arr.reduce((s,v)=>s+v,0);
-  function median(arr){ const a=[...arr].sort((x,y)=>x-y); const m=Math.floor(a.length/2); return a.length%2? a[m] : (a[m-1]+a[m])/2; }
-  function trimmedMean(arr, p=0.15){ if(arr.length===0) return 0; const a=[...arr].sort((x,y)=>x-y); const k=Math.floor(p*a.length); const b=a.slice(k, a.length-k || a.length); return sum(b)/b.length; }
-  function weightedMedian(values, weights){ const arr = values.map((v,i)=>({v, w:weights[i]||1})).sort((a,b)=>a.v-b.v); const total = sum(arr.map(o=>o.w)); let acc=0; for(const o of arr){ acc+=o.w; if(acc >= total/2) return o.v; } return arr.length? arr[arr.length-1].v : 0; }
-  function calibrateAI(p){ const gain=0.8; return clamp01( 1/(1+Math.exp(-((p-0.5)*6*gain))) ); }
-
-  function localHeuristicAI(text){
-    if(!text) return 0.5;
-    const tokens = text.split(/\s+/).filter(Boolean);
-    const sents = text.split(/[.!?]+\s+/);
-    const avgLen = tokens.length / Math.max(1,sents.length);
-    const uniqueFrac = new Set(tokens.map(t=>t.toLowerCase())).size / Math.max(1,tokens.length);
-    const digitFrac = (text.match(/\d/g) || []).length / Math.max(1,text.length);
-    const repeatPenalty = (text.match(/\b(\w+)\b(?=[\s\S]*\b\1\b)/gi) || []).length;
-
-    let ai = 0.5;
-    if(avgLen<14) ai -= 0.08; else if(avgLen>22) ai += 0.08;
-    ai += (0.20 - uniqueFrac)*0.8;
-    ai += Math.max(0, 0.12 - digitFrac);
-    ai += Math.min(0.12, repeatPenalty*0.01);
-    return clamp01(ai);
-  }
-
-  function computeEnsemble(detectors){
-    if(!detectors || detectors.length===0) return 0.5;
-    const vals = detectors.map(d=>clamp01(d.ai));
-    const weights = detectors.map(d=>Math.max(0.1, d.weight || 1));
-    const tmean = trimmedMean(vals, 0.15);
-    const wmed  = weightedMedian(vals, weights);
-    const mix   = (tmean*0.55 + wmed*0.45);
-    return calibrateAI(mix);
-  }
-
-  function updateGauge(finalAI){
-    const ai = clamp01(finalAI);
-    const human = 1 - ai;
-    const setArc = (el, r, pct) => {
-      if(!el) return;
-      const c = 2 * Math.PI * r;
-      const on = c * pct;
-      const off = Math.max(0.0001, c - on);
-      el.style.strokeDasharray = `${on} ${off}`;
-      el.style.strokeDashoffset = "0";
-    };
-    setArc(arcAI, 86, ai);
-    setArc(arcHuman, 66, human);
-    if(scoreBig) scoreBig.textContent = Math.round(ai*100) + '%';
-  }
-
-  function render(finalAI, detectors){
-    const aiPct = Math.round(finalAI*100);
-    const humanPct = 100 - aiPct;
-    aiVal && (aiVal.textContent = aiPct + '%');
-    humanVal && (humanVal.textContent = humanPct + '%');
-    aiFill && (aiFill.style.width = aiPct + '%');
-    humanFill && (humanFill.style.width = humanPct + '%');
-
-    // Confidence
-    const vals = detectors.map(d=>d.ai);
-    const spread = (vals.length>1)? (Math.max(...vals)-Math.min(...vals)) : 0.5;
-    const srcBonus = Math.min(1, detectors.length/4);
-    const confScore = clamp01(1 - spread) * 0.7 + srcBonus * 0.3;
-    conf && (conf.textContent = Math.round(confScore*100));
-
-    // Verdict + badge
-    let verdict='Mixed';
-    let hint='Signals disagree — review content variety and structure.';
-    let cls='hvai-verdict--mixed';
-    if(finalAI <= 0.35){ verdict='Likely Human'; hint='High variation, natural phrasing, diverse sentence patterns.'; cls='hvai-verdict--human'; }
-    else if(finalAI >= 0.65){ verdict='Likely AI'; hint='Low burstiness, uniform phrasing, detector agreement skewed to AI.'; cls='hvai-verdict--ai'; }
-    verdictText && (verdictText.textContent = verdict);
-    verdictHint && (verdictHint.textContent = hint);
-    badge && (badge.hidden = false, badge.classList.add('show'));
-    panel.classList.remove('hvai-verdict--human','hvai-verdict--ai','hvai-verdict--mixed');
-    panel.classList.add(cls);
-
-    // detector chips
-    const row = detRow;
-    if(row){
-      row.innerHTML = '';
-      detectors.forEach(d=>{
-        const el = document.createElement('span');
-        el.className = 'det ' + (d.ok? 'ok': 'err');
-        el.innerHTML = `<i class="fa-solid ${d.icon||'fa-wave-square'}"></i>${d.name}: <b>${Math.round(d.ai*100)}%</b>`;
-        row.appendChild(el);
-      });
-    }
-    // gauge
-    updateGauge(finalAI);
-  }
-
-  // Override global function with v2.3
-  window.updateHvai = function(input){
-    const text = (input && input.text) || '';
-    let detectors = (input && input.detectors) || [];
-    const preferLocal = !!(input && input.preferLocal);
-
-    if(preferLocal || detectors.length===0){
-      detectors = detectors.filter(d=>d && typeof d.ai==='number');
-      detectors.push({ name:'Local Heuristic', ai: localHeuristicAI(text), weight: 0.9, icon:'fa-wave-square', ok:true });
-    }else{
-      detectors = detectors.filter(d=>d && typeof d.ai==='number');
-    }
-
-    detectors = detectors.map(d=>({ 
-      name: d.name || 'Detector', 
-      ai: clamp01(Number(d.ai||0.5)), 
-      weight: Number(d.weight||1), 
-      icon: d.icon, 
-      ok: d.ok!==false 
-    }));
-
-    const finalAI = computeEnsemble(detectors);
-    render(finalAI, detectors);
-  };
-
-  // If bootstrap object exists, re-render with the new version
-  if(window.__hvaiBootstrap){
-    try{ window.updateHvai(window.__hvaiBootstrap); }catch(e){}
-  }
-})();
-</script>
-
-
-<script>
-/* === PSI Ultra UI: bar animation + severity coloring + badge === */
-(function(){
-  const panel = document.getElementById('psiPanel');
-  if(!panel) return;
-  const badge = document.getElementById('psiBadge');
-
-  const el = id => document.getElementById(id);
-  const perf = el('psiPerf');     // 0-100
-  const lcp  = el('psiLcp');      // seconds
-  const inp  = el('psiInp');      // ms
-  const cls  = el('psiCls');      // unitless
-  const ttfb = el('psiTtfb');     // ms
-
-  const lcpBar  = el('psiLcpBar');
-  const inpBar  = el('psiInpBar');
-  const clsBar  = el('psiClsBar');
-  const ttfbBar = el('psiTtfbBar');
-
-  function getNum(el){ if(!el) return null; const s=(el.textContent||'').replace(/[^\d\.]/g,''); return s? Number(s): null; }
-  function pct(x, min, max){ if(x==null) return 0; return Math.max(0, Math.min(100, Math.round((x-min)/(max-min)*100))); }
-
-  // Severity helpers (Web Vitals-ish thresholds)
-  function sevPerf(val){ if(val==null) return 'warn'; return val>=90? 'ok': (val>=50? 'warn':'bad'); }
-  function sevLcp(sec){ if(sec==null) return 'warn'; return sec<=2.5? 'ok': (sec<=4.0? 'warn':'bad'); }
-  function sevInp(ms){ if(ms==null) return 'warn'; return ms<=200? 'ok': (ms<=500? 'warn':'bad'); }
-  function sevCls(x){ if(x==null) return 'warn'; return x<=0.1? 'ok': (x<=0.25? 'warn':'bad'); }
-  function sevTtfb(ms){ if(ms==null) return 'warn'; return ms<=800? 'ok': (ms<=1800? 'warn':'bad'); }
-
-  function paint(bar, pctVal, sev){
-    if(!bar) return;
-    bar.style.width = (pctVal||0) + '%';
-    bar.classList.remove('ok','warn','bad');
-    bar.classList.add(sev);
-    // set gradient by class via CSS; default is ok (green->cyan)
-    if(sev==='bad'){ bar.classList.add('bad'); }
-    else if(sev==='warn'){ bar.classList.add('warn'); }
-  }
-
-  function update(){
-    const p  = getNum(perf);
-    const l  = getNum(lcp);
-    const i  = getNum(inp);
-    const c  = getNum(cls);
-    const t  = getNum(ttfb);
-
-    // Map values to bar % scales (ok zone ~70–100% visual)
-    paint(lcpBar, 100 - pct(l, 0.5, 6.0), sevLcp(l));
-    paint(inpBar, 100 - pct(i, 50, 1500), sevInp(i));
-    paint(clsBar, 100 - pct(c, 0.01, 0.5), sevCls(c));
-    paint(ttfbBar,100 - pct(t, 200, 2500), sevTtfb(t));
-
-    // Badge for fast sites
-    const showBadge = (p!=null && p>=90);
-    if(badge){
-      badge.hidden = !showBadge;
-      badge.classList.toggle('show', !!showBadge);
-    }
-
-    // Strategy chip color if present
-    const strat = document.getElementById('psiStrategy');
-    if(strat){
-      const chip = strat.closest('.chip');
-      if(chip){
-        chip.classList.remove('ok','warn','bad');
-        chip.classList.add(p>=90? 'ok' : (p>=50? 'warn' : 'bad'));
-      }
-    }
-  }
-
-  // Initial + observer so it reacts when your PSI data arrives
-  update();
-  const obs = new MutationObserver(update);
-  obs.observe(panel, { subtree:true, childList:true, characterData:true });
-
-  // Expose manual refresh
-  window.refreshPSIUI = update;
-})();
-</script>
-
-
-<script>
-
-
-<script>
-/* === PanelStack Layout: Readability -> Topic Coverage -> PSI -> Checklist -> Others (robust) === */
-document.addEventListener('DOMContentLoaded', function(){
-  try{
-    var read   = document.getElementById('readabilityPanel');
-    var topics = document.getElementById('topicsPanel');
-    var psi    = document.getElementById('psiPanel');
-
-    function findChecklistRoot(){
-      var grid = document.getElementById('checklistGrid');
-      if(!grid) return null;
-      var el = grid;
-      function hasToolbar(node){
-        if(!node || !node.querySelector) return false;
-        return node.querySelector('#exportChecklist, #importChecklist, #resetChecklist, #printChecklist');
-      }
-      // climb a few levels to find a sensible wrapper
-      var hops = 0, root = el;
-      while(root && hops < 8){
-        if(hasToolbar(root)) break;
-        root = root.parentElement;
-        hops++;
-      }
-      return root || el.closest && el.closest('section,div') || el;
-    }
-    var checklist = findChecklistRoot();
-
-    // Determine first existing panel to place the stack before
-    var panels = [read, topics, psi, checklist].filter(Boolean);
-    if(panels.length === 0) return;
-    var first = panels.reduce(function(a,b){
-      if(!a) return b;
-      return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? a : b;
-    }, null);
-
-    // Create stack container and insert before 'first'
-    var stack = document.getElementById('panelStack');
-    if(!stack){
-      stack = document.createElement('div');
-      stack.id = 'panelStack';
-      stack.className = 'panel-stack';
-      // inline minimal safety styles in case CSS doesn't load yet
-      stack.style.display = 'grid';
-      stack.style.gap = '14px';
-      first.parentNode.insertBefore(stack, first);
-    }
-
-    // Move in desired order
-    [read, topics, psi, checklist].forEach(function(el){
-      if(el && el !== stack && el.parentNode){
-        stack.appendChild(el);
-      }
-    });
-
-    // Done — others remain where they are, after the stack in DOM order.
-  }catch(err){
-    console && console.warn && console.warn('PanelStack reorder skipped:', err);
-  }
 });
 </script>
 
