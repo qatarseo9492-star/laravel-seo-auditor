@@ -1,0 +1,141 @@
+/* public/css/ensemble.css */
+/* === Theme & base colors === */
+:root{
+  --card:#0C0F17;
+  --card-2:#0D111A;
+  --ink:#EAF2FF;
+  --ink-2:#9FB4D8;
+  --accent:#7C4DFF;   /* purple */
+  --accent-2:#00E5FF; /* cyan */
+  --good:#18C37E;
+  --warn:#FFB020;
+  --bad:#FF5C5C;
+  --ring-track: rgba(255,255,255,.07);
+  --glass: rgba(255,255,255,.06);
+  --shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+/* === Panel wrapper === */
+.panel{
+  background: linear-gradient(180deg, var(--card), var(--card-2));
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255,255,255,.06);
+  color: var(--ink);
+  overflow: hidden;
+}
+
+.panel-ensemble .panel-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 18px; border-bottom:1px solid rgba(255,255,255,.06);
+  background: radial-gradient(1200px 250px at 20% -20%, rgba(124,77,255,.18), transparent 60%);
+}
+.panel-ensemble .panel-title{
+  font-weight:700; letter-spacing:.3px; display:flex; gap:10px; align-items:center;
+}
+.panel-ensemble .panel-title em{font-style:normal; color:var(--accent-2);}
+.panel-ensemble .badge.verdict{
+  font-weight:700; padding:6px 10px; border-radius:999px;
+  background: var(--glass); border:1px solid rgba(255,255,255,.08);
+}
+
+/* === Grid layout === */
+.panel-ensemble .panel-body.grid{
+  display:grid; gap:18px; padding:18px;
+  grid-template-columns: 1.2fr 1fr; grid-template-areas:
+  "gauges models"
+  "explain models";
+}
+@media (max-width: 980px){
+  .panel-ensemble .panel-body.grid{
+    grid-template-columns: 1fr; grid-template-areas:
+    "gauges" "models" "explain";
+  }
+}
+
+/* === Gauges === */
+.gauges{ grid-area: gauges; display:grid; gap:16px; grid-template-columns: repeat(3, 1fr); }
+@media (max-width: 980px){ .gauges{ grid-template-columns: 1fr 1fr; } }
+
+.gauge-card{
+  background: var(--glass); border:1px solid rgba(255,255,255,.06);
+  border-radius:16px; padding:14px; position:relative; overflow:hidden;
+}
+.gauge{ position:relative; display:grid; place-items:center; aspect-ratio:1/1; }
+.ring{ width:100%; height:auto; transform: rotate(-90deg); }
+.ring .track{ fill:none; stroke: var(--ring-track); stroke-width: 12; }
+.ring .bar{ fill:none; stroke-width: 12; stroke-linecap: round; }
+.ring .bar.human{ stroke: url(#humanGradient); }
+.ring .bar.ai{ stroke: url(#aiGradient); }
+
+.gauge-center{ position:absolute; display:grid; place-items:center; text-align:center; }
+.gauge-label{ font-size: .78rem; color: var(--ink-2); letter-spacing:.25px; }
+.gauge-value{ font-weight:800; font-size: clamp(1.6rem, 3.4vw, 2.6rem); line-height:1.1; }
+
+/* === Confidence meter === */
+.confidence{ display:grid; gap:8px; }
+.conf-label{ font-size:.85rem; color:var(--ink-2); letter-spacing:.3px; }
+.conf-bar{
+  height:12px; background:rgba(255,255,255,.06);
+  border-radius:999px; overflow:hidden; border:1px solid rgba(255,255,255,.06);
+}
+.conf-fill{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width .8s cubic-bezier(.2,.8,.2,1);
+  border-right:2px solid rgba(255,255,255,.25);
+}
+.conf-value{ font-weight:700; }
+
+.legend{
+  display:flex; gap:14px; align-items:center; margin-top:10px;
+  color:var(--ink-2); font-size:.9rem;
+}
+
+/* === Models list === */
+.models{
+  grid-area: models; background: var(--glass);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px; padding:14px;
+}
+.models-head{ display:flex; gap:10px; align-items:center; font-weight:700; margin-bottom:10px; }
+.model-list{ list-style:none; margin:0; padding:0; display:grid; gap:10px; }
+.model-item{
+  display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center;
+  padding:10px; border-radius:12px;
+  background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+}
+.model-name{ font-weight:600; color:var(--ink); }
+.model-bars{ display:flex; gap:8px; align-items:center; }
+.model-bars .pill{
+  height:8px; width:110px; border-radius:999px;
+  background:rgba(255,255,255,.06); overflow:hidden;
+  border:1px solid rgba(255,255,255,.06);
+}
+.model-bars .fill-human{
+  height:100%; width:0%; background:linear-gradient(90deg, #30CFD0, #330867);
+  transition:width .8s;
+}
+.model-bars .fill-ai{
+  height:100%; width:0%; background:linear-gradient(90deg, #FF7A18, #AF002D);
+  transition:width .8s; opacity:.9;
+}
+.model-note{ margin-top:10px; font-size:.9rem; color:var(--ink-2); }
+
+/* === Explanations section === */
+.explain{ grid-area: explain; display:grid; gap:12px; }
+.exp-card{
+  background: var(--glass); border:1px solid rgba(255,255,255,.06);
+  border-radius:16px; padding:0; overflow:hidden;
+}
+.exp-card > summary{
+  list-style:none; cursor:pointer;
+  padding:12px 14px; font-weight:700;
+  display:flex; gap:10px; align-items:center;
+}
+.exp-card[open] > .exp-body{ padding:0 14px 14px; }
+.exp-points{ margin:0; padding-left:18px; }
+.exp-body p{ margin: 8px 0 8px; color:var(--ink-2); }
+
+/* Gradients for SVG rings (injected by JS) */
+svg.gradient-defs{ position: absolute; width:0; height:0; }
