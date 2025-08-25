@@ -695,11 +695,11 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 }
 
 .hvai-gauge{
-  position:absolute; top:10px; right:12px; width:210px; height:210px;
+  position:relative; margin:8px auto 10px; width:210px; height:210px;
   filter:drop-shadow(0 20px 40px rgba(0,0,0,.45));
 }
 @media (max-width:900px){
-  .hvai-gauge{ position:relative; margin:8px auto 10px; top:auto; right:auto; }
+  .hvai-gauge{ /* styling now consistent with desktop */ }
 }
 
 .g-svg{ width:100%; height:100%; transform:rotate(-90deg) }
