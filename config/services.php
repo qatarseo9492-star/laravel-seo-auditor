@@ -1,4 +1,5 @@
-// config/services.php
+<?php
+
 return [
 
     // ...your other services...
