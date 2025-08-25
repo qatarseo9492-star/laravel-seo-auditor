@@ -1049,9 +1049,9 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </div>
 
     <!-- 1) HUMAN vs AI (Ensemble) -->
-<section id="detectorPanel" style="display:none">
+    \1
 
-  <!-- Stylish verdict badge -->
+  <!-- HVAI Verdict Badge -->
   <div id="hvaiBadge" class="hvai-badge" hidden>
     <div class="badge-sheen"></div>
     <i class="fa-solid fa-hexagon-nodes"></i>
@@ -1061,78 +1061,27 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </div>
   </div>
 
-  <!-- Animated Ensemble Gauge -->
-  <div class="hvai-gauge" style="margin:auto;position:relative;">
-    <svg viewBox="0 0 210 210" class="g-svg" style="width:100%;height:100%;">
-      <defs>
-        <linearGradient id="hvaiHumanGrad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stop-color="#22c55e"/>
-          <stop offset="100%" stop-color="#3de2ff"/>
-        </linearGradient>
-        <linearGradient id="hvaiAIGrad" x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ef4444"/>
-          <stop offset="100%" stop-color="#f59e0b"/>
-        </linearGradient>
-      </defs>
-      <!-- Human arc (outer) -->
-      <circle id="hvaiHumanArc" r="86" cx="105" cy="105" stroke="url(#hvaiHumanGrad)" stroke-width="16" fill="none"
-        style="filter:drop-shadow(0 5px 18px #22c55e99);stroke-dasharray:0 999;stroke-linecap:round;"/>
-      <!-- AI arc (inner) -->
-      <circle id="hvaiAIArc" r="66" cx="105" cy="105" stroke="url(#hvaiAIGrad)" stroke-width="16" fill="none"
-        style="filter:drop-shadow(0 5px 18px #ef444499);stroke-dasharray:0 999;stroke-linecap:round;"/>
-      <!-- Center badge -->
-      <circle cx="105" cy="105" r="48" fill="rgba(255,255,255,0.08)" />
-      <text id="hvaiScoreBig" x="105" y="117" font-size="2.6rem" text-anchor="middle" fill="#fff" font-weight="900" style="text-shadow:0 1px 0 #444">--%</text>
-      <text x="105" y="142" font-size="1rem" text-anchor="middle" fill="#b6b3d6" font-weight="700">AI-likeness</text>
-    </svg>
-  </div>
-
-  <div class="hvai-head" style="margin-top:12px;">
-    <i class="fa-solid fa-users-gear ico ico-purple"></i>
-    <h4>Human vs AI Content <span style="font-weight:400;">(Ensemble)</span></h4>
-  </div>
-
-  <div class="hvai-meta">
-    <span class="hvai-chip">
-      <i class="fa-solid fa-shield-heart" style="color:#3de2ff"></i>
-      Confidence: <b id="detConfidence">—</b>%
-    </span>
-    <span class="hvai-chip">
-      <i class="fa-solid fa-circle-info" style="color:#9b5cff"></i>
-      Higher bar = more AI-like (per detector)
-    </span>
-  </div>
-
-  <div class="hvai-bar">
-    <div>
-      <div class="hvai-label">
-        <span><i class="fa-solid fa-user" style="color:#22c55e"></i> Human-like</span>
-        <b id="hvaiHumanVal">—%</b>
+      <div class="hvai-head">
+        <i class="fa-solid fa-users-gear ico ico-purple"></i>
+        <h4>Human vs AI Content (Ensemble)</h4>
       </div>
-      <div class="hvai-track" style="background:linear-gradient(90deg,#22c55e44,#3de2ff22)">
-        <div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div>
+      <div class="hvai-meta">
+        <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
+        <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
       </div>
-    </div>
-    <div>
-      <div class="hvai-label">
-        <span><i class="fa-solid fa-robot" style="color:#ef4444"></i> AI-like</span>
-        <b id="hvaiAIVal">—%</b>
+      <div class="hvai-bar">
+        <div>
+          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
+        </div>
       </div>
-      <div class="hvai-track" style="background:linear-gradient(90deg,#ef444444,#f59e0b22)">
-        <div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Detector breakdown chips -->
-  <div class="hvai-detectors" style="margin-top:.8rem;">
-    <!-- Chips inserted by JS: <span class="det ok"><i class="fa-solid fa-brain"></i> Stylometry: <b>32%</b></span> -->
-  </div>
-
-  <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.5rem">
-    Local ensemble activates if the backend provides no text/percentages.
-  </div>
-</section>
+      <div class="det-grid" id="detGrid"></div>
+      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
+    </section>
 
     <!-- 2) READABILITY -->
     <section class="readability" id="readabilityPanel" style="display:none">
