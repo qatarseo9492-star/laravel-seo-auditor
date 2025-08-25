@@ -755,7 +755,7 @@ body::after{
             </label>
           </div>
 
-          <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
+          <button id="analyzeBtn" type="button" onclick="try{SEMSEO_go()}catch(e){}; if(window.runPSI){runPSI((document.getElementById('analyzeUrl')&&document.getElementById('analyzeUrl').value)||'');} return false;" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
 
@@ -1296,6 +1296,32 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', expose); } else { expose(); }
   window.addEventListener('load', expose);
+})();
+</script>
+
+
+<script>
+(function(){
+  const btn = document.getElementById('analyzeBtn');
+  const status = document.getElementById('analyzeStatus') || (function(){
+    const s = document.createElement('div'); s.id='analyzeStatus';
+    s.style.cssText='margin-top:.35rem;font-weight:800;color:#a6f7ff;';
+    const row = btn && btn.closest('.analyze-row');
+    if (row) row.parentNode.insertBefore(s, row.nextSibling);
+    return s;
+  })();
+  if (btn && status){
+    btn.addEventListener('click', function(){
+      status.textContent = 'Analyzing…';
+      setTimeout(()=>{ if(status.textContent==='Analyzing…') status.textContent=''; }, 6000);
+    });
+  }
+  // Clear status on PERF update
+  const perf = document.getElementById('psiPerf');
+  if (perf){
+    const obs = new MutationObserver(()=>{ status.textContent=''; });
+    obs.observe(perf, {childList:true, characterData:true, subtree:true});
+  }
 })();
 </script>
 
