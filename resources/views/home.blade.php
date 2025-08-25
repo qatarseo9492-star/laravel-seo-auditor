@@ -852,6 +852,9 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 #psiPanel .chip.ok{   background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18)) }
 #psiPanel .chip.warn{ background:linear-gradient(135deg, rgba(245,158,11,.22), rgba(61,226,255,.18)) }
 #psiPanel .chip.bad{  background:linear-gradient(135deg, rgba(239,68,68,.25), rgba(249,115,22,.22)) }
+
+/* Panel stack layout container */
+#panelStack.panel-stack{ display:grid; gap:14px; }
 </style>
 </head>
 <body>
@@ -2866,20 +2869,11 @@ window.addEventListener('load', function(){
 
 <script>
 
+
 <script>
-/* === Layout Order (SAFE): Readability -> Topic Coverage -> PSI -> Checklist -> Others === */
+/* === PanelStack Layout: Readability -> Topic Coverage -> PSI -> Checklist -> Others (robust) === */
 document.addEventListener('DOMContentLoaded', function(){
   try{
-    // closest() polyfill for older browsers
-    if (!Element.prototype.closest) {
-      Element.prototype.closest = function(s) {
-        var el = this;
-        if (!document.documentElement.contains(el)) return null;
-        do { if (el.matches && el.matches(s)) return el; el = el.parentElement || el.parentNode; } while (el !== null && el.nodeType === 1);
-        return null;
-      };
-    }
-
     var read   = document.getElementById('readabilityPanel');
     var topics = document.getElementById('topicsPanel');
     var psi    = document.getElementById('psiPanel');
@@ -2892,39 +2886,50 @@ document.addEventListener('DOMContentLoaded', function(){
         if(!node || !node.querySelector) return false;
         return node.querySelector('#exportChecklist, #importChecklist, #resetChecklist, #printChecklist');
       }
-      while(el){
-        var root = el.closest('section, div');
-        if(!root) break;
-        if(hasToolbar(root)) return root;
-        el = root.parentElement;
+      // climb a few levels to find a sensible wrapper
+      var hops = 0, root = el;
+      while(root && hops < 8){
+        if(hasToolbar(root)) break;
+        root = root.parentElement;
+        hops++;
       }
-      return grid.closest ? (grid.closest('section, div') || grid) : grid;
+      return root || el.closest && el.closest('section,div') || el;
     }
     var checklist = findChecklistRoot();
 
-    // choose a parent that exists and contains at least one of the targets
-    var parent = (read && read.parentElement) || (topics && topics.parentElement) || (psi && psi.parentElement) || (checklist && checklist.parentElement);
-    if(!parent) return;
+    // Determine first existing panel to place the stack before
+    var panels = [read, topics, psi, checklist].filter(Boolean);
+    if(panels.length === 0) return;
+    var first = panels.reduce(function(a,b){
+      if(!a) return b;
+      return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? a : b;
+    }, null);
 
-    function inDoc(el){ return el && el.nodeType===1 && el.parentElement; }
+    // Create stack container and insert before 'first'
+    var stack = document.getElementById('panelStack');
+    if(!stack){
+      stack = document.createElement('div');
+      stack.id = 'panelStack';
+      stack.className = 'panel-stack';
+      // inline minimal safety styles in case CSS doesn't load yet
+      stack.style.display = 'grid';
+      stack.style.gap = '14px';
+      first.parentNode.insertBefore(stack, first);
+    }
 
-    var order = [read, topics, psi, checklist].filter(inDoc);
-
-    // Append in order only if they share the same parent; otherwise skip to avoid DOM detach bugs.
-    order.forEach(function(el){
-      try{
-        if(!el) return;
-        if(el.parentElement === parent){
-          parent.appendChild(el); // move to the end to enforce order
-        }
-      }catch(e){ /* swallow safely */ }
+    // Move in desired order
+    [read, topics, psi, checklist].forEach(function(el){
+      if(el && el !== stack && el.parentNode){
+        stack.appendChild(el);
+      }
     });
+
+    // Done — others remain where they are, after the stack in DOM order.
   }catch(err){
-    console && console.warn && console.warn('Layout order script skipped:', err);
+    console && console.warn && console.warn('PanelStack reorder skipped:', err);
   }
 });
 </script>
-
 
 </body>
 </html>
