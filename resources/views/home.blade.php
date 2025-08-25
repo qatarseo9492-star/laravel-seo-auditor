@@ -755,7 +755,7 @@ body::after{
             </label>
           </div>
 
-          <button id="analyzeBtn" type="button" class="btn btn-analyze">
+          <button id="analyzeBtn" type="button" class="btn btn-analyze" onclick="try{analyze();}catch(e){}; return false;">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
 
@@ -1232,7 +1232,7 @@ function runPSI(targetUrl){
 
   async function tryProxy(){
     try{
-      const r = await fetch(`${endpoint}?${qs}`, {credentials:'same-origin'});
+      const r = await fetch(`${endpoint}?${qs}`, {});
       if (!r.ok) return { proxy_error: true, status: r.status, body: await r.text() };
       return await r.json();
     }catch(e){ return { proxy_error: true, message: String(e) }; }
