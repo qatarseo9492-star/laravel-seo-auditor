@@ -637,7 +637,7 @@ body::after{
   window.SEMSEO.ENDPOINTS = {
     analyzeJson: @json($analyzeJsonUrl),
     analyze: @json($analyzeUrl),
-    psi: @json($psiProxyUrl), // server proxy; API key stays hidden
+    psi: "/api/psi", // server proxy; API key stays hidden
     // NEW: backend detector endpoint (works even with no API keys; local server ensemble)
     detect: @json($detectUrl)
   };
@@ -755,7 +755,7 @@ body::after{
             </label>
           </div>
 
-          <button id="analyzeBtn" type="button" onclick="try{SEMSEO_go()}catch(e){}; if(window.runPSI){runPSI((document.getElementById('analyzeUrl')&&document.getElementById('analyzeUrl').value)||'');} return false;" class="btn btn-analyze">
+          <button id="analyzeBtn" type="button" onclick="SEMSEO_go();" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
 
@@ -1090,7 +1090,7 @@ body::after{
   const apiPublic = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
   const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
   if (!panel) return;
-  const endpoint = panel.dataset ? panel.dataset.psiEndpoint : null;
+  const endpoint = (panel && panel.dataset && panel.dataset.psiEndpoint) ? panel.dataset.psiEndpoint : "/api/psi";
   const urlInput = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
   const runBtn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
   const strategyEl = document.getElementById('psiStrategy'); // "mobile" / "desktop"
@@ -1112,7 +1112,7 @@ body::after{
     const raw = (targetUrl || (urlInput && urlInput.value) || '').trim();
     if (!raw){ return; } // don't alert; keep UX quiet
     const strategy = (strategyEl && (strategyEl.textContent||'').trim().toLowerCase()) || 'mobile';
-    const qs = `url=${encodeURIComponent(raw)}&strategy=${encodeURIComponent(strategy)}&category=performance&category=accessibility&category=seo&category=best-practices`;
+    const qs = `url=${encodeURIComponent(raw)}&strategy=${encodeURIComponent(strategy)}&category[]=performance&category[]=accessibility&category[]=seo&category[]=best-practices`;
 
     let res;
     try{
@@ -1323,6 +1323,22 @@ document.addEventListener('DOMContentLoaded', function(){
     obs.observe(perf, {childList:true, characterData:true, subtree:true});
   }
 })();
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const btn = document.getElementById('analyzeBtn');
+  const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+  const panel = document.getElementById('psiPanel');
+  function go(){
+    try{ if (typeof SEMSEO_go === 'function') SEMSEO_go(); }catch(_){}
+    if (panel && panel.style.display === 'none') panel.style.display='';
+    if (typeof window.runPSI === 'function'){ window.runPSI((input && input.value)||''); }
+  }
+  if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); go(); }); }
+  if (input){ input.addEventListener('keydown', function(e){ if (e.key==='Enter'){ e.preventDefault(); go(); } }); }
+});
 </script>
 
 </body>
