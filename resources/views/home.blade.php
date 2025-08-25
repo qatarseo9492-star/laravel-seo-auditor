@@ -667,6 +667,94 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (prefers-reduced-motion:reduce){
   #detectorPanel .hvai-head i, .hvai-badge .badge-sheen { animation:none }
 }
+
+/* ==== HVAI ULTRA NEON (gauge + panel) ==== */
+#detectorPanel{
+  position:relative; isolation:isolate; overflow:hidden;
+  border:1px solid var(--read-border); border-radius:20px; padding:18px;
+  background:
+    radial-gradient(1200px 340px at -10% 0%, rgba(147,51,234,.18), transparent 55%),
+    radial-gradient(1000px 360px at 110% 20%, rgba(14,165,233,.16), transparent 60%),
+    linear-gradient(135deg, rgba(15,23,42,.78), rgba(10,12,26,.86));
+  box-shadow:0 24px 70px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(10px);
+}
+#detectorPanel::before{
+  content:""; position:absolute; inset:-1px; border-radius:22px; padding:1px;
+  background:conic-gradient(from 0deg, #22c55e, #3de2ff, #9b5cff, #ef4444, #f97316, #22c55e);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude; opacity:.22; pointer-events:none;
+  animation:readGlow 18s linear infinite;
+}
+
+#detectorPanel .hvai-head i{
+  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;
+  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
+  box-shadow:0 10px 22px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+  animation:spinGrad 16s linear infinite;
+}
+
+.hvai-gauge{
+  position:absolute; top:10px; right:12px; width:210px; height:210px;
+  filter:drop-shadow(0 20px 40px rgba(0,0,0,.45));
+}
+@media (max-width:900px){
+  .hvai-gauge{ position:relative; margin:8px auto 10px; top:auto; right:auto; }
+}
+
+.g-svg{ width:100%; height:100%; transform:rotate(-90deg) }
+.g-track{ fill:none; stroke:rgba(255,255,255,.10); stroke-width:14; }
+.g-track.human{ stroke-width:12 }
+.g-arc{
+  fill:none; stroke-linecap:round; stroke-dasharray:0 999; stroke-dashoffset:0;
+  filter:drop-shadow(0 4px 16px rgba(0,0,0,.35));
+}
+.g-arc.human{ stroke:url(#gradHuman); stroke-width:12 }
+.g-arc.ai{ stroke:url(#gradAI); stroke-width:14 }
+
+.g-center{
+  position:absolute; inset:0; display:grid; place-items:center; pointer-events:none;
+  font-variant-numeric:tabular-nums;
+}
+.g-title{ font-size:.82rem; opacity:.8; letter-spacing:.3px; margin-top:6px }
+.g-score{ font-size:1.8rem; font-weight:900; margin-top:-4px; text-shadow:0 1px 0 rgba(0,0,0,.45) }
+
+/* Verdict badge: glassy prism */
+.hvai-badge{
+  position:absolute; left:12px; top:12px; z-index:3;
+  display:flex; align-items:center; gap:.6rem; padding:.6rem .9rem; border-radius:14px; color:#fff;
+  background:linear-gradient(135deg, rgba(34,197,94,.22), rgba(61,226,255,.22));
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 18px 44px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.08);
+  transform:translateY(-8px) scale(.98); opacity:0; pointer-events:none;
+  transition:transform .35s cubic-bezier(.22,1,.36,1), opacity .35s ease;
+  backdrop-filter:blur(6px);
+}
+.hvai-badge.show{ transform:translateY(0) scale(1); opacity:1; pointer-events:auto; }
+.hvai-badge i{
+  width:36px;height:36px;border-radius:12px; display:grid; place-items:center;
+  background:conic-gradient(from 0deg,#22c55e,#3de2ff,#9b5cff,#22c55e);
+  text-shadow:0 1px 0 rgba(0,0,0,.45);
+  box-shadow:0 8px 20px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.12);
+}
+
+.hvai-verdict--human  .hvai-badge{ background:linear-gradient(135deg, rgba(34,197,94,.24), rgba(61,226,255,.22)); }
+.hvai-verdict--mixed  .hvai-badge{ background:linear-gradient(135deg, rgba(99,102,241,.26), rgba(61,226,255,.22)); }
+.hvai-verdict--ai     .hvai-badge{ background:linear-gradient(135deg, rgba(239,68,68,.26), rgba(249,115,22,.24)); }
+
+/* Bars remain for detail, but look sleeker */
+.hvai-track{ height:14px; border-radius:12px; }
+.hvai-fill.human{ background:linear-gradient(90deg,#22c55e,#3de2ff) }
+.hvai-fill.ai{ background:linear-gradient(90deg,#ef4444,#f97316) }
+
+/* mini detector chips */
+.hvai-detectors .det{
+  background:linear-gradient(135deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:999px; padding:.3rem .6rem;
+}
+.hvai-detectors .det.ok{ background:linear-gradient(135deg, rgba(34,197,94,.18), rgba(61,226,255,.18)) }
+.hvai-detectors .det.err{ background:linear-gradient(135deg, rgba(239,68,68,.22), rgba(249,115,22,.18)) }
 </style>
 </head>
 <body>
@@ -861,7 +949,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     </div>
 
     <!-- 1) HUMAN vs AI (Ensemble) -->
-    
+    \1
 
   <!-- HVAI Verdict Badge -->
   <div id="hvaiBadge" class="hvai-badge" hidden>
@@ -2425,6 +2513,165 @@ window.addEventListener('load', function(){
     window.updateHvai({ text: txt, detectors: [], preferLocal: true });
   }
 });
+</script>
+
+
+<script>
+/* === Human vs AI Ensemble v2.3 — ultra-stylish + robust math + gauge === */
+(function(){
+  const panel = document.getElementById('detectorPanel');
+  if(!panel) return;
+
+  const sel = id => document.getElementById(id);
+  const humanVal = sel('hvaiHumanVal');
+  const aiVal    = sel('hvaiAIVal');
+  const humanFill= sel('hvaiHumanFill');
+  const aiFill   = sel('hvaiAIFill');
+  const conf     = sel('detConfidence');
+  const badge    = sel('hvaiBadge');
+  const verdictText = sel('hvaiVerdictText');
+  const verdictHint = sel('hvaiVerdictHint');
+
+  // gauge elements
+  const arcHuman = sel('hvaiHumanArc');
+  const arcAI    = sel('hvaiAIArc');
+  const scoreBig = sel('hvaiScoreBig');
+
+  // ensure detector chips row exists
+  function upsertDetectorsRow(){
+    let row = panel.querySelector('.hvai-detectors');
+    if(!row){
+      row = document.createElement('div');
+      row.className = 'hvai-detectors';
+      const meta = panel.querySelector('.hvai-meta') || panel;
+      meta.appendChild(row);
+    }
+    return row;
+  }
+  const detRow = upsertDetectorsRow();
+
+  const clamp01 = x => Math.min(1, Math.max(0, x));
+  const sum = arr => arr.reduce((s,v)=>s+v,0);
+  function median(arr){ const a=[...arr].sort((x,y)=>x-y); const m=Math.floor(a.length/2); return a.length%2? a[m] : (a[m-1]+a[m])/2; }
+  function trimmedMean(arr, p=0.15){ if(arr.length===0) return 0; const a=[...arr].sort((x,y)=>x-y); const k=Math.floor(p*a.length); const b=a.slice(k, a.length-k || a.length); return sum(b)/b.length; }
+  function weightedMedian(values, weights){ const arr = values.map((v,i)=>({v, w:weights[i]||1})).sort((a,b)=>a.v-b.v); const total = sum(arr.map(o=>o.w)); let acc=0; for(const o of arr){ acc+=o.w; if(acc >= total/2) return o.v; } return arr.length? arr[arr.length-1].v : 0; }
+  function calibrateAI(p){ const gain=0.8; return clamp01( 1/(1+Math.exp(-((p-0.5)*6*gain))) ); }
+
+  function localHeuristicAI(text){
+    if(!text) return 0.5;
+    const tokens = text.split(/\s+/).filter(Boolean);
+    const sents = text.split(/[.!?]+\s+/);
+    const avgLen = tokens.length / Math.max(1,sents.length);
+    const uniqueFrac = new Set(tokens.map(t=>t.toLowerCase())).size / Math.max(1,tokens.length);
+    const digitFrac = (text.match(/\d/g) || []).length / Math.max(1,text.length);
+    const repeatPenalty = (text.match(/\b(\w+)\b(?=[\s\S]*\b\1\b)/gi) || []).length;
+
+    let ai = 0.5;
+    if(avgLen<14) ai -= 0.08; else if(avgLen>22) ai += 0.08;
+    ai += (0.20 - uniqueFrac)*0.8;
+    ai += Math.max(0, 0.12 - digitFrac);
+    ai += Math.min(0.12, repeatPenalty*0.01);
+    return clamp01(ai);
+  }
+
+  function computeEnsemble(detectors){
+    if(!detectors || detectors.length===0) return 0.5;
+    const vals = detectors.map(d=>clamp01(d.ai));
+    const weights = detectors.map(d=>Math.max(0.1, d.weight || 1));
+    const tmean = trimmedMean(vals, 0.15);
+    const wmed  = weightedMedian(vals, weights);
+    const mix   = (tmean*0.55 + wmed*0.45);
+    return calibrateAI(mix);
+  }
+
+  function updateGauge(finalAI){
+    const ai = clamp01(finalAI);
+    const human = 1 - ai;
+    const setArc = (el, r, pct) => {
+      if(!el) return;
+      const c = 2 * Math.PI * r;
+      const on = c * pct;
+      const off = Math.max(0.0001, c - on);
+      el.style.strokeDasharray = `${on} ${off}`;
+      el.style.strokeDashoffset = "0";
+    };
+    setArc(arcAI, 86, ai);
+    setArc(arcHuman, 66, human);
+    if(scoreBig) scoreBig.textContent = Math.round(ai*100) + '%';
+  }
+
+  function render(finalAI, detectors){
+    const aiPct = Math.round(finalAI*100);
+    const humanPct = 100 - aiPct;
+    aiVal && (aiVal.textContent = aiPct + '%');
+    humanVal && (humanVal.textContent = humanPct + '%');
+    aiFill && (aiFill.style.width = aiPct + '%');
+    humanFill && (humanFill.style.width = humanPct + '%');
+
+    // Confidence
+    const vals = detectors.map(d=>d.ai);
+    const spread = (vals.length>1)? (Math.max(...vals)-Math.min(...vals)) : 0.5;
+    const srcBonus = Math.min(1, detectors.length/4);
+    const confScore = clamp01(1 - spread) * 0.7 + srcBonus * 0.3;
+    conf && (conf.textContent = Math.round(confScore*100));
+
+    // Verdict + badge
+    let verdict='Mixed';
+    let hint='Signals disagree — review content variety and structure.';
+    let cls='hvai-verdict--mixed';
+    if(finalAI <= 0.35){ verdict='Likely Human'; hint='High variation, natural phrasing, diverse sentence patterns.'; cls='hvai-verdict--human'; }
+    else if(finalAI >= 0.65){ verdict='Likely AI'; hint='Low burstiness, uniform phrasing, detector agreement skewed to AI.'; cls='hvai-verdict--ai'; }
+    verdictText && (verdictText.textContent = verdict);
+    verdictHint && (verdictHint.textContent = hint);
+    badge && (badge.hidden = false, badge.classList.add('show'));
+    panel.classList.remove('hvai-verdict--human','hvai-verdict--ai','hvai-verdict--mixed');
+    panel.classList.add(cls);
+
+    // detector chips
+    const row = detRow;
+    if(row){
+      row.innerHTML = '';
+      detectors.forEach(d=>{
+        const el = document.createElement('span');
+        el.className = 'det ' + (d.ok? 'ok': 'err');
+        el.innerHTML = `<i class="fa-solid ${d.icon||'fa-wave-square'}"></i>${d.name}: <b>${Math.round(d.ai*100)}%</b>`;
+        row.appendChild(el);
+      });
+    }
+    // gauge
+    updateGauge(finalAI);
+  }
+
+  // Override global function with v2.3
+  window.updateHvai = function(input){
+    const text = (input && input.text) || '';
+    let detectors = (input && input.detectors) || [];
+    const preferLocal = !!(input && input.preferLocal);
+
+    if(preferLocal || detectors.length===0){
+      detectors = detectors.filter(d=>d && typeof d.ai==='number');
+      detectors.push({ name:'Local Heuristic', ai: localHeuristicAI(text), weight: 0.9, icon:'fa-wave-square', ok:true });
+    }else{
+      detectors = detectors.filter(d=>d && typeof d.ai==='number');
+    }
+
+    detectors = detectors.map(d=>({ 
+      name: d.name || 'Detector', 
+      ai: clamp01(Number(d.ai||0.5)), 
+      weight: Number(d.weight||1), 
+      icon: d.icon, 
+      ok: d.ok!==false 
+    }));
+
+    const finalAI = computeEnsemble(detectors);
+    render(finalAI, detectors);
+  };
+
+  // If bootstrap object exists, re-render with the new version
+  if(window.__hvaiBootstrap){
+    try{ window.updateHvai(window.__hvaiBootstrap); }catch(e){}
+  }
+})();
 </script>
 
 </body>
