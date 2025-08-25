@@ -526,8 +526,9 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .psi-issues li{margin:.22rem 0}
 @media (max-width:768px){.psi-card{grid-column:span 12}}
 
-/* === Site Speed & Core Web Vitals — Neo Card ============================== */
-.speed-card{
+
+/* === Site Speed & Core Web Vitals — Neo Card (scoped) ====================== */
+.psi .speed-card{
   border:1px solid rgba(255,255,255,.08);
   border-radius:18px; padding:16px;
   background: radial-gradient(900px 420px at 90% -10%, rgba(0,255,171,.14), transparent 60%),
@@ -535,25 +536,26 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   box-shadow: 0 8px 24px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.04);
   backdrop-filter: blur(6px);
 }
-.speed-head{ display:flex; align-items:center; gap:.6rem; color:#bdffe7; font-weight:900; font-size: clamp(1.05rem, 1vw + .9rem, 1.35rem); }
-.speed-head .icon{ width:22px; height:22px; filter: drop-shadow(0 0 10px rgba(0,255,171,.25)); }
-.speed-sub{ color:#a6f7ff; font-size:.86rem; opacity:.9; }
+.psi .speed-head{ display:flex; align-items:center; gap:.6rem; color:#bdffe7; font-weight:900; font-size: clamp(1.05rem, 1vw + .9rem, 1.35rem); }
+.psi .speed-head .icon{ width:22px; height:22px; filter: drop-shadow(0 0 10px rgba(0,255,171,.25)); }
+.psi .speed-sub{ color:#a6f7ff; font-size:.86rem; opacity:.9; }
 
-.speed-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:12px; margin-top:10px; }
-.metric{ border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; background: rgba(15,18,30,.55); }
-.metric .top{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
-.metric .lab{ display:flex; align-items:center; gap:.5rem; font-weight:800; color:#eaf2ff; }
-.metric .lab .icon{ width:18px; height:18px; }
-.metric .val{ font-weight:900; font-size:1.1rem; color:#fff; }
-.badge{ padding:.2rem .45rem; border-radius:8px; font-weight:800; font-size:.72rem; }
-.badge.fast{ background:rgba(0,255,171,.16); color:#b2ffe9; border:1px solid rgba(0,255,171,.28); }
-.badge.ok{ background:rgba(255,196,0,.12); color:#ffe8a3; border:1px solid rgba(255,196,0,.25); }
-.badge.slow{ background:rgba(255,95,95,.12); color:#ffc9c9; border:1px solid rgba(255,95,95,.25); }
+.psi .speed-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:12px; margin-top:10px; }
+.psi .metric{ border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; background: rgba(15,18,30,.55); }
+.psi .metric .top{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
+.psi .metric .lab{ display:flex; align-items:center; gap:.5rem; font-weight:800; color:#eaf2ff; }
+.psi .metric .lab .icon{ width:18px; height:18px; }
+.psi .metric .val{ font-weight:900; font-size:1.1rem; color:#fff; }
+.psi .badge{ padding:.2rem .45rem; border-radius:8px; font-weight:800; font-size:.72rem; }
+.psi .badge.fast{ background:rgba(0,255,171,.16); color:#b2ffe9; border:1px solid rgba(0,255,171,.28); }
+.psi .badge.ok{ background:rgba(255,196,0,.12); color:#ffe8a3; border:1px solid rgba(255,196,0,.25); }
+.psi .badge.slow{ background:rgba(255,95,95,.12); color:#ffc9c9; border:1px solid rgba(255,95,95,.25); }
 
 /* tiny bar for each metric */
-.mini{ height:10px; border-radius:10px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px; }
-.mini > i{ display:block; height:100%; border-radius:10px; background:linear-gradient(90deg, #00ffaa, #02ccff); }
+.psi .mini{ height:10px; border-radius:10px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px; }
+.psi .mini > i{ display:block; height:100%; border-radius:10px; background:linear-gradient(90deg, #00ffaa, #02ccff); }
 /* ======================================================================== */
+
 
 </style>
 </head>
@@ -1011,866 +1013,18 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
 <!-- A) Analyze + core logic -->
-<script>
-(function(){
-  var CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-  function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
-  function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
-  function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
 
-  /* === Score wheel === */
-  var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
-  window.setScoreWheel = function(value){
-    if(!GAUGE.rect){
-      GAUGE.rect=document.getElementById('scoreClipRect'); GAUGE.stop1=document.getElementById('scoreStop1'); GAUGE.stop2=document.getElementById('scoreStop2');
-      GAUGE.r1=document.getElementById('ringStop1'); GAUGE.r2=document.getElementById('ringStop2'); GAUGE.arc=document.getElementById('ringArc'); GAUGE.text=document.getElementById('overallScore');
-      if(GAUGE.arc){ GAUGE.arc.style.strokeDasharray=GAUGE.CIRC.toFixed(2); GAUGE.arc.style.strokeDashoffset=GAUGE.CIRC.toFixed(2); }
-    }
-    var v=Math.max(0,Math.min(100,Number(value)||0));
-    var y=GAUGE.H-(GAUGE.H*(v/100));
-    if(GAUGE.rect) GAUGE.rect.setAttribute('y',String(y));
-    if(GAUGE.text) GAUGE.text.textContent=Math.round(v)+'%';
-
-    var c1,c2; if(v>=80){c1='#22c55e';c2='#16a34a'} else if(v>=60){c1='#f59e0b';c2='#fb923c'} else {c1='#ef4444';c2='#b91c1c'}
-    if(GAUGE.stop1) GAUGE.stop1.setAttribute('stop-color',c1); if(GAUGE.stop2) GAUGE.stop2.setAttribute('stop-color',c2);
-    if(GAUGE.r1) GAUGE.r1.setAttribute('stop-color',c1); if(GAUGE.r2) GAUGE.r2.setAttribute('stop-color',c2);
-    if(GAUGE.arc){ var offset=GAUGE.CIRC*(1-(v/100)); GAUGE.arc.style.strokeDashoffset=offset.toFixed(2); }
-    setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
-  };
-
-  /* === Category bars + completion === */
-  function updateCategoryBars(){
-    var cards=[].slice.call(document.querySelectorAll('.category-card'));
-    var total=0, checked=0;
-    cards.forEach(function(card,idx){
-      var items=[].slice.call(card.querySelectorAll('.checklist-item'));
-      var t=items.length, done=items.filter(function(li){ var c=li.querySelector('input'); return c && c.checked; }).length;
-      total+=t; checked+=done;
-      var pct=t?Math.round(done*100/t):0;
-      var fill=document.getElementById('catFillRect-'+idx); if(fill) fill.setAttribute('width', String(6*pct));
-      var pctEl=document.getElementById('catPct-'+idx); if(pctEl) pctEl.textContent = done+'/'+t+' • '+pct+'%';
-      var sub=card.querySelector('.category-sub'); if(sub) sub.textContent = pct>=80?'Great progress':'Keep improving';
-      var cnt=card.querySelector('.checked-count'); if(cnt) cnt.textContent = done;
-      var stop1=document.getElementById('catStop1-'+idx), stop2=document.getElementById('catStop2-'+idx);
-      var c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444'); var c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
-      if(stop1) stop1.setAttribute('stop-color',c1); if(stop2) stop2.setAttribute('stop-color',c2);
-    });
-    var pctAll = total? Math.round(checked*100/total) : 0;
-    var comp=document.getElementById('compClipRect'); if(comp) comp.setAttribute('width', String(6*pctAll));
-    setText('compPct', pctAll + '%'); setText('progressCaption', checked+' of '+total+' items completed');
-  }
-  window.updateCategoryBars = updateCategoryBars;
-
-  /* === Auto-tick by item scores === */
-  function autoTickByScores(map){
-    var autoCount=0;
-    for(var i=1;i<=25;i++){
-      var scVal=Number((map && map[i]!==undefined)? map[i] : NaN);
-      var badge=document.getElementById('sc-'+i);
-      var cb=document.getElementById('ck-'+i);
-      var row=cb ? cb.closest('.checklist-item') : null;
-      if (!badge) continue;
-      if (!isNaN(scVal)) {
-        badge.textContent = Math.round(scVal);
-        badgeTone(badge, scVal);
-        if (document.getElementById('autoApply') && document.getElementById('autoApply').checked && scVal>=80) {
-          if (cb && !cb.checked) { cb.checked=true; autoCount++; }
-          if(row){ row.classList.remove('sev-mid','sev-bad'); row.classList.add('sev-good'); }
-        } else if (scVal>=60) { if(row){ row.classList.remove('sev-bad','sev-good'); row.classList.add('sev-mid'); } }
-        else { if(row){ row.classList.remove('sev-mid','sev-good'); row.classList.add('sev-bad'); } }
-      } else {
-        badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad');
-      }
-    }
-    setText('rAutoCount', autoCount);
-    updateCategoryBars();
-  }
-  window.autoTickByScores = autoTickByScores;
-
-  /* === Water progress === */
-  var Water=(function(){
-    var wrapId=function(){ return document.getElementById('waterWrap'); };
-    var clipId=function(){ return document.getElementById('waterClipRect'); };
-    var pctId=function(){ return document.getElementById('waterPct'); };
-    var t=null, value=0;
-    function show(){ var w=wrapId(); if(w) w.style.display='block'; }
-    function hide(){ var w=wrapId(); if(w) w.style.display='none'; }
-    function set(v){ value=Math.max(0,Math.min(100,v)); var y=200 - (200*value/100); var clip=clipId(); if(clip) clip.setAttribute('y', String(y)); var p=pctId(); if(p) p.textContent = Math.round(value) + '%'; }
-    return {
-      start:function(){ show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
-      finish:function(){ if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
-      reset:function(){ if(t) clearInterval(t); set(0); hide(); }
-    };
-  })();
-  window.Water = Water;
-
-  /* ===================== Fetch helpers ===================== */
-  function normalizeUrl(u) {
-    if (!u) return '';
-    u = u.trim();
-    if (/^https?:\/\//i.test(u)) { try { new URL(u); return u; } catch(e) { return ''; } }
-    var guess = 'https://' + u.replace(/^\/+/, '');
-    try { new URL(guess); return guess; } catch(e) { return ''; }
-  }
-
-  async function fetchBackend(url){
-    let data=null, ok=false, status=0, text='';
-    const qs=new URLSearchParams({url}).toString();
-    try{
-      const r1=await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
-      status=r1.status; text=await r1.text(); try{ data=JSON.parse(text);}catch(_){}
-      if(r1.ok && data) ok=true;
-    }catch(_){}
-    if(!ok){
-      try{
-        const r2=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})});
-        status=r2.status; text=await r2.text(); try{ data=JSON.parse(text);}catch(_){}
-        if(r2.ok && data) ok=true;
-      }catch(_){}
-    }
-    if(!ok){
-      try{
-        const r3=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
-        status=r3.status; text=await r3.text(); try{ data=JSON.parse(text);}catch(_){}
-        if(r3.ok && data) ok=true;
-      }catch(_){}
-    }
-    return {ok,data,status};
-  }
-
-  // NEW: backend multi-detector (works with or without API keys; server may compute local ensemble)
-  async function fetchDetect(text, url){
-    try{
-      const r = await fetch((window.SEMSEO.ENDPOINTS.detect || '/api/detect'),{
-        method:'POST',
-        headers:{
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'X-Requested-With':'XMLHttpRequest',
-          'X-CSRF-TOKEN': CSRF
-        },
-        body: JSON.stringify({ text, url })
-      });
-      if(!r.ok) return null;
-      const j = await r.json();
-      return (j && j.ok) ? j : null;
-    }catch(_){ return null; }
-  }
-
-  async function fetchRawHtml(url){
-    try{
-      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
-      if(r.ok){ const html=await r.text(); if(html && html.length>200) return html; }
-    }catch(_){}
-    return '';
-  }
-
-  async function fetchReadableText(url){
-    try{
-      const httpsR = await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''));
-      if(httpsR.ok){ const t = await httpsR.text(); if(t && t.length>200) return t; }
-    }catch(e){}
-    try{
-      const altR = await fetch('https://r.jina.ai/'+url);
-      if(altR.ok){ const t = await altR.text(); if(t && t.length>200) return t; }
-    }catch(e){}
-    return '';
-  }
-
-  function extractMetaFromHtml(html, baseUrl){
-    try{
-      var d=(new DOMParser()).parseFromString(html,'text/html');
-      var q=(s,a)=>{var el=d.querySelector(s);return el?(a?el.getAttribute(a)||'':(el.textContent||'')) : '';};
-      var title=(q('title')||'').trim();
-      var metaDesc=(q('meta[name="description"]','content')||'').trim();
-      var canonical=(q('link[rel="canonical"]','href')||'').trim()||baseUrl;
-      var robots=(q('meta[name="robots"]','content')||'').trim()||'n/a';
-      var viewport=(q('meta[name="viewport"]','content')||'').trim()||'n/a';
-      var h1=d.querySelectorAll('h1').length, h2=d.querySelectorAll('h2').length, h3=d.querySelectorAll('h3').length;
-      var origin=''; try{ origin=new URL(baseUrl).origin; }catch(_){}
-      var internal=0; d.querySelectorAll('a[href]').forEach(function(a){ try{ var u=new URL(a.getAttribute('href'), baseUrl); if(!origin || u.origin===origin) internal++; }catch(_){} });
-      var schema = !!(d.querySelector('script[type="application/ld+json"]') || d.querySelector('[itemscope],[itemtype*="schema.org"]'));
-      var main=d.querySelector('article,main,[role="main"]'); var sample=main? (main.textContent||''): '';
-      if(!sample){ sample=[].slice.call(d.querySelectorAll('p')).slice(0,12).map(function(p){return p.textContent;}).join('\n\n'); }
-      sample=(sample||'').replace(/\s{2,}/g,' ').trim();
-      return { titleLen: title?title.length:null, metaLen: metaDesc?metaDesc.length:null, canonical, robots, viewport, headings:(h1+'/'+h2+'/'+h3), internalLinks:internal, schema: schema?'yes':'no', sampleText: sample };
-    }catch(_){ return {}; }
-  }
-
-  function mergeMeta(into, add){
-    if(!into) into={};
-    var keys=['titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText'];
-    keys.forEach(function(k){
-      if((into[k]===undefined || into[k]===null || into[k]==='—' || into[k]==='' ) && add && add[k]!==undefined && add[k]!==null){
-        into[k]=add[k];
-      }
-    });
-    return into;
-  }
-
-  /* ===================== Stylometry & Readability ===================== */
-  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
-  function _countSyllables(word){
-    var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0;
-    var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m);
-  }
-  function _syllableStats(text){
-    var wordRe=/[A-Za-z\u00C0-\u024f']+/g;
-    var words=(text.match(wordRe)||[]);
-    var syll=0;
-    for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
-    var spw = words.length ? (syll/words.length) : 0;
-    return { syllables: syll, spw: spw, words: words.length };
-  }
-  function _flesch(text){
-    var sents = (text.match(/[.!?]+/g)||[]).length || 1;
-    var words = (text.match(/[A-Za-z\u00C0-\u024f']+/g)||[]); var wN = words.length||1;
-    var syll = 0; for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
-    return clamp(206.835 - 1.015*(wN/sents) - 84.6*(syll/wN), -20, 120);
-  }
-  function _fkGradeLevel(text){
-    var sents = (text.match(/[.!?]+/g)||[]).length || 1;
-    var st = _syllableStats(text);
-    var words = st.words || 1;
-    var grade = 0.39 * (words / sents) + 11.8 * (st.spw || 0) - 15.59;
-    return Math.max(0, Math.min(18, grade));
-  }
-  function _prep(text){
-    text=(text||'')+''; text=text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
-    var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(text.match(wordRe)||[]).map(function(w){return w.toLowerCase();});
-    var sents=text.split(/(?<=[.!?])\s+|\n+(?=\S)/g).filter(Boolean); var tokens=words.length||1;
-    var freq=Object.create(null); words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
-    var types=Object.keys(freq).length, hapax=0; for(var k in freq){ if(freq[k]===1) hapax++; }
-    var lens=sents.map(function(s){return (s.match(wordRe)||[]).length;}).filter(function(v){return v>0;});
-    var mean=lens.reduce(function(a,b){return a+b;},0)/(lens.length||1);
-    var variance=lens.reduce(function(a,b){return a+Math.pow(b-mean,2);},0)/(lens.length||1);
-    var cov=mean?Math.sqrt(variance)/mean:0;
-    var tri={}, triT=0, triR=0; for(var i=0;i<tokens-2;i++){ var g=words[i]+' '+words[i+1]+' '+words[i+2]; tri[g]=(tri[g]||0)+1; triT++; } for(var kk in tri){ if(tri[kk]>1) triR+=tri[kk]-1; }
-    var digits=(text.match(/\d/g)||[]).length*100/(tokens||1);
-    var avgLen=tokens? (words.join('').length/tokens):0;
-    var longRatio=(lens.filter(function(L){return L>=28;}).length)/(lens.length||1);
-    var TTR=types/(tokens||1);
-    var asl=mean||0;
-    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl };
-  }
-
-  function detectUltra(text){
-    var s=_prep(text||'');
-    if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
-    var ai=10; var covT=0.45; if(s.cov<covT) ai+=clamp((covT-s.cov)/covT,0,1)*25; var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18;
-    var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
-    return { humanPct: 100-clamp(Math.round(ai),0,100), aiPct: clamp(Math.round(ai),0,100), confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai:clamp(Math.round(ai),0,100),w:1}], _s:s };
-  }
-
-  function deriveItemScoresFromSignals(s){
-    function pct(x){ return clamp(Math.round(x),0,100); }
-    function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
-    var read=pct(band(s.flesch,35,75)), rep=pct(100*(1 - s.triRepeatRatio)), ttr=pct(band(s.TTR,0.30,0.65)), longS=pct(band(1-s.longRatio, 0.6, 0.95)), avgLen=pct(band(s.avgWordLen,4.2,5.8)), digits=pct(100*(1 - s.digitsPer100/20));
-    var i=[];
-    i[1]=pct(.5*read+.5*ttr); i[2]=pct(.6*ttr+.4*avgLen); i[3]=pct(.4*ttr+.6*read); i[4]=pct(.7*read+.3*rep); i[5]=pct(.5*read+.5*avgLen);
-    i[6]=pct(.4*ttr+.6*read); i[7]=pct(.4*read+.6*rep); i[8]=pct(.6*rep+.4*digits); i[9]=pct(.6*avgLen+.4*digits); i[10]=pct(.6*avgLen+.4*ttr);
-    i[11]=pct(.5*ttr+.5*rep); i[12]=pct(.6*rep+.4*digits); i[13]=pct(.6*read+.4*rep); i[14]=pct(.6*read+.4*ttr); i[15]=pct(.5*ttr+.5*read);
-    i[16]=pct(.6*digits+.4*read); i[17]=pct(.5*avgLen+.5*ttr); i[18]=pct(.5*read+.5*longS); i[19]=pct(.6*rep+.4*avgLen); i[20]=pct(.5*longS+.5*avgLen);
-    i[21]=pct(.7*read+.3*ttr); i[22]=pct(.6*ttr+.4*avgLen); i[23]=pct(.6*ttr+.4*avgLen); i[24]=pct(.6*avgLen+.4*ttr); i[25]=pct(.6*ttr+.4*digits);
-    var map={}; for(var k=1;k<=25;k++){ map[k]=i[k]; } return map;
-  }
-  function deriveSummaryScoresFromItems(itemMap){
-    var all=[]; for(var i=1;i<=25;i++){ if(isFinite(itemMap[i])) all.push(itemMap[i]); }
-    var avg = function(a){ return a.length? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : 0; };
-    return { contentScore: avg(all.slice(0,13)), overall: avg(all) };
-  }
-
-  function buildSampleFromData(data){
-    var parts = [];
-    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
-    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){
-      var v = data?.[k];
-      if (typeof v === 'string' && v.trim()) parts.push(v);
-      if (Array.isArray(v)) parts.push(v.join('. '));
-    });
-    var txt = parts.join('\n\n').replace(/\s{2,}/g,' ').trim();
-    return txt.length>140000 ? txt.slice(0,140000) : txt;
-  }
-  function ensureScoresExist(data, sample, ensemble){
-    var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
-    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
-    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
-    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
-    if (needItems) data.itemScores = deriveItemScoresFromSignals(s);
-    if (needContent || needOverall){
-      var sums = deriveSummaryScoresFromItems(data.itemScores||{});
-      if (needContent) data.contentScore = sums.contentScore;
-      if (needOverall) data.overall = sums.overall;
-    }
-    return data;
-  }
-
-  /* === Human vs AI rendering === */
-  function renderDetectors(res){
-    var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
-    if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
-    var hv = document.getElementById('hvaiHumanVal'), av=document.getElementById('hvaiAIVal');
-    var hf = document.getElementById('hvaiHumanFill'), af=document.getElementById('hvaiAIFill');
-    if(hv) hv.textContent = isFinite(res.humanPct)? Math.round(res.humanPct)+'%':'—%';
-    if(av) av.textContent = isFinite(res.aiPct)? Math.round(res.aiPct)+'%':'—%';
-    if(hf) hf.style.width = Math.max(0, Math.min(100, res.humanPct||0)) + '%';
-    if(af) af.style.width = Math.max(0, Math.min(100, res.aiPct||0)) + '%';
-
-    var panel = document.getElementById('detectorPanel');
-    // Fix overlap: move any injected toast/banner into the reserved banner slot
-    try{
-      var banner = document.getElementById('hvaiBanner');
-      if (panel && banner){
-        var stray = panel.querySelector('.toast, .banner, [data-toast], [data-banner]');
-        if (stray && stray !== banner){
-          banner.innerHTML = '';
-          banner.appendChild(stray);
-          banner.classList.add('show');
-          stray.style.position = 'static';
-          stray.style.margin = '0';
-        } else {
-          // If nothing to host, hide the slot (keeps layout tidy)
-          banner.classList.remove('show');
-          if (!banner.textContent.trim()) banner.style.display = 'none'; else banner.style.display = 'block';
-        }
-      }
-    }catch(_){};
- if(panel) panel.style.display='block';
-    if(!grid) return; grid.innerHTML = '';
-    (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
-      var id='det-'+d.key; var wrap=document.createElement('div');
-      wrap.className='det-item'; wrap.innerHTML =
-        '<div class="det-row"><div class="det-label">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+(d.ai||0)+'</div></div>'+
-        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+(clamp(d.ai||0,0,100))+'%"></div></div>';
-      grid.appendChild(wrap);
-    });
-  }
-  function applyDetection(humanPct, aiPct, confidence, breakdown){
-    var writer = (isFinite(humanPct) && isFinite(aiPct) && humanPct>=aiPct) ? 'Likely Human' : 'AI-like';
-    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
-    var hp = document.getElementById('humanPct'), ap = document.getElementById('aiPct');
-    if(hp) hp.textContent = isFinite(humanPct)? Math.round(humanPct) : '—';
-    if(ap) ap.textContent = isFinite(aiPct)?    Math.round(aiPct)   : '—';
-    var res = {humanPct:humanPct, aiPct:aiPct, confidence:confidence, detectors:(breakdown && breakdown.detectors)||[{key:'stylometry',label:'Stylometry',ai:aiPct||0}]};
-    renderDetectors(res);
-  }
-
-  /* === Readability rendering === */
-  function renderReadability(s){
-    var p = document.getElementById('readabilityPanel'); if(!p) return;
-    var text = s.text || '';
-    var grade = _fkGradeLevel(text), gradeInt=Math.round(grade);
-    var syl = _syllableStats(text);
-    var ease = s.flesch;
-    var chip = document.getElementById('readChip');
-    var chipText = document.getElementById('readGradeChip');
-    if (chipText) chipText.textContent = 'Grade ' + gradeInt;
-    if (chip){ chip.classList.remove('bad','mid'); if (gradeInt<=8){} else if (gradeInt<=10) chip.classList.add('mid'); else chip.classList.add('bad'); }
-    var sum = document.getElementById('readSummary');
-    if (sum){
-      if (gradeInt <= 8) sum.textContent = 'Easy for most readers (middle school). Great for broad audiences.';
-      else if (gradeInt <= 10) sum.textContent = 'Readable for teens. Consider simpler words & shorter sentences.';
-      else sum.textContent = 'Complex reading level. Use shorter sentences and simpler vocabulary.';
-    }
-    function bar(id, v, max){ var el=document.getElementById(id); if(!el) return; el.style.width = Math.max(0, Math.min(100, (v/max)*100)) + '%'; }
-    setText('mFlesch', Math.round(ease));
-    setText('mWords', s.wordCount);
-    setText('mASL', s.asl ? s.asl.toFixed(1) : '—');
-    setText('mTTR', s.TTR ? (s.TTR*100).toFixed(0)+'%' : '—');
-    setText('mRep', s.triRepeatRatio ? Math.round(s.triRepeatRatio*100)+'%' : '—');
-    setText('mDigits', s.digitsPer100 ? Math.round(s.digitsPer100) : 0);
-    setText('mSPW', syl.spw ? syl.spw.toFixed(2) : '—');
-    bar('mFleschBar', Math.max(0, Math.min(100, ease)), 100);
-    bar('mWordsBar', Math.min(s.wordCount, 4000), 4000);
-    bar('mASLBar', Math.max(0, 30 - (s.asl||0)), 30);
-    bar('mTTRBar', Math.max(0, Math.min(1, s.TTR||0)), 1);
-    bar('mRepBar', Math.max(0, 1 - (s.triRepeatRatio||0)), 1);
-    bar('mDigitsBar', Math.max(0, Math.min(20, 20 - (s.digitsPer100||0))), 20);
-    bar('mSPWBar', Math.max(0, Math.min(1.8, 1.8 - (syl.spw||0))), 1.8);
-    var fixes = [];
-    if ((s.asl||0) > 20) fixes.push('Break long sentences into 12–16 words.');
-    if ((syl.spw||0) > 1.60) fixes.push('Prefer shorter words (use simpler synonyms).');
-    if ((s.TTR||0) < 0.35) fixes.push('Use more varied vocabulary (avoid repeating the same words).');
-    if ((s.triRepeatRatio||0) > 0.10) fixes.push('Remove repeated phrases; keep each idea unique.');
-    if ((s.digitsPer100||0) > 10) fixes.push('Reduce numeric density; round or group numbers where possible.');
-    if (ease < 60 && fixes.length === 0) fixes.push('Aim for shorter sentences and simpler vocabulary to improve readability.');
-    var list = document.getElementById('readSuggest');
-    if (list){ list.innerHTML = fixes.length ? fixes.map(f=>`<li>${f}</li>`).join('') : '<li>Looks good! Keep sentences concise and headings clear.</li>'; }
-    var plain = document.getElementById('readPlain');
-    if (plain){
-      if (gradeInt <= 7){
-        plain.textContent = 'This page is easy to read for a Grade-7 reader: short sentences, common words, and clear ideas.';
-      } else if (gradeInt <= 9){
-        plain.textContent = 'Almost Grade-7 friendly. To make it easier, use shorter sentences and everyday words.';
-      } else {
-        plain.textContent = 'Currently above Grade-7 level. Try smaller sentences, simpler words, and fewer complex clauses.';
-      }
-    }
-    p.style.display='block';
-  }
-
-  /* === Entities & Topics extraction === */
-  function extractEntities(text){
-    var res = {people:[], orgs:[], places:[], topics:[], software:[], games:[]};
-    var clean=(text||'').replace(/\s+/g,' ');
-    // naive capitalized tokens as candidates
-    var cand = (clean.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || []).slice(0, 800);
-    var stop = new Set(['The','A','An','This','That','And','Or','Of','In','On','To','For','By','With','Your','Our','You','We','It','At','From','As','Be','Is','Are','Was','Were','Not']);
-    var uniq={};
-    cand.forEach(function(c){ if(stop.has(c)) return; var k=c.trim(); if(k.length<2||k.length>48) return; uniq[k]=1; });
-    var uniqList = Object.keys(uniq).slice(0,120);
-
-    // very light heuristics
-    uniqList.forEach(function(n){
-      if (/\b(Inc|LLC|Ltd|Corporation|Company|Corp|Studio|Labs|University|College)\b/.test(n)) res.orgs.push(n);
-      else if (/\b(City|Town|Province|State|Country|Park|River|Lake|Valley|Mountain)\b/.test(n)) res.places.push(n);
-      else if (/\b(Mr|Mrs|Ms|Dr|Prof)\b/.test(n) || n.split(' ').length>=2) res.people.push(n);
-      else res.topics.push(n);
-    });
-
-    // software / apk / games (keyword probes)
-    var low = clean.toLowerCase();
-    var swTerms = (low.match(/\b(software|app|application|android|ios|windows|mac|linux|apk|exe|download|install|update|version)\b/g) || []);
-    if (swTerms.length){ // pick key tokens with dots or version-like
-      var soft = (clean.match(/\b([A-Z][A-Za-z0-9\.\-\+]{2,})\b/g) || []).filter(x=>/\b(Android|iOS|Windows|Mac|Linux|Pro|Studio|Editor|App|SDK|Tool)\b/.test(x) || /v?\d+\.\d+/.test(x));
-      res.software = Array.from(new Set(soft)).slice(0,20);
-    }
-    if (/\bapk\b/i.test(low) || /\.apk\b/i.test(low)){ res.software.push('APK'); }
-    var games = (clean.match(/\b([A-Z][A-Za-z0-9\-\s]{2,} (?:Game|Games|Edition|Remastered|Online))\b/g) || []);
-    if (games.length) res.games = Array.from(new Set(games)).slice(0,20);
-
-    // clamp lists
-    res.people = res.people.slice(0,20);
-    res.orgs = res.orgs.slice(0,20);
-    res.places = res.places.slice(0,20);
-    res.topics = res.topics.slice(0,24);
-    return res;
-  }
-  function chipify(list, cls){
-    if(!list || !list.length) return '<span class="echip misc"><i class="fa-solid fa-circle-minus"></i> none</span>';
-    return list.map(v=>`<span class="echip ${cls||'misc'}"><i class="fa-solid fa-tag"></i> ${v}</span>`).join(' ');
-  }
-  function renderEntitiesTopics(sample){
-    var p = document.getElementById('entitiesPanel'); if(!p) return;
-    var ex = extractEntities(sample||'');
-    var m = (id, html)=>{ var el=document.getElementById(id); if(el) el.innerHTML=html; };
-    m('entPeople', chipify(ex.people,'person'));
-    m('entOrgs', chipify(ex.orgs,'org'));
-    m('entPlaces', chipify(ex.places,'place'));
-    m('entTopics', chipify(ex.topics,'misc'));
-    m('entSoftware', chipify(ex.software,'sw'));
-    m('entGames', chipify(ex.games,'game'));
-    p.style.display='block';
-  }
-
-  /* === PSI (Site Speed) via server proxy === */
-  async function startSiteSpeed(url, strategy='mobile'){
-    var panel = document.getElementById('psiPanel'); if(!panel) return;
-    panel.style.display='block';
-    setText('psiStrategy', strategy);
-    setText('psiPerf','—'); setText('psiLcp','—'); setText('psiInp','—'); setText('psiCls','—'); setText('psiTtfb','—');
-    ['psiLcpBar','psiInpBar','psiClsBar','psiTtfbBar'].forEach(id=>{ var el=document.getElementById(id); if(el) el.style.width='0%'; });
-    var note = document.getElementById('psiNote'); if(note) note.textContent='Running PageSpeed Insights…';
-    var advice = document.getElementById('psiAdvice'); if(advice) advice.innerHTML='';
-
-    try{
-      const q = new URLSearchParams({url, strategy}).toString();
-      const r = await fetch((window.SEMSEO.ENDPOINTS.psi||'/api/psi')+'?'+q, {headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
-      const j = await r.json();
-      if(!j || j.ok===false){ throw new Error(j && j.error ? j.error : 'PSI proxy error'); }
-      const lhr = j.data?.lighthouseResult || {};
-      const audits = lhr.audits || {};
-      const catPerf = lhr.categories?.performance?.score;
-      const perfScore = typeof catPerf==='number' ? Math.round(catPerf*100) : '—';
-      setText('psiPerf', perfScore);
-
-      function barPct(id, val, goodMax, clampMax){
-        var el=document.getElementById(id); if(!el) return;
-        var v = Math.max(0, Math.min(clampMax, val||0));
-        var pct = Math.max(0, Math.min(100, (v/goodMax)*100));
-        el.style.width = pct + '%';
-      }
-      // LCP in seconds
-      var lcp = audits['largest-contentful-paint']?.numericValue; // ms
-      var inp = audits['interactive']?.numericValue; // ms (fallback), or 'experimental-interaction-to-next-paint'
-      var inpAlt = audits['experimental-interaction-to-next-paint']?.numericValue;
-      if (inpAlt) inp = inpAlt;
-      var cls = audits['cumulative-layout-shift']?.numericValue;
-      var ttfb = audits['server-response-time']?.numericValue || audits['time-to-first-byte']?.numericValue;
-
-      if (typeof lcp==='number'){ setText('psiLcp', (lcp/1000).toFixed(2)); barPct('psiLcpBar', (lcp/1000), 2.5, 6); }
-      if (typeof inp==='number'){ setText('psiInp', Math.round(inp)); barPct('psiInpBar', inp, 200, 600); }
-      if (typeof cls==='number'){ setText('psiCls', cls.toFixed(3)); barPct('psiClsBar', cls, 0.1, 0.4); }
-      if (typeof ttfb==='number'){ setText('psiTtfb', Math.round(ttfb)); barPct('psiTtfbBar', ttfb, 800, 2500); }
-
-      // Advice list (simple heuristics)
-      var tips=[];
-      if (lcp>2500) tips.push('Optimize hero image (compress, proper size, lazy-load below-the-fold).');
-      if (inp>200) tips.push('Reduce main-thread work (code-split, defer non-critical JS).');
-      if (cls>0.1) tips.push('Reserve space for images/ads; avoid late-loading fonts without fallback.');
-      if (ttfb>800) tips.push('Improve server response (caching, CDN, database/index tuning).');
-      if (!tips.length) tips.push('Looks good! Keep images optimized, JS lean, and layout stable.');
-      if (advice) advice.innerHTML = tips.map(t=>`<li>${t}</li>`).join('');
-
-      if (note) note.textContent = 'Results from Google PageSpeed Insights (via secure server proxy).';
-    }catch(e){
-      if (note) note.textContent = 'PSI error: ' + (e && e.message ? e.message : e);
-    }
-  }
-
-  /* ===================== ANALYZE ===================== */
-  async function analyze(){
-    if (window.SEMSEO.BUSY) return;
-    window.SEMSEO.BUSY = true;
-
-    var input = document.getElementById('analyzeUrl');
-    var url = normalizeUrl(input ? input.value : '');
-    if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
-
-    if (window.Water) window.Water.start();
-    var statusEl = document.getElementById('analyzeStatus');
-    if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
-    var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
-    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
-    var readPanel = document.getElementById('readabilityPanel'); if(readPanel) readPanel.style.display='none';
-    var entPanel = document.getElementById('entitiesPanel'); if(entPanel) entPanel.style.display='none';
-    var psiPanel = document.getElementById('psiPanel'); if(psiPanel) psiPanel.style.display='none';
-
-    // 1) Backend (if present)
-    var {ok,data} = await fetchBackend(url);
-    if(!data) data = {};
-
-    // 2) Build sample (from backend)
-    var sample = buildSampleFromData(data);
-
-    // 3) Try AllOrigins raw HTML (fills meta chips + better sample if needed)
-    try{
-      var raw = await fetchRawHtml(url);
-      if(raw){
-        var meta = extractMetaFromHtml(raw, url);
-        data = mergeMeta(data, meta);
-        if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
-      }
-    }catch(_){}
-
-    // 4) Jina Reader fallback
-    if ((!sample || sample.length < 200)){
-      if (statusEl) statusEl.textContent = 'Getting readable text…';
-      try{ var read = await fetchReadableText(url);
-        if (read && read.length>200){ sample = read; }
-      }catch(_){}
-    }
-
-    // 5) Local detection (prep) + try backend detector FIRST
-    var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
-    var backendDetect = null;
-    if (sample && sample.length > 30) {
-      backendDetect = await fetchDetect(sample, url);
-    }
-
-    // 6) Scores -> guarantee + UI
-    data = ensureScoresExist(data, sample, ensemble);
-
-    var overall = Number(data.overall || 0);
-    var contentScore = Number(data.contentScore || 0);
-    window.setScoreWheel(overall||0);
-    setText('contentScoreInline', Math.round(contentScore||0));
-    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
-
-    // Meta chips
-    setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
-    setText('rTitleLen',  (data.titleLen   !== undefined && data.titleLen !== null) ? data.titleLen   : '—');
-    setText('rMetaLen',   (data.metaLen    !== undefined && data.metaLen  !== null) ? data.metaLen    : '—');
-    setText('rCanonical', data.canonical  ? data.canonical  : '—');
-    setText('rRobots',    data.robots     ? data.robots     : '—');
-    setText('rViewport',  data.viewport   ? data.viewport   : '—');
-    setText('rHeadings',  data.headings   ? data.headings   : '—');
-    setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
-    setText('rSchema',    data.schema     ? data.schema     : '—');
-
-    // Detection (prefer backend multi-detector; fallback to local)
-    var detNote = document.getElementById('detNote');
-    if (backendDetect) {
-      applyDetection(backendDetect.humanPct, backendDetect.aiPct, backendDetect.confidence, backendDetect);
-      if (detNote) detNote.textContent = 'Source: backend multi-detector (ZeroGPT/GPTZero/OriginalityAI if configured; otherwise local on server).';
-    } else if (ensemble) {
-      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-      if (detNote) detNote.textContent = 'Source: local ensemble (no external APIs).';
-    } else {
-      var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
-      var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
-      var backendConf = (typeof data.confidence==='number')? data.confidence : 60;
-      if (isFinite(hp) && isFinite(ap)) {
-        applyDetection(hp, ap, backendConf, null);
-        if (detNote) detNote.textContent = 'Source: backend (partial)'; 
-      }
-    }
-
-    // Readability + Entities
-    var S = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
-    renderReadability(S);
-    renderEntitiesTopics(sample||'');
-
-    // Checklist scores + autotick
-    window.autoTickByScores(data.itemScores || {});
-
-    if (window.Water) window.Water.finish();
-    if (statusEl) statusEl.textContent = 'Analysis complete';
-    if (report) report.style.display = 'block';
-
-    // Auto-start PSI at the end
-    startSiteSpeed(url,'mobile');
-
-    window.SEMSEO.BUSY = false;
-    if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
-  }
-  window.analyze = analyze;
-
-  // Events
-  document.addEventListener('DOMContentLoaded', function(){
-    try{
-      var btn = document.getElementById('analyzeBtn');
-      if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); analyze(); }); }
-      var input = document.getElementById('analyzeUrl');
-      if (input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); analyze(); }}); }
-      var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
-      var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
-
-      window.SEMSEO.READY = true;
-      if (window.SEMSEO.QUEUE>0){ window.SEMSEO.QUEUE=0; analyze(); }
-    }catch(err){
-      var s=document.getElementById('analyzeStatus'); if(s) s.textContent='Boot error: '+err.message;
-    }
-  });
-
-})();
-</script>
-
-<!-- B) Non-critical UI -->
-<script>
-try{
-  // Hue drift
-  (function(){ var root=document.documentElement; var start=performance.now(); function frame(now){ root.style.setProperty('--hue', (((now-start)/4)%360) + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
-
-  // Share links
-  (function(){
-    var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
-    var fb = document.getElementById('shareFb'), x = document.getElementById('shareX'), ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'), em = document.getElementById('shareEm');
-    if(fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?url='+url;
-    if(x)  x.href  = 'https://twitter.com/intent/tweet?text='+title+'&url='+url;
-    if(ln) ln.href = 'https://www.linkedin.com/sharing/share-offsite/?url='+url;
-    if(wa) wa.href = 'https://wa.me/?text='+title+'%20'+url;
-    if(em) em.href = 'mailto:?subject='+title+'&body='+url;
-  })();
-
-  // Reset / Export / Import / Print / UI misc
-  (function(){
-    function updateCategoryBars(){ if (window.updateCategoryBars) window.updateCategoryBars(); }
-    var resetBtn=document.getElementById('resetChecklist');
-    if(resetBtn){ resetBtn.addEventListener('click', function(){
-      Array.prototype.forEach.call(document.querySelectorAll('.checklist input[type="checkbox"]'), function(cb){ cb.checked=false; });
-      Array.prototype.forEach.call(document.querySelectorAll('.score-badge'), function(b){ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
-      updateCategoryBars();
-      if (window.setScoreWheel) window.setScoreWheel(0);
-      var el;
-      el=document.getElementById('contentScoreInline'); if(el) el.textContent='0';
-      var chip=document.getElementById('contentScoreChip'); if(chip){ chip.classList.remove('chip-good','chip-mid','chip-bad'); chip.classList.add('chip-bad'); }
-      el=document.getElementById('humanPct'); if(el) el.textContent='—';
-      el=document.getElementById('aiPct'); if(el) el.textContent='—';
-      var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
-      var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
-      var readPanel=document.getElementById('readabilityPanel'); if(readPanel){ readPanel.style.display='none'; }
-      var entPanel=document.getElementById('entitiesPanel'); if(entPanel){ entPanel.style.display='none'; }
-      var psiPanel=document.getElementById('psiPanel'); if(psiPanel){ psiPanel.style.display='none'; }
-      if (window.Water) window.Water.reset();
-    });}
-
-    var exportBtn=document.getElementById('exportChecklist'), importBtn=document.getElementById('importChecklist'), importFile=document.getElementById('importFile');
-    if(exportBtn){ exportBtn.addEventListener('click', function(){
-      var payload = { checked:[], scores:{} };
-      for(var i=1;i<=25;i++){
-        var cb=document.getElementById('ck-'+i), sc=document.getElementById('sc-'+i);
-        if (cb && cb.checked) payload.checked.push(i);
-        var s = parseInt(sc ? sc.textContent : 'NaN',10); if (!isNaN(s)) payload.scores[i]=s;
-      }
-      var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-      var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
-    });}
-    if(importBtn){ importBtn.addEventListener('click', function(){ if(importFile) importFile.click(); }); }
-    if(importFile){ importFile.addEventListener('change', function(){
-      var file = importFile.files[0]; if (!file) return;
-      var fr = new FileReader();
-      fr.onload = function(){ try{
-        var data = JSON.parse(fr.result);
-        for(var i=1;i<=25;i++){
-          var cb=document.getElementById('ck-'+i); if (cb) cb.checked=(data.checked||[]).includes(i);
-          var sc=document.getElementById('sc-'+i); var val=data.scores ? data.scores[i] : undefined;
-          if (sc && typeof val==='number'){ sc.textContent=val; (window.badgeTone||function(){ })(sc,val); }
-        }
-        updateCategoryBars();
-      }catch(e){ alert('Invalid JSON'); } };
-      fr.readAsText(file);
-    });}
-
-    var printTop=document.getElementById('printTop'), printChecklist=document.getElementById('printChecklist');
-    if(printTop) printTop.addEventListener('click', function(){ window.print(); });
-    if(printChecklist) printChecklist.addEventListener('click', function(){ window.print(); });
-
-    var toTop=document.getElementById('toTopLink'), backTop=document.getElementById('backTop');
-    if(toTop){ toTop.addEventListener('click', function(e){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});}); }
-    window.addEventListener('scroll', function(){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
-  })();
-
-} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
-</script>
-
-<!-- C) Background: tech lines + smoke -->
-<script>
-try{
-  (function(){
-    var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
-    function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
-    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=16,spacing=Math.max(54,h/rows);
-      for(var i=-2;i<rows+2;i++){ var y=i*spacing+((t*0.025)%spacing); var g=ctx.createLinearGradient(0,y,w,y+90);
-        g.addColorStop(0,'rgba(61,226,255,0.14)'); g.addColorStop(0.5,'rgba(155,92,255,0.16)'); g.addColorStop(1,'rgba(255,32,69,0.14)');
-        ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(-120,y); ctx.lineTo(w+120,y+90); ctx.stroke(); }
-      requestAnimationFrame(draw);
-    }
-    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
-  })();
-
-  (function(){
-    var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d');
-    var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], last=performance.now();
-    var PERIOD = window.SEMSEO && window.SEMSEO.SMOKE_HUE_PERIOD_MS ? window.SEMSEO.SMOKE_HUE_PERIOD_MS : 1000000000;
-    function resize(){
-      c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-      var W=window.innerWidth, H=window.innerHeight;
-      var N = 76;
-      blobs=new Array(N).fill(0).map(function(_,i){
-        var px = W*0.65 + Math.random()*W*0.45;
-        var py = H*0.65 + Math.random()*H*0.45;
-        var r  = 120 + Math.random()*260;
-        var speed = 0.18 + Math.random()*0.22;
-        return {
-          x:px, y:py, r:r,
-          vx: -speed*(0.6+Math.random()*0.8),
-          vy: -speed*(0.6+Math.random()*0.8),
-          baseHue: (i*37)%360,
-          alpha: .26 + .20*Math.random()
-        };
-      });
-      last=performance.now();
-    }
-    function draw(now){
-      var W=window.innerWidth, H=window.innerHeight;
-      ctx.clearRect(0,0,W,H);
-      ctx.globalCompositeOperation='screen';
-      var dt = now - last; last = now;
-      for(var i=0;i<blobs.length;i++){
-        var b=blobs[i];
-        b.x += b.vx * dt; b.y += b.vy * dt;
-        if(b.x < -360 || b.y < -360){ b.x = W + Math.random()*260; b.y = H + Math.random()*260; }
-        var hue = (b.baseHue + (now % PERIOD) * (360/PERIOD)) % 360;
-        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
-        g.addColorStop(0,'hsla('+hue+',88%,68%,'+b.alpha+')');
-        g.addColorStop(1,'hsla('+((hue+70)%360)+',88%,50%,0)');
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
-      }
-      requestAnimationFrame(draw);
-    }
-    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
-  })();
-} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
-</script>
-
-<!-- D) Error sink -->
-<script>
-window.addEventListener('error', function(e){
-  var s=document.getElementById('analyzeStatus');
-  if (s) s.textContent = 'JavaScript error: ' + (e && e.message ? e.message : e);
-});
-</script>
-
-
-<script>
-/* HVAI Multilingual (Beta) */
-(function(){
-  const i18n = {
-    en: { human:"Human-like", ai:"AI-like", conf:"Confidence", langLabel:"Language:", mixed:"Mixed — Signals disagree — review content variety and structure." },
-    ur: { human:"انسانی انداز", ai:"اے آئی انداز", conf:"اعتماد", langLabel:"زبان:", mixed:"Mixed — سگنلز میں اختلاف ہے — مواد کی تنوع اور ساخت دیکھیں۔" },
-    ar: { human:"بِشري", ai:"ذكاء اصطناعي", conf:"الثقة", langLabel:"اللغة:", mixed:"مختلط — الإشارات متباينة — راجع تنوع المحتوى وبنيته." },
-    de: { human:"Menschlich", ai:"KI-ähnlich", conf:"Vertrauen", langLabel:"Sprache:", mixed:"Gemischt — Signale weichen ab — Vielfalt & Struktur prüfen." },
-    es: { human:"Humano", ai:"Parecido a IA", conf:"Confianza", langLabel:"Idioma:", mixed:"Mixto — Señales en desacuerdo — revisa variedad y estructura." },
-    pt: { human:"Humano", ai:"Semelhante à IA", conf:"Confiança", langLabel:"Idioma:", mixed:"Misto — Sinais divergentes — reveja a variedade e a estrutura do conteúdo." }
-  };
-  const langSel = document.getElementById('hvaiLang');
-  const hvai = document.getElementById('detectorPanel');
-
-  function seedKeys(){
-    // tag labels so we can swap reliably
-    document.querySelectorAll('#detectorPanel .hvai-label .lab').forEach(el => {
-      const t = (el.textContent||'').toLowerCase();
-      if (t.includes('human')) el.dataset.i18nKey = 'human';
-      else if (t.includes('ai')) el.dataset.i18nKey = 'ai';
-    });
-    const confChip = document.querySelector('#detectorPanel .hvai-chip');
-    if (confChip && !confChip.dataset.i18nKey && /confidence/i.test(confChip.textContent)) confChip.dataset.i18nKey = 'conf';
-    const row = document.getElementById('hvaiLangRow');
-    if (row){ const strong = row.querySelector('strong'); if (strong) strong.dataset.i18nKey = 'langLabel'; }
-  }
-
-  function applyLang(code){
-    const t = i18n[code] || i18n.en;
-    document.querySelectorAll('#detectorPanel .hvai-label .lab').forEach(el => {
-      const key = el.dataset.i18nKey;
-      if (key && t[key]){
-        // keep icon, replace text node
-        let tn = Array.from(el.childNodes).reverse().find(n => n.nodeType === 3);
-        if (!tn){ tn = document.createTextNode(''); el.appendChild(tn); }
-        tn.nodeValue = ' ' + t[key];
-      }
-    });
-    const confChip = document.querySelector('#detectorPanel .hvai-chip[data-i18n-key="conf"], #detectorPanel .hvai-chip[data-i18nKey="conf"]');
-    if (confChip){
-      confChip.innerHTML = confChip.innerHTML.replace(/Confidence[^:<]*/i, t.conf);
-    }
-    const row = document.getElementById('hvaiLangRow');
-    if (row){
-      const strong = row.querySelector('strong');
-      if (strong) strong.textContent = t.langLabel;
-    }
-    // RTL for AR/UR
-    if (hvai){ hvai.setAttribute('dir', (code==='ar' || code==='ur') ? 'rtl' : 'ltr'); }
-    // Update banner text if present
-    const banner = document.getElementById('hvaiBanner');
-    if (banner && banner.textContent.trim().length){
-      banner.innerHTML = t.mixed;
-      banner.classList.add('show');
-      banner.style.display = 'block';
-    }
-  }
-
-  if (langSel){
-    seedKeys();
-    langSel.addEventListener('change', e => applyLang(e.target.value));
-    applyLang(langSel.value);
-  }
-})();
-</script>
 
 
 <script>
 (function(){
   const apiPublic = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
-  const section = document.querySelector('section[id*="psi"], section[id*="pagespeed"], section[id*="siteSpeed"]');
-  const endpoint = (section && section.dataset && section.dataset.psiEndpoint) ? section.dataset.psiEndpoint : null;
-  const urlInput = document.getElementById('urlField') || document.querySelector('input[type="url"], input[name*="url"]');
+  const section = document.getElementById('psiPanel') || document.querySelector('section.psi');
+  const endpoint = section && section.dataset ? section.dataset.psiEndpoint : null;
+  // Use the REAL input id used in your markup
+  const urlInput = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
   const runBtn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
-  const strategySel = document.getElementById('psiStrategy') || { value: 'mobile' };
-
-  function $(sel){ return document.querySelector(sel); }
-  function setText(sel, txt){ const el=$(sel); if(el){ el.textContent = txt; } }
+  const strategyEl = document.getElementById('psiStrategy'); // this is a <b> in your UI (mobile/desktop)
 
   function badge(metric, value){
     if (metric==='LCP'){ if (value<=2500) return ['fast','Good']; if (value<=4000) return ['ok','Needs improv.']; return ['slow','Poor']; }
@@ -1879,11 +1033,16 @@ window.addEventListener('error', function(e){
     return ['ok','Info'];
   }
 
-  async function runPSI(){
-    const raw = (urlInput && urlInput.value || '').trim();
-    if (!raw){ alert("Enter a URL to analyze."); return; }
-    const target = encodeURIComponent(raw);
-    const qs = `url=${target}&strategy=${encodeURIComponent(strategySel.value||'mobile')}&category=performance&category=accessibility&category=seo&category=best-practices`;
+  async function runPSI(targetUrl){
+    const raw = (targetUrl || (urlInput && urlInput.value) || '').trim();
+    if (!raw){
+      // Try to pull from any previously analyzed value stored on the page
+      const stash = section && section.getAttribute('data-last-url');
+      if (stash){ return runPSI(stash); }
+      return; // silent fail instead of alert to avoid UX interruption
+    }
+    const strategy = (strategyEl && (strategyEl.textContent||'').trim().toLowerCase()) || 'mobile';
+    const qs = `url=${encodeURIComponent(raw)}&strategy=${encodeURIComponent(strategy)}&category=performance&category=accessibility&category=seo&category=best-practices`;
 
     let res;
     try{
@@ -1891,64 +1050,76 @@ window.addEventListener('error', function(e){
         const r = await fetch(`${endpoint}?${qs}`, {credentials:'same-origin'});
         if (r.ok) res = await r.json();
       }
-    }catch(_){ /* fallback to public */ }
+    }catch(_){}
 
     if (!res){
       const r = await fetch(`${apiPublic}?${qs}`);
       res = await r.json();
     }
+    section && section.setAttribute('data-last-url', raw);
     renderPSI(res);
   }
 
   function renderPSI(json){
     try{
-      const perf = Math.round((json.lighthouseResult.categories.performance.score||0)*100);
-      setText('#psiPerf', perf + ' / 100');
+      const perfEl = document.getElementById('psiPerf');
+      const perf = json && json.lighthouseResult && json.lighthouseResult.categories && json.lighthouseResult.categories.performance ? Math.round(json.lighthouseResult.categories.performance.score*100) : null;
+      if (perfEl && perf!=null){ perfEl.textContent = perf + ' / 100'; }
 
+      // Prefer field data
       const fx = json.loadingExperience && json.loadingExperience.metrics || {};
       const LCPf = fx.LARGEST_CONTENTFUL_PAINT_MS && fx.LARGEST_CONTENTFUL_PAINT_MS.percentile || null;
       const CLSf = fx.CUMULATIVE_LAYOUT_SHIFT_SCORE && fx.CUMULATIVE_LAYOUT_SHIFT_SCORE.percentile/100 || null;
-      const INPf = (fx.INTERACTION_TO_NEXT_PAINT && fx.INTERACTION_TO_NEXT_PAINT.percentile) || null;
+      const INPf = fx.INTERACTION_TO_NEXT_PAINT && fx.INTERACTION_TO_NEXT_PAINT.percentile || null;
 
-      const audits = json.lighthouseResult.audits || {};
+      const audits = json.lighthouseResult && json.lighthouseResult.audits || {};
       const LCPlab = audits['largest-contentful-paint'] && audits['largest-contentful-paint'].numericValue || null;
       const CLSlab = audits['cumulative-layout-shift'] && audits['cumulative-layout-shift'].numericValue || null;
-      const INPlab = (audits['interaction-to-next-paint'] && audits['interaction-to-next-paint'].numericValue) || null;
+      const INPlab = audits['interaction-to-next-paint'] && audits['interaction-to-next-paint'].numericValue || null;
 
       const LCP = LCPf || LCPlab || 0;
       const CLS = (CLSf!=null ? CLSf : CLSlab) || 0;
       const INP = INPf || INPlab || 0;
 
-      const LCPs = (LCP/1000).toFixed(2) + 's';
-      const INPs = Math.round(INP) + 'ms';
-      const CLSs = (Math.round(CLS*1000)/1000).toFixed(3);
+      const lcpEl = document.getElementById('psiLcp');
+      const inpEl = document.getElementById('psiInp');
+      const clsEl = document.getElementById('psiCls');
+
+      const lcpBar = document.getElementById('psiLcpBar');
+      const inpBar = document.getElementById('psiInpBar');
+      const clsBar = document.getElementById('psiClsBar');
 
       const [bLCP, tLCP] = badge('LCP', LCP);
       const [bINP, tINP] = badge('INP', INP);
       const [bCLS, tCLS] = badge('CLS', CLS);
 
-      const lcpEl = document.getElementById('metricLCP');
-      const inpEl = document.getElementById('metricINP');
-      const clsEl = document.getElementById('metricCLS');
+      if (lcpEl) lcpEl.textContent = (LCP/1000).toFixed(2) + 's';
+      if (inpEl) inpEl.textContent = Math.round(INP) + 'ms';
+      if (clsEl) clsEl.textContent = (Math.round(CLS*1000)/1000).toFixed(3);
 
-      function fill(el, txt, badgeClass, badgeText, frac){
-        if (!el) return;
-        const val = el.querySelector('.val'); if (val) val.textContent = txt;
-        const b = el.querySelector('.badge'); if (b){ b.className = 'badge ' + badgeClass; b.textContent = badgeText; }
-        const bar = el.querySelector('.mini > i'); if (bar){ bar.style.width = Math.min(100, Math.max(5, Math.round(frac*100))) + '%'; }
-      }
-
-      fill(lcpEl, LCPs, bLCP, tLCP, Math.min(LCP/4000, 1));
-      fill(inpEl, INPs, bINP, tINP, Math.min(INP/500, 1));
-      fill(clsEl, CLSs, bCLS, tCLS, Math.min(CLS/0.25, 1));
-
-    }catch(e){
-      console.error('PSI render error', e, json);
-    }
+      if (lcpBar) lcpBar.style.width = Math.min(100, Math.max(5, Math.round((LCP/4000)*100))) + '%';
+      if (inpBar) inpBar.style.width = Math.min(100, Math.max(5, Math.round((INP/500)*100))) + '%';
+      if (clsBar) clsBar.style.width = Math.min(100, Math.max(5, Math.round((CLS/0.25)*100))) + '%';
+    }catch(e){ console.error('PSI render error', e, json); }
   }
 
-  if (runBtn){ runBtn.addEventListener('click', function(e){ e.preventDefault(); runPSI(); }); }
-  if (urlInput && urlInput.value && urlInput.value.startsWith('http')){ setTimeout(runPSI, 300); }
+  // Hook the existing app button
+  if (runBtn){
+    runBtn.addEventListener('click', function(ev){
+      // do not block existing SEMSEO_go(); let it run first
+      setTimeout(()=>runPSI(), 50);
+    });
+  }
+  // Also hook into SEMSEO_go directly
+  const originalSEMSEO = window.SEMSEO_go;
+  window.SEMSEO_go = function(){
+    try{ if (typeof originalSEMSEO === 'function') originalSEMSEO(); }catch(e){}
+    runPSI();
+  };
+
+  // Auto-run if an URL is already filled
+  const pre = urlInput && urlInput.value && urlInput.value.trim();
+  if (pre){ setTimeout(()=>runPSI(pre), 200); }
 })();
 </script>
 
