@@ -33,9 +33,6 @@
 <meta name="twitter:title" content="{{ $metaTitle }}">
 <meta name="twitter:description" content="{{ $metaDescription }}">
 <meta name="twitter:image" content="{{ $metaImage }}">
-
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet"/>
-
 <style>
 :root{
   --bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;
@@ -516,6 +513,99 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
 
   </style>
+
+
+<!-- ===== New Neo‑Glass Aurora Skin (global) ===== -->
+<style>
+:root {
+  /* Base */
+  --bg: #0c1022;
+  --panel: rgba(18, 22, 46, 0.85);
+  --card: rgba(18, 22, 46, 0.92);
+  --text: #eaf1ff;
+  --text-dim: #a7b6ff;
+  --border: rgba(255,255,255,.12);
+  --shadow: 0 20px 60px rgba(0,0,0,.45);
+
+  /* Accents (Aurora) */
+  --acc-1: #7c5cff;
+  --acc-2: #22c3f7;
+  --acc-3: #a3ff7f;
+  --acc-warn: #ffb257;
+  --acc-bad:  #ff6b6b;
+  --acc-good: #39e58c;
+
+  /* Rounding & spacing */
+  --radius: 16px;
+  --chip-radius: 12px;
+  --pad: 16px;
+}
+body { background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(124,92,255,.14), transparent 60%),
+    radial-gradient(1000px 600px at -10% 20%, rgba(34,195,247,.12), transparent 60%),
+    radial-gradient(900px 500px at 50% 120%, rgba(163,255,127,.10), transparent 60%),
+    var(--bg);
+  color: var(--text);
+}
+.card, .panel, .cl-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(6px);
+}
+h2.section-title, .cl-title {
+  letter-spacing: .2px;
+  background: linear-gradient(90deg, var(--acc-1), var(--acc-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.improve-btn {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .45rem .7rem;
+  font-weight: 700; font-size: 13px;
+  color: #111;
+  background: linear-gradient(135deg, var(--acc-2), var(--acc-1));
+  border-radius: var(--chip-radius);
+  border: 0; cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+  box-shadow: 0 6px 18px rgba(124,92,255,.22);
+}
+.improve-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.improve-btn:active { transform: translateY(0); }
+.score-badge {
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width: 42px; height: 28px; padding: 0 .5rem;
+  font-weight: 800; font-size: 13px;
+  border-radius: 999px; border: 1px solid var(--border);
+  background: rgba(255,255,255,.06);
+}
+.score-badge[data-score^="8"], .score-badge[data-score^="9"] { outline: 2px solid var(--acc-good); }
+.score-badge[data-score^="6"], .score-badge[data-score^="7"] { outline: 2px solid var(--acc-warn); }
+.score-badge[data-score^="4"], .score-badge[data-score^="5"], .score-badge[data-score^="3"] { outline: 2px solid var(--acc-bad); }
+.checklist li input[type="checkbox"] {
+  width: 18px; height: 18px; border-radius: 6px;
+  border: 1px solid var(--border); background: rgba(255,255,255,.05);
+}
+.checklist li input[type="checkbox"]:checked {
+  background: linear-gradient(135deg, var(--acc-3), var(--acc-2));
+  border-color: transparent;
+}
+.cl-modal .cl-sub { color: var(--text-dim); }
+.cl-close { border-color: var(--border); }
+.card--aurora, .aurora-border { position: relative; }
+.card--aurora::before, .aurora-border::before {
+  content:""; position:absolute; inset: -1px;
+  border-radius: inherit; pointer-events:none;
+  background: linear-gradient(90deg, rgba(124,92,255,.55), rgba(34,195,247,.55), rgba(163,255,127,.55));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  padding: 1px;
+  border-radius: calc(var(--radius) + 1px);
+}
+</style>
+<!-- ===== /New Neo‑Glass Aurora Skin ===== -->
 
 </head>
 <body>
@@ -2283,6 +2373,123 @@ window.addEventListener('error', function(e){
 })();
 </script>
 <!-- ===== /Checklist Improve Modal ===== -->
+
+
+<!-- ===== Unique Aurora Liquid Wheel + Ambient Glow + Stickers ===== -->
+<style>
+  :root { --fx-spin: 0deg; --fx-h: 120; }
+  body.fx-ambient {
+    background:
+      radial-gradient(1200px 600px at 80% -10%, hsl(var(--fx-h) 90% 60% / .10), transparent 60%),
+      radial-gradient(900px 500px at 20% 110%, hsl(calc(var(--fx-h) + 70) 90% 60% / .10), transparent 60%),
+      #0c1022;
+    transition: background 400ms ease;
+  }
+  .fx-wheel { position: relative; isolation: isolate; filter: drop-shadow(0 12px 40px rgba(0,0,0,.45)); }
+  .fx-wheel .wheel-halo{
+    position:absolute; inset:-18px; z-index:-1; border-radius:50%;
+    background:
+      conic-gradient(from var(--fx-spin),
+        hsl(var(--fx-h) 92% 62% / .65),
+        hsl(calc(var(--fx-h) + 45) 92% 60% / .65),
+        hsl(calc(var(--fx-h) + 90) 92% 58% / .65),
+        hsl(var(--fx-h) 92% 62% / .65));
+    -webkit-mask: radial-gradient(farthest-side, rgba(0,0,0,0) 62%, #000 63%);
+            mask: radial-gradient(farthest-side, rgba(0,0,0,0) 62%, #000 63%);
+    filter: blur(18px) saturate(1.2);
+    opacity:.85; pointer-events:none;
+  }
+  .aurora-title{ position:relative; display:inline-block;
+    background: linear-gradient(90deg, hsl(var(--fx-h) 90% 65%), hsl(calc(var(--fx-h)+50) 90% 65%));
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .aurora-title::after{ content:""; position:absolute; left:0; right:0; bottom:-8px; height:2px; border-radius:999px;
+    background: linear-gradient(90deg, hsl(var(--fx-h) 90% 65%), hsl(calc(var(--fx-h)+50) 90% 65%)); opacity:.6; }
+  .fx-sticker{ position: fixed; z-index: 99999; font-size: 22px; pointer-events:none;
+    transform: translate(-50%, -50%) scale(.9); animation: sticker-pop 900ms cubic-bezier(.2,.8,.2,1) forwards; }
+  @keyframes sticker-pop{
+    0%{ opacity:0; transform: translate(-50%,-30%) scale(.7) rotate(-8deg); }
+    30%{ opacity:1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+    70%{ opacity:1; transform: translate(-50%,-70%) scale(1.02) rotate(2deg); }
+    100%{ opacity:0; transform: translate(-50%,-90%) scale(.96) rotate(6deg); }
+  }
+</style>
+<script>
+(function(){
+  const clamp = (n,min,max)=> Math.max(min, Math.min(max,n));
+  const pick = (qs)=> document.querySelector(qs);
+  function detectScore(){
+    const el =
+      pick('[data-total-score]') ||
+      pick('.score-wheel[data-score]') ||
+      pick('.score-wheel .score-value') ||
+      pick('.main-score') ||
+      pick('.score .value') ||
+      pick('.score-badge[data-score]');
+    let t = '';
+    if(!el) return 0;
+    t = el.dataset.totalScore || el.getAttribute('data-score') || el.textContent || '0';
+    const m = String(t).match(/\d{1,3}/);
+    return clamp(parseInt(m ? m[0] : '0', 10)||0, 0, 100);
+  }
+  const scoreToHue = s => Math.round(120 * (s/100));
+  function startSpin(){
+    let angle = 0;
+    setInterval(()=> {
+      angle = (angle + 18) % 360;
+      document.documentElement.style.setProperty('--fx-spin', angle + 'deg');
+    }, 1000);
+  }
+  function skinWheel(){
+    const wheel =
+      pick('.score-wheel') ||
+      pick('[data-total-score]') ||
+      pick('.main-score') ||
+      pick('.score');
+    if(!wheel) return;
+    if(!wheel.classList.contains('fx-wheel')){
+      wheel.classList.add('fx-wheel');
+      const halo = document.createElement('span');
+      halo.className = 'wheel-halo';
+      wheel.appendChild(halo);
+    }
+    document.body.classList.add('fx-ambient');
+    const score = detectScore();
+    document.documentElement.style.setProperty('--fx-h', scoreToHue(score));
+  }
+  function sticker(x, y, emoji){
+    const s = document.createElement('div');
+    s.className = 'fx-sticker';
+    s.textContent = emoji;
+    s.style.left = x + 'px'; s.style.top = y + 'px';
+    document.body.appendChild(s);
+    setTimeout(()=> s.remove(), 950);
+  }
+  function bindStickers(){
+    document.addEventListener('change', (e)=>{
+      const cb = e.target.closest && e.target.closest('.checklist input[type="checkbox"]');
+      if(cb && cb.checked){
+        const r = cb.getBoundingClientRect();
+        sticker(r.left + r.width/2, r.top + window.scrollY, ['✨','✅','📈','🌈'][Math.floor(Math.random()*4)]);
+      }
+    });
+  }
+  function watchScore(){
+    let last = detectScore();
+    setInterval(()=>{
+      const now = detectScore();
+      if(now !== last){
+        document.documentElement.style.setProperty('--fx-h', Math.round(120 * (now/100)));
+        last = now;
+      }
+    }, 1500);
+  }
+  skinWheel();
+  bindStickers();
+  startSpin();
+  watchScore();
+})();
+</script>
+<!-- ===== /Unique Aurora Liquid Wheel block ===== -->
 
 </body>
 </html>
