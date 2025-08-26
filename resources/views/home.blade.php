@@ -2491,5 +2491,215 @@ window.addEventListener('error', function(e){
 </script>
 <!-- ===== /Unique Aurora Liquid Wheel block ===== -->
 
+
+<!-- ===== Multicolor Animated Category Icons (SVG sprite + auto-attach) ===== -->
+<style>
+  .cat-ico{ width:22px; height:22px; margin-right:.55rem; vertical-align:-3px;
+    filter: drop-shadow(0 6px 16px rgba(124,92,255,.22));
+    animation: catHue 12s linear infinite; }
+  @keyframes catHue { to { filter: hue-rotate(360deg) drop-shadow(0 6px 16px rgba(124,92,255,.22)); } }
+  .cat-ico .line{ fill:none; stroke:url(#grad-aurora-ico); stroke-width:2; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:120; stroke-dashoffset:360; animation: catDash 14s linear infinite; }
+  @keyframes catDash { to { stroke-dashoffset:0; } }
+  .cat-ico .fill{ fill:url(#grad-aurora-ico); }
+  .cat-ico.spin{ animation: catHue 12s linear infinite, catSpin 10s linear infinite; }
+  @keyframes catSpin { to { transform: rotate(360deg); } }
+</style>
+
+<svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">
+  <defs>
+    <linearGradient id="grad-aurora-ico" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#7c5cff"/>
+      <stop offset="50%"  stop-color="#22c3f7"/>
+      <stop offset="100%" stop-color="#a3ff7f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Document / Content -->
+  <symbol id="ico-doc" viewBox="0 0 24 24">
+    <path class="line" d="M6 3h7l5 5v13H6zM13 3v6h6" />
+    <path class="line" d="M8 12h8M8 16h8M8 20h8" />
+  </symbol>
+
+  <!-- Key / Keywords -->
+  <symbol id="ico-key" viewBox="0 0 24 24">
+    <circle class="line" cx="7" cy="12" r="3"/>
+    <path class="line" d="M10 12h6l3-3m-3 3l3 3" />
+  </symbol>
+
+  <!-- Meta / Tag -->
+  <symbol id="ico-tag" viewBox="0 0 24 24">
+    <path class="line" d="M3 12l9-9h6l3 3v6l-9 9L3 12z" />
+    <circle class="line" cx="16" cy="8" r="1.6" />
+  </symbol>
+
+  <!-- Canonical / Link+Check -->
+  <symbol id="ico-canon" viewBox="0 0 24 24">
+    <path class="line" d="M9 12a3 3 0 0 1 3-3h3a3 3 0 1 1 0 6h-3" />
+    <path class="line" d="M15 12a3 3 0 0 1-3 3H9a3 3 0 1 1 0-6h1" />
+    <path class="line" d="M17 4l2 2 3-3" />
+  </symbol>
+
+  <!-- Sitemap / Graph -->
+  <symbol id="ico-sitemap" viewBox="0 0 24 24">
+    <rect class="line" x="10" y="3" width="4" height="3" rx="1"/>
+    <rect class="line" x="3" y="18" width="5" height="3" rx="1"/>
+    <rect class="line" x="16" y="18" width="5" height="3" rx="1"/>
+    <path class="line" d="M12 6v5M12 11h-6v4M12 11h6v4" />
+  </symbol>
+
+  <!-- Shield / E-E-A-T -->
+  <symbol id="ico-shield" viewBox="0 0 24 24">
+    <path class="line" d="M12 3l7 3v5c0 5-3.5 8-7 10-3.5-2-7-5-7-10V6l7-3z" />
+    <path class="line" d="M9.5 12l1.8 1.8 3.2-3.2" />
+  </symbol>
+
+  <!-- Link -->
+  <symbol id="ico-link" viewBox="0 0 24 24">
+    <path class="line" d="M10 14L8 16a4 4 0 0 1-6-6l2-2" />
+    <path class="line" d="M14 10l2-2a4 4 0 0 1 6 6l-2 2" />
+    <path class="line" d="M8 12h8" />
+  </symbol>
+
+  <!-- Media / Image -->
+  <symbol id="ico-media" viewBox="0 0 24 24">
+    <rect class="line" x="3" y="5" width="18" height="14" rx="2" />
+    <circle class="line" cx="9" cy="9" r="2" />
+    <path class="line" d="M3 17l5-5 4 4 3-3 6 6" />
+  </symbol>
+
+  <!-- Structure / List -->
+  <symbol id="ico-structure" viewBox="0 0 24 24">
+    <path class="line" d="M9 6h12M9 12h12M9 18h12" />
+    <circle class="line" cx="5" cy="6" r="1.2" />
+    <circle class="line" cx="5" cy="12" r="1.2" />
+    <circle class="line" cx="5" cy="18" r="1.2" />
+  </symbol>
+
+  <!-- Mobile -->
+  <symbol id="ico-mobile" viewBox="0 0 24 24">
+    <rect class="line" x="7" y="3" width="10" height="18" rx="2"/>
+    <circle class="line" cx="12" cy="17" r="1"/>
+  </symbol>
+
+  <!-- Speed / Gauge -->
+  <symbol id="ico-speed" viewBox="0 0 24 24">
+    <path class="line" d="M4 15a8 8 0 1 1 16 0" />
+    <path class="line" d="M12 15l4-4" />
+    <path class="line" d="M6 19h12" />
+  </symbol>
+
+  <!-- UX / Pointer -->
+  <symbol id="ico-ux" viewBox="0 0 24 24">
+    <path class="line" d="M6 4l8 8-4 1 3 6 2-1 2 4" />
+  </symbol>
+
+  <!-- CTA / Target -->
+  <symbol id="ico-cta" viewBox="0 0 24 24">
+    <circle class="line" cx="12" cy="12" r="8" />
+    <circle class="line" cx="12" cy="12" r="4" />
+    <circle class="line" cx="12" cy="12" r="1" />
+  </symbol>
+
+  <!-- Schema / Graph nodes -->
+  <symbol id="ico-schema" viewBox="0 0 24 24">
+    <circle class="line" cx="5" cy="12" r="2"/>
+    <circle class="line" cx="12" cy="5" r="2"/>
+    <circle class="line" cx="19" cy="12" r="2"/>
+    <circle class="line" cx="12" cy="19" r="2"/>
+    <path class="line" d="M7 12h10M12 7v10M7 11L11 7M17 11l-4-4M7 13l4 4M17 13l-4 4"/>
+  </symbol>
+
+  <!-- Breadcrumbs -->
+  <symbol id="ico-breadcrumb" viewBox="0 0 24 24">
+    <path class="line" d="M5 6l5 6-5 6M14 6l5 6-5 6"/>
+  </symbol>
+
+  <!-- URL / Slug -->
+  <symbol id="ico-url" viewBox="0 0 24 24">
+    <path class="line" d="M7 12a5 5 0 0 1 5-5h1" />
+    <path class="line" d="M17 12a5 5 0 0 1-5 5h-1" />
+    <path class="line" d="M8 12h8" />
+  </symbol>
+
+  <!-- Entity / Atom -->
+  <symbol id="ico-entity" viewBox="0 0 24 24">
+    <circle class="line" cx="12" cy="12" r="2"/>
+    <ellipse class="line" cx="12" cy="12" rx="8" ry="4"/>
+    <ellipse class="line" cx="12" cy="12" rx="4" ry="8" transform="rotate(60 12 12)"/>
+    <ellipse class="line" cx="12" cy="12" rx="4" ry="8" transform="rotate(-60 12 12)"/>
+  </symbol>
+
+  <!-- Star (default) -->
+  <symbol id="ico-star" viewBox="0 0 24 24">
+    <path class="line" d="M12 3l2.8 5.7L21 10l-4.5 4.2L17.6 21 12 17.8 6.4 21l1.1-6.8L3 10l6.2-1.3L12 3z"/>
+  </symbol>
+</svg>
+
+<script>
+(function(){
+  // Keywords -> symbol id
+  const ICONS = [
+    {k:['content','intent','readability','text'], id:'ico-doc'},
+    {k:['keyword','semantic','terms'], id:'ico-key'},
+    {k:['meta','description','title','tag'], id:'ico-tag'},
+    {k:['canonical','duplicate'], id:'ico-canon'},
+    {k:['sitemap','index'], id:'ico-sitemap'},
+    {k:['eat','e-e-a-t','trust','expertise','author'], id:'ico-shield'},
+    {k:['link','internal','external','backlink'], id:'ico-link'},
+    {k:['image','media','video'], id:'ico-media'},
+    {k:['structure','heading','h1','h2','outline'], id:'ico-structure'},
+    {k:['mobile','responsive'], id:'ico-mobile'},
+    {k:['speed','performance','vitals','core web vitals','lcp','cls','inp'], id:'ico-speed'},
+    {k:['ux','usability','accessibility'], id:'ico-ux'},
+    {k:['cta','conversion','button'], id:'ico-cta'},
+    {k:['schema','json-ld','rich result'], id:'ico-schema'},
+    {k:['breadcrumb'], id:'ico-breadcrumb'},
+    {k:['url','slug'], id:'ico-url'},
+    {k:['entity','entities','topic'], id:'ico-entity'},
+  ];
+  const pickIcon = (label)=>{
+    const t = (label||'').toLowerCase();
+    for(const m of ICONS){
+      if(m.k.some(w => t.includes(w))) return m.id;
+    }
+    return 'ico-star';
+  };
+
+  // Candidate headers for categories (robust across your templates)
+  const headers = Array.from(document.querySelectorAll(
+    '.checklist h3, .checklist .category-title, .checklist .group-title, .checklist [data-cat-title], .checklist .section-title, .checklist .title, .checklist .header'
+  ));
+
+  // If no explicit checklist container, fall back to any h3 with data-category
+  if(headers.length === 0){
+    document.querySelectorAll('h3,[data-category],[data-cat]').forEach(h => headers.push(h));
+  }
+
+  headers.forEach((h, idx)=>{
+    if(h.querySelector('svg.cat-ico')) return; // already has one
+    // Hide any old <i> icon fonts if present
+    h.querySelectorAll('i').forEach(i=> i.style.display='none');
+
+    const label = h.textContent.trim();
+    const sym = pickIcon(label);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class','cat-ico');
+    svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('aria-hidden','true');
+
+    const use = document.createElementNS('http://www.w3.org/2000/svg','use');
+    use.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href','#'+sym);
+    // Newer browsers support href without xlink:
+    use.setAttribute('href','#'+sym);
+    svg.appendChild(use);
+
+    // Insert at the very start
+    h.insertBefore(svg, h.firstChild);
+  });
+})();
+</script>
+<!-- ===== /Animated Category Icons ===== -->
+
 </body>
 </html>
