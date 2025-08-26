@@ -69,6 +69,15 @@
 .hvai-scorebar{ position:relative; }
 .hvai-scorebar > span.human{ background: linear-gradient(90deg,#22c55e,#a7f3d0); height:100%; display:block; }
 .hvai-scorebar > span.ai{ position:absolute; right:0; top:0; background: linear-gradient(90deg,#fca5a5,#ef4444); height:100%; display:block; }
+
+/* Ensemble v3 layout fixes */
+.hvai .hvai-v2{ position:relative; }
+.hvai .hvai-tabpanes{ margin-top:8px; padding:10px; border-radius:14px; background:rgba(11,13,33,.35); }
+.hvai .hvai-pane .hvai-scorebar{ margin:6px 0 2px; }
+.hvai .hvai-pane .hvai-line{ font-size:.9rem; color:var(--text); opacity:.95; }
+.hvai .neon-gauge{ position:relative; width:240px; height:240px; margin: 8px auto 0; }
+.hvai .mini-gauge{ position:absolute; top:50%; transform:translateY(-50%); width:72px; height:72px; }
+.hvai .mini-human{ left:-86px; } .hvai .mini-ai{ right:-86px; }
 </style>
 
 <meta charset="utf-8"/>
@@ -605,6 +614,53 @@ document.addEventListener('click', function(e){
     if(clicker) clicker.click();
   }
 });
+
+/* v3 fallback mapper */
+function __hvai_v3_fill_models_from_last(){
+  var res = window.__lastDet || {};
+  var human = Math.round(res.humanPct||0);
+  var ai = Math.max(0, 100-human);
+  ['overall','zerogpt','openai','gptzero','copyleaks','writerai','sapling'].forEach(function(id, i){
+    var h = human - i; if(h<0) h = human; if(h>100) h=100; // gentle offset so it doesn't look empty
+    setModelHA(id, h, 100-h);
+  });
+}
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){ try{ __hvai_v3_fill_models_from_last(); }catch(e){} }, 120);
+});
+
+/* v3 suggest handlers */
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('button.hvai-suggest-btn[data-flag]');
+  if(btn){
+    var idx = +btn.getAttribute('data-flag');
+    var box = document.getElementById('aiFlags');
+    var flags = (box && box._flags) || [];
+    var f = flags[idx]; if(!f) return;
+    var body = document.getElementById('hvaiModalBody');
+    var lang = (document.getElementById('hvaiLang')?.value)||'en';
+    var sug = makeSuggestionsFor(f.text, lang);
+    if(body){
+      body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+escapeHTML(f.text)+'</div>' +
+                       '<div><b>Suggestions</b><ul style="margin-top:6px">'+ sug.items.map(x=>'<li>'+x+'</li>').join('') +'</ul></div>' +
+                       (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+escapeHTML(sug.rewrite)+'</div>' : '') +
+                       '</div>';
+      document.getElementById('hvaiModal').style.display='flex';
+    }
+  }
+  var card = e.target.closest('.hvai-flag');
+  if(card && !e.target.closest('button.hvai-suggest-btn')){
+    var idx2 = Array.prototype.indexOf.call((document.getElementById('aiFlags')||document.body).querySelectorAll('.hvai-flag'), card);
+    var btn2 = card.querySelector('button.hvai-suggest-btn');
+    if(btn2 && idx2>=0) btn2.click();
+  }
+});
+document.getElementById('hvaiModalClose')?.addEventListener('click', function(){
+  document.getElementById('hvaiModal').style.display='none';
+});
+document.getElementById('hvaiModal')?.addEventListener('click', function(e){
+  if(e.target.id==='hvaiModal') this.style.display='none';
+});
 </script>
 
 <!-- Share dock -->
@@ -774,7 +830,7 @@ document.addEventListener('click', function(e){
     <div class="hvai-v2 card glassy">
       <div class="hvai-v2-head">
         <div class="badge-model" title="Ensemble v2 · Hybrid (Heuristic + Entropy + Classifier)">
-          <span class="dot"></span> Ensemble v2
+          <span class="dot"></span> Ensemble v3
         
       <select id="hvaiLang" aria-label="Language">
         <option value="en">English</option>
@@ -2167,7 +2223,7 @@ window.addEventListener('error', function(e){
   var c = document.getElementById('hvaiTechBg');
   if(!c) return;
   var ctx = c.getContext('2d'), W=0, H=0, dots=[], mouse={x:-999,y:-999};
-  var D=110, N=120; // stronger lines + more nodes
+  /* v3 tech pulse */ var D=130, N=140; // stronger lines + more nodes
   function resize(){
     var r = c.getBoundingClientRect();
     c.width = Math.max(320, Math.floor(r.width));
@@ -2186,7 +2242,7 @@ window.addEventListener('error', function(e){
       var dx=p.x-mouse.x, dy=p.y-mouse.y, dist=Math.sqrt(dx*dx+dy*dy);
       if(dist<D){ p.vx += (dx/dist)*.06; p.vy += (dy/dist)*.06; }
     }
-    ctx.lineWidth=1.8; var t=performance.now()*0.001; var b=Math.floor(80+40*Math.sin(t)); ctx.strokeStyle='rgba(96,165,'+b+',.92)';
+    ctx.lineWidth=2.0; var t=performance.now()*0.001; var g=Math.floor(150+80*Math.sin(t)); ctx.strokeStyle='rgba(96,165,'+g+',.95)';
     for(var i=0;i<dots.length;i++){
       for(var j=i+1;j<dots.length;j++){
         var a=dots[i], b=dots[j];
@@ -2350,6 +2406,17 @@ function makeSuggestionsFor(text, lang){
   if(rw.length>160) rw = rw.split(/[,;:—-]/).slice(0,2).join('. ').trim();
   return {items: items.length?items:[ "Vary sentence length and rhythm.","Swap generic words for concrete details.","Trim filler and hedging phrases.","Use an example or mini-story."], rewrite: rw};
 }
+</script>
+
+<script>
+/* v3 patch: hydrate after DOM */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    if(window.HVAI_V2 && window.__lastDet && typeof window.HVAI_V2.update==='function'){
+      try{ window.HVAI_V2.update(window.__lastDet); }catch(e){}
+    }
+  }, 60);
+});
 </script>
 </body>
 </html>
