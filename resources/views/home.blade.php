@@ -1043,8 +1043,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
   <div class="hvai-pane" id="pane-suggestions">
     <div id="aiSuggestBox">Click a flagged sentence in “AI Content” to open detailed suggestions.</div>
   </div>
-</div>
-<div class="det-grid" id="detGrid"></div>
+</div><div class="det-grid" id="detGrid"></div>
       <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
     </section>
 
@@ -2201,18 +2200,20 @@ window.addEventListener('error', function(e){
       var det = Array.isArray(res?.detectors) ? res.detectors : [];
       function getD(key, fallback){
         try{
-          var d = det.find(x => String(x.key||'').toLowerCase().includes(key));
-          var aiLike = Math.round(d?.ai ?? (100 - fallback));
-          var humanLike = 100 - aiLike;
-          return Math.max(0, Math.min(100, humanLike));
-        }catch(e){ return Math.max(0, Math.min(100, fallback)); }
+          var re = new RegExp(key, 'i');
+          var d = det.find(x => re.test(String(x.key||x.name||x.label||'')));
+          var aiLike = (d && (Number(d.ai) || Number(d.ai_like) || (100 - Number(d.human || d.human_like || d.score)))) || (100 - fallback);
+          var humanLike = 100 - Math.max(0, Math.min(100, Math.round(aiLike)));
+          return Math.max(0, Math.min(100, Math.round(humanLike)));
+        }catch(e){ return Math.max(0, Math.min(100, Math.round(fallback))); }
+      }catch(e){ return Math.max(0, Math.min(100, fallback)); }
       }
-      (function(){ var h=getD('zero',   human); if (typeof setModelHA === 'function') setModelHA('zerogpt',  h, 100-h); })();
-      (function(){ var h=getD('openai', human); if (typeof setModelHA === 'function') setModelHA('openai',   h, 100-h); })();
-      (function(){ var h=getD('gptzero',human); if (typeof setModelHA === 'function') setModelHA('gptzero',  h, 100-h); })();
-      (function(){ var h=getD('copy',   human); if (typeof setModelHA === 'function') setModelHA('copyleaks',h, 100-h); })();
-      (function(){ var h=getD('writer', human); if (typeof setModelHA === 'function') setModelHA('writerai', h, 100-h); })();
-      (function(){ var h=getD('sapling',human); if (typeof setModelHA === 'function') setModelHA('sapling',  h, 100-h); })();
+      /* v3: detector mapping */ (function(){ var h=getD('zero|zerogpt|zgpt',   human); if (typeof setModelHA === 'function') setModelHA('zerogpt',  h, 100-h); })();
+      (function(){ var h=getD('openai|oai', human); if (typeof setModelHA === 'function') setModelHA('openai',   h, 100-h); })();
+      (function(){ var h=getD('gptzero|gptz',human); if (typeof setModelHA === 'function') setModelHA('gptzero',  h, 100-h); })();
+      (function(){ var h=getD('copyleaks|copy|cl',   human); if (typeof setModelHA === 'function') setModelHA('copyleaks',h, 100-h); })();
+      (function(){ var h=getD('writer|writerai', human); if (typeof setModelHA === 'function') setModelHA('writerai', h, 100-h); })();
+      (function(){ var h=getD('sapling|spl',human); if (typeof setModelHA === 'function') setModelHA('sapling',  h, 100-h); })();
 
       // AI-like content flags into the AI Content tab
       try{
@@ -2496,6 +2497,20 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     }catch(e){}
   }, 80);
+});
+</script>
+
+<script>
+/* v3 hydrate models */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    try{
+      if(window.HVAI_V3_HYDRATED) return;
+      window.HVAI_V3_HYDRATED = true;
+      var res = window.__lastDet || { humanPct: (window.__lastScore||0), aiPct: 100-(window.__lastScore||0) };
+      if(window.HVAI_V2 && typeof window.HVAI_V2.update==='function') window.HVAI_V2.update(res);
+    }catch(e){}
+  }, 120);
 });
 </script>
 </body>
