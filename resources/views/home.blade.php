@@ -707,223 +707,110 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 <!-- HUMAN vs AI Content (Ensemble) — v19 FEATHER (fast) -->
 
 <!-- HUMAN vs AI Content (Ensemble) — v20 PRISM (multicolor) -->
-<section id="hvai" class="hvai hvai-v20" aria-label="Human vs AI Content (Ensemble)">
+
+<!-- HUMAN vs AI Content (Ensemble) — v22 PRISM (scoped, full) -->
+<section id="hvai" class="hvai hvai-v22" aria-label="Human vs AI Content (Ensemble)">
   <style>
-  /* ===== HVAI v20 Prism: multicolor arc + compact text ===== */
-  .hvai.hvai-v20{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
-  .hvai.hvai-v20 *{box-sizing:border-box}
-  .hvai.hvai-v20 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
+  .hvai.hvai-v22{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
+  .hvai.hvai-v22 *{box-sizing:border-box}
+  .hvai.hvai-v22 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
     background:
       linear-gradient(135deg, rgba(0,255,255,.10) 1px, transparent 1px) 0 0/18px 18px,
       linear-gradient(45deg, rgba(255,0,180,.08) 1px, transparent 1px) 0 0/20px 20px,
       radial-gradient(800px 600px at 85% 10%, rgba(67,169,255,.08), transparent 60%),
       radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
   }
-
-  .hvai.hvai-v20 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(240px, 26vw, 360px)); align-items:center}
-  @media (max-width:1100px){ .hvai.hvai-v20 .grid{grid-template-columns:1fr} .hvai.hvai-v20 .wheel{order:-1; margin:6px auto 14px} }
-
-  /* Title */
-  .hvai.hvai-v20 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
-  .hvai.hvai-v20 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  .hvai.hvai-v20 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
+  .hvai.hvai-v22 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(240px, 26vw, 360px)); align-items:center}
+  @media (max-width:1100px){ .hvai.hvai-v22 .grid{grid-template-columns:1fr} .hvai.hvai-v22 .wheel{order:-1; margin:6px auto 14px} }
+  .hvai.hvai-v22 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
+  .hvai.hvai-v22 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  .hvai.hvai-v22 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
   @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 
-  /* Status badge */
-  .hvai.hvai-v20 .status{margin:6px 0 12px}
-  .hvai.hvai-v20 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
-  .hvai.hvai-v20 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
-  .hvai.hvai-v20 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
-  .hvai.hvai-v20 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
-  .hvai.hvai-v20 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
+  .hvai.hvai-v22 .status{margin:6px 0 12px}
+  .hvai.hvai-v22 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
+  .hvai.hvai-v22 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
+  .hvai.hvai-v22 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
+  .hvai.hvai-v22 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
+  .hvai.hvai-v22 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
 
-  /* Bars */
-  .hvai.hvai-v20 .row2{display:flex; gap:18px; flex-wrap:wrap}
-  .hvai.hvai-v20 .bar{flex:1 1 420px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:280px}
-  .hvai.hvai-v20 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
-  .hvai.hvai-v20 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
-  .hvai.hvai-v20 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
-  .hvai.hvai-v20 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
-  .hvai.hvai-v20 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
+  .hvai.hvai-v22 .row2{display:flex; gap:18px; flex-wrap:wrap}
+  .hvai.hvai-v22 .bar{flex:1 1 420px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:280px}
+  .hvai.hvai-v22 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
+  .hvai.hvai-v22 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
+  .hvai.hvai-v22 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
+  .hvai.hvai-v22 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
+  .hvai.hvai-v22 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
 
-  /* PRISM WHEEL: CSS conic arc with ring mask and rotating pointer */
+  /* Prism wheel (multicolor arc) */
   .prism-wheel{position:relative; width:var(--wheel-size, clamp(240px, 26vw, 360px)); aspect-ratio:1; margin-left:auto}
   .prism-wheel .track{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) calc(50% - var(--thick,18px)), transparent calc(50% - var(--thick,18px)), transparent 100%)}
-  .prism-wheel .arc{
-    position:absolute; inset:0; border-radius:50%;
-    background: conic-gradient(from -90deg,
-      #ff6a00 0%, #ffb700 10%, #ffd300 20%, #96e21a 30%, #2ad1a3 40%, #1aa6ff 50%, #5a6bff 60%, #9659ff 70%, #ff6aff 80%, #ff6a00 100%);
-    -webkit-mask:
-      radial-gradient(farthest-side, transparent calc(100% - var(--thick,18px)), #000 calc(100% - var(--thick,18px))),
-      conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
-            mask:
-      radial-gradient(farthest-side, transparent calc(100% - var(--thick,18px)), #000 calc(100% - var(--thick,18px))),
-      conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
+  .prism-wheel .arc{position:absolute; inset:0; border-radius:50%;
+    background: conic-gradient(from -90deg, #ff6a00 0%, #ffb700 10%, #ffd300 20%, #96e21a 30%, #2ad1a3 40%, #1aa6ff 50%, #5a6bff 60%, #9659ff 70%, #ff6aff 80%, #ff6a00 100%);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,18px)), #000 calc(100% - var(--thick,18px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
+            mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,18px)), #000 calc(100% - var(--thick,18px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
   }
   .prism-wheel .pointer{position:absolute; inset:0; transform: rotate(calc(var(--p)*3.6deg)); transform-origin:50% 50%}
-  .prism-wheel .pointer::after{
-    content:""; position:absolute; left:50%; top: calc(var(--thick,18px)/2);
-    transform: translateX(-50%); width:14px; height:14px; border-radius:50%; background:#00f5c4; box-shadow:0 0 0 4px rgba(0,245,196,.15)
-  }
-  .prism-wheel .center{position:absolute; inset:calc(var(--thick,18px) + 14px); border-radius:50%; display:grid; place-items:center; background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.08), rgba(10,12,20,.50))}
+  .prism-wheel .pointer::after{content:""; position:absolute; left:50%; top: calc(var(--thick,18px)/2); transform: translateX(-50%); width:12px; height:12px; border-radius:50%; background:#00f5c4; box-shadow:0 0 0 4px rgba(0,245,196,.15)}
+  .prism-wheel .center{position:absolute; inset:calc(var(--thick,18px) + 18px); border-radius:50%; display:grid; place-items:center; background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.06), rgba(10,12,20,.55))}
   .prism-wheel .kv{display:grid; gap:6px; text-align:center}
-  .prism-wheel .kv .row{display:flex; align-items:center; gap:6px; justify-content:center; font: 700 14px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; color:#eaf1ff}
-  .prism-wheel .kv .val{font-weight:900; font-size:18px}
+  .prism-wheel .kv .row{display:flex; align-items:center; gap:6px; justify-content:center; font: 700 13px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; color:#eaf1ff}
+  .prism-wheel .kv .val{font-weight:900; font-size:17px}
   .prism-wheel .kv .dot{width:8px; height:8px; border-radius:50%}
   .prism-wheel .kv .dot.ai{background:#7c5bff}
   .prism-wheel .kv .dot.h{background:#00f5c4}
-
-  /* Ensure any legacy wheel DOM inside .wheel is hidden */
-  .hvai.hvai-v20 .wheel > *:not(.prism-wheel){ display:none !important; }
+  .hvai.hvai-v22 .wheel > *:not(.prism-wheel){ display:none !important; }
   </style>
 
   <div class="tech" aria-hidden="true"></div>
 
   <div class="grid">
     <div class="left">
-      <div class="title">
-        <div class="txt"><span class="rainbow">Human vs AI Content (Ensemble)</span></div>
-      </div>
-
-      <div id="hvaiStatus" class="status neutral" aria-live="polite">
-        <span class="status-badge"><span class="ico">⌛</span><span class="txt">Waiting for analysis…</span></span>
-      </div>
-
+      <div class="title"><div class="txt"><span class="rainbow">Human vs AI Content (Ensemble)</span></div></div>
+      <div id="hvaiStatus" class="status neutral" aria-live="polite"><span class="status-badge"><span class="ico">⌛</span><span class="txt">Waiting for analysis…</span></span></div>
       <div class="badges">
         <div class="badge">🛡️ <strong>Confidence:</strong> <span id="hvaiConf">0</span>%</div>
         <div class="badge">ℹ️ Higher bar = more AI-like</div>
       </div>
-
       <div class="row2" id="hvaiBars">
-        <div class="bar" data-key="humanLike">
-          <div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div>
-          <div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div>
-        </div>
-        <div class="bar" data-key="lexical">
-          <div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div>
-          <div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div>
-        </div>
-        <div class="bar" data-key="burst">
-          <div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div>
-          <div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div>
-        </div>
-        <div class="bar" data-key="digits">
-          <div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div>
-          <div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div>
-        </div>
-        <div class="bar" data-key="repetition">
-          <div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div>
-          <div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div>
-        </div>
-        <div class="bar" data-key="entropy">
-          <div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div>
-          <div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div>
-        </div>
+        <div class="bar" data-key="humanLike"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div></div>
+        <div class="bar" data-key="lexical"><div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div><div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div></div>
+        <div class="bar" data-key="burst"><div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div><div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div></div>
+        <div class="bar" data-key="digits"><div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div><div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div></div>
+        <div class="bar" data-key="repetition"><div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div><div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div></div>
+        <div class="bar" data-key="entropy"><div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div><div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div></div>
       </div>
-
       <small>Source: local ensemble (no external APIs).</small>
     </div>
 
     <div class="wheel">
       <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:18px;">
-        <div class="track"></div>
-        <div class="arc"></div>
-        <div class="pointer"></div>
-        <div class="center">
-          <div class="kv">
-            <div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div>
-            <div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div>
-          </div>
-        </div>
+        <div class="track"></div><div class="arc"></div><div class="pointer"></div>
+        <div class="center"><div class="kv">
+          <div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div>
+          <div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div>
+        </div></div>
       </div>
     </div>
   </div>
 
   <script>
-  // ===== v20 Prism logic =====
-  function setBadge(h){ 
-    var st=document.getElementById('hvaiStatus'); if(!st) return;
-    var txt=st.querySelector('.txt'); var ico=st.querySelector('.ico');
-    st.classList.remove('neutral','good','warn','bad');
-    if(h>=80){ st.classList.add('good'); if(txt) txt.textContent='Great Work'; if(ico) ico.textContent='✅'; }
-    else if(h>=60){ st.classList.add('warn'); if(txt) txt.textContent='Need More Hard work on content'; if(ico) ico.textContent='🟡'; }
-    else { st.classList.add('bad'); if(txt) txt.textContent='Needs Rewrite the Content'; if(ico) ico.textContent='✍️'; }
-  }
-
-  function updateBars(subs){
-    if(!subs) return;
-    var map=[
-      ['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],
-      ['hvaiBarLex','hvaiValLex', subs.lexical],
-      ['hvaiBarBurst','hvaiValBurst', subs.burst],
-      ['hvaiBarDigits','hvaiValDigits', subs.digits],
-      ['hvaiBarRep','hvaiValRep', subs.repetition],
-      ['hvaiBarEnt','hvaiValEnt', subs.entropy],
-    ];
-    map.forEach(function(r){ var f=document.getElementById(r[0]); var n=document.getElementById(r[1]);
-      var v=Math.max(0,Math.min(100,Math.round(r[2]||0))); if(f) f.style.width=v+'%'; if(n) n.textContent=v; });
-  }
-
-  function deriveSubs(pAI){
-    var h=100-pAI, clamp=v=>Math.max(0,Math.min(100,Math.round(v)));
-    return { humanLike:clamp(h), lexical:clamp(35+h*0.55), burst:clamp(25+h*0.7), digits:clamp(10+(100-h)*0.3), repetition:clamp(60-h*0.4), entropy:clamp(35+h*0.45) };
-  }
-
-  window.updateHVAIScore=function(pAI){
-    var p=Math.max(0,Math.min(100,Math.round(pAI||0))), h=100-p;
-    var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p);
-    var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p;
-    var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h;
-    setBadge(h);
-    updateBars(deriveSubs(p));
-  };
-
-  // Optional precise compute if text is provided
-  function detectUltra(text){
-    text=(text||'').replace(/\s+/g,' ').trim();
-    var len=text.length; if(len<40) return {ai:0,conf:0,subs:null};
-    var s=text.split(/(?<=[.!?])\s+/).filter(Boolean);
-    var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]);
-    var types=new Set(t);
-    var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100;
-    var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;}
-    var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100;
-    var sl=s.map(x=>(x.match(/\\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length);
-    var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100;
-    var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; }
-    for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100;
-    var digits=(text.match(/\\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100;
-    function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));}
-    var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words));
-    var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100;
-    var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15; // compact mapping
-    var ai=Math.max(0,Math.min(100,100-human));
-    var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) };
-    var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
-    var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length;
-    var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10));
-    return {ai:Math.round(ai), conf:Math.round(conf), subs};
-  }
-
-  window.hvaiCompute=function(text){
-    try{ var r=detectUltra(text||''); updateHVAIScore(r.ai); updateBars(r.subs); var c=document.getElementById('hvaiConf'); if(c) c.textContent=r.conf; return r; }
-    catch(e){ console.warn('hvaiCompute error',e); return null; }
-  };
-
-  // Cleanup any old wheel nodes inside .wheel and inject our Prism wheel if needed
   (function(){
-    var wrap=document.querySelector('#hvai.hvai-v20 .wheel');
-    if(!wrap) return;
-    var existing=wrap.querySelector('.prism-wheel');
-    if(!existing){
-      wrap.innerHTML = wrap.innerHTML; // no-op but ensures our markup above remains; kept for safety
-    }
+    var confLocked=false;
+    function clamp(v){ return Math.max(0,Math.min(100,Math.round(v||0))); }
+    function setBadge(h){ var st=document.getElementById('hvaiStatus'); if(!st) return; var txt=st.querySelector('.txt'); var ico=st.querySelector('.ico'); st.classList.remove('neutral','good','warn','bad'); if(h>=80){ st.classList.add('good'); if(txt) txt.textContent='Great Work'; if(ico) ico.textContent='✅'; } else if(h>=60){ st.classList.add('warn'); if(txt) txt.textContent='Need More Hard work on content'; if(ico) ico.textContent='🟡'; } else { st.classList.add('bad'); if(txt) txt.textContent='Needs Rewrite the Content'; if(ico) ico.textContent='✍️'; } }
+    function setConfidence(v){ var el=document.getElementById('hvaiConf'); if(el) el.textContent=clamp(v); }
+    function deriveConfFromAI(pAI){ return 60 + (Math.abs(50 - pAI) / 50) * 30; }
+    function updateBars(subs){ if(!subs) return; var map=[['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],['hvaiBarLex','hvaiValLex', subs.lexical],['hvaiBarBurst','hvaiValBurst', subs.burst],['hvaiBarDigits','hvaiValDigits', subs.digits],['hvaiBarRep','hvaiValRep', subs.repetition],['hvaiBarEnt','hvaiValEnt', subs.entropy],]; map.forEach(function(r){ var f=document.getElementById(r[0]); var n=document.getElementById(r[1]); var v=clamp(r[2]); if(f) f.style.width=v+'%'; if(n) n.textContent=v; }); }
+    function deriveSubs(pAI){ var h=100-pAI, c=v=>Math.max(0,Math.min(100,Math.round(v))); return { humanLike:c(h), lexical:c(35+h*0.55), burst:c(25+h*0.7), digits:c(10+(100-h)*0.3), repetition:c(60-h*0.4), entropy:c(35+h*0.45) }; }
+    window.updateHVAIScore=function(pAI){ var p=clamp(pAI), h=100-p; var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p); var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p; var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h; setBadge(h); if(!confLocked) setConfidence(deriveConfFromAI(p)); updateBars(deriveSubs(p)); };
+    function detectUltra(text){ text=(text||'').replace(/\s+/g,' ').trim(); var len=text.length; if(len<40) return {ai:0,conf:60,subs:deriveSubs(0)}; var s=text.split(/(?<=[.!?])\s+/).filter(Boolean); var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]); var types=new Set(t); var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100; var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;} var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100; var sl=s.map(x=>(x.match(/\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length); var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100; var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; } for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100; var digits=(text.match(/\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100; function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\b/gi)||[]).length+(w.match(/le\b/gi)?1:0));} var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words)); var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100; var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15; var ai=Math.max(0,Math.min(100,100-human)); var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) }; var varSignals=[ttrS,repS,burstS,entS,digS,readS]; var mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length; var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length; var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10)); return {ai:Math.round(ai), conf:Math.round(conf), subs}; }
+    window.hvaiCompute=function(text){ try{ var r=detectUltra(text||''); confLocked=true; updateHVAIScore(r.ai); updateBars(r.subs); setConfidence(r.conf); return r; }catch(e){ console.warn('hvaiCompute error',e); return null; } };
+    updateHVAIScore(0);
   })();
-
-  // Init
-  (function(){ updateHVAIScore(0); var c=document.getElementById('hvaiConf'); if(c) c.textContent=0; })();
   </script>
 </section>
+
 
 
 
