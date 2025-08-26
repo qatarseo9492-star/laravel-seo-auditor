@@ -772,11 +772,11 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
   /* NOVA WHEEL — uniquely named to avoid conflicts */
   .nova-wheel{position:relative; width:var(--wheel-size, clamp(240px, 28vw, 380px)); aspect-ratio:1/1; margin-left:auto}
-  .nova-wheel .halo, .nova-wheel .ink, .nova-wheel .bloom, .nova-wheel .drops, .nova-wheel .sweep, .nova-wheel .center{position:absolute; inset:0; border-radius:50% will-change: filter;  will-change: filter; }
+  .nova-wheel .halo, .nova-wheel .ink, .nova-wheel .bloom, .nova-wheel .drops, .nova-wheel .sweep, .nova-wheel .center{position:absolute; inset:0; border-radius:50%}
   @property --h { syntax:'<angle>'; inherits:false; initial-value:0deg }
   @keyframes hueTick { to{ --h: 360deg } }
   /* change every second (step), but still animated */
-  .nova-wheel .ink, .nova-wheel .bloom{ animation: hueTick 1s steps(1,end) infinite; filter: hue-rotate(var(--h))  will-change: filter;  will-change: filter; }
+  .nova-wheel .ink, .nova-wheel .bloom{ animation: hueTick 60s steps(60,end) infinite; filter: hue-rotate(var(--h)) }
 
   /* ring base */
   .nova-wheel .halo{ 
@@ -791,13 +791,13 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring,22px)), #000 calc(100% - var(--ring,22px)));
             mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring,22px)), #000 calc(100% - var(--ring,22px)));
     filter: hue-rotate(var(--h)) drop-shadow(0 0 16px rgba(255,255,255,.25));
-   will-change: filter; }
+  }
   .nova-wheel .bloom{
     background: conic-gradient(from -90deg, rgba(255,90,0,.6) 0%, rgba(255,210,0,.6) 12%, rgba(42,209,163,.6) 48%, rgba(26,166,255,.6) 60%, rgba(150,89,255,.6) 84%, rgba(255,106,255,.6) calc(var(--p)*1%), transparent calc(var(--p)*1%));
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - calc(var(--ring,22px) + 14px)), #000 calc(100% - calc(var(--ring,22px) + 14px)));
             mask: radial-gradient(farthest-side, transparent calc(100% - calc(var(--ring,22px) + 14px)), #000 calc(100% - calc(var(--ring,22px) + 14px)));
     filter: hue-rotate(var(--h)) blur(14px) saturate(1.4); mix-blend-mode:screen; opacity:.8
-   will-change: filter; }
+  }
   .nova-wheel .drops{
     background: repeating-conic-gradient(from -90deg, rgba(255,255,255,.25) 0 .8deg, transparent .8deg 10deg);
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - calc(var(--ring,22px) + 8px)), #000 calc(100% - calc(var(--ring,22px) + 8px)));
@@ -817,16 +817,6 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   .nova-wheel .dot{width:10px; height:10px; border-radius:50%}
   .nova-wheel .dot.ai{background:#9d6bff}
   .nova-wheel .dot.h{background:#00f5c4}
-
-  
-  /* --- Performance: render fast, animate later --- */
-  .hvai.hvai-v17{ content-visibility:auto; contain:layout paint style; }
-  .hvai.hvai-v17:not(.live) .tech{ animation:none; opacity:.6 }
-  .hvai.hvai-v17.live .tech{ animation: techDrift 26s linear infinite; }
-  .hvai.hvai-v17:not(.live) .nova-wheel .ink,
-  .hvai.hvai-v17:not(.live) .nova-wheel .bloom{ animation:none; opacity:.0; }
-  .hvai.hvai-v17.live .nova-wheel .ink,
-  .hvai.hvai-v17.live .nova-wheel .bloom{ animation: hueTick 1s steps(1,end) infinite; opacity:1; }
 
   </style>
 
@@ -1002,36 +992,6 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
   // Init at zero
   (function(){ updateHVAIScore(0); var c=document.getElementById('hvaiConf'); if(c) c.textContent=0; })();
-  
-  // Performance boot: enable animations when idle (or after a short delay)
-  (function perfBoot(){
-    var root=document.querySelector('.hvai.hvai-v17');
-    if(!root) return;
-    var go=function(){ root.classList.add('live'); };
-    if('requestIdleCallback' in window){ requestIdleCallback(go, {timeout:800}); }
-    else { setTimeout(go, 600); }
-  })();
-
-  // Ensure the DOM watcher disconnects after first compute
-  (function(){
-    var sels=['#analysisResults','.analysis-results','#results','.results','#output','.output','#report','.report','#contentPreview','.content-preview','.report-body','main','article'];
-    var targets=sels.map(s=>document.querySelector(s)).filter(Boolean);
-    if(!targets.length) return;
-    var done=false;
-    var mo=new MutationObserver(function(){
-      if(done) return;
-      for(var el of targets){
-        var txt=(el.innerText||'').replace(/\s+/g,' ').trim();
-        if(txt && txt.length>120){
-          done=true; try{ mo.disconnect(); }catch(_){}
-          hvaiCompute(txt);
-          return;
-        }
-      }
-    });
-    targets.forEach(t=>mo.observe(t,{subtree:true,childList:true,characterData:true}));
-  })();
-
   </script>
 </section>
 
