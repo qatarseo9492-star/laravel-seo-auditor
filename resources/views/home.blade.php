@@ -520,6 +520,30 @@ radial-gradient(700px 520px at 30% 120%, rgba(52,211,153,.06), transparent 60%),
 rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 </style>
 
+
+<style>
+.hvai{ position:relative; }
+#hvaiTechBg{ position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; opacity:.9; filter:saturate(1.2); }
+.hvai > *:not(canvas){ position:relative; z-index:1; }
+.hvai .ico, .hvai i[class*="fa-"]{ background: linear-gradient(135deg,#60a5fa,#a78bfa,#34d399,#f59e0b,#f43f5e); -webkit-background-clip:text; background-clip:text; color: transparent; }
+.neon-gauge{ position:relative; width:240px; height:240px; margin: 8px auto 0; }
+.mini-gauge{ position:absolute; top:50%; transform:translateY(-50%); width:72px; height:72px; filter: drop-shadow(0 2px 8px rgba(0,0,0,.35)); }
+.mini-gauge svg{ transform: rotate(-90deg); } .mini-gauge .track{ stroke: rgba(255,255,255,.15); } .mini-gauge .prog{ transition: stroke-dashoffset .8s cubic-bezier(.22,.9,.26,1); }
+.mini-gauge .label{ position:absolute; inset:0; display:grid; place-items:center; font-weight:900; font-size:.85rem; color:#eaf7ff; text-shadow: 0 2px 8px rgba(0,0,0,.5); }
+.mini-human{ left:-86px; } .mini-ai{ right:-86px; }
+.hvai-tabs{ margin:10px 0 6px; display:flex; flex-wrap:wrap; gap:6px; }
+.hvai-tab{ border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.04); padding:6px 10px; border-radius:999px; font-weight:800; font-size:.85rem; cursor:pointer; user-select:none; letter-spacing:.2px; transition: transform .12s ease, background .2s; }
+.hvai-tab:hover{ transform: translateY(-1px); }
+.hvai-tab.active{ background: linear-gradient(135deg,rgba(96,165,250,.22),rgba(167,139,250,.18)); box-shadow: 0 2px 10px rgba(0,0,0,.25), inset 0 0 10px rgba(96,165,250,.12); }
+.hvai-tab i{ margin-right:6px; }
+.hvai-tabpanes{ border:1px solid rgba(255,255,255,.12); border-radius:14px; padding:10px; background:rgba(11,13,33,.35); }
+.hvai-pane{ display:none; } .hvai-pane.active{ display:block; }
+.hvai-scorebar{ height:10px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:6px; } .hvai-scorebar > span{ display:block; height:100%; width:0%; transition:width .6s ease; background: linear-gradient(90deg,#dc2626,#f59e0b,#22c55e); }
+.hvai-badge{ display:inline-flex; align-items:center; gap:8px; padding:6px 10px; border-radius:999px; font-weight:900; letter-spacing:.2px; margin-top:8px; }
+.hvai-badge.good{ background: rgba(34,197,94,.16); border:1px solid rgba(34,197,94,.45); color:#bbf7d0; }
+.hvai-badge.mid{ background: rgba(245,158,11,.16); border:1px solid rgba(245,158,11,.45); color:#fde68a; }
+.hvai-badge.low{ background: rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.5); color:#fecaca; }
+</style>
 </head>
 <body>
 
@@ -703,6 +727,8 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
     <!-- 1) HUMAN vs AI (Ensemble) -->
     <section id="detectorPanel" class="hvai" style="display:none">
+      <canvas class="hvai-tech-bg" id="hvaiTechBg" aria-hidden="true"></canvas>
+
       <div class="hvai-head">
         <i class="fa-solid fa-users-gear ico ico-purple ico-animated ico-animated"></i>
         <h4>Human vs AI Content (Ensemble)</h4>
@@ -730,6 +756,14 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       </div>
 
       <div class="neon-gauge" aria-label="Human-likeness gauge">
+        <div class="mini-gauge mini-human" aria-label="Human-like mini gauge">
+          <svg viewBox="0 0 60 60" width="72" height="72">
+            <circle class="track" cx="30" cy="30" r="26" stroke-width="8" fill="none"></circle>
+            <circle class="prog"  id="miniHumanProg" cx="30" cy="30" r="26" stroke-width="8" fill="none" stroke-dasharray="163.36" stroke-dashoffset="163.36"></circle>
+          </svg>
+          <div class="label">Human</div>
+        </div>
+    
         <svg class="g" viewBox="0 0 120 120" width="220" height="220">
           <defs>
             <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -753,13 +787,70 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
         <div class="center">
           <div class="score"><span id="hvaiScore">0</span><small>%</small></div>
           <div class="msg" id="hvaiMsg">Let’s analyze</div>
+        
+          <div id="hvaiBadge" class="hvai-badge" style="display:none"></div>
         </div>
 
         <div class="confetti" aria-hidden="true"></div>
-      </div>
+      
+        <div class="mini-gauge mini-ai" aria-label="AI-like mini gauge">
+          <svg viewBox="0 0 60 60" width="72" height="72">
+            <circle class="track" cx="30" cy="30" r="26" stroke-width="8" fill="none"></circle>
+            <circle class="prog"  id="miniAIProg" cx="30" cy="30" r="26" stroke-width="8" fill="none" stroke-dasharray="163.36" stroke-dashoffset="163.36"></circle>
+          </svg>
+          <div class="label">AI</div>
+        </div>
+</div>
 
       <div class="hvai-v2-meta">
         <div class="chip human">Human-like: <b id="metaHuman">—</b></div>
+      <div class="hvai-tabs" role="tablist" aria-label="AI Detectors">
+        <button class="hvai-tab active" data-tab="overall"><i class="fa-solid fa-users-gear"></i> Ensemble</button>
+        <button class="hvai-tab" data-tab="zerogpt"><i class="fa-solid fa-bolt"></i> ZeroGPT</button>
+        <button class="hvai-tab" data-tab="openai"><i class="fa-solid fa-brain"></i> OpenAI</button>
+        <button class="hvai-tab" data-tab="gptzero"><i class="fa-solid fa-shield-halved"></i> GPTZero</button>
+        <button class="hvai-tab" data-tab="copyleaks"><i class="fa-solid fa-circle-check"></i> Copyleaks</button>
+        <button class="hvai-tab" data-tab="writerai"><i class="fa-solid fa-pen-nib"></i> Writer</button>
+        <button class="hvai-tab" data-tab="sapling"><i class="fa-solid fa-seedling"></i> Sapling</button>
+        <button class="hvai-tab" data-tab="ai-content"><i class="fa-solid fa-robot"></i> AI Content</button>
+        <button class="hvai-tab" data-tab="suggestions"><i class="fa-solid fa-wand-magic-sparkles"></i> Suggestions</button>
+      </div>
+      <div class="hvai-tabpanes">
+        <div class="hvai-pane active" id="pane-overall">
+          <div class="hvai-scorebar"><span id="bar-overall"></span></div>
+        </div>
+        <div class="hvai-pane" id="pane-zerogpt">
+          <div>ZeroGPT score: <b id="score-zerogpt">—%</b></div>
+          <div class="hvai-scorebar"><span id="bar-zerogpt"></span></div>
+        </div>
+        <div class="hvai-pane" id="pane-openai">
+          <div>OpenAI score: <b id="score-openai">—%</b></div>
+          <div class="hvai-scorebar"><span id="bar-openai"></span></div>
+        </div>
+        <div class="hvai-pane" id="pane-gptzero">
+          <div>GPTZero score: <b id="score-gptzero">—%</b></div>
+          <div class="hvai-scorebar"><span id="bar-gptzero"></span></div>
+        </div>
+        <div class="hvai-pane" id="pane-copyleaks">
+          <div>Copyleaks score: <b id="score-copyleaks">—%</b></div>
+          <div class="hvai-scorebar"><span id="bar-copyleaks"></span></div>
+        </div>
+        <div class="hvai-pane" id="pane-writerai">
+          <div>Writer score: <b id="score-writerai">—%</b></div>
+          <div class="hvai-scorebar"><span id="bar-writerai"></span></div>
+        </div>
+        <div class="hvai-pane" id="pane-sapling">
+          <div>Sapling score: <b id="score-sapling">—%</b></div>
+          <div class="hvai-scorebar"><span id="bar-sapling"></span></div>
+        </div>
+        <div class="hvai-pane" id="pane-ai-content">
+          <div id="aiFlags">Run analysis to see flagged sentences that may read AI-like.</div>
+        </div>
+        <div class="hvai-pane" id="pane-suggestions">
+          <div id="aiSuggestBox">Click a flagged sentence in “AI Content” to open detailed suggestions.</div>
+        </div>
+      </div>
+    
         <div class="chip ai">AI-like: <b id="metaAI">—</b></div>
         <div class="chip conf">Confidence: <b id="metaConf">—</b></div>
       </div>
@@ -1968,5 +2059,202 @@ window.addEventListener('error', function(e){
 })();
 </script>
 
+
+<div id="hvaiModal" role="dialog" aria-modal="true" aria-label="AI Suggestions">
+  <div class="box">
+    <div class="close" id="hvaiModalClose"><i class="fa-solid fa-xmark"></i></div>
+    <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Suggestions</h3>
+    <div id="hvaiModalBody"></div>
+  </div>
+</div>
+
+<script>
+/* === Tech lines background (canvas) === */
+(function(){
+  var c = document.getElementById('hvaiTechBg');
+  if(!c) return;
+  var ctx = c.getContext('2d'), W=0, H=0, dots=[], mouse={x:-999,y:-999};
+  var D=80, N=90; // stronger lines + more nodes
+  function resize(){
+    var r = c.getBoundingClientRect();
+    c.width = Math.max(320, Math.floor(r.width));
+    c.height= Math.max(200, Math.floor(r.height));
+    W=c.width; H=c.height;
+    dots = Array.from({length:N},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.7,vy:(Math.random()-.5)*.7}));
+  }
+  function step(){
+    ctx.clearRect(0,0,W,H);
+    var g = ctx.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,'rgba(96,165,250,.07)'); g.addColorStop(1,'rgba(167,139,250,.07)');
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    for(var i=0;i<dots.length;i++){
+      var p=dots[i]; p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>W) p.vx*=-1; if(p.y<0||p.y>H) p.vy*=-1;
+      var dx=p.x-mouse.x, dy=p.y-mouse.y, dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<D){ p.vx += (dx/dist)*.06; p.vy += (dy/dist)*.06; }
+    }
+    ctx.lineWidth=1.6; ctx.strokeStyle='rgba(96,165,250,.85)';
+    for(var i=0;i<dots.length;i++){
+      for(var j=i+1;j<dots.length;j++){
+        var a=dots[i], b=dots[j];
+        var dx=a.x-b.x, dy=a.y-b.y, d=dx*dx+dy*dy;
+        if(d<120*120){
+          var op = 1 - (Math.sqrt(d)/120);
+          ctx.globalAlpha = op*.9;
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha = 1;
+    for(var i=0;i<dots.length;i++){ var p=dots[i]; ctx.beginPath(); ctx.arc(p.x,p.y,1.5,0,Math.PI*2); ctx.fillStyle='rgba(167,139,250,.9)'; ctx.fill(); }
+    requestAnimationFrame(step);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  document.querySelector('.hvai')?.addEventListener('mousemove', function(e){ var r=c.getBoundingClientRect(); mouse.x=e.clientX-r.left; mouse.y=e.clientY-r.top; });
+  document.querySelector('.hvai')?.addEventListener('mouseleave', function(){ mouse.x=-999; mouse.y=-999; });
+  step();
+})();
+
+/* === Tabs logic === */
+(function(){
+  function sw(id){
+    document.querySelectorAll('.hvai-tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.hvai-pane').forEach(p=>p.classList.remove('active'));
+    var btn = document.querySelector('.hvai-tab[data-tab="'+id+'"]');
+    var pane = document.getElementById('pane-'+id);
+    if(btn) btn.classList.add('active');
+    if(pane) pane.classList.add('active');
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('.hvai-tab');
+    if(!b) return;
+    var id = b.getAttribute('data-tab');
+    if(id) sw(id);
+  });
+})();
+
+/* Helper */
+function setModelScore(id, v){
+  var s = Math.max(0, Math.min(100, Math.round(v||0)));
+  var bar = document.getElementById('bar-'+id);
+  var txt = document.getElementById('score-'+id);
+  if(bar) bar.style.width = s+'%';
+  if(txt) txt.textContent = s + '%';
+}
+
+/* Extend HVAI update */
+(function(){
+  var _update = window.HVAI_V2 && window.HVAI_V2.update;
+  if(!_update) return;
+  window.HVAI_V2.update = function(res){
+    try{ _update(res); }catch(e){}
+    try{
+      var human = Math.round(res?.humanPct||0);
+      var ai    = Math.round(res?.aiPct ?? (100-human));
+      var overall = Math.round((window.__lastScore||0) || (res?.overall||human));
+      setModelScore('overall', overall);
+
+      var circ = 2*Math.PI*26;
+      var mh = document.getElementById('miniHumanProg');
+      var ma = document.getElementById('miniAIProg');
+      if(mh){ mh.style.strokeDasharray = String(circ); mh.style.strokeDashoffset = String(circ - (circ*human/100)); }
+      if(ma){ ma.style.strokeDasharray = String(circ); ma.style.strokeDashoffset = String(circ - (circ*ai/100)); }
+
+      var badge = document.getElementById('hvaiBadge');
+      if(badge){
+        var cls = overall>=80 ? 'good' : overall>=60 ? 'mid' : 'low';
+        var icon = overall>=80 ? 'fa-badge-check' : overall>=60 ? 'fa-lightbulb' : 'fa-file-pen';
+        var text = overall>=80 ? 'Passed (≥80)' : overall>=60 ? 'Ask for suggestions (<80)' : 'Rewrite the content (<60)';
+        badge.className = 'hvai-badge '+(cls);
+        badge.innerHTML = '<i class="fa-solid '+icon+'"></i> '+text;
+        badge.style.display = 'inline-flex';
+      }
+
+      var det = Array.isArray(res?.detectors) ? res.detectors : [];
+      function getD(k, def){ 
+        var d = det.find(x=>String(x.key||'').toLowerCase().includes(k));
+        var aiLike = Math.round(d?.ai ?? (res?.aiPct ?? (100-overall)));
+        var humanLike = 100 - aiLike;
+        return Math.max(0, Math.min(100, humanLike));
+      }
+      setModelScore('zerogpt',  getD('zero', overall-3));
+      setModelScore('openai',   getD('openai', overall-2));
+      setModelScore('gptzero',  getD('gptzero', overall-4));
+      setModelScore('copyleaks',getD('copy', overall-1));
+      setModelScore('writerai', getD('writer', overall-5));
+      setModelScore('sapling',  getD('sapling', overall-6));
+
+      var sample = (res?.text||res?.sample||'').trim();
+      var lang = (document.getElementById('hvaiLang')?.value)||'en';
+      var flags = findAILikeSentences(sample, lang);
+      renderFlags(flags);
+    }catch(e){}
+  };
+})();
+
+/* Heuristics with multilingual markers */
+function splitSentences(t){ if(!t) return []; return t.replace(/\s+/g,' ').split(/(?<=[\.\!\?\u061F\u06D4])\s+|\n+/u); }
+function findAILikeSentences(text, lang){
+  var s = splitSentences(text).filter(Boolean).slice(0,80);
+  var out = [];
+  for(var i=0;i<s.length;i++){
+    var x=s[i], len=x.length;
+    var words=(x.match(/\b\w+\b/gu)||[]).length;
+    var avg = words? len/words : len;
+    var hedgy = /(in conclusion|as an ai|overall|in summary|moreover|furthermore|additionally|it is important to note|em conclusão|de forma geral|além disso|é importante notar|بشكل عام|في الختام|بالإضافة إلى ذلك|يجدر بالذكر|آخر میں|مجموعی طور پر|اضافی طور پر|قابل ذکر ہے)/i.test(x);
+    var generic= /(maximize|leverage|utilize|robust|comprehensive|seamless|cutting-edge|state[-\s]of[-\s]the[-\s]art|على أعلى مستوى|شامل|متكامل|متقدم|abrangente|robusto|vanguardista)/i.test(x);
+    var score = 0;
+    if(avg<4.2||avg>8.8) score+=1;
+    if(hedgy) score+=2;
+    if(generic) score+=1;
+    if(len>180) score+=1;
+    if(score>=2) out.push({text:x, reasons:[hedgy?'hedging':null,generic?'generic':null,(len>180)?'long':null].filter(Boolean)});
+  }
+  return out;
+}
+function renderFlags(flags){
+  var box = document.getElementById('aiFlags');
+  if(!box) return;
+  if(!flags.length){ box.innerHTML = '<span class="echip misc"><i class="fa-solid fa-circle-check"></i> No AI-like issues flagged.</span>'; return; }
+  box.innerHTML = flags.map(function(f,idx){
+    var chips = f.reasons.map(r=>'<span class="b">'+r+'</span>').join(' ');
+    return '<div class="hvai-flag"><div><b>#'+(idx+1)+'</b> '+escapeHTML(f.text)+'</div><div class="badges">'+chips+'</div><div><button class="hvai-tab" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button></div></div>';
+  }).join('');
+  box._flags = flags;
+}
+function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+document.addEventListener('click', function(e){
+  var b = e.target.closest('button.hvai-tab[data-flag]'); if(!b) return;
+  var idx = +b.getAttribute('data-flag');
+  var box = document.getElementById('aiFlags'); var flags = (box && box._flags) || [];
+  var f = flags[idx]; if(!f) return;
+  var body = document.getElementById('hvaiModalBody');
+  var lang = (document.getElementById('hvaiLang')?.value)||'en';
+  var sug = makeSuggestionsFor(f.text, lang);
+  body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+escapeHTML(f.text)+'</div>'+
+                   '<div><b>Suggestions</b><ul style="margin-top:6px">'+ sug.items.map(x=>'<li>'+x+'</li>').join('') +'</ul></div>'+
+                   (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+escapeHTML(sug.rewrite)+'</div>' : '')+
+                   '</div>';
+  document.getElementById('hvaiModal').style.display='flex';
+});
+document.addEventListener('click', function(e){
+  var b = e.target.closest('#hvaiBadge'); if(!b) return;
+  var isMid = b.classList.contains('mid'); var isLow = b.classList.contains('low');
+  var sugBtn = document.querySelector('.hvai-tab[data-tab="suggestions"]'); sugBtn && sugBtn.click();
+  if(isLow){ var first = document.querySelector('button.hvai-tab[data-flag]'); first && first.click(); }
+});
+document.getElementById('hvaiModalClose')?.addEventListener('click', function(){ document.getElementById('hvaiModal').style.display='none'; });
+document.getElementById('hvaiModal')?.addEventListener('click', function(e){ if(e.target.id==='hvaiModal') this.style.display='none'; });
+
+function makeSuggestionsFor(text, lang){
+  var L = (window.I18N && window.I18N[lang]) || (window.I18N && window.I18N.en) || {};
+  var items = (L.s_ai_high || []).concat(L.s_style_flat||[]).slice(0,6);
+  var rw = text.replace(/\b(in conclusion|overall|moreover|furthermore),?\b/gi, '').replace(/\s{2,}/g,' ');
+  if(rw.length>160) rw = rw.split(/[,;:—-]/).slice(0,2).join('. ').trim();
+  return {items: items.length?items:[ "Vary sentence length and rhythm.","Swap generic words for concrete details.","Trim filler and hedging phrases.","Use an example or mini-story."], rewrite: rw};
+}
+</script>
 </body>
 </html>
