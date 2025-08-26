@@ -2166,6 +2166,59 @@ window.addEventListener('error', function(e){
     const _paint   = window.HVAI_V2.paint;
     const _update  = window.HVAI_V2.update;
     window.HVAI_V2.update = function(res){
+  /* v3: minis + flags + models */
+  try{
+    var score = isFinite(res && res.humanPct) ? Math.round(res.humanPct) :
+                (isFinite(window.__lastScore) ? Math.round(window.__lastScore) : 0);
+    var human = score;
+    var ai    = Math.max(0, 100 - human);
+
+    // main gauge numeric
+    if (typeof setHVAIScore==='function') setHVAIScore(human);
+
+    // mini wheels arcs + numbers
+    var circ = 2*Math.PI*26;
+    var mh = document.getElementById('miniHumanProg');
+    var ma = document.getElementById('miniAIProg');
+    if(mh){ mh.style.strokeDasharray = String(circ); mh.style.strokeDashoffset = String(circ - (circ*human/100)); }
+    if(ma){ ma.style.strokeDasharray = String(circ); ma.style.strokeDashoffset = String(circ - (circ*ai/100)); }
+    var mhN = document.getElementById('miniHumanNum'); if(mhN) mhN.textContent = human + '%';
+    var maN = document.getElementById('miniAINum');   if(maN) maN.textContent = ai + '%';
+
+    // overall dual lines
+    if (typeof setModelHA==='function') setModelHA('overall', human, ai);
+
+    // detector mapping (aliases) -> human-like%
+    var det = Array.isArray(res?.detectors) ? res.detectors : [];
+    function getD(keyRegex, fallback){
+      try{
+        var re = new RegExp(keyRegex, 'i');
+        var d = det.find(x => re.test(String(x.key||x.name||x.label||'')));
+        var aiLike = (d && (Number(d.ai) || Number(d.ai_like) || (100 - Number(d.human || d.human_like || d.score)))) || (100 - fallback);
+        var humanLike = 100 - Math.max(0, Math.min(100, Math.round(aiLike)));
+        return Math.max(0, Math.min(100, Math.round(humanLike)));
+      }catch(e){ return Math.max(0, Math.min(100, Math.round(fallback))); }
+    }
+    if (typeof setModelHA==='function'){
+      (function(){ var h=getD('zero|zerogpt|zgpt',   human); setModelHA('zerogpt',  h, 100-h); })();
+      (function(){ var h=getD('openai|oai',          human); setModelHA('openai',   h, 100-h); })();
+      (function(){ var h=getD('gptzero|gptz',        human); setModelHA('gptzero',  h, 100-h); })();
+      (function(){ var h=getD('copyleaks|copy|cl',   human); setModelHA('copyleaks',h, 100-h); })();
+      (function(){ var h=getD('writer|writerai',     human); setModelHA('writerai', h, 100-h); })();
+      (function(){ var h=getD('sapling|spl',         human); setModelHA('sapling',  h, 100-h); })();
+    }
+
+    // AI Content flags -> Suggestions list
+    try{
+      var sample = (res && (res.text||res.sample)) ? String(res.text||res.sample).trim() : '';
+      var lang = (document.getElementById('hvaiLang')?.value)||'en';
+      if (sample && typeof findAILikeSentences==='function' && typeof renderFlags==='function'){
+        var flags = findAILikeSentences(sample, lang);
+        renderFlags(flags);
+      }
+    }catch(e){}
+  }catch(e){}
+
   try{
     var baseScore = isFinite(res && res.humanPct) ? Math.round(res.humanPct) : (isFinite(window.__lastScore)? Math.round(window.__lastScore): 0);
     if(typeof setHVAIScore==='function') setHVAIScore(baseScore);
