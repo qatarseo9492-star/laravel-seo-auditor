@@ -78,6 +78,43 @@
 .hvai .neon-gauge{ position:relative; width:240px; height:240px; margin: 8px auto 0; }
 .hvai .mini-gauge{ position:absolute; top:50%; transform:translateY(-50%); width:72px; height:72px; }
 .hvai .mini-human{ left:-86px; } .hvai .mini-ai{ right:-86px; }
+
+/* === Ensemble v3 • layout fix 2 === */
+.hvai{ position:relative; overflow:hidden; } /* prevent horizontal scroll if minis overflow */
+.hvai .hvai-v2{ position:relative; padding:16px 14px; margin:10px 0 6px; }
+.hvai .hvai-head{ margin-bottom:6px; }
+.hvai .neon-gauge{ position:relative; width:240px; height:240px; margin: 6px auto 8px; }
+.hvai .mini-gauge{ position:absolute; top:50%; transform:translateY(-50%); width:72px; height:72px; }
+.hvai .mini-human{ left:-84px; } .hvai .mini-ai{ right:-84px; }
+
+.hvai .hvai-tabs{ margin:8px auto 6px; gap:8px; flex-wrap:wrap; justify-content:center; }
+.hvai .hvai-tab{ padding:6px 12px; border-radius:999px; font-weight:800; font-size:.85rem; }
+.hvai .hvai-tabpanes{ margin:6px auto 0; max-width:760px; width:100%; padding:10px; border-radius:14px; background:rgba(11,13,33,.28); border:1px solid rgba(255,255,255,.08); }
+.hvai .hvai-pane .hvai-line{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.92rem; }
+.hvai .hvai-pane .hvai-scorebar{ height:8px; margin:6px 0 2px; border-radius:999px; background:rgba(255,255,255,.06); }
+.hvai .hvai-scorebar>span{ height:100%; display:block; }
+
+/* prevent unusual large margins around the whole HVAI card */
+.hvai .hvai-v2-meta{ margin:8px 0 0; }
+
+/* Responsive: keep minis from pushing the card edges on small screens */
+@media (max-width: 860px){
+  .hvai .mini-human{ left:-64px; } .hvai .mini-ai{ right:-64px; }
+}
+@media (max-width: 680px){
+  .hvai .neon-gauge{ width:200px; height:200px; }
+  .hvai .mini-gauge{ width:60px; height:60px; }
+  .hvai .mini-human{ left:-52px; } .hvai .mini-ai{ right:-52px; }
+}
+@media (max-width: 520px){
+  .hvai .neon-gauge{ width:180px; height:180px; }
+  .hvai .mini-gauge{ width:52px; height:52px; }
+  .hvai .mini-human{ left:-44px; } .hvai .mini-ai{ right:-44px; }
+}
+
+.hvai .hvai-pane.active{ display:block; min-height:34px; }
+
+/* hvai overflow guard */ .hvai *{ max-width:100%; box-sizing:border-box; }
 </style>
 
 <meta charset="utf-8"/>
@@ -829,7 +866,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
     <!-- HVAI v2 Stylish Gauge -->
     <div class="hvai-v2 card glassy">
       <div class="hvai-v2-head">
-        <div class="badge-model" title="Ensemble v2 · Hybrid (Heuristic + Entropy + Classifier)">
+        <div class="badge-model" title="Ensemble v3 · Hybrid (Heuristic + Entropy + Classifier)">
           <span class="dot"></span> Ensemble v3
         
       <select id="hvaiLang" aria-label="Language">
@@ -2416,6 +2453,20 @@ document.addEventListener('DOMContentLoaded', function(){
       try{ window.HVAI_V2.update(window.__lastDet); }catch(e){}
     }
   }, 60);
+});
+</script>
+
+<script>
+/* v3 layout hydrate */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    try{
+      if(window.HVAI_V2 && typeof window.HVAI_V2.update==='function'){
+        var seed = window.__lastDet || { humanPct: (window.__lastScore||0), aiPct: 100-(window.__lastScore||0) };
+        window.HVAI_V2.update(seed);
+      }
+    }catch(e){}
+  }, 80);
 });
 </script>
 </body>
