@@ -720,7 +720,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       radial-gradient(800px 600px at 85% 10%, rgba(67,169,255,.08), transparent 60%),
       radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
   }
-  .hvai.hvai-v22 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(180px, 20vw, 260px)); align-items:center}
+  .hvai.hvai-v22 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(240px, 26vw, 360px)); align-items:center}
   @media (max-width:1100px){ .hvai.hvai-v22 .grid{grid-template-columns:1fr} .hvai.hvai-v22 .wheel{order:-1; margin:6px auto 14px} }
   .hvai.hvai-v22 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
   .hvai.hvai-v22 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
@@ -743,7 +743,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   .hvai.hvai-v22 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
 
   /* Prism wheel (multicolor arc) */
-  .prism-wheel{position:relative; width:var(--wheel-size, clamp(240px, 26vw, 360px)); aspect-ratio:1; margin-left:auto}
+  .prism-wheel{position:relative; width:var(--wheel-size, clamp(200px, 22vw, 300px)); aspect-ratio:1; margin-left:auto}
   .prism-wheel .track{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) calc(50% - var(--thick,18px)), transparent calc(50% - var(--thick,18px)), transparent 100%)}
   .prism-wheel .arc{position:absolute; inset:0; border-radius:50%;
     background: conic-gradient(from -90deg, #ff6a00 0%, #ffb700 10%, #ffd300 20%, #96e21a 30%, #2ad1a3 40%, #1aa6ff 50%, #5a6bff 60%, #9659ff 70%, #ff6aff 80%, #ff6a00 100%);
@@ -799,7 +799,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     </div>
 
     <div class="wheel">
-      <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:18px;">
+      <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;"
         <div class="track"></div><div class="arc"></div><div class="pointer"></div>
         <div class="center"><div class="kv">
           <div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div>
