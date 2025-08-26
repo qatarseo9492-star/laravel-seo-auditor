@@ -2761,3 +2761,22 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 </body>
 </html>
+
+<script>
+/* v3 analyze failsafe */
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    var btn = document.getElementById('analyzeBtn');
+    if(btn){
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        try{ if(typeof analyze==='function') analyze(); }catch(err){
+          var s=document.getElementById('analyzeStatus'); if(s) s.textContent='Analyze error: '+(err && err.message? err.message : err);
+        }
+      }, {capture:false});
+    }
+    // Ensure READY flag is set
+    if (window.SEMSEO) window.SEMSEO.READY = true;
+  }catch(e){}
+});
+</script>
