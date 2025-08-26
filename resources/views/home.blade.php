@@ -484,7 +484,15 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     }
     @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
 
-  </style>
+  
+/* === FIX: Social share labels + FA icons visible === */
+.share-dock{display:flex;flex-direction:column;gap:8px}
+.share-btn{display:inline-flex;align-items:center;gap:8px;width:auto;min-width:42px;height:42px;padding:0 12px}
+.share-btn .share-label{font-weight:800;font-size:.92rem;letter-spacing:.2px}
+@media (max-width:520px){.share-btn .share-label{display:none}}
+.category-icon i{font-size:24px;line-height:1}
+/* ================================================ */
+</style>
 
 <style>
 /* Fallback colorful panel */
@@ -607,6 +615,7 @@ h2.section-title, .cl-title {
 </style>
 <!-- ===== /New Neo‑Glass Aurora Skin ===== -->
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 </head>
 <body>
 
@@ -635,11 +644,11 @@ h2.section-title, .cl-title {
 
 <!-- Share dock -->
 <div class="share-dock" aria-label="Share">
-  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
-  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
-  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
-  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
-  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
+  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow" aria-label="Share on Facebook"><i class="fa-brands fa-facebook-f"></i><span class="share-label">Facebook</span></a>
+  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow" aria-label="Share on X (Twitter)"><i class="fa-brands fa-x-twitter"></i><span class="share-label">X</span></a>
+  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow" aria-label="Share on LinkedIn"><i class="fa-brands fa-linkedin-in"></i><span class="share-label">LinkedIn</span></a>
+  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i><span class="share-label">WhatsApp</span></a>
+  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener" aria-label="Share via Email"><i class="fa-solid fa-envelope"></i><span class="share-label">Email</span></a>
 </div>
 
 <div class="wrap">
@@ -1120,7 +1129,7 @@ h2.section-title, .cl-title {
       ] as $c)
         <article class="category-card" data-cat-i="{{ $loop->index }}" style="background-image: {{ $c[4] }}; background-blend-mode: lighten;">
           <header class="category-head">
-            <span class="category-icon" aria-hidden="true"><i class="fas {{ $c[3] }}"></i></span>
+            <span class="category-icon" aria-hidden="true"><i class="fa-solid {{ $c[3] }}"></i></span>
             <div>
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
