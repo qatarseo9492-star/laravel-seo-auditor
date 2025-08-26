@@ -2186,6 +2186,64 @@ window.addEventListener('error', function(e){
     const _paint   = window.HVAI_V2.paint;
     const _update  = window.HVAI_V2.update;
     window.HVAI_V2.update = function(res){
+  /* v3: robust mapping */
+  try{
+    var overallH = hvai_normPercent(res && (res.humanPct||res.human||res.human_like||res.overallHuman||res.overall));
+    if(overallH===null){
+      var overallA = hvai_normPercent(res && (res.aiPct||res.ai||res.ai_like));
+      overallH = overallA!==null ? (100-overallA) : (isFinite(window.__lastScore)? Math.round(window.__lastScore) : 0);
+    }
+    // update gauge + store
+    if (typeof setHVAIScore==='function') setHVAIScore(overallH);
+
+    // minis
+    (function(){
+      var human = overallH, ai = 100-human;
+      var circ = 2*Math.PI*26;
+      var mh = document.getElementById('miniHumanProg');
+      var ma = document.getElementById('miniAIProg');
+      if(mh){ mh.style.strokeDasharray = String(circ); mh.style.strokeDashoffset = String(circ - (circ*human/100)); }
+      if(ma){ ma.style.strokeDasharray = String(circ); ma.style.strokeDashoffset = String(circ - (circ*ai/100)); }
+      var mhN = document.getElementById('miniHumanNum'); if(mhN) mhN.textContent = human + '%';
+      var maN = document.getElementById('miniAINum');   if(maN) maN.textContent = ai + '%';
+      if (typeof setModelHA==='function') setModelHA('overall', human, ai);
+    })();
+
+    // per-detector
+    var det = Array.isArray(res && res.detectors) ? res.detectors : [];
+    function pick(keyRegex){
+      if(!det.length) return {human:overallH, ai:100-overallH};
+      var re = new RegExp(keyRegex,'i');
+      var d = det.find(function(x){ return re.test(String(x.key||x.name||x.label||'')); });
+      return hvai_deriveHumanAi(d, overallH);
+    }
+    var mZero   = pick('zero|zerogpt|zgpt');
+    var mOpenAI = pick('openai|oai');
+    var mGPTZ   = pick('gptzero|gptz');
+    var mCopy   = pick('copyleaks|copy|cl');
+    var mWriter = pick('writer|writerai');
+    var mSap    = pick('sapling|spl');
+
+    if (typeof setModelHA==='function'){
+      setModelHA('zerogpt',  mZero.human,   mZero.ai);
+      setModelHA('openai',   mOpenAI.human, mOpenAI.ai);
+      setModelHA('gptzero',  mGPTZ.human,   mGPTZ.ai);
+      setModelHA('copyleaks',mCopy.human,   mCopy.ai);
+      setModelHA('writerai', mWriter.human, mWriter.ai);
+      setModelHA('sapling',  mSap.human,    mSap.ai);
+    }
+
+    // AI Content flags -> Suggestions
+    try{
+      var sample = (res && (res.text||res.sample||res.content||res.body)) ? String(res.text||res.sample||res.content||res.body).trim() : '';
+      var lang = (document.getElementById('hvaiLang')?.value)||'en';
+      if (sample && typeof findAILikeSentences==='function' && typeof renderFlags==='function'){
+        var flags = findAILikeSentences(sample, lang);
+        renderFlags(flags);
+      }
+    }catch(e){}
+  }catch(e){}
+
   /* v3: minis + flags + models */
   try{
     var score = isFinite(res && res.humanPct) ? Math.round(res.humanPct) :
@@ -2690,6 +2748,51 @@ document.addEventListener('DOMContentLoaded', function(){
     var n1 = document.getElementById('miniHumanNum'); if(n1) n1.textContent = human + '%';
     var n2 = document.getElementById('miniAINum');   if(n2) n2.textContent = ai + '%';
   }, 60);
+});
+</script>
+
+<script>
+/* v3 robust percent helpers */
+function hvai_normPercent(v){
+  var n = Number(v);
+  if(!isFinite(n)) return null;
+  if(n<=1 && n>=0) n = n*100;
+  if(n<0) n = 0; if(n>100) n = 100;
+  return Math.round(n);
+}
+function hvai_deriveHumanAi(d, fallbackHuman){
+  var H=null, A=null;
+  if(d && typeof d==='object'){
+    var hcands = [d.human, d.human_like, d.humanPct, d.human_pct, d.humanPercent, d.humanScore, d.human_probability, d.humanProbability, d.humanLikelihood];
+    for(var i=0;i<hcands.length && H===null;i++){ H = hvai_normPercent(hcands[i]); }
+    var acands = [d.ai, d.ai_like, d.aiPct, d.ai_pct, d.aiPercent, d.aiScore, d.ai_probability, d.aiProbability, d.aiLikelihood];
+    for(var j=0;j<acands.length && A===null;j++){ A = hvai_normPercent(acands[j]); }
+    // some detectors return "score" ~ human-likeness, try that if both missing
+    if(H===null && A===null && d.score!=null){
+      H = hvai_normPercent(d.score);
+    }
+    // reconcile
+    if(H!==null && A===null) A = 100-H;
+    if(A!==null && H===null) H = 100-A;
+  }
+  if(H===null){
+    H = hvai_normPercent(fallbackHuman);
+    if(H===null) H = 0;
+  }
+  if(A===null) A = 100-H;
+  return {human:H, ai:A};
+}
+</script>
+
+<script>
+/* v3 hydrate after analyze */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    try{
+      var res = window.__lastDet || { humanPct: (window.__lastScore||0), aiPct: 100-(window.__lastScore||0) };
+      if(window.HVAI_V2 && typeof window.HVAI_V2.update==='function'){ window.HVAI_V2.update(res); }
+    }catch(e){}
+  }, 120);
 });
 </script>
 </body>
