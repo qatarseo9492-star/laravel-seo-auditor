@@ -1224,7 +1224,7 @@ document.addEventListener('DOMContentLoaded', function(){
 (function(){
   const apiPublic = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
   const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
-  const endpoint = (panel && panel.dataset && panel.dataset.psiEndpoint) ? panel.dataset.psiEndpoint : "/api/psi";
+  const endpoint = (panel && panel.dataset && panel.dataset.psiEndpoint) ? panel.dataset.psiEndpoint : (window.SEMSEO && window.SEMSEO.ENDPOINTS && window.SEMSEO.ENDPOINTS.psi ? window.SEMSEO.ENDPOINTS.psi : "/psi-proxy");
   const strategyEl = document.getElementById('psiStrategy');
 
   async 
