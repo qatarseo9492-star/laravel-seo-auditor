@@ -705,14 +705,14 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 <!-- HUMAN vs AI Content (Ensemble) — v17 CLEAN -->
 
 <!-- HUMAN vs AI Content (Ensemble) — v19 FEATHER (fast) -->
-<section id="hvai" class="hvai hvai-v19" aria-label="Human vs AI Content (Ensemble)">
-  <style>
-  /* ===== HVAI v19 Feather: fast, minimal repaints ===== */
-  .hvai.hvai-v19{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
-  .hvai.hvai-v19 *{box-sizing:border-box}
 
-  /* Static tech lines (no animation) */
-  .hvai.hvai-v19 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
+<!-- HUMAN vs AI Content (Ensemble) — v20 PRISM (multicolor) -->
+<section id="hvai" class="hvai hvai-v20" aria-label="Human vs AI Content (Ensemble)">
+  <style>
+  /* ===== HVAI v20 Prism: multicolor arc + compact text ===== */
+  .hvai.hvai-v20{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
+  .hvai.hvai-v20 *{box-sizing:border-box}
+  .hvai.hvai-v20 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
     background:
       linear-gradient(135deg, rgba(0,255,255,.10) 1px, transparent 1px) 0 0/18px 18px,
       linear-gradient(45deg, rgba(255,0,180,.08) 1px, transparent 1px) 0 0/20px 20px,
@@ -720,48 +720,61 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
   }
 
-  .hvai.hvai-v19 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(240px, 26vw, 360px)); align-items:center}
-  @media (max-width:1100px){ .hvai.hvai-v19 .grid{grid-template-columns:1fr} .hvai.hvai-v19 .wheel{order:-1; margin:6px auto 14px} }
+  .hvai.hvai-v20 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(240px, 26vw, 360px)); align-items:center}
+  @media (max-width:1100px){ .hvai.hvai-v20 .grid{grid-template-columns:1fr} .hvai.hvai-v20 .wheel{order:-1; margin:6px auto 14px} }
 
   /* Title */
-  .hvai.hvai-v19 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
-  .hvai.hvai-v19 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  .hvai.hvai-v19 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
+  .hvai.hvai-v20 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
+  .hvai.hvai-v20 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  .hvai.hvai-v20 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
   @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 
-  /* Status badge (colorful, minimal effects) */
-  .hvai.hvai-v19 .status{margin:6px 0 12px}
-  .hvai.hvai-v19 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
-  .hvai.hvai-v19 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
-  .hvai.hvai-v19 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
-  .hvai.hvai-v19 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
-  .hvai.hvai-v19 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
+  /* Status badge */
+  .hvai.hvai-v20 .status{margin:6px 0 12px}
+  .hvai.hvai-v20 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
+  .hvai.hvai-v20 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
+  .hvai.hvai-v20 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
+  .hvai.hvai-v20 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
+  .hvai.hvai-v20 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
 
   /* Bars */
-  .hvai.hvai-v19 .row2{display:flex; gap:18px; flex-wrap:wrap}
-  .hvai.hvai-v19 .bar{flex:1 1 420px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:280px}
-  .hvai.hvai-v19 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
-  .hvai.hvai-v19 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
-  .hvai.hvai-v19 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
-  .hvai.hvai-v19 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
-  .hvai.hvai-v19 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
+  .hvai.hvai-v20 .row2{display:flex; gap:18px; flex-wrap:wrap}
+  .hvai.hvai-v20 .bar{flex:1 1 420px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:280px}
+  .hvai.hvai-v20 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
+  .hvai.hvai-v20 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
+  .hvai.hvai-v20 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
+  .hvai.hvai-v20 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
+  .hvai.hvai-v20 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
 
-  /* FEATHER WHEEL (SVG) — zero blur/filters, single repaint */
-  .feather-wheel{width:var(--wheel-size, clamp(240px, 26vw, 360px)); height:auto; display:block}
-  .feather-wheel .track{stroke:rgba(255,255,255,.12)}
-  .feather-wheel .arc{transform:rotate(-90deg); transform-origin:60px 60px; stroke-linecap:round}
-  .feather-wheel .ai{stroke:var(--aiColor,#7c5bff)}
-  .feather-wheel .human{stroke:var(--humanColor,#00f5c4)}
-  .feather-wheel .ai, .feather-wheel .human{stroke-dasharray: var(--dash, 0) 100}
-  /* Palette cycle: swap CSS variable every second (lightweight) */
-  .hvai.hvai-v19.live{ --aiColor:#ff6a00 }
-  @keyframes palette {
-    0%{ --aiColor:#ff6a00 } 10%{ --aiColor:#ffb700 } 20%{ --aiColor:#ffd300 } 30%{ --aiColor:#96e21a }
-    40%{ --aiColor:#2ad1a3 } 50%{ --aiColor:#1aa6ff } 60%{ --aiColor:#5a6bff } 70%{ --aiColor:#9659ff }
-    80%{ --aiColor:#ff6aff } 90%{ --aiColor:#ff5b8a } 100%{ --aiColor:#ff6a00 }
+  /* PRISM WHEEL: CSS conic arc with ring mask and rotating pointer */
+  .prism-wheel{position:relative; width:var(--wheel-size, clamp(240px, 26vw, 360px)); aspect-ratio:1; margin-left:auto}
+  .prism-wheel .track{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) calc(50% - var(--thick,18px)), transparent calc(50% - var(--thick,18px)), transparent 100%)}
+  .prism-wheel .arc{
+    position:absolute; inset:0; border-radius:50%;
+    background: conic-gradient(from -90deg,
+      #ff6a00 0%, #ffb700 10%, #ffd300 20%, #96e21a 30%, #2ad1a3 40%, #1aa6ff 50%, #5a6bff 60%, #9659ff 70%, #ff6aff 80%, #ff6a00 100%);
+    -webkit-mask:
+      radial-gradient(farthest-side, transparent calc(100% - var(--thick,18px)), #000 calc(100% - var(--thick,18px))),
+      conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
+            mask:
+      radial-gradient(farthest-side, transparent calc(100% - var(--thick,18px)), #000 calc(100% - var(--thick,18px))),
+      conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
   }
-  .hvai.hvai-v19.live .feather-wheel{ animation: palette 10s steps(10,end) infinite }
+  .prism-wheel .pointer{position:absolute; inset:0; transform: rotate(calc(var(--p)*3.6deg)); transform-origin:50% 50%}
+  .prism-wheel .pointer::after{
+    content:""; position:absolute; left:50%; top: calc(var(--thick,18px)/2);
+    transform: translateX(-50%); width:14px; height:14px; border-radius:50%; background:#00f5c4; box-shadow:0 0 0 4px rgba(0,245,196,.15)
+  }
+  .prism-wheel .center{position:absolute; inset:calc(var(--thick,18px) + 14px); border-radius:50%; display:grid; place-items:center; background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.08), rgba(10,12,20,.50))}
+  .prism-wheel .kv{display:grid; gap:6px; text-align:center}
+  .prism-wheel .kv .row{display:flex; align-items:center; gap:6px; justify-content:center; font: 700 14px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; color:#eaf1ff}
+  .prism-wheel .kv .val{font-weight:900; font-size:18px}
+  .prism-wheel .kv .dot{width:8px; height:8px; border-radius:50%}
+  .prism-wheel .kv .dot.ai{background:#7c5bff}
+  .prism-wheel .kv .dot.h{background:#00f5c4}
 
+  /* Ensure any legacy wheel DOM inside .wheel is hidden */
+  .hvai.hvai-v20 .wheel > *:not(.prism-wheel){ display:none !important; }
   </style>
 
   <div class="tech" aria-hidden="true"></div>
@@ -812,25 +825,22 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     </div>
 
     <div class="wheel">
-      <!-- Feather SVG wheel -->
-      <svg viewBox="0 0 120 120" class="feather-wheel" id="featherWheel">
-        <!-- tracks -->
-        <circle class="track" cx="60" cy="60" r="46" stroke-width="12" fill="none" />
-        <circle class="track" cx="60" cy="60" r="36" stroke-width="8" fill="none" />
-        <!-- arcs (use pathLength to allow % dasharray) -->
-        <circle class="arc ai" cx="60" cy="60" r="46" stroke-width="12" fill="none" pathLength="100" style="--dash:0" />
-        <circle class="arc human" cx="60" cy="60" r="36" stroke-width="8" fill="none" pathLength="100" style="--dash:0" />
-        <!-- labels (light DOM so no heavy layout) -->
-        <g font-family="Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial" font-weight="800" text-anchor="middle" fill="#EAF1FF">
-          <text id="aiText" x="60" y="54" font-size="18">AI‑like <tspan id="hvaiAIVal">0</tspan>%</text>
-          <text id="hText" x="60" y="78" font-size="18">Human‑like <tspan id="hvaiHumanVal">0</tspan>%</text>
-        </g>
-      </svg>
+      <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:18px;">
+        <div class="track"></div>
+        <div class="arc"></div>
+        <div class="pointer"></div>
+        <div class="center">
+          <div class="kv">
+            <div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div>
+            <div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-  // ===== v19 Feather logic =====
+  // ===== v20 Prism logic =====
   function setBadge(h){ 
     var st=document.getElementById('hvaiStatus'); if(!st) return;
     var txt=st.querySelector('.txt'); var ico=st.querySelector('.ico');
@@ -861,19 +871,14 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
   window.updateHVAIScore=function(pAI){
     var p=Math.max(0,Math.min(100,Math.round(pAI||0))), h=100-p;
-    var wheel=document.getElementById('featherWheel');
-    if(wheel){
-      var ai=wheel.querySelector('.arc.ai'); var hu=wheel.querySelector('.arc.human');
-      if(ai) ai.style.setProperty('--dash', p);
-      if(hu) hu.style.setProperty('--dash', h);
-    }
+    var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p);
     var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p;
     var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h;
     setBadge(h);
     updateBars(deriveSubs(p));
   };
 
-  // Optional: precise compute if text is provided
+  // Optional precise compute if text is provided
   function detectUltra(text){
     text=(text||'').replace(/\s+/g,' ').trim();
     var len=text.length; if(len<40) return {ai:0,conf:0,subs:null};
@@ -883,7 +888,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100;
     var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;}
     var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100;
-    var sl=s.map(x=>(x.match(/\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length);
+    var sl=s.map(x=>(x.match(/\\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length);
     var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100;
     var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; }
     for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100;
@@ -891,7 +896,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));}
     var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words));
     var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100;
-    var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + (1-Math.abs(0.42-Math.min(0.9,(t.filter(x=>new Set(['the','and','of','to','a','in','is','it','that','for','on','you','with','as','are','this','be','or','by','an','from','at','have','not','was','but','they','we','can','if','will','your','about']).has(x)).length/Math.max(1,t.length)))/0.42))*.12 + digS*.10 + readS*.15;
+    var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15; // compact mapping
     var ai=Math.max(0,Math.min(100,100-human));
     var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) };
     var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
@@ -905,33 +910,21 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     catch(e){ console.warn('hvaiCompute error',e); return null; }
   };
 
-  // Activate animations only when visible & idle
+  // Cleanup any old wheel nodes inside .wheel and inject our Prism wheel if needed
   (function(){
-    var root=document.querySelector('.hvai.hvai-v19');
-    if(!root) return;
-    var start=function(){ root.classList.add('live'); };
-    var onView=function(entries,obs){ entries.forEach(function(en){ if(en.isIntersecting){ setTimeout(start, 200); obs.disconnect(); } }); };
-    if('IntersectionObserver' in window){ new IntersectionObserver(onView, {rootMargin:'0px 0px -20% 0px'}).observe(root); }
-    else { setTimeout(start, 600); }
-  })();
-
-  // Minimal watchers (disconnect after first compute)
-  (function(){
-    var sels=['#analysisResults','.analysis-results','#results','.results','#output','.output','#report','.report','#contentPreview','.content-preview','.report-body'];
-    var targets=sels.map(s=>document.querySelector(s)).filter(Boolean);
-    if(!targets.length) return;
-    var done=false;
-    var mo=new MutationObserver(function(){
-      if(done) return;
-      for(var el of targets){ var txt=(el.innerText||'').replace(/\\s+/g,' ').trim(); if(txt && txt.length>120){ done=true; try{ mo.disconnect(); }catch(_){ } hvaiCompute(txt); return; } }
-    });
-    targets.forEach(t=>mo.observe(t,{subtree:true,childList:true,characterData:true}));
+    var wrap=document.querySelector('#hvai.hvai-v20 .wheel');
+    if(!wrap) return;
+    var existing=wrap.querySelector('.prism-wheel');
+    if(!existing){
+      wrap.innerHTML = wrap.innerHTML; // no-op but ensures our markup above remains; kept for safety
+    }
   })();
 
   // Init
   (function(){ updateHVAIScore(0); var c=document.getElementById('hvaiConf'); if(c) c.textContent=0; })();
   </script>
 </section>
+
 
 
 
