@@ -605,6 +605,21 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 .hvai-badge.mid{ background: rgba(245,158,11,.16); border:1px solid rgba(245,158,11,.45); color:#fde68a; }
 .hvai-badge.low{ background: rgba(239,68,68,.16); border:1px solid rgba(239,68,68,.5); color:#fecaca; }
 </style>
+
+<style>
+/* v3 modal overlay */
+#hvaiModal{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background: rgba(4,6,20,.55); backdrop-filter: blur(6px); z-index:9999;
+}
+#hvaiModal .box{
+  width:min(880px,92vw); max-height:86vh; overflow:auto;
+  background: linear-gradient(180deg,rgba(14,17,40,.96),rgba(10,12,32,.96));
+  border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.45);
+}
+#hvaiModal .close{ position:sticky; top:0; float:right; cursor:pointer; opacity:.8; }
+</style>
 </head>
 <body>
 
@@ -2163,6 +2178,50 @@ window.addEventListener('error', function(e){
         msg.textContent = (score >= 80 ? L.great : score >= 60 ? L.mid : L.bad);
       }
 
+
+      /* v3: dual lines + minis + flags */
+      var human = Math.round(res?.humanPct ?? score);
+      var ai    = Math.max(0, 100 - human);
+
+      // update main & mini wheels
+      try{
+        var circ = 2*Math.PI*26;
+        var mh = document.getElementById('miniHumanProg');
+        var ma = document.getElementById('miniAIProg');
+        if(mh){ mh.style.strokeDasharray = String(circ); mh.style.strokeDashoffset = String(circ - (circ*human/100)); }
+        if(ma){ ma.style.strokeDasharray = String(circ); ma.style.strokeDashoffset = String(circ - (circ*ai/100)); }
+        var mhN = document.getElementById('miniHumanNum'); if(mhN) mhN.textContent = human + '%';
+        var maN = document.getElementById('miniAINum');   if(maN) maN.textContent = ai + '%';
+      }catch(e){}
+
+      // overall dual line
+      if (typeof setModelHA === 'function') setModelHA('overall', human, ai);
+
+      // per-model (use detectors when available, else human as fallback)
+      var det = Array.isArray(res?.detectors) ? res.detectors : [];
+      function getD(key, fallback){
+        try{
+          var d = det.find(x => String(x.key||'').toLowerCase().includes(key));
+          var aiLike = Math.round(d?.ai ?? (100 - fallback));
+          var humanLike = 100 - aiLike;
+          return Math.max(0, Math.min(100, humanLike));
+        }catch(e){ return Math.max(0, Math.min(100, fallback)); }
+      }
+      (function(){ var h=getD('zero',   human); if (typeof setModelHA === 'function') setModelHA('zerogpt',  h, 100-h); })();
+      (function(){ var h=getD('openai', human); if (typeof setModelHA === 'function') setModelHA('openai',   h, 100-h); })();
+      (function(){ var h=getD('gptzero',human); if (typeof setModelHA === 'function') setModelHA('gptzero',  h, 100-h); })();
+      (function(){ var h=getD('copy',   human); if (typeof setModelHA === 'function') setModelHA('copyleaks',h, 100-h); })();
+      (function(){ var h=getD('writer', human); if (typeof setModelHA === 'function') setModelHA('writerai', h, 100-h); })();
+      (function(){ var h=getD('sapling',human); if (typeof setModelHA === 'function') setModelHA('sapling',  h, 100-h); })();
+
+      // AI-like content flags into the AI Content tab
+      try{
+        var sample = (res?.text||res?.sample||'').trim();
+        if (typeof findAILikeSentences === 'function' && typeof renderFlags === 'function'){
+          var flags = findAILikeSentences(sample, lang);
+          renderFlags(flags);
+        }
+      }catch(e){}
       // meta chips
       try{
         const h = document.getElementById('metaHuman'); if(h) h.textContent = ((res?.humanPct??0)|0)+'%';
