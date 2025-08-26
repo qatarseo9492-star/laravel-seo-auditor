@@ -2776,5 +2776,72 @@ document.addEventListener('DOMContentLoaded', function(){
   }, 120);
 });
 </script>
+
+<script>
+window.renderFlags = function(flags){
+  var box = document.getElementById('aiFlags');
+  var sbox = document.getElementById('aiSuggestBox');
+  var empty = '<span class="echip misc"><i class="fa-solid fa-circle-check"></i> No AI-like issues flagged.</span>';
+  if(!box){ return; }
+  flags = Array.isArray(flags) ? flags : [];
+  if(!flags.length){
+    box.innerHTML = empty;
+    if(sbox) sbox.innerHTML = empty;
+    box._flags = [];
+    return;
+  }
+  function cardHTML(f, idx, compact){
+    var chips = (f.reasons||[]).map(function(r){ return '<span class="b">'+window.escapeHTML(String(r))+'</span>'; }).join(' ');
+    if(compact){
+      return '<div class="hvai-flag" data-idx="'+idx+'">'
+           + '  <div style="margin-bottom:6px"><b>#'+(idx+1)+'</b> '+window.escapeHTML(String(f.text||""))+'</div>'
+           + '  <button class="hvai-suggest-btn" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button>'
+           + '</div>';
+    }
+    return '<div class="hvai-flag" data-idx="'+idx+'">'
+         + '  <div><b>#'+(idx+1)+'</b> '+window.escapeHTML(String(f.text||""))+'</div>'
+         + '  <div class="badges">'+chips+'</div>'
+         + '  <div><button class="hvai-suggest-btn" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button></div>'
+         + '</div>';
+  }
+  box.innerHTML = flags.map(function(f, idx){ return cardHTML(f, idx, false); }).join('');
+  if(sbox){ sbox.innerHTML = flags.map(function(f, idx){ return cardHTML(f, idx, true); }).join(''); }
+  box._flags = flags;
+};
+</script>
+
+<script>
+(function(){
+  if(window.__HVAIV3_WIRED) return; window.__HVAIV3_WIRED = true;
+
+  function openModalForIndex(idx){
+    var box = document.getElementById('aiFlags');
+    var flags = (box && box._flags) || [];
+    var f = flags[idx]; if(!f) return;
+    var body = document.getElementById('hvaiModalBody');
+    var langEl = document.getElementById('hvaiLang');
+    var lang = langEl ? langEl.value : 'en';
+    var sug = window.makeSuggestionsFor(f.text, lang);
+    if(body){
+      body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+window.escapeHTML(String(f.text||""))+'</div>' +
+                       '<div><b>Suggestions</b><ul style="margin-top:6px">'+ (sug.items||[]).map(function(x){return '<li>'+x+'</li>';}).join('') +'</ul></div>' +
+                       (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+window.escapeHTML(String(sug.rewrite||""))+'</div>' : '') +
+                       '</div>';
+      document.getElementById('hvaiModal').style.display='flex';
+      window.hvaiSwitchTab('suggestions');
+    }
+  }
+
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('button.hvai-suggest-btn[data-flag]');
+    if(btn){ var idx = +btn.getAttribute('data-flag'); openModalForIndex(idx); return; }
+    var card = e.target.closest && e.target.closest('.hvai-flag');
+    if(card && !e.target.closest('button.hvai-suggest-btn')){
+      var idx2 = +card.getAttribute('data-idx');
+      openModalForIndex(idx2);
+    }
+  }, false);
+})();
+</script>
 </body>
 </html>
