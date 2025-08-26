@@ -38,12 +38,9 @@
 
 <style>
 :root{
-      --bg-url: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221600%22%20height%3D%221000%22%20viewBox%3D%220%200%201600%201000%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gViolet%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%28200%20-80%29%20rotate%280%29%20scale%28900%20600%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%238b5cf6%22%20stop-opacity%3D%220.55%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b5cf6%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gCyan%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%281500%2050%29%20rotate%280%29%20scale%28800%20520%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2306b6d4%22%20stop-opacity%3D%220.5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2306b6d4%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gAmber%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%28900%201050%29%20rotate%280%29%20scale%28700%20420%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f59e0b%22%20stop-opacity%3D%220.35%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f59e0b%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22noise%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%0A%20%20%20%20%20%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%222%22%20stitchTiles%3D%22stitch%22%20result%3D%22n%22/%3E%0A%20%20%20%20%20%20%3CfeColorMatrix%20type%3D%22saturate%22%20values%3D%220%22%20in%3D%22n%22%20result%3D%22gn%22/%3E%0A%20%20%20%20%20%20%3CfeComponentTransfer%20in%3D%22gn%22%3E%0A%20%20%20%20%20%20%20%20%3CfeFuncA%20type%3D%22table%22%20tableValues%3D%220%200%200%200%20.04%20.06%20.08%20.1%20.12%22/%3E%0A%20%20%20%20%20%20%3C/feComponentTransfer%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%230b0d12%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gViolet%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gCyan%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gAmber%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23noise%29%22%20opacity%3D%220.18%22/%3E%0A%20%20%3C%21--%20soft%20vignette%20--%3E%0A%20%20%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%22120%22%20opacity%3D%220.45%22/%3E%0A%3C/svg%3E');
-
   --bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;
   --good:#22c55e;--warn:#f59e0b;--bad:#ef4444;--accent:#3de2ff;--accent2:#9b5cff;
   --radius:18px;--shadow:0 10px 40px rgba(0,0,0,.55);--container:1200px;--hue:0deg
-      --bg-url: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221600%22%20height%3D%221000%22%20viewBox%3D%220%200%201600%201000%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gViolet%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%28200%20-80%29%20rotate%280%29%20scale%28900%20600%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%238b5cf6%22%20stop-opacity%3D%220.55%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b5cf6%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gCyan%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%281500%2050%29%20rotate%280%29%20scale%28800%20520%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2306b6d4%22%20stop-opacity%3D%220.5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2306b6d4%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gAmber%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%28900%201050%29%20rotate%280%29%20scale%28700%20420%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f59e0b%22%20stop-opacity%3D%220.35%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f59e0b%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22noise%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%0A%20%20%20%20%20%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%222%22%20stitchTiles%3D%22stitch%22%20result%3D%22n%22/%3E%0A%20%20%20%20%20%20%3CfeColorMatrix%20type%3D%22saturate%22%20values%3D%220%22%20in%3D%22n%22%20result%3D%22gn%22/%3E%0A%20%20%20%20%20%20%3CfeComponentTransfer%20in%3D%22gn%22%3E%0A%20%20%20%20%20%20%20%20%3CfeFuncA%20type%3D%22table%22%20tableValues%3D%220%200%200%200%20.04%20.06%20.08%20.1%20.12%22/%3E%0A%20%20%20%20%20%20%3C/feComponentTransfer%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%230b0d12%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gViolet%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gCyan%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gAmber%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23noise%29%22%20opacity%3D%220.18%22/%3E%0A%20%20%3C%21--%20soft%20vignette%20--%3E%0A%20%20%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%22120%22%20opacity%3D%220.45%22/%3E%0A%3C/svg%3E');
 }
 *{box-sizing:border-box}html,body{height:100%}html{scroll-behavior:smooth}
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:
@@ -176,8 +173,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 
 /* ==== Readability (ULTRA PRO restyle) ==== */
 :root{
-      --bg-url: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%221600%22%20height%3D%221000%22%20viewBox%3D%220%200%201600%201000%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gViolet%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%28200%20-80%29%20rotate%280%29%20scale%28900%20600%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%238b5cf6%22%20stop-opacity%3D%220.55%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%238b5cf6%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gCyan%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%281500%2050%29%20rotate%280%29%20scale%28800%20520%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%2306b6d4%22%20stop-opacity%3D%220.5%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%2306b6d4%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3CradialGradient%20id%3D%22gAmber%22%20cx%3D%220%22%20cy%3D%220%22%20r%3D%221%22%20gradientUnits%3D%22userSpaceOnUse%22%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gradientTransform%3D%22translate%28900%201050%29%20rotate%280%29%20scale%28700%20420%29%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23f59e0b%22%20stop-opacity%3D%220.35%22/%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23f59e0b%22%20stop-opacity%3D%220%22/%3E%0A%20%20%20%20%3C/radialGradient%3E%0A%20%20%20%20%3Cfilter%20id%3D%22noise%22%20x%3D%220%22%20y%3D%220%22%20width%3D%22100%25%22%20height%3D%22100%25%22%3E%0A%20%20%20%20%20%20%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%222%22%20stitchTiles%3D%22stitch%22%20result%3D%22n%22/%3E%0A%20%20%20%20%20%20%3CfeColorMatrix%20type%3D%22saturate%22%20values%3D%220%22%20in%3D%22n%22%20result%3D%22gn%22/%3E%0A%20%20%20%20%20%20%3CfeComponentTransfer%20in%3D%22gn%22%3E%0A%20%20%20%20%20%20%20%20%3CfeFuncA%20type%3D%22table%22%20tableValues%3D%220%200%200%200%20.04%20.06%20.08%20.1%20.12%22/%3E%0A%20%20%20%20%20%20%3C/feComponentTransfer%3E%0A%20%20%20%20%3C/filter%3E%0A%20%20%3C/defs%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%230b0d12%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gViolet%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gCyan%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22url%28%23gAmber%29%22/%3E%0A%20%20%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23noise%29%22%20opacity%3D%220.18%22/%3E%0A%20%20%3C%21--%20soft%20vignette%20--%3E%0A%20%20%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%221600%22%20height%3D%221000%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%22120%22%20opacity%3D%220.45%22/%3E%0A%3C/svg%3E');
-
   --read-ac1:#22c55e; /* emerald */
   --read-ac2:#3de2ff; /* cyan */
   --read-ac3:#9b5cff; /* purple */
@@ -456,7 +451,68 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .hvai .hvai-head .ico{ background: linear-gradient(135deg,#60a5fa,#a78bfa,#34d399,#f59e0b); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 10px rgba(99,102,241,.5)); animation: spinPulse 8s linear infinite; }
 @keyframes spinPulse{ 0%{ transform: rotate(0deg);} 100%{ transform: rotate(360deg);} }
 
-</style>
+
+    /* Animated colorful layer */
+    .bg-anim{
+      position: absolute;
+      inset: -20%;
+      z-index: -1;
+      background:
+        radial-gradient(40% 40% at 20% 20%, rgba(139,92,246,.45), transparent 60%),
+        radial-gradient(35% 35% at 80% 25%, rgba(6,182,212,.45), transparent 60%),
+        radial-gradient(60% 50% at 70% 90%, rgba(245,158,11,.35), transparent 70%),
+        conic-gradient(from 0deg at 50% 50%, rgba(139,92,246,.25), rgba(6,182,212,.25), rgba(34,197,94,.25), rgba(245,158,11,.25), rgba(239,68,68,.25), rgba(139,92,246,.25));
+      filter: blur(30px) saturate(120%);
+      animation: spin 28s linear infinite;
+      transform-origin: 50% 50%;
+      opacity: .85;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg) scale(1.05); }
+      to   { transform: rotate(360deg) scale(1.05); }
+    }
+
+  
+    /* ===== Stylish Gradient Score Wheel ===== */
+    .score-wrap{
+      display: grid;
+      place-items: center;
+      gap: 10px;
+    }
+    .score-wheel{
+      position: relative;
+      width: var(--size, 160px);
+      height: var(--size, 160px);
+    }
+    .score-wheel svg{
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,.45));
+    }
+    .score-wheel .center{
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      pointer-events: none;
+    }
+    .score-wheel .value{
+      font-weight: 800;
+      font-size: 28px;
+      letter-spacing: .3px;
+    }
+    .score-wheel .label{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .score-wheel .tick{
+      opacity: .25;
+    }
+
+  </style>
 
 <style>
 /* Fallback colorful panel */
@@ -464,7 +520,68 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 radial-gradient(950px 480px at 110% -10%, rgba(167,139,250,.08), transparent 60%),
 radial-gradient(700px 520px at 30% 120%, rgba(52,211,153,.06), transparent 60%),
 rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
-</style>
+
+    /* Animated colorful layer */
+    .bg-anim{
+      position: absolute;
+      inset: -20%;
+      z-index: -1;
+      background:
+        radial-gradient(40% 40% at 20% 20%, rgba(139,92,246,.45), transparent 60%),
+        radial-gradient(35% 35% at 80% 25%, rgba(6,182,212,.45), transparent 60%),
+        radial-gradient(60% 50% at 70% 90%, rgba(245,158,11,.35), transparent 70%),
+        conic-gradient(from 0deg at 50% 50%, rgba(139,92,246,.25), rgba(6,182,212,.25), rgba(34,197,94,.25), rgba(245,158,11,.25), rgba(239,68,68,.25), rgba(139,92,246,.25));
+      filter: blur(30px) saturate(120%);
+      animation: spin 28s linear infinite;
+      transform-origin: 50% 50%;
+      opacity: .85;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg) scale(1.05); }
+      to   { transform: rotate(360deg) scale(1.05); }
+    }
+
+  
+    /* ===== Stylish Gradient Score Wheel ===== */
+    .score-wrap{
+      display: grid;
+      place-items: center;
+      gap: 10px;
+    }
+    .score-wheel{
+      position: relative;
+      width: var(--size, 160px);
+      height: var(--size, 160px);
+    }
+    .score-wheel svg{
+      width: 100%;
+      height: 100%;
+      display: block;
+      filter: drop-shadow(0 6px 18px rgba(0,0,0,.45));
+    }
+    .score-wheel .center{
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      pointer-events: none;
+    }
+    .score-wheel .value{
+      font-weight: 800;
+      font-size: 28px;
+      letter-spacing: .3px;
+    }
+    .score-wheel .label{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .score-wheel .tick{
+      opacity: .25;
+    }
+
+  </style>
 
 </head>
 <body>
@@ -1870,5 +1987,94 @@ window.addEventListener('error', function(e){
   document.addEventListener('DOMContentLoaded', wrapHVAI);
 })();
 </script>
+
+  <script>
+    // Optional: re-render wheel dash offsets if values change dynamically
+    document.querySelectorAll('.score-wheel').forEach(function(el){
+      var pct = parseFloat(el.getAttribute('data-pct')) || 0;
+      var circ = parseFloat(el.getAttribute('data-circ')) || 0;
+      var circle = el.querySelector('circle[stroke^="url"]');
+      if (circle && circ > 0){
+        var off = circ - (circ * (pct/100));
+        circle.style.strokeDasharray = circ;
+        circle.style.strokeDashoffset = off;
+      }
+    });
+  </script>
+
 </body>
 </html>
+
+  <?php
+    if (!function_exists('hvai_score_wheel')) {
+      /**
+       * Render a gradient circular score wheel.
+       * @param float $pct   0..100
+       * @param string $label
+       * @param string $from HEX like #8b5cf6
+       * @param string $to   HEX like #06b6d4
+       * @param int $size px
+       */
+      function hvai_score_wheel($pct, $label='Score', $from='#8b5cf6', $to='#06b6d4', $size=160){
+        $pct = max(0, min(100, floatval($pct)));
+        $id = 'sw_' . str_replace('.', '_', uniqid('', true));
+        $r = 64;              // radius
+        $sw = 14;             // stroke width
+        $cx = $cy = $r + $sw; // center
+        $box = ($r + $sw) * 2;
+        $circ = 2 * M_PI * $r;
+        $dash = $circ * ($pct/100.0);
+        $off = $circ - $dash;
+
+        return '
+        <div class="score-wrap" style="--size:'.$size.'px">
+          <div class="score-wheel" data-pct="'.$pct.'" data-circ="'.$circ.'">
+            <svg viewBox="0 0 '.$box.' '.$box.'" fill="none" role="img" aria-label="Score '.$pct.' percent">
+              <defs>
+                <linearGradient id="'.$id.'" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="'.$from.'"/>
+                  <stop offset="100%" stop-color="'.$to.'"/>
+                </linearGradient>
+                <filter id="'.$id.'_glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="6" result="b"/>
+                  <feMerge>
+                    <feMergeNode in="b"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Track -->
+              <circle cx="'.$cx.'" cy="'.$cy.'" r="'.$r.'" stroke="rgba(255,255,255,.14)" stroke-width="'.$sw.'" stroke-linecap="round"/>
+
+              <!-- Ticks (optional aesthetic) -->
+              <g class="tick" stroke="rgba(255,255,255,.18)" stroke-width="2">
+                '.implode("", array_map(function($i) use($cx, $cy, $r){
+                  $a = deg2rad($i*30 - 90);
+                  $x1 = $cx + cos($a) * ($r + 2);
+                  $y1 = $cy + sin($a) * ($r + 2);
+                  $x2 = $cx + cos($a) * ($r - 8);
+                  $y2 = $cy + sin($a) * ($r - 8);
+                  return "<line x1=$x1 y1=$y1 x2=$x2 y2=$y2 />";
+                }, range(0,11))).'
+              </g>
+
+              <!-- Progress -->
+              <g style="transform-origin: '.$cx.'px '.$cy.'px; animation: spin 12s linear infinite;">
+                <circle cx="'.$cx.'" cy="'.$cy.'" r="'.$r.'"
+                        stroke="url(#'.$id.')" stroke-width="'.$sw.'"
+                        stroke-linecap="round"
+                        stroke-dasharray="'.$circ.'"
+                        stroke-dashoffset="'.$off.'"
+                        filter="url(#'.$id.'_glow)"/>
+              </g>
+            </svg>
+            <div class="center">
+              <div class="value">'.(intval(round($pct))).'%</div>
+              <div class="label">'.htmlspecialchars($label).'</div>
+            </div>
+          </div>
+        </div>';
+      }
+    }
+  ?>
