@@ -720,7 +720,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       radial-gradient(800px 600px at 85% 10%, rgba(67,169,255,.08), transparent 60%),
       radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
   }
-  .hvai.hvai-v22 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(240px, 26vw, 360px)); align-items:center}
+  .hvai.hvai-v22 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(180px, 20vw, 260px)); align-items:center}
   @media (max-width:1100px){ .hvai.hvai-v22 .grid{grid-template-columns:1fr} .hvai.hvai-v22 .wheel{order:-1; margin:6px auto 14px} }
   .hvai.hvai-v22 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
   .hvai.hvai-v22 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
