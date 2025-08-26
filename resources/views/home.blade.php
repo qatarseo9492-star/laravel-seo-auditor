@@ -888,7 +888,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
         <div class="label"><span class="rainbow">Human vs AI Content (Ensemble)</span></div>
       </div>
 
-      <div id="hvaiStatus" class="status neutral" aria-live="polite">Waiting for analysis…</div>
+      <div id="hvaiStatus" class="status neutral" aria-live="polite"><span class="msg">Waiting for analysis…</span> <span id="hvaiRewrite" class="rewrite-badge" style="display:none">Rewrite the Content</span></div>
       <div class="badges">
         <div class="badge"><strong>🛡️ Confidence:</strong> <span id="hvaiConf">0</span>%</div>
         <div class="badge">ℹ️ Higher bar = more AI-like</div>
@@ -907,11 +907,14 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
     <!-- RIGHT: Dual-ring wheel -->
     <div class="hvai-wheel-wrap" aria-hidden="false">
-      <div class="hvai-wheel-track"></div>
-      <div class="hvai-arc-ai" id="hvaiArcAI"></div>
-      <div class="hvai-arc-human" id="hvaiArcHuman"></div>
-      <div class="hvai-glow" aria-hidden="true"></div>
-      <div class="hvai-ticks"></div>
+      <div class="hvai-wheel-track ring-track"></div>
+      <div class="hvai-arc-ai ring-gradient" id="hvaiArcAI"></div>
+      <div class="hvai-arc-human inner-human" id="hvaiArcHuman"></div>
+      <div class="hvai-glow aurora" aria-hidden="true"></div>
+      <div class="hvai-ticks ring-ticks"></div>
+      <div class="hvai-stripes" aria-hidden="true"></div>
+      <div class="hvai-spark" aria-hidden="true"></div>
+      <div class="hvai-sweep" aria-hidden="true"></div>
       <div class="hvai-wheel-center">
         <div class="kv">
           <div class="row"><span class="pill"><span class="dot ai"></span>AI‑like</span> <span class="val"><span id="hvaiAIVal">0</span><sup>%</sup></span></div>
@@ -925,20 +928,25 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   
   <script>
   // ===== HVAI Adapter v8: thresholds + bars + 0-init =====
+  
   function setStatus(humanPct){
     var st = document.getElementById('hvaiStatus');
     if(!st) return;
+    var msg = st.querySelector('.msg');
+    var rb  = document.getElementById('hvaiRewrite');
     st.classList.remove('neutral','good','warn','bad');
-    var rewrite = '<span class="rewrite-badge">Rewrite the Content</span>';
     if(humanPct >= 80){
       st.classList.add('good');
-      st.innerHTML = '🎉 Great Work';
+      if(msg) msg.textContent = 'Great Work';
+      if(rb) rb.style.display = 'none';
     }else if(humanPct >= 60){
       st.classList.add('warn');
-      st.innerHTML = '💡 Need More Hard Work';
+      if(msg) msg.textContent = 'Need More Hard Work';
+      if(rb) rb.style.display = 'none';
     }else{
       st.classList.add('bad');
-      st.innerHTML = '⚠️ Need More Hard Work ' + rewrite;
+      if(msg) msg.textContent = 'Need More Hard Work';
+      if(rb) rb.style.display = 'inline-flex';
     }
   }
 
