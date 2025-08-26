@@ -2843,5 +2843,62 @@ window.renderFlags = function(flags){
   }, false);
 })();
 </script>
+
+<script>
+window.hvai = window.hvai || {};
+if(!window.escapeHTML){
+  window.escapeHTML = function(s){ return (s||'').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); }); };
+}
+if(typeof window.makeSuggestionsFor !== 'function'){
+  window.makeSuggestionsFor = function(text, lang){
+    var tips = [
+      "Shorten long sentences into 1–2 concise lines.",
+      "Swap generic terms for concrete nouns and verbs.",
+      "Remove hedging like 'overall', 'in conclusion', 'as an AI'.",
+      "Add an example or specific detail to ground the point."
+    ];
+    var r = String(text||'').replace(/\b(in conclusion|overall|moreover|furthermore),?\b/gi, '').replace(/\s{2,}/g,' ');
+    if(r.length>160) r = r.split(/[,;:—-]/).slice(0,2).join('. ').trim();
+    return { items: tips, rewrite: r };
+  };
+}
+if(typeof window.hvaiSwitchTab !== 'function'){
+  window.hvaiSwitchTab = function(id){
+    try{
+      var tabs = document.querySelectorAll('.hvai-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.remove('active'); }
+      var panes = document.querySelectorAll('.hvai-pane'); for(var j=0;j<panes.length;j++){ panes[j].classList.remove('active'); }
+      var b = document.querySelector('.hvai-tab[data-tab="'+id+'"]'); if(b) b.classList.add('active');
+      var p = document.getElementById('pane-'+id); if(p) p.classList.add('active');
+    }catch(e){}
+  };
+}
+if(typeof window.hvaiOpenSuggestion !== 'function'){
+  window.hvaiOpenSuggestion = function(txt){
+    var body = document.getElementById('hvaiModalBody');
+    var langEl = document.getElementById('hvaiLang');
+    var lang = langEl ? langEl.value : 'en';
+    var sug = window.makeSuggestionsFor(txt, lang);
+    if(body){
+      body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+window.escapeHTML(String(txt||""))+'</div>' +
+                       '<div><b>Suggestions</b><ul style="margin-top:6px">'+ (sug.items||[]).map(function(x){return '<li>'+x+'</li>';}).join('') +'</ul></div>' +
+                       (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+window.escapeHTML(String(sug.rewrite||""))+'</div>' : '') +
+                       '</div>';
+      document.getElementById('hvaiModal').style.display='flex';
+      window.hvaiSwitchTab('suggestions');
+    }
+  };
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    try{
+      var box = document.getElementById('aiFlags');
+      if(box && Array.isArray(box._flags) && box._flags.length){ window.renderFlags(box._flags); }
+    }catch(e){}
+  }, 120);
+});
+</script>
 </body>
 </html>
