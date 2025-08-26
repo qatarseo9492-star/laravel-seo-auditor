@@ -862,7 +862,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   <div class="hvai-grid">
     <!-- LEFT: Title + badges + bars -->
     <div class="hvai-left">
-      <div class="title">
+      <div class="title"><span class="verchip" title="HVAI build v13">HVAI v13</span>
         <!-- Animated colorful icon -->
         <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
           <defs>
@@ -895,7 +895,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       </div>
 
       <div class="bars">
-        <div class="bar"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:39%"></div></div></div>
+        <div class="bar"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div></div>
         <div class="bar"><div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div><div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div></div>
         <div class="bar"><div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div><div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div></div>
         <div class="bar"><div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div><div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div></div>
@@ -926,9 +926,16 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
   
   
-  <script>
-  // ===== HVAI Adapter v8: thresholds + bars + 0-init =====
   
+  <script>
+  // HVAI v13 bootstrap
+  (function(){
+    try{
+      console.log('%cHVAI v13 loaded','background:linear-gradient(90deg,#1aa6ff,#9659ff);color:#fff;padding:4px 8px;border-radius:6px;');
+    }catch(_){}
+  })();
+
+  // Threshold badge/status logic
   function setStatus(humanPct){
     var st = document.getElementById('hvaiStatus');
     if(!st) return;
@@ -936,110 +943,68 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     var rb  = document.getElementById('hvaiRewrite');
     st.classList.remove('neutral','good','warn','bad');
     if(humanPct >= 80){
-      st.classList.add('good');
-      if(msg) msg.textContent = 'Great Work';
-      if(rb) rb.style.display = 'none';
+      st.classList.add('good'); if(msg) msg.textContent = 'Great Work'; if(rb) rb.style.display = 'none';
     }else if(humanPct >= 60){
-      st.classList.add('warn');
-      if(msg) msg.textContent = 'Need More Hard Work';
-      if(rb) rb.style.display = 'none';
+      st.classList.add('warn'); if(msg) msg.textContent = 'Need More Hard Work'; if(rb) rb.style.display = 'none';
     }else{
-      st.classList.add('bad');
-      if(msg) msg.textContent = 'Need More Hard Work';
-      if(rb) rb.style.display = 'inline-flex';
+      st.classList.add('bad');  if(msg) msg.textContent = 'Need More Hard Work'; if(rb) rb.style.display = 'inline-flex';
     }
   }
 
-  // Visual updater (dual-ring)
+  // Update visuals (dual-ring wheel + human bar)
   window.updateHVAIScore = function(pctAI){
     var p = Math.max(0, Math.min(100, Math.round(pctAI)));
     var pH = 100 - p;
     var root = document.querySelector('#hvai');
-    if(root){
-      root.style.setProperty('--p', p);
-      root.style.setProperty('--pH', pH);
-    }
+    if(root){ root.style.setProperty('--p', p); root.style.setProperty('--pH', pH); }
     var a = document.getElementById('hvaiAIVal'); if(a) a.textContent = p;
     var h = document.getElementById('hvaiHumanVal'); if(h) h.textContent = pH;
     var hb = document.getElementById('hvaiBarHuman'); if(hb) hb.style.width = pH+'%';
     var hNum = document.getElementById('hvaiValHumanBar'); if(hNum) hNum.textContent = Math.round(pH);
-    setStatus(pH); // thresholds use Human-like %
+    setStatus(pH);
   };
-
-  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
 
   function detectUltra(text){
     text = (text||'').replace(/\s+/g,' ').trim();
-    var len = text.length;
-    if(len < 40) return { ai: 0, human: 0, conf: 0, subs: null };
-
+    var len = text.length; if(len < 40) return { ai:0, human:0, conf:0, subs:null };
     var sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
     var tokens = text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g) || [];
     var types = new Set(tokens);
-
     var ttr = types.size / Math.max(1, tokens.length);
     var ttrScore = (1 - Math.abs(0.52 - Math.min(0.95, ttr))/0.52) * 100;
-
-    var tri = {};
-    for(let i=0;i<tokens.length-2;i++){ let g=tokens.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1; }
+    var tri = {}; for(let i=0;i<tokens.length-2;i++){ let g=tokens.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1; }
     var repeatedTri = Object.values(tri).filter(v=>v>1).length;
     var repRatio = repeatedTri / Math.max(1, Object.keys(tri).length);
     var repScore = (1 - Math.min(0.6, repRatio)/0.6) * 100;
-
     var sl = sentences.map(s=> (s.match(/\w+/g)||[]).length );
     var avgSL = sl.reduce((a,b)=>a+b,0) / Math.max(1, sl.length);
     var sdSL = Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avgSL,2),0)/Math.max(1, sl.length));
     var cov = avgSL ? sdSL/avgSL : 0;
     var burstScore = Math.min(1, cov/0.8) * 100;
-
     var freq = {}; for (let ch of text) { if(ch < ' ' || ch > '~') continue; freq[ch]=(freq[ch]||0)+1; }
     var H=0, N=Object.values(freq).reduce((a,b)=>a+b,0)||1;
     for (let k in freq){ let p=freq[k]/N; H += -p*Math.log2(p); }
     var entScore = (1 - Math.abs(3.8 - Math.min(6.0, H))/3.8) * 100;
-
     var sw = new Set(['the','and','of','to','a','in','is','it','that','for','on','you','with','as','are','this','be','or','by','an','from','at','have','not','was','but','they','we','can','if','will','your','about']);
     var swCount = tokens.filter(t=>sw.has(t)).length;
     var swRatio = swCount / Math.max(1, tokens.length);
     var swScore = (1 - Math.abs(0.42 - Math.min(0.9, swRatio))/0.42) * 100;
-
     var digits = (text.match(/\d/g)||[]).length / Math.max(1, len);
     var digScore = (1 - Math.max(0, 0.06 - digits)/0.06) * 100;
-
-    var words = tokens.length || 1;
     function syllables(w){ return Math.max(1, (w.match(/[aeiouy]+/gi)||[]).length - (w.match(/(?:e|ed|es)\b/gi)||[]).length + (w.match(/le\b/gi)?1:0)); }
+    var words = tokens.length || 1;
     var syls = tokens.reduce((a,w)=>a+syllables(w),0);
     var FRE = 206.835 - (1.015 * (words/Math.max(1, sentences.length))) - (84.6 * (syls/words));
     var readScore = (1 - Math.abs(60 - Math.max(0, Math.min(100, FRE))) / 60) * 100;
-
     var weights = { ttr:.18, rep:.15, burst:.18, ent:.12, sw:.12, dig:.10, read:.15 };
-    var humanComposite =
-      ttrScore*weights.ttr +
-      repScore*weights.rep +
-      burstScore*weights.burst +
-      entScore*weights.ent +
-      swScore*weights.sw +
-      digScore*weights.dig +
-      readScore*weights.read;
-
+    var humanComposite = ttrScore*weights.ttr + repScore*weights.rep + burstScore*weights.burst + entScore*weights.ent + swScore*weights.sw + digScore*weights.dig + readScore*weights.read;
     var aiLike = Math.max(0, Math.min(100, 100 - humanComposite));
     var varSignals = [ttrScore, repScore, burstScore, entScore, swScore, digScore, readScore];
     var mean = varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
     var variance = varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length;
     var conf = Math.max(50, Math.min(98, 60 + Math.log10(len+1)*8 + Math.sqrt(variance)/10));
-
-    return { 
-      ai: Math.round(aiLike), 
-      human: Math.round(100 - aiLike), 
-      conf: Math.round(conf),
-      subs: {
-        humanLike: Math.round(humanComposite),
-        lexical: Math.round(ttrScore),
-        burst: Math.round(burstScore),
-        digits: Math.round(digScore),
-        repetition: Math.round(repScore),
-        entropy: Math.round(entScore)
-      }
-    };
+    return { ai: Math.round(aiLike), human: Math.round(100 - aiLike), conf: Math.round(conf),
+      subs:{ humanLike: Math.round(humanComposite), lexical: Math.round(ttrScore), burst: Math.round(burstScore), digits: Math.round(digScore), repetition: Math.round(repScore), entropy: Math.round(entScore) } };
   }
 
   function updateBars(subs){
@@ -1061,27 +1026,6 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     }
   }
 
-
-  function updateBars(subs){
-    if(!subs) return;
-    var map = [
-      ['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],
-      ['hvaiBarLex','hvaiValLex', subs.lexical],
-      ['hvaiBarBurst','hvaiValBurst', subs.burst],
-      ['hvaiBarDigits','hvaiValDigits', subs.digits],
-      ['hvaiBarRep','hvaiValRep', subs.repetition],
-      ['hvaiBarEnt','hvaiValEnt', subs.entropy],
-    ];
-    map.forEach(function(row){
-      var fill = document.getElementById(row[0]);
-      var num  = document.getElementById(row[1]);
-      var val  = Math.max(0, Math.min(100, Math.round(row[2]||0)));
-      if(fill) fill.style.width = val + '%';
-      if(num)  num.textContent = val;
-    });
-  }
-
-  
   // Public API
   window.hvaiCompute = function(text){
     try{
@@ -1093,7 +1037,49 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     }catch(e){ console.warn('HVAI compute error', e); return null; }
   };
 
-  // Reset to 0 while waiting for analysis
+  // Expanded watchers: try many typical result containers
+  (function(){
+    var sels = [
+      '#analysisResults','.analysis-results','#results','.results','#output','.output','#report','.report',
+      '#contentPreview','.content-preview','.report-body','main','article'
+    ];
+    var targets = []; for(var i=0;i<sels.length;i++){ var el = document.querySelector(sels[i]); if(el) targets.push(el); }
+    if(targets.length){
+      var seenOnce = false;
+      var mo = new MutationObserver(function(){
+        if(seenOnce) return;
+        for(var el of targets){
+          var txt = (el.innerText||'').replace(/\s+/g,' ').trim();
+          if(txt && txt.length > 120){
+            seenOnce = true;
+            hvaiCompute(txt);
+            break;
+          }
+        }
+      });
+      targets.forEach(t=>mo.observe(t, {subtree:true, childList:true, characterData:true}));
+    }
+  })();
+
+  // Analyze button fallback
+  (function(){
+    var btns = Array.from(document.querySelectorAll('#analyzeBtn,[data-role=\"analyze\"],button,.btn'))
+      .filter(b=>/analy[sz]e/i.test(b.textContent||''));
+    btns.forEach(b=> b.addEventListener('click', function(){
+      setTimeout(function(){
+        var inputs = ['#inputText','#content','#textToAnalyze','textarea[name=\"content\"]','#pasteArea','textarea'];
+        for(var sel of inputs){
+          var el = document.querySelector(sel);
+          if(el && ((el.value||'').trim().length>120 || (el.innerText||'').trim().length>120)){
+            hvaiCompute(el.value || el.innerText);
+            break;
+          }
+        }
+      }, 1200);
+    }));
+  })();
+
+  // Reset to zero at load
   (function reset(){
     updateHVAIScore(0);
     updateBars({humanLike:0,lexical:0,burst:0,digits:0,repetition:0,entropy:0});
