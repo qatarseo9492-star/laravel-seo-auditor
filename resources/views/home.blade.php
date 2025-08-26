@@ -862,7 +862,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   <div class="hvai-grid">
     <!-- LEFT: Title + badges + bars -->
     <div class="hvai-left">
-      <div class="title"><span class="verchip" title="HVAI build v13">HVAI v13</span>
+      <div class="title">
         <!-- Animated colorful icon -->
         <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
           <defs>
