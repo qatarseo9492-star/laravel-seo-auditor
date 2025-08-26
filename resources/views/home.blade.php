@@ -58,7 +58,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .btn::after{content:"";position:absolute;inset:-2px;border-radius:inherit;opacity:.0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);transform:translateX(-120%);transition:opacity .2s}
 .btn:hover::after{opacity:1;animation:btnSweep 2.6s linear infinite}
 @keyframes btnSweep{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
-.btn-analyze{ position:relative; z-index:99; background:linear-gradient(135deg,#10b981,#22c55e);border-color:#20d391}
+.btn-analyze{background:linear-gradient(135deg,#10b981,#22c55e);border-color:#20d391}
 .btn-print{background:linear-gradient(135deg,#3b82f6,#6366f1);border-color:#5b77ef}
 .btn-reset{background:linear-gradient(135deg,#f59e0b,#f97316);border-color:#f59e0b}
 .btn-export{background:linear-gradient(135deg,#a855f7,#ec4899);border-color:#c26cf2}
@@ -92,7 +92,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .waterbar{position:relative;height:64px;border-radius:18px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .water-svg{position:absolute;inset:0;width:100%;height:100%;z-index:1}
 .water-mask-rect{transition:all .25s ease-out}
-.water-overlay{ pointer-events:none; /* global non-blocking overlays */position:absolute;inset:0;pointer-events:none;background:radial-gradient(120px 60px at 20% -20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(0deg,rgba(255,255,255,.05),transparent 40%,transparent 60%,rgba(255,255,255,.06));mix-blend-mode:screen;z-index:2}
+.water-overlay{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120px 60px at 20% -20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(0deg,rgba(255,255,255,.05),transparent 40%,transparent 60%,rgba(255,255,255,.06));mix-blend-mode:screen;z-index:2}
 .water-pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1.05rem;text-shadow:0 1px 0 rgba(0,0,0,.45);letter-spacing:.4px;z-index:4}
 .wave1{animation:waveX 7s linear infinite}.wave2{animation:waveX 10s linear infinite reverse;opacity:.7}
 @keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
@@ -170,126 +170,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .det-score{font-weight:1000}
 .det-bar{margin-top:.35rem;position:relative;height:14px;border-radius:10px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
 .det-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);transition:width .35s ease}
-
-
-/* --- FIX: Prevent HVAI banner/toast or gauge from overlapping content (2025-08-25) --- */
-.hvai{ 
-  display:grid; 
-  grid-template-areas:
-    "head"
-    "meta"
-    "banner"
-    "bars"
-    "grid"
-    "note";
-}
-.hvai-head{ grid-area: head; }
-.hvai-meta{ grid-area: meta; }
-.hvai-banner{ grid-area: banner; }
-.hvai-bar{ grid-area: bars; }
-.det-grid{ grid-area: grid; }
-#detNote{ grid-area: note; }
-
-.hvai-banner{
-  display:none;
-  margin:.4rem 0 .6rem;
-  padding:.6rem .8rem;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,.12);
-  background:linear-gradient(135deg, rgba(61,226,255,.10), rgba(155,92,255,.10));
-  font-weight:900;
-}
-.hvai-banner.show{ display:block; }
-
-/* If external detector injects .toast/.banner as absolute overlay, normalize it into flow */
-.hvai > .toast, .hvai > .banner, .hvai [data-toast], .hvai [data-banner]{
-  position: static !important;
-  inset: auto !important;
-  display:block !important;
-  margin:.4rem 0 .6rem !important;
-  z-index:auto !important;
-}
-
-/* If a donut/ring gauge exists on the right, ensure it wraps instead of overlapping */
-.hvai .gauge, .hvai .ring, .hvai .donut, .hvai svg[viewBox*="200 200"]{
-  max-width:320px;
-  width:100%;
-  margin-left:auto;
-}
-@media (max-width:900px){
-  .hvai .gauge, .hvai .ring, .hvai .donut, .hvai svg[viewBox*="200 200"]{
-    margin:0 auto;
-  }
-}
-/* --- /FIX --- */
-
-/* === HVAI Neo Theme (with Multilingual) ================================= */
-:root{
-  --hvai-bg: radial-gradient(1200px 600px at 85% -10%, rgba(155,92,255,.25), transparent 60%),
-             radial-gradient(1000px 480px at 10% -20%, rgba(2,204,255,.20), transparent 60%);
-  --hvai-card: rgba(17, 20, 31, .66);
-  --hvai-border: rgba(255,255,255,.08);
-  --hvai-head: #e2ccff;
-  --hvai-sub: #96f0ff;
-  --hvai-human: #22c55e;  /* green */
-  --hvai-ai: #ff7a59;     /* orange */
-  --hvai-neutral: #a7b0c0;
-  --hvai-chip: rgba(255,255,255,.06);
-}
-
-.hvai{
-  border:1px solid var(--hvai-border);
-  background: var(--hvai-bg);
-  border-radius: 18px;
-  padding: 14px;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 6px 24px rgba(0,0,0,.25) inset, 0 8px 24px rgba(0,0,0,.25);
-}
-.hvai-head{
-  display:flex; align-items:center; gap:.6rem;
-  color:var(--hvai-head); font-weight:900; letter-spacing:.2px;
-  font-size: clamp(1.05rem, 1vw + .9rem, 1.35rem);
-}
-.hvai-head .icon{
-  width:22px; height:22px; opacity:.95; flex:0 0 auto;
-  filter: drop-shadow(0 0 10px rgba(226,204,255,.25));
-}
-.hvai-sub{ color:var(--hvai-sub); font-size:.85rem; opacity:.9; margin:.2rem 0 .3rem; display:inline-block; }
-
-.hvai-meta{ display:flex; flex-wrap:wrap; align-items:center; gap:.6rem 1rem; margin-top:.5rem; }
-.hvai-chip{ display:inline-flex; align-items:center; gap:.45rem; padding:.35rem .6rem; border-radius:999px; background:var(--hvai-chip);
-  border:1px solid var(--hvai-border); color:#e7eef7; font-weight:700; }
-.hvai-chip .icon{ width:16px; height:16px; opacity:.9; }
-
-/* Bars keep your existing classes but refresh colors */
-.hvai-fill.human{ background: linear-gradient(90deg, var(--hvai-human), #29f59d); box-shadow: 0 0 28px rgba(34,197,94,.35); }
-.hvai-fill.ai{ background: linear-gradient(270deg, #ff7a59, #ffb15e); box-shadow: 0 0 28px rgba(255,122,89,.35); }
-
-.hvai-label{ display:flex; align-items:center; justify-content:space-between; gap:1rem; font-weight:800; color:#eaf2ff; }
-.hvai-label .lab{ display:flex; align-items:center; gap:.5rem; }
-.hvai-label .lab .icon{ width:18px; height:18px; }
-
-.hvai .ring .ai-arc{ stroke:var(--hvai-ai) !important; }
-.hvai .ring .human-arc{ stroke:var(--hvai-human) !important; }
-.hvai .ring text{ fill:#eaf2ff !important; font-weight:900; }
-
-/* Language row */
-.hvai .lang-row{ display:flex; align-items:center; gap:.6rem; margin:.6rem 0 .2rem; }
-.hvai .lang-row select{
-  background:var(--hvai-card); color:#eaf2ff; border:1px solid var(--hvai-border);
-  padding:.4rem .6rem; border-radius:10px; font-weight:700;
-}
-.hvai .lang-row .icon{ width:18px; height:18px; }
-
-/* RTL helper for AR/UR */
-.hvai[dir="rtl"] .hvai-label{ flex-direction: row-reverse; }
-.hvai[dir="rtl"] .hvai-label .lab{ flex-direction: row-reverse; }
-.hvai[dir="rtl"] .hvai-meta{ justify-content:flex-end; }
-
-/* small badge */
-.badge-beta{ display:inline-flex; align-items:center; gap:.35rem; padding:.2rem .5rem; border-radius:10px;
-  background:rgba(2,204,255,.12); border:1px solid var(--hvai-border); color:#aaf7ff; font-weight:800; font-size:.72rem; }
-/* ====================================================================== */
 
 /* ==== Readability (ULTRA PRO restyle) ==== */
 :root{
@@ -525,127 +405,9 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .psi-issues ul{margin:.2rem 0 0;padding-left:1rem}
 .psi-issues li{margin:.22rem 0}
 @media (max-width:768px){.psi-card{grid-column:span 12}}
-
-
-/* === Site Speed & Core Web Vitals — Neo Card (scoped) ====================== */
-.psi .speed-card{
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px; padding:16px;
-  background: radial-gradient(900px 420px at 90% -10%, rgba(0,255,171,.14), transparent 60%),
-              radial-gradient(900px 420px at 0% -20%, rgba(2,204,255,.10), transparent 55%);
-  box-shadow: 0 8px 24px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.04);
-  backdrop-filter: blur(6px);
-}
-.psi .speed-head{ display:flex; align-items:center; gap:.6rem; color:#bdffe7; font-weight:900; font-size: clamp(1.05rem, 1vw + .9rem, 1.35rem); }
-.psi .speed-head .icon{ width:22px; height:22px; filter: drop-shadow(0 0 10px rgba(0,255,171,.25)); }
-.psi .speed-sub{ color:#a6f7ff; font-size:.86rem; opacity:.9; }
-
-.psi .speed-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:12px; margin-top:10px; }
-.psi .metric{ border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px; background: rgba(15,18,30,.55); }
-.psi .metric .top{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
-.psi .metric .lab{ display:flex; align-items:center; gap:.5rem; font-weight:800; color:#eaf2ff; }
-.psi .metric .lab .icon{ width:18px; height:18px; }
-.psi .metric .val{ font-weight:900; font-size:1.1rem; color:#fff; }
-.psi .badge{ padding:.2rem .45rem; border-radius:8px; font-weight:800; font-size:.72rem; }
-.psi .badge.fast{ background:rgba(0,255,171,.16); color:#b2ffe9; border:1px solid rgba(0,255,171,.28); }
-.psi .badge.ok{ background:rgba(255,196,0,.12); color:#ffe8a3; border:1px solid rgba(255,196,0,.25); }
-.psi .badge.slow{ background:rgba(255,95,95,.12); color:#ffc9c9; border:1px solid rgba(255,95,95,.25); }
-
-/* tiny bar for each metric */
-.psi .mini{ height:10px; border-radius:10px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px; }
-.psi .mini > i{ display:block; height:100%; border-radius:10px; background:linear-gradient(90deg, #00ffaa, #02ccff); }
-/* ======================================================================== */
-
-
-
-/* Keep background overlays visible (but non-interactive) */
-.water-overlay, .water-svg, .comp-overlay{
-  pointer-events: none;
-  z-index: 0;
-}
-
-
-/* Heavy multicolor smoke + tech lines */
-.page-bg{
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-}
-/* layered 'smoke' using multiple radial gradients */
-body::before, body::after{
-  content: "";
-  position: fixed;
-  inset: -10% -10% auto -10%;
-  height: 80%;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(600px 300px at 10% 10%, rgba(155,92,255,.30), transparent 60%),
-    radial-gradient(650px 320px at 90% 15%, rgba(2,204,255,.26), transparent 60%),
-    radial-gradient(700px 340px at 50% -10%, rgba(0,255,171,.22), transparent 60%),
-    radial-gradient(500px 260px at 20% 80%, rgba(255,165,0,.12), transparent 70%);
-  filter: blur(10px);
-}
-body::after{
-  inset: auto -10% -10% -10%;
-  height: 70%;
-  background:
-    radial-gradient(700px 340px at 80% 80%, rgba(155,92,255,.22), transparent 60%),
-    radial-gradient(600px 300px at 20% 70%, rgba(2,204,255,.18), transparent 60%),
-    radial-gradient(650px 320px at 60% 90%, rgba(0,255,171,.18), transparent 60%);
-  filter: blur(12px);
-}
-/* subtle tech lines overlay */
-.bg-lines{
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: .35;
-  mix-blend-mode: screen;
-}
-
-
-/* Non-blocking overlays fix (do not intercept clicks) */
-.water-pct, .comp-pct, .bg-lines, .water-svg, .comp-svg {
-  pointer-events: none !important;
-}
-
-
-/* --- Content above background art (z-index fix) --- */
-.wrap, .analyzer, header, footer {
-  position: relative;
-  z-index: 10;
-}
-.water-svg, .water-overlay, .water-pct,
-.comp-svg, .comp-overlay, .comp-pct,
-.bg-lines {
-  z-index: 0 !important;
-  pointer-events: none !important;
-}
-
 </style>
 </head>
 <body>
-
-<div class="page-bg" aria-hidden="true">
-  <svg class="bg-lines" viewBox="0 0 1200 600" preserveAspectRatio="none">
-    <defs>
-      <linearGradient id="glow" x1="0" x2="1" y1="0" y2="1">
-        <stop offset="0%" stop-color="#9b5cff" stop-opacity="0.35"/>
-        <stop offset="50%" stop-color="#02ccff" stop-opacity="0.25"/>
-        <stop offset="100%" stop-color="#00ffab" stop-opacity="0.25"/>
-      </linearGradient>
-    </defs>
-    <g stroke="url(#glow)" stroke-width="1">
-      <path d="M0,520 C250,420 450,580 700,480 C950,380 1000,560 1200,480" fill="none"/>
-      <path d="M0,420 C250,320 450,480 700,380 C950,280 1000,460 1200,380" fill="none"/>
-      <path d="M0,320 C250,220 450,380 700,280 C950,180 1000,360 1200,280" fill="none"/>
-    </g>
-  </svg>
-</div>
-
 
 <!-- Background canvases -->
 <canvas id="linesCanvas"></canvas>
@@ -774,7 +536,7 @@ body::after{
             </label>
           </div>
 
-          <button id="analyzeBtn" type="button" class="btn btn-analyze" onclick="try{analyze();}catch(e){}; return false;">
+          <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
             <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
 
@@ -828,40 +590,22 @@ body::after{
     <!-- 1) HUMAN vs AI (Ensemble) -->
     <section id="detectorPanel" class="hvai" style="display:none">
       <div class="hvai-head">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11a5 5 0 1 1 10 0v2h1a2 2 0 0 1 2 2v2h-5v-2H9v2H4v-2a2 2 0 0 1 2-2h1v-2Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="8.5" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg><h4>Human vs AI Content (Ensemble)</h4>
+        <i class="fa-solid fa-users-gear ico ico-purple"></i>
+        <h4>Human vs AI Content (Ensemble)</h4>
       </div>
-<span class="hvai-sub">Ensemble signals</span> <span class="badge-beta">⚡ Multilingual Beta</span>
       <div class="hvai-meta">
         <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
         <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
-      
-      <div class="lang-row" id="hvaiLangRow">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M3 12h18M12 3v18M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.3"/>
-        </svg>
-        <strong>Language:</strong>
-        <select id="hvaiLang">
-          <option value="en" selected>English</option>
-          <option value="ur">Urdu / اردو</option>
-          <option value="ar">العربية</option>
-          <option value="de">Deutsch</option>
-          <option value="es">Español</option>
-          <option value="pt">Português</option>
-        </select>
       </div>
-    
-</div>
-        <div id="hvaiBanner" class="hvai-banner" aria-live="polite" style="display:none"></div>
-
 
       <!-- Animated Human vs AI bars -->
       <div class="hvai-bar">
         <div>
-          <div class="hvai-label"><span class="lab"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12c2.8 0 5-2.2 5-5s-2.2-5-5-5-5 2.2-5 5 2.2 5 5 5Z" stroke="currentColor" stroke-width="1.5"/><path d="M21 22a8.9 8.9 0 0 0-18 0" stroke="currentColor" stroke-width="1.5"/></svg></span> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
           <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
         </div>
         <div>
-          <div class="hvai-label"><span class="lab"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" ry="3" stroke="currentColor" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5"/></svg></span> AI-like</span><b id="hvaiAIVal">—%</b></div>
+          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
           <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
         </div>
       </div>
@@ -962,7 +706,7 @@ body::after{
     </section>
 
     <!-- 4) SITE SPEED & CORE WEB VITALS (End) -->
-    <section class="psi" id="psiPanel" data-psi-endpoint="/psi-proxy">
+    <section class="psi" id="psiPanel" style="display:none">
       <div class="psi-head">
         <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
         <h4>Site Speed & Core Web Vitals</h4>
@@ -995,7 +739,8 @@ body::after{
         <div class="title"><i class="fa-solid fa-screwdriver-wrench"></i> How to Improve</div>
         <ul id="psiAdvice"></ul>
       </div>
-      <div id="psiNote" style="color:var(--text-dim);margin-top:.4rem"></div></section>
+      <div id="psiNote" style="color:var(--text-dim);margin-top:.4rem"></div>
+    </section>
 
     <!-- Checklist categories (unchanged) -->
     @php $labels = [
@@ -1098,335 +843,766 @@ body::after{
 <button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
 <!-- A) Analyze + core logic -->
-
-
-
-
-
-
-
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  (function(){
-    const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
-    const urlInput = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-    const runBtn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
-    if (!panel) return;
-    function ensureVisible(){ if (panel.style.display==='none') panel.style.display=''; panel.classList.add('psi-ready'); }
-    function safeClick(){ ensureVisible(); if (typeof window.runPSI==='function') setTimeout(()=>window.runPSI(), 60); else if (typeof window.SEMSEO_go==='function'){ try{ window.SEMSEO_go(); }catch(e){} } }
-    if (runBtn){ runBtn.addEventListener('click', function(e){ e.preventDefault(); safeClick(); }); runBtn.style.pointerEvents='auto'; }
-    if (urlInput){ urlInput.addEventListener('keydown', function(e){ if (e.key==='Enter'){ e.preventDefault(); safeClick(); } }); }
-  })();
-});
-</script>
-
-
 <script>
 (function(){
-  function wirePSI(){
-    try{
-      const btn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
-      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-      if (!btn || !input) return;
-      // Ensure visible
-      const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
-      if (panel && panel.style.display==='none') panel.style.display='';
-      btn.style.pointerEvents='auto';
-      btn.addEventListener('click', function(ev){
-        try{ ev.preventDefault(); }catch(_){}
-        // Prefer app's analyze, then PSI
-        if (typeof window.SEMSEO_go === 'function'){ try{ window.SEMSEO_go(); }catch(_){ } }
-        if (typeof window.runPSI === 'function'){ setTimeout(()=>window.runPSI(input.value||''), 120); }
-      }, { once:false });
-      input.addEventListener('keydown', function(e){
-        if (e.key === 'Enter'){
-          e.preventDefault();
-          if (typeof window.SEMSEO_go === 'function'){ try{ window.SEMSEO_go(); }catch(_){ } }
-          if (typeof window.runPSI === 'function'){ setTimeout(()=>window.runPSI(input.value||''), 120); }
-        }
-      });
-    }catch(e){ console.error('PSI wire error', e); }
-  }
-  if (document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', wirePSI);
-  }else{
-    wirePSI();
-  }
-  window.addEventListener('load', wirePSI);
-})();
-</script>
+  var CSRF = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  function setText(id,val){ var el=document.getElementById(id); if(el){ el.textContent=val; } return el; }
+  function setChipTone(el, v){ if(!el) return; el.classList.remove('chip-good','chip-mid','chip-bad'); var n=Number(v)||0; el.classList.add(n>=80?'chip-good':(n>=60?'chip-mid':'chip-bad')); }
+  function badgeTone(el, v){ if(!el) return; el.classList.remove('score-good','score-mid','score-bad'); el.classList.add(v>=80?'score-good':(v>=60?'score-mid':'score-bad')); }
 
-
-<script>
-// Final hardening of Analyze + Page URL controls
-(function(){
-  function expose(){
-    try{
-      // If SEMSEO_go exists, wrap to ensure PSI always runs as fallback
-      const prior = window.SEMSEO_go;
-      window.SEMSEO_go = function(){
-        try{ if (typeof prior === 'function') prior(); }catch(e){}
-        try{
-          const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-          const val = (input && input.value) ? input.value.trim() : '';
-          if (typeof window.runPSI === 'function'){ window.runPSI(val); }
-        }catch(_){}
-      };
-    }catch(_){}
-
-    // Paste button: use clipboard; fallback to location.href
-    try{
-      const pasteBtn = document.getElementById('pasteUrl');
-      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-      if (pasteBtn && input){
-        pasteBtn.addEventListener('click', async function(e){
-          e.preventDefault();
-          let txt = '';
-          try{ txt = await navigator.clipboard.readText(); }catch(_){}
-          if (!txt){ try{ txt = window.location.href || ''; }catch(_){}
-          if (!/^https?:\/\//i.test(txt) && txt){ txt = 'https://' + txt.replace(/^\/*/, ''); }
-          if (txt){ input.value = txt; input.focus(); }
-        });
-      }
-    }catch(_){}
-
-    // Bonus: clicking the Performance chip runs PSI
-    try{
-      const perf = document.getElementById('psiPerf');
-      if (perf){ perf.addEventListener('click', function(){ 
-        const input = document.getElementById('analyzeUrl'); 
-        if (typeof window.runPSI === 'function') window.runPSI((input && input.value)||''); 
-      });}
-    }catch(_){}
-  }
-  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', expose); } else { expose(); }
-  window.addEventListener('load', expose);
-})();
-</script>
-
-
-<script>
-(function(){
-  const btn = document.getElementById('analyzeBtn');
-  const status = document.getElementById('analyzeStatus') || (function(){
-    const s = document.createElement('div'); s.id='analyzeStatus';
-    s.style.cssText='margin-top:.35rem;font-weight:800;color:#a6f7ff;';
-    const row = btn && btn.closest('.analyze-row');
-    if (row) row.parentNode.insertBefore(s, row.nextSibling);
-    return s;
-  })();
-  if (btn && status){
-    btn.addEventListener('click', function(){
-      status.textContent = 'Analyzing…';
-      setTimeout(()=>{ if(status.textContent==='Analyzing…') status.textContent=''; }, 6000);
-    });
-  }
-  // Clear status on PERF update
-  const perf = document.getElementById('psiPerf');
-  if (perf){
-    const obs = new MutationObserver(()=>{ status.textContent=''; });
-    obs.observe(perf, {childList:true, characterData:true, subtree:true});
-  }
-})();
-</script>
-
-
-<script>
-(function(){
-  const apiPublic = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
-  const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
-  const endpoint = (panel && panel.dataset && panel.dataset.psiEndpoint) ? panel.dataset.psiEndpoint : (window.SEMSEO && window.SEMSEO.ENDPOINTS && window.SEMSEO.ENDPOINTS.psi ? window.SEMSEO.ENDPOINTS.psi : "/psi-proxy");
-  const strategyEl = document.getElementById('psiStrategy');
-
-  async 
-function runPSI(targetUrl){
-  const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-  const raw = (targetUrl || (input && input.value) || "").trim();
-  const strategy = (strategyEl && (strategyEl.textContent||"").trim().toLowerCase()) || "mobile";
-  const status = document.getElementById('psiStatus') || (function(){ const s=document.createElement('div'); s.id='psiStatus'; s.style.cssText='margin:.25rem 0 0;color:#a6f7ff;font-weight:700;font-size:.85rem;'; const panel=document.getElementById('psiPanel'); if(panel) panel.insertBefore(s, panel.firstChild); return s; })();
-  if (!raw){ status.textContent = "Please enter a URL."; return; }
-  const qs = `url=${encodeURIComponent(raw)}&strategy=${encodeURIComponent(strategy)}&category[]=performance&category[]=accessibility&category[]=seo&category[]=best-practices`;
-
-  async function tryProxy(){
-    try{
-      const r = await fetch(`${endpoint}?${qs}`);
-      if (!r.ok) return { proxy_error: true, status: r.status, body: await r.text() };
-      return await r.json();
-    }catch(e){ return { proxy_error: true, message: String(e) }; }
-  }
-  async function tryPublic(){
-    try{
-      const r = await fetch(`${apiPublic}?${qs}`);
-      if (!r.ok) return { proxy_error: true, status: r.status, body: await r.text() };
-      return await r.json();
-    }catch(e){ return { proxy_error: true, message: String(e) }; }
-  }
-
-  (async ()=>{
-    status.textContent = "Running PageSpeed…";
-    let data = await tryProxy();
-    if (data && (data.ok === false || data.proxy_error || data.error) ){ data = await tryPublic(); }
-    if (!data || (!data.lighthouseResult && !data.loadingExperience)){
-      status.textContent = "PSI request failed.";
-      renderPSI({}); return;
+  /* === Score wheel === */
+  var GAUGE={rect:null,stop1:null,stop2:null,r1:null,r2:null,arc:null,text:null,H:200,CIRC:2*Math.PI*95};
+  window.setScoreWheel = function(value){
+    if(!GAUGE.rect){
+      GAUGE.rect=document.getElementById('scoreClipRect'); GAUGE.stop1=document.getElementById('scoreStop1'); GAUGE.stop2=document.getElementById('scoreStop2');
+      GAUGE.r1=document.getElementById('ringStop1'); GAUGE.r2=document.getElementById('ringStop2'); GAUGE.arc=document.getElementById('ringArc'); GAUGE.text=document.getElementById('overallScore');
+      if(GAUGE.arc){ GAUGE.arc.style.strokeDasharray=GAUGE.CIRC.toFixed(2); GAUGE.arc.style.strokeDashoffset=GAUGE.CIRC.toFixed(2); }
     }
-    status.textContent = "";
-    renderPSI(data);
-  })();
-}
-window.runPSI = runPSI;
+    var v=Math.max(0,Math.min(100,Number(value)||0));
+    var y=GAUGE.H-(GAUGE.H*(v/100));
+    if(GAUGE.rect) GAUGE.rect.setAttribute('y',String(y));
+    if(GAUGE.text) GAUGE.text.textContent=Math.round(v)+'%';
 
-
-  function renderPSI(json){
-    try{
-      const perfEl = document.getElementById('psiPerf');
-      const perf = json?.lighthouseResult?.categories?.performance?.score;
-      if (perfEl && typeof perf === 'number') perfEl.textContent = Math.round(perf*100) + ' / 100';
-
-      const fx = json?.loadingExperience?.metrics || {};
-      const LCPf = fx?.LARGEST_CONTENTFUL_PAINT_MS?.percentile ?? null;
-      const CLSf = (fx?.CUMULATIVE_LAYOUT_SHIFT_SCORE?.percentile ?? null)/100;
-      const INPf = fx?.INTERACTION_TO_NEXT_PAINT?.percentile ?? null;
-
-      const audits = json?.lighthouseResult?.audits || {};
-      const LCPlab = audits['largest-contentful-paint']?.numericValue ?? null;
-      const CLSlab = audits['cumulative-layout-shift']?.numericValue ?? null;
-      const INPlab = audits['interaction-to-next-paint']?.numericValue ?? null;
-
-      const LCP = LCPf || LCPlab || 0;
-      const CLS = (CLSf!=null ? CLSf : CLSlab) || 0;
-      const INP = INPf || INPlab || 0;
-
-      const lcpEl = document.getElementById('psiLcp');
-      const inpEl = document.getElementById('psiInp');
-      const clsEl = document.getElementById('psiCls');
-      const lcpBar = document.getElementById('psiLcpBar');
-      const inpBar = document.getElementById('psiInpBar');
-      const clsBar = document.getElementById('psiClsBar');
-
-      if (lcpEl) lcpEl.textContent = (LCP/1000).toFixed(2) + 's';
-      if (inpEl) inpEl.textContent = Math.round(INP) + 'ms';
-      if (clsEl) clsEl.textContent = (Math.round(CLS*1000)/1000).toFixed(3);
-
-      if (lcpBar) lcpBar.style.width = Math.min(100, Math.max(5, Math.round((LCP/4000)*100))) + '%';
-      if (inpBar) inpBar.style.width = Math.min(100, Math.max(5, Math.round((INP/500)*100))) + '%';
-      if (clsBar) clsBar.style.width = Math.min(100, Math.max(5, Math.round((CLS/0.25)*100))) + '%';
-    }catch(e){ console.error('PSI render error', e, json); }
-  }
-})();
-</script>
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  const btn = document.getElementById('analyzeBtn');
-  const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-  const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
-  function go(){
-    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
-    if (panel && panel.style.display === 'none') panel.style.display = '';
-    if (typeof window.runPSI === 'function'){ window.runPSI((input && input.value) || ''); }
-  }
-  if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); go(); }); }
-  if (input){ input.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); go(); } }); }
-});
-</script>
-
-
-<script>
-(function(){
-  // Provide a safe global analyze() that preserves any original implementation
-  const __origAnalyze = window.analyze;
-  window.analyze = function(){
-    // 1) Call the app's original analyze() if it exists
-    try{ if (typeof __origAnalyze === 'function') __origAnalyze(); }catch(_){}
-    // 2) Call SEMSEO_go() if available
-    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
-    // 3) Always try PSI
-    try{
-      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-      if (typeof window.runPSI === 'function'){ window.runPSI((input && input.value) || ''); }
-    }catch(_){}
-    return false;
+    var c1,c2; if(v>=80){c1='#22c55e';c2='#16a34a'} else if(v>=60){c1='#f59e0b';c2='#fb923c'} else {c1='#ef4444';c2='#b91c1c'}
+    if(GAUGE.stop1) GAUGE.stop1.setAttribute('stop-color',c1); if(GAUGE.stop2) GAUGE.stop2.setAttribute('stop-color',c2);
+    if(GAUGE.r1) GAUGE.r1.setAttribute('stop-color',c1); if(GAUGE.r2) GAUGE.r2.setAttribute('stop-color',c2);
+    if(GAUGE.arc){ var offset=GAUGE.CIRC*(1-(v/100)); GAUGE.arc.style.strokeDashoffset=offset.toFixed(2); }
+    setText('overallScoreInline',Math.round(v)); setChipTone(document.getElementById('overallChip'),v);
   };
-})();
-</script>
 
-
-<script>
-// Ultra-robust Analyze wiring (capture phase + form submit + keydown)
-(function(){
-  function getUrlVal(){
-    var el = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-    return (el && el.value ? el.value.trim() : '');
-  }
-  function doAnalyze(){
-    try{ if (typeof window.analyze === 'function') { try{ window.analyze.__patched__ = true; }catch(e){} } }catch(e){}
-    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(e){}
-    try{ if (typeof window.runPSI === 'function') window.runPSI(getUrlVal()); }catch(e){}
-    return false;
-  }
-
-  // 1) Capture click on button by id (works even if other handlers stop propagation)
-  window.addEventListener('click', function(e){
-    var t = e.target;
-    // walk up to button
-    while (t && t !== document){
-      if (t.id === 'analyzeBtn'){
-        e.preventDefault();
-        doAnalyze();
-        break;
-      }
-      t = t.parentNode;
-    }
-  }, true); // capture!
-
-  // 2) Enter key on URL input
-  document.addEventListener('keydown', function(e){
-    if ((e.key === 'Enter' || e.keyCode === 13)){
-      var a = e.target;
-      if (a && (a.id === 'analyzeUrl' || (a.closest && a.closest('#urlField')))){
-        e.preventDefault();
-        doAnalyze();
-      }
-    }
-  }, true);
-
-  // 3) Form submit (if any) — always run our flow
-  var f = document.getElementById('analyzeForm') || document.querySelector('form[id*="analy"]');
-  if (f){
-    f.addEventListener('submit', function(e){ e.preventDefault(); doAnalyze(); return false; }, true);
-  }
-
-  // 4) Ensure button is enabled
-  var btn = document.getElementById('analyzeBtn');
-  if (btn){ btn.removeAttribute('disabled'); btn.style.pointerEvents = 'auto'; btn.setAttribute('role','button'); btn.setAttribute('tabindex','0'); }
-})();
-</script>
-
-
-<script>
-(function(){
-  function wire(){
-    var btn = document.getElementById('analyzeBtn');
-    var input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-    if(!btn) return;
-    btn.addEventListener('click', function(e){
-      try{ e.preventDefault(); }catch(_){}
-      try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
-      try{ if (typeof window.runPSI === 'function') window.runPSI((input && input.value) || ''); }catch(_){}
-      return false;
+  /* === Category bars + completion === */
+  function updateCategoryBars(){
+    var cards=[].slice.call(document.querySelectorAll('.category-card'));
+    var total=0, checked=0;
+    cards.forEach(function(card,idx){
+      var items=[].slice.call(card.querySelectorAll('.checklist-item'));
+      var t=items.length, done=items.filter(function(li){ var c=li.querySelector('input'); return c && c.checked; }).length;
+      total+=t; checked+=done;
+      var pct=t?Math.round(done*100/t):0;
+      var fill=document.getElementById('catFillRect-'+idx); if(fill) fill.setAttribute('width', String(6*pct));
+      var pctEl=document.getElementById('catPct-'+idx); if(pctEl) pctEl.textContent = done+'/'+t+' • '+pct+'%';
+      var sub=card.querySelector('.category-sub'); if(sub) sub.textContent = pct>=80?'Great progress':'Keep improving';
+      var cnt=card.querySelector('.checked-count'); if(cnt) cnt.textContent = done;
+      var stop1=document.getElementById('catStop1-'+idx), stop2=document.getElementById('catStop2-'+idx);
+      var c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444'); var c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
+      if(stop1) stop1.setAttribute('stop-color',c1); if(stop2) stop2.setAttribute('stop-color',c2);
     });
-    if (input){
-      input.addEventListener('keydown', function(e){
-        if (e.key === 'Enter'){ e.preventDefault(); btn.click(); }
+    var pctAll = total? Math.round(checked*100/total) : 0;
+    var comp=document.getElementById('compClipRect'); if(comp) comp.setAttribute('width', String(6*pctAll));
+    setText('compPct', pctAll + '%'); setText('progressCaption', checked+' of '+total+' items completed');
+  }
+  window.updateCategoryBars = updateCategoryBars;
+
+  /* === Auto-tick by item scores === */
+  function autoTickByScores(map){
+    var autoCount=0;
+    for(var i=1;i<=25;i++){
+      var scVal=Number((map && map[i]!==undefined)? map[i] : NaN);
+      var badge=document.getElementById('sc-'+i);
+      var cb=document.getElementById('ck-'+i);
+      var row=cb ? cb.closest('.checklist-item') : null;
+      if (!badge) continue;
+      if (!isNaN(scVal)) {
+        badge.textContent = Math.round(scVal);
+        badgeTone(badge, scVal);
+        if (document.getElementById('autoApply') && document.getElementById('autoApply').checked && scVal>=80) {
+          if (cb && !cb.checked) { cb.checked=true; autoCount++; }
+          if(row){ row.classList.remove('sev-mid','sev-bad'); row.classList.add('sev-good'); }
+        } else if (scVal>=60) { if(row){ row.classList.remove('sev-bad','sev-good'); row.classList.add('sev-mid'); } }
+        else { if(row){ row.classList.remove('sev-mid','sev-good'); row.classList.add('sev-bad'); } }
+      } else {
+        badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad');
+      }
+    }
+    setText('rAutoCount', autoCount);
+    updateCategoryBars();
+  }
+  window.autoTickByScores = autoTickByScores;
+
+  /* === Water progress === */
+  var Water=(function(){
+    var wrapId=function(){ return document.getElementById('waterWrap'); };
+    var clipId=function(){ return document.getElementById('waterClipRect'); };
+    var pctId=function(){ return document.getElementById('waterPct'); };
+    var t=null, value=0;
+    function show(){ var w=wrapId(); if(w) w.style.display='block'; }
+    function hide(){ var w=wrapId(); if(w) w.style.display='none'; }
+    function set(v){ value=Math.max(0,Math.min(100,v)); var y=200 - (200*value/100); var clip=clipId(); if(clip) clip.setAttribute('y', String(y)); var p=pctId(); if(p) p.textContent = Math.round(value) + '%'; }
+    return {
+      start:function(){ show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
+      finish:function(){ if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
+      reset:function(){ if(t) clearInterval(t); set(0); hide(); }
+    };
+  })();
+  window.Water = Water;
+
+  /* ===================== Fetch helpers ===================== */
+  function normalizeUrl(u) {
+    if (!u) return '';
+    u = u.trim();
+    if (/^https?:\/\//i.test(u)) { try { new URL(u); return u; } catch(e) { return ''; } }
+    var guess = 'https://' + u.replace(/^\/+/, '');
+    try { new URL(guess); return guess; } catch(e) { return ''; }
+  }
+
+  async function fetchBackend(url){
+    let data=null, ok=false, status=0, text='';
+    const qs=new URLSearchParams({url}).toString();
+    try{
+      const r1=await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+      status=r1.status; text=await r1.text(); try{ data=JSON.parse(text);}catch(_){}
+      if(r1.ok && data) ok=true;
+    }catch(_){}
+    if(!ok){
+      try{
+        const r2=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})});
+        status=r2.status; text=await r2.text(); try{ data=JSON.parse(text);}catch(_){}
+        if(r2.ok && data) ok=true;
+      }catch(_){}
+    }
+    if(!ok){
+      try{
+        const r3=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+        status=r3.status; text=await r3.text(); try{ data=JSON.parse(text);}catch(_){}
+        if(r3.ok && data) ok=true;
+      }catch(_){}
+    }
+    return {ok,data,status};
+  }
+
+  // NEW: backend multi-detector (works with or without API keys; server may compute local ensemble)
+  async function fetchDetect(text, url){
+    try{
+      const r = await fetch((window.SEMSEO.ENDPOINTS.detect || '/api/detect'),{
+        method:'POST',
+        headers:{
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'X-Requested-With':'XMLHttpRequest',
+          'X-CSRF-TOKEN': CSRF
+        },
+        body: JSON.stringify({ text, url })
       });
+      if(!r.ok) return null;
+      const j = await r.json();
+      return (j && j.ok) ? j : null;
+    }catch(_){ return null; }
+  }
+
+  async function fetchRawHtml(url){
+    try{
+      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
+      if(r.ok){ const html=await r.text(); if(html && html.length>200) return html; }
+    }catch(_){}
+    return '';
+  }
+
+  async function fetchReadableText(url){
+    try{
+      const httpsR = await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''));
+      if(httpsR.ok){ const t = await httpsR.text(); if(t && t.length>200) return t; }
+    }catch(e){}
+    try{
+      const altR = await fetch('https://r.jina.ai/'+url);
+      if(altR.ok){ const t = await altR.text(); if(t && t.length>200) return t; }
+    }catch(e){}
+    return '';
+  }
+
+  function extractMetaFromHtml(html, baseUrl){
+    try{
+      var d=(new DOMParser()).parseFromString(html,'text/html');
+      var q=(s,a)=>{var el=d.querySelector(s);return el?(a?el.getAttribute(a)||'':(el.textContent||'')) : '';};
+      var title=(q('title')||'').trim();
+      var metaDesc=(q('meta[name="description"]','content')||'').trim();
+      var canonical=(q('link[rel="canonical"]','href')||'').trim()||baseUrl;
+      var robots=(q('meta[name="robots"]','content')||'').trim()||'n/a';
+      var viewport=(q('meta[name="viewport"]','content')||'').trim()||'n/a';
+      var h1=d.querySelectorAll('h1').length, h2=d.querySelectorAll('h2').length, h3=d.querySelectorAll('h3').length;
+      var origin=''; try{ origin=new URL(baseUrl).origin; }catch(_){}
+      var internal=0; d.querySelectorAll('a[href]').forEach(function(a){ try{ var u=new URL(a.getAttribute('href'), baseUrl); if(!origin || u.origin===origin) internal++; }catch(_){} });
+      var schema = !!(d.querySelector('script[type="application/ld+json"]') || d.querySelector('[itemscope],[itemtype*="schema.org"]'));
+      var main=d.querySelector('article,main,[role="main"]'); var sample=main? (main.textContent||''): '';
+      if(!sample){ sample=[].slice.call(d.querySelectorAll('p')).slice(0,12).map(function(p){return p.textContent;}).join('\n\n'); }
+      sample=(sample||'').replace(/\s{2,}/g,' ').trim();
+      return { titleLen: title?title.length:null, metaLen: metaDesc?metaDesc.length:null, canonical, robots, viewport, headings:(h1+'/'+h2+'/'+h3), internalLinks:internal, schema: schema?'yes':'no', sampleText: sample };
+    }catch(_){ return {}; }
+  }
+
+  function mergeMeta(into, add){
+    if(!into) into={};
+    var keys=['titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText'];
+    keys.forEach(function(k){
+      if((into[k]===undefined || into[k]===null || into[k]==='—' || into[k]==='' ) && add && add[k]!==undefined && add[k]!==null){
+        into[k]=add[k];
+      }
+    });
+    return into;
+  }
+
+  /* ===================== Stylometry & Readability ===================== */
+  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
+  function _countSyllables(word){
+    var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0;
+    var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m);
+  }
+  function _syllableStats(text){
+    var wordRe=/[A-Za-z\u00C0-\u024f']+/g;
+    var words=(text.match(wordRe)||[]);
+    var syll=0;
+    for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
+    var spw = words.length ? (syll/words.length) : 0;
+    return { syllables: syll, spw: spw, words: words.length };
+  }
+  function _flesch(text){
+    var sents = (text.match(/[.!?]+/g)||[]).length || 1;
+    var words = (text.match(/[A-Za-z\u00C0-\u024f']+/g)||[]); var wN = words.length||1;
+    var syll = 0; for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
+    return clamp(206.835 - 1.015*(wN/sents) - 84.6*(syll/wN), -20, 120);
+  }
+  function _fkGradeLevel(text){
+    var sents = (text.match(/[.!?]+/g)||[]).length || 1;
+    var st = _syllableStats(text);
+    var words = st.words || 1;
+    var grade = 0.39 * (words / sents) + 11.8 * (st.spw || 0) - 15.59;
+    return Math.max(0, Math.min(18, grade));
+  }
+  function _prep(text){
+    text=(text||'')+''; text=text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
+    var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(text.match(wordRe)||[]).map(function(w){return w.toLowerCase();});
+    var sents=text.split(/(?<=[.!?])\s+|\n+(?=\S)/g).filter(Boolean); var tokens=words.length||1;
+    var freq=Object.create(null); words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
+    var types=Object.keys(freq).length, hapax=0; for(var k in freq){ if(freq[k]===1) hapax++; }
+    var lens=sents.map(function(s){return (s.match(wordRe)||[]).length;}).filter(function(v){return v>0;});
+    var mean=lens.reduce(function(a,b){return a+b;},0)/(lens.length||1);
+    var variance=lens.reduce(function(a,b){return a+Math.pow(b-mean,2);},0)/(lens.length||1);
+    var cov=mean?Math.sqrt(variance)/mean:0;
+    var tri={}, triT=0, triR=0; for(var i=0;i<tokens-2;i++){ var g=words[i]+' '+words[i+1]+' '+words[i+2]; tri[g]=(tri[g]||0)+1; triT++; } for(var kk in tri){ if(tri[kk]>1) triR+=tri[kk]-1; }
+    var digits=(text.match(/\d/g)||[]).length*100/(tokens||1);
+    var avgLen=tokens? (words.join('').length/tokens):0;
+    var longRatio=(lens.filter(function(L){return L>=28;}).length)/(lens.length||1);
+    var TTR=types/(tokens||1);
+    var asl=mean||0;
+    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl };
+  }
+
+  function detectUltra(text){
+    var s=_prep(text||'');
+    if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
+    var ai=10; var covT=0.45; if(s.cov<covT) ai+=clamp((covT-s.cov)/covT,0,1)*25; var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18;
+    var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
+    return { humanPct: 100-clamp(Math.round(ai),0,100), aiPct: clamp(Math.round(ai),0,100), confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai:clamp(Math.round(ai),0,100),w:1}], _s:s };
+  }
+
+  function deriveItemScoresFromSignals(s){
+    function pct(x){ return clamp(Math.round(x),0,100); }
+    function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
+    var read=pct(band(s.flesch,35,75)), rep=pct(100*(1 - s.triRepeatRatio)), ttr=pct(band(s.TTR,0.30,0.65)), longS=pct(band(1-s.longRatio, 0.6, 0.95)), avgLen=pct(band(s.avgWordLen,4.2,5.8)), digits=pct(100*(1 - s.digitsPer100/20));
+    var i=[];
+    i[1]=pct(.5*read+.5*ttr); i[2]=pct(.6*ttr+.4*avgLen); i[3]=pct(.4*ttr+.6*read); i[4]=pct(.7*read+.3*rep); i[5]=pct(.5*read+.5*avgLen);
+    i[6]=pct(.4*ttr+.6*read); i[7]=pct(.4*read+.6*rep); i[8]=pct(.6*rep+.4*digits); i[9]=pct(.6*avgLen+.4*digits); i[10]=pct(.6*avgLen+.4*ttr);
+    i[11]=pct(.5*ttr+.5*rep); i[12]=pct(.6*rep+.4*digits); i[13]=pct(.6*read+.4*rep); i[14]=pct(.6*read+.4*ttr); i[15]=pct(.5*ttr+.5*read);
+    i[16]=pct(.6*digits+.4*read); i[17]=pct(.5*avgLen+.5*ttr); i[18]=pct(.5*read+.5*longS); i[19]=pct(.6*rep+.4*avgLen); i[20]=pct(.5*longS+.5*avgLen);
+    i[21]=pct(.7*read+.3*ttr); i[22]=pct(.6*ttr+.4*avgLen); i[23]=pct(.6*ttr+.4*avgLen); i[24]=pct(.6*avgLen+.4*ttr); i[25]=pct(.6*ttr+.4*digits);
+    var map={}; for(var k=1;k<=25;k++){ map[k]=i[k]; } return map;
+  }
+  function deriveSummaryScoresFromItems(itemMap){
+    var all=[]; for(var i=1;i<=25;i++){ if(isFinite(itemMap[i])) all.push(itemMap[i]); }
+    var avg = function(a){ return a.length? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : 0; };
+    return { contentScore: avg(all.slice(0,13)), overall: avg(all) };
+  }
+
+  function buildSampleFromData(data){
+    var parts = [];
+    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
+    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){
+      var v = data?.[k];
+      if (typeof v === 'string' && v.trim()) parts.push(v);
+      if (Array.isArray(v)) parts.push(v.join('. '));
+    });
+    var txt = parts.join('\n\n').replace(/\s{2,}/g,' ').trim();
+    return txt.length>140000 ? txt.slice(0,140000) : txt;
+  }
+  function ensureScoresExist(data, sample, ensemble){
+    var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
+    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
+    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
+    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
+    if (needItems) data.itemScores = deriveItemScoresFromSignals(s);
+    if (needContent || needOverall){
+      var sums = deriveSummaryScoresFromItems(data.itemScores||{});
+      if (needContent) data.contentScore = sums.contentScore;
+      if (needOverall) data.overall = sums.overall;
+    }
+    return data;
+  }
+
+  /* === Human vs AI rendering === */
+  function renderDetectors(res){
+    var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
+    if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
+    var hv = document.getElementById('hvaiHumanVal'), av=document.getElementById('hvaiAIVal');
+    var hf = document.getElementById('hvaiHumanFill'), af=document.getElementById('hvaiAIFill');
+    if(hv) hv.textContent = isFinite(res.humanPct)? Math.round(res.humanPct)+'%':'—%';
+    if(av) av.textContent = isFinite(res.aiPct)? Math.round(res.aiPct)+'%':'—%';
+    if(hf) hf.style.width = Math.max(0, Math.min(100, res.humanPct||0)) + '%';
+    if(af) af.style.width = Math.max(0, Math.min(100, res.aiPct||0)) + '%';
+
+    var panel = document.getElementById('detectorPanel'); if(panel) panel.style.display='block';
+    if(!grid) return; grid.innerHTML = '';
+    (res.detectors||[{key:'stylometry',label:'Stylometry',ai:res.aiPct||0}]).forEach(function(d){
+      var id='det-'+d.key; var wrap=document.createElement('div');
+      wrap.className='det-item'; wrap.innerHTML =
+        '<div class="det-row"><div class="det-label">'+d.label+'</div><div class="det-score" id="'+id+'-score">'+(d.ai||0)+'</div></div>'+
+        '<div class="det-bar"><div class="det-fill" id="'+id+'-fill" style="width:'+(clamp(d.ai||0,0,100))+'%"></div></div>';
+      grid.appendChild(wrap);
+    });
+  }
+  function applyDetection(humanPct, aiPct, confidence, breakdown){
+    var writer = (isFinite(humanPct) && isFinite(aiPct) && humanPct>=aiPct) ? 'Likely Human' : 'AI-like';
+    var badge = document.getElementById('aiBadge'); if (badge){ var b=badge.querySelector('b'); if(b) b.textContent = writer; badge.title = 'Confidence: ' + (confidence? confidence+'%':'—'); }
+    var hp = document.getElementById('humanPct'), ap = document.getElementById('aiPct');
+    if(hp) hp.textContent = isFinite(humanPct)? Math.round(humanPct) : '—';
+    if(ap) ap.textContent = isFinite(aiPct)?    Math.round(aiPct)   : '—';
+    var res = {humanPct:humanPct, aiPct:aiPct, confidence:confidence, detectors:(breakdown && breakdown.detectors)||[{key:'stylometry',label:'Stylometry',ai:aiPct||0}]};
+    renderDetectors(res);
+  }
+
+  /* === Readability rendering === */
+  function renderReadability(s){
+    var p = document.getElementById('readabilityPanel'); if(!p) return;
+    var text = s.text || '';
+    var grade = _fkGradeLevel(text), gradeInt=Math.round(grade);
+    var syl = _syllableStats(text);
+    var ease = s.flesch;
+    var chip = document.getElementById('readChip');
+    var chipText = document.getElementById('readGradeChip');
+    if (chipText) chipText.textContent = 'Grade ' + gradeInt;
+    if (chip){ chip.classList.remove('bad','mid'); if (gradeInt<=8){} else if (gradeInt<=10) chip.classList.add('mid'); else chip.classList.add('bad'); }
+    var sum = document.getElementById('readSummary');
+    if (sum){
+      if (gradeInt <= 8) sum.textContent = 'Easy for most readers (middle school). Great for broad audiences.';
+      else if (gradeInt <= 10) sum.textContent = 'Readable for teens. Consider simpler words & shorter sentences.';
+      else sum.textContent = 'Complex reading level. Use shorter sentences and simpler vocabulary.';
+    }
+    function bar(id, v, max){ var el=document.getElementById(id); if(!el) return; el.style.width = Math.max(0, Math.min(100, (v/max)*100)) + '%'; }
+    setText('mFlesch', Math.round(ease));
+    setText('mWords', s.wordCount);
+    setText('mASL', s.asl ? s.asl.toFixed(1) : '—');
+    setText('mTTR', s.TTR ? (s.TTR*100).toFixed(0)+'%' : '—');
+    setText('mRep', s.triRepeatRatio ? Math.round(s.triRepeatRatio*100)+'%' : '—');
+    setText('mDigits', s.digitsPer100 ? Math.round(s.digitsPer100) : 0);
+    setText('mSPW', syl.spw ? syl.spw.toFixed(2) : '—');
+    bar('mFleschBar', Math.max(0, Math.min(100, ease)), 100);
+    bar('mWordsBar', Math.min(s.wordCount, 4000), 4000);
+    bar('mASLBar', Math.max(0, 30 - (s.asl||0)), 30);
+    bar('mTTRBar', Math.max(0, Math.min(1, s.TTR||0)), 1);
+    bar('mRepBar', Math.max(0, 1 - (s.triRepeatRatio||0)), 1);
+    bar('mDigitsBar', Math.max(0, Math.min(20, 20 - (s.digitsPer100||0))), 20);
+    bar('mSPWBar', Math.max(0, Math.min(1.8, 1.8 - (syl.spw||0))), 1.8);
+    var fixes = [];
+    if ((s.asl||0) > 20) fixes.push('Break long sentences into 12–16 words.');
+    if ((syl.spw||0) > 1.60) fixes.push('Prefer shorter words (use simpler synonyms).');
+    if ((s.TTR||0) < 0.35) fixes.push('Use more varied vocabulary (avoid repeating the same words).');
+    if ((s.triRepeatRatio||0) > 0.10) fixes.push('Remove repeated phrases; keep each idea unique.');
+    if ((s.digitsPer100||0) > 10) fixes.push('Reduce numeric density; round or group numbers where possible.');
+    if (ease < 60 && fixes.length === 0) fixes.push('Aim for shorter sentences and simpler vocabulary to improve readability.');
+    var list = document.getElementById('readSuggest');
+    if (list){ list.innerHTML = fixes.length ? fixes.map(f=>`<li>${f}</li>`).join('') : '<li>Looks good! Keep sentences concise and headings clear.</li>'; }
+    var plain = document.getElementById('readPlain');
+    if (plain){
+      if (gradeInt <= 7){
+        plain.textContent = 'This page is easy to read for a Grade-7 reader: short sentences, common words, and clear ideas.';
+      } else if (gradeInt <= 9){
+        plain.textContent = 'Almost Grade-7 friendly. To make it easier, use shorter sentences and everyday words.';
+      } else {
+        plain.textContent = 'Currently above Grade-7 level. Try smaller sentences, simpler words, and fewer complex clauses.';
+      }
+    }
+    p.style.display='block';
+  }
+
+  /* === Entities & Topics extraction === */
+  function extractEntities(text){
+    var res = {people:[], orgs:[], places:[], topics:[], software:[], games:[]};
+    var clean=(text||'').replace(/\s+/g,' ');
+    // naive capitalized tokens as candidates
+    var cand = (clean.match(/\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\b/g) || []).slice(0, 800);
+    var stop = new Set(['The','A','An','This','That','And','Or','Of','In','On','To','For','By','With','Your','Our','You','We','It','At','From','As','Be','Is','Are','Was','Were','Not']);
+    var uniq={};
+    cand.forEach(function(c){ if(stop.has(c)) return; var k=c.trim(); if(k.length<2||k.length>48) return; uniq[k]=1; });
+    var uniqList = Object.keys(uniq).slice(0,120);
+
+    // very light heuristics
+    uniqList.forEach(function(n){
+      if (/\b(Inc|LLC|Ltd|Corporation|Company|Corp|Studio|Labs|University|College)\b/.test(n)) res.orgs.push(n);
+      else if (/\b(City|Town|Province|State|Country|Park|River|Lake|Valley|Mountain)\b/.test(n)) res.places.push(n);
+      else if (/\b(Mr|Mrs|Ms|Dr|Prof)\b/.test(n) || n.split(' ').length>=2) res.people.push(n);
+      else res.topics.push(n);
+    });
+
+    // software / apk / games (keyword probes)
+    var low = clean.toLowerCase();
+    var swTerms = (low.match(/\b(software|app|application|android|ios|windows|mac|linux|apk|exe|download|install|update|version)\b/g) || []);
+    if (swTerms.length){ // pick key tokens with dots or version-like
+      var soft = (clean.match(/\b([A-Z][A-Za-z0-9\.\-\+]{2,})\b/g) || []).filter(x=>/\b(Android|iOS|Windows|Mac|Linux|Pro|Studio|Editor|App|SDK|Tool)\b/.test(x) || /v?\d+\.\d+/.test(x));
+      res.software = Array.from(new Set(soft)).slice(0,20);
+    }
+    if (/\bapk\b/i.test(low) || /\.apk\b/i.test(low)){ res.software.push('APK'); }
+    var games = (clean.match(/\b([A-Z][A-Za-z0-9\-\s]{2,} (?:Game|Games|Edition|Remastered|Online))\b/g) || []);
+    if (games.length) res.games = Array.from(new Set(games)).slice(0,20);
+
+    // clamp lists
+    res.people = res.people.slice(0,20);
+    res.orgs = res.orgs.slice(0,20);
+    res.places = res.places.slice(0,20);
+    res.topics = res.topics.slice(0,24);
+    return res;
+  }
+  function chipify(list, cls){
+    if(!list || !list.length) return '<span class="echip misc"><i class="fa-solid fa-circle-minus"></i> none</span>';
+    return list.map(v=>`<span class="echip ${cls||'misc'}"><i class="fa-solid fa-tag"></i> ${v}</span>`).join(' ');
+  }
+  function renderEntitiesTopics(sample){
+    var p = document.getElementById('entitiesPanel'); if(!p) return;
+    var ex = extractEntities(sample||'');
+    var m = (id, html)=>{ var el=document.getElementById(id); if(el) el.innerHTML=html; };
+    m('entPeople', chipify(ex.people,'person'));
+    m('entOrgs', chipify(ex.orgs,'org'));
+    m('entPlaces', chipify(ex.places,'place'));
+    m('entTopics', chipify(ex.topics,'misc'));
+    m('entSoftware', chipify(ex.software,'sw'));
+    m('entGames', chipify(ex.games,'game'));
+    p.style.display='block';
+  }
+
+  /* === PSI (Site Speed) via server proxy === */
+  async function startSiteSpeed(url, strategy='mobile'){
+    var panel = document.getElementById('psiPanel'); if(!panel) return;
+    panel.style.display='block';
+    setText('psiStrategy', strategy);
+    setText('psiPerf','—'); setText('psiLcp','—'); setText('psiInp','—'); setText('psiCls','—'); setText('psiTtfb','—');
+    ['psiLcpBar','psiInpBar','psiClsBar','psiTtfbBar'].forEach(id=>{ var el=document.getElementById(id); if(el) el.style.width='0%'; });
+    var note = document.getElementById('psiNote'); if(note) note.textContent='Running PageSpeed Insights…';
+    var advice = document.getElementById('psiAdvice'); if(advice) advice.innerHTML='';
+
+    try{
+      const q = new URLSearchParams({url, strategy}).toString();
+      const r = await fetch((window.SEMSEO.ENDPOINTS.psi||'/api/psi')+'?'+q, {headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+      const j = await r.json();
+      if(!j || j.ok===false){ throw new Error(j && j.error ? j.error : 'PSI proxy error'); }
+      const lhr = j.data?.lighthouseResult || {};
+      const audits = lhr.audits || {};
+      const catPerf = lhr.categories?.performance?.score;
+      const perfScore = typeof catPerf==='number' ? Math.round(catPerf*100) : '—';
+      setText('psiPerf', perfScore);
+
+      function barPct(id, val, goodMax, clampMax){
+        var el=document.getElementById(id); if(!el) return;
+        var v = Math.max(0, Math.min(clampMax, val||0));
+        var pct = Math.max(0, Math.min(100, (v/goodMax)*100));
+        el.style.width = pct + '%';
+      }
+      // LCP in seconds
+      var lcp = audits['largest-contentful-paint']?.numericValue; // ms
+      var inp = audits['interactive']?.numericValue; // ms (fallback), or 'experimental-interaction-to-next-paint'
+      var inpAlt = audits['experimental-interaction-to-next-paint']?.numericValue;
+      if (inpAlt) inp = inpAlt;
+      var cls = audits['cumulative-layout-shift']?.numericValue;
+      var ttfb = audits['server-response-time']?.numericValue || audits['time-to-first-byte']?.numericValue;
+
+      if (typeof lcp==='number'){ setText('psiLcp', (lcp/1000).toFixed(2)); barPct('psiLcpBar', (lcp/1000), 2.5, 6); }
+      if (typeof inp==='number'){ setText('psiInp', Math.round(inp)); barPct('psiInpBar', inp, 200, 600); }
+      if (typeof cls==='number'){ setText('psiCls', cls.toFixed(3)); barPct('psiClsBar', cls, 0.1, 0.4); }
+      if (typeof ttfb==='number'){ setText('psiTtfb', Math.round(ttfb)); barPct('psiTtfbBar', ttfb, 800, 2500); }
+
+      // Advice list (simple heuristics)
+      var tips=[];
+      if (lcp>2500) tips.push('Optimize hero image (compress, proper size, lazy-load below-the-fold).');
+      if (inp>200) tips.push('Reduce main-thread work (code-split, defer non-critical JS).');
+      if (cls>0.1) tips.push('Reserve space for images/ads; avoid late-loading fonts without fallback.');
+      if (ttfb>800) tips.push('Improve server response (caching, CDN, database/index tuning).');
+      if (!tips.length) tips.push('Looks good! Keep images optimized, JS lean, and layout stable.');
+      if (advice) advice.innerHTML = tips.map(t=>`<li>${t}</li>`).join('');
+
+      if (note) note.textContent = 'Results from Google PageSpeed Insights (via secure server proxy).';
+    }catch(e){
+      if (note) note.textContent = 'PSI error: ' + (e && e.message ? e.message : e);
     }
   }
-  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', wire); } else { wire(); }
+
+  /* ===================== ANALYZE ===================== */
+  async function analyze(){
+    if (window.SEMSEO.BUSY) return;
+    window.SEMSEO.BUSY = true;
+
+    var input = document.getElementById('analyzeUrl');
+    var url = normalizeUrl(input ? input.value : '');
+    if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
+
+    if (window.Water) window.Water.start();
+    var statusEl = document.getElementById('analyzeStatus');
+    if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
+    var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
+    var detPanel = document.getElementById('detectorPanel'); if(detPanel) detPanel.style.display='none';
+    var readPanel = document.getElementById('readabilityPanel'); if(readPanel) readPanel.style.display='none';
+    var entPanel = document.getElementById('entitiesPanel'); if(entPanel) entPanel.style.display='none';
+    var psiPanel = document.getElementById('psiPanel'); if(psiPanel) psiPanel.style.display='none';
+
+    // 1) Backend (if present)
+    var {ok,data} = await fetchBackend(url);
+    if(!data) data = {};
+
+    // 2) Build sample (from backend)
+    var sample = buildSampleFromData(data);
+
+    // 3) Try AllOrigins raw HTML (fills meta chips + better sample if needed)
+    try{
+      var raw = await fetchRawHtml(url);
+      if(raw){
+        var meta = extractMetaFromHtml(raw, url);
+        data = mergeMeta(data, meta);
+        if((!sample || sample.length<200) && meta.sampleText) sample = meta.sampleText;
+      }
+    }catch(_){}
+
+    // 4) Jina Reader fallback
+    if ((!sample || sample.length < 200)){
+      if (statusEl) statusEl.textContent = 'Getting readable text…';
+      try{ var read = await fetchReadableText(url);
+        if (read && read.length>200){ sample = read; }
+      }catch(_){}
+    }
+
+    // 5) Local detection (prep) + try backend detector FIRST
+    var ensemble = sample && sample.length>30 ? detectUltra(sample) : null;
+    var backendDetect = null;
+    if (sample && sample.length > 30) {
+      backendDetect = await fetchDetect(sample, url);
+    }
+
+    // 6) Scores -> guarantee + UI
+    data = ensureScoresExist(data, sample, ensemble);
+
+    var overall = Number(data.overall || 0);
+    var contentScore = Number(data.contentScore || 0);
+    window.setScoreWheel(overall||0);
+    setText('contentScoreInline', Math.round(contentScore||0));
+    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
+
+    // Meta chips
+    setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
+    setText('rTitleLen',  (data.titleLen   !== undefined && data.titleLen !== null) ? data.titleLen   : '—');
+    setText('rMetaLen',   (data.metaLen    !== undefined && data.metaLen  !== null) ? data.metaLen    : '—');
+    setText('rCanonical', data.canonical  ? data.canonical  : '—');
+    setText('rRobots',    data.robots     ? data.robots     : '—');
+    setText('rViewport',  data.viewport   ? data.viewport   : '—');
+    setText('rHeadings',  data.headings   ? data.headings   : '—');
+    setText('rInternal',  (data.internalLinks!==undefined && data.internalLinks!==null) ? data.internalLinks : '—');
+    setText('rSchema',    data.schema     ? data.schema     : '—');
+
+    // Detection (prefer backend multi-detector; fallback to local)
+    var detNote = document.getElementById('detNote');
+    if (backendDetect) {
+      applyDetection(backendDetect.humanPct, backendDetect.aiPct, backendDetect.confidence, backendDetect);
+      if (detNote) detNote.textContent = 'Source: backend multi-detector (ZeroGPT/GPTZero/OriginalityAI if configured; otherwise local on server).';
+    } else if (ensemble) {
+      applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
+      if (detNote) detNote.textContent = 'Source: local ensemble (no external APIs).';
+    } else {
+      var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
+      var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
+      var backendConf = (typeof data.confidence==='number')? data.confidence : 60;
+      if (isFinite(hp) && isFinite(ap)) {
+        applyDetection(hp, ap, backendConf, null);
+        if (detNote) detNote.textContent = 'Source: backend (partial)'; 
+      }
+    }
+
+    // Readability + Entities
+    var S = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
+    renderReadability(S);
+    renderEntitiesTopics(sample||'');
+
+    // Checklist scores + autotick
+    window.autoTickByScores(data.itemScores || {});
+
+    if (window.Water) window.Water.finish();
+    if (statusEl) statusEl.textContent = 'Analysis complete';
+    if (report) report.style.display = 'block';
+
+    // Auto-start PSI at the end
+    startSiteSpeed(url,'mobile');
+
+    window.SEMSEO.BUSY = false;
+    if (window.SEMSEO.QUEUE > 0){ window.SEMSEO.QUEUE = 0; }
+  }
+  window.analyze = analyze;
+
+  // Events
+  document.addEventListener('DOMContentLoaded', function(){
+    try{
+      var btn = document.getElementById('analyzeBtn');
+      if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); analyze(); }); }
+      var input = document.getElementById('analyzeUrl');
+      if (input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); analyze(); }}); }
+      var clr = document.getElementById('clearUrl'); if(clr && input){ clr.onclick=function(){ input.value=''; input.focus(); }; }
+      var pst = document.getElementById('pasteUrl'); if(pst && input && navigator.clipboard){ pst.onclick=async function(){ try{ var t=await navigator.clipboard.readText(); if(t){ input.value=t.trim(); } }catch(e){} }; }
+
+      window.SEMSEO.READY = true;
+      if (window.SEMSEO.QUEUE>0){ window.SEMSEO.QUEUE=0; analyze(); }
+    }catch(err){
+      var s=document.getElementById('analyzeStatus'); if(s) s.textContent='Boot error: '+err.message;
+    }
+  });
+
 })();
+</script>
+
+<!-- B) Non-critical UI -->
+<script>
+try{
+  // Hue drift
+  (function(){ var root=document.documentElement; var start=performance.now(); function frame(now){ root.style.setProperty('--hue', (((now-start)/4)%360) + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+
+  // Share links
+  (function(){
+    var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
+    var fb = document.getElementById('shareFb'), x = document.getElementById('shareX'), ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'), em = document.getElementById('shareEm');
+    if(fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?u='+url;
+    if(x)  x.href  = 'https://twitter.com/intent/tweet?text='+title+'&url='+url;
+    if(ln) ln.href = 'https://www.linkedin.com/sharing/share-offsite/?url='+url;
+    if(wa) wa.href = 'https://wa.me/?text='+title+'%20'+url;
+    if(em) em.href = 'mailto:?subject='+title+'&body='+url;
+  })();
+
+  // Reset / Export / Import / Print / UI misc
+  (function(){
+    function updateCategoryBars(){ if (window.updateCategoryBars) window.updateCategoryBars(); }
+    var resetBtn=document.getElementById('resetChecklist');
+    if(resetBtn){ resetBtn.addEventListener('click', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.checklist input[type="checkbox"]'), function(cb){ cb.checked=false; });
+      Array.prototype.forEach.call(document.querySelectorAll('.score-badge'), function(b){ b.textContent='—'; b.classList.remove('score-good','score-mid','score-bad'); });
+      updateCategoryBars();
+      if (window.setScoreWheel) window.setScoreWheel(0);
+      var el;
+      el=document.getElementById('contentScoreInline'); if(el) el.textContent='0';
+      var chip=document.getElementById('contentScoreChip'); if(chip){ chip.classList.remove('chip-good','chip-mid','chip-bad'); chip.classList.add('chip-bad'); }
+      el=document.getElementById('humanPct'); if(el) el.textContent='—';
+      el=document.getElementById('aiPct'); if(el) el.textContent='—';
+      var badge=document.getElementById('aiBadge'); if(badge){ var b=badge.querySelector('b'); if(b) b.textContent='—'; }
+      var detPanel=document.getElementById('detectorPanel'); if(detPanel){ detPanel.style.display='none'; }
+      var readPanel=document.getElementById('readabilityPanel'); if(readPanel){ readPanel.style.display='none'; }
+      var entPanel=document.getElementById('entitiesPanel'); if(entPanel){ entPanel.style.display='none'; }
+      var psiPanel=document.getElementById('psiPanel'); if(psiPanel){ psiPanel.style.display='none'; }
+      if (window.Water) window.Water.reset();
+    });}
+
+    var exportBtn=document.getElementById('exportChecklist'), importBtn=document.getElementById('importChecklist'), importFile=document.getElementById('importFile');
+    if(exportBtn){ exportBtn.addEventListener('click', function(){
+      var payload = { checked:[], scores:{} };
+      for(var i=1;i<=25;i++){
+        var cb=document.getElementById('ck-'+i), sc=document.getElementById('sc-'+i);
+        if (cb && cb.checked) payload.checked.push(i);
+        var s = parseInt(sc ? sc.textContent : 'NaN',10); if (!isNaN(s)) payload.scores[i]=s;
+      }
+      var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+      var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='checklist.json'; a.click(); URL.revokeObjectURL(a.href);
+    });}
+    if(importBtn){ importBtn.addEventListener('click', function(){ if(importFile) importFile.click(); }); }
+    if(importFile){ importFile.addEventListener('change', function(){
+      var file = importFile.files[0]; if (!file) return;
+      var fr = new FileReader();
+      fr.onload = function(){ try{
+        var data = JSON.parse(fr.result);
+        for(var i=1;i<=25;i++){
+          var cb=document.getElementById('ck-'+i); if (cb) cb.checked=(data.checked||[]).includes(i);
+          var sc=document.getElementById('sc-'+i); var val=data.scores ? data.scores[i] : undefined;
+          if (sc && typeof val==='number'){ sc.textContent=val; (window.badgeTone||function(){ })(sc,val); }
+        }
+        updateCategoryBars();
+      }catch(e){ alert('Invalid JSON'); } };
+      fr.readAsText(file);
+    });}
+
+    var printTop=document.getElementById('printTop'), printChecklist=document.getElementById('printChecklist');
+    if(printTop) printTop.addEventListener('click', function(){ window.print(); });
+    if(printChecklist) printChecklist.addEventListener('click', function(){ window.print(); });
+
+    var toTop=document.getElementById('toTopLink'), backTop=document.getElementById('backTop');
+    if(toTop){ toTop.addEventListener('click', function(e){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});}); }
+    window.addEventListener('scroll', function(){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
+  })();
+
+} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
+</script>
+
+<!-- C) Background: tech lines + smoke -->
+<script>
+try{
+  (function(){
+    var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
+    function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
+    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=16,spacing=Math.max(54,h/rows);
+      for(var i=-2;i<rows+2;i++){ var y=i*spacing+((t*0.025)%spacing); var g=ctx.createLinearGradient(0,y,w,y+90);
+        g.addColorStop(0,'rgba(61,226,255,0.14)'); g.addColorStop(0.5,'rgba(155,92,255,0.16)'); g.addColorStop(1,'rgba(255,32,69,0.14)');
+        ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(-120,y); ctx.lineTo(w+120,y+90); ctx.stroke(); }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+  })();
+
+  (function(){
+    var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d');
+    var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], last=performance.now();
+    var PERIOD = window.SEMSEO && window.SEMSEO.SMOKE_HUE_PERIOD_MS ? window.SEMSEO.SMOKE_HUE_PERIOD_MS : 1000000000;
+    function resize(){
+      c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+      var W=window.innerWidth, H=window.innerHeight;
+      var N = 76;
+      blobs=new Array(N).fill(0).map(function(_,i){
+        var px = W*0.65 + Math.random()*W*0.45;
+        var py = H*0.65 + Math.random()*H*0.45;
+        var r  = 120 + Math.random()*260;
+        var speed = 0.18 + Math.random()*0.22;
+        return {
+          x:px, y:py, r:r,
+          vx: -speed*(0.6+Math.random()*0.8),
+          vy: -speed*(0.6+Math.random()*0.8),
+          baseHue: (i*37)%360,
+          alpha: .26 + .20*Math.random()
+        };
+      });
+      last=performance.now();
+    }
+    function draw(now){
+      var W=window.innerWidth, H=window.innerHeight;
+      ctx.clearRect(0,0,W,H);
+      ctx.globalCompositeOperation='screen';
+      var dt = now - last; last = now;
+      for(var i=0;i<blobs.length;i++){
+        var b=blobs[i];
+        b.x += b.vx * dt; b.y += b.vy * dt;
+        if(b.x < -360 || b.y < -360){ b.x = W + Math.random()*260; b.y = H + Math.random()*260; }
+        var hue = (b.baseHue + (now % PERIOD) * (360/PERIOD)) % 360;
+        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+        g.addColorStop(0,'hsla('+hue+',88%,68%,'+b.alpha+')');
+        g.addColorStop(1,'hsla('+((hue+70)%360)+',88%,50%,0)');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+  })();
+} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
+</script>
+
+<!-- D) Error sink -->
+<script>
+window.addEventListener('error', function(e){
+  var s=document.getElementById('analyzeStatus');
+  if (s) s.textContent = 'JavaScript error: ' + (e && e.message ? e.message : e);
+});
 </script>
 
 </body>
