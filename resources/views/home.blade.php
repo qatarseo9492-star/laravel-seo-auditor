@@ -150,6 +150,22 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
 
 /* ==== Human vs AI (Ensemble) — upgraded ==== */
+
+  /* Status banner & rewrite badge */
+  .hvai .status{margin:6px 0 10px 0; font-weight:800; padding:10px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04)}
+  .hvai .status.neutral{color:#cbd5ff}
+  .hvai .status.good{background:linear-gradient(90deg, rgba(0,255,180,.10), rgba(0,200,255,.10)); color:#8bffd6; border-color:rgba(0,255,200,.25)}
+  .hvai .status.warn{background:linear-gradient(90deg, rgba(255,200,0,.10), rgba(255,120,0,.10)); color:#ffd37a; border-color:rgba(255,180,0,.25)}
+  .hvai .status.bad{background:linear-gradient(90deg, rgba(255,0,120,.12), rgba(255,0,0,.10)); color:#ff9ab6; border-color:rgba(255,60,120,.25)}
+  .hvai .rewrite-badge{display:none; margin-left:8px; padding:6px 10px; border-radius:999px; font-weight:900; letter-spacing:.02em; background:#ff1f5b; color:white; box-shadow:0 0 16px rgba(255,31,91,.45)}
+  .hvai .status.bad .rewrite-badge{display:inline-flex}
+
+  /* Animated colorful icon for each bar label */
+  .hvai .label{display:flex; align-items:center; gap:8px; justify-content:space-between}
+  .hvai .label .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00, #ffd300, #2ad1a3, #1aa6ff, #9659ff, #ff6a00); animation: spin 6s linear infinite; box-shadow:0 0 10px rgba(255,255,255,.25)}
+  .hvai .label .num{font-weight:900; opacity:.9}
+  @keyframes spin{to{transform:rotate(1turn)}}
+
 .hvai{margin-top:14px;background:linear-gradient(135deg,rgba(60,220,255,.06),rgba(155,92,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px}
 .hvai-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
 .hvai-head h4{margin:0;font-size:1.08rem}
@@ -688,6 +704,25 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 <section id="hvai" class="hvai" aria-label="Human vs AI Content (Ensemble)">
   <style>
   /* ==== Human vs AI (Ensemble) — Visuals v5 (scoped) ==== */
+
+  /* Rainbow animated heading text */
+  .hvai .title .label{font-weight:800; font-size:clamp(18px, 2.1vw, 28px); line-height:1.15}
+  .hvai .title .label .rainbow{
+    background: linear-gradient(90deg,
+      #ff6a00, #ffd300, #2ad1a3, #1aa6ff, #5a6bff, #9659ff, #ff6aff, #ff6a00);
+    background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip:text; color:transparent;
+    animation: rainbowShift 7s linear infinite;
+    -webkit-text-stroke: .6px rgba(0,0,0,.25);
+    text-shadow: 0 1px 0 rgba(0,0,0,.15);
+  }
+  .hvai .title .label::after{
+    content:""; display:block; height:2px; margin-top:6px; border-radius:2px;
+    background: linear-gradient(90deg, #ff6a00, #ffd300, #2ad1a3, #1aa6ff, #9659ff, #ff6aff);
+    opacity:.65;
+  }
+  @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+
   .hvai{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.45); overflow:hidden;}
   .hvai .hvai-techlines{position:absolute; inset:-2px; z-index:0; pointer-events:none;
     background:
@@ -726,14 +761,14 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   .hvai .title .icon{width:28px; height:28px; flex:0 0 28px}
   .hvai .title svg{display:block}
   .hvai .title .label{font-weight:800; font-size:clamp(18px, 2.1vw, 28px)}
-  .hvai .title .shimmer{background:linear-gradient(90deg, #fff, #cbd5ff, #fff); -webkit-background-clip:text; background-clip:text; color:transparent; animation: shimmer 4s linear infinite}
+  
   @keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
   .hvai .gradShift stop{animation: hue 7s linear infinite}
   @keyframes hue{0%{stop-color:#ff6a00}50%{stop-color:#1aa6ff}100%{stop-color:#ff6a00}}
 
   /* Wheel v5 — dual ring (AI outer / Human inner) with ticks */
   .hvai{--wheel-size: clamp(200px, 22vw, 340px);} .hvai .hvai-wheel-wrap{position:relative; width:var(--wheel-size); aspect-ratio:1/1; margin-left:auto}
-  .hvai{--ring: 22px; --p: 61; --pH: 39}
+  .hvai{--ring: 22px; --p: 0; --pH: 0}
   .hvai .hvai-wheel-track, .hvai .hvai-arc-ai, .hvai .hvai-arc-human, .hvai .hvai-ticks{position:absolute; inset:0; border-radius:50%}
   .hvai .hvai-wheel-track{
     background: conic-gradient(from -90deg, rgba(255,255,255,.08) 0 100%);
@@ -834,21 +869,22 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
           <circle cx="50" cy="24" r="2" fill="#f0f"/>
           <rect x="38" y="34" width="12" height="12" rx="6" fill="url(#g2)"/>
         </svg>
-        <div class="label"><span class="shimmer">Human vs AI Content (Ensemble)</span></div>
+        <div class="label"><span class="rainbow">Human vs AI Content (Ensemble)</span></div>
       </div>
 
+      <div id="hvaiStatus" class="status neutral" aria-live="polite">Waiting for analysis…</div>
       <div class="badges">
-        <div class="badge"><strong>🛡️ Confidence:</strong> <span id="hvaiConf">94</span>%</div>
+        <div class="badge"><strong>🛡️ Confidence:</strong> <span id="hvaiConf">0</span>%</div>
         <div class="badge">ℹ️ Higher bar = more AI-like</div>
       </div>
 
       <div class="bars">
-        <div class="bar"><div class="label">Human-like</div><div class="track"><div class="fill" id="hvaiHumanFill" style="width:39%"></div></div></div>
-        <div class="bar"><div class="label">Lexical Diversity</div><div class="track"><div class="fill" style="width:84%"></div></div></div>
-        <div class="bar"><div class="label">Burstiness</div><div class="track"><div class="fill" style="width:100%"></div></div></div>
-        <div class="bar"><div class="label">Digits Density</div><div class="track"><div class="fill" style="width:100%"></div></div></div>
-        <div class="bar"><div class="label">Repetition (3-gram)</div><div class="track"><div class="fill" style="width:0%"></div></div></div>
-        <div class="bar"><div class="label">Character Entropy</div><div class="track"><div class="fill" style="width:0%"></div></div></div>
+        <div class="bar"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:39%"></div></div></div>
+        <div class="bar"><div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div><div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div></div>
+        <div class="bar"><div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div><div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div></div>
+        <div class="bar"><div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div><div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div></div>
+        <div class="bar"><div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div><div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div></div>
+        <div class="bar"><div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div><div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div></div>
       </div>
       <small>Source: local ensemble (no external APIs).</small>
     </div>
@@ -861,17 +897,35 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       <div class="hvai-ticks"></div>
       <div class="hvai-wheel-center">
         <div class="kv">
-          <div class="row"><span class="pill"><span class="dot ai"></span>AI‑like</span> <span class="val"><span id="hvaiAIVal">61</span><sup>%</sup></span></div>
-          <div class="row"><span class="pill"><span class="dot human"></span>Human‑like</span> <span class="val"><span id="hvaiHumanVal">39</span><sup>%</sup></span></div>
+          <div class="row"><span class="pill"><span class="dot ai"></span>AI‑like</span> <span class="val"><span id="hvaiAIVal">0</span><sup>%</sup></span></div>
+          <div class="row"><span class="pill"><span class="dot human"></span>Human‑like</span> <span class="val"><span id="hvaiHumanVal">0</span><sup>%</sup></span></div>
         </div>
       </div>
     </div>
   </div>
 
   
+  
   <script>
-  // ===== HVAI Adapter v6: connects the wheel to Analyze results =====
-  // Visual updater (kept from v5)
+  // ===== HVAI Adapter v8: thresholds + bars + 0-init =====
+  function setStatus(humanPct){
+    var st = document.getElementById('hvaiStatus');
+    if(!st) return;
+    st.classList.remove('neutral','good','warn','bad');
+    var rewrite = '<span class="rewrite-badge">Rewrite the Content</span>';
+    if(humanPct >= 80){
+      st.classList.add('good');
+      st.innerHTML = '🎉 Great Work';
+    }else if(humanPct >= 60){
+      st.classList.add('warn');
+      st.innerHTML = '💡 Need More Hard Work';
+    }else{
+      st.classList.add('bad');
+      st.innerHTML = '⚠️ Need More Hard Work ' + rewrite;
+    }
+  }
+
+  // Visual updater (dual-ring)
   window.updateHVAIScore = function(pctAI){
     var p = Math.max(0, Math.min(100, Math.round(pctAI)));
     var pH = 100 - p;
@@ -882,65 +936,57 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     }
     var a = document.getElementById('hvaiAIVal'); if(a) a.textContent = p;
     var h = document.getElementById('hvaiHumanVal'); if(h) h.textContent = pH;
-    var hb = document.getElementById('hvaiHumanFill'); if(hb) hb.style.width = pH+'%';
+    var hb = document.getElementById('hvaiBarHuman'); if(hb) hb.style.width = pH+'%';
+    var hNum = document.getElementById('hvaiValHumanBar'); if(hNum) hNum.textContent = Math.round(pH);
+    setStatus(pH); // thresholds use Human-like %
   };
 
-  // Lightweight local ensemble to infer AI-likeness without external APIs
+  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
   function detectUltra(text){
     text = (text||'').replace(/\s+/g,' ').trim();
     var len = text.length;
-    if(len < 40) return { ai: 0, conf: 0, reasons: ['Too short'] };
+    if(len < 40) return { ai: 0, human: 0, conf: 0, subs: null };
 
-    // Tokens & sentences
     var sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
     var tokens = text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g) || [];
     var types = new Set(tokens);
 
-    // Lexical diversity (TTR)
-    var ttr = types.size / Math.max(1, tokens.length); // 0..1 (higher = more human)
-    var ttrScore = (1 - Math.abs(0.52 - Math.min(0.95, ttr))/0.52) * 100; // peak around ~0.52
+    var ttr = types.size / Math.max(1, tokens.length);
+    var ttrScore = (1 - Math.abs(0.52 - Math.min(0.95, ttr))/0.52) * 100;
 
-    // Repetition (3-gram) ratio
     var tri = {};
     for(let i=0;i<tokens.length-2;i++){ let g=tokens.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1; }
     var repeatedTri = Object.values(tri).filter(v=>v>1).length;
     var repRatio = repeatedTri / Math.max(1, Object.keys(tri).length);
     var repScore = (1 - Math.min(0.6, repRatio)/0.6) * 100;
 
-    // Burstiness via sentence length coefficient of variation (CoV)
     var sl = sentences.map(s=> (s.match(/\w+/g)||[]).length );
-    var avgSL = sl.reduce((a,b)=>a+b,0) / sl.length;
-    var sdSL = Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avgSL,2),0)/sl.length);
+    var avgSL = sl.reduce((a,b)=>a+b,0) / Math.max(1, sl.length);
+    var sdSL = Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avgSL,2),0)/Math.max(1, sl.length));
     var cov = avgSL ? sdSL/avgSL : 0;
-    var burstScore = Math.min(1, cov/0.8) * 100; // more variation => more human
+    var burstScore = Math.min(1, cov/0.8) * 100;
 
-    // Character entropy (Shannon over ASCII subset)
     var freq = {}; for (let ch of text) { if(ch < ' ' || ch > '~') continue; freq[ch]=(freq[ch]||0)+1; }
     var H=0, N=Object.values(freq).reduce((a,b)=>a+b,0)||1;
     for (let k in freq){ let p=freq[k]/N; H += -p*Math.log2(p); }
-    var entScore = (1 - Math.abs(3.8 - Math.min(6.0, H))/3.8) * 100; // bell around ~3.8
+    var entScore = (1 - Math.abs(3.8 - Math.min(6.0, H))/3.8) * 100;
 
-    // Stopword ratio (EN baseline, language-agnostic fallback)
     var sw = new Set(['the','and','of','to','a','in','is','it','that','for','on','you','with','as','are','this','be','or','by','an','from','at','have','not','was','but','they','we','can','if','will','your','about']);
     var swCount = tokens.filter(t=>sw.has(t)).length;
     var swRatio = swCount / Math.max(1, tokens.length);
     var swScore = (1 - Math.abs(0.42 - Math.min(0.9, swRatio))/0.42) * 100;
 
-    // Digits density
     var digits = (text.match(/\d/g)||[]).length / Math.max(1, len);
-    var digScore = (1 - Math.max(0, 0.06 - digits)/0.06) * 100; // 0.06+ feels human-ish (data presence)
+    var digScore = (1 - Math.max(0, 0.06 - digits)/0.06) * 100;
 
-    // Readability balance using Flesch reading ease (approx, EN-biased)
-    function syllables(w){ return Math.max(1, (w.match(/[aeiouy]+/gi)||[]).length - (w.match(/(?:e|ed|es)\b/gi)||[]).length + (w.match(/le\b/gi)?1:0)); }
     var words = tokens.length || 1;
+    function syllables(w){ return Math.max(1, (w.match(/[aeiouy]+/gi)||[]).length - (w.match(/(?:e|ed|es)\b/gi)||[]).length + (w.match(/le\b/gi)?1:0)); }
     var syls = tokens.reduce((a,w)=>a+syllables(w),0);
     var FRE = 206.835 - (1.015 * (words/Math.max(1, sentences.length))) - (84.6 * (syls/words));
     var readScore = (1 - Math.abs(60 - Math.max(0, Math.min(100, FRE))) / 60) * 100;
 
-    // Aggregate with weights (sum to 1)
-    var weights = {
-      ttr: .18, rep:.15, burst:.18, ent:.12, sw:.12, dig:.10, read:.15
-    };
+    var weights = { ttr:.18, rep:.15, burst:.18, ent:.12, sw:.12, dig:.10, read:.15 };
     var humanComposite =
       ttrScore*weights.ttr +
       repScore*weights.rep +
@@ -950,70 +996,63 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       digScore*weights.dig +
       readScore*weights.read;
 
-    var aiLike = Math.max(0, Math.min(100, 100 - humanComposite)); // inverse
-    // Confidence: grows with text length & variance of signals
+    var aiLike = Math.max(0, Math.min(100, 100 - humanComposite));
     var varSignals = [ttrScore, repScore, burstScore, entScore, swScore, digScore, readScore];
     var mean = varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
     var variance = varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length;
     var conf = Math.max(50, Math.min(98, 60 + Math.log10(len+1)*8 + Math.sqrt(variance)/10));
 
-    return { ai: Math.round(aiLike), human: Math.round(100 - aiLike), conf: Math.round(conf) };
+    return { 
+      ai: Math.round(aiLike), 
+      human: Math.round(100 - aiLike), 
+      conf: Math.round(conf),
+      subs: {
+        humanLike: Math.round(humanComposite),
+        lexical: Math.round(ttrScore),
+        burst: Math.round(burstScore),
+        digits: Math.round(digScore),
+        repetition: Math.round(repScore),
+        entropy: Math.round(entScore)
+      }
+    };
   }
 
-  // Public API so your pipeline can feed text directly
+  function updateBars(subs){
+    if(!subs) return;
+    var map = [
+      ['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],
+      ['hvaiBarLex','hvaiValLex', subs.lexical],
+      ['hvaiBarBurst','hvaiValBurst', subs.burst],
+      ['hvaiBarDigits','hvaiValDigits', subs.digits],
+      ['hvaiBarRep','hvaiValRep', subs.repetition],
+      ['hvaiBarEnt','hvaiValEnt', subs.entropy],
+    ];
+    map.forEach(function(row){
+      var fill = document.getElementById(row[0]);
+      var num  = document.getElementById(row[1]);
+      var val  = Math.max(0, Math.min(100, Math.round(row[2]||0)));
+      if(fill) fill.style.width = val + '%';
+      if(num)  num.textContent = val;
+    });
+  }
+
+  // Public API
   window.hvaiCompute = function(text){
     try{
       var r = detectUltra(text||'');
       updateHVAIScore(r.ai);
+      updateBars(r.subs);
       var c = document.getElementById('hvaiConf'); if(c) c.textContent = r.conf;
-      // also reflect human value label
-      var hv = document.getElementById('hvaiHumanVal'); if(hv) hv.textContent = r.human;
       return r;
     }catch(e){ console.warn('HVAI compute error', e); return null; }
   };
 
-  // Listen for a custom app event if your backend already emits one
-  document.addEventListener('analysis:complete', function(ev){
-    var detail = ev && ev.detail || {};
-    var txt = detail.text || detail.body || detail.content || '';
-    if(txt && txt.length > 40){ window.hvaiCompute(txt); }
-  });
-
-  // DOM watcher fallback: observe common result containers and recompute when content changes
-  (function(){
-    var candidates = ['#analysisResults', '.analysis-results', '#results', '#output', '#contentPreview', '.report-body'];
-    var targets = candidates.map(sel=>document.querySelector(sel)).filter(Boolean);
-    var observer = new MutationObserver(function(){
-      for(var el of targets){
-        if(!el) continue;
-        var txt = (el.innerText||'').replace(/\s+/g,' ').trim();
-        if(txt && txt.length > 120){
-          window.hvaiCompute(txt);
-          return;
-        }
-      }
-    });
-    var config = {subtree:true, childList:true, characterData:true};
-    targets.forEach(t=>observer.observe(t, config));
-  })();
-
-  // Button hook fallback: if an Analyze button exists, run on a small delay after click
-  (function(){
-    var btns = Array.from(document.querySelectorAll('#analyzeBtn, [data-role=\"analyze\"], button, .btn'))
-      .filter(b=>/analy[sz]e/i.test(b.textContent||''));
-    btns.forEach(b=> b.addEventListener('click', function(){
-      setTimeout(function(){
-        // try to capture raw input area as well
-        var inputs = ['#inputText', '#content', '#textToAnalyze', 'textarea[name=\"content\"]', '#pasteArea'];
-        for(var sel of inputs){
-          var el = document.querySelector(sel);
-          if(el && (el.value||'').trim().length>120){
-            window.hvaiCompute(el.value);
-            break;
-          }
-        }
-      }, 1200); // allow UI to render results
-    }));
+  // Reset to 0 while waiting for analysis
+  (function reset(){
+    updateHVAIScore(0);
+    updateBars({humanLike:0,lexical:0,burst:0,digits:0,repetition:0,entropy:0});
+    var c = document.getElementById('hvaiConf'); if(c) c.textContent = 0;
+    setStatus(0);
   })();
   </script>
 </section>
