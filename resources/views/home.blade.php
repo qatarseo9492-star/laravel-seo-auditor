@@ -2780,3 +2780,46 @@ document.addEventListener('DOMContentLoaded', function(){
   }catch(e){}
 });
 </script>
+
+<script>
+/* v3 analyze super-failsafe */
+(function(){
+  function startAnalyze(){
+    try{
+      var s = document.getElementById('analyzeStatus');
+      if(s) s.textContent = 'Starting analysis…';
+      if (window.SEMSEO) window.SEMSEO.READY = true;
+      if (typeof analyze === 'function') analyze();
+      else if (typeof SEMSEO_go === 'function') SEMSEO_go();
+    }catch(err){
+      var s2 = document.getElementById('analyzeStatus'); if(s2) s2.textContent = 'Analyze error: '+(err && err.message ? err.message : err);
+    }
+  }
+  // Direct button
+  var btn = document.getElementById('analyzeBtn');
+  if(btn){
+    btn.addEventListener('click', function(e){ e.preventDefault(); startAnalyze(); }, {capture:false});
+  }
+  // Delegated (in case button is re-rendered)
+  document.addEventListener('click', function(e){
+    var b = e.target.closest && e.target.closest('#analyzeBtn, .btn-analyze');
+    if(!b) return;
+    e.preventDefault();
+    startAnalyze();
+  }, false);
+  // Enter in URL field
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter') return;
+    var el = document.activeElement;
+    if(!el) return;
+    if(el.id === 'analyzeUrl' || el.closest && el.closest('#analyzeUrl')){
+      e.preventDefault();
+      startAnalyze();
+    }
+  }, false);
+  // Load-ready
+  window.addEventListener('load', function(){
+    if (window.SEMSEO) window.SEMSEO.READY = true;
+  });
+})();
+</script>
