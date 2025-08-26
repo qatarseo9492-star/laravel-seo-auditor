@@ -142,7 +142,11 @@
 
 /* v3 checklist affordance */
 .improve, [data-improve="true"], .checklist-improve{ cursor:pointer; }
+
+/* hide leftover suggestions */
+#hvaiModal, #pane-suggestions, #aiSuggestBox { display:none !important; visibility:hidden !important; }
 </style>
+
 
 
 <meta charset="utf-8"/>
@@ -2316,14 +2320,6 @@ window.addEventListener('error', function(e){
 })();
 </script>
 
-
-<div id="hvaiModal" role="dialog" aria-modal="true" aria-label="AI Suggestions">
-  <div class="box">
-    <div class="close" id="hvaiModalClose"><i class="fa-solid fa-xmark"></i></div>
-    <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Suggestions</h3>
-    <div id="hvaiModalBody"></div>
-  </div>
-</div>
 
 <script>
 /* === Tech lines background (canvas) === */
