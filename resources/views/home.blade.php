@@ -139,6 +139,9 @@
   background: linear-gradient(90deg,#f97316,#ef4444,#ec4899,#a855f7);
 }
 .hvai .hvai-flag{ cursor:pointer; }
+
+/* v3 checklist affordance */
+.improve, [data-improve="true"], .checklist-improve{ cursor:pointer; }
 </style>
 
 
@@ -2638,6 +2641,55 @@ document.addEventListener('click', function(e){
   if(btn && idx>=0){
     btn.click();
   }
+});
+</script>
+
+<script>
+/* v3 checklist improve -> modal */
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('.improve,[data-improve="true"],.checklist-improve');
+  if(!btn) return;
+
+  // Try to find the sentence/content near the button
+  var container = btn.closest('.hvai-flag, .check-item, .read-check, .list-item, li, p, div');
+  var raw = '';
+  if(container){
+    // Prefer a data attribute if present
+    raw = container.getAttribute('data-text') || container.getAttribute('data-content') || '';
+    if(!raw){
+      // Fallback: collect the first text block inside
+      var tNode = container.querySelector('.text, .content, .desc, p, span, div');
+      raw = (tNode && (tNode.innerText || tNode.textContent)) || container.innerText || container.textContent || '';
+    }
+  }
+  raw = (raw || '').trim();
+
+  // If still empty, bail
+  if(!raw) return;
+
+  // Build suggestions
+  var body = document.getElementById('hvaiModalBody');
+  var lang = (document.getElementById('hvaiLang')?.value)||'en';
+  var sug = (typeof makeSuggestionsFor==='function') ? makeSuggestionsFor(raw, lang) : {items:[], rewrite:''};
+  if(body){
+    body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+escapeHTML(raw)+'</div>' +
+                     '<div><b>Suggestions</b><ul style="margin-top:6px">'+ (sug.items||[]).map(x=>'<li>'+x+'</li>').join('') +'</ul></div>' +
+                     (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+escapeHTML(sug.rewrite)+'</div>' : '') +
+                     '</div>';
+    document.getElementById('hvaiModal').style.display='flex';
+  }
+});
+</script>
+
+<script>
+/* v3 minis hydrate */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    var human = isFinite(window.__lastScore) ? Math.round(window.__lastScore) : 0;
+    var ai = Math.max(0, 100 - human);
+    var n1 = document.getElementById('miniHumanNum'); if(n1) n1.textContent = human + '%';
+    var n2 = document.getElementById('miniAINum');   if(n2) n2.textContent = ai + '%';
+  }, 60);
 });
 </script>
 </body>
