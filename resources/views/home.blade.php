@@ -709,66 +709,70 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 <!-- HUMAN vs AI Content (Ensemble) — v20 PRISM (multicolor) -->
 
 <!-- HUMAN vs AI Content (Ensemble) — v22 PRISM (scoped, full) -->
-<section id="hvai" class="hvai hvai-v22" aria-label="Human vs AI Content (Ensemble)">
+
+<!-- HUMAN vs AI Content (Ensemble) — v26 PRISM (forcefix) -->
+<section id="hvai" class="hvai hvai-v26" aria-label="Human vs AI Content (Ensemble)">
   <style>
-  .hvai.hvai-v22{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
-  .hvai.hvai-v22 *{box-sizing:border-box}
-  .hvai.hvai-v22 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
+  .hvai.hvai-v26{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
+  .hvai.hvai-v26 *{box-sizing:border-box}
+  .hvai.hvai-v26 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
     background:
       linear-gradient(135deg, rgba(0,255,255,.10) 1px, transparent 1px) 0 0/18px 18px,
       linear-gradient(45deg, rgba(255,0,180,.08) 1px, transparent 1px) 0 0/20px 20px,
       radial-gradient(800px 600px at 85% 10%, rgba(67,169,255,.08), transparent 60%),
       radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
   }
-  .hvai.hvai-v22 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(240px, 26vw, 360px)); align-items:center}
-  @media (max-width:1100px){ .hvai.hvai-v22 .grid{grid-template-columns:1fr} .hvai.hvai-v22 .wheel{order:-1; margin:6px auto 14px} }
-  .hvai.hvai-v22 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
-  .hvai.hvai-v22 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  .hvai.hvai-v22 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
+  .hvai.hvai-v26 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(220px, clamp(220px, 24vw, 320px)); align-items:center}
+  @media (max-width:1100px){ .hvai.hvai-v26 .grid{grid-template-columns:1fr} .hvai.hvai-v26 .wheel{order:-1; margin:6px auto 14px} }
+  .hvai.hvai-v26 .wheel{ display:flex; align-items:center; justify-content:center; }
+
+  .hvai.hvai-v26 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
+  .hvai.hvai-v26 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  .hvai.hvai-v26 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
   @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 
-  .hvai.hvai-v22 .status{margin:6px 0 12px}
-  .hvai.hvai-v22 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
-  .hvai.hvai-v22 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
-  .hvai.hvai-v22 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
-  .hvai.hvai-v22 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
-  .hvai.hvai-v22 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
+  .hvai.hvai-v26 .status{margin:6px 0 12px}
+  .hvai.hvai-v26 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
+  .hvai.hvai-v26 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
+  .hvai.hvai-v26 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
+  .hvai.hvai-v26 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
+  .hvai.hvai-v26 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
 
-  .hvai.hvai-v22 .row2{display:flex; gap:18px; flex-wrap:wrap}
-  .hvai.hvai-v22 .bar{flex:1 1 420px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:280px}
-  .hvai.hvai-v22 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
-  .hvai.hvai-v22 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
-  .hvai.hvai-v22 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
-  .hvai.hvai-v22 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
-  .hvai.hvai-v22 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
+  .hvai.hvai-v26 .row2{display:flex; gap:18px; flex-wrap:wrap}
+  .hvai.hvai-v26 .bar{flex:1 1 360px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:260px}
+  .hvai.hvai-v26 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
+  .hvai.hvai-v26 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
+  .hvai.hvai-v26 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
+  .hvai.hvai-v26 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
+  .hvai.hvai-v26 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
 
-  /* Prism wheel (multicolor arc) */
-  .prism-wheel{position:relative; width:var(--wheel-size, clamp(200px, 22vw, 300px)); aspect-ratio:1; margin-left:auto}
-  .prism-wheel .track{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) calc(50% - var(--thick,18px)), transparent calc(50% - var(--thick,18px)), transparent 100%)}
+  /* Improve panel */
+  .hvai.hvai-v26 .improve{margin-top:16px; padding:14px; border-radius:14px; background:linear-gradient(180deg, rgba(0,255,200,.06), rgba(0,140,255,.05)); border:1px solid rgba(255,255,255,.10)}
+  .hvai.hvai-v26 .improve.hidden{display:none}
+  .hvai.hvai-v26 .improve-head{font:800 15px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; margin-bottom:8px}
+  .hvai.hvai-v26 .improve-list{margin:0; padding-left:16px}
+  .hvai.hvai-v26 .improve-list li{margin:6px 0; line-height:1.35}
+
+  /* Prism wheel (compact) */
+  .prism-wheel{position:relative; width:var(--wheel-size, clamp(200px, 22vw, 300px)); aspect-ratio:1; margin:0 auto}
+  .prism-wheel .track{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) calc(50% - var(--thick,14px)), transparent calc(50% - var(--thick,14px)), transparent 100%)}
   .prism-wheel .arc{position:absolute; inset:0; border-radius:50%;
     background: conic-gradient(from -90deg, #ff6a00 0%, #ffb700 10%, #ffd300 20%, #96e21a 30%, #2ad1a3 40%, #1aa6ff 50%, #5a6bff 60%, #9659ff 70%, #ff6aff 80%, #ff6a00 100%);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,18px)), #000 calc(100% - var(--thick,18px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
-            mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,18px)), #000 calc(100% - var(--thick,18px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,14px)), #000 calc(100% - var(--thick,14px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
+            mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,14px)), #000 calc(100% - var(--thick,14px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
   }
   .prism-wheel .pointer{position:absolute; inset:0; transform: rotate(calc(var(--p)*3.6deg)); transform-origin:50% 50%}
-  .prism-wheel .pointer::after{content:""; position:absolute; left:50%; top: calc(var(--thick,18px)/2); transform: translateX(-50%); width:12px; height:12px; border-radius:50%; background:#00f5c4; box-shadow:0 0 0 4px rgba(0,245,196,.15)}
-  .prism-wheel .center{position:absolute; inset:calc(var(--thick,18px) + 18px); border-radius:50%; display:grid; place-items:center; background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.06), rgba(10,12,20,.55))}
+  .prism-wheel .pointer::after{content:""; position:absolute; left:50%; top: calc(var(--thick,14px)/2); transform: translateX(-50%); width:12px; height:12px; border-radius:50%; background:#00f5c4; box-shadow:0 0 0 4px rgba(0,245,196,.15)}
+  .prism-wheel .center{position:absolute; inset:calc(var(--thick,14px) + 16px); border-radius:50%; display:grid; place-items:center; background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.06), rgba(10,12,20,.55))}
   .prism-wheel .kv{display:grid; gap:6px; text-align:center}
   .prism-wheel .kv .row{display:flex; align-items:center; gap:6px; justify-content:center; font: 700 13px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; color:#eaf1ff}
   .prism-wheel .kv .val{font-weight:900; font-size:17px}
   .prism-wheel .kv .dot{width:8px; height:8px; border-radius:50%}
   .prism-wheel .kv .dot.ai{background:#7c5bff}
   .prism-wheel .kv .dot.h{background:#00f5c4}
-  .hvai.hvai-v22 .wheel > *:not(.prism-wheel){ display:none !important; }
-  
-  /* Improve panel */
-  .hvai.hvai-v22 .improve{margin-top:16px; padding:14px; border-radius:14px; background:linear-gradient(180deg, rgba(0,255,200,.06), rgba(0,140,255,.05)); border:1px solid rgba(255,255,255,.10)}
-  .hvai.hvai-v22 .improve.hidden{display:none}
-  .hvai.hvai-v22 .improve-head{font:800 15px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; margin-bottom:8px}
-  .hvai.hvai-v22 .improve-list{margin:0; padding-left:16px}
-  .hvai.hvai-v22 .improve-list li{margin:6px 0; line-height:1.35}
-  .hvai.hvai-v22 .chip{display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.08); margin-left:6px; font-weight:700; font-size:12px}
 
+  /* Hide any legacy wheel nodes inside .wheel */
+  .hvai.hvai-v26 .wheel > *:not(.prism-wheel){ display:none !important; }
   </style>
 
   <div class="tech" aria-hidden="true"></div>
@@ -776,11 +780,16 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   <div class="grid">
     <div class="left">
       <div class="title"><div class="txt"><span class="rainbow">Human vs AI Content (Ensemble)</span></div></div>
-      <div id="hvaiStatus" class="status neutral" aria-live="polite"><span class="status-badge"><span class="ico">⌛</span><span class="txt">Waiting for analysis…</span></span></div>
+
+      <div id="hvaiStatus" class="status neutral" aria-live="polite">
+        <span class="status-badge"><span class="ico">⌛</span><span class="txt">Waiting for analysis…</span></span>
+      </div>
+
       <div class="badges">
         <div class="badge">🛡️ <strong>Confidence:</strong> <span id="hvaiConf">0</span>%</div>
         <div class="badge">ℹ️ Higher bar = more AI-like</div>
       </div>
+
       <div class="row2" id="hvaiBars">
         <div class="bar" data-key="humanLike"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div></div>
         <div class="bar" data-key="lexical"><div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div><div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div></div>
@@ -789,17 +798,17 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
         <div class="bar" data-key="repetition"><div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div><div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div></div>
         <div class="bar" data-key="entropy"><div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div><div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div></div>
       </div>
-      
+
       <div id="hvaiImprove" class="improve hidden" aria-live="polite">
         <div class="improve-head">How to raise your score</div>
         <ul class="improve-list" id="hvaiImproveList"></ul>
       </div>
+
       <small>Source: local ensemble (no external APIs).</small>
-    
     </div>
 
     <div class="wheel">
-      <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;"
+      <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;">
         <div class="track"></div><div class="arc"></div><div class="pointer"></div>
         <div class="center"><div class="kv">
           <div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div>
@@ -809,103 +818,37 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     </div>
   </div>
 
-  
   <script>
   (function(){
+    console.log('HVAI v26 loaded');
     var confLocked=false;
     function clamp(v){ return Math.max(0,Math.min(100,Math.round(v||0))); }
     function setBadge(h){ var st=document.getElementById('hvaiStatus'); if(!st) return; var txt=st.querySelector('.txt'); var ico=st.querySelector('.ico'); st.classList.remove('neutral','good','warn','bad'); if(h>=80){ st.classList.add('good'); if(txt) txt.textContent='Great Work'; if(ico) ico.textContent='✅'; } else if(h>=60){ st.classList.add('warn'); if(txt) txt.textContent='Need More Hard work on content'; if(ico) ico.textContent='🟡'; } else { st.classList.add('bad'); if(txt) txt.textContent='Needs Rewrite the Content'; if(ico) ico.textContent='✍️'; } }
     function setConfidence(v){ var el=document.getElementById('hvaiConf'); if(el) el.textContent=clamp(v); }
     function deriveConfFromAI(pAI){ return 60 + (Math.abs(50 - pAI) / 50) * 30; }
     function updateBars(subs){ if(!subs) return; var map=[['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],['hvaiBarLex','hvaiValLex', subs.lexical],['hvaiBarBurst','hvaiValBurst', subs.burst],['hvaiBarDigits','hvaiValDigits', subs.digits],['hvaiBarRep','hvaiValRep', subs.repetition],['hvaiBarEnt','hvaiValEnt', subs.entropy],]; map.forEach(function(r){ var f=document.getElementById(r[0]); var n=document.getElementById(r[1]); var v=clamp(r[2]); if(f) f.style.width=v+'%'; if(n) n.textContent=v; }); }
+    function deriveSubs(pAI){ var h=100-pAI, c=v=>Math.max(0,Math.min(100,Math.round(v))); return { humanLike:c(h), lexical:c(35+h*0.55), burst:c(25+h*0.7), digits:c(10+(100-h)*0.3), repetition:c(60-h*0.4), entropy:c(35+h*0.45) }; }
+    function showImprovements(subs){ var box=document.getElementById('hvaiImprove'); var ul=document.getElementById('hvaiImproveList'); if(!box||!ul) return; var tips=[], h=subs.humanLike||0; function add(t){ if(t) tips.push(t); } if(h<80) add('Overall Human-like is ' + h + '%. Aim for ≥ 80 by applying the tips below.'); if(subs.lexical<75) add('Lexical Diversity is low ('+subs.lexical+'%). Add domain-specific terms and vary phrasing.'); if(subs.burst<70) add('Burstiness is low ('+subs.burst+'%). Mix short and long sentences.'); if(subs.repetition<70) add('Repetition (3‑gram) is high ('+subs.repetition+'%). Rephrase repeated chunks.'); if(subs.entropy<70) add('Character Entropy is low ('+subs.entropy+'%). Add varied punctuation and specific names.'); if(subs.digits>80) add('Digits Density is high ('+subs.digits+'%). Remove unnecessary numbers.'); if(tips.length<=1 && h<80) add('Add concrete examples and personal/brand perspective.'); ul.innerHTML=''; tips.slice(0,8).forEach(function(t){ var li=document.createElement('li'); li.textContent=t; ul.appendChild(li); }); box.classList.toggle('hidden', !(h<80 || tips.length>0)); }
+    window.updateHVAIScore=function(pAI){ var p=clamp(pAI), h=100-p; var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p); var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p; var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h; setBadge(h); if(!confLocked) setConfidence(deriveConfFromAI(p)); var subs=deriveSubs(p); updateBars(subs); showImprovements(subs); };
+    function detectUltra(text){ text=(text||'').replace(/\s+/g,' ').trim(); var len=text.length; if(len<40) return {ai:0,conf:60,subs:deriveSubs(0)}; var s=text.split(/(?<=[.!?])\s+/).filter(Boolean); var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]); var types=new Set(t); var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100; var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;} var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100; var sl=s.map(x=>(x.match(/\\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length); var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100; var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; } for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100; var digits=(text.match(/\\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100; function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));} var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words)); var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100; var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15; var ai=Math.max(0,Math.min(100,100-human)); var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) }; var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length; var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length; var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10)); return {ai:Math.round(ai), conf:Math.round(conf), subs}; }
+    window.hvaiCompute=function(text){ try{ var r=detectUltra(text||''); confLocked=true; updateHVAIScore(r.ai); updateBars(r.subs); setConfidence(r.conf); showImprovements(r.subs); return r; }catch(e){ console.warn('hvaiCompute error',e); return null; } };
 
-    // Build targeted improvement tips based on subscores
-    function buildImprovements(subs){
-      var tips=[], h=subs.humanLike||0;
-      function add(t){ if(t) tips.push(t); }
-      if(h<80) add('Overall Human-like is ' + h + '%. Aim for ≥ 80 by applying the tips below.');
-
-      if(subs.lexical < 75) add('Lexical Diversity is low ('+subs.lexical+'%). Add domain-specific terms, vary nouns/verbs, and avoid repeating the same phrases.');
-      if(subs.burst   < 70) add('Burstiness is low ('+subs.burst+'%). Mix sentence lengths: add a few short punchy lines and a few longer, detailed ones.');
-      if(subs.repetition < 70) add('Repetition (3‑gram) is high ('+subs.repetition+'%). Rephrase repeated 3‑word chunks and merge near-duplicate sentences.');
-      if(subs.entropy < 70) add('Character Entropy is low ('+subs.entropy+'%). Use more varied punctuation, numbers where meaningful, and specific names or examples.');
-      if(subs.digits  > 80) add('Digits Density is unusual ('+subs.digits+'%). Reduce unnecessary numbers, keep only data that adds value.');
-
-      // If everything is fine but Human-like still <80, suggest adding personal context
-      if(tips.length<=1 && h<80) add('Add concrete examples, personal/brand perspective, and context only a human author would know.');
-
-      return tips.slice(0,8);
-    }
-
-    function showImprovements(subs){
-      var box = document.getElementById('hvaiImprove');
-      var ul  = document.getElementById('hvaiImproveList');
-      if(!box || !ul) return;
-      var tips = buildImprovements(subs||{});
-      ul.innerHTML = '';
-      tips.forEach(function(t){ var li=document.createElement('li'); li.textContent = t; ul.appendChild(li); });
-      box.classList.toggle('hidden', !( (subs.humanLike||0) < 80 || tips.length>0 ));
-    }
-
-    function deriveSubs(pAI){
-      var h=100-pAI, c=v=>Math.max(0,Math.min(100,Math.round(v)));
-      return { humanLike:c(h), lexical:c(35+h*0.55), burst:c(25+h*0.7), digits:c(10+(100-h)*0.3), repetition:c(60-h*0.4), entropy:c(35+h*0.45) };
-    }
-
-    window.updateHVAIScore=function(pAI){
-      var p=clamp(pAI), h=100-p;
-      var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p);
-      var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p;
-      var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h;
-      setBadge(h);
-      if(!confLocked) setConfidence(deriveConfFromAI(p));
-      var subs = deriveSubs(p);
-      updateBars(subs);
-      showImprovements(subs);
-    };
-
-    function detectUltra(text){
-      text=(text||'').replace(/\s+/g,' ').trim();
-      var len=text.length; if(len<40) return {ai:0,conf:60,subs:deriveSubs(0)};
-      var s=text.split(/(?<=[.!?])\s+/).filter(Boolean);
-      var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]);
-      var types=new Set(t);
-      var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100;
-      var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;}
-      var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100;
-      var sl=s.map(x=>(x.match(/\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length);
-      var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100;
-      var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; }
-      for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100;
-      var digits=(text.match(/\\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100;
-      function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));}
-      var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words)); var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100;
-      var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15;
-      var ai=Math.max(0,Math.min(100,100-human));
-      var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) };
-      var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
-      var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length;
-      var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10));
-      return {ai:Math.round(ai), conf:Math.round(conf), subs};
-    }
-
-    window.hvaiCompute=function(text){
-      try{
-        var r=detectUltra(text||'');
-        confLocked=true;
-        updateHVAIScore(r.ai);
-        updateBars(r.subs);
-        setConfidence(r.conf);
-        showImprovements(r.subs);
-        return r;
-      }catch(e){ console.warn('hvaiCompute error',e); return null; }
-    };
+    // Force-inject Prism wheel markup if old wheel is present
+    (function ensureWheel(){
+      var wrap=document.querySelector('#hvai.hvai-v26 .wheel');
+      if(!wrap) return;
+      var hasPrism = !!wrap.querySelector('.prism-wheel');
+      if(!hasPrism){
+        wrap.innerHTML = '<div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;"><div class="track"></div><div class="arc"></div><div class="pointer"></div><div class="center"><div class="kv"><div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div><div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div></div></div></div>';
+      }
+    })();
 
     // init
     updateHVAIScore(0);
   })();
   </script>
 </section>
+
 
 
 
@@ -2065,5 +2008,163 @@ window.addEventListener('error', function(e){
 })();
 </script>
   
+
+
+<!-- Checklist Suggest Patch -->
+<style>
+
+/* checklist-suggest-patch-v1.css */
+.gc-suggest{
+  background: rgba(20,23,36,.98);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.45);
+  max-height: 320px;
+  overflow: auto;
+  padding: 6px;
+}
+.gc-suggest__item{
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font: 500 14px/1.3 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  color: #EAF1FF;
+}
+.gc-suggest__item:hover,
+.gc-suggest__item.is-active{
+  background: linear-gradient(90deg, #00ffc822, #6bf7ff22);
+}
+
+</style>
+<script>
+
+/*! checklist-suggest-patch-v1
+ * Lightweight Google Suggest hookup for a single input (Checklist Improve).
+ * - Renders dropdown in <body> (portal) to bypass overflow/z-index clipping.
+ * - Debounced fetch from suggestqueries.google.com (Firefox client = JSON).
+ * - Keyboard support: ↑/↓ navigate, Enter pick, Esc close.
+ * - Autodetects the input using common selectors, but you can call attachSuggest(input) yourself.
+ */
+(function(){
+  const S = Object.freeze({
+    MAX: 8,
+    HL: document.documentElement.lang || 'en',
+    CLASS: 'gc-suggest',
+    ITEM: 'gc-suggest__item',
+    ACTIVE: 'is-active'
+  });
+
+  function debounce(fn, ms){ let t; return function(...a){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,a), ms); }; }
+
+  // Create dropdown attached to <body>
+  function createPortal(){
+    const el = document.createElement('div');
+    el.className = S.CLASS;
+    el.setAttribute('role','listbox');
+    el.style.position = 'absolute';
+    el.style.display = 'none';
+    el.style.zIndex = '99999';
+    document.body.appendChild(el);
+    return el;
+  }
+
+  // Position the portal under the input
+  function place(portal, input){
+    const r = input.getBoundingClientRect();
+    portal.style.left = Math.round(r.left + window.scrollX) + 'px';
+    portal.style.top  = Math.round(r.bottom + window.scrollY) + 'px';
+    portal.style.minWidth = Math.round(r.width) + 'px';
+  }
+
+  async function fetchSuggest(q){
+    if(!q || !q.trim()){ return []; }
+    const url = 'https://suggestqueries.google.com/complete/search?client=firefox&hl=' + encodeURIComponent(S.HL) + '&q=' + encodeURIComponent(q.trim());
+    try{
+      const rs = await fetch(url, { mode:'cors', cache:'no-store' });
+      const data = await rs.json();
+      return Array.isArray(data) && Array.isArray(data[1]) ? data[1].slice(0,S.MAX) : [];
+    }catch(e){
+      // Network/CORS/CSP: fail silently
+      return [];
+    }
+  }
+
+  function renderList(portal, items, onPick){
+    portal.innerHTML = '';
+    items.forEach((t, i)=>{
+      const li = document.createElement('div');
+      li.className = S.ITEM;
+      li.setAttribute('role','option');
+      li.setAttribute('id', 'gc-opt-' + i);
+      li.textContent = t;
+      li.addEventListener('mousedown', (ev)=>{ ev.preventDefault(); onPick(t); hide(portal); });
+      portal.appendChild(li);
+    });
+    portal.style.display = items.length ? 'block' : 'none';
+  }
+
+  function hide(portal){ portal.style.display='none'; portal.innerHTML=''; activeIndex=-1; }
+
+  let portal = null, activeIndex = -1;
+
+  function attachSuggest(input){
+    if(!input) return;
+    if(!portal) portal = createPortal();
+
+    const deb = debounce(async function(){
+      const q = input.value;
+      const items = await fetchSuggest(q);
+      place(portal, input);
+      renderList(portal, items, (text)=>{
+        input.value = text;
+        input.dispatchEvent(new Event('input', {bubbles:true}));
+      });
+    }, 180);
+
+    input.setAttribute('autocomplete','off');
+    input.setAttribute('aria-controls','gc-suggest');
+    input.addEventListener('input', deb);
+    input.addEventListener('focus', ()=>{ place(portal, input); deb(); });
+    window.addEventListener('resize', ()=> portal && portal.style.display!=='none' && place(portal, input));
+    window.addEventListener('scroll', ()=> portal && portal.style.display!=='none' && place(portal, input), true);
+
+    input.addEventListener('keydown', (e)=>{
+      const items = portal.querySelectorAll('.' + S.ITEM);
+      if(!items.length) return;
+      if(e.key === 'ArrowDown'){ e.preventDefault(); activeIndex = (activeIndex+1) % items.length; updateActive(items); }
+      else if(e.key === 'ArrowUp'){ e.preventDefault(); activeIndex = (activeIndex-1+items.length) % items.length; updateActive(items); }
+      else if(e.key === 'Enter'){ if(activeIndex>=0){ e.preventDefault(); items[activeIndex].dispatchEvent(new Event('mousedown')); } }
+      else if(e.key === 'Escape'){ hide(portal); }
+    });
+
+    document.addEventListener('click', (ev)=>{
+      if(!portal || ev.target===portal || portal.contains(ev.target) || ev.target===input) return;
+      hide(portal);
+    });
+  }
+
+  function updateActive(items){
+    items.forEach((el,i)=> el.classList.toggle(S.ACTIVE, i===activeIndex));
+    if(activeIndex>=0){
+      const el = items[activeIndex];
+      el.scrollIntoView({ block:'nearest' });
+    }
+  }
+
+  // Auto attach using likely selectors
+  const candidates = [
+    '#checklistImprove', '#checklist-improve', '#improveChecklist', '#improveChecklistInput',
+    '[data-role="checklist-improve"]', 'input[placeholder*="improve" i]', 'input[placeholder*="checklist" i]'
+  ];
+  let input = null;
+  for(const sel of candidates){ input = document.querySelector(sel); if(input) break; }
+  if(input){ attachSuggest(input); }
+
+  // expose global attach if needed
+  window.attachChecklistSuggest = attachSuggest;
+})();
+
+</script>
+
 </body>
 </html>
