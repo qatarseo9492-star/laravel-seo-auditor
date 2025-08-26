@@ -59,6 +59,16 @@
 #hvaiLang:after{ content:""; }
 #hvaiLang option{ color:#0b0d21; }
 #hvaiLang:focus{ outline: none; box-shadow: 0 0 0 6px rgba(96,165,250,.15); }
+
+.neon-gauge .prog{ stroke: url(#gradRainbow) !important; }
+
+.mini-human .prog{ stroke: url(#miniHumanGrad) !important; }
+.mini-ai .prog{ stroke: url(#miniAIGrad) !important; }
+.mini-gauge .label b{ font-size:1rem; }
+
+.hvai-scorebar{ position:relative; }
+.hvai-scorebar > span.human{ background: linear-gradient(90deg,#22c55e,#a7f3d0); height:100%; display:block; }
+.hvai-scorebar > span.ai{ position:absolute; right:0; top:0; background: linear-gradient(90deg,#fca5a5,#ef4444); height:100%; display:block; }
 </style>
 
 <meta charset="utf-8"/>
@@ -568,6 +578,33 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     if (window.SEMSEO.READY && typeof analyze === 'function') { analyze(); }
     else { window.SEMSEO.QUEUE++; const s=document.getElementById('analyzeStatus'); if(s) s.textContent='Initializing…'; }
   }
+
+function setModelHA(id, human, ai){
+  var h = Math.max(0, Math.min(100, Math.round(human||0)));
+  var a = Math.max(0, Math.min(100, Math.round(ai||0)));
+  var hb = document.getElementById('bar-'+id+'-human');
+  var ab = document.getElementById('bar-'+id+'-ai');
+  var ht = document.getElementById('score-'+id+'-human');
+  var at = document.getElementById('score-'+id+'-ai');
+  if(hb){ hb.style.width = h+'%'; }
+  if(ab){ ab.style.width = a+'%'; }
+  if(ht){ ht.textContent = h+'%'; }
+  if(at){ at.textContent = a+'%'; }
+}
+
+/* open modal on flag click */
+document.addEventListener('click', function(e){
+  var card = e.target.closest('.hvai-flag');
+  if(!card || e.target.closest('button.hvai-suggest-btn')) return;
+  var box = document.getElementById('aiFlags');
+  if(!box) return;
+  var cards = Array.from(box.querySelectorAll('.hvai-flag'));
+  var idx = cards.indexOf(card);
+  if(idx>=0){
+    var clicker = card.querySelector('button.hvai-suggest-btn');
+    if(clicker) clicker.click();
+  }
+});
 </script>
 
 <!-- Share dock -->
@@ -731,7 +768,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
       <div class="hvai-head">
         <i class="fa-solid fa-users-gear ico ico-purple ico-animated ico-animated"></i>
-        <h4>Human vs AI Content (Ensemble)</h4>
+        <h4>Human vs AI Content (Ensemble v3)</h4>
       </div>
     <!-- HVAI v2 Stylish Gauge -->
     <div class="hvai-v2 card glassy">
@@ -757,11 +794,11 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
       <div class="neon-gauge" aria-label="Human-likeness gauge">
         <div class="mini-gauge mini-human" aria-label="Human-like mini gauge">
-          <svg viewBox="0 0 60 60" width="72" height="72">
+          <svg viewBox="0 0 60 60" width="72" height="72"><defs><linearGradient id="miniHumanGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#dc2626"/><stop offset="33%" stop-color="#f59e0b"/><stop offset="66%" stop-color="#22c55e"/><stop offset="100%" stop-color="#60a5fa"/></linearGradient></defs>
             <circle class="track" cx="30" cy="30" r="26" stroke-width="8" fill="none"></circle>
             <circle class="prog"  id="miniHumanProg" cx="30" cy="30" r="26" stroke-width="8" fill="none" stroke-dasharray="163.36" stroke-dashoffset="163.36"></circle>
           </svg>
-          <div class="label">Human</div>
+          <div class="label"><b id="miniHumanNum">—%</b><small style="display:block;opacity:.75;font-weight:700">Human</small></div>
         </div>
     
         <svg class="g" viewBox="0 0 120 120" width="220" height="220">
@@ -779,7 +816,14 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
               <feGaussianBlur stdDeviation="2.5" result="c"/>
               <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
-          </defs>
+          
+            <linearGradient id="gradRainbow" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#dc2626"/>
+              <stop offset="33%" stop-color="#f59e0b"/>
+              <stop offset="66%" stop-color="#22c55e"/>
+              <stop offset="100%" stop-color="#60a5fa"/>
+            </linearGradient>
+            </defs>
           <circle class="track" cx="60" cy="60" r="48" stroke-width="12" fill="none"/>
           <circle class="prog good" cx="60" cy="60" r="48" stroke="url(#gradGood)" stroke-width="12" stroke-linecap="round" fill="none" filter="url(#glow)"/>
         </svg>
@@ -794,11 +838,11 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
         <div class="confetti" aria-hidden="true"></div>
       
         <div class="mini-gauge mini-ai" aria-label="AI-like mini gauge">
-          <svg viewBox="0 0 60 60" width="72" height="72">
+          <svg viewBox="0 0 60 60" width="72" height="72"><defs><linearGradient id="miniAIGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#60a5fa"/><stop offset="33%" stop-color="#22c55e"/><stop offset="66%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#dc2626"/></linearGradient></defs>
             <circle class="track" cx="30" cy="30" r="26" stroke-width="8" fill="none"></circle>
             <circle class="prog"  id="miniAIProg" cx="30" cy="30" r="26" stroke-width="8" fill="none" stroke-dasharray="163.36" stroke-dashoffset="163.36"></circle>
           </svg>
-          <div class="label">AI</div>
+          <div class="label"><b id="miniAINum">—%</b><small style="display:block;opacity:.75;font-weight:700">AI</small></div>
         </div>
 </div>
 
@@ -817,30 +861,79 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       </div>
       <div class="hvai-tabpanes">
         <div class="hvai-pane active" id="pane-overall">
-          <div class="hvai-scorebar"><span id="bar-overall"></span></div>
+          <div class="hvai-line">
+            <div>Human: <b id="score-overall-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-overall-ai">—%</b></div>
+            <div class="hvai-scorebar">
+              <span class="human" id="bar-overall-human"></span>
+              <span class="ai" id="bar-overall-ai"></span>
+            </div>
+          </div>
+    </div>
         </div>
         <div class="hvai-pane" id="pane-zerogpt">
-          <div>ZeroGPT score: <b id="score-zerogpt">—%</b></div>
+          <div class="hvai-line">
+            <div>Human: <b id="score-zerogpt-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-zerogpt-ai">—%</b></div>
+            <div class="hvai-scorebar">
+              <span class="human" id="bar-zerogpt-human"></span>
+              <span class="ai" id="bar-zerogpt-ai"></span>
+            </div>
+          </div>
+    </div>
           <div class="hvai-scorebar"><span id="bar-zerogpt"></span></div>
         </div>
         <div class="hvai-pane" id="pane-openai">
-          <div>OpenAI score: <b id="score-openai">—%</b></div>
+          <div class="hvai-line">
+            <div>Human: <b id="score-openai-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-openai-ai">—%</b></div>
+            <div class="hvai-scorebar">
+              <span class="human" id="bar-openai-human"></span>
+              <span class="ai" id="bar-openai-ai"></span>
+            </div>
+          </div>
+    </div>
           <div class="hvai-scorebar"><span id="bar-openai"></span></div>
         </div>
         <div class="hvai-pane" id="pane-gptzero">
-          <div>GPTZero score: <b id="score-gptzero">—%</b></div>
+          <div class="hvai-line">
+            <div>Human: <b id="score-gptzero-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-gptzero-ai">—%</b></div>
+            <div class="hvai-scorebar">
+              <span class="human" id="bar-gptzero-human"></span>
+              <span class="ai" id="bar-gptzero-ai"></span>
+            </div>
+          </div>
+    </div>
           <div class="hvai-scorebar"><span id="bar-gptzero"></span></div>
         </div>
         <div class="hvai-pane" id="pane-copyleaks">
-          <div>Copyleaks score: <b id="score-copyleaks">—%</b></div>
+          <div class="hvai-line">
+            <div>Human: <b id="score-copyleaks-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-copyleaks-ai">—%</b></div>
+            <div class="hvai-scorebar">
+              <span class="human" id="bar-copyleaks-human"></span>
+              <span class="ai" id="bar-copyleaks-ai"></span>
+            </div>
+          </div>
+    </div>
           <div class="hvai-scorebar"><span id="bar-copyleaks"></span></div>
         </div>
         <div class="hvai-pane" id="pane-writerai">
-          <div>Writer score: <b id="score-writerai">—%</b></div>
+          <div class="hvai-line">
+            <div>Human: <b id="score-writerai-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-writerai-ai">—%</b></div>
+            <div class="hvai-scorebar">
+              <span class="human" id="bar-writerai-human"></span>
+              <span class="ai" id="bar-writerai-ai"></span>
+            </div>
+          </div>
+    </div>
           <div class="hvai-scorebar"><span id="bar-writerai"></span></div>
         </div>
         <div class="hvai-pane" id="pane-sapling">
-          <div>Sapling score: <b id="score-sapling">—%</b></div>
+          <div class="hvai-line">
+            <div>Human: <b id="score-sapling-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-sapling-ai">—%</b></div>
+            <div class="hvai-scorebar">
+              <span class="human" id="bar-sapling-human"></span>
+              <span class="ai" id="bar-sapling-ai"></span>
+            </div>
+          </div>
+    </div>
           <div class="hvai-scorebar"><span id="bar-sapling"></span></div>
         </div>
         <div class="hvai-pane" id="pane-ai-content">
@@ -2074,7 +2167,7 @@ window.addEventListener('error', function(e){
   var c = document.getElementById('hvaiTechBg');
   if(!c) return;
   var ctx = c.getContext('2d'), W=0, H=0, dots=[], mouse={x:-999,y:-999};
-  var D=80, N=90; // stronger lines + more nodes
+  var D=110, N=120; // stronger lines + more nodes
   function resize(){
     var r = c.getBoundingClientRect();
     c.width = Math.max(320, Math.floor(r.width));
@@ -2093,7 +2186,7 @@ window.addEventListener('error', function(e){
       var dx=p.x-mouse.x, dy=p.y-mouse.y, dist=Math.sqrt(dx*dx+dy*dy);
       if(dist<D){ p.vx += (dx/dist)*.06; p.vy += (dy/dist)*.06; }
     }
-    ctx.lineWidth=1.6; ctx.strokeStyle='rgba(96,165,250,.85)';
+    ctx.lineWidth=1.8; var t=performance.now()*0.001; var b=Math.floor(80+40*Math.sin(t)); ctx.strokeStyle='rgba(96,165,'+b+',.92)';
     for(var i=0;i<dots.length;i++){
       for(var j=i+1;j<dots.length;j++){
         var a=dots[i], b=dots[j];
@@ -2155,17 +2248,19 @@ function setModelScore(id, v){
       var overall = Math.round((window.__lastScore||0) || (res?.overall||human));
       setModelScore('overall', overall);
 
-      var circ = 2*Math.PI*26;
+      /* v3 dual-lines */ setModelHA('overall', overall, 100-overall);
+var circ = 2*Math.PI*26;
       var mh = document.getElementById('miniHumanProg');
       var ma = document.getElementById('miniAIProg');
       if(mh){ mh.style.strokeDasharray = String(circ); mh.style.strokeDashoffset = String(circ - (circ*human/100)); }
       if(ma){ ma.style.strokeDasharray = String(circ); ma.style.strokeDashoffset = String(circ - (circ*ai/100)); }
 
-      var badge = document.getElementById('hvaiBadge');
+      var mhN=document.getElementById('miniHumanNum'); if(mhN) mhN.textContent = human+'%'; var maN=document.getElementById('miniAINum'); if(maN) maN.textContent = ai+'%';
+var badge = document.getElementById('hvaiBadge');
       if(badge){
         var cls = overall>=80 ? 'good' : overall>=60 ? 'mid' : 'low';
         var icon = overall>=80 ? 'fa-badge-check' : overall>=60 ? 'fa-lightbulb' : 'fa-file-pen';
-        var text = overall>=80 ? 'Passed (≥80)' : overall>=60 ? 'Ask for suggestions (<80)' : 'Rewrite the content (<60)';
+        var text = overall>=80 ? 'Great work' : overall>=60 ? 'Ask for suggestions (<80)' : 'Rewrite the content (<60)';
         badge.className = 'hvai-badge '+(cls);
         badge.innerHTML = '<i class="fa-solid '+icon+'"></i> '+text;
         badge.style.display = 'inline-flex';
@@ -2178,12 +2273,12 @@ function setModelScore(id, v){
         var humanLike = 100 - aiLike;
         return Math.max(0, Math.min(100, humanLike));
       }
-      setModelScore('zerogpt',  getD('zero', overall-3));
-      setModelScore('openai',   getD('openai', overall-2));
-      setModelScore('gptzero',  getD('gptzero', overall-4));
-      setModelScore('copyleaks',getD('copy', overall-1));
-      setModelScore('writerai', getD('writer', overall-5));
-      setModelScore('sapling',  getD('sapling', overall-6));
+      (function(){var h=getD('zero',overall-3); setModelHA('zerogpt',h,100-h);})();
+      (function(){var h=getD('openai',overall-2); setModelHA('openai',h,100-h);})();
+      (function(){var h=getD('gptzero',overall-4); setModelHA('gptzero',h,100-h);})();
+      (function(){var h=getD('copy',overall-1); setModelHA('copyleaks',h,100-h);})();
+      (function(){var h=getD('writer',overall-5); setModelHA('writerai',h,100-h);})();
+      (function(){var h=getD('sapling',overall-6); setModelHA('sapling',h,100-h);})();
 
       var sample = (res?.text||res?.sample||'').trim();
       var lang = (document.getElementById('hvaiLang')?.value)||'en';
@@ -2219,14 +2314,14 @@ function renderFlags(flags){
   if(!flags.length){ box.innerHTML = '<span class="echip misc"><i class="fa-solid fa-circle-check"></i> No AI-like issues flagged.</span>'; return; }
   box.innerHTML = flags.map(function(f,idx){
     var chips = f.reasons.map(r=>'<span class="b">'+r+'</span>').join(' ');
-    return '<div class="hvai-flag"><div><b>#'+(idx+1)+'</b> '+escapeHTML(f.text)+'</div><div class="badges">'+chips+'</div><div><button class="hvai-tab" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button></div></div>';
+    return '<div class="hvai-flag"><div><b>#'+(idx+1)+'</b> '+escapeHTML(f.text)+'</div><div class="badges">'+chips+'</div><div><button class="hvai-suggest-btn" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button></div></div>';
   }).join('');
   box._flags = flags;
 }
 function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
 document.addEventListener('click', function(e){
-  var b = e.target.closest('button.hvai-tab[data-flag]'); if(!b) return;
+  var b = e.target.closest('button.hvai-suggest-btn[data-flag]'); if(!b) return;
   var idx = +b.getAttribute('data-flag');
   var box = document.getElementById('aiFlags'); var flags = (box && box._flags) || [];
   var f = flags[idx]; if(!f) return;
