@@ -451,7 +451,27 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .hvai .hvai-head .ico{ background: linear-gradient(135deg,#60a5fa,#a78bfa,#34d399,#f59e0b); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 10px rgba(99,102,241,.5)); animation: spinPulse 8s linear infinite; }
 @keyframes spinPulse{ 0%{ transform: rotate(0deg);} 100%{ transform: rotate(360deg);} }
 
-</style>
+
+    /* DEBUG badge to confirm the updated view is live */
+    .hvai-version-badge{
+      position: fixed;
+      right: 10px;
+      bottom: 10px;
+      z-index: 9999;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(90deg, #8b5cf6, #06b6d4, #22c55e, #f59e0b, #ef4444);
+      background-size: 300% 100%;
+      animation: badgeShift 2s linear infinite;
+      box-shadow: 0 8px 22px rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.35);
+    }
+    @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
+
+  </style>
 
 <style>
 /* Fallback colorful panel */
@@ -459,7 +479,27 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 radial-gradient(950px 480px at 110% -10%, rgba(167,139,250,.08), transparent 60%),
 radial-gradient(700px 520px at 30% 120%, rgba(52,211,153,.06), transparent 60%),
 rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
-</style>
+
+    /* DEBUG badge to confirm the updated view is live */
+    .hvai-version-badge{
+      position: fixed;
+      right: 10px;
+      bottom: 10px;
+      z-index: 9999;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 999px;
+      color: #fff;
+      background: linear-gradient(90deg, #8b5cf6, #06b6d4, #22c55e, #f59e0b, #ef4444);
+      background-size: 300% 100%;
+      animation: badgeShift 2s linear infinite;
+      box-shadow: 0 8px 22px rgba(0,0,0,.45);
+      border: 1px solid rgba(255,255,255,.35);
+    }
+    @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
+
+  </style>
 
 </head>
 <body>
@@ -1865,5 +1905,6 @@ window.addEventListener('error', function(e){
   document.addEventListener('DOMContentLoaded', wrapHVAI);
 })();
 </script>
+  <div class="hvai-version-badge">HVAI v5 LIVE</div>
 </body>
 </html>
