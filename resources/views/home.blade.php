@@ -631,10 +631,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
 <style>
 /* v3 modal overlay */
-#hvaiModal{
-  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-  background: rgba(4,6,20,.55); backdrop-filter: blur(6px); z-index:9999;
-}
+
 #hvaiModal .box{
   width:min(880px,92vw); max-height:86vh; overflow:auto;
   background: linear-gradient(180deg,rgba(14,17,40,.96),rgba(10,12,32,.96));
@@ -719,29 +716,7 @@ document.addEventListener('click', function(e){
     var f = flags[idx]; if(!f) return;
     var body = document.getElementById('hvaiModalBody');
     var lang = (document.getElementById('hvaiLang')?.value)||'en';
-    var sug = makeSuggestionsFor(f.text, lang);
-    if(body){
-      body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+escapeHTML(f.text)+'</div>' +
-                       '<div><b>Suggestions</b><ul style="margin-top:6px">'+ sug.items.map(x=>'<li>'+x+'</li>').join('') +'</ul></div>' +
-                       (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+escapeHTML(sug.rewrite)+'</div>' : '') +
-                       '</div>';
-      document.getElementById('hvaiModal').style.display='flex';
-    }
-  }
-  var card = e.target.closest('.hvai-flag');
-  if(card && !e.target.closest('button.hvai-suggest-btn')){
-    var idx2 = Array.prototype.indexOf.call((document.getElementById('aiFlags')||document.body).querySelectorAll('.hvai-flag'), card);
-    var btn2 = card.querySelector('button.hvai-suggest-btn');
-    if(btn2 && idx2>=0) btn2.click();
-  }
-});
-document.getElementById('hvaiModalClose')?.addEventListener('click', function(){
-  document.getElementById('hvaiModal').style.display='none';
-});
-document.getElementById('hvaiModal')?.addEventListener('click', function(e){
-  if(e.target.id==='hvaiModal') this.style.display='none';
-});
-</script>
+    var sug = </script>
 
 <!-- Share dock -->
 <div class="share-dock" aria-label="Share">
@@ -987,8 +962,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
       <div class="hvai-tabs" role="tablist" aria-label="AI Detectors">
         <button class="hvai-tab active" data-tab="overall"><i class="fa-solid fa-users-gear"></i> Ensemble</button>
         <button class="hvai-tab" data-tab="ai-content"><i class="fa-solid fa-robot"></i> AI Content</button>
-        <button class="hvai-tab" data-tab="suggestions"><i class="fa-solid fa-wand-magic-sparkles"></i> Suggestions</button>
-      </div>
+        </div>
       
 <div class="hvai-tabpanes">
         <div class="hvai-pane active" id="pane-overall">
@@ -1001,8 +975,6 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
         <div class="hvai-pane" id="pane-ai-content">
           <div id="aiFlags"></div>
         </div>
-        <div class="hvai-pane" id="pane-suggestions">
-          <div id="aiSuggestBox"></div>
         </div>
       </div><div class="det-grid" id="detGrid"></div>
       <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
@@ -1865,7 +1837,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
       if (detNote) detNote.textContent = 'Source: backend multi-detector (ZeroGPT/GPTZero/OriginalityAI if configured; otherwise local on server).';
     } else if (ensemble) {
       applyDetection(ensemble.humanPct, ensemble.aiPct, ensemble.confidence, ensemble);
-      if (detNote) detNote.textContent = 'Source: local ensemble (no external APIs).';
+      if (detNote) detNote.textContent = '';
     } else {
       var hp = (typeof data.humanPct==='number')? data.humanPct : NaN;
       var ap = (typeof data.aiPct==='number')? data.aiPct : NaN;
@@ -2124,6 +2096,23 @@ window.addEventListener('error', function(e){
     const _paint   = window.HVAI_V2.paint;
     const _update  = window.HVAI_V2.update;
     window.HVAI_V2.update = function(res){
+  /* v3 wheels-only */
+  try{
+    var H = hvai_normPercent(res && (res.humanPct||res.human||res.human_like||res.overallHuman||res.overall));
+    if(H===null){
+      var A = hvai_normPercent(res && (res.aiPct||res.ai||res.ai_like||res.overallAI));
+      H = (A!==null) ? (100-A) : (isFinite(window.__lastScore) ? Math.round(window.__lastScore) : 0);
+    }
+    if(typeof setHVAIScore === 'function') setHVAIScore(H);
+    var circ = 2*Math.PI*26;
+    var mh = document.getElementById('miniHumanProg');
+    var ma = document.getElementById('miniAIProg');
+    if(mh){ mh.style.strokeDasharray = String(circ); mh.style.strokeDashoffset = String(circ - (circ*H/100)); }
+    if(ma){ var A2 = 100-H; ma.style.strokeDasharray = String(circ); ma.style.strokeDashoffset = String(circ - (circ*A2/100)); }
+    var mhN = document.getElementById('miniHumanNum'); if(mhN) mhN.textContent = H + '%';
+    var maN = document.getElementById('miniAINum');   if(maN) maN.textContent = (100-H) + '%';
+  }catch(e){}
+
   
   
   /* v3: robust mapping */
@@ -2492,7 +2481,7 @@ function renderFlags(flags){
   return '<div class="hvai-flag" data-idx="'+idx+'">'
     + '<div><b>#'+(idx+1)+'</b> '+escapeHTML(f.text)+'</div>'
     + '<div class="badges">'+chips+'</div>'
-    + '<div><button class="hvai-suggest-btn" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button></div>'
+    + '<div></div>'
     + '</div>';
 }).join('');
   box._flags = flags;
@@ -2506,30 +2495,7 @@ document.addEventListener('click', function(e){
   var f = flags[idx]; if(!f) return;
   var body = document.getElementById('hvaiModalBody');
   var lang = (document.getElementById('hvaiLang')?.value)||'en';
-  var sug = makeSuggestionsFor(f.text, lang);
-  body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+escapeHTML(f.text)+'</div>'+
-                   '<div><b>Suggestions</b><ul style="margin-top:6px">'+ sug.items.map(x=>'<li>'+x+'</li>').join('') +'</ul></div>'+
-                   (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+escapeHTML(sug.rewrite)+'</div>' : '')+
-                   '</div>';
-  document.getElementById('hvaiModal').style.display='flex';
-});
-document.addEventListener('click', function(e){
-  var b = e.target.closest('#hvaiBadge'); if(!b) return;
-  var isMid = b.classList.contains('mid'); var isLow = b.classList.contains('low');
-  var sugBtn = document.querySelector('.hvai-tab[data-tab="suggestions"]'); sugBtn && sugBtn.click();
-  if(isLow){ var first = document.querySelector('button.hvai-tab[data-flag]'); first && first.click(); }
-});
-document.getElementById('hvaiModalClose')?.addEventListener('click', function(){ document.getElementById('hvaiModal').style.display='none'; });
-document.getElementById('hvaiModal')?.addEventListener('click', function(e){ if(e.target.id==='hvaiModal') this.style.display='none'; });
-
-function makeSuggestionsFor(text, lang){
-  var L = (window.I18N && window.I18N[lang]) || (window.I18N && window.I18N.en) || {};
-  var items = (L.s_ai_high || []).concat(L.s_style_flat||[]).slice(0,6);
-  var rw = text.replace(/\b(in conclusion|overall|moreover|furthermore),?\b/gi, '').replace(/\s{2,}/g,' ');
-  if(rw.length>160) rw = rw.split(/[,;:—-]/).slice(0,2).join('. ').trim();
-  return {items: items.length?items:[ "Vary sentence length and rhythm.","Swap generic words for concrete details.","Trim filler and hedging phrases.","Use an example or mini-story."], rewrite: rw};
-}
-</script>
+  var sug = </script>
 
 <script>
 /* v3 patch: hydrate after DOM */
@@ -2641,16 +2607,7 @@ document.addEventListener('click', function(e){
   // Build suggestions
   var body = document.getElementById('hvaiModalBody');
   var lang = (document.getElementById('hvaiLang')?.value)||'en';
-  var sug = (typeof makeSuggestionsFor==='function') ? makeSuggestionsFor(raw, lang) : {items:[], rewrite:''};
-  if(body){
-    body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+escapeHTML(raw)+'</div>' +
-                     '<div><b>Suggestions</b><ul style="margin-top:6px">'+ (sug.items||[]).map(x=>'<li>'+x+'</li>').join('') +'</ul></div>' +
-                     (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+escapeHTML(sug.rewrite)+'</div>' : '') +
-                     '</div>';
-    document.getElementById('hvaiModal').style.display='flex';
-  }
-});
-</script>
+  var sug = (typeof </script>
 
 <script>
 /* v3 minis hydrate */
@@ -2722,17 +2679,7 @@ document.addEventListener('DOMContentLoaded', function(){
 </script>
 
 <script>
-function hvaiSwitchTab(id){
-  try{
-    document.querySelectorAll('.hvai-tab').forEach(function(b){ b.classList.remove('active'); });
-    document.querySelectorAll('.hvai-pane').forEach(function(p){ p.classList.remove('active'); });
-    var btn = document.querySelector('.hvai-tab[data-tab="'+id+'"]');
-    var pane = document.getElementById('pane-'+id);
-    if(btn) btn.classList.add('active');
-    if(pane) pane.classList.add('active');
-  }catch(e){}
-}
-</script>
+function </script>
 
 <script>
 /* hvai unified improve handler */
@@ -2742,26 +2689,7 @@ function hvaiOpenSuggestion(idx){
   var f = flags[idx]; if(!f) return;
   var body = document.getElementById('hvaiModalBody');
   var lang = (document.getElementById('hvaiLang')?.value)||'en';
-  var sug = makeSuggestionsFor(f.text, lang);
-  if(body){
-    body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+escapeHTML(f.text)+'</div>' +
-                     '<div><b>Suggestions</b><ul style="margin-top:6px">'+ (sug.items||[]).map(x=>'<li>'+x+'</li>').join('') +'</ul></div>' +
-                     (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+escapeHTML(sug.rewrite)+'</div>' : '') +
-                     '</div>';
-    document.getElementById('hvaiModal').style.display='flex';
-  }
-  hvaiSwitchTab('suggestions');
-}
-document.addEventListener('click', function(e){
-  var btn = e.target.closest('button.hvai-suggest-btn[data-flag]');
-  if(btn){ hvaiOpenSuggestion(+btn.getAttribute('data-flag')); return; }
-  var card = e.target.closest('.hvai-flag');
-  if(card && !e.target.closest('button.hvai-suggest-btn')){
-    var idx = +card.getAttribute('data-idx');
-    hvaiOpenSuggestion(idx);
-  }
-});
-</script>
+  var sug = </script>
 
 <script>
 /* hvai flags mirror hydrate */
@@ -2777,118 +2705,37 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 </script>
 
+
 <script>
 window.renderFlags = function(flags){
   var box = document.getElementById('aiFlags');
-  var sbox = document.getElementById('aiSuggestBox');
   var empty = '<span class="echip misc"><i class="fa-solid fa-circle-check"></i> No AI-like issues flagged.</span>';
-  if(!box){ return; }
+  if(!box) return;
   flags = Array.isArray(flags) ? flags : [];
-  if(!flags.length){
-    box.innerHTML = empty;
-    if(sbox) sbox.innerHTML = empty;
-    box._flags = [];
-    return;
-  }
-  function cardHTML(f, idx, compact){
-    var chips = (f.reasons||[]).map(function(r){ return '<span class="b">'+window.escapeHTML(String(r))+'</span>'; }).join(' ');
-    if(compact){
-      return '<div class="hvai-flag" data-idx="'+idx+'">'
-           + '  <div style="margin-bottom:6px"><b>#'+(idx+1)+'</b> '+window.escapeHTML(String(f.text||""))+'</div>'
-           + '  <button class="hvai-suggest-btn" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button>'
-           + '</div>';
-    }
+  if(!flags.length){ box.innerHTML = empty; box._flags = []; return; }
+  box.innerHTML = flags.map(function(f,idx){
+    var chips = (f.reasons||[]).map(function(r){ return '<span class="b">'+(String(r).replace(/[&<>"]/g, function(m){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]);}))+'</span>'; }).join(' ');
+    var txt = (String(f.text||'').replace(/[&<>"]/g, function(m){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]);}));
     return '<div class="hvai-flag" data-idx="'+idx+'">'
-         + '  <div><b>#'+(idx+1)+'</b> '+window.escapeHTML(String(f.text||""))+'</div>'
+         + '  <div><b>#'+(idx+1)+'</b> '+txt+'</div>'
          + '  <div class="badges">'+chips+'</div>'
-         + '  <div><button class="hvai-suggest-btn" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button></div>'
          + '</div>';
-  }
-  box.innerHTML = flags.map(function(f, idx){ return cardHTML(f, idx, false); }).join('');
-  if(sbox){ sbox.innerHTML = flags.map(function(f, idx){ return cardHTML(f, idx, true); }).join(''); }
+  }).join('');
   box._flags = flags;
 };
 </script>
 
+
 <script>
 (function(){
-  if(window.__HVAIV3_WIRED) return; window.__HVAIV3_WIRED = true;
-
-  function openModalForIndex(idx){
-    var box = document.getElementById('aiFlags');
-    var flags = (box && box._flags) || [];
-    var f = flags[idx]; if(!f) return;
-    var body = document.getElementById('hvaiModalBody');
-    var langEl = document.getElementById('hvaiLang');
-    var lang = langEl ? langEl.value : 'en';
-    var sug = window.makeSuggestionsFor(f.text, lang);
-    if(body){
-      body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+window.escapeHTML(String(f.text||""))+'</div>' +
-                       '<div><b>Suggestions</b><ul style="margin-top:6px">'+ (sug.items||[]).map(function(x){return '<li>'+x+'</li>';}).join('') +'</ul></div>' +
-                       (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+window.escapeHTML(String(sug.rewrite||""))+'</div>' : '') +
-                       '</div>';
-      document.getElementById('hvaiModal').style.display='flex';
-      window.hvaiSwitchTab('suggestions');
-    }
-  }
-
-  document.addEventListener('click', function(e){
-    var btn = e.target.closest && e.target.closest('button.hvai-suggest-btn[data-flag]');
-    if(btn){ var idx = +btn.getAttribute('data-flag'); openModalForIndex(idx); return; }
-    var card = e.target.closest && e.target.closest('.hvai-flag');
-    if(card && !e.target.closest('button.hvai-suggest-btn')){
-      var idx2 = +card.getAttribute('data-idx');
-      openModalForIndex(idx2);
-    }
-  }, false);
-})();
-</script>
+  if(window.</script>
 
 <script>
 window.hvai = window.hvai || {};
 if(!window.escapeHTML){
   window.escapeHTML = function(s){ return (s||'').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); }); };
 }
-if(typeof window.makeSuggestionsFor !== 'function'){
-  window.makeSuggestionsFor = function(text, lang){
-    var tips = [
-      "Shorten long sentences into 1–2 concise lines.",
-      "Swap generic terms for concrete nouns and verbs.",
-      "Remove hedging like 'overall', 'in conclusion', 'as an AI'.",
-      "Add an example or specific detail to ground the point."
-    ];
-    var r = String(text||'').replace(/\b(in conclusion|overall|moreover|furthermore),?\b/gi, '').replace(/\s{2,}/g,' ');
-    if(r.length>160) r = r.split(/[,;:—-]/).slice(0,2).join('. ').trim();
-    return { items: tips, rewrite: r };
-  };
-}
-if(typeof window.hvaiSwitchTab !== 'function'){
-  window.hvaiSwitchTab = function(id){
-    try{
-      var tabs = document.querySelectorAll('.hvai-tab'); for(var i=0;i<tabs.length;i++){ tabs[i].classList.remove('active'); }
-      var panes = document.querySelectorAll('.hvai-pane'); for(var j=0;j<panes.length;j++){ panes[j].classList.remove('active'); }
-      var b = document.querySelector('.hvai-tab[data-tab="'+id+'"]'); if(b) b.classList.add('active');
-      var p = document.getElementById('pane-'+id); if(p) p.classList.add('active');
-    }catch(e){}
-  };
-}
-if(typeof window.hvaiOpenSuggestion !== 'function'){
-  window.hvaiOpenSuggestion = function(txt){
-    var body = document.getElementById('hvaiModalBody');
-    var langEl = document.getElementById('hvaiLang');
-    var lang = langEl ? langEl.value : 'en';
-    var sug = window.makeSuggestionsFor(txt, lang);
-    if(body){
-      body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+window.escapeHTML(String(txt||""))+'</div>' +
-                       '<div><b>Suggestions</b><ul style="margin-top:6px">'+ (sug.items||[]).map(function(x){return '<li>'+x+'</li>';}).join('') +'</ul></div>' +
-                       (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+window.escapeHTML(String(sug.rewrite||""))+'</div>' : '') +
-                       '</div>';
-      document.getElementById('hvaiModal').style.display='flex';
-      window.hvaiSwitchTab('suggestions');
-    }
-  };
-}
-</script>
+if(typeof window.</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
@@ -2898,6 +2745,18 @@ document.addEventListener('DOMContentLoaded', function(){
       if(box && Array.isArray(box._flags) && box._flags.length){ window.renderFlags(box._flags); }
     }catch(e){}
   }, 120);
+});
+</script>
+
+<script>
+/* v3 wheels hydrate */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    try{
+      var res = window.__lastDet || { humanPct: (window.__lastScore||0) };
+      if(window.HVAI_V2 && typeof window.HVAI_V2.update==='function') window.HVAI_V2.update(res);
+    }catch(e){}
+  }, 80);
 });
 </script>
 </body>
