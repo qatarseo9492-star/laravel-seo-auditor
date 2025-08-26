@@ -760,6 +760,15 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   .prism-wheel .kv .dot.ai{background:#7c5bff}
   .prism-wheel .kv .dot.h{background:#00f5c4}
   .hvai.hvai-v22 .wheel > *:not(.prism-wheel){ display:none !important; }
+  
+  /* Improve panel */
+  .hvai.hvai-v22 .improve{margin-top:16px; padding:14px; border-radius:14px; background:linear-gradient(180deg, rgba(0,255,200,.06), rgba(0,140,255,.05)); border:1px solid rgba(255,255,255,.10)}
+  .hvai.hvai-v22 .improve.hidden{display:none}
+  .hvai.hvai-v22 .improve-head{font:800 15px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; margin-bottom:8px}
+  .hvai.hvai-v22 .improve-list{margin:0; padding-left:16px}
+  .hvai.hvai-v22 .improve-list li{margin:6px 0; line-height:1.35}
+  .hvai.hvai-v22 .chip{display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(255,255,255,.08); margin-left:6px; font-weight:700; font-size:12px}
+
   </style>
 
   <div class="tech" aria-hidden="true"></div>
@@ -780,7 +789,13 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
         <div class="bar" data-key="repetition"><div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div><div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div></div>
         <div class="bar" data-key="entropy"><div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div><div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div></div>
       </div>
+      
+      <div id="hvaiImprove" class="improve hidden" aria-live="polite">
+        <div class="improve-head">How to raise your score</div>
+        <ul class="improve-list" id="hvaiImproveList"></ul>
+      </div>
       <small>Source: local ensemble (no external APIs).</small>
+    
     </div>
 
     <div class="wheel">
@@ -794,6 +809,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     </div>
   </div>
 
+  
   <script>
   (function(){
     var confLocked=false;
@@ -802,10 +818,90 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     function setConfidence(v){ var el=document.getElementById('hvaiConf'); if(el) el.textContent=clamp(v); }
     function deriveConfFromAI(pAI){ return 60 + (Math.abs(50 - pAI) / 50) * 30; }
     function updateBars(subs){ if(!subs) return; var map=[['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],['hvaiBarLex','hvaiValLex', subs.lexical],['hvaiBarBurst','hvaiValBurst', subs.burst],['hvaiBarDigits','hvaiValDigits', subs.digits],['hvaiBarRep','hvaiValRep', subs.repetition],['hvaiBarEnt','hvaiValEnt', subs.entropy],]; map.forEach(function(r){ var f=document.getElementById(r[0]); var n=document.getElementById(r[1]); var v=clamp(r[2]); if(f) f.style.width=v+'%'; if(n) n.textContent=v; }); }
-    function deriveSubs(pAI){ var h=100-pAI, c=v=>Math.max(0,Math.min(100,Math.round(v))); return { humanLike:c(h), lexical:c(35+h*0.55), burst:c(25+h*0.7), digits:c(10+(100-h)*0.3), repetition:c(60-h*0.4), entropy:c(35+h*0.45) }; }
-    window.updateHVAIScore=function(pAI){ var p=clamp(pAI), h=100-p; var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p); var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p; var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h; setBadge(h); if(!confLocked) setConfidence(deriveConfFromAI(p)); updateBars(deriveSubs(p)); };
-    function detectUltra(text){ text=(text||'').replace(/\s+/g,' ').trim(); var len=text.length; if(len<40) return {ai:0,conf:60,subs:deriveSubs(0)}; var s=text.split(/(?<=[.!?])\s+/).filter(Boolean); var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]); var types=new Set(t); var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100; var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;} var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100; var sl=s.map(x=>(x.match(/\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length); var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100; var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; } for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100; var digits=(text.match(/\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100; function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\b/gi)||[]).length+(w.match(/le\b/gi)?1:0));} var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words)); var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100; var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15; var ai=Math.max(0,Math.min(100,100-human)); var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) }; var varSignals=[ttrS,repS,burstS,entS,digS,readS]; var mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length; var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length; var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10)); return {ai:Math.round(ai), conf:Math.round(conf), subs}; }
-    window.hvaiCompute=function(text){ try{ var r=detectUltra(text||''); confLocked=true; updateHVAIScore(r.ai); updateBars(r.subs); setConfidence(r.conf); return r; }catch(e){ console.warn('hvaiCompute error',e); return null; } };
+
+    // Build targeted improvement tips based on subscores
+    function buildImprovements(subs){
+      var tips=[], h=subs.humanLike||0;
+      function add(t){ if(t) tips.push(t); }
+      if(h<80) add('Overall Human-like is ' + h + '%. Aim for ≥ 80 by applying the tips below.');
+
+      if(subs.lexical < 75) add('Lexical Diversity is low ('+subs.lexical+'%). Add domain-specific terms, vary nouns/verbs, and avoid repeating the same phrases.');
+      if(subs.burst   < 70) add('Burstiness is low ('+subs.burst+'%). Mix sentence lengths: add a few short punchy lines and a few longer, detailed ones.');
+      if(subs.repetition < 70) add('Repetition (3‑gram) is high ('+subs.repetition+'%). Rephrase repeated 3‑word chunks and merge near-duplicate sentences.');
+      if(subs.entropy < 70) add('Character Entropy is low ('+subs.entropy+'%). Use more varied punctuation, numbers where meaningful, and specific names or examples.');
+      if(subs.digits  > 80) add('Digits Density is unusual ('+subs.digits+'%). Reduce unnecessary numbers, keep only data that adds value.');
+
+      // If everything is fine but Human-like still <80, suggest adding personal context
+      if(tips.length<=1 && h<80) add('Add concrete examples, personal/brand perspective, and context only a human author would know.');
+
+      return tips.slice(0,8);
+    }
+
+    function showImprovements(subs){
+      var box = document.getElementById('hvaiImprove');
+      var ul  = document.getElementById('hvaiImproveList');
+      if(!box || !ul) return;
+      var tips = buildImprovements(subs||{});
+      ul.innerHTML = '';
+      tips.forEach(function(t){ var li=document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+      box.classList.toggle('hidden', !( (subs.humanLike||0) < 80 || tips.length>0 ));
+    }
+
+    function deriveSubs(pAI){
+      var h=100-pAI, c=v=>Math.max(0,Math.min(100,Math.round(v)));
+      return { humanLike:c(h), lexical:c(35+h*0.55), burst:c(25+h*0.7), digits:c(10+(100-h)*0.3), repetition:c(60-h*0.4), entropy:c(35+h*0.45) };
+    }
+
+    window.updateHVAIScore=function(pAI){
+      var p=clamp(pAI), h=100-p;
+      var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p);
+      var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p;
+      var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h;
+      setBadge(h);
+      if(!confLocked) setConfidence(deriveConfFromAI(p));
+      var subs = deriveSubs(p);
+      updateBars(subs);
+      showImprovements(subs);
+    };
+
+    function detectUltra(text){
+      text=(text||'').replace(/\s+/g,' ').trim();
+      var len=text.length; if(len<40) return {ai:0,conf:60,subs:deriveSubs(0)};
+      var s=text.split(/(?<=[.!?])\s+/).filter(Boolean);
+      var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]);
+      var types=new Set(t);
+      var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100;
+      var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;}
+      var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100;
+      var sl=s.map(x=>(x.match(/\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length);
+      var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100;
+      var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; }
+      for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100;
+      var digits=(text.match(/\\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100;
+      function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));}
+      var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words)); var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100;
+      var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15;
+      var ai=Math.max(0,Math.min(100,100-human));
+      var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) };
+      var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
+      var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length;
+      var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10));
+      return {ai:Math.round(ai), conf:Math.round(conf), subs};
+    }
+
+    window.hvaiCompute=function(text){
+      try{
+        var r=detectUltra(text||'');
+        confLocked=true;
+        updateHVAIScore(r.ai);
+        updateBars(r.subs);
+        setConfidence(r.conf);
+        showImprovements(r.subs);
+        return r;
+      }catch(e){ console.warn('hvaiCompute error',e); return null; }
+    };
+
+    // init
     updateHVAIScore(0);
   })();
   </script>
