@@ -888,7 +888,13 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
         <div class="label"><span class="rainbow">Human vs AI Content (Ensemble)</span></div>
       </div>
 
-      <div id="hvaiStatus" class="status neutral" aria-live="polite"><span class="msg">Waiting for analysis…</span> <span id="hvaiRewrite" class="rewrite-badge" style="display:none">Rewrite the Content</span></div>
+      <div id="hvaiStatus" class="status neutral" aria-live="polite">
+      <span class="status-badge">
+        <span class="status-glow" aria-hidden="true"></span>
+        <span class="status-ico" aria-hidden="true">⌛</span>
+        <span class="status-txt">Waiting for analysis…</span>
+      </span>
+    </div>
       <div class="badges">
         <div class="badge"><strong>🛡️ Confidence:</strong> <span id="hvaiConf">0</span>%</div>
         <div class="badge">ℹ️ Higher bar = more AI-like</div>
@@ -907,15 +913,15 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
     <!-- RIGHT: Dual-ring wheel -->
     <div class="hvai-wheel-wrap" aria-hidden="false">
-      <div class="hvai-wheel-track ring-track"></div>
-      <div class="hvai-arc-ai ring-gradient" id="hvaiArcAI"></div>
-      <div class="hvai-arc-human inner-human" id="hvaiArcHuman"></div>
-      <div class="hvai-glow aurora" aria-hidden="true"></div>
-      <div class="hvai-ticks ring-ticks"></div>
-      <div class="hvai-stripes" aria-hidden="true"></div>
-      <div class="hvai-spark" aria-hidden="true"></div>
-      <div class="hvai-sweep" aria-hidden="true"></div>
-      <div class="hvai-wheel-center">
+      <!-- Bleeding Colors Wheel -->
+      <div class="wheel-bleed-base"></div>
+      <div class="wheel-bleed-ink"></div>
+      <div class="wheel-bleed-spread"></div>
+      <div class="wheel-bleed-drops"></div>
+      <div class="wheel-bleed-bloom"></div>
+      <div class="wheel-bleed-spark"></div>
+      <div class="wheel-bleed-sweep"></div>
+<div class="hvai-wheel-center">
         <div class="kv">
           <div class="row"><span class="pill"><span class="dot ai"></span>AI‑like</span> <span class="val"><span id="hvaiAIVal">0</span><sup>%</sup></span></div>
           <div class="row"><span class="pill"><span class="dot human"></span>Human‑like</span> <span class="val"><span id="hvaiHumanVal">0</span><sup>%</sup></span></div>
@@ -927,164 +933,130 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   
   
   
+  
   <script>
-  // HVAI v13 bootstrap
-  (function(){
-    try{
-      console.log('%cHVAI v13 loaded','background:linear-gradient(90deg,#1aa6ff,#9659ff);color:#fff;padding:4px 8px;border-radius:6px;');
-    }catch(_){}
-  })();
-
-  // Threshold badge/status logic
-  function setStatus(humanPct){
+  // ===== v15: Badge thresholds + wheel-bar sync =====
+  function setStatusByHuman(humanPct){
     var st = document.getElementById('hvaiStatus');
     if(!st) return;
-    var msg = st.querySelector('.msg');
-    var rb  = document.getElementById('hvaiRewrite');
+    var txt = st.querySelector('.status-txt');
+    var ico = st.querySelector('.status-ico');
     st.classList.remove('neutral','good','warn','bad');
     if(humanPct >= 80){
-      st.classList.add('good'); if(msg) msg.textContent = 'Great Work'; if(rb) rb.style.display = 'none';
+      st.classList.add('good');
+      if(txt) txt.textContent = 'Great Work';
+      if(ico) ico.textContent = '✅';
     }else if(humanPct >= 60){
-      st.classList.add('warn'); if(msg) msg.textContent = 'Need More Hard Work'; if(rb) rb.style.display = 'none';
+      st.classList.add('warn');
+      if(txt) txt.textContent = 'Need More Hard work on content';
+      if(ico) ico.textContent = '🟡';
     }else{
-      st.classList.add('bad');  if(msg) msg.textContent = 'Need More Hard Work'; if(rb) rb.style.display = 'inline-flex';
+      st.classList.add('bad');
+      if(txt) txt.textContent = 'Needs Rewrite the Content';
+      if(ico) ico.textContent = '✍️';
     }
   }
 
-  // Update visuals (dual-ring wheel + human bar)
+  // Visual updater from percent (keeps bars in sync for Human-like; others wait for hvaiCompute)
   window.updateHVAIScore = function(pctAI){
     var p = Math.max(0, Math.min(100, Math.round(pctAI)));
     var pH = 100 - p;
     var root = document.querySelector('#hvai');
     if(root){ root.style.setProperty('--p', p); root.style.setProperty('--pH', pH); }
+    // center numbers
     var a = document.getElementById('hvaiAIVal'); if(a) a.textContent = p;
     var h = document.getElementById('hvaiHumanVal'); if(h) h.textContent = pH;
+    // human-like bar mirrors wheel
     var hb = document.getElementById('hvaiBarHuman'); if(hb) hb.style.width = pH+'%';
     var hNum = document.getElementById('hvaiValHumanBar'); if(hNum) hNum.textContent = Math.round(pH);
-    setStatus(pH);
+    // threshold badge
+    setStatusByHuman(pH);
   };
 
-  function detectUltra(text){
-    text = (text||'').replace(/\s+/g,' ').trim();
-    var len = text.length; if(len < 40) return { ai:0, human:0, conf:0, subs:null };
-    var sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
-    var tokens = text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g) || [];
-    var types = new Set(tokens);
-    var ttr = types.size / Math.max(1, tokens.length);
-    var ttrScore = (1 - Math.abs(0.52 - Math.min(0.95, ttr))/0.52) * 100;
-    var tri = {}; for(let i=0;i<tokens.length-2;i++){ let g=tokens.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1; }
-    var repeatedTri = Object.values(tri).filter(v=>v>1).length;
-    var repRatio = repeatedTri / Math.max(1, Object.keys(tri).length);
-    var repScore = (1 - Math.min(0.6, repRatio)/0.6) * 100;
-    var sl = sentences.map(s=> (s.match(/\w+/g)||[]).length );
-    var avgSL = sl.reduce((a,b)=>a+b,0) / Math.max(1, sl.length);
-    var sdSL = Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avgSL,2),0)/Math.max(1, sl.length));
-    var cov = avgSL ? sdSL/avgSL : 0;
-    var burstScore = Math.min(1, cov/0.8) * 100;
-    var freq = {}; for (let ch of text) { if(ch < ' ' || ch > '~') continue; freq[ch]=(freq[ch]||0)+1; }
-    var H=0, N=Object.values(freq).reduce((a,b)=>a+b,0)||1;
-    for (let k in freq){ let p=freq[k]/N; H += -p*Math.log2(p); }
-    var entScore = (1 - Math.abs(3.8 - Math.min(6.0, H))/3.8) * 100;
-    var sw = new Set(['the','and','of','to','a','in','is','it','that','for','on','you','with','as','are','this','be','or','by','an','from','at','have','not','was','but','they','we','can','if','will','your','about']);
-    var swCount = tokens.filter(t=>sw.has(t)).length;
-    var swRatio = swCount / Math.max(1, tokens.length);
-    var swScore = (1 - Math.abs(0.42 - Math.min(0.9, swRatio))/0.42) * 100;
-    var digits = (text.match(/\d/g)||[]).length / Math.max(1, len);
-    var digScore = (1 - Math.max(0, 0.06 - digits)/0.06) * 100;
-    function syllables(w){ return Math.max(1, (w.match(/[aeiouy]+/gi)||[]).length - (w.match(/(?:e|ed|es)\b/gi)||[]).length + (w.match(/le\b/gi)?1:0)); }
-    var words = tokens.length || 1;
-    var syls = tokens.reduce((a,w)=>a+syllables(w),0);
-    var FRE = 206.835 - (1.015 * (words/Math.max(1, sentences.length))) - (84.6 * (syls/words));
-    var readScore = (1 - Math.abs(60 - Math.max(0, Math.min(100, FRE))) / 60) * 100;
-    var weights = { ttr:.18, rep:.15, burst:.18, ent:.12, sw:.12, dig:.10, read:.15 };
-    var humanComposite = ttrScore*weights.ttr + repScore*weights.rep + burstScore*weights.burst + entScore*weights.ent + swScore*weights.sw + digScore*weights.dig + readScore*weights.read;
-    var aiLike = Math.max(0, Math.min(100, 100 - humanComposite));
-    var varSignals = [ttrScore, repScore, burstScore, entScore, swScore, digScore, readScore];
-    var mean = varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
-    var variance = varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length;
-    var conf = Math.max(50, Math.min(98, 60 + Math.log10(len+1)*8 + Math.sqrt(variance)/10));
-    return { ai: Math.round(aiLike), human: Math.round(100 - aiLike), conf: Math.round(conf),
-      subs:{ humanLike: Math.round(humanComposite), lexical: Math.round(ttrScore), burst: Math.round(burstScore), digits: Math.round(digScore), repetition: Math.round(repScore), entropy: Math.round(entScore) } };
-  }
-
-  function updateBars(subs){
-    if(!subs) return;
-    var fields = [
-      ['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],
-      ['hvaiBarLex','hvaiValLex', subs.lexical],
-      ['hvaiBarBurst','hvaiValBurst', subs.burst],
-      ['hvaiBarDigits','hvaiValDigits', subs.digits],
-      ['hvaiBarRep','hvaiValRep', subs.repetition],
-      ['hvaiBarEnt','hvaiValEnt', subs.entropy],
-    ];
-    for (var i=0;i<fields.length;i++){
-      var fill = document.getElementById(fields[i][0]);
-      var num  = document.getElementById(fields[i][1]);
-      var val  = Math.max(0, Math.min(100, Math.round(fields[i][2]||0)));
-      if(fill) fill.style.width = val + '%';
-      if(num)  num.textContent = val;
+  // Keep detectUltra + hvaiCompute if present (from previous versions). If they exist, don't override.
+  if(typeof detectUltra !== 'function'){
+    function detectUltra(text){
+      text = (text||'').replace(/\s+/g,' ').trim();
+      var len = text.length; if(len < 40) return { ai:0, human:0, conf:0, subs:null };
+      var sentences = text.split(/(?<=[.!?])\s+/).filter(Boolean);
+      var tokens = text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g) || [];
+      var types = new Set(tokens);
+      var ttr = types.size / Math.max(1, tokens.length);
+      var ttrScore = (1 - Math.abs(0.52 - Math.min(0.95, ttr))/0.52) * 100;
+      var tri = {}; for(let i=0;i<tokens.length-2;i++){ let g=tokens.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1; }
+      var repeatedTri = Object.values(tri).filter(v=>v>1).length;
+      var repRatio = repeatedTri / Math.max(1, Object.keys(tri).length);
+      var repScore = (1 - Math.min(0.6, repRatio)/0.6) * 100;
+      var sl = sentences.map(s=> (s.match(/\w+/g)||[]).length );
+      var avgSL = sl.reduce((a,b)=>a+b,0) / Math.max(1, sl.length);
+      var sdSL = Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avgSL,2),0)/Math.max(1, sl.length));
+      var cov = avgSL ? sdSL/avgSL : 0;
+      var burstScore = Math.min(1, cov/0.8) * 100;
+      var freq = {}; for (let ch of text) { if(ch < ' ' || ch > '~') continue; freq[ch]=(freq[ch]||0)+1; }
+      var H=0, N=Object.values(freq).reduce((a,b)=>a+b,0)||1;
+      for (let k in freq){ let p=freq[k]/N; H += -p*Math.log2(p); }
+      var entScore = (1 - Math.abs(3.8 - Math.min(6.0, H))/3.8) * 100;
+      var sw = new Set(['the','and','of','to','a','in','is','it','that','for','on','you','with','as','are','this','be','or','by','an','from','at','have','not','was','but','they','we','can','if','will','your','about']);
+      var swCount = tokens.filter(t=>sw.has(t)).length;
+      var swRatio = swCount / Math.max(1, tokens.length);
+      var swScore = (1 - Math.abs(0.42 - Math.min(0.9, swRatio))/0.42) * 100;
+      var digits = (text.match(/\d/g)||[]).length / Math.max(1, len);
+      var digScore = (1 - Math.max(0, 0.06 - digits)/0.06) * 100;
+      function syllables(w){ return Math.max(1, (w.match(/[aeiouy]+/gi)||[]).length - (w.match(/(?:e|ed|es)\b/gi)||[]).length + (w.match(/le\b/gi)?1:0)); }
+      var words = tokens.length || 1;
+      var syls = tokens.reduce((a,w)=>a+syllables(w),0);
+      var FRE = 206.835 - (1.015 * (words/Math.max(1, sentences.length))) - (84.6 * (syls/words));
+      var readScore = (1 - Math.abs(60 - Math.max(0, Math.min(100, FRE))) / 60) * 100;
+      var weights = { ttr:.18, rep:.15, burst:.18, ent:.12, sw:.12, dig:.10, read:.15 };
+      var humanComposite = ttrScore*weights.ttr + repScore*weights.rep + burstScore*weights.burst + entScore*weights.ent + swScore*weights.sw + digScore*weights.dig + readScore*weights.read;
+      var aiLike = Math.max(0, Math.min(100, 100 - humanComposite));
+      var varSignals = [ttrScore, repScore, burstScore, entScore, swScore, digScore, readScore];
+      var mean = varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
+      var variance = varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length;
+      var conf = Math.max(50, Math.min(98, 60 + Math.log10(len+1)*8 + Math.sqrt(variance)/10));
+      return { ai: Math.round(aiLike), human: Math.round(100 - aiLike), conf: Math.round(conf),
+        subs:{ humanLike: Math.round(100 - aiLike), lexical: Math.round(ttrScore), burst: Math.round(burstScore), digits: Math.round(digScore), repetition: Math.round(repScore), entropy: Math.round(entScore) } };
     }
   }
 
-  // Public API
+  if(typeof updateBars !== 'function'){
+    function updateBars(subs){
+      if(!subs) return;
+      var fields = [
+        ['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],
+        ['hvaiBarLex','hvaiValLex', subs.lexical],
+        ['hvaiBarBurst','hvaiValBurst', subs.burst],
+        ['hvaiBarDigits','hvaiValDigits', subs.digits],
+        ['hvaiBarRep','hvaiValRep', subs.repetition],
+        ['hvaiBarEnt','hvaiValEnt', subs.entropy],
+      ];
+      for (var i=0;i<fields.length;i++){
+        var fill = document.getElementById(fields[i][0]);
+        var num  = document.getElementById(fields[i][1]);
+        var val  = Math.max(0, Math.min(100, Math.round(fields[i][2]||0)));
+        if(fill) fill.style.width = val + '%';
+        if(num)  num.textContent = val;
+      }
+    }
+  }
+
+  // Public API (kept)
   window.hvaiCompute = function(text){
     try{
       var r = detectUltra(text||'');
-      updateHVAIScore(r.ai);
-      updateBars(r.subs);
+      updateHVAIScore(r.ai);         // ensures wheel + human-like bar + badge
+      updateBars(r.subs);            // ensures other bars reflect subscores
       var c = document.getElementById('hvaiConf'); if(c) c.textContent = r.conf;
       return r;
     }catch(e){ console.warn('HVAI compute error', e); return null; }
   };
 
-  // Expanded watchers: try many typical result containers
-  (function(){
-    var sels = [
-      '#analysisResults','.analysis-results','#results','.results','#output','.output','#report','.report',
-      '#contentPreview','.content-preview','.report-body','main','article'
-    ];
-    var targets = []; for(var i=0;i<sels.length;i++){ var el = document.querySelector(sels[i]); if(el) targets.push(el); }
-    if(targets.length){
-      var seenOnce = false;
-      var mo = new MutationObserver(function(){
-        if(seenOnce) return;
-        for(var el of targets){
-          var txt = (el.innerText||'').replace(/\s+/g,' ').trim();
-          if(txt && txt.length > 120){
-            seenOnce = true;
-            hvaiCompute(txt);
-            break;
-          }
-        }
-      });
-      targets.forEach(t=>mo.observe(t, {subtree:true, childList:true, characterData:true}));
-    }
-  })();
-
-  // Analyze button fallback
-  (function(){
-    var btns = Array.from(document.querySelectorAll('#analyzeBtn,[data-role=\"analyze\"],button,.btn'))
-      .filter(b=>/analy[sz]e/i.test(b.textContent||''));
-    btns.forEach(b=> b.addEventListener('click', function(){
-      setTimeout(function(){
-        var inputs = ['#inputText','#content','#textToAnalyze','textarea[name=\"content\"]','#pasteArea','textarea'];
-        for(var sel of inputs){
-          var el = document.querySelector(sel);
-          if(el && ((el.value||'').trim().length>120 || (el.innerText||'').trim().length>120)){
-            hvaiCompute(el.value || el.innerText);
-            break;
-          }
-        }
-      }, 1200);
-    }));
-  })();
-
-  // Reset to zero at load
+  // Reset to 0 on load
   (function reset(){
     updateHVAIScore(0);
     updateBars({humanLike:0,lexical:0,burst:0,digits:0,repetition:0,entropy:0});
     var c = document.getElementById('hvaiConf'); if(c) c.textContent = 0;
-    setStatus(0);
+    setStatusByHuman(0);
   })();
   </script>
 </section>
