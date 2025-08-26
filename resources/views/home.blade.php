@@ -2767,6 +2767,77 @@ document.addEventListener('DOMContentLoaded', function(){
   }, 80);
 });
 </script>
+
+<script>
+function hvaiStatus(msg){
+  try{
+    var s = document.getElementById('analyzeStatus');
+    if(s) s.textContent = msg;
+  }catch(e){}
+}
+</script>
+
+<script>
+/* v3 analyze final superwire */
+(function(){
+  function startAnalyze(){
+    try{
+      hvaiStatus('Starting analysis…');
+      if (window.SEMSEO) window.SEMSEO.READY = true;
+      if (typeof analyze === 'function') { analyze(); return; }
+      if (typeof SEMSEO_go === 'function') { SEMSEO_go(); return; }
+      hvaiStatus('Analyze handler not found.');
+    }catch(err){
+      hvaiStatus('Analyze error: '+(err && err.message ? err.message : err));
+    }
+  }
+  function isAnalyzeEl(el){
+    if(!el) return false;
+    if(el.matches && (el.matches('#analyzeBtn') || el.matches('.btn-analyze') || el.matches('[data-action="analyze"]'))) return true;
+    var label = (el.getAttribute && (el.getAttribute('aria-label')||'')) || '';
+    if(/analy/i.test(label)) return true;
+    var txt = (el.innerText||el.textContent||'').trim();
+    if(/^(analy[zs]e|analyze url|run|go)$/i.test(txt)) return true;
+    return false;
+  }
+  function bind(container){
+    if(!container) return;
+    // Direct bind known buttons
+    container.querySelectorAll('#analyzeBtn, .btn-analyze, [data-action="analyze"]').forEach(function(b){
+      b.removeAttribute('disabled'); b.style.pointerEvents='auto';
+      if(!b.__hvaiBound){ b.addEventListener('click', function(e){ e.preventDefault(); startAnalyze(); }, {capture:false}); b.__hvaiBound=true; }
+    });
+    // Delegate all clicks inside the panel
+    if(!container.__hvaiDelegated){
+      container.addEventListener('click', function(e){
+        var t = e.target.closest('button, a, [role="button"], [data-action]');
+        if(!t) return;
+        if(isAnalyzeEl(t)){ e.preventDefault(); startAnalyze(); }
+      }, true);
+      container.__hvaiDelegated = true;
+    }
+    // Enter in URL field(s)
+    if(!container.__hvaiKey){
+      container.addEventListener('keydown', function(e){
+        if(e.key !== 'Enter') return;
+        var el = e.target;
+        if(!el) return;
+        if(el.matches('input[name="url"], #analyzeUrl, input[type="url"], input[type="text"]')){
+          e.preventDefault(); startAnalyze();
+        }
+      }, true);
+      container.__hvaiKey = true;
+    }
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var panel = document.getElementById('detectorPanel') || document;
+    bind(panel);
+    var mo = new MutationObserver(function(){ bind(panel); });
+    mo.observe(panel, {childList:true, subtree:true});
+    window.addEventListener('load', function(){ if(window.SEMSEO) window.SEMSEO.READY = true; });
+  });
+})();
+</script>
 </body>
 </html>
 
