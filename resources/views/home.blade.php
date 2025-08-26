@@ -986,87 +986,31 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
         <div class="chip human">Human-like: <b id="metaHuman">—</b></div>
       <div class="hvai-tabs" role="tablist" aria-label="AI Detectors">
         <button class="hvai-tab active" data-tab="overall"><i class="fa-solid fa-users-gear"></i> Ensemble</button>
-        <button class="hvai-tab" data-tab="zerogpt"><i class="fa-solid fa-bolt"></i> ZeroGPT</button>
-        <button class="hvai-tab" data-tab="openai"><i class="fa-solid fa-brain"></i> OpenAI</button>
-        <button class="hvai-tab" data-tab="gptzero"><i class="fa-solid fa-shield-halved"></i> GPTZero</button>
-        <button class="hvai-tab" data-tab="copyleaks"><i class="fa-solid fa-circle-check"></i> Copyleaks</button>
-        <button class="hvai-tab" data-tab="writerai"><i class="fa-solid fa-pen-nib"></i> Writer</button>
-        <button class="hvai-tab" data-tab="sapling"><i class="fa-solid fa-seedling"></i> Sapling</button>
         <button class="hvai-tab" data-tab="ai-content"><i class="fa-solid fa-robot"></i> AI Content</button>
         <button class="hvai-tab" data-tab="suggestions"><i class="fa-solid fa-wand-magic-sparkles"></i> Suggestions</button>
       </div>
       
 <div class="hvai-tabpanes">
-  <div class="hvai-pane active" id="pane-overall">
-    <div class="hvai-line">
-      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-overall-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-overall-ai">—%</b></span></div></div>
-      <div class="hvai-scorebar">
-        <span class="human" id="bar-overall-human"></span>
-        <span class="ai" id="bar-overall-ai"></span>
-      </div>
-    </div>
-  </div>
-  <div class="hvai-pane" id="pane-zerogpt">
-    <div class="hvai-line">
-      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-zerogpt-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-zerogpt-ai">—%</b></span></div></div>
-      <div class="hvai-scorebar">
-        <span class="human" id="bar-zerogpt-human"></span>
-        <span class="ai" id="bar-zerogpt-ai"></span>
-      </div>
-    </div>
-  </div>
-  <div class="hvai-pane" id="pane-openai">
-    <div class="hvai-line">
-      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-openai-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-openai-ai">—%</b></span></div></div>
-      <div class="hvai-scorebar">
-        <span class="human" id="bar-openai-human"></span>
-        <span class="ai" id="bar-openai-ai"></span>
-      </div>
-    </div>
-  </div>
-  <div class="hvai-pane" id="pane-gptzero">
-    <div class="hvai-line">
-      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-gptzero-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-gptzero-ai">—%</b></span></div></div>
-      <div class="hvai-scorebar">
-        <span class="human" id="bar-gptzero-human"></span>
-        <span class="ai" id="bar-gptzero-ai"></span>
-      </div>
-    </div>
-  </div>
-  <div class="hvai-pane" id="pane-copyleaks">
-    <div class="hvai-line">
-      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-copyleaks-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-copyleaks-ai">—%</b></span></div></div>
-      <div class="hvai-scorebar">
-        <span class="human" id="bar-copyleaks-human"></span>
-        <span class="ai" id="bar-copyleaks-ai"></span>
-      </div>
-    </div>
-  </div>
-  <div class="hvai-pane" id="pane-writerai">
-    <div class="hvai-line">
-      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-writerai-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-writerai-ai">—%</b></span></div></div>
-      <div class="hvai-scorebar">
-        <span class="human" id="bar-writerai-human"></span>
-        <span class="ai" id="bar-writerai-ai"></span>
-      </div>
-    </div>
-  </div>
-  <div class="hvai-pane" id="pane-sapling">
-    <div class="hvai-line">
-      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-sapling-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-sapling-ai">—%</b></span></div></div>
-      <div class="hvai-scorebar">
-        <span class="human" id="bar-sapling-human"></span>
-        <span class="ai" id="bar-sapling-ai"></span>
-      </div>
-    </div>
-  </div>
-  <div class="hvai-pane" id="pane-ai-content">
-    <div id="aiFlags">Run analysis to see flagged sentences that may read AI-like.</div>
-  </div>
-  <div class="hvai-pane" id="pane-suggestions">
-    <div id="aiSuggestBox">Click a flagged sentence in “AI Content” to open detailed suggestions.</div>
-  </div>
-</div><div class="det-grid" id="detGrid"></div>
+        <div class="hvai-pane active" id="pane-overall">
+          <div class="hvai-line">
+            <div class="label-badges">
+              <span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-overall-human">—%</b></span>
+              &nbsp;|&nbsp;
+              <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-overall-ai">—%</b></span>
+            </div>
+            <div class="hvai-scorebar">
+              <span class="human" id="bar-overall-human"></span>
+              <span class="ai" id="bar-overall-ai"></span>
+            </div>
+          </div>
+        </div>
+        <div class="hvai-pane" id="pane-ai-content">
+          <div id="aiFlags">Run analysis to see flagged sentences that may read AI-like.</div>
+        </div>
+        <div class="hvai-pane" id="pane-suggestions">
+          <div id="aiSuggestBox">Click a flagged sentence in “AI Content” to open detailed suggestions.</div>
+        </div>
+      </div><div class="det-grid" id="detGrid"></div>
       <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
     </section>
 
@@ -2186,6 +2130,7 @@ window.addEventListener('error', function(e){
     const _paint   = window.HVAI_V2.paint;
     const _update  = window.HVAI_V2.update;
     window.HVAI_V2.update = function(res){
+  
   /* v3: robust mapping */
   try{
     var overallH = hvai_normPercent(res && (res.humanPct||res.human||res.human_like||res.overallHuman||res.overall));
@@ -2196,7 +2141,7 @@ window.addEventListener('error', function(e){
     // update gauge + store
     if (typeof setHVAIScore==='function') setHVAIScore(overallH);
 
-    // minis
+    // minis + overall dual bars
     (function(){
       var human = overallH, ai = 100-human;
       var circ = 2*Math.PI*26;
@@ -2209,31 +2154,6 @@ window.addEventListener('error', function(e){
       if (typeof setModelHA==='function') setModelHA('overall', human, ai);
     })();
 
-    // per-detector
-    var det = Array.isArray(res && res.detectors) ? res.detectors : [];
-    function pick(keyRegex){
-      if(!det.length) return {human:overallH, ai:100-overallH};
-      var re = new RegExp(keyRegex,'i');
-      var d = det.find(function(x){ return re.test(String(x.key||x.name||x.label||'')); });
-      return hvai_deriveHumanAi(d, overallH);
-    }
-    var mZero   = pick('zero|zerogpt|zgpt');
-    var mOpenAI = pick('openai|oai');
-    var mGPTZ   = pick('gptzero|gptz');
-    var mCopy   = pick('copyleaks|copy|cl');
-    var mWriter = pick('writer|writerai');
-    var mSap    = pick('sapling|spl');
-
-    if (typeof setModelHA==='function'){
-      setModelHA('zerogpt',  mZero.human,   mZero.ai);
-      setModelHA('openai',   mOpenAI.human, mOpenAI.ai);
-      setModelHA('gptzero',  mGPTZ.human,   mGPTZ.ai);
-      setModelHA('copyleaks',mCopy.human,   mCopy.ai);
-      setModelHA('writerai', mWriter.human, mWriter.ai);
-      setModelHA('sapling',  mSap.human,    mSap.ai);
-    }
-
-    // AI Content flags -> Suggestions
     try{
       var sample = (res && (res.text||res.sample||res.content||res.body)) ? String(res.text||res.sample||res.content||res.body).trim() : '';
       var lang = (document.getElementById('hvaiLang')?.value)||'en';
@@ -2786,6 +2706,18 @@ function hvai_deriveHumanAi(d, fallbackHuman){
 
 <script>
 /* v3 hydrate after analyze */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    try{
+      var res = window.__lastDet || { humanPct: (window.__lastScore||0), aiPct: 100-(window.__lastScore||0) };
+      if(window.HVAI_V2 && typeof window.HVAI_V2.update==='function'){ window.HVAI_V2.update(res); }
+    }catch(e){}
+  }, 120);
+});
+</script>
+
+<script>
+/* v3 hydrate solo */
 document.addEventListener('DOMContentLoaded', function(){
   setTimeout(function(){
     try{
