@@ -949,7 +949,7 @@ body::after{
     </section>
 
     <!-- 4) SITE SPEED & CORE WEB VITALS (End) -->
-    <section class="psi" id="psiPanel" data-psi-endpoint="/api/psi">
+    <section class="psi" id="psiPanel" data-psi-endpoint="/psi-proxy">
       <div class="psi-head">
         <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
         <h4>Site Speed & Core Web Vitals</h4>
@@ -1238,7 +1238,7 @@ function runPSI(targetUrl){
 
   async function tryProxy(){
     try{
-      const r = await fetch(`${endpoint}?${qs}`, {});
+      const r = await fetch(`${endpoint}?${qs}`);
       if (!r.ok) return { proxy_error: true, status: r.status, body: await r.text() };
       return await r.json();
     }catch(e){ return { proxy_error: true, message: String(e) }; }
