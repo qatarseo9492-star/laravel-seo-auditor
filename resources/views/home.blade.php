@@ -703,6 +703,14 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 <!-- 1) HUMAN vs AI Content (Ensemble) — v2025-08-26 • v5 wheel + tech lines + animated icon -->
 <section id="hvai" class="hvai" aria-label="Human vs AI Content (Ensemble)">
   <style>
+  /* Ultra-fast hue animation and glow */
+  @property --h {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+  @keyframes hvaiHue { to { --h: 360deg; } }
+
   /* ==== Human vs AI (Ensemble) — Visuals v5 (scoped) ==== */
 
   /* Rainbow animated heading text */
@@ -792,6 +800,10 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring)), #000 calc(100% - var(--ring)));
             mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring)), #000 calc(100% - var(--ring)));
     filter: saturate(1.2) contrast(1.05);
+  
+    filter: hue-rotate(var(--h)) drop-shadow(0 0 14px rgba(255,255,255,.25));
+    animation: hvaiHue 1s steps(1000, end) infinite;
+    will-change: filter;
   }
   /* Inner human arc (thin) */
   .hvai .hvai-arc-human{
@@ -803,6 +815,10 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 8px));
             mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 8px));
     filter: drop-shadow(0 0 8px rgba(0,245,196,.35));
+  
+    filter: hue-rotate(var(--h)) drop-shadow(0 0 12px rgba(0,245,196,.35));
+    animation: hvaiHue 1s steps(1000, end) infinite;
+    will-change: filter;
   }
   /* tick marks */
   .hvai .hvai-ticks{
@@ -894,6 +910,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       <div class="hvai-wheel-track"></div>
       <div class="hvai-arc-ai" id="hvaiArcAI"></div>
       <div class="hvai-arc-human" id="hvaiArcHuman"></div>
+      <div class="hvai-glow" aria-hidden="true"></div>
       <div class="hvai-ticks"></div>
       <div class="hvai-wheel-center">
         <div class="kv">
@@ -1019,6 +1036,26 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
   function updateBars(subs){
     if(!subs) return;
+    var fields = [
+      ['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],
+      ['hvaiBarLex','hvaiValLex', subs.lexical],
+      ['hvaiBarBurst','hvaiValBurst', subs.burst],
+      ['hvaiBarDigits','hvaiValDigits', subs.digits],
+      ['hvaiBarRep','hvaiValRep', subs.repetition],
+      ['hvaiBarEnt','hvaiValEnt', subs.entropy],
+    ];
+    for (var i=0;i<fields.length;i++){
+      var fill = document.getElementById(fields[i][0]);
+      var num  = document.getElementById(fields[i][1]);
+      var val  = Math.max(0, Math.min(100, Math.round(fields[i][2]||0)));
+      if(fill) fill.style.width = val + '%';
+      if(num)  num.textContent = val;
+    }
+  }
+
+
+  function updateBars(subs){
+    if(!subs) return;
     var map = [
       ['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],
       ['hvaiBarLex','hvaiValLex', subs.lexical],
@@ -1036,6 +1073,7 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     });
   }
 
+  
   // Public API
   window.hvaiCompute = function(text){
     try{
