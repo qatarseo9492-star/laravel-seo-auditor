@@ -612,6 +612,19 @@ body::after{
   pointer-events: none !important;
 }
 
+
+/* --- Content above background art (z-index fix) --- */
+.wrap, .analyzer, header, footer {
+  position: relative;
+  z-index: 10;
+}
+.water-svg, .water-overlay, .water-pct,
+.comp-svg, .comp-overlay, .comp-pct,
+.bg-lines {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
 </style>
 </head>
 <body>
@@ -638,12 +651,453 @@ body::after{
 <canvas id="linesCanvas"></canvas>
 <canvas id="smokeCanvas"></canvas>
 
+<script>
+  window.SEMSEO = window.SEMSEO || {};
+  window.SEMSEO.ENDPOINTS = {
+    analyzeJson: @json($analyzeJsonUrl),
+    analyze: @json($analyzeUrl),
+    psi: @json($psiProxyUrl), // server proxy; API key stays hidden
+    // NEW: backend detector endpoint (works even with no API keys; local server ensemble)
+    detect: @json($detectUrl)
+  };
+  window.SEMSEO.SMOKE_HUE_PERIOD_MS = 1000000000;
+  window.SEMSEO.READY = false;
+  window.SEMSEO.BUSY = false;
+  window.SEMSEO.QUEUE = 0;
+  function SEMSEO_go(){
+    if (window.SEMSEO.READY && typeof analyze === 'function') { analyze(); }
+    else { window.SEMSEO.QUEUE++; const s=document.getElementById('analyzeStatus'); if(s) s.textContent='Initializing…'; }
+  }
+</script>
+
+<!-- Share dock -->
+<div class="share-dock" aria-label="Share">
+  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
+  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
+  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
+  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
+  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
+</div>
+
+<div class="wrap">
+  <header class="site">
+    <div class="brand">
+      <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
+      <div>
+        <div class="hero-heading">Semantic SEO Master Analyzer</div>
+        <div class="hero-sub">Analyze URLs, get scores & colorful insights</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-print" id="printTop"><i class="fa-solid fa-print"></i> Print</button>
+    </div>
+  </header>
+
+  <main class="analyzer" id="analyzer" role="main">
+    <h2 class="section-title">Analyze a URL</h2>
+    <p class="section-subtitle">
+      Wheel + water bars fill with your scores.
+      <span class="legend l-green">Green ≥ 80</span>
+      <span class="legend l-orange">Orange 60–79</span>
+      <span class="legend l-red">Red &lt; 60</span>
+    </p>
+
+    <div class="score-area">
+      <div class="score-container">
+        <!-- Circular water score -->
+        <div class="score-gauge">
+          <svg class="gauge-svg" viewBox="0 0 200 200" aria-label="Overall score gauge">
+            <defs>
+              <clipPath id="scoreCircleClip"><circle cx="100" cy="100" r="88"/></clipPath>
+              <clipPath id="scoreFillClip"><rect id="scoreClipRect" class="score-mask-rect" x="0" y="200" width="200" height="200"/></clipPath>
+              <linearGradient id="scoreGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop id="scoreStop1" offset="0%" stop-color="#22c55e"/>
+                <stop id="scoreStop2" offset="100%" stop-color="#16a34a"/>
+              </linearGradient>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop id="ringStop1" offset="0%" stop-color="#22c55e"/>
+                <stop id="ringStop2" offset="100%" stop-color="#16a34a"/>
+              </linearGradient>
+              <filter id="ringGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <path id="scoreWavePath" d="M0 110 Q 15 90 30 110 T 60 110 T 90 110 T 120 110 T 150 110 T 180 110 T 210 110 V 220 H 0 Z"/>
+            </defs>
+            <circle cx="100" cy="100" r="96" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+            <circle id="ringTrack" cx="100" cy="100" r="95" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="6" transform="rotate(-90 100 100)"/>
+            <circle id="ringArc" cx="100" cy="100" r="95" fill="none" stroke="url(#ringGrad)" stroke-width="6" stroke-linecap="round" filter="url(#ringGlow)" opacity=".95" transform="rotate(-90 100 100)"/>
+            <g clip-path="url(#scoreCircleClip)">
+              <rect x="0" y="0" width="200" height="200" fill="#0b0d21"/>
+              <g clip-path="url(#scoreFillClip)">
+                <g class="score-wave1 multiHueFast">
+                  <use href="#scoreWavePath" x="0" fill="url(#scoreGrad)"/><use href="#scoreWavePath" x="210" fill="url(#scoreGrad)"/>
+                </g>
+                <g class="score-wave2 multiHueFast" opacity=".85">
+                  <use href="#scoreWavePath" x="0" y="6" fill="url(#scoreGrad)"/><use href="#scoreWavePath" x="210" y="6" fill="url(#scoreGrad)"/>
+                </g>
+              </g>
+            </g>
+            <text id="overallScore" x="100" y="106" text-anchor="middle" dominant-baseline="middle" class="score-text">0%</text>
+          </svg>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:.5rem">
+        <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+          <span class="chip" id="overallChip"><i class="fa-solid fa-gauge-high ico"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
+          <span class="chip" id="contentScoreChip"><i class="fa-solid fa-file-lines ico"></i> Content: <b id="contentScoreInline">0</b>/100</span>
+          <span class="chip" id="aiBadge" title="Detection summary"><i class="fa-solid fa-user-check ico ico-green"></i> Writer: <b>—</b></span>
+          <button id="viewHumanBtn" class="btn btn-ghost"><i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%</button>
+          <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-robot ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
+          <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
+        </div>
+        <small style="color:var(--text-dim)">If the backend returns no scores, a local ensemble + heuristics derive stable scores so the UI always reflects reality.</small>
+      </div>
+    </div>
+
+    <div class="analyze-box" style="margin-top:12px;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px">
+      <form id="analyzeForm" onsubmit="event.preventDefault(); analyze(); return false;">
+        <label for="analyzeUrl" style="display:inline-block;font-weight:900;margin-bottom:.35rem">Page URL</label>
+        <div class="url-field" id="urlField">
+          <i class="fa-solid fa-globe url-icon"></i>
+          <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" aria-describedby="analyzeStatus"/>
+          <button type="button" class="url-mini url-clear" id="clearUrl" title="Clear"><i class="fa-solid fa-xmark"></i></button>
+          <button type="button" class="url-mini" id="pasteUrl" title="Paste">Paste</button>
+          <span class="url-border" aria-hidden="true"></span>
+        </div>
+
+        <div class="analyze-row">
+          <div style="display:flex;align-items:center;gap:.6rem">
+            <label style="display:inline-flex;align-items:center;gap:.45rem;cursor:pointer">
+              <input id="autoApply" type="checkbox" checked style="accent-color:#9b5cff">
+              <span>Auto-apply checkmarks (≥ 80)</span>
+            </label>
+          </div>
+
+          <button id="analyzeBtn" type="button" class="btn btn-analyze" onclick="try{analyze();}catch(e){}; return false;">
+            <i class="fa-solid fa-magnifying-glass"></i> Analyze
+          </button>
+
+          <button class="btn btn-print" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> Print</button>
+          <button class="btn btn-reset" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
+          <button class="btn btn-export" id="exportChecklist" type="button" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
+          <button class="btn btn-export" id="importChecklist" type="button" title="Import checklist JSON"><i class="fa-solid fa-file-import"></i> Import</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+        </div>
+
+        <div class="water-wrap" id="waterWrap" aria-hidden="true">
+          <div class="waterbar" id="waterBar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <svg class="water-svg" viewBox="0 0 600 200" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="waterGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#3de2ff"/><stop offset="100%" stop-color="#9b5cff"/></linearGradient>
+                <clipPath id="roundClip"><rect x="1" y="1" width="598" height="198" rx="18" ry="18"/></clipPath>
+                <clipPath id="fillClip"><rect id="waterClipRect" class="water-mask-rect" x="0" y="200" width="600" height="200"/></clipPath>
+                <path id="wave" d="M0 120 Q 50 90 100 120 T 200 120 T 300 120 T 400 120 T 500 120 T 600 120 V 220 H 0 Z"/>
+              </defs>
+              <g clip-path="url(#roundClip)">
+                <rect x="0" y="0" width="600" height="200" fill="#0b0d21"/>
+                <g clip-path="url(#fillClip)">
+                  <g class="wave1 multiHue"><use href="#wave" x="0" fill="url(#waterGrad)"/><use href="#wave" x="600" fill="url(#waterGrad)"/></g>
+                  <g class="wave2 multiHue" opacity=".65"><use href="#wave" x="0" y="8" fill="url(#waterGrad)"/><use href="#wave" x="600" y="8" fill="url(#waterGrad)"/></g>
+                </g>
+              </g>
+            </svg>
+            <div class="water-overlay"></div>
+            <div class="water-pct"><span id="waterPct">0%</span></div>
+          </div>
+          <div id="analyzeStatus" style="margin-top:.4rem;color:var(--text-dim)" aria-live="polite"></div>
+        </div>
+
+        <div id="analyzeReport" style="margin-top:.9rem;display:none">
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+            <span class="chip">HTTP: <b id="rStatus">—</b></span>
+            <span class="chip">Title: <b id="rTitleLen">—</b></span>
+            <span class="chip">Meta desc: <b id="rMetaLen">—</b></span>
+            <span class="chip">Canonical: <b id="rCanonical">—</b></span>
+            <span class="chip">Robots: <b id="rRobots">—</b></span>
+            <span class="chip">Viewport: <b id="rViewport">—</b></span>
+            <span class="chip">H1/H2/H3: <b id="rHeadings">—</b></span>
+            <span class="chip">Internal links: <b id="rInternal">—</b></span>
+            <span class="chip">Schema: <b id="rSchema">—</b></span>
+            <span class="chip">Auto-checked: <b id="rAutoCount">—</b></span>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- 1) HUMAN vs AI (Ensemble) -->
+    <section id="detectorPanel" class="hvai" style="display:none">
+      <div class="hvai-head">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11a5 5 0 1 1 10 0v2h1a2 2 0 0 1 2 2v2h-5v-2H9v2H4v-2a2 2 0 0 1 2-2h1v-2Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="8.5" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg><h4>Human vs AI Content (Ensemble)</h4>
+      </div>
+<span class="hvai-sub">Ensemble signals</span> <span class="badge-beta">⚡ Multilingual Beta</span>
+      <div class="hvai-meta">
+        <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
+        <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
+      
+      <div class="lang-row" id="hvaiLangRow">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 12h18M12 3v18M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+        <strong>Language:</strong>
+        <select id="hvaiLang">
+          <option value="en" selected>English</option>
+          <option value="ur">Urdu / اردو</option>
+          <option value="ar">العربية</option>
+          <option value="de">Deutsch</option>
+          <option value="es">Español</option>
+          <option value="pt">Português</option>
+        </select>
+      </div>
+    
+</div>
+        <div id="hvaiBanner" class="hvai-banner" aria-live="polite" style="display:none"></div>
 
 
+      <!-- Animated Human vs AI bars -->
+      <div class="hvai-bar">
+        <div>
+          <div class="hvai-label"><span class="lab"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 12c2.8 0 5-2.2 5-5s-2.2-5-5-5-5 2.2-5 5 2.2 5 5 5Z" stroke="currentColor" stroke-width="1.5"/><path d="M21 22a8.9 8.9 0 0 0-18 0" stroke="currentColor" stroke-width="1.5"/></svg></span> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="hvai-label"><span class="lab"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="3" ry="3" stroke="currentColor" stroke-width="1.5"/><path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="1.5"/></svg></span> AI-like</span><b id="hvaiAIVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
+        </div>
+      </div>
 
+      <!-- Detectors grid -->
+      <div class="det-grid" id="detGrid"></div>
+      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
+    </section>
 
+    <!-- 2) READABILITY INSIGHTS (Upgraded) -->
+    <section class="readability" id="readabilityPanel" style="display:none">
+      <div class="read-head">
+        <i class="fa-solid fa-book-open-reader ico ico-cyan"></i>
+        <h4>Readability Insights</h4>
+      </div>
+      <div class="read-summary">
+        <span class="read-chip" id="readChip">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span id="readGradeChip">Grade —</span>
+        </span>
+        <div class="read-caption" id="readSummary">We’ll estimate the reading level and show what to fix.</div>
+      </div>
 
+      <div class="read-grid">
+        <div class="read-card">
+          <div class="metric"><span><i class="fa-solid fa-face-smile"></i> Flesch Reading Ease</span><b id="mFlesch">—</b></div>
+          <div class="meter"><span id="mFleschBar"></span></div>
+        </div>
+        <div class="read-card">
+          <div class="metric"><span><i class="fa-solid fa-align-left"></i> Avg Sentence Length</span><b id="mASL">—</b></div>
+          <div class="meter"><span id="mASLBar"></span></div>
+        </div>
+        <div class="read-card">
+          <div class="metric"><span><i class="fa-solid fa-font"></i> Words</span><b id="mWords">—</b></div>
+          <div class="meter"><span id="mWordsBar"></span></div>
+        </div>
+        <div class="read-card">
+          <div class="metric"><span><i class="fa-solid fa-language"></i> Syllables / Word</span><b id="mSPW">—</b></div>
+          <div class="meter"><span id="mSPWBar"></span></div>
+        </div>
+        <div class="read-card">
+          <div class="metric"><span><i class="fa-solid fa-shuffle"></i> Lexical Diversity (TTR)</span><b id="mTTR">—</b></div>
+          <div class="meter"><span id="mTTRBar"></span></div>
+        </div>
+        <div class="read-card">
+          <div class="metric"><span><i class="fa-solid fa-repeat"></i> Repetition (tri-gram)</span><b id="mRep">—</b></div>
+          <div class="meter"><span id="mRepBar"></span></div>
+        </div>
+        <div class="read-card">
+          <div class="metric"><span><i class="fa-solid fa-hashtag"></i> Digits / 100 words</span><b id="mDigits">—</b></div>
+          <div class="meter"><span id="mDigitsBar"></span></div>
+        </div>
+      </div>
 
+      <div class="read-suggest">
+        <div class="title"><i class="fa-solid fa-lightbulb"></i> Simple Fixes</div>
+        <ul id="readSuggest"></ul>
+      </div>
+
+      <div class="read-plain">
+        <div class="title"><i class="fa-solid fa-child-reaching"></i> Easy to read (Grade 7)</div>
+        <div id="readPlain">We’ll write a friendly one-line summary here.</div>
+      </div>
+    </section>
+
+    <!-- 3) ENTITIES & TOPICS (Upgraded) -->
+    <section class="entities" id="entitiesPanel" style="display:none">
+      <div class="entities-head">
+        <i class="fa-solid fa-database ico ico-cyan"></i>
+        <h4>Entities & Topics</h4>
+      </div>
+      <div class="entity-groups">
+        <div class="entity-card">
+          <div class="entity-title"><i class="fa-solid fa-person"></i> People</div>
+          <div class="entity-chips" id="entPeople"></div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-title"><i class="fa-solid fa-building"></i> Organizations</div>
+          <div class="entity-chips" id="entOrgs"></div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-title"><i class="fa-solid fa-location-dot"></i> Places</div>
+          <div class="entity-chips" id="entPlaces"></div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-title"><i class="fa-solid fa-tags"></i> Topics</div>
+          <div class="entity-chips" id="entTopics"></div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-title"><i class="fa-solid fa-microchip"></i> Software / APK</div>
+          <div class="entity-chips" id="entSoftware"></div>
+        </div>
+        <div class="entity-card">
+          <div class="entity-title"><i class="fa-solid fa-gamepad"></i> Games</div>
+          <div class="entity-chips" id="entGames"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4) SITE SPEED & CORE WEB VITALS (End) -->
+    <section class="psi" id="psiPanel" data-psi-endpoint="/psi-proxy">
+      <div class="psi-head">
+        <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
+        <h4>Site Speed & Core Web Vitals</h4>
+      </div>
+      <div class="psi-meta">
+        <span class="psi-chip"><i class="fa-solid fa-mobile-screen-button"></i> Strategy: <b id="psiStrategy">mobile</b></span>
+        <span class="psi-chip"><i class="fa-solid fa-chart-simple"></i> Performance: <b id="psiPerf">—</b></span>
+      </div>
+
+      <div class="psi-grid">
+        <div class="psi-card">
+          <div class="metric"><span><i class="fa-solid fa-stopwatch-20"></i> LCP (s)</span><b id="psiLcp">—</b></div>
+          <div class="psi-meter"><span id="psiLcpBar"></span></div>
+        </div>
+        <div class="psi-card">
+          <div class="metric"><span><i class="fa-solid fa-arrow-pointer"></i> INP (ms)</span><b id="psiInp">—</b></div>
+          <div class="psi-meter"><span id="psiInpBar"></span></div>
+        </div>
+        <div class="psi-card">
+          <div class="metric"><span><i class="fa-solid fa-expand"></i> CLS</span><b id="psiCls">—</b></div>
+          <div class="psi-meter"><span id="psiClsBar"></span></div>
+        </div>
+        <div class="psi-card">
+          <div class="metric"><span><i class="fa-solid fa-rocket"></i> TTFB (ms)</span><b id="psiTtfb">—</b></div>
+          <div class="psi-meter"><span id="psiTtfbBar"></span></div>
+        </div>
+      </div>
+
+      <div class="psi-issues">
+        <div class="title"><i class="fa-solid fa-screwdriver-wrench"></i> How to Improve</div>
+        <ul id="psiAdvice"></ul>
+      </div>
+      <div id="psiNote" style="color:var(--text-dim);margin-top:.4rem"></div></section>
+
+    <!-- Checklist categories (unchanged) -->
+    @php $labels = [
+      1=>'Define search intent & primary topic', 2=>'Map target & related keywords (synonyms/PAA)', 3=>'H1 includes primary topic naturally',
+      4=>'Integrate FAQs / questions with answers', 5=>'Readable, NLP-friendly language', 6=>'Title tag (≈50–60 chars) w/ primary keyword',
+      7=>'Meta description (≈140–160 chars) + CTA', 8=>'Canonical tag set correctly', 9=>'Indexable & listed in XML sitemap',
+      10=>'E-E-A-T signals (author, date, expertise)', 11=>'Unique value vs. top competitors', 12=>'Facts & citations up to date',
+      13=>'Helpful media (images/video) w/ captions', 14=>'Logical H2/H3 headings & topic clusters', 15=>'Internal links to hub/related pages',
+      16=>'Clean, descriptive URL slug', 17=>'Breadcrumbs enabled (+ schema)', 18=>'Mobile-friendly, responsive layout',
+      19=>'Optimized speed (compression, lazy-load)', 20=>'Core Web Vitals passing (LCP/INP/CLS)', 21=>'Clear CTAs and next steps',
+      22=>'Primary entity clearly defined', 23=>'Related entities covered with context', 24=>'Valid schema markup (Article/FAQ/Product)',
+      25=>'sameAs/Organization details present'
+    ]; @endphp
+
+    <div class="progress-wrap">
+      <div class="comp-water" id="compWater" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <svg class="comp-svg" viewBox="0 0 600 140" preserveAspectRatio="none">
+          <defs>
+            <clipPath id="compRound"><rect x="1" y="1" width="598" height="138" rx="14" ry="14"/></clipPath>
+            <clipPath id="compFillClip"><rect id="compClipRect" x="0" y="0" width="0" height="140"/></clipPath>
+            <linearGradient id="compGrad" x1="0" y1="0" x2="1" y2="1"><stop id="compStop1" offset="0%" stop-color="#3de2ff"/><stop id="compStop2" offset="100%" stop-color="#9b5cff"/></linearGradient>
+            <path id="compWave" d="M0 80 Q 50 60 100 80 T 200 80 T 300 80 T 400 80 T 500 80 T 600 80 V 160 H 0 Z"/>
+          </defs>
+          <g clip-path="url(#compRound)">
+            <rect x="0" y="0" width="600" height="140" fill="#0b0d21"/>
+            <g clip-path="url(#compFillClip)">
+              <g class="comp-wave1 multiHue"><use href="#compWave" x="0" fill="url(#compGrad)"/><use href="#compWave" x="600" fill="url(#compGrad)"/></g>
+              <g class="comp-wave2 multiHue" opacity=".75"><use href="#compWave" x="0" y="6" fill="url(#compGrad)"/><use href="#compWave" x="600" y="6" fill="url(#compGrad)"/></g>
+            </g>
+          </g>
+        </svg>
+        <div class="comp-overlay"></div>
+        <div class="comp-pct"><span id="compPct">0%</span></div>
+      </div>
+      <div id="progressCaption" class="progress-caption" style="color:var(--text-dim)">0 of 25 items completed</div>
+    </div>
+
+    <div class="analyzer-grid" id="checklistGrid">
+      @foreach ([
+        ['Content & Keywords',1,5,'fa-pen-nib','linear-gradient(135deg,#22d3ee33,#a78bfa33)'],
+        ['Technical Elements',6,9,'fa-code','linear-gradient(135deg,#a7f3d033,#60a5fa33)'],
+        ['Content Quality',10,13,'fa-star','linear-gradient(135deg,#fcd34d33,#fb718533)'],
+        ['Structure & Architecture',14,17,'fa-sitemap','linear-gradient(135deg,#86efac33,#f0abfc33)'],
+        ['User Signals & Experience',18,21,'fa-user-check','linear-gradient(135deg,#fca5a533,#fde68a33)'],
+        ['Entities & Context',22,25,'fa-database','linear-gradient(135deg,#f472b633,#60a5fa33)'],
+      ] as $c)
+        <article class="category-card" data-cat-i="{{ $loop->index }}" style="background-image: {{ $c[4] }}; background-blend-mode: lighten;">
+          <header class="category-head">
+            <span class="category-icon" aria-hidden="true"><i class="fas {{ $c[3] }}"></i></span>
+            <div>
+              <h3 class="category-title">{{ $c[0] }}</h3>
+              <p class="category-sub">—</p>
+              <div class="cat-water" id="catWater-{{ $loop->index }}">
+                <svg class="cat-svg" viewBox="0 0 600 24" preserveAspectRatio="none">
+                  <defs>
+                    <clipPath id="catClip-{{ $loop->index }}"><rect x="0" y="0" width="600" height="24" rx="10" ry="10"/></clipPath>
+                    <clipPath id="catFillClip-{{ $loop->index }}"><rect id="catFillRect-{{ $loop->index }}" x="0" y="0" width="0" height="24"/></clipPath>
+                    <linearGradient id="catGrad-{{ $loop->index }}" x1="0" y1="0" x2="1" y2="1">
+                      <stop id="catStop1-{{ $loop->index }}" offset="0%" stop-color="#22d3ee"/>
+                      <stop id="catStop2-{{ $loop->index }}" offset="100%" stop-color="#a78bfa"/>
+                    </linearGradient>
+                    <path id="catWave-{{ $loop->index }}" d="M0 12 Q 40 6 80 12 T 160 12 T 240 12 T 320 12 T 400 12 T 480 12 T 560 12 T 640 12 V 30 H 0 Z"/>
+                  </defs>
+                  <g clip-path="url(#catClip-{{ $loop->index }})">
+                    <rect x="0" y="0" width="600" height="24" fill="#0b0d21"/>
+                    <g clip-path="url(#catFillClip-{{ $loop->index }})">
+                      <g class="cat-wave1"><use href="#catWave-{{ $loop->index }}" x="0" fill="url(#catGrad-{{ $loop->index }})"/><use href="#catWave-{{ $loop->index }}" x="640" fill="url(#catGrad-{{ $loop->index }})"/></g>
+                      <g class="cat-wave2" opacity=".85"><use href="#catWave-{{ $loop->index }}" x="0" y="3" fill="url(#catGrad-{{ $loop->index }})"/><use href="#catWave-{{ $loop->index }}" x="640" y="3" fill="url(#catGrad-{{ $loop->index }})"/></g>
+                    </g>
+                  </g>
+                </svg>
+                <div class="cat-water-pct" id="catPct-{{ $loop->index }}">0/0 • 0%</div>
+              </div>
+            </div>
+            <span class="chip"><span class="checked-count">0</span>/<span class="total-count">{{ $c[2]-$c[1]+1 }}</span></span>
+          </header>
+          <ul class="checklist">
+            @for($i=$c[1];$i<=$c[2];$i++)
+              <li class="checklist-item">
+                <label><input type="checkbox" id="ck-{{ $i }}"><span>{{ $labels[$i] }}</span></label>
+                <span class="score-badge" id="sc-{{ $i }}">—</span>
+                <button class="improve-btn" type="button" data-id="ck-{{ $i }}">Improve</button>
+              </li>
+            @endfor
+          </ul>
+        </article>
+      @endforeach
+    </div>
+  </main>
+</div>
+
+<footer class="site">
+  <div><strong>Semantic SEO Master</strong></div>
+  <div class="footer-links">
+    <a href="#analyzer">Analyzer</a>
+    <a href="#" id="toTopLink">Back to top</a>
+  </div>
+</footer>
+
+<button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
+
+<!-- A) Analyze + core logic -->
 
 
 
@@ -654,21 +1108,324 @@ body::after{
 
 
 <script>
+document.addEventListener('DOMContentLoaded', function(){
+  (function(){
+    const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
+    const urlInput = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+    const runBtn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
+    if (!panel) return;
+    function ensureVisible(){ if (panel.style.display==='none') panel.style.display=''; panel.classList.add('psi-ready'); }
+    function safeClick(){ ensureVisible(); if (typeof window.runPSI==='function') setTimeout(()=>window.runPSI(), 60); else if (typeof window.SEMSEO_go==='function'){ try{ window.SEMSEO_go(); }catch(e){} } }
+    if (runBtn){ runBtn.addEventListener('click', function(e){ e.preventDefault(); safeClick(); }); runBtn.style.pointerEvents='auto'; }
+    if (urlInput){ urlInput.addEventListener('keydown', function(e){ if (e.key==='Enter'){ e.preventDefault(); safeClick(); } }); }
+  })();
+});
+</script>
+
+
+<script>
 (function(){
-  var __origAnalyze = (typeof window.analyze === 'function') ? window.analyze : null;
-  window.analyze = function(){
-    try{ if (__origAnalyze) __origAnalyze(); }catch(_){}
-    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
-    // PSI has been removed, call only if present
+  function wirePSI(){
     try{
-      if (typeof window.runPSI === 'function'){
-        var input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
-        var val = (input && input.value) ? input.value.trim() : '';
-        window.runPSI(val);
+      const btn = document.getElementById('analyzeBtn') || document.querySelector('[data-action="analyze"]');
+      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+      if (!btn || !input) return;
+      // Ensure visible
+      const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
+      if (panel && panel.style.display==='none') panel.style.display='';
+      btn.style.pointerEvents='auto';
+      btn.addEventListener('click', function(ev){
+        try{ ev.preventDefault(); }catch(_){}
+        // Prefer app's analyze, then PSI
+        if (typeof window.SEMSEO_go === 'function'){ try{ window.SEMSEO_go(); }catch(_){ } }
+        if (typeof window.runPSI === 'function'){ setTimeout(()=>window.runPSI(input.value||''), 120); }
+      }, { once:false });
+      input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter'){
+          e.preventDefault();
+          if (typeof window.SEMSEO_go === 'function'){ try{ window.SEMSEO_go(); }catch(_){ } }
+          if (typeof window.runPSI === 'function'){ setTimeout(()=>window.runPSI(input.value||''), 120); }
+        }
+      });
+    }catch(e){ console.error('PSI wire error', e); }
+  }
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', wirePSI);
+  }else{
+    wirePSI();
+  }
+  window.addEventListener('load', wirePSI);
+})();
+</script>
+
+
+<script>
+// Final hardening of Analyze + Page URL controls
+(function(){
+  function expose(){
+    try{
+      // If SEMSEO_go exists, wrap to ensure PSI always runs as fallback
+      const prior = window.SEMSEO_go;
+      window.SEMSEO_go = function(){
+        try{ if (typeof prior === 'function') prior(); }catch(e){}
+        try{
+          const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+          const val = (input && input.value) ? input.value.trim() : '';
+          if (typeof window.runPSI === 'function'){ window.runPSI(val); }
+        }catch(_){}
+      };
+    }catch(_){}
+
+    // Paste button: use clipboard; fallback to location.href
+    try{
+      const pasteBtn = document.getElementById('pasteUrl');
+      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+      if (pasteBtn && input){
+        pasteBtn.addEventListener('click', async function(e){
+          e.preventDefault();
+          let txt = '';
+          try{ txt = await navigator.clipboard.readText(); }catch(_){}
+          if (!txt){ try{ txt = window.location.href || ''; }catch(_){}
+          if (!/^https?:\/\//i.test(txt) && txt){ txt = 'https://' + txt.replace(/^\/*/, ''); }
+          if (txt){ input.value = txt; input.focus(); }
+        });
       }
+    }catch(_){}
+
+    // Bonus: clicking the Performance chip runs PSI
+    try{
+      const perf = document.getElementById('psiPerf');
+      if (perf){ perf.addEventListener('click', function(){ 
+        const input = document.getElementById('analyzeUrl'); 
+        if (typeof window.runPSI === 'function') window.runPSI((input && input.value)||''); 
+      });}
+    }catch(_){}
+  }
+  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', expose); } else { expose(); }
+  window.addEventListener('load', expose);
+})();
+</script>
+
+
+<script>
+(function(){
+  const btn = document.getElementById('analyzeBtn');
+  const status = document.getElementById('analyzeStatus') || (function(){
+    const s = document.createElement('div'); s.id='analyzeStatus';
+    s.style.cssText='margin-top:.35rem;font-weight:800;color:#a6f7ff;';
+    const row = btn && btn.closest('.analyze-row');
+    if (row) row.parentNode.insertBefore(s, row.nextSibling);
+    return s;
+  })();
+  if (btn && status){
+    btn.addEventListener('click', function(){
+      status.textContent = 'Analyzing…';
+      setTimeout(()=>{ if(status.textContent==='Analyzing…') status.textContent=''; }, 6000);
+    });
+  }
+  // Clear status on PERF update
+  const perf = document.getElementById('psiPerf');
+  if (perf){
+    const obs = new MutationObserver(()=>{ status.textContent=''; });
+    obs.observe(perf, {childList:true, characterData:true, subtree:true});
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  const apiPublic = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
+  const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
+  const endpoint = (panel && panel.dataset && panel.dataset.psiEndpoint) ? panel.dataset.psiEndpoint : (window.SEMSEO && window.SEMSEO.ENDPOINTS && window.SEMSEO.ENDPOINTS.psi ? window.SEMSEO.ENDPOINTS.psi : "/psi-proxy");
+  const strategyEl = document.getElementById('psiStrategy');
+
+  async 
+function runPSI(targetUrl){
+  const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+  const raw = (targetUrl || (input && input.value) || "").trim();
+  const strategy = (strategyEl && (strategyEl.textContent||"").trim().toLowerCase()) || "mobile";
+  const status = document.getElementById('psiStatus') || (function(){ const s=document.createElement('div'); s.id='psiStatus'; s.style.cssText='margin:.25rem 0 0;color:#a6f7ff;font-weight:700;font-size:.85rem;'; const panel=document.getElementById('psiPanel'); if(panel) panel.insertBefore(s, panel.firstChild); return s; })();
+  if (!raw){ status.textContent = "Please enter a URL."; return; }
+  const qs = `url=${encodeURIComponent(raw)}&strategy=${encodeURIComponent(strategy)}&category[]=performance&category[]=accessibility&category[]=seo&category[]=best-practices`;
+
+  async function tryProxy(){
+    try{
+      const r = await fetch(`${endpoint}?${qs}`);
+      if (!r.ok) return { proxy_error: true, status: r.status, body: await r.text() };
+      return await r.json();
+    }catch(e){ return { proxy_error: true, message: String(e) }; }
+  }
+  async function tryPublic(){
+    try{
+      const r = await fetch(`${apiPublic}?${qs}`);
+      if (!r.ok) return { proxy_error: true, status: r.status, body: await r.text() };
+      return await r.json();
+    }catch(e){ return { proxy_error: true, message: String(e) }; }
+  }
+
+  (async ()=>{
+    status.textContent = "Running PageSpeed…";
+    let data = await tryProxy();
+    if (data && (data.ok === false || data.proxy_error || data.error) ){ data = await tryPublic(); }
+    if (!data || (!data.lighthouseResult && !data.loadingExperience)){
+      status.textContent = "PSI request failed.";
+      renderPSI({}); return;
+    }
+    status.textContent = "";
+    renderPSI(data);
+  })();
+}
+window.runPSI = runPSI;
+
+
+  function renderPSI(json){
+    try{
+      const perfEl = document.getElementById('psiPerf');
+      const perf = json?.lighthouseResult?.categories?.performance?.score;
+      if (perfEl && typeof perf === 'number') perfEl.textContent = Math.round(perf*100) + ' / 100';
+
+      const fx = json?.loadingExperience?.metrics || {};
+      const LCPf = fx?.LARGEST_CONTENTFUL_PAINT_MS?.percentile ?? null;
+      const CLSf = (fx?.CUMULATIVE_LAYOUT_SHIFT_SCORE?.percentile ?? null)/100;
+      const INPf = fx?.INTERACTION_TO_NEXT_PAINT?.percentile ?? null;
+
+      const audits = json?.lighthouseResult?.audits || {};
+      const LCPlab = audits['largest-contentful-paint']?.numericValue ?? null;
+      const CLSlab = audits['cumulative-layout-shift']?.numericValue ?? null;
+      const INPlab = audits['interaction-to-next-paint']?.numericValue ?? null;
+
+      const LCP = LCPf || LCPlab || 0;
+      const CLS = (CLSf!=null ? CLSf : CLSlab) || 0;
+      const INP = INPf || INPlab || 0;
+
+      const lcpEl = document.getElementById('psiLcp');
+      const inpEl = document.getElementById('psiInp');
+      const clsEl = document.getElementById('psiCls');
+      const lcpBar = document.getElementById('psiLcpBar');
+      const inpBar = document.getElementById('psiInpBar');
+      const clsBar = document.getElementById('psiClsBar');
+
+      if (lcpEl) lcpEl.textContent = (LCP/1000).toFixed(2) + 's';
+      if (inpEl) inpEl.textContent = Math.round(INP) + 'ms';
+      if (clsEl) clsEl.textContent = (Math.round(CLS*1000)/1000).toFixed(3);
+
+      if (lcpBar) lcpBar.style.width = Math.min(100, Math.max(5, Math.round((LCP/4000)*100))) + '%';
+      if (inpBar) inpBar.style.width = Math.min(100, Math.max(5, Math.round((INP/500)*100))) + '%';
+      if (clsBar) clsBar.style.width = Math.min(100, Math.max(5, Math.round((CLS/0.25)*100))) + '%';
+    }catch(e){ console.error('PSI render error', e, json); }
+  }
+})();
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const btn = document.getElementById('analyzeBtn');
+  const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+  const panel = document.getElementById('psiPanel') || document.querySelector('section.psi');
+  function go(){
+    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
+    if (panel && panel.style.display === 'none') panel.style.display = '';
+    if (typeof window.runPSI === 'function'){ window.runPSI((input && input.value) || ''); }
+  }
+  if (btn){ btn.addEventListener('click', function(e){ e.preventDefault(); go(); }); }
+  if (input){ input.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); go(); } }); }
+});
+</script>
+
+
+<script>
+(function(){
+  // Provide a safe global analyze() that preserves any original implementation
+  const __origAnalyze = window.analyze;
+  window.analyze = function(){
+    // 1) Call the app's original analyze() if it exists
+    try{ if (typeof __origAnalyze === 'function') __origAnalyze(); }catch(_){}
+    // 2) Call SEMSEO_go() if available
+    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
+    // 3) Always try PSI
+    try{
+      const input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+      if (typeof window.runPSI === 'function'){ window.runPSI((input && input.value) || ''); }
     }catch(_){}
     return false;
   };
+})();
+</script>
+
+
+<script>
+// Ultra-robust Analyze wiring (capture phase + form submit + keydown)
+(function(){
+  function getUrlVal(){
+    var el = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+    return (el && el.value ? el.value.trim() : '');
+  }
+  function doAnalyze(){
+    try{ if (typeof window.analyze === 'function') { try{ window.analyze.__patched__ = true; }catch(e){} } }catch(e){}
+    try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(e){}
+    try{ if (typeof window.runPSI === 'function') window.runPSI(getUrlVal()); }catch(e){}
+    return false;
+  }
+
+  // 1) Capture click on button by id (works even if other handlers stop propagation)
+  window.addEventListener('click', function(e){
+    var t = e.target;
+    // walk up to button
+    while (t && t !== document){
+      if (t.id === 'analyzeBtn'){
+        e.preventDefault();
+        doAnalyze();
+        break;
+      }
+      t = t.parentNode;
+    }
+  }, true); // capture!
+
+  // 2) Enter key on URL input
+  document.addEventListener('keydown', function(e){
+    if ((e.key === 'Enter' || e.keyCode === 13)){
+      var a = e.target;
+      if (a && (a.id === 'analyzeUrl' || (a.closest && a.closest('#urlField')))){
+        e.preventDefault();
+        doAnalyze();
+      }
+    }
+  }, true);
+
+  // 3) Form submit (if any) — always run our flow
+  var f = document.getElementById('analyzeForm') || document.querySelector('form[id*="analy"]');
+  if (f){
+    f.addEventListener('submit', function(e){ e.preventDefault(); doAnalyze(); return false; }, true);
+  }
+
+  // 4) Ensure button is enabled
+  var btn = document.getElementById('analyzeBtn');
+  if (btn){ btn.removeAttribute('disabled'); btn.style.pointerEvents = 'auto'; btn.setAttribute('role','button'); btn.setAttribute('tabindex','0'); }
+})();
+</script>
+
+
+<script>
+(function(){
+  function wire(){
+    var btn = document.getElementById('analyzeBtn');
+    var input = document.getElementById('analyzeUrl') || document.querySelector('input[type="url"], input[name*="url"]');
+    if(!btn) return;
+    btn.addEventListener('click', function(e){
+      try{ e.preventDefault(); }catch(_){}
+      try{ if (typeof window.SEMSEO_go === 'function') window.SEMSEO_go(); }catch(_){}
+      try{ if (typeof window.runPSI === 'function') window.runPSI((input && input.value) || ''); }catch(_){}
+      return false;
+    });
+    if (input){
+      input.addEventListener('keydown', function(e){
+        if (e.key === 'Enter'){ e.preventDefault(); btn.click(); }
+      });
+    }
+  }
+  if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', wire); } else { wire(); }
 })();
 </script>
 
