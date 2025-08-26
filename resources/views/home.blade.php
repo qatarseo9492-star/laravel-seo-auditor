@@ -606,6 +606,12 @@ body::after{
   mix-blend-mode: screen;
 }
 
+
+/* Non-blocking overlays fix (do not intercept clicks) */
+.water-pct, .comp-pct, .bg-lines, .water-svg, .comp-svg {
+  pointer-events: none !important;
+}
+
 </style>
 </head>
 <body>
