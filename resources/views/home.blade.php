@@ -2701,5 +2701,139 @@ window.addEventListener('error', function(e){
 </script>
 <!-- ===== /Animated Category Icons ===== -->
 
+
+<!-- ===== Burning Fire Score Wheel for Checklist Categories ===== -->
+<style>
+  /* Make headers align icon + wheel + text nicely */
+  .checklist h3, .checklist .category-title, .checklist .group-title, .checklist [data-cat-title], .checklist .section-title, .checklist .title, .checklist .header{
+    display:flex; align-items:center; gap:.65rem;
+  }
+
+  .cat-wheel{
+    --size: 48px;
+    --thick: 6px;
+    --pct: 0;
+    --ang: calc(3.6deg * var(--pct));
+    position:relative; width:var(--size); height:var(--size);
+    border-radius:50%; display:inline-grid; place-items:center;
+    background:
+      radial-gradient(farthest-side, rgba(255,255,255,.06) calc(99% - var(--thick)), transparent calc(100% - var(--thick))),
+      conic-gradient(from -90deg, rgba(255,255,255,.08) var(--ang), rgba(255,255,255,.02) 0 360deg);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.12), 0 10px 24px rgba(0,0,0,.35);
+    overflow:visible;
+  }
+  .cat-wheel .val{
+    position:relative; z-index:3; font:800 12.5px/1.1 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    color:#fff; text-shadow:0 2px 10px rgba(0,0,0,.6);
+  }
+  /* Fire fill (masked to progress arc) */
+  .cat-wheel .fire{
+    position:absolute; inset:0; border-radius:50%; z-index:2;
+    background:
+      conic-gradient(
+        from var(--spin, -90deg),
+        #ff3d00 0%, #ff6a00 10%, #ffae00 20%, #ffd200 30%,
+        #ff3d00 40%, #ff6a00 50%, #ffae00 60%, #ffd200 70%,
+        #ff3d00 80%, #ff6a00 90%, #ffae00 100%);
+    -webkit-mask:
+      radial-gradient(farthest-side, transparent calc(100% - var(--thick)), #000 calc(100% - var(--thick) + .5px)),
+      conic-gradient(#000 0deg var(--ang), transparent var(--ang) 360deg);
+            mask:
+      radial-gradient(farthest-side, transparent calc(100% - var(--thick)), #000 calc(100% - var(--thick) + .5px)),
+      conic-gradient(#000 0deg var(--ang), transparent var(--ang) 360deg);
+    filter: saturate(1.35) brightness(1.05);
+    animation: fireSpin 8s linear infinite, fireFlicker 1.8s ease-in-out infinite;
+  }
+  /* Soft glowing halo following the filled arc */
+  .cat-wheel::before{
+    content:""; position:absolute; inset:-8px; border-radius:50%; z-index:1;
+    background:
+      conic-gradient(from var(--spin, -90deg),
+        rgba(255,77,0,.65), rgba(255,154,0,.65), rgba(255,210,0,.60), rgba(255,77,0,.65));
+    -webkit-mask:
+      radial-gradient(farthest-side, transparent calc(100% - var(--thick) - 8px), #000 calc(100% - var(--thick) - 7px)),
+      conic-gradient(#000 0deg var(--ang), transparent var(--ang) 360deg);
+            mask:
+      radial-gradient(farthest-side, transparent calc(100% - var(--thick) - 8px), #000 calc(100% - var(--thick) - 7px)),
+      conic-gradient(#000 0deg var(--ang), transparent var(--ang) 360deg);
+    filter: blur(12px) saturate(1.4) brightness(1.15);
+    opacity:.85;
+    animation: fireSpin 10s linear infinite, fireFlicker 2.2s ease-in-out infinite;
+  }
+  @keyframes fireSpin { to { transform: rotate(360deg); } }
+  @keyframes fireFlicker {
+    0%{ filter: saturate(1.2) brightness(1.0); }
+    50%{ filter: saturate(1.45) brightness(1.15); }
+    100%{ filter: saturate(1.25) brightness(1.0); }
+  }
+</style>
+<script>
+(function(){
+  function findCategoryHeaders(){
+    return Array.from(document.querySelectorAll(
+      '.checklist h3, .checklist .category-title, .checklist .group-title, .checklist [data-cat-title], .checklist .section-title, .checklist .title, .checklist .header'
+    ));
+  }
+  function categoryRootFromHeader(h){
+    // Go up to a reasonable container for this category
+    return h.closest('.card, .panel, .category, .group, section, .checklist') || h.parentElement;
+  }
+  function computeCategoryPct(root){
+    const inputs = root.querySelectorAll('input[type="checkbox"]');
+    const total = inputs.length;
+    const checked = Array.from(inputs).filter(i=> i.checked).length;
+    const pct = total ? Math.round((checked/total) * 100) : 0;
+    return {pct, total, checked};
+  }
+  function ensureWheelOnHeader(h){
+    if(h.querySelector('.cat-wheel')) return h.querySelector('.cat-wheel');
+    const wheel = document.createElement('span');
+    wheel.className = 'cat-wheel';
+    wheel.innerHTML = '<span class="fire"></span><b class="val">0%</b>';
+    // Insert as very first element (before icon, if any)
+    h.insertBefore(wheel, h.firstChild);
+    return wheel;
+  }
+  function updateWheel(wheel, pct){
+    wheel.style.setProperty('--pct', pct);
+    const val = wheel.querySelector('.val');
+    if(val) val.textContent = pct + '%';
+  }
+  function refreshAll(){
+    findCategoryHeaders().forEach(h=>{
+      const root = categoryRootFromHeader(h);
+      const {pct} = computeCategoryPct(root);
+      const wheel = ensureWheelOnHeader(h);
+      updateWheel(wheel, pct);
+    });
+  }
+  // Initial
+  refreshAll();
+  // On changes inside checklist
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.matches('.checklist input[type="checkbox"]')){
+      // refresh the category where it changed
+      const h = (e.target.closest('.card, .panel, .category, .group, section, .checklist') || document).querySelector('.category-title, h3, .group-title, [data-cat-title], .section-title, .title, .header');
+      if(h){
+        const root = h.closest('.card, .panel, .category, .group, section, .checklist') || h.parentElement;
+        const {pct} = (function(root){
+          const inputs = root.querySelectorAll('input[type="checkbox"]');
+          const total = inputs.length;
+          const checked = Array.from(inputs).filter(i=> i.checked).length;
+          return {pct: total ? Math.round((checked/total) * 100) : 0};
+        })(root);
+        const wheel = ensureWheelOnHeader(h);
+        updateWheel(wheel, pct);
+      } else {
+        refreshAll();
+      }
+    }
+  });
+  // Optional: recalc every few seconds if content is dynamic
+  setInterval(refreshAll, 5000);
+})();
+</script>
+<!-- ===== /Burning Fire Score Wheel ===== -->
+
 </body>
 </html>
