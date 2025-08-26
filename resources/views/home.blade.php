@@ -2727,5 +2727,47 @@ document.addEventListener('DOMContentLoaded', function(){
   }, 120);
 });
 </script>
+
+<script>
+function hvaiSwitchTab(id){
+  try{
+    document.querySelectorAll('.hvai-tab').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.hvai-pane').forEach(function(p){ p.classList.remove('active'); });
+    var btn = document.querySelector('.hvai-tab[data-tab="'+id+'"]');
+    var pane = document.getElementById('pane-'+id);
+    if(btn) btn.classList.add('active');
+    if(pane) pane.classList.add('active');
+  }catch(e){}
+}
+</script>
+
+<script>
+/* hvai unified improve handler */
+function hvaiOpenSuggestion(idx){
+  var box = document.getElementById('aiFlags');
+  var flags = (box && box._flags) || [];
+  var f = flags[idx]; if(!f) return;
+  var body = document.getElementById('hvaiModalBody');
+  var lang = (document.getElementById('hvaiLang')?.value)||'en';
+  var sug = makeSuggestionsFor(f.text, lang);
+  if(body){
+    body.innerHTML = '<div class="hvai-flag"><div style="margin-bottom:6px"><b>Original</b><br>'+escapeHTML(f.text)+'</div>' +
+                     '<div><b>Suggestions</b><ul style="margin-top:6px">'+ (sug.items||[]).map(x=>'<li>'+x+'</li>').join('') +'</ul></div>' +
+                     (sug.rewrite ? '<div style="margin-top:8px"><b>Rewritten Example</b><br>'+escapeHTML(sug.rewrite)+'</div>' : '') +
+                     '</div>';
+    document.getElementById('hvaiModal').style.display='flex';
+  }
+  hvaiSwitchTab('suggestions');
+}
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('button.hvai-suggest-btn[data-flag]');
+  if(btn){ hvaiOpenSuggestion(+btn.getAttribute('data-flag')); return; }
+  var card = e.target.closest('.hvai-flag');
+  if(card && !e.target.closest('button.hvai-suggest-btn')){
+    var idx = +card.getAttribute('data-idx');
+    hvaiOpenSuggestion(idx);
+  }
+});
+</script>
 </body>
 </html>
