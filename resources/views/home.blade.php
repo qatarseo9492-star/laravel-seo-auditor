@@ -452,6 +452,15 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @keyframes spinPulse{ 0%{ transform: rotate(0deg);} 100%{ transform: rotate(360deg);} }
 
 </style>
+
+<style>
+/* Fallback colorful panel */
+.hvai-v2.card.glassy{background: radial-gradient(1200px 500px at -10% -20%, rgba(96,165,250,.08), transparent 55%),
+radial-gradient(950px 480px at 110% -10%, rgba(167,139,250,.08), transparent 60%),
+radial-gradient(700px 520px at 30% 120%, rgba(52,211,153,.06), transparent 60%),
+rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
+</style>
+
 </head>
 <body>
 
@@ -1759,5 +1768,102 @@ window.addEventListener('error', function(e){
 });
 </script>
 
+<script>
+/* === HVAI v2: i18n + Suggestions === */
+(function(){
+  const I18N = {
+    en: {
+      great: "Great work — looks human!",
+      mid: "Pretty close — a few tweaks.",
+      bad: "Red zone — sounds AI-ish.",
+      suggestions: "Suggestions",
+      keep: "Keep going — you’re on the right track.",
+      s_ai_high: ["Vary sentence length and rhythm.","Add concrete details: dates, names, domain terms.","Trim generic fillers and hedge words.","Use idioms or locally flavored phrases."],
+      s_style_flat: ["Break long paragraphs into 2–3 lines.","Add a brief story or example.","Mix short and long sentences for cadence."],
+      s_repetitive: ["Replace repeated words with synonyms.","Swap predictable transitions for fresher ones."],
+    },
+    pt: {
+      great: "Ótimo trabalho — parece humano!",
+      mid: "Quase lá — alguns ajustes.",
+      bad: "Zona vermelha — soa artificial.",
+      suggestions: "Sugestões",
+      keep: "Continue — está no caminho certo.",
+      s_ai_high: ["Varie o comprimento das frases e o ritmo.","Inclua detalhes concretos: datas, nomes e termos do domínio.","Remova preenchimentos genéricos.","Use expressões locais/idiomáticas."],
+      s_style_flat: ["Divida parágrafos longos.","Adicione um exemplo curto ou história.","Alterne frases curtas e longas."],
+      s_repetitive: ["Troque repetições por sinônimos.","Evite conectivos previsíveis."],
+    },
+    ar: {
+      great: "عمل رائع — يبدو بشريًا!",
+      mid: "قريب جدًا — بعض اللمسات فقط.",
+      bad: "منطقة حمراء — يبدو آليًا.",
+      suggestions: "اقتراحات",
+      keep: "استمر — أنت على المسار الصحيح.",
+      s_ai_high: ["نوِّع طول الجمل وإيقاعها.","أضِف تفاصيل ملموسة: تواريخ، أسماء، مصطلحات.","احذف العبارات العامة المتكررة.","استخدم تعابير محلية دارجة."],
+      s_style_flat: ["قسّم الفقرات الطويلة.","أدرج مثالًا قصيرًا أو قصة.","نوِّع بين الجمل القصيرة والطويلة."],
+      s_repetitive: ["استبدل الكلمات المكررة بمرادفات.","غيّر أدوات الربط المتوقعة."],
+    }
+  };
+
+  function setPanelDir(lang){
+    const hvai = document.querySelector('.hvai');
+    if (!hvai) return;
+    hvai.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  }
+
+  function suggest(res, lang){
+    const L = I18N[lang] || I18N.en;
+    const arr = [];
+    const ai = Number(res?.aiPct ?? 0);
+    const human = Number(res?.humanPct ?? 0);
+    const style = Number(res?.stylometry ?? 50);
+    if (ai > 40) arr.push(...L.s_ai_high.slice(0,2));
+    if (style > 55 || style < 25) arr.push(...L.s_style_flat.slice(0,2));
+    if (human < 70) arr.push(...L.s_repetitive.slice(0,2));
+    if (!arr.length) arr.push(L.keep);
+    return { title: L.suggestions, items: arr.slice(0,4) };
+  }
+
+  // Re-wrap HVAI_V2 update so text is localized and suggestions generated
+  function wrapHVAI(){
+    if (!window.HVAI_V2) return;
+    const _compute = window.HVAI_V2.compute;
+    const _paint   = window.HVAI_V2.paint;
+    const _update  = window.HVAI_V2.update;
+    window.HVAI_V2.update = function(res){
+      window.__lastDet = res;
+      const sel  = document.getElementById('hvaiLang');
+      const lang = sel ? sel.value : 'en';
+      setPanelDir(lang);
+
+      // compute + paint (but replace message string to localized)
+      const score = _compute ? _compute(res||{}) : 0;
+      if (_paint) _paint(score);
+      const L = I18N[lang] || I18N.en;
+      const msg = document.getElementById('hvaiMsg');
+      if (msg){
+        msg.textContent = (score >= 80 ? L.great : score >= 60 ? L.mid : L.bad);
+      }
+
+      // meta chips
+      try{
+        const h = document.getElementById('metaHuman'); if(h) h.textContent = ((res?.humanPct??0)|0)+'%';
+        const a = document.getElementById('metaAI');    if(a) a.textContent = ((res?.aiPct??res?.aiLikePct??0)|0)+'%';
+        const c = document.getElementById('metaConf');  if(c) c.textContent = (res?.confidence? Math.round(res.confidence*100):'—');
+      }catch(e){}
+
+      // suggestions
+      const box = suggest(res||{}, lang);
+      const t = document.getElementById('hvaiSugTitle'); if (t) t.textContent = box.title;
+      const list = document.getElementById('hvaiSugList');
+      if (list){ list.innerHTML = box.items.map(x=>`<li>${x}</li>`).join(''); }
+
+      // call original for any downstream work
+      if (_update) try{ _update(res); }catch(e){}
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', wrapHVAI);
+})();
+</script>
 </body>
 </html>
