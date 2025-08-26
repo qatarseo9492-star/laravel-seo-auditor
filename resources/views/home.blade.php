@@ -992,23 +992,17 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
       
 <div class="hvai-tabpanes">
         <div class="hvai-pane active" id="pane-overall">
-          <div class="hvai-line">
-            <div class="label-badges">
-              <span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-overall-human">—%</b></span>
-              &nbsp;|&nbsp;
-              <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-overall-ai">—%</b></span>
-            </div>
-            <div class="hvai-scorebar">
+          <div class="hvai-scorebar">
               <span class="human" id="bar-overall-human"></span>
               <span class="ai" id="bar-overall-ai"></span>
             </div>
           </div>
         </div>
         <div class="hvai-pane" id="pane-ai-content">
-          <div id="aiFlags">Run analysis to see flagged sentences that may read AI-like.</div>
+          <div id="aiFlags"></div>
         </div>
         <div class="hvai-pane" id="pane-suggestions">
-          <div id="aiSuggestBox">Click a flagged sentence in “AI Content” to open detailed suggestions.</div>
+          <div id="aiSuggestBox"></div>
         </div>
       </div><div class="det-grid" id="detGrid"></div>
       <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
@@ -2131,6 +2125,7 @@ window.addEventListener('error', function(e){
     const _update  = window.HVAI_V2.update;
     window.HVAI_V2.update = function(res){
   
+  
   /* v3: robust mapping */
   try{
     var overallH = hvai_normPercent(res && (res.humanPct||res.human||res.human_like||res.overallHuman||res.overall));
@@ -2138,10 +2133,9 @@ window.addEventListener('error', function(e){
       var overallA = hvai_normPercent(res && (res.aiPct||res.ai||res.ai_like));
       overallH = overallA!==null ? (100-overallA) : (isFinite(window.__lastScore)? Math.round(window.__lastScore) : 0);
     }
-    // update gauge + store
     if (typeof setHVAIScore==='function') setHVAIScore(overallH);
 
-    // minis + overall dual bars
+    // mini wheels only (no dual bars now)
     (function(){
       var human = overallH, ai = 100-human;
       var circ = 2*Math.PI*26;
@@ -2151,7 +2145,6 @@ window.addEventListener('error', function(e){
       if(ma){ ma.style.strokeDasharray = String(circ); ma.style.strokeDashoffset = String(circ - (circ*ai/100)); }
       var mhN = document.getElementById('miniHumanNum'); if(mhN) mhN.textContent = human + '%';
       var maN = document.getElementById('miniAINum');   if(maN) maN.textContent = ai + '%';
-      if (typeof setModelHA==='function') setModelHA('overall', human, ai);
     })();
 
     try{
@@ -2767,6 +2760,20 @@ document.addEventListener('click', function(e){
     var idx = +card.getAttribute('data-idx');
     hvaiOpenSuggestion(idx);
   }
+});
+</script>
+
+<script>
+/* hvai flags mirror hydrate */
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    try{
+      var box = document.getElementById('aiFlags');
+      if(box && Array.isArray(box._flags) && box._flags.length){
+        renderFlags(box._flags);
+      }
+    }catch(e){}
+  }, 120);
 });
 </script>
 </body>
