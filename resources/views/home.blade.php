@@ -405,6 +405,43 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .psi-issues ul{margin:.2rem 0 0;padding-left:1rem}
 .psi-issues li{margin:.22rem 0}
 @media (max-width:768px){.psi-card{grid-column:span 12}}
+
+/* === Human vs AI: Burning Wheel Score === */
+.hvai .hvai-head .ico { filter: drop-shadow(0 0 8px rgba(255,255,255,.25)); }
+.hvai .hvai-head .ico-animated { animation: hueShift 6s linear infinite, floaty 5s ease-in-out infinite; }
+@keyframes hueShift { to { filter: hue-rotate(360deg) drop-shadow(0 0 10px rgba(255,255,255,.35)); } }
+@keyframes floaty { 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-4px);} }
+
+.hvai-wheel{ display:flex; justify-content:center; align-items:center; margin: 12px 0 18px; }
+.burn-wheel{ --size: 160px; --score: 0; --ring:#22c55e; --ring2:#16a34a; --glow:rgba(34,197,94,.6);
+  position:relative; width:var(--size); height:var(--size); border-radius:50%; isolation:isolate; }
+.burn-wheel .ring{ position:absolute; inset:0; border-radius:50%;
+  background:
+    conic-gradient(var(--ring) calc(var(--score)*1%), rgba(255,255,255,.1) 0);
+  mask: radial-gradient(circle at center, transparent 58%, black 59%);
+  -webkit-mask: radial-gradient(circle at center, transparent 58%, black 59%);
+  box-shadow: 0 0 22px var(--glow), inset 0 0 22px var(--glow);
+  transition: background .6s ease, box-shadow .6s ease; }
+.burn-wheel .score{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#eaf7ff; font-weight:800; }
+.burn-wheel .score span{ font-size:40px; line-height:1; letter-spacing:.5px; }
+.burn-wheel .score small{ font-size:14px; opacity:.85; }
+
+.burn-wheel .flame{ position:absolute; inset:10px; border-radius:50%;
+  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,.15), transparent 60%),
+              radial-gradient(circle at 70% 30%, rgba(255,255,255,.12), transparent 55%);
+  mix-blend-mode: screen; pointer-events:none; }
+.burn-wheel .dot{ position:absolute; width:10px; height:10px; border-radius:50%; background:var(--ring);
+  top:0; left:50%; transform-origin: calc(var(--size)/2 - 14px) calc(var(--size)/2 - 14px);
+  transform: translate(-50%, 8px) rotate(calc(var(--score)*3.6deg));
+  box-shadow: 0 0 10px var(--glow); transition: transform .6s ease; }
+
+.burn-wheel .caption{ text-align:center; margin-top: calc(var(--size) + 10px); font-size:.95rem; font-weight:700; color:#a6f7ff; text-shadow: 0 2px 6px rgba(0,0,0,.4);}
+
+/* color states */
+.burn-wheel.good{ --ring:#22c55e; --ring2:#16a34a; --glow:rgba(34,197,94,.6); }
+.burn-wheel.mid{  --ring:#f59e0b; --ring2:#d97706; --glow:rgba(245,158,11,.6); }
+.burn-wheel.bad{  --ring:#ef4444; --ring2:#dc2626; --glow:rgba(239,68,68,.6); }
+
 </style>
 </head>
 <body>
@@ -590,12 +627,22 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     <!-- 1) HUMAN vs AI (Ensemble) -->
     <section id="detectorPanel" class="hvai" style="display:none">
       <div class="hvai-head">
-        <i class="fa-solid fa-users-gear ico ico-purple"></i>
+        <i class="fa-solid fa-users-gear ico ico-purple ico-animated"></i>
         <h4>Human vs AI Content (Ensemble)</h4>
       </div>
       <div class="hvai-meta">
         <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
         <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
+      
+      <!-- Burning Wheel Score -->
+      <div class="hvai-wheel">
+        <div class="burn-wheel" role="img" aria-label="Human-likeness score">
+          <div class="flame"></div>
+          <div class="ring"></div>
+          <div class="dot"></div>
+          <div class="score"><span id="hvaiScore">0</span><small>%</small></div>
+          <div class="caption" id="hvaiCaption">Let’s test your content</div>
+        </div>
       </div>
 
       <!-- Animated Human vs AI bars -->
@@ -1137,7 +1184,21 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     return data;
   }
 
-  /* === Human vs AI rendering === */
+  
+  /* Burning wheel score setter */
+  window.setHVAIScore = function(score){
+    var wheel = document.querySelector('.burn-wheel'); if(!wheel) return;
+    var s = Math.max(0, Math.min(100, score||0));
+    wheel.style.setProperty('--score', s);
+    var num = document.getElementById('hvaiScore'); if(num) num.textContent = s;
+    var cap = document.getElementById('hvaiCaption');
+    wheel.classList.remove('good','mid','bad');
+    if (s >= 80){ wheel.classList.add('good'); if(cap) cap.textContent = 'Great work! Looks human-like.'; }
+    else if (s >= 60){ wheel.classList.add('mid'); if(cap) cap.textContent = 'Decent. A few tweaks to feel more human.'; }
+    else { wheel.classList.add('bad'); if(cap) cap.textContent = 'Red zone — rewrite to reduce AI signals.'; }
+  };
+
+/* === Human vs AI rendering === */
   function renderDetectors(res){
     var grid = document.getElementById('detGrid'); var confEl = document.getElementById('detConfidence');
     if(confEl) confEl.textContent = isFinite(res.confidence)? Math.round(res.confidence): '—';
@@ -1147,6 +1208,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if(av) av.textContent = isFinite(res.aiPct)? Math.round(res.aiPct)+'%':'—%';
     if(hf) hf.style.width = Math.max(0, Math.min(100, res.humanPct||0)) + '%';
     if(af) af.style.width = Math.max(0, Math.min(100, res.aiPct||0)) + '%';
+    if (window.setHVAIScore) window.setHVAIScore(Math.round(res.humanPct||0));
 
     var panel = document.getElementById('detectorPanel'); if(panel) panel.style.display='block';
     if(!grid) return; grid.innerHTML = '';
