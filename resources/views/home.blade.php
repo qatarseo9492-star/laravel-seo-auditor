@@ -122,6 +122,23 @@
 
 /* tabs flex override */
 .hvai .hvai-tabs{ display:flex; }
+
+/* v3 colorful bars + clickable flags */
+.hvai .hvai-line .label-badges{ display:flex; align-items:center; gap:12px; font-weight:800; }
+.hvai .hvai-line .label-badges .hlabel i,
+.hvai .hvai-line .label-badges .alabel i{
+  background: linear-gradient(135deg,#60a5fa,#a78bfa,#34d399,#f59e0b,#f43f5e);
+  -webkit-background-clip:text; background-clip:text; color: transparent;
+}
+.hvai .hvai-scorebar{ position:relative; height:12px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; }
+.hvai .hvai-scorebar>span.human{
+  background: linear-gradient(90deg,#22c55e,#10b981,#06b6d4,#60a5fa);
+}
+.hvai .hvai-scorebar>span.ai{
+  position:absolute; right:0; top:0;
+  background: linear-gradient(90deg,#f97316,#ef4444,#ec4899,#a855f7);
+}
+.hvai .hvai-flag{ cursor:pointer; }
 </style>
 
 
@@ -979,7 +996,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
 <div class="hvai-tabpanes">
   <div class="hvai-pane active" id="pane-overall">
     <div class="hvai-line">
-      <div>Human: <b id="score-overall-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-overall-ai">—%</b></div>
+      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-overall-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-overall-ai">—%</b></span></div></div>
       <div class="hvai-scorebar">
         <span class="human" id="bar-overall-human"></span>
         <span class="ai" id="bar-overall-ai"></span>
@@ -988,7 +1005,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
   </div>
   <div class="hvai-pane" id="pane-zerogpt">
     <div class="hvai-line">
-      <div>ZeroGPT — Human: <b id="score-zerogpt-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-zerogpt-ai">—%</b></div>
+      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-zerogpt-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-zerogpt-ai">—%</b></span></div></div>
       <div class="hvai-scorebar">
         <span class="human" id="bar-zerogpt-human"></span>
         <span class="ai" id="bar-zerogpt-ai"></span>
@@ -997,7 +1014,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
   </div>
   <div class="hvai-pane" id="pane-openai">
     <div class="hvai-line">
-      <div>OpenAI — Human: <b id="score-openai-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-openai-ai">—%</b></div>
+      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-openai-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-openai-ai">—%</b></span></div></div>
       <div class="hvai-scorebar">
         <span class="human" id="bar-openai-human"></span>
         <span class="ai" id="bar-openai-ai"></span>
@@ -1006,7 +1023,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
   </div>
   <div class="hvai-pane" id="pane-gptzero">
     <div class="hvai-line">
-      <div>GPTZero — Human: <b id="score-gptzero-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-gptzero-ai">—%</b></div>
+      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-gptzero-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-gptzero-ai">—%</b></span></div></div>
       <div class="hvai-scorebar">
         <span class="human" id="bar-gptzero-human"></span>
         <span class="ai" id="bar-gptzero-ai"></span>
@@ -1015,7 +1032,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
   </div>
   <div class="hvai-pane" id="pane-copyleaks">
     <div class="hvai-line">
-      <div>Copyleaks — Human: <b id="score-copyleaks-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-copyleaks-ai">—%</b></div>
+      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-copyleaks-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-copyleaks-ai">—%</b></span></div></div>
       <div class="hvai-scorebar">
         <span class="human" id="bar-copyleaks-human"></span>
         <span class="ai" id="bar-copyleaks-ai"></span>
@@ -1024,7 +1041,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
   </div>
   <div class="hvai-pane" id="pane-writerai">
     <div class="hvai-line">
-      <div>Writer — Human: <b id="score-writerai-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-writerai-ai">—%</b></div>
+      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-writerai-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-writerai-ai">—%</b></span></div></div>
       <div class="hvai-scorebar">
         <span class="human" id="bar-writerai-human"></span>
         <span class="ai" id="bar-writerai-ai"></span>
@@ -1033,7 +1050,7 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
   </div>
   <div class="hvai-pane" id="pane-sapling">
     <div class="hvai-line">
-      <div>Sapling — Human: <b id="score-sapling-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-sapling-ai">—%</b></div>
+      <div><div class="label-badges"><span class="hlabel"><i class="fa-solid fa-user"></i> Human: <b id="score-sapling-human">—%</b></span> &nbsp;|&nbsp; <span class="alabel"><i class="fa-solid fa-robot"></i> AI: <b id="score-sapling-ai">—%</b></span></div></div>
       <div class="hvai-scorebar">
         <span class="human" id="bar-sapling-human"></span>
         <span class="ai" id="bar-sapling-ai"></span>
@@ -2497,9 +2514,13 @@ function renderFlags(flags){
   if(!box) return;
   if(!flags.length){ box.innerHTML = '<span class="echip misc"><i class="fa-solid fa-circle-check"></i> No AI-like issues flagged.</span>'; return; }
   box.innerHTML = flags.map(function(f,idx){
-    var chips = f.reasons.map(r=>'<span class="b">'+r+'</span>').join(' ');
-    return '<div class="hvai-flag"><div><b>#'+(idx+1)+'</b> '+escapeHTML(f.text)+'</div><div class="badges">'+chips+'</div><div><button class="hvai-suggest-btn" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button></div></div>';
-  }).join('');
+  var chips = f.reasons.map(r=>'<span class="b">'+r+'</span>').join(' ');
+  return '<div class="hvai-flag" data-idx="'+idx+'">'
+    + '<div><b>#'+(idx+1)+'</b> '+escapeHTML(f.text)+'</div>'
+    + '<div class="badges">'+chips+'</div>'
+    + '<div><button class="hvai-suggest-btn" data-flag="'+idx+'"><i class="fa-solid fa-wand-magic-sparkles"></i> Improve</button></div>'
+    + '</div>';
+}).join('');
   box._flags = flags;
 }
 function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
@@ -2601,6 +2622,21 @@ document.addEventListener('DOMContentLoaded', function(){
       var hasH = document.getElementById('bar-'+id+'-human');
       if(hasH && !hasH.style.width) setModelHA(id, s, 100-s);
     });
+  }
+});
+</script>
+
+<script>
+/* v3 card click opens modal */
+document.addEventListener('click', function(e){
+  var card = e.target.closest('.hvai-flag');
+  if(!card) return;
+  // if clicking the button, let the button handler do its thing
+  if(e.target.closest('button.hvai-suggest-btn')) return;
+  var idx = +card.getAttribute('data-idx');
+  var btn = card.querySelector('button.hvai-suggest-btn');
+  if(btn && idx>=0){
+    btn.click();
   }
 });
 </script>
