@@ -661,7 +661,15 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
   window.SEMSEO.BUSY = false;
   window.SEMSEO.QUEUE = 0;
   function SEMSEO_go(){
-    if (window.SEMSEO.READY && typeof analyze === 'function') { analyze(); }
+  try{ if(window.SEMSEO) window.SEMSEO.READY = true; }catch(e){}
+  if (typeof analyze === 'function') { analyze(); }
+  else {
+    try{
+      const s=document.getElementById('analyzeStatus');
+      if(s) s.textContent='Analyze handler not found.';
+    }catch(e){}
+  }
+}
     else { window.SEMSEO.QUEUE++; const s=document.getElementById('analyzeStatus'); if(s) s.textContent='Initializing…'; }
   }
 
