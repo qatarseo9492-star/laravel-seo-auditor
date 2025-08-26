@@ -2166,5 +2166,123 @@ window.addEventListener('error', function(e){
 
 </script>
 
+
+<!-- ===== Checklist Improve Modal (lightweight, no deps) ===== -->
+<style>
+  .cl-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999}
+  .cl-modal.open{display:flex}
+  .cl-back{position:absolute;inset:0;background:rgba(4,8,22,.6);backdrop-filter:blur(4px)}
+  .cl-card{position:relative;max-width:780px;width:92%;background:linear-gradient(180deg,rgba(15,18,38,.96),rgba(15,18,38,.98));
+    border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 60px rgba(0,0,0,.45);border-radius:16px;padding:20px}
+  .cl-title{font:800 18px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#eaf1ff;margin:0 0 10px}
+  .cl-sub{font:500 13px/1.35 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#9fb2ff;margin:0 0 14px}
+  .cl-list{margin:0;padding-left:1.05rem;max-height:46vh;overflow:auto}
+  .cl-list li{margin:.35rem 0;color:#eaf1ff}
+  .cl-kicker{display:inline-flex;align-items:center;gap:.5rem;margin:.25rem 0 .65rem;color:#c2cffd;font-weight:700}
+  .cl-close{position:absolute;top:10px;right:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#eaf1ff;
+    font:700 12px/1 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:.4rem .55rem;border-radius:10px;cursor:pointer}
+  .cl-close:hover{background:rgba(255,255,255,.08)}
+</style>
+<div id="clModal" class="cl-modal" aria-hidden="true" role="dialog" aria-label="Checklist improvement tips">
+  <div class="cl-back" data-close="1"></div>
+  <div class="cl-card" role="document">
+    <button class="cl-close" type="button" data-close="1">Close ✕</button>
+    <h3 class="cl-title" id="clTitle">Improve</h3>
+    <div class="cl-sub" id="clScoreRow"></div>
+    <ul class="cl-list" id="clList"></ul>
+  </div>
+</div>
+<script>
+(function(){
+  // Category tips map (1..25). Keep concise, practical actions.
+  const CAT_TIPS = {
+    1: ['State the user intent in first 100 words', 'Answer the main question above the fold', 'Use one clear primary topic per page', 'Link to a hub page for this topic'],
+    2: ['Research related terms (PAA, autosuggest, synonyms)', 'Add 3–5 supportive subheadings with related phrases', 'Include long-tail questions users ask', 'Avoid keyword stuffing—use natural wording'],
+    3: ['Use one H1 only', 'Put the primary topic early in H1', 'Keep H1 ~45–70 chars and human-readable', 'Match H1 & page purpose'],
+    4: ['Add 3–6 FAQ Q&As that reflect search intent', 'Answer each in 1–3 short sentences', 'Mark up with FAQPage schema if appropriate', 'Place FAQs near the end or in a sidebar'],
+    5: ['Break text with short paragraphs (2–4 lines)', 'Use bullets, tables, and images with captions', 'Write in simple language and active voice', 'Add a TL;DR summary box'],
+    6: ['Keep title 50–60 chars with target keyword', 'Add benefit or number (e.g., 7 tips)', 'Avoid truncation and clickbait', 'Make each title unique site‑wide'],
+    7: ['Write a 140–160 char meta description', 'Include keyword + benefit + CTA', 'Avoid duplication across pages', 'Reflect the page’s actual content'],
+    8: ['Add a canonical tag to preferred URL', 'Avoid self‑referencing canonicals if not needed', 'Fix duplicate parameter pages', 'Ensure only one canonical per page'],
+    9: ['Include page in XML sitemap', 'Return 200 OK and allow indexing', 'Avoid noindex on important pages', 'Submit sitemap in Search Console'],
+    10:['Show author name & bio with expertise', 'Add date/updated stamp', 'Cite trustworthy sources', 'Include About/Contact/Editorial policy links'],
+    11:['Explain what’s unique vs. competitors', 'Add original insights, data, or examples', 'Use fresh screenshots or media', 'Cut thin or repetitive sections'],
+    12:['Verify facts and dates; link citations', 'Use up‑to‑date sources (last 12–24 months)', 'Quote statistics precisely', 'Avoid dead or low‑quality links'],
+    13:['Add at least 1–3 images or a short video', 'Compress and lazy‑load media', 'Use descriptive alt text and captions', 'Place media near related text'],
+    14:['Organize H2/H3 logically into clusters', 'One idea per section; avoid orphan headings', 'Use table of contents for long pages', 'Cross‑link cluster pages'],
+    15:['Add contextual internal links to hubs', 'Link from hubs back to this page', 'Use descriptive, natural anchor text', 'Fix orphan pages (no internal links)'],
+    16:['Make slug short and readable (e.g., /topic-guide)', 'Avoid dates/IDs unless needed', 'Use hyphens, no stopwords when possible', 'Keep lowercase & canonicalized'],
+    17:['Add breadcrumb navigation', 'Implement BreadcrumbList schema', 'Reflect logical site hierarchy', 'Show breadcrumbs above the H1'],
+    18:['Use responsive layout & fluid images', 'Tap targets ≥ 44px on mobile', 'Avoid horizontal scroll', 'Test at 360–414px wide'],
+    19:['Compress images (WebP/AVIF), minify CSS/JS', 'Defer non‑critical JS; inline critical CSS', 'Enable HTTP caching & CDN', 'Lazy‑load below‑the‑fold media'],
+    20:['LCP: optimize hero image & server TTFB', 'INP: reduce JS work and long tasks', 'CLS: set width/height for media & fonts', 'Monitor with PSI + field data'],
+    21:['Add a primary CTA matching intent', 'Use descriptive button labels', 'Place CTAs at top + end', 'Link to next step (signup, contact, guide)'],
+    22:['Declare the primary entity (name/type)', 'Use consistent naming across the page', 'Link to the entity’s official page', 'Add schema (e.g., Organization, Person)'],
+    23:['Mention related entities with short context', 'Link to authoritative sources', 'Avoid keyword lists—use sentences', 'Use a glossary or hover cards if needed'],
+    24:['Add the right schema (Article/FAQ/Product)', 'Validate in Rich Results Test', 'Avoid conflicting or duplicate types', 'Keep JSON‑LD up to date'],
+    25:['Show sameAs and Organization details', 'Add logo, address, phone (NAP)', 'Link to social profiles', 'Ensure footer/company page is complete']
+  };
+
+  function openModal(catIndex, anchorBtn){
+    const m = document.getElementById('clModal');
+    const title = document.getElementById('clTitle');
+    const scoreRow = document.getElementById('clScoreRow');
+    const list = document.getElementById('clList');
+    if(!m || !list) return;
+
+    // Use label text from the same <li>
+    let labelText = '';
+    const li = anchorBtn ? anchorBtn.closest('li') : null;
+    if(li){
+      const lbl = li.querySelector('label span');
+      if(lbl) labelText = lbl.textContent.trim();
+    }
+    if(!labelText) labelText = 'Checklist improvement';
+
+    // Pull numeric index and score if available
+    let idx = parseInt((anchorBtn && anchorBtn.getAttribute('data-id') || '').replace(/[^0-9]/g,''), 10);
+    if(!idx || !(idx in CAT_TIPS)) idx = Object.keys(CAT_TIPS)[0];
+
+    // Score badge content
+    let score = '—';
+    if(li){
+      const badge = li.querySelector('.score-badge');
+      if(badge) score = badge.textContent.trim();
+    }
+    title.textContent = 'Improve: ' + labelText;
+    scoreRow.textContent = (score !== '—') ? ('Current score: ' + score) : '';
+
+    // Build the list
+    const tips = CAT_TIPS[idx] || ['No tips available for this item yet.'];
+    list.innerHTML = tips.map(t => '<li>'+ t +'</li>').join('');
+
+    // Open
+    m.classList.add('open');
+    m.setAttribute('aria-hidden','false');
+
+    // Focus management
+    const closeBtn = m.querySelector('[data-close]');
+    setTimeout(()=>{ if(closeBtn) closeBtn.focus(); }, 0);
+  }
+
+  function closeModal(){
+    const m = document.getElementById('clModal');
+    if(!m) return;
+    m.classList.remove('open');
+    m.setAttribute('aria-hidden','true');
+  }
+
+  // Click binding (event delegation)
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest && e.target.closest('.improve-btn');
+    if(btn){ e.preventDefault(); openModal(null, btn); return; }
+    if(e.target && e.target.getAttribute && e.target.getAttribute('data-close')==='1'){ closeModal(); }
+  });
+  // ESC to close
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
+})();
+</script>
+<!-- ===== /Checklist Improve Modal ===== -->
+
 </body>
 </html>
