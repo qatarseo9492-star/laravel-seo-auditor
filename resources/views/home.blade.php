@@ -87,7 +87,7 @@
 .hvai .mini-gauge{ position:absolute; top:50%; transform:translateY(-50%); width:72px; height:72px; }
 .hvai .mini-human{ left:-84px; } .hvai .mini-ai{ right:-84px; }
 
-.hvai .hvai-tabs{ margin:8px auto 6px; gap:8px; flex-wrap:wrap; justify-content:center; }
+.hvai .hvai-tabs{ display:flex; margin:8px auto 6px; gap:8px; flex-wrap:wrap; justify-content:center; }
 .hvai .hvai-tab{ padding:6px 12px; border-radius:999px; font-weight:800; font-size:.85rem; }
 .hvai .hvai-tabpanes{ margin:6px auto 0; max-width:760px; width:100%; padding:10px; border-radius:14px; background:rgba(11,13,33,.28); border:1px solid rgba(255,255,255,.08); }
 .hvai .hvai-pane .hvai-line{ display:flex; align-items:center; justify-content:space-between; gap:10px; font-size:.92rem; }
@@ -119,6 +119,9 @@
 /* v3 layoutfix2 panes */
 .hvai .hvai-tabpanes{ margin:8px auto; max-width:780px; width:100%; }
 .hvai .hvai-line>div:first-child{ flex:1 1 auto; }
+
+/* tabs flex override */
+.hvai .hvai-tabs{ display:flex; }
 </style>
 
 
@@ -2163,6 +2166,11 @@ window.addEventListener('error', function(e){
     const _paint   = window.HVAI_V2.paint;
     const _update  = window.HVAI_V2.update;
     window.HVAI_V2.update = function(res){
+  try{
+    var baseScore = isFinite(res && res.humanPct) ? Math.round(res.humanPct) : (isFinite(window.__lastScore)? Math.round(window.__lastScore): 0);
+    if(typeof setHVAIScore==='function') setHVAIScore(baseScore);
+  }catch(e){};
+
       window.__lastDet = res;
       const sel  = document.getElementById('hvaiLang');
       const lang = sel ? sel.value : 'en';
@@ -2511,6 +2519,36 @@ document.addEventListener('DOMContentLoaded', function(){
       if(window.HVAI_V2 && typeof window.HVAI_V2.update==='function') window.HVAI_V2.update(res);
     }catch(e){}
   }, 120);
+});
+</script>
+
+<script>
+/* hvai tabs click */
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('.hvai-tab');
+  if(!btn) return;
+  var id = btn.getAttribute('data-tab');
+  if(!id) return;
+  document.querySelectorAll('.hvai-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.hvai-pane').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  var pane = document.getElementById('pane-'+id);
+  if(pane) pane.classList.add('active');
+});
+</script>
+
+<script>
+/* hvai init paint */
+document.addEventListener('DOMContentLoaded', function(){
+  var s = isFinite(window.__lastScore) ? Math.round(window.__lastScore) : 0;
+  if (typeof setHVAIScore==='function') setHVAIScore(s);
+  // hydrate dual bars with s if empty
+  if (typeof setModelHA==='function'){
+    ['overall','zerogpt','openai','gptzero','copyleaks','writerai','sapling'].forEach(function(id){
+      var hasH = document.getElementById('bar-'+id+'-human');
+      if(hasH && !hasH.style.width) setModelHA(id, s, 100-s);
+    });
+  }
 });
 </script>
 </body>
