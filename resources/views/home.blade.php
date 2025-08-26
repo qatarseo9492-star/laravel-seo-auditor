@@ -701,273 +701,148 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     
 
 <!-- 1) HUMAN vs AI Content (Ensemble) — v2025-08-26 • v5 wheel + tech lines + animated icon -->
-<section id="hvai" class="hvai" aria-label="Human vs AI Content (Ensemble)">
+
+<!-- HUMAN vs AI Content (Ensemble) — v17 CLEAN -->
+
+<!-- HUMAN vs AI Content (Ensemble) — v19 FEATHER (fast) -->
+<section id="hvai" class="hvai hvai-v19" aria-label="Human vs AI Content (Ensemble)">
   <style>
-  /* Ultra-fast hue animation and glow */
-  @property --h {
-    syntax: '<angle>';
-    inherits: false;
-    initial-value: 0deg;
-  }
-  @keyframes hvaiHue { to { --h: 360deg; } }
+  /* ===== HVAI v19 Feather: fast, minimal repaints ===== */
+  .hvai.hvai-v19{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
+  .hvai.hvai-v19 *{box-sizing:border-box}
 
-  /* ==== Human vs AI (Ensemble) — Visuals v5 (scoped) ==== */
+  /* Static tech lines (no animation) */
+  .hvai.hvai-v19 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
+    background:
+      linear-gradient(135deg, rgba(0,255,255,.10) 1px, transparent 1px) 0 0/18px 18px,
+      linear-gradient(45deg, rgba(255,0,180,.08) 1px, transparent 1px) 0 0/20px 20px,
+      radial-gradient(800px 600px at 85% 10%, rgba(67,169,255,.08), transparent 60%),
+      radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
+  }
 
-  /* Rainbow animated heading text */
-  .hvai .title .label{font-weight:800; font-size:clamp(18px, 2.1vw, 28px); line-height:1.15}
-  .hvai .title .label .rainbow{
-    background: linear-gradient(90deg,
-      #ff6a00, #ffd300, #2ad1a3, #1aa6ff, #5a6bff, #9659ff, #ff6aff, #ff6a00);
-    background-size: 300% 100%;
-    -webkit-background-clip: text; background-clip:text; color:transparent;
-    animation: rainbowShift 7s linear infinite;
-    -webkit-text-stroke: .6px rgba(0,0,0,.25);
-    text-shadow: 0 1px 0 rgba(0,0,0,.15);
-  }
-  .hvai .title .label::after{
-    content:""; display:block; height:2px; margin-top:6px; border-radius:2px;
-    background: linear-gradient(90deg, #ff6a00, #ffd300, #2ad1a3, #1aa6ff, #9659ff, #ff6aff);
-    opacity:.65;
-  }
+  .hvai.hvai-v19 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(240px, clamp(240px, 26vw, 360px)); align-items:center}
+  @media (max-width:1100px){ .hvai.hvai-v19 .grid{grid-template-columns:1fr} .hvai.hvai-v19 .wheel{order:-1; margin:6px auto 14px} }
+
+  /* Title */
+  .hvai.hvai-v19 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
+  .hvai.hvai-v19 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  .hvai.hvai-v19 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
   @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 
-  .hvai{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.45); overflow:hidden;}
-  .hvai .hvai-techlines{position:absolute; inset:-2px; z-index:0; pointer-events:none;
-    background:
-      /* cyan diagonal dashed */
-      repeating-linear-gradient(135deg, rgba(0,255,255,.14) 0 2px, rgba(0,0,0,0) 2px 18px),
-      /* magenta diagonal dashed */
-      repeating-linear-gradient(45deg, rgba(255,0,180,.12) 0 2px, rgba(0,0,0,0) 2px 20px),
-      /* glowing nodes */
-      radial-gradient(6px 6px at 20% 24%, rgba(0,255,255,.55), transparent 60%),
-      radial-gradient(6px 6px at 42% 70%, rgba(255,0,200,.45), transparent 60%),
-      radial-gradient(6px 6px at 88% 22%, rgba(0,255,190,.55), transparent 60%),
-      radial-gradient(6px 6px at 72% 86%, rgba(140,120,255,.50), transparent 60%),
-      /* subtle vignette + hues */
-      radial-gradient(900px 600px at 85% 10%, rgba(67,169,255,.10), transparent 60%),
-      radial-gradient(800px 600px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
-    filter: saturate(1.1);
-    opacity:.9;
-    animation: hvaiTechDrift 26s linear infinite;
-    mask-image: linear-gradient(to bottom, transparent, #000 18%, #000 82%, transparent);
-  }
-  @keyframes hvaiTechDrift{
-    0%{background-position:0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0}
-    100%{background-position:1200px 0, -800px 0, 140px 0, -90px 0, 60px 0, -60px 0, 0 0, 0 0}
-  }
+  /* Status badge (colorful, minimal effects) */
+  .hvai.hvai-v19 .status{margin:6px 0 12px}
+  .hvai.hvai-v19 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
+  .hvai.hvai-v19 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
+  .hvai.hvai-v19 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
+  .hvai.hvai-v19 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
+  .hvai.hvai-v19 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
 
-  .hvai .hvai-grid{position:relative; z-index:1; display:grid; gap:24px;
-    grid-template-columns: 1fr minmax(240px, clamp(240px, 24vw, 360px)); align-items:center;
-  }
-  @media (max-width: 1100px){
-    .hvai .hvai-grid{grid-template-columns:1fr}
-    .hvai{--wheel-size: clamp(200px, 22vw, 340px);} .hvai .hvai-wheel-wrap{order:-1; margin:6px auto 14px auto;}
-  }
+  /* Bars */
+  .hvai.hvai-v19 .row2{display:flex; gap:18px; flex-wrap:wrap}
+  .hvai.hvai-v19 .bar{flex:1 1 420px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:280px}
+  .hvai.hvai-v19 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
+  .hvai.hvai-v19 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
+  .hvai.hvai-v19 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
+  .hvai.hvai-v19 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
+  .hvai.hvai-v19 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
 
-  /* Title row with animated icon */
-  .hvai .title{display:flex; align-items:center; gap:14px; margin-bottom:8px}
-  .hvai .title .icon{width:28px; height:28px; flex:0 0 28px}
-  .hvai .title svg{display:block}
-  .hvai .title .label{font-weight:800; font-size:clamp(18px, 2.1vw, 28px)}
-  
-  @keyframes shimmer{0%{background-position:0%}100%{background-position:200%}}
-  .hvai .gradShift stop{animation: hue 7s linear infinite}
-  @keyframes hue{0%{stop-color:#ff6a00}50%{stop-color:#1aa6ff}100%{stop-color:#ff6a00}}
+  /* FEATHER WHEEL (SVG) — zero blur/filters, single repaint */
+  .feather-wheel{width:var(--wheel-size, clamp(240px, 26vw, 360px)); height:auto; display:block}
+  .feather-wheel .track{stroke:rgba(255,255,255,.12)}
+  .feather-wheel .arc{transform:rotate(-90deg); transform-origin:60px 60px; stroke-linecap:round}
+  .feather-wheel .ai{stroke:var(--aiColor,#7c5bff)}
+  .feather-wheel .human{stroke:var(--humanColor,#00f5c4)}
+  .feather-wheel .ai, .feather-wheel .human{stroke-dasharray: var(--dash, 0) 100}
+  /* Palette cycle: swap CSS variable every second (lightweight) */
+  .hvai.hvai-v19.live{ --aiColor:#ff6a00 }
+  @keyframes palette {
+    0%{ --aiColor:#ff6a00 } 10%{ --aiColor:#ffb700 } 20%{ --aiColor:#ffd300 } 30%{ --aiColor:#96e21a }
+    40%{ --aiColor:#2ad1a3 } 50%{ --aiColor:#1aa6ff } 60%{ --aiColor:#5a6bff } 70%{ --aiColor:#9659ff }
+    80%{ --aiColor:#ff6aff } 90%{ --aiColor:#ff5b8a } 100%{ --aiColor:#ff6a00 }
+  }
+  .hvai.hvai-v19.live .feather-wheel{ animation: palette 10s steps(10,end) infinite }
 
-  /* Wheel v5 — dual ring (AI outer / Human inner) with ticks */
-  .hvai{--wheel-size: clamp(200px, 22vw, 340px);} .hvai .hvai-wheel-wrap{position:relative; width:var(--wheel-size); aspect-ratio:1/1; margin-left:auto}
-  .hvai{--ring: 22px; --p: 0; --pH: 0}
-  .hvai .hvai-wheel-track, .hvai .hvai-arc-ai, .hvai .hvai-arc-human, .hvai .hvai-ticks{position:absolute; inset:0; border-radius:50%}
-  .hvai .hvai-wheel-track{
-    background: conic-gradient(from -90deg, rgba(255,255,255,.08) 0 100%);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring)), #000 calc(100% - var(--ring)));
-            mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring)), #000 calc(100% - var(--ring)));
-  }
-  /* Outer AI arc */
-  .hvai .hvai-arc-ai{
-    background:
-      conic-gradient(from -90deg,
-        #ff6a00 0%,
-        #ffae00 10%,
-        #ffd300 20%,
-        #96e21a 30%,
-        #2ad1a3 40%,
-        #1aa6ff 55%,
-        #5a6bff 70%,
-        #9659ff 85%,
-        #ff6aff calc(var(--p)*1%),
-        rgba(255,255,255,.06) calc(var(--p)*1%));
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring)), #000 calc(100% - var(--ring)));
-            mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring)), #000 calc(100% - var(--ring)));
-    filter: saturate(1.2) contrast(1.05);
-  
-    filter: hue-rotate(var(--h)) drop-shadow(0 0 14px rgba(255,255,255,.25));
-    animation: hvaiHue 1s steps(1,end) infinite;
-    will-change: filter;
-  }
-  /* Inner human arc (thin) */
-  .hvai .hvai-arc-human{
-    inset: calc(var(--ring) + 12px);
-    background:
-      conic-gradient(from -90deg,
-        rgba(255,255,255,.09) 0 calc(100% - var(--p)*1%),
-        #00f5c4 calc(100% - var(--p)*1%));
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 8px));
-            mask: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 calc(100% - 8px));
-    filter: drop-shadow(0 0 8px rgba(0,245,196,.35));
-  
-    filter: hue-rotate(var(--h)) drop-shadow(0 0 12px rgba(0,245,196,.35));
-    animation: hvaiHue 1s steps(1,end) infinite;
-    will-change: filter;
-  }
-  /* tick marks */
-  .hvai .hvai-ticks{
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring)), #000 calc(100% - var(--ring)));
-            mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring)), #000 calc(100% - var(--ring)));
-    background:
-      repeating-conic-gradient(from -90deg, rgba(255,255,255,.25) 0 1deg, transparent 1deg 6deg);
-    opacity:.35;
-  }
-
-  .hvai .hvai-wheel-center{
-    position:absolute; inset:calc(var(--ring) + 16px); border-radius:50%;
-    background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.12), rgba(10,12,20,.62));
-    display:grid; place-items:center; text-align:center; padding:10px;
-    box-shadow: inset 0 0 18px rgba(0,0,0,.35);
-  }
-  .hvai .kv{display:grid; gap:6px}
-  .hvai .row{display:flex; align-items:baseline; gap:8px; justify-content:center}
-  .hvai .kicker{font:700 11px/1.1 system-ui, -apple-system, Segoe UI, Roboto, "Inter", Arial; letter-spacing:.14em; opacity:.85; text-transform:uppercase}
-  .hvai .val{font:800 clamp(22px, 3.6vw, 44px)/1.0 system-ui, -apple-system, Segoe UI, Roboto, "Inter", Arial}
-  .hvai .val sup{font-size:.45em; opacity:.85}
-  .hvai .pill{display:inline-flex; align-items:center; gap:8px; padding:9px 12px; border-radius:999px; background:rgba(255,255,255,.06); backdrop-filter:blur(6px); border:1px solid rgba(255,255,255,.10); font-weight:700}
-  .hvai .dot{width:8px; height:8px; border-radius:50%}
-  .hvai .dot.ai{background:#9659ff; box-shadow:0 0 10px rgba(150,89,255,.7)}
-  .hvai .dot.human{background:#00f5c4; box-shadow:0 0 10px rgba(0,245,196,.7)}
-
-  /* Left column content */
-  .hvai .hvai-left{display:grid; gap:12px}
-  .hvai .badges{display:flex; gap:10px; flex-wrap:wrap}
-  .hvai .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08)}
-  .hvai .bars{display:grid; grid-template-columns:1fr 1fr; gap:16px}
-  @media (max-width: 900px){ .hvai .bars{grid-template-columns:1fr} }
-  .hvai .bar{background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06)}
-  .hvai .bar .label{font-weight:800; opacity:.9; margin-bottom:8px}
-  .hvai .bar .track{height:12px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden}
-  .hvai .bar .fill{height:100%; background:linear-gradient(90deg, #ff6a00, #ffd300, #2ad1a3, #1aa6ff, #9659ff); width:0%}
   </style>
 
-  <div class="hvai-techlines" aria-hidden="true"></div>
+  <div class="tech" aria-hidden="true"></div>
 
-  <div class="hvai-grid">
-    <!-- LEFT: Title + badges + bars -->
-    <div class="hvai-left">
+  <div class="grid">
+    <div class="left">
       <div class="title">
-        <!-- Animated colorful icon -->
-        <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
-          <defs>
-            <linearGradient id="g1" class="gradShift" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%"/>
-              <stop offset="50%"/>
-              <stop offset="100%"/>
-            </linearGradient>
-            <linearGradient id="g2" class="gradShift" x1="1" y1="0" x2="0" y2="1">
-              <stop offset="0%"/>
-              <stop offset="100%"/>
-            </linearGradient>
-          </defs>
-          <!-- human -->
-          <circle cx="20" cy="22" r="8" fill="url(#g1)"/>
-          <rect x="12" y="32" width="16" height="14" rx="7" fill="url(#g2)"/>
-          <!-- bot -->
-          <rect x="36" y="16" width="16" height="16" rx="4" fill="url(#g1)"/>
-          <circle cx="42" cy="24" r="2" fill="#0ff"/>
-          <circle cx="50" cy="24" r="2" fill="#f0f"/>
-          <rect x="38" y="34" width="12" height="12" rx="6" fill="url(#g2)"/>
-        </svg>
-        <div class="label"><span class="rainbow">Human vs AI Content (Ensemble)</span></div>
+        <div class="txt"><span class="rainbow">Human vs AI Content (Ensemble)</span></div>
       </div>
 
       <div id="hvaiStatus" class="status neutral" aria-live="polite">
-      <span class="status-badge">
-        <span class="status-glow" aria-hidden="true"></span>
-        <span class="status-ico" aria-hidden="true">⌛</span>
-        <span class="status-txt">Waiting for analysis…</span>
-      </span>
-    </div>
+        <span class="status-badge"><span class="ico">⌛</span><span class="txt">Waiting for analysis…</span></span>
+      </div>
+
       <div class="badges">
-        <div class="badge"><strong>🛡️ Confidence:</strong> <span id="hvaiConf">0</span>%</div>
+        <div class="badge">🛡️ <strong>Confidence:</strong> <span id="hvaiConf">0</span>%</div>
         <div class="badge">ℹ️ Higher bar = more AI-like</div>
       </div>
 
-      <div class="bars">
-        <div class="bar"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div></div>
-        <div class="bar"><div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div><div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div></div>
-        <div class="bar"><div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div><div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div></div>
-        <div class="bar"><div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div><div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div></div>
-        <div class="bar"><div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div><div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div></div>
-        <div class="bar"><div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div><div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div></div>
+      <div class="row2" id="hvaiBars">
+        <div class="bar" data-key="humanLike">
+          <div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div>
+          <div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div>
+        </div>
+        <div class="bar" data-key="lexical">
+          <div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div>
+          <div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div>
+        </div>
+        <div class="bar" data-key="burst">
+          <div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div>
+          <div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div>
+        </div>
+        <div class="bar" data-key="digits">
+          <div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div>
+          <div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div>
+        </div>
+        <div class="bar" data-key="repetition">
+          <div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div>
+          <div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div>
+        </div>
+        <div class="bar" data-key="entropy">
+          <div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div>
+          <div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div>
+        </div>
       </div>
+
       <small>Source: local ensemble (no external APIs).</small>
     </div>
 
-    <!-- RIGHT: Dual-ring wheel -->
-    <div class="hvai-wheel-wrap" aria-hidden="false">
-      <!-- Bleeding Colors Wheel -->
-      <div class="wheel-bleed-base"></div>
-      <div class="wheel-bleed-ink"></div>
-      <div class="wheel-bleed-spread"></div>
-      <div class="wheel-bleed-drops"></div>
-      <div class="wheel-bleed-bloom"></div>
-      <div class="wheel-bleed-spark"></div>
-      <div class="wheel-bleed-sweep"></div>
-<div class="hvai-wheel-center">
-        <div class="kv">
-          <div class="row"><span class="pill"><span class="dot ai"></span>AI‑like</span> <span class="val"><span id="hvaiAIVal">0</span><sup>%</sup></span></div>
-          <div class="row"><span class="pill"><span class="dot human"></span>Human‑like</span> <span class="val"><span id="hvaiHumanVal">0</span><sup>%</sup></span></div>
-        </div>
-      </div>
+    <div class="wheel">
+      <!-- Feather SVG wheel -->
+      <svg viewBox="0 0 120 120" class="feather-wheel" id="featherWheel">
+        <!-- tracks -->
+        <circle class="track" cx="60" cy="60" r="46" stroke-width="12" fill="none" />
+        <circle class="track" cx="60" cy="60" r="36" stroke-width="8" fill="none" />
+        <!-- arcs (use pathLength to allow % dasharray) -->
+        <circle class="arc ai" cx="60" cy="60" r="46" stroke-width="12" fill="none" pathLength="100" style="--dash:0" />
+        <circle class="arc human" cx="60" cy="60" r="36" stroke-width="8" fill="none" pathLength="100" style="--dash:0" />
+        <!-- labels (light DOM so no heavy layout) -->
+        <g font-family="Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial" font-weight="800" text-anchor="middle" fill="#EAF1FF">
+          <text id="aiText" x="60" y="54" font-size="18">AI‑like <tspan id="hvaiAIVal">0</tspan>%</text>
+          <text id="hText" x="60" y="78" font-size="18">Human‑like <tspan id="hvaiHumanVal">0</tspan>%</text>
+        </g>
+      </svg>
     </div>
   </div>
 
-  
-  
-  
-  
-  
   <script>
-  // ===== v16: fallback subs from AI%, colorful badges, legacy cleanup =====
-
-  // Derive sub-scores when only AI% is known (keeps UI informative)
-  function deriveSubsFromAI(pAI){
-    var pH = 100 - pAI;
-    // Heuristic mapping (bounded 0..100)
-    function clamp(v){ return Math.max(0, Math.min(100, Math.round(v))); }
-    return {
-      humanLike: clamp(pH),
-      lexical:   clamp(30 + pH*0.6),      // more human -> richer vocab
-      burst:     clamp(25 + pH*0.7),      // more human -> higher burst
-      digits:    clamp(10 + (100-pH)*0.3),// more AI -> more digits (slightly)
-      repetition:clamp(50 - pH*0.4 + 20), // more human -> less repetition
-      entropy:   clamp(35 + pH*0.45)      // more human -> higher entropy
-    };
-  }
-
-  // Badge logic (based on Human-like %)
-  function setStatusByHuman(humanPct){
-    var st  = document.getElementById('hvaiStatus'); if(!st) return;
-    var txt = st.querySelector('.status-txt');
-    var ico = st.querySelector('.status-ico');
+  // ===== v19 Feather logic =====
+  function setBadge(h){ 
+    var st=document.getElementById('hvaiStatus'); if(!st) return;
+    var txt=st.querySelector('.txt'); var ico=st.querySelector('.ico');
     st.classList.remove('neutral','good','warn','bad');
-    if(humanPct >= 80){ st.classList.add('good'); if(txt) txt.textContent='Great Work'; if(ico) ico.textContent='✅'; }
-    else if(humanPct >= 60){ st.classList.add('warn'); if(txt) txt.textContent='Need More Hard work on content'; if(ico) ico.textContent='🟡'; }
+    if(h>=80){ st.classList.add('good'); if(txt) txt.textContent='Great Work'; if(ico) ico.textContent='✅'; }
+    else if(h>=60){ st.classList.add('warn'); if(txt) txt.textContent='Need More Hard work on content'; if(ico) ico.textContent='🟡'; }
     else { st.classList.add('bad'); if(txt) txt.textContent='Needs Rewrite the Content'; if(ico) ico.textContent='✍️'; }
   }
 
-  // Update bar helper
   function updateBars(subs){
     if(!subs) return;
-    var map = [
+    var map=[
       ['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],
       ['hvaiBarLex','hvaiValLex', subs.lexical],
       ['hvaiBarBurst','hvaiValBurst', subs.burst],
@@ -975,66 +850,90 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       ['hvaiBarRep','hvaiValRep', subs.repetition],
       ['hvaiBarEnt','hvaiValEnt', subs.entropy],
     ];
-    map.forEach(function(row){
-      var fill = document.getElementById(row[0]);
-      var num  = document.getElementById(row[1]);
-      var val  = Math.max(0, Math.min(100, Math.round(row[2]||0)));
-      if(fill) fill.style.width = val + '%';
-      if(num)  num.textContent = val;
-    });
-    // remember
-    window.__hvaiLastSubs = subs;
+    map.forEach(function(r){ var f=document.getElementById(r[0]); var n=document.getElementById(r[1]);
+      var v=Math.max(0,Math.min(100,Math.round(r[2]||0))); if(f) f.style.width=v+'%'; if(n) n.textContent=v; });
   }
 
-  // Wheel + badge + human bar sync
-  window.updateHVAIScore = function(pctAI){
-    var p = Math.max(0, Math.min(100, Math.round(pctAI)));
-    var pH = 100 - p;
-    var root = document.querySelector('#hvai');
-    if(root){ root.style.setProperty('--p', p); root.style.setProperty('--pH', pH); }
-    var a = document.getElementById('hvaiAIVal'); if(a) a.textContent = p;
-    var h = document.getElementById('hvaiHumanVal'); if(h) h.textContent = pH;
-    var hb = document.getElementById('hvaiBarHuman'); if(hb) hb.style.width = pH+'%';
-    var hNum = document.getElementById('hvaiValHumanBar'); if(hNum) hNum.textContent = pH;
-    setStatusByHuman(pH);
+  function deriveSubs(pAI){
+    var h=100-pAI, clamp=v=>Math.max(0,Math.min(100,Math.round(v)));
+    return { humanLike:clamp(h), lexical:clamp(35+h*0.55), burst:clamp(25+h*0.7), digits:clamp(10+(100-h)*0.3), repetition:clamp(60-h*0.4), entropy:clamp(35+h*0.45) };
+  }
 
-    // If no subs were computed yet, derive from AI% so bars aren't empty
-    if(!window.__hvaiLastSubs){
-      updateBars(deriveSubsFromAI(p));
+  window.updateHVAIScore=function(pAI){
+    var p=Math.max(0,Math.min(100,Math.round(pAI||0))), h=100-p;
+    var wheel=document.getElementById('featherWheel');
+    if(wheel){
+      var ai=wheel.querySelector('.arc.ai'); var hu=wheel.querySelector('.arc.human');
+      if(ai) ai.style.setProperty('--dash', p);
+      if(hu) hu.style.setProperty('--dash', h);
     }
+    var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p;
+    var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h;
+    setBadge(h);
+    updateBars(deriveSubs(p));
   };
 
-  // Keep hvaiCompute for real analysis -> precise subs
-  if(typeof hvaiCompute !== 'function'){
-    window.hvaiCompute = function(text){
-      try{
-        // If previous detectUltra present, use it; else fallback to derived
-        if(typeof detectUltra === 'function'){
-          var r = detectUltra(text||'');
-          updateHVAIScore(r.ai);
-          updateBars(r.subs || deriveSubsFromAI(r.ai));
-          var c = document.getElementById('hvaiConf'); if(c) c.textContent = r.conf||0;
-          return r;
-        }else{
-          var fake = { ai: 50, conf: 70 }; // basic placeholder if detector missing
-          updateHVAIScore(fake.ai);
-          updateBars(deriveSubsFromAI(fake.ai));
-          var c2 = document.getElementById('hvaiConf'); if(c2) c2.textContent = fake.conf;
-          return fake;
-        }
-      }catch(e){ console.warn('HVAI compute error', e); return null; }
-    }
+  // Optional: precise compute if text is provided
+  function detectUltra(text){
+    text=(text||'').replace(/\s+/g,' ').trim();
+    var len=text.length; if(len<40) return {ai:0,conf:0,subs:null};
+    var s=text.split(/(?<=[.!?])\s+/).filter(Boolean);
+    var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]);
+    var types=new Set(t);
+    var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100;
+    var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;}
+    var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100;
+    var sl=s.map(x=>(x.match(/\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length);
+    var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100;
+    var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; }
+    for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100;
+    var digits=(text.match(/\\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100;
+    function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));}
+    var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words));
+    var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100;
+    var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + (1-Math.abs(0.42-Math.min(0.9,(t.filter(x=>new Set(['the','and','of','to','a','in','is','it','that','for','on','you','with','as','are','this','be','or','by','an','from','at','have','not','was','but','they','we','can','if','will','your','about']).has(x)).length/Math.max(1,t.length)))/0.42))*.12 + digS*.10 + readS*.15;
+    var ai=Math.max(0,Math.min(100,100-human));
+    var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) };
+    var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length;
+    var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length;
+    var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10));
+    return {ai:Math.round(ai), conf:Math.round(conf), subs};
   }
 
-  // Reset state
-  (function reset(){
-    window.__hvaiLastSubs = null;
-    updateHVAIScore(0);
-    updateBars(deriveSubsFromAI(0));
-    var c = document.getElementById('hvaiConf'); if(c) c.textContent = 0;
+  window.hvaiCompute=function(text){
+    try{ var r=detectUltra(text||''); updateHVAIScore(r.ai); updateBars(r.subs); var c=document.getElementById('hvaiConf'); if(c) c.textContent=r.conf; return r; }
+    catch(e){ console.warn('hvaiCompute error',e); return null; }
+  };
+
+  // Activate animations only when visible & idle
+  (function(){
+    var root=document.querySelector('.hvai.hvai-v19');
+    if(!root) return;
+    var start=function(){ root.classList.add('live'); };
+    var onView=function(entries,obs){ entries.forEach(function(en){ if(en.isIntersecting){ setTimeout(start, 200); obs.disconnect(); } }); };
+    if('IntersectionObserver' in window){ new IntersectionObserver(onView, {rootMargin:'0px 0px -20% 0px'}).observe(root); }
+    else { setTimeout(start, 600); }
   })();
+
+  // Minimal watchers (disconnect after first compute)
+  (function(){
+    var sels=['#analysisResults','.analysis-results','#results','.results','#output','.output','#report','.report','#contentPreview','.content-preview','.report-body'];
+    var targets=sels.map(s=>document.querySelector(s)).filter(Boolean);
+    if(!targets.length) return;
+    var done=false;
+    var mo=new MutationObserver(function(){
+      if(done) return;
+      for(var el of targets){ var txt=(el.innerText||'').replace(/\\s+/g,' ').trim(); if(txt && txt.length>120){ done=true; try{ mo.disconnect(); }catch(_){ } hvaiCompute(txt); return; } }
+    });
+    targets.forEach(t=>mo.observe(t,{subtree:true,childList:true,characterData:true}));
+  })();
+
+  // Init
+  (function(){ updateHVAIScore(0); var c=document.getElementById('hvaiConf'); if(c) c.textContent=0; })();
   </script>
 </section>
+
+
 
 
 
