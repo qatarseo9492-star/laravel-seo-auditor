@@ -142,11 +142,7 @@
 
 /* v3 checklist affordance */
 .improve, [data-improve="true"], .checklist-improve{ cursor:pointer; }
-
-/* hide leftover suggestions */
-#hvaiModal, #pane-suggestions, #aiSuggestBox { display:none !important; visibility:hidden !important; }
 </style>
-
 
 
 <meta charset="utf-8"/>
@@ -2321,6 +2317,14 @@ window.addEventListener('error', function(e){
 </script>
 
 
+<div id="hvaiModal" role="dialog" aria-modal="true" aria-label="AI Suggestions">
+  <div class="box">
+    <div class="close" id="hvaiModalClose"><i class="fa-solid fa-xmark"></i></div>
+    <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Suggestions</h3>
+    <div id="hvaiModalBody"></div>
+  </div>
+</div>
+
 <script>
 /* === Tech lines background (canvas) === */
 (function(){
@@ -2816,6 +2820,58 @@ document.addEventListener('DOMContentLoaded', function(){
   // Load-ready
   window.addEventListener('load', function(){
     if (window.SEMSEO) window.SEMSEO.READY = true;
+  });
+})();
+</script>
+
+<script>
+/* v3 analyze observer */
+(function(){
+  function status(msg){
+    var s = document.getElementById('analyzeStatus');
+    if(s) s.textContent = msg;
+  }
+  function startAnalyze(){
+    try{
+      status('Starting analysis…');
+      if (window.SEMSEO) window.SEMSEO.READY = true;
+      if (typeof analyze === 'function') { analyze(); return; }
+      if (typeof SEMSEO_go === 'function') { SEMSEO_go(); return; }
+      status('Analyze handler not found.');
+    }catch(err){
+      status('Analyze error: '+(err && err.message ? err.message : err));
+    }
+  }
+  function bindAnalyze(){
+    var candidates = document.querySelectorAll('#analyzeBtn, .btn-analyze, [data-action="analyze"]');
+    for (var i=0;i<candidates.length;i++){
+      var b = candidates[i];
+      if(!b) continue;
+      b.removeAttribute('disabled');
+      b.style.pointerEvents = 'auto';
+      if(!b.__hvaiBound){
+        b.addEventListener('click', function(e){ e.preventDefault(); startAnalyze(); }, {capture:false});
+        b.__hvaiBound = true;
+      }
+    }
+  }
+  // Initial bind + observe DOM mutations
+  document.addEventListener('DOMContentLoaded', function(){
+    bindAnalyze();
+    // Enter key in URL field
+    document.addEventListener('keydown', function(e){
+      if(e.key !== 'Enter') return;
+      var el = document.activeElement;
+      if(!el) return;
+      if(el.id === 'analyzeUrl' || (el.closest && el.closest('#analyzeUrl'))){
+        e.preventDefault();
+        startAnalyze();
+      }
+    }, false);
+    var mo = new MutationObserver(function(){ bindAnalyze(); });
+    mo.observe(document.body, {childList:true, subtree:true});
+    // Force READY after load in case other scripts rely on it
+    window.addEventListener('load', function(){ if(window.SEMSEO) window.SEMSEO.READY = true; });
   });
 })();
 </script>
