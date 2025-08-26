@@ -2,6 +2,65 @@
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 <head>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+/* === Upgrade: Colorful Headings (non-invasive) === */
+.hvai .hvai-head h4,
+.readability .read-head h4,
+.entities .entities-head h4,
+.psi .psi-head h4{
+  background: linear-gradient(92deg,#60a5fa,#a78bfa,#34d399,#f59e0b,#f43f5e,#60a5fa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 900;
+  letter-spacing: .2px;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.3));
+}
+
+/* === Upgrade: Pinterest-style neon aura for gauge === */
+.neon-gauge::before{
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border-radius: 999px;
+  background: conic-gradient(from 0deg, #60a5fa, #a78bfa, #34d399, #f59e0b, #f43f5e, #60a5fa);
+  -webkit-mask: radial-gradient(transparent 64px, #000 65px);
+          mask: radial-gradient(transparent 64px, #000 65px);
+  filter: blur(6px) saturate(1.2);
+  opacity: .45;
+  animation: spinAura 12s linear infinite;
+  pointer-events: none;
+}
+@keyframes spinAura{ to{ transform: rotate(360deg); } }
+
+/* === Upgrade: Language pill (uses existing HVAI i18n) === */
+.hvai-v2-head{
+  position: relative;
+}
+#hvaiLang{
+  appearance: none;
+  -webkit-appearance: none;
+  font: 700 12px/1 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  padding: 6px 28px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.18);
+  background:
+    linear-gradient(135deg,rgba(96,165,250,.18),rgba(167,139,250,.12)) padding-box,
+    linear-gradient(135deg,rgba(255,255,255,.28),rgba(255,255,255,.08)) border-box;
+  color: #eaf7ff;
+  position: absolute;
+  right: 0;
+  top: -4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25), 0 0 10px rgba(96,165,250,.15) inset;
+  cursor: pointer;
+}
+#hvaiLang:after{ content:""; }
+#hvaiLang option{ color:#0b0d21; }
+#hvaiLang:focus{ outline: none; box-shadow: 0 0 0 6px rgba(96,165,250,.15); }
+</style>
+
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -653,7 +712,20 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       <div class="hvai-v2-head">
         <div class="badge-model" title="Ensemble v2 · Hybrid (Heuristic + Entropy + Classifier)">
           <span class="dot"></span> Ensemble v2
-        </div>
+        
+      <select id="hvaiLang" aria-label="Language">
+        <option value="en">English</option>
+        <option value="es">Español</option>
+        <option value="pt">Português</option>
+        <option value="de">Deutsch</option>
+        <option value="ar">العربية</option>
+        <option value="ur">اردو</option>
+        <option value="hi">हिंदी</option>
+        <option value="tr">Türkçe</option>
+        <option value="fa">فارسی</option>
+      </select>
+    
+      </div>
         <div class="model-note">Hybrid signal blend for stable scores</div>
       </div>
 
@@ -1865,5 +1937,36 @@ window.addEventListener('error', function(e){
   document.addEventListener('DOMContentLoaded', wrapHVAI);
 })();
 </script>
+
+<script>
+(function(){
+  function applyLang(val){
+    try{
+      var html = document.documentElement;
+      html.setAttribute('lang', val);
+      html.setAttribute('data-lang', val);
+      localStorage.setItem('hvaiLang', val);
+      if (typeof setPanelDir === 'function') setPanelDir(val);
+      if (window.HVAI_V2 && typeof window.HVAI_V2.update === 'function' && window.__lastDet){
+        window.HVAI_V2.update(window.__lastDet);
+      } else {
+        // Update message if available
+        var L = (window.I18N && window.I18N[val]) || (window.I18N && window.I18N.en) || {};
+        var msg = document.getElementById('hvaiMsg');
+        if (msg && L.great) msg.textContent = L.great;
+      }
+    }catch(e){ /* silent */ }
+  }
+  document.addEventListener('DOMContentLoaded', function(){
+    var sel = document.getElementById('hvaiLang');
+    if (!sel) return;
+    var saved = localStorage.getItem('hvaiLang') || document.documentElement.getAttribute('data-lang') || 'en';
+    sel.value = saved;
+    applyLang(saved);
+    sel.addEventListener('change', function(){ applyLang(sel.value); });
+  });
+})();
+</script>
+
 </body>
 </html>
