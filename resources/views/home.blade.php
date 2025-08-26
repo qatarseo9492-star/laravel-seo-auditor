@@ -1,3 +1,4 @@
+
 {{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
@@ -150,6 +151,55 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
 
 /* ==== Human vs AI (Ensemble) — upgraded ==== */
+/* ==== Human vs AI (Ensemble) — v2 visuals (multicolor wheel) ==== */
+.hvai.hvai--v2{position:relative;overflow:hidden;background:radial-gradient(1200px 900px at 110% -10%, rgba(76,0,255,.15), transparent 60%)}
+.hvai .hvai-canvas{position:absolute;inset:-40px -20px -20px -20px;pointer-events:none;z-index:0}
+.hvai .hvai-body, .hvai .hvai-head, .hvai .hvai-meta, .hvai .det-note{position:relative;z-index:1}
+.hvai .hvai-wheel{position:absolute;top:-40px;right:-40px;width:360px;height:360px;display:grid;place-items:center;
+  --pct:0;
+  --ang: calc((var(--pct) * 1deg) * 3.6);
+  background:
+    conic-gradient(from -90deg at 50% 50%,
+      #ef4444 0turn,
+      #f97316 .08turn,
+      #f59e0b .16turn,
+      #eab308 .24turn,
+      #84cc16 .33turn,
+      #22c55e .42turn,
+      #10b981 .50turn,
+      #06b6d4 .58turn,
+      #3b82f6 .66turn,
+      #8b5cf6 .75turn,
+      #d946ef .83turn,
+      #f43f5e .92turn,
+      #ef4444 1turn);
+  -webkit-mask: radial-gradient(circle at 50% 50%, #0000 62%, #000 63%),
+                 conic-gradient(from -90deg, #000 0 var(--ang), #0000 var(--ang));
+          mask: radial-gradient(circle at 50% 50%, #0000 62%, #000 63%),
+                 conic-gradient(from -90deg, #000 0 var(--ang), #0000 var(--ang));
+  filter: saturate(1.2) contrast(1.1);
+  border-radius: 50%;
+}
+.hvai .hvai-wheel::after{
+  content:""; position:absolute; inset:40px; border-radius:50%;
+  box-shadow: 0 0 64px 16px rgba(99,102,241,.25) inset, 0 0 120px rgba(59,130,246,.25);
+}
+.hvai .hvai-wheel-glow{position:absolute; inset:0; border-radius:50%;
+  background: radial-gradient(60% 60% at 50% 50%, rgba(255,255,255,.06), rgba(255,255,255,0));
+  filter: blur(1px);
+}
+.hvai .hvai-wheel-core{position:absolute; inset:74px; display:grid; place-items:center; text-align:center; border-radius:50%;
+  background: radial-gradient(80% 80% at 50% 50%, rgba(13,18,37,.88), rgba(13,18,37,.65));
+  box-shadow: 0 6px 30px rgba(0,0,0,.25);
+}
+.hvai .hvai-wheel-label{font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim); display:inline-flex; align-items:center; gap:.4rem}
+.hvai .hvai-wheel-val{font-weight:900; font-size:2.8rem; line-height:1; margin-top:.2rem}
+.hvai .hvai-wheel-val small{font-size:1.1rem; opacity:.8; margin-left:.1rem}
+
+/* keep existing bars tidy on narrow screens */
+@media (max-width: 760px){
+  .hvai .hvai-wheel{opacity:.35; transform:scale(.8); right:-80px; top:-80px}
+}
 .hvai{margin-top:14px;background:linear-gradient(135deg,rgba(60,220,255,.06),rgba(155,92,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px}
 .hvai-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
 .hvai-head h4{margin:0;font-size:1.08rem}
@@ -587,32 +637,48 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       </form>
     </div>
 
-    <!-- 1) HUMAN vs AI (Ensemble) -->
-    <section id="detectorPanel" class="hvai" style="display:none">
+    <!-- 1) HUMAN vs AI (Ensemble) — v2025-08-26 stylized -->
+    <section id="detectorPanel" class="hvai hvai--v2" style="display:none">
+      <div class="hvai-canvas" aria-hidden="true">
+        <div class="hvai-wheel" id="hvaiWheel" style="--pct:0">
+          <div class="hvai-wheel-glow"></div>
+          <div class="hvai-wheel-core">
+            <div class="hvai-wheel-label"><i class="fa-solid fa-robot"></i> AI‑like</div>
+            <div class="hvai-wheel-val"><span id="hvaiWheelVal">0</span><small>%</small></div>
+          </div>
+        </div>
+      </div>
+
       <div class="hvai-head">
         <i class="fa-solid fa-users-gear ico ico-purple"></i>
         <h4>Human vs AI Content (Ensemble)</h4>
       </div>
+
       <div class="hvai-meta">
         <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
         <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
       </div>
 
-      <!-- Animated Human vs AI bars -->
-      <div class="hvai-bar">
-        <div>
-          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
-          <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+      <div class="hvai-body">
+        <!-- Animated Human vs AI bars -->
+        <div class="hvai-bar">
+          <div>
+            <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+            <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+          </div>
+          <div>
+            <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
+            <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
+          </div>
         </div>
-        <div>
-          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
-          <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
-        </div>
+
+        <!-- Detectors grid -->
+        <div class="det-grid" id="detGrid"></div>
       </div>
 
-      <!-- Detectors grid -->
-      <div class="det-grid" id="detGrid"></div>
-      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
+      <div class="det-note" id="detNote" style="color:var(--text-dim);font-size:.85rem;margin-top:.5rem">
+        Auto‑fallback activates if the backend provides no text/percentages.
+      </div>
     </section>
 
     <!-- 2) READABILITY INSIGHTS (Upgraded) -->
@@ -1087,12 +1153,88 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   }
 
   function detectUltra(text){
-    var s=_prep(text||'');
-    if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
-    var ai=10; var covT=0.45; if(s.cov<covT) ai+=clamp((covT-s.cov)/covT,0,1)*25; var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18;
-    var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
-    return { humanPct: 100-clamp(Math.round(ai),0,100), aiPct: clamp(Math.round(ai),0,100), confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai:clamp(Math.round(ai),0,100),w:1}], _s:s };
+// NEW multi-signal heuristic ensemble (no APIs) — tuned to be conservative
+  var s = _prep(text||'');
+
+  // Quick exit for too-short inputs
+  if ((s.wordCount||0) < 40){
+    var quick = clamp(70 - (s.wordCount||0)*1.2, 5, 70);
+    return { humanPct: 100-quick, aiPct: quick, confidence: 46, detectors: [{key:'short',label:'Too short input',ai:quick,w:1}], _s:s };
   }
+
+  // Helpers (scoped)
+  function pct(x){ return Math.max(0, Math.min(100, Math.round(x))); }
+  function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
+  function charEntropy3(t){
+    t=(t||'').toLowerCase();
+    var n=0, map=Object.create(null);
+    for(var i=0;i<t.length-2;i++){ var tri=t.slice(i,i+3); if(/\s/.test(tri)) continue; map[tri]=(map[tri]||0)+1; n++; }
+    var H=0; for(var k in map){ var p=map[k]/n; H -= p*Math.log2(p); }
+    // normalize roughly to 0..1 by dividing with max ~ log2(unique) but clamp
+    var uniq=Object.keys(map).length||1;
+    var Hmax=Math.log2(uniq||1)||1;
+    var norm = Hmax ? (H/Hmax) : 0.5;
+    return Math.max(0, Math.min(1, norm));
+  }
+  function stopwordRatio(words){
+    var sw = new Set(['the','is','and','or','to','of','in','a','that','it','for','on','with','as','are','this','by','be','an','from','at','was','were','if','but','not','so','we','you','i','they','their','our']);
+    var tot=words.length||1, c=0; for(var i=0;i<words.length;i++){ if(sw.has(words[i])) c++; }
+    return c/tot;
+  }
+
+  // Derived signals
+  var entropy = charEntropy3(s.text||'');                         // 0..1 higher = more diverse
+  var burst   = s.burstiness || 0;                                // 0..1 higher = more human
+  var read    = band(s.flesch, 35, 75)/100;                       // 0..1 moderate is good
+  var ttr     = s.TTR || 0;                                       // 0..1 unique words
+  var rep     = s.triRepeat || 0;                                 // 0..1 repetition fraction
+  var digits  = s.digitsPer100 || 0;                              // per 100 words
+  var spw     = s.spw || 0;                                       // syllables per word
+  var asl     = s.asl || 0;                                       // avg sentence length
+  var stopR   = stopwordRatio((s.text||'').toLowerCase().match(/[a-z\u00C0-\u024f']+/g)||[]);
+
+  // Feature-wise AI-likeness (0..100)
+  var F = {};
+  F.burst    = pct(100*(1 - burst));                 // low burstiness => AI
+  F.ttr      = pct(100*(0.55 - Math.min(0.55, ttr)) / 0.55); // low ttr => AI
+  F.rep      = pct(100*rep);                         // high repetition => AI
+  F.entropy  = pct(100*(0.65 - Math.min(0.65, entropy))/0.65); // low entropy => AI
+  F.read     = pct(100*(Math.abs(read-0.55)/0.55)); // too simple/too hard put some AI pressure
+  F.digits   = pct(100*Math.max(0, (digits-8)/22)); // too many digits => AI
+  F.sentence = pct(100*(Math.abs((asl||0)-22)/22)); // extreme sentence lengths uniformity => AI
+  F.stop     = pct(100*Math.max(0, (stopR-0.63)/0.25)); // unusually high stopwords => AI
+
+  // Weighted ensemble (conservative)
+  var weights = { burst:2.0, ttr:1.6, rep:1.4, entropy:1.4, read:1.0, digits:0.7, sentence:0.9, stop:0.7 };
+  var wsum = 0, acc = 0;
+  Object.keys(weights).forEach(function(k){ acc += (F[k]||0)*weights[k]; wsum += weights[k]; });
+  var ai = acc / (wsum||1);
+
+  // Confidence grows with length and agreement between top features
+  var lengthBoost = Math.min(45, Math.log((s.wordCount||1)+1)*7);
+  var spread = (F.burst + F.ttr + F.entropy)/3;
+  var confidence = clamp(50 + lengthBoost * 0.9 + (spread-50)*0.3, 48, 96);
+
+  // Build detector breakdown
+  var detectors = [
+    {key:'burst',  label:'Burstiness',           ai:F.burst,   w:weights.burst},
+    {key:'ttr',    label:'Lexical Diversity',    ai:F.ttr,     w:weights.ttr},
+    {key:'rept',   label:'Repetition (3‑gram)',  ai:F.rep,     w:weights.rep},
+    {key:'entropy',label:'Character Entropy',    ai:F.entropy, w:weights.entropy},
+    {key:'read',   label:'Readability Balance',  ai:F.read,    w:weights.read},
+    {key:'digits', label:'Digits Density',       ai:F.digits,  w:weights.digits},
+    {key:'sent',   label:'Sentence Length',      ai:F.sentence,w:weights.sentence},
+    {key:'stop',   label:'Stopword Ratio',       ai:F.stop,    w:weights.stop}
+  ];
+
+  return {
+    humanPct: 100 - pct(ai),
+    aiPct: pct(ai),
+    confidence: Math.round(confidence),
+    detectors: detectors,
+    _s: s
+  };
+}
 
   function deriveItemScoresFromSignals(s){
     function pct(x){ return clamp(Math.round(x),0,100); }
@@ -1147,6 +1289,10 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
     if(av) av.textContent = isFinite(res.aiPct)? Math.round(res.aiPct)+'%':'—%';
     if(hf) hf.style.width = Math.max(0, Math.min(100, res.humanPct||0)) + '%';
     if(af) af.style.width = Math.max(0, Math.min(100, res.aiPct||0)) + '%';
+
+    var wheel = document.getElementById('hvaiWheel'); var wv=document.getElementById('hvaiWheelVal');
+    if(wheel){ wheel.style.setProperty('--pct', String(Math.max(0, Math.min(100, res.aiPct||0)))); }
+    if(wv){ wv.textContent = isFinite(res.aiPct)? Math.round(res.aiPct) : '—'; }
 
     var panel = document.getElementById('detectorPanel'); if(panel) panel.style.display='block';
     if(!grid) return; grid.innerHTML = '';
