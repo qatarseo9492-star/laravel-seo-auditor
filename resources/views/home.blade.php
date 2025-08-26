@@ -115,7 +115,12 @@
 .hvai .hvai-pane.active{ display:block; min-height:34px; }
 
 /* hvai overflow guard */ .hvai *{ max-width:100%; box-sizing:border-box; }
+
+/* v3 layoutfix2 panes */
+.hvai .hvai-tabpanes{ margin:8px auto; max-width:780px; width:100%; }
+.hvai .hvai-line>div:first-child{ flex:1 1 auto; }
 </style>
+
 
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -952,114 +957,79 @@ document.getElementById('hvaiModal')?.addEventListener('click', function(e){
         <button class="hvai-tab" data-tab="ai-content"><i class="fa-solid fa-robot"></i> AI Content</button>
         <button class="hvai-tab" data-tab="suggestions"><i class="fa-solid fa-wand-magic-sparkles"></i> Suggestions</button>
       </div>
-      <div class="hvai-tabpanes">
-        <div class="hvai-pane active" id="pane-overall">
-          <div class="hvai-line">
-            <div>Human: <b id="score-overall-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-overall-ai">—%</b></div>
-            <div class="hvai-scorebar">
-              <span class="human" id="bar-overall-human"></span>
-              <span class="ai" id="bar-overall-ai"></span>
-            </div>
-          </div>
-    </div>
-        </div>
-        <div class="hvai-pane" id="pane-zerogpt">
-          <div class="hvai-line">
-            <div>Human: <b id="score-zerogpt-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-zerogpt-ai">—%</b></div>
-            <div class="hvai-scorebar">
-              <span class="human" id="bar-zerogpt-human"></span>
-              <span class="ai" id="bar-zerogpt-ai"></span>
-            </div>
-          </div>
-    </div>
-          <div class="hvai-scorebar"><span id="bar-zerogpt"></span></div>
-        </div>
-        <div class="hvai-pane" id="pane-openai">
-          <div class="hvai-line">
-            <div>Human: <b id="score-openai-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-openai-ai">—%</b></div>
-            <div class="hvai-scorebar">
-              <span class="human" id="bar-openai-human"></span>
-              <span class="ai" id="bar-openai-ai"></span>
-            </div>
-          </div>
-    </div>
-          <div class="hvai-scorebar"><span id="bar-openai"></span></div>
-        </div>
-        <div class="hvai-pane" id="pane-gptzero">
-          <div class="hvai-line">
-            <div>Human: <b id="score-gptzero-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-gptzero-ai">—%</b></div>
-            <div class="hvai-scorebar">
-              <span class="human" id="bar-gptzero-human"></span>
-              <span class="ai" id="bar-gptzero-ai"></span>
-            </div>
-          </div>
-    </div>
-          <div class="hvai-scorebar"><span id="bar-gptzero"></span></div>
-        </div>
-        <div class="hvai-pane" id="pane-copyleaks">
-          <div class="hvai-line">
-            <div>Human: <b id="score-copyleaks-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-copyleaks-ai">—%</b></div>
-            <div class="hvai-scorebar">
-              <span class="human" id="bar-copyleaks-human"></span>
-              <span class="ai" id="bar-copyleaks-ai"></span>
-            </div>
-          </div>
-    </div>
-          <div class="hvai-scorebar"><span id="bar-copyleaks"></span></div>
-        </div>
-        <div class="hvai-pane" id="pane-writerai">
-          <div class="hvai-line">
-            <div>Human: <b id="score-writerai-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-writerai-ai">—%</b></div>
-            <div class="hvai-scorebar">
-              <span class="human" id="bar-writerai-human"></span>
-              <span class="ai" id="bar-writerai-ai"></span>
-            </div>
-          </div>
-    </div>
-          <div class="hvai-scorebar"><span id="bar-writerai"></span></div>
-        </div>
-        <div class="hvai-pane" id="pane-sapling">
-          <div class="hvai-line">
-            <div>Human: <b id="score-sapling-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-sapling-ai">—%</b></div>
-            <div class="hvai-scorebar">
-              <span class="human" id="bar-sapling-human"></span>
-              <span class="ai" id="bar-sapling-ai"></span>
-            </div>
-          </div>
-    </div>
-          <div class="hvai-scorebar"><span id="bar-sapling"></span></div>
-        </div>
-        <div class="hvai-pane" id="pane-ai-content">
-          <div id="aiFlags">Run analysis to see flagged sentences that may read AI-like.</div>
-        </div>
-        <div class="hvai-pane" id="pane-suggestions">
-          <div id="aiSuggestBox">Click a flagged sentence in “AI Content” to open detailed suggestions.</div>
-        </div>
-      </div>
-    
-        <div class="chip ai">AI-like: <b id="metaAI">—</b></div>
-        <div class="chip conf">Confidence: <b id="metaConf">—</b></div>
-      </div>
-    </div>
-    
-      <div class="hvai-meta">
-        <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
-        <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
       
-      <!-- Animated Human vs AI bars -->
-      <div class="hvai-bar">
-        <div>
-          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
-          <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
-        </div>
-        <div>
-          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
-          <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
-        </div>
+<div class="hvai-tabpanes">
+  <div class="hvai-pane active" id="pane-overall">
+    <div class="hvai-line">
+      <div>Human: <b id="score-overall-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-overall-ai">—%</b></div>
+      <div class="hvai-scorebar">
+        <span class="human" id="bar-overall-human"></span>
+        <span class="ai" id="bar-overall-ai"></span>
       </div>
-
-      <!-- Detectors grid -->
-      <div class="det-grid" id="detGrid"></div>
+    </div>
+  </div>
+  <div class="hvai-pane" id="pane-zerogpt">
+    <div class="hvai-line">
+      <div>ZeroGPT — Human: <b id="score-zerogpt-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-zerogpt-ai">—%</b></div>
+      <div class="hvai-scorebar">
+        <span class="human" id="bar-zerogpt-human"></span>
+        <span class="ai" id="bar-zerogpt-ai"></span>
+      </div>
+    </div>
+  </div>
+  <div class="hvai-pane" id="pane-openai">
+    <div class="hvai-line">
+      <div>OpenAI — Human: <b id="score-openai-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-openai-ai">—%</b></div>
+      <div class="hvai-scorebar">
+        <span class="human" id="bar-openai-human"></span>
+        <span class="ai" id="bar-openai-ai"></span>
+      </div>
+    </div>
+  </div>
+  <div class="hvai-pane" id="pane-gptzero">
+    <div class="hvai-line">
+      <div>GPTZero — Human: <b id="score-gptzero-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-gptzero-ai">—%</b></div>
+      <div class="hvai-scorebar">
+        <span class="human" id="bar-gptzero-human"></span>
+        <span class="ai" id="bar-gptzero-ai"></span>
+      </div>
+    </div>
+  </div>
+  <div class="hvai-pane" id="pane-copyleaks">
+    <div class="hvai-line">
+      <div>Copyleaks — Human: <b id="score-copyleaks-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-copyleaks-ai">—%</b></div>
+      <div class="hvai-scorebar">
+        <span class="human" id="bar-copyleaks-human"></span>
+        <span class="ai" id="bar-copyleaks-ai"></span>
+      </div>
+    </div>
+  </div>
+  <div class="hvai-pane" id="pane-writerai">
+    <div class="hvai-line">
+      <div>Writer — Human: <b id="score-writerai-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-writerai-ai">—%</b></div>
+      <div class="hvai-scorebar">
+        <span class="human" id="bar-writerai-human"></span>
+        <span class="ai" id="bar-writerai-ai"></span>
+      </div>
+    </div>
+  </div>
+  <div class="hvai-pane" id="pane-sapling">
+    <div class="hvai-line">
+      <div>Sapling — Human: <b id="score-sapling-human">—%</b> &nbsp;|&nbsp; AI: <b id="score-sapling-ai">—%</b></div>
+      <div class="hvai-scorebar">
+        <span class="human" id="bar-sapling-human"></span>
+        <span class="ai" id="bar-sapling-ai"></span>
+      </div>
+    </div>
+  </div>
+  <div class="hvai-pane" id="pane-ai-content">
+    <div id="aiFlags">Run analysis to see flagged sentences that may read AI-like.</div>
+  </div>
+  <div class="hvai-pane" id="pane-suggestions">
+    <div id="aiSuggestBox">Click a flagged sentence in “AI Content” to open detailed suggestions.</div>
+  </div>
+</div>
+<div class="det-grid" id="detGrid"></div>
       <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
     </section>
 
