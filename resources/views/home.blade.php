@@ -1,8 +1,15 @@
 {{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
+<!-- Lightweight build v2025-08-27: animations removed, icons simplified, JS trimmed -->
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
 
 <style>
+
+/* lightweight mode: reduce motion */
+@media (prefers-reduced-motion:no-preference){
+  .floaty, .stars { animation: none !important; }
+}
+
 :root{
   --bg1:#0b0b18; --bg2:#0b0f2a; --ink:#eaf1ff;
   --accent:#7c4dff; --accent2:#00e5ff; --accent3:#ff4dd2;
@@ -94,8 +101,6 @@ header.site.hdr{display:flex;align-items:center;gap:1rem;padding:12px 18px;posit
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:
   radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),
   radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
-#linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
-#linesCanvas{opacity:.55}#smokeCanvas{opacity:.9;mix-blend-mode:screen}
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 header.site{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:14px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand{display:flex;align-items:center;gap:.8rem;min-width:0}
@@ -195,7 +200,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (max-width:768px){.wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}.share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}.checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}}
 @media (max-width:480px){.score-container{width:150px}.category-icon{width:40px;height:40px}.category-title{font-size:1rem}}
 @media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
-@media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
+@media print{.share-dock,#backTop,}
 
 /* ==== Human vs AI (Ensemble) — upgraded ==== */
 
@@ -680,40 +685,10 @@ h2.section-title, .cl-title {
 <!-- ===== /New Neo‑Glass Aurora Skin ===== -->
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<script src="https://cdn.lordicon.com/lordicon.js"></script>
-<style>
-/* Unified theme (Sign-up gradient → global) */
-:root{
-  --bg1:#0b0b18; --bg2:#0b0f2a; --ink:#eaf1ff;
-  --primary:#ff4dd2; /* pink from signup */
-  --primary2:#00e5ff; /* cyan tail */
-  --success:#22c55e; --warning:#f59e0b; --danger:#ef4444;
-}
-
-/* Unify all CTAs */
-.pill.primary,
-.pill.alt,
-.btn,
-.btn-primary,
-.button.primary,
-.cta,
-.signup,
-a.signup,
-button.signup{
-  border-color:transparent !important;
-  background:linear-gradient(135deg, var(--primary), var(--primary2)) !important;
-  color:#081019 !important;
-  box-shadow:0 10px 30px rgba(255,77,210,.28) !important;
-}
-</style>
 </head>
 <body>
 
 <!-- Background canvases -->
-<canvas id="linesCanvas"></canvas>
-<canvas id="smokeCanvas"></canvas>
-
 <script>
   window.SEMSEO = window.SEMSEO || {};
   window.SEMSEO.ENDPOINTS = {
@@ -749,7 +724,7 @@ button.signup{
   <div class="cont">
     <div class="sb-left">
       <a href="{{ route('home') }}" class="pill {{ request()->routeIs('home') ? 'primary' : '' }}">
-        <lord-icon src="https://cdn.lordicon.com/lecprnjb.json" trigger="loop" delay="2000" style="width:20px;height:20px"></lord-icon>
+        <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
         <span>Semantic SEO Analyzer</span>
       </a>
 
@@ -759,7 +734,7 @@ button.signup{
       @endphp
       <a href="{{ auth()->check() ? $topicUrl : ( \Illuminate\Support\Facades\Route::has('login') ? route('login') : url('/login') ) }}"
          class="pill {{ request()->is('seo/topic-clusters*') ? 'primary' : '' }}">
-        <lord-icon src="https://cdn.lordicon.com/wmwqvixz.json" trigger="loop" delay="2000" style="width:20px;height:20px"></lord-icon>
+        <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
         <span>Topic Cluster Identification</span>
       </a>
     </div>
@@ -1649,8 +1624,8 @@ header.site.hdr{ top: var(--superbar-h) !important; }
   }
   function ensureScoresExist(data, sample, ensemble){
     var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
-    var needContent = !isFinite(Number(data.contentScore));
-    var needOverall = !isFinite(Number(data.overall));
+    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
+    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
     var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
     if (needItems) data.itemScores = deriveItemScoresFromSignals(s);
     if (needContent || needOverall){
@@ -2119,70 +2094,10 @@ try{
 
     var toTop=document.getElementById('toTopLink'), backTop=document.getElementById('backTop');
     if(toTop){ toTop.addEventListener('click', function(e){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});}); }
-    window.addEventListener('scroll', function(){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
+    window.addEventListener('scroll', function(, {passive:true}){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
   })();
 
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
-</script>
-
-<!-- C) Background: tech lines + smoke -->
-<script>
-try{
-  (function(){
-    var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
-    function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
-    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=16,spacing=Math.max(54,h/rows);
-      for(var i=-2;i<rows+2;i++){ var y=i*spacing+((t*0.025)%spacing); var g=ctx.createLinearGradient(0,y,w,y+90);
-        g.addColorStop(0,'rgba(61,226,255,0.14)'); g.addColorStop(0.5,'rgba(155,92,255,0.16)'); g.addColorStop(1,'rgba(255,32,69,0.14)');
-        ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(-120,y); ctx.lineTo(w+120,y+90); ctx.stroke(); }
-      requestAnimationFrame(draw);
-    }
-    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
-  })();
-
-  (function(){
-    var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d');
-    var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], last=performance.now();
-    var PERIOD = window.SEMSEO && window.SEMSEO.SMOKE_HUE_PERIOD_MS ? window.SEMSEO.SMOKE_HUE_PERIOD_MS : 1000000000;
-    function resize(){
-      c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
-      var W=window.innerWidth, H=window.innerHeight;
-      var N = 76;
-      blobs=new Array(N).fill(0).map(function(_,i){
-        var px = W*0.65 + Math.random()*W*0.45;
-        var py = H*0.65 + Math.random()*H*0.45;
-        var r  = 120 + Math.random()*260;
-        var speed = 0.18 + Math.random()*0.22;
-        return {
-          x:px, y:py, r:r,
-          vx: -speed*(0.6+Math.random()*0.8),
-          vy: -speed*(0.6+Math.random()*0.8),
-          baseHue: (i*37)%360,
-          alpha: .26 + .20*Math.random()
-        };
-      });
-      last=performance.now();
-    }
-    function draw(now){
-      var W=window.innerWidth, H=window.innerHeight;
-      ctx.clearRect(0,0,W,H);
-      ctx.globalCompositeOperation='screen';
-      var dt = now - last; last = now;
-      for(var i=0;i<blobs.length;i++){
-        var b=blobs[i];
-        b.x += b.vx * dt; b.y += b.vy * dt;
-        if(b.x < -360 || b.y < -360){ b.x = W + Math.random()*260; b.y = H + Math.random()*260; }
-        var hue = (b.baseHue + (now % PERIOD) * (360/PERIOD)) % 360;
-        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
-        g.addColorStop(0,'hsla('+hue+',88%,68%,'+b.alpha+')');
-        g.addColorStop(1,'hsla('+((hue+70)%360)+',88%,50%,0)');
-        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
-      }
-      requestAnimationFrame(draw);
-    }
-    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
-  })();
-} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
 </script>
 
 <!-- D) Error sink -->
@@ -2409,7 +2324,7 @@ window.addEventListener('error', function(e){
     input.addEventListener('input', deb);
     input.addEventListener('focus', ()=>{ place(portal, input); deb(); });
     window.addEventListener('resize', ()=> portal && portal.style.display!=='none' && place(portal, input));
-    window.addEventListener('scroll', ()=> portal && portal.style.display!=='none' && place(portal, input), true);
+    window.addEventListener('scroll', (, {passive:true})=> portal && portal.style.display!=='none' && place(portal, input), true);
 
     input.addEventListener('keydown', (e)=>{
       const items = portal.querySelectorAll('.' + S.ITEM);
@@ -2612,13 +2527,12 @@ window.addEventListener('error', function(e){
   const pick = (qs)=> document.querySelector(qs);
   function detectScore(){
     const el =
-    document.getElementById('overallScore') ||
-    document.querySelector('[data-total-score]') ||
-    document.querySelector('.score-wheel[data-score]') ||
-    document.querySelector('.score-wheel .score-value') ||
-    document.querySelector('.main-score') ||
-    document.querySelector('.score .value') ||
-    document.querySelector('.score-badge[data-score]');
+      pick('[data-total-score]') ||
+      pick('.score-wheel[data-score]') ||
+      pick('.score-wheel .score-value') ||
+      pick('.main-score') ||
+      pick('.score .value') ||
+      pick('.score-badge[data-score]');
     let t = '';
     if(!el) return 0;
     t = el.dataset.totalScore || el.getAttribute('data-score') || el.textContent || '0';
@@ -2684,20 +2598,6 @@ window.addEventListener('error', function(e){
 })();
 </script>
 <!-- ===== /Unique Aurora Liquid Wheel block ===== -->
-
-
-<script>
-(function(){
-  if(!window.__force100Patched){
-    const _origSet = window.setScoreWheel;
-    window.setScoreWheel = function(value){
-      if (document.documentElement && document.documentElement.hasAttribute('data-demo-100')) { value = 100; }
-      if (typeof _origSet === 'function') return _origSet.call(this, value);
-    };
-    window.__force100Patched = true;
-  }
-})();
-</script>
 
 </body>
 </html>
