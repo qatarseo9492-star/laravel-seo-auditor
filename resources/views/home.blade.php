@@ -817,8 +817,8 @@ h2.section-title, .cl-title {
 
 {{-- BEGIN: Multi-Model Ensemble Content Detection (STYLISH PRO v1) --}}
 <div class="mmecd" data-component="multi-ensemble-detector"
-     data-endpoint-detect="{{ url('/api/detect') }}"
-     data-endpoint-detect-url="{{ url('/api/detect/url') }}">
+     data-endpoint-detect="/api/detect"
+     data-endpoint-detect-url="/api/detect/url">
   <div class="mmecd__head">
     <div class="mmecd__titleWrap">
       <svg class="mmecd__titleIcon" viewBox="0 0 64 64" aria-hidden="true">
@@ -838,9 +838,7 @@ h2.section-title, .cl-title {
       <span class="mmecd__pill mmecd__pill--status" title="API status">Checking…</span>
     </div>
     <p class="mmecd__subtitle">Colorful, animated & professional UI. Hugging Face ensemble + local stats. Paste text or analyze a URL.</p>
-    <div class="mmecd__routesBox" role="note" aria-label="Routes for API">
-      <div class="mmecd__routesTitle">API Routes</div>
-      <pre class="mmecd__routesCode"><code>use App\Http\Controllers\ContentDetectionController;
+<pre class="mmecd__routesCode"><code>use App\Http\Controllers\ContentDetectionController;
 Route::post('/detect', [ContentDetectionController::class, 'detect']);
 Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</code></pre>
     </div>
@@ -966,12 +964,6 @@ Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</c
   .mmecd__ico--pulse{animation:mmecd-pulse 2.2s ease-in-out infinite}
   .mmecd__ico--float{animation:mmecd-float 3.4s ease-in-out infinite}
   .mmecd__ico--spin{animation:mmecd-spin 6s linear infinite}
-
-  
-  .mmecd__routesBox{margin-top:.6rem;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:.6rem .75rem}
-  .mmecd__routesTitle{font-weight:800;font-size:.85rem;opacity:.95;margin-bottom:.3rem}
-  .mmecd__routesCode{margin:0;overflow:auto;max-height:140px}
-  .mmecd__routesCode code{display:block;white-space:pre;line-height:1.25;font-size:.85rem;color:#e5e7eb}
 .mmecd__grid{display:grid;gap:16px;grid-template-columns: minmax(280px,1fr) 360px;align-items:stretch}
   @media (max-width:900px){.mmecd__grid{grid-template-columns:1fr}}
 
