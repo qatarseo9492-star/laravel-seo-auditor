@@ -33,6 +33,9 @@
 <meta name="twitter:title" content="{{ $metaTitle }}">
 <meta name="twitter:description" content="{{ $metaDescription }}">
 <meta name="twitter:image" content="{{ $metaImage }}">
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css?v=2" rel="stylesheet"/>
+
 <style>
 :root{
   --bg:#07080e;--panel:#0f1022;--panel-2:#141433;--text:#f0effa;--text-dim:#b6b3d6;
@@ -147,22 +150,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
 
 /* ==== Human vs AI (Ensemble) — upgraded ==== */
-
-  /* Status banner & rewrite badge */
-  .hvai .status{margin:6px 0 10px 0; font-weight:800; padding:10px 12px; border-radius:12px; display:inline-flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04)}
-  .hvai .status.neutral{color:#cbd5ff}
-  .hvai .status.good{background:linear-gradient(90deg, rgba(0,255,180,.10), rgba(0,200,255,.10)); color:#8bffd6; border-color:rgba(0,255,200,.25)}
-  .hvai .status.warn{background:linear-gradient(90deg, rgba(255,200,0,.10), rgba(255,120,0,.10)); color:#ffd37a; border-color:rgba(255,180,0,.25)}
-  .hvai .status.bad{background:linear-gradient(90deg, rgba(255,0,120,.12), rgba(255,0,0,.10)); color:#ff9ab6; border-color:rgba(255,60,120,.25)}
-  .hvai .rewrite-badge{display:none; margin-left:8px; padding:6px 10px; border-radius:999px; font-weight:900; letter-spacing:.02em; background:#ff1f5b; color:white; box-shadow:0 0 16px rgba(255,31,91,.45)}
-  .hvai .status.bad .rewrite-badge{display:inline-flex}
-
-  /* Animated colorful icon for each bar label */
-  .hvai .label{display:flex; align-items:center; gap:8px; justify-content:space-between}
-  .hvai .label .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00, #ffd300, #2ad1a3, #1aa6ff, #9659ff, #ff6a00); animation: spin 6s linear infinite; box-shadow:0 0 10px rgba(255,255,255,.25)}
-  .hvai .label .num{font-weight:900; opacity:.9}
-  @keyframes spin{to{transform:rotate(1turn)}}
-
 .hvai{margin-top:14px;background:linear-gradient(135deg,rgba(60,220,255,.06),rgba(155,92,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px}
 .hvai-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
 .hvai-head h4{margin:0;font-size:1.08rem}
@@ -464,34 +451,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .hvai .hvai-head .ico{ background: linear-gradient(135deg,#60a5fa,#a78bfa,#34d399,#f59e0b); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 10px rgba(99,102,241,.5)); animation: spinPulse 8s linear infinite; }
 @keyframes spinPulse{ 0%{ transform: rotate(0deg);} 100%{ transform: rotate(360deg);} }
 
-
-    /* DEBUG badge to confirm the updated view is live */
-    .hvai-version-badge{
-      position: fixed;
-      right: 10px;
-      bottom: 10px;
-      z-index: 9999;
-      padding: 8px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      border-radius: 999px;
-      color: #fff;
-      background: linear-gradient(90deg, #8b5cf6, #06b6d4, #22c55e, #f59e0b, #ef4444);
-      background-size: 300% 100%;
-      animation: badgeShift 2s linear infinite;
-      box-shadow: 0 8px 22px rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.35);
-    }
-    @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
-
-  
-/* === FIX: Social share labels + FA icons visible === */
-.share-dock{display:flex;flex-direction:column;gap:8px}
-.share-btn{display:inline-flex;align-items:center;gap:8px;width:auto;min-width:42px;height:42px;padding:0 12px}
-.share-btn .share-label{font-weight:800;font-size:.92rem;letter-spacing:.2px}
-@media (max-width:520px){.share-btn .share-label{display:none}}
-.category-icon i{font-size:24px;line-height:1}
-/* ================================================ */
 </style>
 
 <style>
@@ -500,122 +459,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 radial-gradient(950px 480px at 110% -10%, rgba(167,139,250,.08), transparent 60%),
 radial-gradient(700px 520px at 30% 120%, rgba(52,211,153,.06), transparent 60%),
 rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
-
-    /* DEBUG badge to confirm the updated view is live */
-    .hvai-version-badge{
-      position: fixed;
-      right: 10px;
-      bottom: 10px;
-      z-index: 9999;
-      padding: 8px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      border-radius: 999px;
-      color: #fff;
-      background: linear-gradient(90deg, #8b5cf6, #06b6d4, #22c55e, #f59e0b, #ef4444);
-      background-size: 300% 100%;
-      animation: badgeShift 2s linear infinite;
-      box-shadow: 0 8px 22px rgba(0,0,0,.45);
-      border: 1px solid rgba(255,255,255,.35);
-    }
-    @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
-
-  </style>
-
-
-<!-- ===== New Neo‑Glass Aurora Skin (global) ===== -->
-<style>
-:root {
-  /* Base */
-  --bg: #0c1022;
-  --panel: rgba(18, 22, 46, 0.85);
-  --card: rgba(18, 22, 46, 0.92);
-  --text: #eaf1ff;
-  --text-dim: #a7b6ff;
-  --border: rgba(255,255,255,.12);
-  --shadow: 0 20px 60px rgba(0,0,0,.45);
-
-  /* Accents (Aurora) */
-  --acc-1: #7c5cff;
-  --acc-2: #22c3f7;
-  --acc-3: #a3ff7f;
-  --acc-warn: #ffb257;
-  --acc-bad:  #ff6b6b;
-  --acc-good: #39e58c;
-
-  /* Rounding & spacing */
-  --radius: 16px;
-  --chip-radius: 12px;
-  --pad: 16px;
-}
-body { background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(124,92,255,.14), transparent 60%),
-    radial-gradient(1000px 600px at -10% 20%, rgba(34,195,247,.12), transparent 60%),
-    radial-gradient(900px 500px at 50% 120%, rgba(163,255,127,.10), transparent 60%),
-    var(--bg);
-  color: var(--text);
-}
-.card, .panel, .cl-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(6px);
-}
-h2.section-title, .cl-title {
-  letter-spacing: .2px;
-  background: linear-gradient(90deg, var(--acc-1), var(--acc-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-.improve-btn {
-  display: inline-flex; align-items: center; gap: .45rem;
-  padding: .45rem .7rem;
-  font-weight: 700; font-size: 13px;
-  color: #111;
-  background: linear-gradient(135deg, var(--acc-2), var(--acc-1));
-  border-radius: var(--chip-radius);
-  border: 0; cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
-  box-shadow: 0 6px 18px rgba(124,92,255,.22);
-}
-.improve-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
-.improve-btn:active { transform: translateY(0); }
-.score-badge {
-  display:inline-flex; align-items:center; justify-content:center;
-  min-width: 42px; height: 28px; padding: 0 .5rem;
-  font-weight: 800; font-size: 13px;
-  border-radius: 999px; border: 1px solid var(--border);
-  background: rgba(255,255,255,.06);
-}
-.score-badge[data-score^="8"], .score-badge[data-score^="9"] { outline: 2px solid var(--acc-good); }
-.score-badge[data-score^="6"], .score-badge[data-score^="7"] { outline: 2px solid var(--acc-warn); }
-.score-badge[data-score^="4"], .score-badge[data-score^="5"], .score-badge[data-score^="3"] { outline: 2px solid var(--acc-bad); }
-.checklist li input[type="checkbox"] {
-  width: 18px; height: 18px; border-radius: 6px;
-  border: 1px solid var(--border); background: rgba(255,255,255,.05);
-}
-.checklist li input[type="checkbox"]:checked {
-  background: linear-gradient(135deg, var(--acc-3), var(--acc-2));
-  border-color: transparent;
-}
-.cl-modal .cl-sub { color: var(--text-dim); }
-.cl-close { border-color: var(--border); }
-.card--aurora, .aurora-border { position: relative; }
-.card--aurora::before, .aurora-border::before {
-  content:""; position:absolute; inset: -1px;
-  border-radius: inherit; pointer-events:none;
-  background: linear-gradient(90deg, rgba(124,92,255,.55), rgba(34,195,247,.55), rgba(163,255,127,.55));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude;
-  padding: 1px;
-  border-radius: calc(var(--radius) + 1px);
-}
 </style>
-<!-- ===== /New Neo‑Glass Aurora Skin ===== -->
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 </head>
 <body>
 
@@ -644,11 +489,11 @@ h2.section-title, .cl-title {
 
 <!-- Share dock -->
 <div class="share-dock" aria-label="Share">
-  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow" aria-label="Share on Facebook"><i class="fa-brands fa-facebook-f"></i><span class="share-label">Facebook</span></a>
-  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow" aria-label="Share on X (Twitter)"><i class="fa-brands fa-x-twitter"></i><span class="share-label">X</span></a>
-  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow" aria-label="Share on LinkedIn"><i class="fa-brands fa-linkedin-in"></i><span class="share-label">LinkedIn</span></a>
-  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i><span class="share-label">WhatsApp</span></a>
-  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener" aria-label="Share via Email"><i class="fa-solid fa-envelope"></i><span class="share-label">Email</span></a>
+  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-facebook-f"></i></a>
+  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow"><i class="fa-brands fa-x-twitter"></i></a>
+  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-linkedin-in"></i></a>
+  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow"><i class="fa-brands fa-whatsapp"></i></a>
+  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener"><i class="fa-solid fa-envelope"></i></a>
 </div>
 
 <div class="wrap">
@@ -797,163 +642,77 @@ h2.section-title, .cl-title {
       </form>
     </div>
 
+    <!-- 1) HUMAN vs AI (Ensemble) -->
+    <section id="detectorPanel" class="hvai" style="display:none">
+      <div class="hvai-head">
+        <i class="fa-solid fa-users-gear ico ico-purple ico-animated ico-animated"></i>
+        <h4>Human vs AI Content (Ensemble)</h4>
+      </div>
+    <!-- HVAI v2 Stylish Gauge -->
+    <div class="hvai-v2 card glassy">
+      <div class="hvai-v2-head">
+        <div class="badge-model" title="Ensemble v2 · Hybrid (Heuristic + Entropy + Classifier)">
+          <span class="dot"></span> Ensemble v2
+        </div>
+        <div class="model-note">Hybrid signal blend for stable scores</div>
+      </div>
+
+      <div class="neon-gauge" aria-label="Human-likeness gauge">
+        <svg class="g" viewBox="0 0 120 120" width="220" height="220">
+          <defs>
+            <linearGradient id="gradGood" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#16a34a"/><stop offset="100%" stop-color="#22c55e"/>
+            </linearGradient>
+            <linearGradient id="gradMid" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#d97706"/><stop offset="100%" stop-color="#f59e0b"/>
+            </linearGradient>
+            <linearGradient id="gradBad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#ef4444"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2.5" result="c"/>
+              <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <circle class="track" cx="60" cy="60" r="48" stroke-width="12" fill="none"/>
+          <circle class="prog good" cx="60" cy="60" r="48" stroke="url(#gradGood)" stroke-width="12" stroke-linecap="round" fill="none" filter="url(#glow)"/>
+        </svg>
+
+        <div class="center">
+          <div class="score"><span id="hvaiScore">0</span><small>%</small></div>
+          <div class="msg" id="hvaiMsg">Let’s analyze</div>
+        </div>
+
+        <div class="confetti" aria-hidden="true"></div>
+      </div>
+
+      <div class="hvai-v2-meta">
+        <div class="chip human">Human-like: <b id="metaHuman">—</b></div>
+        <div class="chip ai">AI-like: <b id="metaAI">—</b></div>
+        <div class="chip conf">Confidence: <b id="metaConf">—</b></div>
+      </div>
+    </div>
     
-
-<!-- 1) HUMAN vs AI Content (Ensemble) — v2025-08-26 • v5 wheel + tech lines + animated icon -->
-
-<!-- HUMAN vs AI Content (Ensemble) — v17 CLEAN -->
-
-<!-- HUMAN vs AI Content (Ensemble) — v19 FEATHER (fast) -->
-
-<!-- HUMAN vs AI Content (Ensemble) — v20 PRISM (multicolor) -->
-
-<!-- HUMAN vs AI Content (Ensemble) — v22 PRISM (scoped, full) -->
-
-<!-- HUMAN vs AI Content (Ensemble) — v26 PRISM (forcefix) -->
-<section id="hvai" class="hvai hvai-v26" aria-label="Human vs AI Content (Ensemble)">
-  <style>
-  .hvai.hvai-v26{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
-  .hvai.hvai-v26 *{box-sizing:border-box}
-  .hvai.hvai-v26 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
-    background:
-      linear-gradient(135deg, rgba(0,255,255,.10) 1px, transparent 1px) 0 0/18px 18px,
-      linear-gradient(45deg, rgba(255,0,180,.08) 1px, transparent 1px) 0 0/20px 20px,
-      radial-gradient(800px 600px at 85% 10%, rgba(67,169,255,.08), transparent 60%),
-      radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
-  }
-  .hvai.hvai-v26 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(220px, clamp(220px, 24vw, 320px)); align-items:center}
-  @media (max-width:1100px){ .hvai.hvai-v26 .grid{grid-template-columns:1fr} .hvai.hvai-v26 .wheel{order:-1; margin:6px auto 14px} }
-  .hvai.hvai-v26 .wheel{ display:flex; align-items:center; justify-content:center; }
-
-  .hvai.hvai-v26 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
-  .hvai.hvai-v26 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  .hvai.hvai-v26 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
-  @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
-
-  .hvai.hvai-v26 .status{margin:6px 0 12px}
-  .hvai.hvai-v26 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
-  .hvai.hvai-v26 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
-  .hvai.hvai-v26 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
-  .hvai.hvai-v26 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
-  .hvai.hvai-v26 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
-
-  .hvai.hvai-v26 .row2{display:flex; gap:18px; flex-wrap:wrap}
-  .hvai.hvai-v26 .bar{flex:1 1 360px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:260px}
-  .hvai.hvai-v26 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
-  .hvai.hvai-v26 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
-  .hvai.hvai-v26 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
-  .hvai.hvai-v26 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
-  .hvai.hvai-v26 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
-
-  /* Improve panel */
-  .hvai.hvai-v26 .improve{margin-top:16px; padding:14px; border-radius:14px; background:linear-gradient(180deg, rgba(0,255,200,.06), rgba(0,140,255,.05)); border:1px solid rgba(255,255,255,.10)}
-  .hvai.hvai-v26 .improve.hidden{display:none}
-  .hvai.hvai-v26 .improve-head{font:800 15px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; margin-bottom:8px}
-  .hvai.hvai-v26 .improve-list{margin:0; padding-left:16px}
-  .hvai.hvai-v26 .improve-list li{margin:6px 0; line-height:1.35}
-
-  /* Prism wheel (compact) */
-  .prism-wheel{position:relative; width:var(--wheel-size, clamp(200px, 22vw, 300px)); aspect-ratio:1; margin:0 auto}
-  .prism-wheel .track{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) calc(50% - var(--thick,14px)), transparent calc(50% - var(--thick,14px)), transparent 100%)}
-  .prism-wheel .arc{position:absolute; inset:0; border-radius:50%;
-    background: conic-gradient(from -90deg, #ff6a00 0%, #ffb700 10%, #ffd300 20%, #96e21a 30%, #2ad1a3 40%, #1aa6ff 50%, #5a6bff 60%, #9659ff 70%, #ff6aff 80%, #ff6a00 100%);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,14px)), #000 calc(100% - var(--thick,14px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
-            mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,14px)), #000 calc(100% - var(--thick,14px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
-  }
-  .prism-wheel .pointer{position:absolute; inset:0; transform: rotate(calc(var(--p)*3.6deg)); transform-origin:50% 50%}
-  .prism-wheel .pointer::after{content:""; position:absolute; left:50%; top: calc(var(--thick,14px)/2); transform: translateX(-50%); width:12px; height:12px; border-radius:50%; background:#00f5c4; box-shadow:0 0 0 4px rgba(0,245,196,.15)}
-  .prism-wheel .center{position:absolute; inset:calc(var(--thick,14px) + 16px); border-radius:50%; display:grid; place-items:center; background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.06), rgba(10,12,20,.55))}
-  .prism-wheel .kv{display:grid; gap:6px; text-align:center}
-  .prism-wheel .kv .row{display:flex; align-items:center; gap:6px; justify-content:center; font: 700 13px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; color:#eaf1ff}
-  .prism-wheel .kv .val{font-weight:900; font-size:17px}
-  .prism-wheel .kv .dot{width:8px; height:8px; border-radius:50%}
-  .prism-wheel .kv .dot.ai{background:#7c5bff}
-  .prism-wheel .kv .dot.h{background:#00f5c4}
-
-  /* Hide any legacy wheel nodes inside .wheel */
-  .hvai.hvai-v26 .wheel > *:not(.prism-wheel){ display:none !important; }
-  </style>
-
-  <div class="tech" aria-hidden="true"></div>
-
-  <div class="grid">
-    <div class="left">
-      <div class="title"><div class="txt"><span class="rainbow">Human vs AI Content (Ensemble)</span></div></div>
-
-      <div id="hvaiStatus" class="status neutral" aria-live="polite">
-        <span class="status-badge"><span class="ico">⌛</span><span class="txt">Waiting for analysis…</span></span>
+      <div class="hvai-meta">
+        <span class="hvai-chip"><i class="fa-solid fa-shield-heart"></i> Confidence: <b id="detConfidence">—</b>%</span>
+        <span class="hvai-chip"><i class="fa-solid fa-circle-info"></i> Higher bar = more AI-like (per detector)</span>
+      
+      <!-- Animated Human vs AI bars -->
+      <div class="hvai-bar">
+        <div>
+          <div class="hvai-label"><span><i class="fa-solid fa-user"></i> Human-like</span><b id="hvaiHumanVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiHumanFill" class="hvai-fill human" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="hvai-label"><span><i class="fa-solid fa-robot"></i> AI-like</span><b id="hvaiAIVal">—%</b></div>
+          <div class="hvai-track"><div id="hvaiAIFill" class="hvai-fill ai" style="width:0%"></div></div>
+        </div>
       </div>
 
-      <div class="badges">
-        <div class="badge">🛡️ <strong>Confidence:</strong> <span id="hvaiConf">0</span>%</div>
-        <div class="badge">ℹ️ Higher bar = more AI-like</div>
-      </div>
-
-      <div class="row2" id="hvaiBars">
-        <div class="bar" data-key="humanLike"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div></div>
-        <div class="bar" data-key="lexical"><div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div><div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div></div>
-        <div class="bar" data-key="burst"><div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div><div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div></div>
-        <div class="bar" data-key="digits"><div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div><div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div></div>
-        <div class="bar" data-key="repetition"><div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div><div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div></div>
-        <div class="bar" data-key="entropy"><div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div><div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div></div>
-      </div>
-
-      <div id="hvaiImprove" class="improve hidden" aria-live="polite">
-        <div class="improve-head">How to raise your score</div>
-        <ul class="improve-list" id="hvaiImproveList"></ul>
-      </div>
-
-      <small>Source: local ensemble (no external APIs).</small>
-    </div>
-
-    <div class="wheel">
-      <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;">
-        <div class="track"></div><div class="arc"></div><div class="pointer"></div>
-        <div class="center"><div class="kv">
-          <div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div>
-          <div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div>
-        </div></div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-  (function(){
-    console.log('HVAI v26 loaded');
-    var confLocked=false;
-    function clamp(v){ return Math.max(0,Math.min(100,Math.round(v||0))); }
-    function setBadge(h){ var st=document.getElementById('hvaiStatus'); if(!st) return; var txt=st.querySelector('.txt'); var ico=st.querySelector('.ico'); st.classList.remove('neutral','good','warn','bad'); if(h>=80){ st.classList.add('good'); if(txt) txt.textContent='Great Work'; if(ico) ico.textContent='✅'; } else if(h>=60){ st.classList.add('warn'); if(txt) txt.textContent='Need More Hard work on content'; if(ico) ico.textContent='🟡'; } else { st.classList.add('bad'); if(txt) txt.textContent='Needs Rewrite the Content'; if(ico) ico.textContent='✍️'; } }
-    function setConfidence(v){ var el=document.getElementById('hvaiConf'); if(el) el.textContent=clamp(v); }
-    function deriveConfFromAI(pAI){ return 60 + (Math.abs(50 - pAI) / 50) * 30; }
-    function updateBars(subs){ if(!subs) return; var map=[['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],['hvaiBarLex','hvaiValLex', subs.lexical],['hvaiBarBurst','hvaiValBurst', subs.burst],['hvaiBarDigits','hvaiValDigits', subs.digits],['hvaiBarRep','hvaiValRep', subs.repetition],['hvaiBarEnt','hvaiValEnt', subs.entropy],]; map.forEach(function(r){ var f=document.getElementById(r[0]); var n=document.getElementById(r[1]); var v=clamp(r[2]); if(f) f.style.width=v+'%'; if(n) n.textContent=v; }); }
-    function deriveSubs(pAI){ var h=100-pAI, c=v=>Math.max(0,Math.min(100,Math.round(v))); return { humanLike:c(h), lexical:c(35+h*0.55), burst:c(25+h*0.7), digits:c(10+(100-h)*0.3), repetition:c(60-h*0.4), entropy:c(35+h*0.45) }; }
-    function showImprovements(subs){ var box=document.getElementById('hvaiImprove'); var ul=document.getElementById('hvaiImproveList'); if(!box||!ul) return; var tips=[], h=subs.humanLike||0; function add(t){ if(t) tips.push(t); } if(h<80) add('Overall Human-like is ' + h + '%. Aim for ≥ 80 by applying the tips below.'); if(subs.lexical<75) add('Lexical Diversity is low ('+subs.lexical+'%). Add domain-specific terms and vary phrasing.'); if(subs.burst<70) add('Burstiness is low ('+subs.burst+'%). Mix short and long sentences.'); if(subs.repetition<70) add('Repetition (3‑gram) is high ('+subs.repetition+'%). Rephrase repeated chunks.'); if(subs.entropy<70) add('Character Entropy is low ('+subs.entropy+'%). Add varied punctuation and specific names.'); if(subs.digits>80) add('Digits Density is high ('+subs.digits+'%). Remove unnecessary numbers.'); if(tips.length<=1 && h<80) add('Add concrete examples and personal/brand perspective.'); ul.innerHTML=''; tips.slice(0,8).forEach(function(t){ var li=document.createElement('li'); li.textContent=t; ul.appendChild(li); }); box.classList.toggle('hidden', !(h<80 || tips.length>0)); }
-    window.updateHVAIScore=function(pAI){ var p=clamp(pAI), h=100-p; var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p); var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p; var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h; setBadge(h); if(!confLocked) setConfidence(deriveConfFromAI(p)); var subs=deriveSubs(p); updateBars(subs); showImprovements(subs); };
-    function detectUltra(text){ text=(text||'').replace(/\s+/g,' ').trim(); var len=text.length; if(len<40) return {ai:0,conf:60,subs:deriveSubs(0)}; var s=text.split(/(?<=[.!?])\s+/).filter(Boolean); var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]); var types=new Set(t); var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100; var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;} var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100; var sl=s.map(x=>(x.match(/\\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length); var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100; var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; } for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100; var digits=(text.match(/\\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100; function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));} var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words)); var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100; var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15; var ai=Math.max(0,Math.min(100,100-human)); var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) }; var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length; var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length; var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10)); return {ai:Math.round(ai), conf:Math.round(conf), subs}; }
-    window.hvaiCompute=function(text){ try{ var r=detectUltra(text||''); confLocked=true; updateHVAIScore(r.ai); updateBars(r.subs); setConfidence(r.conf); showImprovements(r.subs); return r; }catch(e){ console.warn('hvaiCompute error',e); return null; } };
-
-    // Force-inject Prism wheel markup if old wheel is present
-    (function ensureWheel(){
-      var wrap=document.querySelector('#hvai.hvai-v26 .wheel');
-      if(!wrap) return;
-      var hasPrism = !!wrap.querySelector('.prism-wheel');
-      if(!hasPrism){
-        wrap.innerHTML = '<div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;"><div class="track"></div><div class="arc"></div><div class="pointer"></div><div class="center"><div class="kv"><div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div><div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div></div></div></div>';
-      }
-    })();
-
-    // init
-    updateHVAIScore(0);
-  })();
-  </script>
-</section>
-
-
-
-
-
-
-
+      <!-- Detectors grid -->
+      <div class="det-grid" id="detGrid"></div>
+      <div class="det-note" id="detNote" style="color:var(--text-dim);margin-top:.35rem">Local ensemble activates if the backend provides no text/percentages.</div>
+    </section>
 
     <!-- 2) READABILITY INSIGHTS (Upgraded) -->
     <section class="readability" id="readabilityPanel" style="display:none">
@@ -1129,7 +888,7 @@ h2.section-title, .cl-title {
       ] as $c)
         <article class="category-card" data-cat-i="{{ $loop->index }}" style="background-image: {{ $c[4] }}; background-blend-mode: lighten;">
           <header class="category-head">
-            <span class="category-icon" aria-hidden="true"><i class="fa-solid {{ $c[3] }}"></i></span>
+            <span class="category-icon" aria-hidden="true"><i class="fas {{ $c[3] }}"></i></span>
             <div>
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
@@ -2106,399 +1865,5 @@ window.addEventListener('error', function(e){
   document.addEventListener('DOMContentLoaded', wrapHVAI);
 })();
 </script>
-  
-
-
-<!-- Checklist Suggest Patch -->
-<style>
-
-/* checklist-suggest-patch-v1.css */
-.gc-suggest{
-  background: rgba(20,23,36,.98);
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 10px;
-  box-shadow: 0 8px 22px rgba(0,0,0,.45);
-  max-height: 320px;
-  overflow: auto;
-  padding: 6px;
-}
-.gc-suggest__item{
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font: 500 14px/1.3 Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  color: #EAF1FF;
-}
-.gc-suggest__item:hover,
-.gc-suggest__item.is-active{
-  background: linear-gradient(90deg, #00ffc822, #6bf7ff22);
-}
-
-</style>
-<script>
-
-/*! checklist-suggest-patch-v1
- * Lightweight Google Suggest hookup for a single input (Checklist Improve).
- * - Renders dropdown in <body> (portal) to bypass overflow/z-index clipping.
- * - Debounced fetch from suggestqueries.google.com (Firefox client = JSON).
- * - Keyboard support: ↑/↓ navigate, Enter pick, Esc close.
- * - Autodetects the input using common selectors, but you can call attachSuggest(input) yourself.
- */
-(function(){
-  const S = Object.freeze({
-    MAX: 8,
-    HL: document.documentElement.lang || 'en',
-    CLASS: 'gc-suggest',
-    ITEM: 'gc-suggest__item',
-    ACTIVE: 'is-active'
-  });
-
-  function debounce(fn, ms){ let t; return function(...a){ clearTimeout(t); t = setTimeout(()=>fn.apply(this,a), ms); }; }
-
-  // Create dropdown attached to <body>
-  function createPortal(){
-    const el = document.createElement('div');
-    el.className = S.CLASS;
-    el.setAttribute('role','listbox');
-    el.style.position = 'absolute';
-    el.style.display = 'none';
-    el.style.zIndex = '99999';
-    document.body.appendChild(el);
-    return el;
-  }
-
-  // Position the portal under the input
-  function place(portal, input){
-    const r = input.getBoundingClientRect();
-    portal.style.left = Math.round(r.left + window.scrollX) + 'px';
-    portal.style.top  = Math.round(r.bottom + window.scrollY) + 'px';
-    portal.style.minWidth = Math.round(r.width) + 'px';
-  }
-
-  async function fetchSuggest(q){
-    if(!q || !q.trim()){ return []; }
-    const url = 'https://suggestqueries.google.com/complete/search?client=firefox&hl=' + encodeURIComponent(S.HL) + '&q=' + encodeURIComponent(q.trim());
-    try{
-      const rs = await fetch(url, { mode:'cors', cache:'no-store' });
-      const data = await rs.json();
-      return Array.isArray(data) && Array.isArray(data[1]) ? data[1].slice(0,S.MAX) : [];
-    }catch(e){
-      // Network/CORS/CSP: fail silently
-      return [];
-    }
-  }
-
-  function renderList(portal, items, onPick){
-    portal.innerHTML = '';
-    items.forEach((t, i)=>{
-      const li = document.createElement('div');
-      li.className = S.ITEM;
-      li.setAttribute('role','option');
-      li.setAttribute('id', 'gc-opt-' + i);
-      li.textContent = t;
-      li.addEventListener('mousedown', (ev)=>{ ev.preventDefault(); onPick(t); hide(portal); });
-      portal.appendChild(li);
-    });
-    portal.style.display = items.length ? 'block' : 'none';
-  }
-
-  function hide(portal){ portal.style.display='none'; portal.innerHTML=''; activeIndex=-1; }
-
-  let portal = null, activeIndex = -1;
-
-  function attachSuggest(input){
-    if(!input) return;
-    if(!portal) portal = createPortal();
-
-    const deb = debounce(async function(){
-      const q = input.value;
-      const items = await fetchSuggest(q);
-      place(portal, input);
-      renderList(portal, items, (text)=>{
-        input.value = text;
-        input.dispatchEvent(new Event('input', {bubbles:true}));
-      });
-    }, 180);
-
-    input.setAttribute('autocomplete','off');
-    input.setAttribute('aria-controls','gc-suggest');
-    input.addEventListener('input', deb);
-    input.addEventListener('focus', ()=>{ place(portal, input); deb(); });
-    window.addEventListener('resize', ()=> portal && portal.style.display!=='none' && place(portal, input));
-    window.addEventListener('scroll', ()=> portal && portal.style.display!=='none' && place(portal, input), true);
-
-    input.addEventListener('keydown', (e)=>{
-      const items = portal.querySelectorAll('.' + S.ITEM);
-      if(!items.length) return;
-      if(e.key === 'ArrowDown'){ e.preventDefault(); activeIndex = (activeIndex+1) % items.length; updateActive(items); }
-      else if(e.key === 'ArrowUp'){ e.preventDefault(); activeIndex = (activeIndex-1+items.length) % items.length; updateActive(items); }
-      else if(e.key === 'Enter'){ if(activeIndex>=0){ e.preventDefault(); items[activeIndex].dispatchEvent(new Event('mousedown')); } }
-      else if(e.key === 'Escape'){ hide(portal); }
-    });
-
-    document.addEventListener('click', (ev)=>{
-      if(!portal || ev.target===portal || portal.contains(ev.target) || ev.target===input) return;
-      hide(portal);
-    });
-  }
-
-  function updateActive(items){
-    items.forEach((el,i)=> el.classList.toggle(S.ACTIVE, i===activeIndex));
-    if(activeIndex>=0){
-      const el = items[activeIndex];
-      el.scrollIntoView({ block:'nearest' });
-    }
-  }
-
-  // Auto attach using likely selectors
-  const candidates = [
-    '#checklistImprove', '#checklist-improve', '#improveChecklist', '#improveChecklistInput',
-    '[data-role="checklist-improve"]', 'input[placeholder*="improve" i]', 'input[placeholder*="checklist" i]'
-  ];
-  let input = null;
-  for(const sel of candidates){ input = document.querySelector(sel); if(input) break; }
-  if(input){ attachSuggest(input); }
-
-  // expose global attach if needed
-  window.attachChecklistSuggest = attachSuggest;
-})();
-
-</script>
-
-
-<!-- ===== Checklist Improve Modal (lightweight, no deps) ===== -->
-<style>
-  .cl-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:9999}
-  .cl-modal.open{display:flex}
-  .cl-back{position:absolute;inset:0;background:rgba(4,8,22,.6);backdrop-filter:blur(4px)}
-  .cl-card{position:relative;max-width:780px;width:92%;background:linear-gradient(180deg,rgba(15,18,38,.96),rgba(15,18,38,.98));
-    border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 60px rgba(0,0,0,.45);border-radius:16px;padding:20px}
-  .cl-title{font:800 18px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#eaf1ff;margin:0 0 10px}
-  .cl-sub{font:500 13px/1.35 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#9fb2ff;margin:0 0 14px}
-  .cl-list{margin:0;padding-left:1.05rem;max-height:46vh;overflow:auto}
-  .cl-list li{margin:.35rem 0;color:#eaf1ff}
-  .cl-kicker{display:inline-flex;align-items:center;gap:.5rem;margin:.25rem 0 .65rem;color:#c2cffd;font-weight:700}
-  .cl-close{position:absolute;top:10px;right:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#eaf1ff;
-    font:700 12px/1 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:.4rem .55rem;border-radius:10px;cursor:pointer}
-  .cl-close:hover{background:rgba(255,255,255,.08)}
-</style>
-<div id="clModal" class="cl-modal" aria-hidden="true" role="dialog" aria-label="Checklist improvement tips">
-  <div class="cl-back" data-close="1"></div>
-  <div class="cl-card" role="document">
-    <button class="cl-close" type="button" data-close="1">Close ✕</button>
-    <h3 class="cl-title" id="clTitle">Improve</h3>
-    <div class="cl-sub" id="clScoreRow"></div>
-    <ul class="cl-list" id="clList"></ul>
-  </div>
-</div>
-<script>
-(function(){
-  // Category tips map (1..25). Keep concise, practical actions.
-  const CAT_TIPS = {
-    1: ['State the user intent in first 100 words', 'Answer the main question above the fold', 'Use one clear primary topic per page', 'Link to a hub page for this topic'],
-    2: ['Research related terms (PAA, autosuggest, synonyms)', 'Add 3–5 supportive subheadings with related phrases', 'Include long-tail questions users ask', 'Avoid keyword stuffing—use natural wording'],
-    3: ['Use one H1 only', 'Put the primary topic early in H1', 'Keep H1 ~45–70 chars and human-readable', 'Match H1 & page purpose'],
-    4: ['Add 3–6 FAQ Q&As that reflect search intent', 'Answer each in 1–3 short sentences', 'Mark up with FAQPage schema if appropriate', 'Place FAQs near the end or in a sidebar'],
-    5: ['Break text with short paragraphs (2–4 lines)', 'Use bullets, tables, and images with captions', 'Write in simple language and active voice', 'Add a TL;DR summary box'],
-    6: ['Keep title 50–60 chars with target keyword', 'Add benefit or number (e.g., 7 tips)', 'Avoid truncation and clickbait', 'Make each title unique site‑wide'],
-    7: ['Write a 140–160 char meta description', 'Include keyword + benefit + CTA', 'Avoid duplication across pages', 'Reflect the page’s actual content'],
-    8: ['Add a canonical tag to preferred URL', 'Avoid self‑referencing canonicals if not needed', 'Fix duplicate parameter pages', 'Ensure only one canonical per page'],
-    9: ['Include page in XML sitemap', 'Return 200 OK and allow indexing', 'Avoid noindex on important pages', 'Submit sitemap in Search Console'],
-    10:['Show author name & bio with expertise', 'Add date/updated stamp', 'Cite trustworthy sources', 'Include About/Contact/Editorial policy links'],
-    11:['Explain what’s unique vs. competitors', 'Add original insights, data, or examples', 'Use fresh screenshots or media', 'Cut thin or repetitive sections'],
-    12:['Verify facts and dates; link citations', 'Use up‑to‑date sources (last 12–24 months)', 'Quote statistics precisely', 'Avoid dead or low‑quality links'],
-    13:['Add at least 1–3 images or a short video', 'Compress and lazy‑load media', 'Use descriptive alt text and captions', 'Place media near related text'],
-    14:['Organize H2/H3 logically into clusters', 'One idea per section; avoid orphan headings', 'Use table of contents for long pages', 'Cross‑link cluster pages'],
-    15:['Add contextual internal links to hubs', 'Link from hubs back to this page', 'Use descriptive, natural anchor text', 'Fix orphan pages (no internal links)'],
-    16:['Make slug short and readable (e.g., /topic-guide)', 'Avoid dates/IDs unless needed', 'Use hyphens, no stopwords when possible', 'Keep lowercase & canonicalized'],
-    17:['Add breadcrumb navigation', 'Implement BreadcrumbList schema', 'Reflect logical site hierarchy', 'Show breadcrumbs above the H1'],
-    18:['Use responsive layout & fluid images', 'Tap targets ≥ 44px on mobile', 'Avoid horizontal scroll', 'Test at 360–414px wide'],
-    19:['Compress images (WebP/AVIF), minify CSS/JS', 'Defer non‑critical JS; inline critical CSS', 'Enable HTTP caching & CDN', 'Lazy‑load below‑the‑fold media'],
-    20:['LCP: optimize hero image & server TTFB', 'INP: reduce JS work and long tasks', 'CLS: set width/height for media & fonts', 'Monitor with PSI + field data'],
-    21:['Add a primary CTA matching intent', 'Use descriptive button labels', 'Place CTAs at top + end', 'Link to next step (signup, contact, guide)'],
-    22:['Declare the primary entity (name/type)', 'Use consistent naming across the page', 'Link to the entity’s official page', 'Add schema (e.g., Organization, Person)'],
-    23:['Mention related entities with short context', 'Link to authoritative sources', 'Avoid keyword lists—use sentences', 'Use a glossary or hover cards if needed'],
-    24:['Add the right schema (Article/FAQ/Product)', 'Validate in Rich Results Test', 'Avoid conflicting or duplicate types', 'Keep JSON‑LD up to date'],
-    25:['Show sameAs and Organization details', 'Add logo, address, phone (NAP)', 'Link to social profiles', 'Ensure footer/company page is complete']
-  };
-
-  function openModal(catIndex, anchorBtn){
-    const m = document.getElementById('clModal');
-    const title = document.getElementById('clTitle');
-    const scoreRow = document.getElementById('clScoreRow');
-    const list = document.getElementById('clList');
-    if(!m || !list) return;
-
-    // Use label text from the same <li>
-    let labelText = '';
-    const li = anchorBtn ? anchorBtn.closest('li') : null;
-    if(li){
-      const lbl = li.querySelector('label span');
-      if(lbl) labelText = lbl.textContent.trim();
-    }
-    if(!labelText) labelText = 'Checklist improvement';
-
-    // Pull numeric index and score if available
-    let idx = parseInt((anchorBtn && anchorBtn.getAttribute('data-id') || '').replace(/[^0-9]/g,''), 10);
-    if(!idx || !(idx in CAT_TIPS)) idx = Object.keys(CAT_TIPS)[0];
-
-    // Score badge content
-    let score = '—';
-    if(li){
-      const badge = li.querySelector('.score-badge');
-      if(badge) score = badge.textContent.trim();
-    }
-    title.textContent = 'Improve: ' + labelText;
-    scoreRow.textContent = (score !== '—') ? ('Current score: ' + score) : '';
-
-    // Build the list
-    const tips = CAT_TIPS[idx] || ['No tips available for this item yet.'];
-    list.innerHTML = tips.map(t => '<li>'+ t +'</li>').join('');
-
-    // Open
-    m.classList.add('open');
-    m.setAttribute('aria-hidden','false');
-
-    // Focus management
-    const closeBtn = m.querySelector('[data-close]');
-    setTimeout(()=>{ if(closeBtn) closeBtn.focus(); }, 0);
-  }
-
-  function closeModal(){
-    const m = document.getElementById('clModal');
-    if(!m) return;
-    m.classList.remove('open');
-    m.setAttribute('aria-hidden','true');
-  }
-
-  // Click binding (event delegation)
-  document.addEventListener('click', function(e){
-    const btn = e.target.closest && e.target.closest('.improve-btn');
-    if(btn){ e.preventDefault(); openModal(null, btn); return; }
-    if(e.target && e.target.getAttribute && e.target.getAttribute('data-close')==='1'){ closeModal(); }
-  });
-  // ESC to close
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeModal(); });
-})();
-</script>
-<!-- ===== /Checklist Improve Modal ===== -->
-
-
-<!-- ===== Unique Aurora Liquid Wheel + Ambient Glow + Stickers ===== -->
-<style>
-  :root { --fx-spin: 0deg; --fx-h: 120; }
-  body.fx-ambient {
-    background:
-      radial-gradient(1200px 600px at 80% -10%, hsl(var(--fx-h) 90% 60% / .10), transparent 60%),
-      radial-gradient(900px 500px at 20% 110%, hsl(calc(var(--fx-h) + 70) 90% 60% / .10), transparent 60%),
-      #0c1022;
-    transition: background 400ms ease;
-  }
-  .fx-wheel { position: relative; isolation: isolate; filter: drop-shadow(0 12px 40px rgba(0,0,0,.45)); }
-  .fx-wheel .wheel-halo{
-    position:absolute; inset:-18px; z-index:-1; border-radius:50%;
-    background:
-      conic-gradient(from var(--fx-spin),
-        hsl(var(--fx-h) 92% 62% / .65),
-        hsl(calc(var(--fx-h) + 45) 92% 60% / .65),
-        hsl(calc(var(--fx-h) + 90) 92% 58% / .65),
-        hsl(var(--fx-h) 92% 62% / .65));
-    -webkit-mask: radial-gradient(farthest-side, rgba(0,0,0,0) 62%, #000 63%);
-            mask: radial-gradient(farthest-side, rgba(0,0,0,0) 62%, #000 63%);
-    filter: blur(18px) saturate(1.2);
-    opacity:.85; pointer-events:none;
-  }
-  .aurora-title{ position:relative; display:inline-block;
-    background: linear-gradient(90deg, hsl(var(--fx-h) 90% 65%), hsl(calc(var(--fx-h)+50) 90% 65%));
-    -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .aurora-title::after{ content:""; position:absolute; left:0; right:0; bottom:-8px; height:2px; border-radius:999px;
-    background: linear-gradient(90deg, hsl(var(--fx-h) 90% 65%), hsl(calc(var(--fx-h)+50) 90% 65%)); opacity:.6; }
-  .fx-sticker{ position: fixed; z-index: 99999; font-size: 22px; pointer-events:none;
-    transform: translate(-50%, -50%) scale(.9); animation: sticker-pop 900ms cubic-bezier(.2,.8,.2,1) forwards; }
-  @keyframes sticker-pop{
-    0%{ opacity:0; transform: translate(-50%,-30%) scale(.7) rotate(-8deg); }
-    30%{ opacity:1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
-    70%{ opacity:1; transform: translate(-50%,-70%) scale(1.02) rotate(2deg); }
-    100%{ opacity:0; transform: translate(-50%,-90%) scale(.96) rotate(6deg); }
-  }
-</style>
-<script>
-(function(){
-  const clamp = (n,min,max)=> Math.max(min, Math.min(max,n));
-  const pick = (qs)=> document.querySelector(qs);
-  function detectScore(){
-    const el =
-      pick('[data-total-score]') ||
-      pick('.score-wheel[data-score]') ||
-      pick('.score-wheel .score-value') ||
-      pick('.main-score') ||
-      pick('.score .value') ||
-      pick('.score-badge[data-score]');
-    let t = '';
-    if(!el) return 0;
-    t = el.dataset.totalScore || el.getAttribute('data-score') || el.textContent || '0';
-    const m = String(t).match(/\d{1,3}/);
-    return clamp(parseInt(m ? m[0] : '0', 10)||0, 0, 100);
-  }
-  const scoreToHue = s => Math.round(120 * (s/100));
-  function startSpin(){
-    let angle = 0;
-    setInterval(()=> {
-      angle = (angle + 18) % 360;
-      document.documentElement.style.setProperty('--fx-spin', angle + 'deg');
-    }, 1000);
-  }
-  function skinWheel(){
-    const wheel =
-      pick('.score-wheel') ||
-      pick('[data-total-score]') ||
-      pick('.main-score') ||
-      pick('.score');
-    if(!wheel) return;
-    if(!wheel.classList.contains('fx-wheel')){
-      wheel.classList.add('fx-wheel');
-      const halo = document.createElement('span');
-      halo.className = 'wheel-halo';
-      wheel.appendChild(halo);
-    }
-    document.body.classList.add('fx-ambient');
-    const score = detectScore();
-    document.documentElement.style.setProperty('--fx-h', scoreToHue(score));
-  }
-  function sticker(x, y, emoji){
-    const s = document.createElement('div');
-    s.className = 'fx-sticker';
-    s.textContent = emoji;
-    s.style.left = x + 'px'; s.style.top = y + 'px';
-    document.body.appendChild(s);
-    setTimeout(()=> s.remove(), 950);
-  }
-  function bindStickers(){
-    document.addEventListener('change', (e)=>{
-      const cb = e.target.closest && e.target.closest('.checklist input[type="checkbox"]');
-      if(cb && cb.checked){
-        const r = cb.getBoundingClientRect();
-        sticker(r.left + r.width/2, r.top + window.scrollY, ['✨','✅','📈','🌈'][Math.floor(Math.random()*4)]);
-      }
-    });
-  }
-  function watchScore(){
-    let last = detectScore();
-    setInterval(()=>{
-      const now = detectScore();
-      if(now !== last){
-        document.documentElement.style.setProperty('--fx-h', Math.round(120 * (now/100)));
-        last = now;
-      }
-    }, 1500);
-  }
-  skinWheel();
-  bindStickers();
-  startSpin();
-  watchScore();
-})();
-</script>
-<!-- ===== /Unique Aurora Liquid Wheel block ===== -->
-
 </body>
 </html>
