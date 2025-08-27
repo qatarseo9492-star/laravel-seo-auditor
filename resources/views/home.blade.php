@@ -1359,278 +1359,98 @@ h2.section-title, .cl-title {
         </details>
       </div>
 
+      
+      
       <style>
-        /* ===== Scoped Styles: hvai2 ===== */
+        /* ===== HVAI v9 — Neo-Glow UI (old styles removed) ===== */
         .hvai2-wrapper {
-          --bg: var(--card, #0b0e1a);
-          --muted: #9aa4b2;
-          --text: var(--fg, #e7ebf3);
-          --ok: #22c55e;
-          --warn: #f59e0b;
-          --bad: #ef4444;
-          --brand1: #7c3aed;
-          --brand2: #06b6d4;
-          --brand3: #f43f5e;
-          padding: 2rem 0;
-          position: relative;
-          isolation: isolate;
+          --bg0:#0a0e19; --bg1:#0d1426; --bg2:#0b1221;
+          --text:#e9edf7; --muted:#9aa4b2;
+          --ok:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+          --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e;
+          background:
+            radial-gradient(900px 600px at 12% -10%, rgba(124,58,237,.14), transparent 55%),
+            radial-gradient(900px 600px at 90% 0%, rgba(6,182,212,.12), transparent 60%),
+            linear-gradient(180deg, var(--bg1), var(--bg2));
+          color:var(--text);
+          padding:2rem 0; position:relative; isolation:isolate;
         }
-        .hvai2-container { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
-        .hvai2-header { text-align: center; margin-bottom: 1rem; position: relative; }
-        .hvai2-title { margin: 0; line-height: 1.1; }
-        .hvai2-gradient {
-          font-size: clamp(1.4rem, 2vw + 1rem, 2rem);
-          font-weight: 800;
-          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          letter-spacing: .4px;
-          display: inline-block;
-        }
-        .hvai2-sub { display: block; color: var(--muted); font-weight: 600; margin-top: .25rem; }
-        .hvai2-kicker { color: var(--muted); margin: .35rem 0 1.25rem; }
-
-        .hvai2-sparkles { position: absolute; inset: 0; pointer-events: none; }
-        .hvai2-sparkles .sparkle { position: absolute; opacity: .25; width: 22px; height: 22px; fill: currentColor; color: var(--brand2); }
-        .hvai2-sparkles .s1 { top: -6px; left: 10%; animation: float 6s ease-in-out infinite; }
-        .hvai2-sparkles .s2 { top: 4px; right: 18%; color: var(--brand1); animation: twirl 8s linear infinite; }
-        .hvai2-sparkles .s3 { bottom: -6px; left: 50%; color: var(--brand3); animation: pulse 5s ease-in-out infinite; }
-
-        @keyframes float { 0% { transform: translateY(0) } 50% { transform: translateY(-6px) } 100% { transform: translateY(0) } }
-        @keyframes twirl { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
-        @keyframes pulse { 0%,100% { transform: scale(1) } 50% { transform: scale(1.15) } }
-
-        .hvai2-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1rem; align-items: start; }
-        @media (max-width: 900px) { .hvai2-grid { grid-template-columns: 1fr; } }
-
-        .hvai2-inputcard, .hvai2-output {
-          background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 16px;
-          padding: 1rem;
-          box-shadow: 0 10px 30px rgba(0,0,0,.25);
-          backdrop-filter: blur(6px);
-        }
-
-        .hvai2-toolbar { display: flex; gap: .5rem; justify-content: flex-end; margin-bottom: .5rem; }
-        .hvai2-btn {
-          display: inline-flex; align-items: center; gap: .5rem;
-          padding: .55rem .9rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.1);
-          color: var(--text); background: rgba(255,255,255,.06); cursor: pointer;
-          transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
-        }
-        .hvai2-btn:hover { background: rgba(255,255,255,.12); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
-        .hvai2-btn:active { transform: translateY(1px) scale(.98); }
-        .hvai2-btn .ico { display: inline-flex; width: 18px; height: 18px; }
-        .hvai2-btn .ico svg { width: 100%; height: 100%; }
-        .hvai2-btn .ico.spin svg { animation: spin 1.4s linear infinite; transform-origin: center; }
-        .hvai2-primary { background: linear-gradient(90deg, var(--brand1), var(--brand2)); border-color: transparent; }
-
-        @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
-
-        .hvai2-textarea {
-          width: 100%; resize: vertical; min-height: 220px;
-          background: rgba(0,0,0,.35); color: var(--text);
-          border-radius: 12px; border: 1px solid rgba(255,255,255,.1);
-          padding: .9rem 1rem; line-height: 1.5;
-          font: 500 15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
-        }
-        .hvai2-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: .9rem; margin-top: .5rem; }
-
-        .hvai2-ensemble { display: grid; grid-template-columns: 140px 1fr; gap: 1rem; align-items: center; }
-        @media (max-width: 500px) { .hvai2-ensemble { grid-template-columns: 1fr; } }
-
-        .hvai2-gauge { width: 140px; height: 140px; position: relative; }
-        .hvai2-gauge svg { width: 100%; height: 100%; display: block; }
-        .hvai2-gauge .track { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 10; }
-        .hvai2-gauge .progress { fill: none; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset .6s ease; }
-
-        .hvai2-gauge-center { position: absolute; inset: 0; display: grid; place-items: center; gap: .1rem; text-align: center; }
-        #hvai2-ensemble-score { font-weight: 800; font-size: 1.35rem; }
-        #hvai2-ensemble-label { color: var(--muted); font-weight: 600; }
-
-        .hvai2-legend { list-style: none; padding: 0; margin: 0; display: flex; gap: 1rem; flex-wrap: wrap; }
-        .hvai2-legend .dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .35rem; vertical-align: middle; }
-        .hvai2-legend .ok { background: var(--ok); } .hvai2-legend .mid { background: var(--warn); } .hvai2-legend .bad { background: var(--bad); }
-
-        .hvai2-models { margin-top: 1rem; display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; }
-        @media (max-width: 700px) { .hvai2-models { grid-template-columns: 1fr; } }
-
-        .hvai2-card {
-          background: rgba(255,255,255,.04);
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 12px;
-          padding: .8rem .9rem;
-          position: relative;
-          overflow: hidden;
-        }
-        .hvai2-card h4 { margin: 0 0 .35rem; font-size: 1rem; display: flex; align-items: center; gap: .5rem; }
-        .hvai2-chip { font-size: .75rem; padding: .25rem .5rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: var(--muted); }
-        .hvai2-bar { height: 8px; background: rgba(255,255,255,.09); border-radius: 999px; overflow: hidden; margin: .35rem 0 .25rem; }
-        .hvai2-bar > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--ok), var(--warn), var(--bad)); transition: width .6s ease; }
-        .hvai2-row { display: flex; justify-content: space-between; align-items: center; }
-        .hvai2-score { font-weight: 800; }
-        .hvai2-desc { color: var(--muted); font-size: .85rem; }
-
-        .hvai2-note { margin-top: 1rem; color: var(--muted); }
-        .hvai2-note summary { cursor: pointer; font-weight: 700; }
-
-      
-        /* Badge styles */
-        .hvai2-badge { 
-          position: absolute; 
-          top: -12px; 
-          right: -12px; 
-          display: inline-flex; 
-          align-items: center; 
-          gap: .4rem; 
-          padding: .35rem .6rem; 
-          border-radius: 999px; 
-          font-weight: 800; 
-          font-size: .8rem;
-          backdrop-filter: blur(6px);
-          border: 1px solid rgba(255,255,255,.18);
-          box-shadow: 0 6px 18px rgba(0,0,0,.25);
-          transform-origin: 50% 50%;
-          animation: popIn .6s ease forwards;
-        }
-        .hvai2-badge .ico { width: 18px; height: 18px; display: inline-flex; }
-        .hvai2-badge .ico svg { width: 100%; height: 100%; animation: wiggle 2.4s ease-in-out infinite; }
-        .hvai2-badge .text { white-space: nowrap; }
-        .hvai2-badge-hidden { display: none !important; }
-        .badge-good { background: linear-gradient(90deg, #22c55e, #16a34a); color: #06130a; }
-        .badge-okay { background: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0d00; }
-        .badge-low  { background: linear-gradient(90deg, #ef4444, #dc2626); color: #160404; }
-
-        @keyframes popIn { 0% { transform: scale(.8); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
-        @keyframes wiggle { 0%,100% { transform: rotate(0deg) } 25% { transform: rotate(7deg) } 75% { transform: rotate(-7deg) } }
-
-        /* Tech lines background */
-        .hvai2-techwrap {
-          position: absolute; inset: 0;
-          z-index: -1; pointer-events: none; overflow: hidden;
-          border-radius: 16px;
-        }
-        canvas.hvai2-tech {
-          width: 100%; height: 100%;
-          display: block; opacity: .45;
-        }
-
-      
-        /* Bridge (URL Analyzer integration) */
-        .hvai2-bridge { position: relative; z-index: 1; }
-        .hvai2-statusrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--muted); }
-        .hvai2-urlpill { display: inline-block; padding: .4rem .7rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 700; margin-bottom: .5rem; }
-        .dotpulse { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 rgba(34,197,94,.6); animation: dotPulse 1.8s infinite; }
-        @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.7) } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
-
-      
-        /* Multicolor wheel behind the gauge */
-        .hvai2-gauge { position: relative; }
-        .hvai2-gauge svg, .hvai2-gauge .hvai2-gauge-center { position: relative; z-index: 2; }
-        .hvai2-wheel {
-          position: absolute; inset: -12px;
-          width: calc(100% + 24px); height: calc(100% + 24px);
-          display: block; z-index: 1; pointer-events: none;
-          filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
-          opacity: .95;
-        }
-
-      
-        /* ===== Modernized look & better layering ===== */
-        .hvai2-wrapper {
-          --bg: color-mix(in oklab, #0a0c14 94%, #10162b 6%);
-          --surface: color-mix(in oklab, #0f1322 80%, #0b0f1a 20%);
-          --glass: rgba(255,255,255,.04);
-          --border: rgba(255,255,255,.10);
-          --border-strong: rgba(255,255,255,.18);
-          --muted: #9aa4b2;
-          --text: #e9edf7;
-          --ok: #22c55e; --warn: #f59e0b; --bad: #ef4444;
-          --brand1: #7c3aed; --brand2: #06b6d4; --brand3: #f43f5e;
-          background: radial-gradient(1200px 800px at 15% -10%, rgba(124,58,237,.12), transparent 55%),
-                      radial-gradient(1000px 800px at 90% 10%, rgba(6,182,212,.10), transparent 60%),
-                      var(--bg);
-        }
-        .hvai2-header .hvai2-title {
-          display: inline-grid; gap: .2rem; padding: .2rem .6rem;
-          border-radius: 14px; position: relative;
-        }
-        .hvai2-header .hvai2-title::after {
-          content:'';
-          height: 2px; width: 100%;
-          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
-          border-radius: 2px; margin-top: .35rem;
-        }
-        .hvai2-inputcard, .hvai2-output {
-          position: relative; overflow: hidden;
-          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
-          border-radius: 20px;
-          border: 1px solid var(--border);
-          box-shadow: 0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
-        }
-        .hvai2-inputcard > *:not(.hvai2-techwrap),
-        .hvai2-output > *:not(.hvai2-techwrap) { position: relative; z-index: 1; }
-        .hvai2-techwrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-
-        /* Gradient border shimmer */
-        .hvai2-inputcard::before, .hvai2-output::before {
-          content:''; position:absolute; inset:-1px;
-          border-radius: inherit; padding: 1px; pointer-events: none;
-          background: linear-gradient(120deg, rgba(124,58,237,.5), rgba(6,182,212,.4), rgba(244,63,94,.5));
-          -webkit-mask: 
-            linear-gradient(#000 0 0) content-box, 
-            linear-gradient(#000 0 0);
-          -webkit-mask-composite: xor; mask-composite: exclude;
-          opacity: .65;
-        }
-
-        /* Modern chips & bars */
-        .hvai2-chip { background: rgba(255,255,255,.05); border-color: var(--border-strong); }
-        .hvai2-bar { background: rgba(255,255,255,.08); }
-        .hvai2-bar > span { background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
-
-        /* Header sparkles toned & modern */
-        .hvai2-sparkles .sparkle { opacity: .18; }
-
-        /* Bridge polish */
-        .hvai2-urlpill { background: rgba(255,255,255,.08); border-color: var(--border-strong); }
-
-        /* Gauge numbers larger */
-        #hvai2-ensemble-score { font-size: 1.6rem; }
-
-      
-        /* ===== Stylish Glow Outline + Theme Vars ===== */
-        :root {
-          --hvai2-bg1: #0a0c14;
-          --hvai2-bg2: #0f1322;
-          --hvai2-accent1: #7c3aed;
-          --hvai2-accent2: #06b6d4;
-          --hvai2-accent3: #f43f5e;
-        }
-        .hvai2-wrapper[data-theme="violet"] { --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e; }
         .hvai2-wrapper[data-theme="emerald"] { --brand1:#10b981; --brand2:#22d3ee; --brand3:#a3e635; }
-        .hvai2-wrapper[data-theme="sunset"] { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
+        .hvai2-wrapper[data-theme="sunset"]  { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
 
-        .hvai2-inputcard, .hvai2-output {
-          box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+        .hvai2-container{max-width:1100px;margin:0 auto;padding:0 1rem;}
+
+        .hvai2-header{text-align:left;margin-bottom:.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+        .hvai2-title{margin:0;line-height:1.1}
+        .hvai2-gradient{
+          font-size: clamp(1.6rem, 2.2vw + 1rem, 2.4rem);
+          font-weight: 900;
+          letter-spacing:.3px;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          -webkit-background-clip:text;background-clip:text;color:transparent;
+          text-shadow: 0 10px 30px rgba(0,0,0,.35);
         }
-        .hvai2-inputcard::after, .hvai2-output::after {
-          content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
-          background: conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));
-          filter: blur(18px); opacity:.55; animation: hvai2-spin 14s linear infinite;
-        }
-        @keyframes hvai2-spin { to { transform: rotate(360deg); } }
 
-        /* Live scoreboard pills */
-        .hvai2-statusrow .statustext { font-weight: 700; }
-        .hvai2-statusrow .sep { opacity:.5; margin: 0 .35rem; }
+        .hvai2-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:1rem;align-items:start}
+        @media (max-width: 900px){.hvai2-grid{grid-template-columns:1fr}}
 
-        /* Ensure tech canvas is more visible */
-        canvas.hvai2-tech { opacity: .6; mix-blend-mode: screen; }
+        .hvai2-inputcard,.hvai2-output{position:relative;overflow:hidden;border-radius:22px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);box-shadow:0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06)}
+        .hvai2-inputcard::before,.hvai2-output::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:1px;pointer-events:none;background:linear-gradient(120deg, rgba(124,58,237,.55), rgba(6,182,212,.45), rgba(244,63,94,.55));-webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.7}
+        .hvai2-inputcard::after,.hvai2-output::after{content:'';position:absolute;inset:-2px;border-radius:inherit;z-index:0;background:conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));filter:blur(18px);opacity:.5;animation:spin 14s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
 
+        .hvai2-techwrap{position:absolute;inset:0;z-index:0;pointer-events:none}
+        canvas.hvai2-tech{width:100%;height:100%;display:block;opacity:.6;mix-blend-mode:screen}
+
+        .hvai2-bridge .hvai2-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.9rem;margin-top:.25rem}
+        .hvai2-statusrow{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;color:var(--muted);font-weight:800}
+        .hvai2-urlpill{display:inline-block;padding:.45rem .8rem;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);font-weight:800}
+        .dotpulse{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 rgba(34,197,94,.6);animation:dotPulse 1.8s infinite}
+        @keyframes dotPulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,.7)} 70%{box-shadow:0 0 0 10px rgba(34,197,94,0)} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+
+        .hvai2-ensemble{display:grid;grid-template-columns:180px 1fr;gap:1rem;align-items:center}
+        @media (max-width: 500px){.hvai2-ensemble{grid-template-columns:1fr}}
+        .hvai2-gauge{width:180px;height:180px;position:relative}
+        .hvai2-gauge svg{width:100%;height:100%;display:block;position:relative;z-index:2}
+        .hvai2-gauge .track{fill:none;stroke:rgba(255,255,255,.1);stroke-width:12}
+        .hvai2-gauge .progress{fill:none;stroke-width:12;stroke-linecap:round;stroke-dasharray: 376.99; stroke-dashoffset:376.99;transform:rotate(-90deg);transform-origin:50% 50%;transition:stroke-dashoffset .6s ease}
+        .hvai2-gauge-center{position:absolute;inset:0;display:grid;place-items:center;gap:.15rem;text-align:center;z-index:3}
+        #hvai2-ensemble-score{font-weight:900;font-size:1.8rem}
+        #hvai2-ensemble-label{color:var(--muted);font-weight:700}
+
+        .hvai2-wheel{position:absolute;inset:-14px;width:calc(100% + 28px);height:calc(100% + 28px);display:block;z-index:1;pointer-events:none;filter:drop-shadow(0 8px 24px rgba(0,0,0,.4));opacity:.95}
+
+        .hvai2-legend{list-style:none;padding:0;margin:.2rem 0 0;display:flex;gap:1rem;flex-wrap:wrap}
+        .hvai2-legend .dot{width:.6rem;height:.6rem;border-radius:50%;margin-right:.35rem;display:inline-block;vertical-align:middle}
+        .hvai2-legend .ok{background:var(--ok)} .hvai2-legend .mid{background:var(--warn)} .hvai2-legend .bad{background:var(--bad)}
+
+        .hvai2-models{margin-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+        @media (max-width: 700px){.hvai2-models{grid-template-columns:1fr}}
+        .hvai2-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.9rem 1rem;position:relative;overflow:hidden}
+        .hvai2-card h4{margin:0 0 .35rem;font-size:1rem;display:flex;align-items:center;gap:.5rem}
+        .hvai2-chip{font-size:.75rem;padding:.25rem .5rem;border-radius:999px;border:1px solid rgba(255,255,255,.2);color:var(--muted)}
+        .hvai2-bar{height:10px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:.35rem 0 .25rem}
+        .hvai2-bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#a3e635,#f59e0b,#ef4444);transition:width .6s ease}
+        .hvai2-row{display:flex;justify-content:space-between;align-items:center}
+        .hvai2-score{font-weight:900}
+        .hvai2-desc{color:var(--muted);font-size:.85rem}
+
+        .hvai2-badge{position:absolute;top:-10px;right:-10px;display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .6rem;border-radius:999px;font-weight:900;font-size:.8rem;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.18);box-shadow:0 6px 18px rgba(0,0,0,.25);transform-origin:50% 50%;animation:popIn .6s ease forwards}
+        .hvai2-badge .ico{width:18px;height:18px;display:inline-flex}
+        .hvai2-badge .ico svg{width:100%;height:100%;animation:wiggle 2.4s ease-in-out infinite}
+        .hvai2-badge .text{white-space:nowrap}
+        .hvai2-badge-hidden{display:none !important}
+        .badge-good{background:linear-gradient(90deg,#22c55e,#16a34a);color:#06130a}
+        .badge-okay{background:linear-gradient(90deg,#f59e0b,#f97316);color:#1a0d00}
+        .badge-low{background:linear-gradient(90deg,#ef4444,#dc2626);color:#160404}
+        @keyframes popIn{0%{transform:scale(.8);opacity:0}100%{transform:scale(1);opacity:1}}
+        @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(7deg)}75%{transform:rotate(-7deg)}}
+
+        .hvai2-note{margin-top:1rem;color:var(--muted)}
+        .hvai2-note summary{cursor:pointer;font-weight:700}
       </style>
+</style>
+
 
       <script>
       (function(){
