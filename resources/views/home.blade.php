@@ -616,6 +616,36 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
         /* Gauge numbers larger */
         #hvai2-ensemble-score { font-size: 1.6rem; }
 
+      
+        /* ===== Stylish Glow Outline + Theme Vars ===== */
+        :root {
+          --hvai2-bg1: #0a0c14;
+          --hvai2-bg2: #0f1322;
+          --hvai2-accent1: #7c3aed;
+          --hvai2-accent2: #06b6d4;
+          --hvai2-accent3: #f43f5e;
+        }
+        .hvai2-wrapper[data-theme="violet"] { --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e; }
+        .hvai2-wrapper[data-theme="emerald"] { --brand1:#10b981; --brand2:#22d3ee; --brand3:#a3e635; }
+        .hvai2-wrapper[data-theme="sunset"] { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
+
+        .hvai2-inputcard, .hvai2-output {
+          box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+        }
+        .hvai2-inputcard::after, .hvai2-output::after {
+          content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
+          background: conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));
+          filter: blur(18px); opacity:.55; animation: hvai2-spin 14s linear infinite;
+        }
+        @keyframes hvai2-spin { to { transform: rotate(360deg); } }
+
+        /* Live scoreboard pills */
+        .hvai2-statusrow .statustext { font-weight: 700; }
+        .hvai2-statusrow .sep { opacity:.5; margin: 0 .35rem; }
+
+        /* Ensure tech canvas is more visible */
+        canvas.hvai2-tech { opacity: .6; mix-blend-mode: screen; }
+
       </style>
 
 <style>
@@ -767,6 +797,36 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
 
         /* Gauge numbers larger */
         #hvai2-ensemble-score { font-size: 1.6rem; }
+
+      
+        /* ===== Stylish Glow Outline + Theme Vars ===== */
+        :root {
+          --hvai2-bg1: #0a0c14;
+          --hvai2-bg2: #0f1322;
+          --hvai2-accent1: #7c3aed;
+          --hvai2-accent2: #06b6d4;
+          --hvai2-accent3: #f43f5e;
+        }
+        .hvai2-wrapper[data-theme="violet"] { --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e; }
+        .hvai2-wrapper[data-theme="emerald"] { --brand1:#10b981; --brand2:#22d3ee; --brand3:#a3e635; }
+        .hvai2-wrapper[data-theme="sunset"] { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
+
+        .hvai2-inputcard, .hvai2-output {
+          box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+        }
+        .hvai2-inputcard::after, .hvai2-output::after {
+          content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
+          background: conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));
+          filter: blur(18px); opacity:.55; animation: hvai2-spin 14s linear infinite;
+        }
+        @keyframes hvai2-spin { to { transform: rotate(360deg); } }
+
+        /* Live scoreboard pills */
+        .hvai2-statusrow .statustext { font-weight: 700; }
+        .hvai2-statusrow .sep { opacity:.5; margin: 0 .35rem; }
+
+        /* Ensure tech canvas is more visible */
+        canvas.hvai2-tech { opacity: .6; mix-blend-mode: screen; }
 
       </style>
 
@@ -984,6 +1044,36 @@ h2.section-title, .cl-title {
         /* Gauge numbers larger */
         #hvai2-ensemble-score { font-size: 1.6rem; }
 
+      
+        /* ===== Stylish Glow Outline + Theme Vars ===== */
+        :root {
+          --hvai2-bg1: #0a0c14;
+          --hvai2-bg2: #0f1322;
+          --hvai2-accent1: #7c3aed;
+          --hvai2-accent2: #06b6d4;
+          --hvai2-accent3: #f43f5e;
+        }
+        .hvai2-wrapper[data-theme="violet"] { --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e; }
+        .hvai2-wrapper[data-theme="emerald"] { --brand1:#10b981; --brand2:#22d3ee; --brand3:#a3e635; }
+        .hvai2-wrapper[data-theme="sunset"] { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
+
+        .hvai2-inputcard, .hvai2-output {
+          box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+        }
+        .hvai2-inputcard::after, .hvai2-output::after {
+          content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
+          background: conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));
+          filter: blur(18px); opacity:.55; animation: hvai2-spin 14s linear infinite;
+        }
+        @keyframes hvai2-spin { to { transform: rotate(360deg); } }
+
+        /* Live scoreboard pills */
+        .hvai2-statusrow .statustext { font-weight: 700; }
+        .hvai2-statusrow .sep { opacity:.5; margin: 0 .35rem; }
+
+        /* Ensure tech canvas is more visible */
+        canvas.hvai2-tech { opacity: .6; mix-blend-mode: screen; }
+
       </style>
 <!-- ===== /New Neo‑Glass Aurora Skin ===== -->
 
@@ -1190,32 +1280,36 @@ h2.section-title, .cl-title {
           <div class="hvai2-titlewrap">
             <h2 class="hvai2-title">
               <span class="hvai2-gradient">Multi-Model Ensemble Content</span>
-              <span class="hvai2-sub">Per‑model scores + final verdict</span>
-            </h2>
+              </h2>
             <div class="hvai2-sparkles" aria-hidden="true">
               <svg class="sparkle s1" viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
               <svg class="sparkle s2" viewBox="0 0 24 24"><path d="M12 3l1.6 4.8L19 9l-5.4 1.2L12 15 10.4 10.2 5 9l5.4-1.2z"/></svg>
               <svg class="sparkle s3" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>
             </div>
           </div>
-          <p class="hvai2-kicker">Paste text below → analyze → see per‑model scores and the final ensemble verdict.</p>
-        </header>
+          </header>
 
         <div class="hvai2-grid">
           <div class="hvai2-inputcard">
             <div class="hvai2-techwrap"><canvas class="hvai2-tech"></canvas></div>
             <div class="hvai2-bridge">
+              
               <div class="hvai2-statusrow">
                 <span class="dotpulse" aria-hidden="true"></span>
-                <span class="statustext"><strong>Connected:</strong> Waiting for URL Analyzer…</span>
+                <span class="statustext">
+                  <strong id="hvai2-live-label">Score:</strong>
+                  <span id="hvai2-live-score">—%</span>
+                  <span class="sep">•</span>
+                  <span id="hvai2-live-state">Waiting…</span>
+                </span>
               </div>
+    
               <div class="hvai2-urlpill">URL: <span id="hvai2-current-url">—</span></div>
               <div class="hvai2-meta">
                 <span id="hvai2-count">0 chars • 0 words • 0 sentences</span>
                 <span id="hvai2-lang">lang: —</span>
               </div>
-              <p class="hvai2-bridge-hint">Tip: Trigger your main site URL Analyzer. This module will automatically ingest the extracted content and display scores here.</p>
-            </div>
+              </div>
 
           </div>
 
@@ -1505,6 +1599,36 @@ h2.section-title, .cl-title {
 
         /* Gauge numbers larger */
         #hvai2-ensemble-score { font-size: 1.6rem; }
+
+      
+        /* ===== Stylish Glow Outline + Theme Vars ===== */
+        :root {
+          --hvai2-bg1: #0a0c14;
+          --hvai2-bg2: #0f1322;
+          --hvai2-accent1: #7c3aed;
+          --hvai2-accent2: #06b6d4;
+          --hvai2-accent3: #f43f5e;
+        }
+        .hvai2-wrapper[data-theme="violet"] { --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e; }
+        .hvai2-wrapper[data-theme="emerald"] { --brand1:#10b981; --brand2:#22d3ee; --brand3:#a3e635; }
+        .hvai2-wrapper[data-theme="sunset"] { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
+
+        .hvai2-inputcard, .hvai2-output {
+          box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+        }
+        .hvai2-inputcard::after, .hvai2-output::after {
+          content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
+          background: conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));
+          filter: blur(18px); opacity:.55; animation: hvai2-spin 14s linear infinite;
+        }
+        @keyframes hvai2-spin { to { transform: rotate(360deg); } }
+
+        /* Live scoreboard pills */
+        .hvai2-statusrow .statustext { font-weight: 700; }
+        .hvai2-statusrow .sep { opacity:.5; margin: 0 .35rem; }
+
+        /* Ensure tech canvas is more visible */
+        canvas.hvai2-tech { opacity: .6; mix-blend-mode: screen; }
 
       </style>
 
@@ -3278,6 +3402,36 @@ window.addEventListener('error', function(e){
         /* Gauge numbers larger */
         #hvai2-ensemble-score { font-size: 1.6rem; }
 
+      
+        /* ===== Stylish Glow Outline + Theme Vars ===== */
+        :root {
+          --hvai2-bg1: #0a0c14;
+          --hvai2-bg2: #0f1322;
+          --hvai2-accent1: #7c3aed;
+          --hvai2-accent2: #06b6d4;
+          --hvai2-accent3: #f43f5e;
+        }
+        .hvai2-wrapper[data-theme="violet"] { --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e; }
+        .hvai2-wrapper[data-theme="emerald"] { --brand1:#10b981; --brand2:#22d3ee; --brand3:#a3e635; }
+        .hvai2-wrapper[data-theme="sunset"] { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
+
+        .hvai2-inputcard, .hvai2-output {
+          box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+        }
+        .hvai2-inputcard::after, .hvai2-output::after {
+          content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
+          background: conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));
+          filter: blur(18px); opacity:.55; animation: hvai2-spin 14s linear infinite;
+        }
+        @keyframes hvai2-spin { to { transform: rotate(360deg); } }
+
+        /* Live scoreboard pills */
+        .hvai2-statusrow .statustext { font-weight: 700; }
+        .hvai2-statusrow .sep { opacity:.5; margin: 0 .35rem; }
+
+        /* Ensure tech canvas is more visible */
+        canvas.hvai2-tech { opacity: .6; mix-blend-mode: screen; }
+
       </style>
 <script>
 
@@ -3549,6 +3703,36 @@ window.addEventListener('error', function(e){
         /* Gauge numbers larger */
         #hvai2-ensemble-score { font-size: 1.6rem; }
 
+      
+        /* ===== Stylish Glow Outline + Theme Vars ===== */
+        :root {
+          --hvai2-bg1: #0a0c14;
+          --hvai2-bg2: #0f1322;
+          --hvai2-accent1: #7c3aed;
+          --hvai2-accent2: #06b6d4;
+          --hvai2-accent3: #f43f5e;
+        }
+        .hvai2-wrapper[data-theme="violet"] { --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e; }
+        .hvai2-wrapper[data-theme="emerald"] { --brand1:#10b981; --brand2:#22d3ee; --brand3:#a3e635; }
+        .hvai2-wrapper[data-theme="sunset"] { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
+
+        .hvai2-inputcard, .hvai2-output {
+          box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+        }
+        .hvai2-inputcard::after, .hvai2-output::after {
+          content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
+          background: conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));
+          filter: blur(18px); opacity:.55; animation: hvai2-spin 14s linear infinite;
+        }
+        @keyframes hvai2-spin { to { transform: rotate(360deg); } }
+
+        /* Live scoreboard pills */
+        .hvai2-statusrow .statustext { font-weight: 700; }
+        .hvai2-statusrow .sep { opacity:.5; margin: 0 .35rem; }
+
+        /* Ensure tech canvas is more visible */
+        canvas.hvai2-tech { opacity: .6; mix-blend-mode: screen; }
+
       </style>
 <div id="clModal" class="cl-modal" aria-hidden="true" role="dialog" aria-label="Checklist improvement tips">
   <div class="cl-back" data-close="1"></div>
@@ -3812,6 +3996,36 @@ window.addEventListener('error', function(e){
 
         /* Gauge numbers larger */
         #hvai2-ensemble-score { font-size: 1.6rem; }
+
+      
+        /* ===== Stylish Glow Outline + Theme Vars ===== */
+        :root {
+          --hvai2-bg1: #0a0c14;
+          --hvai2-bg2: #0f1322;
+          --hvai2-accent1: #7c3aed;
+          --hvai2-accent2: #06b6d4;
+          --hvai2-accent3: #f43f5e;
+        }
+        .hvai2-wrapper[data-theme="violet"] { --brand1:#7c3aed; --brand2:#06b6d4; --brand3:#f43f5e; }
+        .hvai2-wrapper[data-theme="emerald"] { --brand1:#10b981; --brand2:#22d3ee; --brand3:#a3e635; }
+        .hvai2-wrapper[data-theme="sunset"] { --brand1:#fb7185; --brand2:#f59e0b; --brand3:#22d3ee; }
+
+        .hvai2-inputcard, .hvai2-output {
+          box-shadow: 0 24px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+        }
+        .hvai2-inputcard::after, .hvai2-output::after {
+          content:''; position:absolute; inset:-2px; border-radius:inherit; z-index:0;
+          background: conic-gradient(from 0deg, var(--brand1), var(--brand2), var(--brand3), var(--brand1));
+          filter: blur(18px); opacity:.55; animation: hvai2-spin 14s linear infinite;
+        }
+        @keyframes hvai2-spin { to { transform: rotate(360deg); } }
+
+        /* Live scoreboard pills */
+        .hvai2-statusrow .statustext { font-weight: 700; }
+        .hvai2-statusrow .sep { opacity:.5; margin: 0 .35rem; }
+
+        /* Ensure tech canvas is more visible */
+        canvas.hvai2-tech { opacity: .6; mix-blend-mode: screen; }
 
       </style>
 <script>
