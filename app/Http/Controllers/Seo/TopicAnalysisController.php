@@ -10,15 +10,20 @@ use Illuminate\Http\Request;
 class TopicAnalysisController extends Controller
 {
     /**
-     * Show the input form.
+     * Show the Topic Cluster form.
      */
     public function create()
     {
+        // View: resources/views/seo/topic-analysis.blade.php
         return view('seo.topic-analysis');
     }
 
     /**
-     * Process the form: validate -> check cache -> analyze -> save -> redirect to results.
+     * Handle form submission:
+     *  - Validate
+     *  - Check cached analysis (by signature)
+     *  - Generate (via TopicClusterService) if not cached
+     *  - Persist and redirect to results
      */
     public function store(Request $request, TopicClusterService $service)
     {
@@ -27,8 +32,8 @@ class TopicAnalysisController extends Controller
             'num_clusters' => ['nullable', 'integer', 'min:2', 'max:12'],
         ]);
 
-        // Split lines into distinct URLs
-        $urls = preg_split('/\r\n|\r|\n/', $data['urls']);
+        // Split by lines, trim, dedupe
+        $urls = preg_split('/\r\n|\r|\n/', $data['urls'] ?? '');
         $urls = array_values(
             array_unique(
                 array_filter(
@@ -43,28 +48,29 @@ class TopicAnalysisController extends Controller
                 ->withInput();
         }
 
-        $numClusters = (int)($data['num_clusters'] ?? 5);
+        $numClusters = (int) ($data['num_clusters'] ?? 5);
 
-        // Dedupe exact list by signature and check cache
+        // Signature for this exact set of URLs
         $signature = TopicClusterService::signatureForUrls($urls);
-        $existing = TopicAnalysis::where('urls_signature', $signature)->latest()->first();
 
+        // Return cached result if exists
+        $existing = TopicAnalysis::where('urls_signature', $signature)->latest('id')->first();
         if ($existing) {
             return redirect()->route('seo.topic-clusters.results', ['analysis' => $existing->id]);
         }
 
-        // Fresh analysis via service
+        // Generate via service
         $out = $service->generateClusters($urls, $numClusters);
 
-        // Save to DB
+        // Persist
         $analysis = TopicAnalysis::create([
             'urls_list'       => $urls,
             'urls_signature'  => $signature,
-            'analysis_result' => $out['result'],
+            'analysis_result' => $out['result'] ?? ['clusters' => []],
             'openai_metadata' => $out['openai_meta'] ?? [],
         ]);
 
-        // Redirect to results page
+        // Redirect to results
         return redirect()->route('seo.topic-clusters.results', ['analysis' => $analysis->id]);
     }
 }
