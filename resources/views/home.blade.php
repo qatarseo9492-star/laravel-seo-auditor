@@ -814,7 +814,8 @@ h2.section-title, .cl-title {
 
   
 
-{{-- BEGIN: Multi-Model Ensemble Content Detection (stylish v3, robust errors) --}}
+
+{{-- BEGIN: Multi-Model Ensemble Content Detection (STYLISH PRO v1) --}}
 <div class="mmecd" data-component="multi-ensemble-detector"
      data-endpoint-detect="{{ url('/api/detect') }}"
      data-endpoint-detect-url="{{ url('/api/detect/url') }}">
@@ -834,8 +835,9 @@ h2.section-title, .cl-title {
         </g>
       </svg>
       <h3 class="mmecd__title">Multi-Model Ensemble Content Detection</h3>
+      <span class="mmecd__pill mmecd__pill--status" title="API status">Checking…</span>
     </div>
-    <p class="mmecd__subtitle">Colorful, animated results. Hugging Face ensemble + local statistics. Paste text, Analyze a URL, or auto-run from your URL analyzer.</p>
+    <p class="mmecd__subtitle">Colorful, animated & professional UI. Hugging Face ensemble + local stats. Paste text or analyze a URL.</p>
     <div class="mmecd__icons">
       <svg class="mmecd__ico mmecd__ico--pulse" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M3 12h5l2-5 4 10 2-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -855,6 +857,12 @@ h2.section-title, .cl-title {
         <textarea class="mmecd__input" rows="8" placeholder="Paste content here… (min 20 characters)"></textarea>
         <div class="mmecd__inputHalo"></div>
       </div>
+
+      <div class="mmecd__urlbar">
+        <input type="url" class="mmecd__url" placeholder="https://example.com/article…" inputmode="url">
+        <button type="button" class="mmecd__btnUrl">Analyze URL</button>
+      </div>
+
       <div class="mmecd__actions">
         <button class="mmecd__btn" type="button">
           <span class="mmecd__btnIcon">▶</span>
@@ -903,12 +911,24 @@ h2.section-title, .cl-title {
 
   <details class="mmecd__panel">
     <summary>Model breakdown</summary>
-    <ul class="mmecd__models"></ul>
+    <div class="mmecd__modelsGrid">
+      <div class="mmecd__empty" data-slot="models">
+        <div class="mmecd__emptyIcon">📊</div>
+        <div class="mmecd__emptyTitle">No model scores yet</div>
+        <div class="mmecd__emptyText">Paste content or analyze a URL to see per‑model probabilities and weights.</div>
+      </div>
+    </div>
   </details>
 
   <details class="mmecd__panel">
     <summary>Statistical features</summary>
-    <pre class="mmecd__stats"></pre>
+    <div class="mmecd__statsGrid">
+      <div class="mmecd__empty" data-slot="stats">
+        <div class="mmecd__emptyIcon">📐</div>
+        <div class="mmecd__emptyTitle">No statistical summary yet</div>
+        <div class="mmecd__emptyText">We’ll show perplexity, burstiness, lexical diversity, readability and more here.</div>
+      </div>
+    </div>
   </details>
 </div>
 
@@ -916,7 +936,7 @@ h2.section-title, .cl-title {
   .mmecd{--bg:rgba(255,255,255,.05);--bd:rgba(255,255,255,.12);--fg:#e5e7eb;--muted:#a1a1aa;--accent:#7c3aed;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444}
   .mmecd *{box-sizing:border-box}
   .mmecd__head{margin-bottom:1rem}
-  .mmecd__titleWrap{display:flex;align-items:center;gap:.65rem}
+  .mmecd__titleWrap{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}
   .mmecd__titleIcon{width:34px;height:34px;opacity:.95}
   .mmecd__titleIconSpin{transform-origin:32px 32px;animation:mmecd-spin 8s linear infinite}
   .mmecd__title{
@@ -931,6 +951,8 @@ h2.section-title, .cl-title {
     animation:mmecd-gradient 10s ease infinite;
     letter-spacing:.2px;
   }
+  .mmecd__pill{display:inline-flex;align-items:center;gap:.4rem;padding:.28rem .55rem;border-radius:999px;font-size:.78rem;font-weight:700}
+  .mmecd__pill--status{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#e9d5ff}
   .mmecd__subtitle{margin:.35rem 0 0;color:var(--muted);font-size:.98rem}
   .mmecd__icons{display:flex;gap:.6rem;margin-top:.6rem}
   .mmecd__ico{width:18px;height:18px;color:#a5b4fc;opacity:.95}
@@ -949,11 +971,15 @@ h2.section-title, .cl-title {
                 radial-gradient(600px 120px at 80% 0%, rgba(16,185,129,.35), transparent 60%);
     filter: blur(12px); opacity:0; transform:scale(.98); transition:all .25s ease}
 
+  .mmecd__urlbar{display:flex;gap:10px;margin-top:10px}
+  .mmecd__url{flex:1 1 auto;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);padding:10px 12px;outline:none}
+  .mmecd__btnUrl{appearance:none;border:0;border-radius:12px;background:linear-gradient(90deg,#22d3ee,#10b981);color:white;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(34,211,238,.25)}
+
   .mmecd__actions{display:flex;align-items:center;gap:10px;margin-top:8px}
   .mmecd__btn{appearance:none;border:0;border-radius:12px;background:linear-gradient(90deg,#6366f1,#22d3ee);color:white;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(99,102,241,.25)}
-  .mmecd__btn:hover{filter:brightness(1.05)}
+  .mmecd__btn:hover,.mmecd__btnUrl:hover{filter:brightness(1.05)}
   .mmecd__btnIcon{display:inline-block;margin-right:6px;transform:translateY(1px)}
-  .mmecd__status{color:var(--muted);font-size:.95rem}
+  .mmecd__status{color:var(--muted);font-size:.95rem;min-height:1.1em}
 
   .mmecd__wheel{position:relative;width:220px;height:220px;margin:0 auto}
   .mmecd__svg{width:220px;height:220px;display:block;animation:mmecd-hue 18s linear infinite}
@@ -971,6 +997,23 @@ h2.section-title, .cl-title {
   .mmecd__meta{font-size:.98rem;color:var(--muted);text-align:center;margin-top:.5rem}
   .mmecd__panel{margin-top:.75rem;background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:.6rem 1rem}
   .mmecd__panel summary{cursor:pointer;font-weight:700}
+
+  .mmecd__modelsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:.6rem}
+  .mmecd__modelCard{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:.7rem}
+  .mmecd__modelCard .name{font-weight:800;font-size:.95rem}
+  .mmecd__modelCard .meta{font-size:.85rem;color:var(--muted);margin-top:.25rem}
+  .mmecd__modelCard .bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);margin-top:.45rem;overflow:hidden}
+  .mmecd__modelCard .bar > i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#10b981,#f59e0b);width:0}
+
+  .mmecd__statsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:.6rem}
+  .mmecd__stat{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:.6rem}
+  .mmecd__stat .k{font-weight:800;font-size:.9rem}
+  .mmecd__stat .v{font-size:.95rem;margin-top:.25rem}
+
+  .mmecd__empty{border:1px dashed rgba(255,255,255,.18);border-radius:12px;padding:1rem;text-align:center;color:var(--muted);background:rgba(255,255,255,.03)}
+  .mmecd__emptyIcon{font-size:1.3rem;opacity:.9}
+  .mmecd__emptyTitle{font-weight:800;margin-top:.35rem}
+  .mmecd__emptyText{font-size:.92rem;margin-top:.2rem}
 
   @keyframes mmecd-gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
   @keyframes mmecd-pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.15);opacity:1}}
@@ -993,6 +1036,8 @@ h2.section-title, .cl-title {
   const ta   = root.querySelector('.mmecd__input');
   const btn  = root.querySelector('.mmecd__btn');
   const st   = root.querySelector('.mmecd__status');
+  const urlI = root.querySelector('.mmecd__url');
+  const btnU = root.querySelector('.mmecd__btnUrl');
   const svg  = root.querySelector('.mmecd__svg');
   const ticks= root.querySelector('.mmecd__ticks');
   const prog = root.querySelector('.mmecd__progress');
@@ -1000,15 +1045,16 @@ h2.section-title, .cl-title {
   const verdictEl = root.querySelector('.mmecd__verdict');
   const confEl = root.querySelector('.mmecd__confidence');
   const sigEl  = root.querySelector('.mmecd__signals');
-  const modelsEl = root.querySelector('.mmecd__models');
-  const statsEl  = root.querySelector('.mmecd__stats');
+  const modelsGrid = root.querySelector('.mmecd__modelsGrid');
+  const statsGrid  = root.querySelector('.mmecd__statsGrid');
   const sparks   = root.querySelector('.mmecd__sparks');
+  const statusPill = root.querySelector('.mmecd__pill--status');
 
   const epDetect    = root.getAttribute('data-endpoint-detect') || '/api/detect';
   const epDetectUrl = root.getAttribute('data-endpoint-detect-url') || '/api/detect/url';
   const csrf = document.querySelector('meta[name=csrf-token]')?.content || '';
 
-  // Build ticks (40 with 8 majors)
+  // Build ticks
   (function buildTicks(){
     const cx=70, cy=70, r=58, N=40;
     for(let i=0;i<N;i++){
@@ -1029,7 +1075,7 @@ h2.section-title, .cl-title {
     }
   })();
 
-  const CIRC = 2 * Math.PI * 58; // r=58 -> 364.42
+  const CIRC = 2 * Math.PI * 58;
   prog.style.strokeDasharray = CIRC;
 
   function colorBurst(){
@@ -1076,10 +1122,17 @@ h2.section-title, .cl-title {
     colorBurst();
   }
 
-  function enable(disabled){ btn.disabled = disabled; }
+  function enable(disabled){ btn.disabled = disabled; btnU.disabled = disabled; }
+
+  function setStatusPill(ok, text){
+    statusPill.textContent = text || (ok ? 'Connected' : 'Not Connected');
+    statusPill.style.background = ok ? 'rgba(16,185,129,.18)' : 'rgba(239,68,68,.18)';
+    statusPill.style.borderColor = ok ? 'rgba(16,185,129,.45)' : 'rgba(239,68,68,.45)';
+    statusPill.style.color = ok ? '#bbf7d0' : '#fecaca';
+  }
 
   function showError(json, status, text){
-    let msg = 'Invalid JSON response';
+    let msg = 'Non-JSON response';
     if(json){
       if(json.error) msg = json.error;
       else if(json.errors){
@@ -1087,15 +1140,18 @@ h2.section-title, .cl-title {
         if(Array.isArray(first) && first.length) msg = first[0];
       }else if(typeof json === 'string'){
         msg = json.slice(0, 180);
+      }else if(json.details){
+        msg = String(json.details).slice(0,180);
       }
     }else if(text){
       msg = (text || '').slice(0, 180);
     }
-    if(status === 404) msg = 'Endpoint not found (404). Check your routes.';
-    if(status === 401) msg = 'Unauthorized (auth middleware?); ensure API route is public.';
-    if(status === 419) msg = 'Session/CSRF issue; ensure API route or include CSRF token.';
-    if(status === 429) msg = 'Rate limit exceeded (try again later).';
+    if(status === 404) msg = 'Endpoint not found (404). Check routes.';
+    if(status === 401) msg = 'Unauthorized (401). Remove auth from API route.';
+    if(status === 419) msg = 'CSRF/session (419). Use API routes or include token.';
+    if(status === 429) msg = 'Rate limit (429). Try later.';
     st.textContent = msg;
+    setStatusPill(false, 'Not Connected');
   }
 
   async function parseResponse(res){
@@ -1108,22 +1164,55 @@ h2.section-title, .cl-title {
     }
   }
 
-  async function handleResult(json){
-    if(!json || !json.ok){ showError(json, undefined, json?.details); return; }
-    const d = json.data;
-    setScore(d.final_score ?? 0.5);
-    confEl.textContent = Math.round((d.confidence ?? 0) * 100) + '%';
-    sigEl.textContent  = 'Signals: ' + (Array.isArray(d.used) ? d.used.join(', ') : '—');
-    modelsEl.innerHTML = '';
-    const by = d.by_model || {};
-    for(const [name,val] of Object.entries(by)){
-      const li = document.createElement('li');
-      const pct = (val && typeof val.prob_ai === 'number') ? Math.round(val.prob_ai*100)+'%' : '—';
-      li.innerHTML = `<strong>${name}</strong> → ${pct} <span style="opacity:.7">(w=${val?.weight ?? 0})</span>`;
-      modelsEl.appendChild(li);
+  function renderModels(by){
+    modelsGrid.innerHTML = '';
+    const keys = Object.keys(by||{});
+    if(!keys.length){
+      modelsGrid.innerHTML = `
+        <div class="mmecd__empty" data-slot="models">
+          <div class="mmecd__emptyIcon">📊</div>
+          <div class="mmecd__emptyTitle">No model scores yet</div>
+          <div class="mmecd__emptyText">Paste content or analyze a URL to see per‑model probabilities and weights.</div>
+        </div>`;
+        return;
     }
-    statsEl.textContent = d?.stats?.features ? JSON.stringify(d.stats.features, null, 2) : '—';
-    st.textContent = 'Done'; setTimeout(()=>{ st.textContent=''; }, 1400);
+    keys.forEach(name=>{
+      const val = by[name] || {};
+      const prob = typeof val.prob_ai === 'number' ? Math.max(0, Math.min(1, val.prob_ai)) : 0;
+      const weight = val.weight ?? 0;
+      const card = document.createElement('div');
+      card.className = 'mmecd__modelCard';
+      card.innerHTML = `
+        <div class="name">${name}</div>
+        <div class="meta">p(ai) ${Math.round(prob*100)}% • w=${weight}</div>
+        <div class="bar"><i style="width:${Math.round(prob*100)}%"></i></div>`;
+      modelsGrid.appendChild(card);
+    });
+  }
+
+  function renderStats(features){
+    statsGrid.innerHTML = '';
+    const keys = features ? Object.keys(features) : [];
+    if(!keys.length){
+      statsGrid.innerHTML = `
+        <div class="mmecd__empty" data-slot="stats">
+          <div class="mmecd__emptyIcon">📐</div>
+          <div class="mmecd__emptyTitle">No statistical summary yet</div>
+          <div class="mmecd__emptyText">We’ll show perplexity, burstiness, lexical diversity, readability and more here.</div>
+        </div>`;
+      return;
+    }
+    const pretty = {
+      'perplexity':'Perplexity','burstiness':'Burstiness','ttr':'Type‑Token Ratio',
+      'honore':'Honore’s Statistic','flesch_kincaid':'Flesch‑Kincaid','gunning_fog':'Gunning Fog'
+    };
+    keys.forEach(k=>{
+      const v = features[k];
+      const card = document.createElement('div');
+      card.className = 'mmecd__stat';
+      card.innerHTML = `<div class="k">${pretty[k] || k}</div><div class="v">${v}</div>`;
+      statsGrid.appendChild(card);
+    });
   }
 
   async function postJson(url, payload){
@@ -1142,6 +1231,18 @@ h2.section-title, .cl-title {
     return { res, parsed };
   }
 
+  async function handleResult(json){
+    if(!json || !json.ok){ showError(json, undefined, json?.details); return; }
+    const d = json.data;
+    setScore(d.final_score ?? 0.5);
+    confEl.textContent = Math.round((d.confidence ?? 0) * 100) + '%';
+    sigEl.textContent  = 'Signals: ' + (Array.isArray(d.used) ? d.used.join(', ') : '—');
+    renderModels(d.by_model || {});
+    renderStats(d?.stats?.features || {});
+    st.textContent = 'Done'; setTimeout(()=>{ st.textContent=''; }, 1400);
+    setStatusPill(true, 'Connected');
+  }
+
   async function detect(){
     const text = ta.value.trim();
     if (text.length < 20) { st.textContent = 'Please paste at least 20 characters.'; return; }
@@ -1150,7 +1251,7 @@ h2.section-title, .cl-title {
       const {res, parsed} = await postJson(epDetect, {content:text});
       if(!res.ok){ showError(parsed, res.status, parsed?.details); }
       else { await handleResult(parsed); }
-    }catch(e){ console.error(e); st.textContent='Network error'; }
+    }catch(e){ console.error(e); st.textContent='Network error'; setStatusPill(false,'Not Connected'); }
     finally{ enable(false); }
   }
 
@@ -1165,23 +1266,38 @@ h2.section-title, .cl-title {
       }
       if(!res.ok){ showError(parsed, res.status, parsed?.details); }
       else { await handleResult(parsed); }
-    }catch(e){ console.error(e); st.textContent='Network error'; }
+    }catch(e){ console.error(e); st.textContent='Network error'; setStatusPill(false,'Not Connected'); }
     finally{ enable(false); }
   }
 
   // Wire up UI
   btn.addEventListener('click', detect);
+  btnU.addEventListener('click', ()=>{
+    const u = (urlI.value||'').trim();
+    if(!u) { st.textContent = 'Enter a URL to analyze.'; return; }
+    detectFromUrl(u);
+  });
   ta.addEventListener('input', ()=>{ btn.disabled = (ta.value.trim().length < 20); });
   btn.disabled = true;
 
-  // Auto-run: 1) URL param ?analyze_url=...
+  // Connectivity sanity check (HEAD-like via POST with ping mode, if backend ignores it we still continue)
+  (async()=>{
+    try{
+      const {res} = await postJson(epDetect, {ping:true});
+      setStatusPill(res.ok, res.ok?'Connected':'Not Connected');
+    }catch(_){
+      setStatusPill(false,'Not Connected');
+    }
+  })();
+
+  // Auto-run: query param ?analyze_url=...
   try{
     const params = new URLSearchParams(location.search);
     const u = params.get('analyze_url');
     if(u){ detectFromUrl(u); }
   }catch(_){}
 
-  // Auto-run: 2) Global event from your existing URL analyzer JS
+  // Auto-run: global event
   window.addEventListener('semantic:urlAnalyzed', (e)=>{
     const detail = e?.detail || {};
     if(detail.content && detail.content.length >= 20){
@@ -1195,6 +1311,7 @@ h2.section-title, .cl-title {
 })();
 </script>
 {{-- END: Multi-Model Ensemble Content Detection --}}
+
 
 
 
