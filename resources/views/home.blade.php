@@ -838,6 +838,13 @@ h2.section-title, .cl-title {
       <span class="mmecd__pill mmecd__pill--status" title="API status">Checking…</span>
     </div>
     <p class="mmecd__subtitle">Colorful, animated & professional UI. Hugging Face ensemble + local stats. Paste text or analyze a URL.</p>
+    <div class="mmecd__routesBox" role="note" aria-label="Routes for API">
+      <div class="mmecd__routesTitle">API Routes</div>
+      <pre class="mmecd__routesCode"><code>use App\Http\Controllers\ContentDetectionController;
+Route::post('/detect', [ContentDetectionController::class, 'detect']);
+Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</code></pre>
+    </div>
+
     <div class="mmecd__icons">
       <svg class="mmecd__ico mmecd__ico--pulse" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M3 12h5l2-5 4 10 2-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -960,7 +967,12 @@ h2.section-title, .cl-title {
   .mmecd__ico--float{animation:mmecd-float 3.4s ease-in-out infinite}
   .mmecd__ico--spin{animation:mmecd-spin 6s linear infinite}
 
-  .mmecd__grid{display:grid;gap:16px;grid-template-columns: minmax(280px,1fr) 360px;align-items:stretch}
+  
+  .mmecd__routesBox{margin-top:.6rem;background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:.6rem .75rem}
+  .mmecd__routesTitle{font-weight:800;font-size:.85rem;opacity:.95;margin-bottom:.3rem}
+  .mmecd__routesCode{margin:0;overflow:auto;max-height:140px}
+  .mmecd__routesCode code{display:block;white-space:pre;line-height:1.25;font-size:.85rem;color:#e5e7eb}
+.mmecd__grid{display:grid;gap:16px;grid-template-columns: minmax(280px,1fr) 360px;align-items:stretch}
   @media (max-width:900px){.mmecd__grid{grid-template-columns:1fr}}
 
   .mmecd__inputWrap{position:relative}
