@@ -1,7 +1,6 @@
 {{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
-\1
 
 <style>
 :root{
