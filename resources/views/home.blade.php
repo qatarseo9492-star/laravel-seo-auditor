@@ -533,6 +533,26 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           display: block; opacity: .45;
         }
 
+      
+        /* Bridge (URL Analyzer integration) */
+        .hvai2-bridge { position: relative; z-index: 1; }
+        .hvai2-statusrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--muted); }
+        .hvai2-urlpill { display: inline-block; padding: .4rem .7rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 700; margin-bottom: .5rem; }
+        .dotpulse { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 rgba(34,197,94,.6); animation: dotPulse 1.8s infinite; }
+        @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.7) } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
+
+      
+        /* Multicolor wheel behind the gauge */
+        .hvai2-gauge { position: relative; }
+        .hvai2-gauge svg, .hvai2-gauge .hvai2-gauge-center { position: relative; z-index: 2; }
+        .hvai2-wheel {
+          position: absolute; inset: -12px;
+          width: calc(100% + 24px); height: calc(100% + 24px);
+          display: block; z-index: 1; pointer-events: none;
+          filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
+          opacity: .95;
+        }
+
       </style>
 
 <style>
@@ -600,6 +620,26 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
         canvas.hvai2-tech {
           width: 100%; height: 100%;
           display: block; opacity: .45;
+        }
+
+      
+        /* Bridge (URL Analyzer integration) */
+        .hvai2-bridge { position: relative; z-index: 1; }
+        .hvai2-statusrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--muted); }
+        .hvai2-urlpill { display: inline-block; padding: .4rem .7rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 700; margin-bottom: .5rem; }
+        .dotpulse { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 rgba(34,197,94,.6); animation: dotPulse 1.8s infinite; }
+        @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.7) } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
+
+      
+        /* Multicolor wheel behind the gauge */
+        .hvai2-gauge { position: relative; }
+        .hvai2-gauge svg, .hvai2-gauge .hvai2-gauge-center { position: relative; z-index: 2; }
+        .hvai2-wheel {
+          position: absolute; inset: -12px;
+          width: calc(100% + 24px); height: calc(100% + 24px);
+          display: block; z-index: 1; pointer-events: none;
+          filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
+          opacity: .95;
         }
 
       </style>
@@ -733,6 +773,26 @@ h2.section-title, .cl-title {
         canvas.hvai2-tech {
           width: 100%; height: 100%;
           display: block; opacity: .45;
+        }
+
+      
+        /* Bridge (URL Analyzer integration) */
+        .hvai2-bridge { position: relative; z-index: 1; }
+        .hvai2-statusrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--muted); }
+        .hvai2-urlpill { display: inline-block; padding: .4rem .7rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 700; margin-bottom: .5rem; }
+        .dotpulse { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 rgba(34,197,94,.6); animation: dotPulse 1.8s infinite; }
+        @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.7) } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
+
+      
+        /* Multicolor wheel behind the gauge */
+        .hvai2-gauge { position: relative; }
+        .hvai2-gauge svg, .hvai2-gauge .hvai2-gauge-center { position: relative; z-index: 2; }
+        .hvai2-wheel {
+          position: absolute; inset: -12px;
+          width: calc(100% + 24px); height: calc(100% + 24px);
+          display: block; z-index: 1; pointer-events: none;
+          filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
+          opacity: .95;
         }
 
       </style>
@@ -956,37 +1016,26 @@ h2.section-title, .cl-title {
         <div class="hvai2-grid">
           <div class="hvai2-inputcard">
             <div class="hvai2-techwrap"><canvas class="hvai2-tech"></canvas></div>
-            <div class="hvai2-toolbar">
-              <button type="button" class="hvai2-btn" id="hvai2-btn-sample">
-                <span class="ico">
-                  <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h12v2H3z"/></svg>
-                </span>
-                Sample
-              </button>
-              <button type="button" class="hvai2-btn" id="hvai2-btn-clear">
-                <span class="ico">
-                  <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 1-2-2V7h16v10a2 2 0 0 1-2 2H6zM9 3h6l1 2H8l1-2z"/></svg>
-                </span>
-                Clear
-              </button>
-              <button type="button" class="hvai2-btn hvai2-primary" id="hvai2-btn-analyze">
-                <span class="ico spin">
-                  <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1-7.07 2.93" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                </span>
-                Analyze
-              </button>
+            <div class="hvai2-bridge">
+              <div class="hvai2-statusrow">
+                <span class="dotpulse" aria-hidden="true"></span>
+                <span class="statustext"><strong>Connected:</strong> Waiting for URL Analyzer…</span>
+              </div>
+              <div class="hvai2-urlpill">URL: <span id="hvai2-current-url">—</span></div>
+              <div class="hvai2-meta">
+                <span id="hvai2-count">0 chars • 0 words • 0 sentences</span>
+                <span id="hvai2-lang">lang: —</span>
+              </div>
+              <p class="hvai2-bridge-hint">Tip: Trigger your main site URL Analyzer. This module will automatically ingest the extracted content and display scores here.</p>
             </div>
-            <textarea id="hvai2-text" class="hvai2-textarea" rows="10" placeholder="Paste or start typing your content here...">@isset($ai_text){ $ai_text }@endisset</textarea>
-            <div class="hvai2-meta">
-              <span id="hvai2-count">0 chars • 0 words • 0 sentences</span>
-              <span id="hvai2-lang">lang: auto</span>
-            </div>
+
           </div>
 
           <div class="hvai2-output">
             <div class="hvai2-techwrap"><canvas class="hvai2-tech"></canvas></div>
             <div class="hvai2-ensemble">
               <div class="hvai2-gauge" aria-label="Ensemble score">
+                <canvas class="hvai2-wheel"></canvas>
                 <svg viewBox="0 0 120 120">
                   <defs>
                     <linearGradient id="hvai2-grad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -1186,6 +1235,26 @@ h2.section-title, .cl-title {
           display: block; opacity: .45;
         }
 
+      
+        /* Bridge (URL Analyzer integration) */
+        .hvai2-bridge { position: relative; z-index: 1; }
+        .hvai2-statusrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--muted); }
+        .hvai2-urlpill { display: inline-block; padding: .4rem .7rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 700; margin-bottom: .5rem; }
+        .dotpulse { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 rgba(34,197,94,.6); animation: dotPulse 1.8s infinite; }
+        @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.7) } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
+
+      
+        /* Multicolor wheel behind the gauge */
+        .hvai2-gauge { position: relative; }
+        .hvai2-gauge svg, .hvai2-gauge .hvai2-gauge-center { position: relative; z-index: 2; }
+        .hvai2-wheel {
+          position: absolute; inset: -12px;
+          width: calc(100% + 24px); height: calc(100% + 24px);
+          display: block; z-index: 1; pointer-events: none;
+          filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
+          opacity: .95;
+        }
+
       </style>
 
       <script>
@@ -1195,16 +1264,16 @@ h2.section-title, .cl-title {
         const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
         const lerp = (a,b,t)=>a+(b-a)*t;
 
-        const txt = $("#hvai2-text");
+        let currentText = "";
         const count = $("#hvai2-count");
         const lang = $("#hvai2-lang");
-        const btnAnalyze = $("#hvai2-btn-analyze");
-        const btnClear = $("#hvai2-btn-clear");
-        const btnSample = $("#hvai2-btn-sample");
+        const urlEl = $("#hvai2-current-url");
+        const bridgeHint = $(".hvai2-bridge-hint");
         const modelsEl = $("#hvai2-models");
         const gauge = $(".hvai2-gauge .progress");
         const gScore = $("#hvai2-ensemble-score");
         const gLabel = $("#hvai2-ensemble-label");
+        let hvai2Wheel = null;
 
         // === Badge + thresholds ===
         const badge = $("#hvai2-badge");
@@ -1490,16 +1559,14 @@ h2.section-title, .cl-title {
           return { def, node, bar: $('.hvai2-bar > span', node), score: $('.hvai2-score', node) };
         });
 
-        function updateCounts() {
-          const t = txt.value;
+        function updateCounts() { const t = currentText; 
           const ws = words(t);
           const sents = splitSentences(t).filter(Boolean);
           count.textContent = \`\${t.length} chars • \${ws.length} words • \${sents.length} sentences\`;
           lang.textContent = 'lang: ' + detectLang(t);
         }
 
-        function analyze() {
-          const t = txt.value.trim();
+        function analyze() { const t = (currentText||"").trim();
           updateCounts();
           if(!t) {
             setGauge(0, '—');
@@ -1535,6 +1602,7 @@ h2.section-title, .cl-title {
 
         function setGauge(v, label){
           setBadge(v);
+          try{ hvai2Wheel && hvai2Wheel.setScore(v); }catch(e){}
           const offset = TWO_PI_R * (1 - clamp(v,0,100)/100);
           gauge.style.strokeDashoffset = offset;
           gScore.textContent = v.toFixed(0) + '%';
@@ -1544,22 +1612,105 @@ h2.section-title, .cl-title {
         // Wire events
         txt.addEventListener('input', updateCounts);
         btnAnalyze.addEventListener('click', analyze);
-        btnClear.addEventListener('click', ()=>{ txt.value=''; analyze(); });
+        btnClear.addEventListener('click', ()=>{ currentText=''; analyze(); });
         btnSample.addEventListener('click', ()=>{
-          txt.value = `Humans often weave ideas together with small detours, surprising turns, and uneven sentence lengths. 
+          currentText = `Humans often weave ideas together with small detours, surprising turns, and uneven sentence lengths. 
 Meanwhile, many AI systems tend to produce even, balanced phrasing with fewer rough edges. 
 This paragraph intentionally mixes both styles—some short lines, then a much longer sentence that carries multiple clauses, 
 so we can observe how the multi‑model ensemble reacts to burstiness, repetition, and lexical variety.`;
           analyze();
         });
 
+        
+        // === Multicolor Score Wheel (behind gauge) ===
+        function initWheel(scope){
+          const cvs = scope ? scope.querySelector(".hvai2-wheel") : null;
+          if(!cvs) return { setScore: function(_){} };
+          const ctx = cvs.getContext("2d");
+          let DPR = window.devicePixelRatio || 1;
+          let W = 0, H = 0, cx = 0, cy = 0, R = 0, ri = 0;
+
+          function resize(){
+            const rect = cvs.getBoundingClientRect();
+            W = Math.max(120, rect.width); H = Math.max(120, rect.height);
+            DPR = window.devicePixelRatio || 1;
+            cvs.width = Math.floor(W * DPR);
+            cvs.height = Math.floor(H * DPR);
+            cx = W/2; cy = H/2;
+            R = Math.min(W,H)/2 - 8; // outer radius
+            ri = R - 22;             // ring thickness
+          }
+          resize();
+          window.addEventListener("resize", resize);
+
+          let angle = 0;
+          let target = 0;
+          let tprev = 0;
+
+          function render(ts){
+            if(!tprev) tprev = ts;
+            const dt = Math.min(32, ts - tprev); tprev = ts;
+            angle += (target - angle) * 0.08;
+
+            ctx.clearRect(0,0,cvs.width,cvs.height);
+            ctx.save();
+            ctx.scale(DPR,DPR);
+            ctx.translate(cx, cy);
+
+            // soft glow background
+            const glow = ctx.createRadialGradient(0,0,ri*0.4, 0,0,R*1.08);
+            glow.addColorStop(0, "rgba(124,58,237,.18)");
+            glow.addColorStop(1, "rgba(6,182,212,0)");
+            ctx.fillStyle = glow;
+            ctx.beginPath(); ctx.arc(0,0,R*1.08,0,Math.PI*2); ctx.fill();
+
+            // spinning multicolor ring
+            const N = 36;
+            const spin = ts * 0.0004;
+            for(let i=0;i<N;i++){
+              const a0 = (i/N)*Math.PI*2 + angle + spin;
+              const a1 = ((i+1)/N)*Math.PI*2 + angle + spin;
+              const hue = Math.round((i/N)*360);
+              ctx.beginPath();
+              ctx.arc(0,0,R-2, a0, a1, false);
+              ctx.arc(0,0,ri+2, a1, a0, true);
+              ctx.closePath();
+              ctx.fillStyle = `hsla(${hue}, 85%, 55%, .88)`;
+              ctx.fill();
+            }
+
+            // pointer highlight at target angle
+            ctx.rotate(target);
+            ctx.beginPath();
+            ctx.arc(0,0,R, -0.03, 0.03);
+            ctx.arc(0,0,ri, 0.03, -0.03, true);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(255,255,255,.95)";
+            ctx.shadowColor = "rgba(255,255,255,.65)";
+            ctx.shadowBlur = 12;
+            ctx.fill();
+
+            ctx.restore();
+            requestAnimationFrame(render);
+          }
+          requestAnimationFrame(render);
+
+          function setScore(v){
+            const t = Math.max(0, Math.min(100, v));
+            target = (t/100) * Math.PI * 2;
+          }
+          return { setScore };
+        }
+
         // initial
         updateCounts();
         // init tech backgrounds on cards
         $$('.hvai2-inputcard, .hvai2-output').forEach(initTechCanvas);
+        // init multicolor wheel
+        hvai2Wheel = initWheel($('.hvai2-gauge'));
 
         // If server provided text, auto-run
-        if(txt.value.trim().length>0) analyze();
+        if((currentText||'').trim().length>0) analyze();
 
       })();
       </script>
@@ -2793,6 +2944,26 @@ window.addEventListener('error', function(e){
           display: block; opacity: .45;
         }
 
+      
+        /* Bridge (URL Analyzer integration) */
+        .hvai2-bridge { position: relative; z-index: 1; }
+        .hvai2-statusrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--muted); }
+        .hvai2-urlpill { display: inline-block; padding: .4rem .7rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 700; margin-bottom: .5rem; }
+        .dotpulse { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 rgba(34,197,94,.6); animation: dotPulse 1.8s infinite; }
+        @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.7) } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
+
+      
+        /* Multicolor wheel behind the gauge */
+        .hvai2-gauge { position: relative; }
+        .hvai2-gauge svg, .hvai2-gauge .hvai2-gauge-center { position: relative; z-index: 2; }
+        .hvai2-wheel {
+          position: absolute; inset: -12px;
+          width: calc(100% + 24px); height: calc(100% + 24px);
+          display: block; z-index: 1; pointer-events: none;
+          filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
+          opacity: .95;
+        }
+
       </style>
 <script>
 
@@ -2981,6 +3152,26 @@ window.addEventListener('error', function(e){
           display: block; opacity: .45;
         }
 
+      
+        /* Bridge (URL Analyzer integration) */
+        .hvai2-bridge { position: relative; z-index: 1; }
+        .hvai2-statusrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--muted); }
+        .hvai2-urlpill { display: inline-block; padding: .4rem .7rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 700; margin-bottom: .5rem; }
+        .dotpulse { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 rgba(34,197,94,.6); animation: dotPulse 1.8s infinite; }
+        @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.7) } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
+
+      
+        /* Multicolor wheel behind the gauge */
+        .hvai2-gauge { position: relative; }
+        .hvai2-gauge svg, .hvai2-gauge .hvai2-gauge-center { position: relative; z-index: 2; }
+        .hvai2-wheel {
+          position: absolute; inset: -12px;
+          width: calc(100% + 24px); height: calc(100% + 24px);
+          display: block; z-index: 1; pointer-events: none;
+          filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
+          opacity: .95;
+        }
+
       </style>
 <div id="clModal" class="cl-modal" aria-hidden="true" role="dialog" aria-label="Checklist improvement tips">
   <div class="cl-back" data-close="1"></div>
@@ -3160,6 +3351,26 @@ window.addEventListener('error', function(e){
         canvas.hvai2-tech {
           width: 100%; height: 100%;
           display: block; opacity: .45;
+        }
+
+      
+        /* Bridge (URL Analyzer integration) */
+        .hvai2-bridge { position: relative; z-index: 1; }
+        .hvai2-statusrow { display: flex; align-items: center; gap: .5rem; margin-bottom: .5rem; color: var(--muted); }
+        .hvai2-urlpill { display: inline-block; padding: .4rem .7rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-weight: 700; margin-bottom: .5rem; }
+        .dotpulse { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 rgba(34,197,94,.6); animation: dotPulse 1.8s infinite; }
+        @keyframes dotPulse { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,.7) } 70% { box-shadow: 0 0 0 10px rgba(34,197,94,0) } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0) } }
+
+      
+        /* Multicolor wheel behind the gauge */
+        .hvai2-gauge { position: relative; }
+        .hvai2-gauge svg, .hvai2-gauge .hvai2-gauge-center { position: relative; z-index: 2; }
+        .hvai2-wheel {
+          position: absolute; inset: -12px;
+          width: calc(100% + 24px); height: calc(100% + 24px);
+          display: block; z-index: 1; pointer-events: none;
+          filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
+          opacity: .95;
         }
 
       </style>
