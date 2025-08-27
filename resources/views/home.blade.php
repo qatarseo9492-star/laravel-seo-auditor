@@ -813,8 +813,11 @@ h2.section-title, .cl-title {
 <section id="hvai" class="hvai hvai-v26" aria-label="Human vs AI Content (Ensemble)">
 
   
-{{-- BEGIN: Multi-Model Ensemble Content Detection (stylish v2) --}}
-<div class="mmecd" data-component="multi-ensemble-detector">
+
+{{-- BEGIN: Multi-Model Ensemble Content Detection (stylish v3, robust errors) --}}
+<div class="mmecd" data-component="multi-ensemble-detector"
+     data-endpoint-detect="{{ url('/api/detect') }}"
+     data-endpoint-detect-url="{{ url('/api/detect/url') }}">
   <div class="mmecd__head">
     <div class="mmecd__titleWrap">
       <svg class="mmecd__titleIcon" viewBox="0 0 64 64" aria-hidden="true">
@@ -830,9 +833,9 @@ h2.section-title, .cl-title {
           <circle cx="32" cy="32" r="6" fill="#fff" opacity=".9"/>
         </g>
       </svg>
-      <h3 class="mmecd__title">Multi‑Model Ensemble Content Detection</h3>
+      <h3 class="mmecd__title">Multi-Model Ensemble Content Detection</h3>
     </div>
-    <p class="mmecd__subtitle">Colorful, animated results. Hugging Face ensemble + local statistics. Paste text, Analyze a URL, or let it auto‑run from your URL analyzer.</p>
+    <p class="mmecd__subtitle">Colorful, animated results. Hugging Face ensemble + local statistics. Paste text, Analyze a URL, or auto-run from your URL analyzer.</p>
     <div class="mmecd__icons">
       <svg class="mmecd__ico mmecd__ico--pulse" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M3 12h5l2-5 4 10 2-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -879,15 +882,9 @@ h2.section-title, .cl-title {
             </filter>
           </defs>
 
-          <!-- tick marks (drawn via JS for 40 ticks) -->
           <g class="mmecd__ticks"></g>
-
-          <!-- background track -->
           <circle cx="70" cy="70" r="58" fill="none" stroke="currentColor" class="mmecd__track"/>
-
-          <!-- progress arc -->
           <circle cx="70" cy="70" r="58" fill="none" class="mmecd__progress" stroke="url(#mmecdGrad)" stroke-linecap="round" filter="url(#mmecdGlow)" transform="rotate(-90 70 70)"/>
-          <!-- animated sweep accent -->
           <circle cx="70" cy="70" r="58" fill="none" class="mmecd__sweep" stroke="url(#mmecdGrad)" transform="rotate(-90 70 70)"/>
         </svg>
         <div class="mmecd__scorewrap">
@@ -975,15 +972,9 @@ h2.section-title, .cl-title {
   .mmecd__panel{margin-top:.75rem;background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:.6rem 1rem}
   .mmecd__panel summary{cursor:pointer;font-weight:700}
 
-  @keyframes mmecd-gradient{
-    0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}
-  }
-  @keyframes mmecd-pulse{
-    0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.15);opacity:1}
-  }
-  @keyframes mmecd-float{
-    0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}
-  }
+  @keyframes mmecd-gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  @keyframes mmecd-pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.15);opacity:1}}
+  @keyframes mmecd-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
   @keyframes mmecd-spin{to{transform:rotate(360deg)}}
   @keyframes mmecd-hue{to{filter:hue-rotate(360deg)}}
   @keyframes mmecd-sweep{to{stroke-dashoffset:-390}}
@@ -1013,6 +1004,11 @@ h2.section-title, .cl-title {
   const statsEl  = root.querySelector('.mmecd__stats');
   const sparks   = root.querySelector('.mmecd__sparks');
 
+  // API endpoints (absolute)
+  const epDetect    = root.getAttribute('data-endpoint-detect') || '/api/detect';
+  const epDetectUrl = root.getAttribute('data-endpoint-detect-url') || '/api/detect/url';
+  const csrf = document.querySelector('meta[name=csrf-token]')?.content || '';
+
   // Build ticks (40 with 8 majors)
   (function buildTicks(){
     const cx=70, cy=70, r=58, N=40;
@@ -1038,7 +1034,6 @@ h2.section-title, .cl-title {
   prog.style.strokeDasharray = CIRC;
 
   function colorBurst(){
-    // confetti sparks around the wheel on completion
     const N=14;
     for(let i=0;i<N;i++){
       const el = document.createElement('div');
@@ -1070,10 +1065,8 @@ h2.section-title, .cl-title {
     scoreEl.textContent = pct + '%';
     const thAI = 0.70, thHuman = 0.30;
     verdictEl.textContent = s >= thAI ? 'ai-like' : (s <= thHuman ? 'human-like' : 'uncertain');
-
     const offset = CIRC * (1 - s);
     prog.style.strokeDashoffset = offset;
-
     const [c1,c2,c3] = colorForScore(s);
     const grad = root.querySelector('#mmecdGrad');
     if(grad){
@@ -1086,8 +1079,23 @@ h2.section-title, .cl-title {
 
   function enable(disabled){ btn.disabled = disabled; }
 
+  function showError(json, status){
+    let msg = 'Detection failed';
+    if(json){
+      if(json.error) msg = json.error;
+      else if(json.errors){
+        // pick first error message
+        const first = Object.values(json.errors)[0];
+        if(Array.isArray(first) && first.length) msg = first[0];
+      }
+    }
+    if(status === 429) msg = 'Rate limit exceeded (try again later)';
+    if(status === 419) msg = 'Session/CSRF issue; use API routes or include CSRF token';
+    st.textContent = msg;
+  }
+
   async function handleResult(json){
-    if(!json || !json.ok){ st.textContent = (json?.error || 'Detection failed'); return; }
+    if(!json || !json.ok){ showError(json); return; }
     const d = json.data;
     setScore(d.final_score ?? 0.5);
     confEl.textContent = Math.round((d.confidence ?? 0) * 100) + '%';
@@ -1109,13 +1117,14 @@ h2.section-title, .cl-title {
     if (text.length < 20) return;
     enable(true); st.textContent = 'Analyzing…';
     try{
-      const res = await fetch('/api/detect', {
+      const res = await fetch(epDetect, {
         method:'POST',
-        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': csrf},
         body: JSON.stringify({content:text})
       });
-      await handleResult(await res.json());
-    }catch(e){ console.error(e); st.textContent='Detection failed'; }
+      const json = await res.json().catch(()=>({ok:false,error:'Invalid JSON response'}));
+      if(!res.ok) { showError(json, res.status); } else { await handleResult(json); }
+    }catch(e){ console.error(e); st.textContent='Network error'; }
     finally{ enable(false); }
   }
 
@@ -1123,18 +1132,18 @@ h2.section-title, .cl-title {
     if(!u) return;
     enable(true); st.textContent = 'Fetching & analyzing URL…';
     try{
-      const res = await fetch('/api/detect/url', {
+      const res = await fetch(epDetectUrl, {
         method:'POST',
-        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': csrf},
         body: JSON.stringify({url:u})
       });
-      const json = await res.json();
+      const json = await res.json().catch(()=>({ok:false,error:'Invalid JSON response'}));
       if(json && json.extracted){
         ta.value = json.extracted;
         btn.disabled = (ta.value.trim().length < 20);
       }
-      await handleResult(json);
-    }catch(e){ console.error(e); st.textContent='URL analyze failed'; }
+      if(!res.ok) { showError(json, res.status); } else { await handleResult(json); }
+    }catch(e){ console.error(e); st.textContent='Network error'; }
     finally{ enable(false); }
   }
 
@@ -1164,6 +1173,7 @@ h2.section-title, .cl-title {
 })();
 </script>
 {{-- END: Multi-Model Ensemble Content Detection --}}
+
 
 
 </section>
