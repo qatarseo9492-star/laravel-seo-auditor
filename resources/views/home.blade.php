@@ -684,6 +684,7 @@ h2.section-title, .cl-title {
 <script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 <body>
+<script>window.APP = { loggedIn: @auth true @else false @endauth };</script>
 
 <!-- Background canvases -->
 <canvas id="linesCanvas"></canvas>
@@ -1588,7 +1589,10 @@ header.site.hdr{ top: var(--superbar-h) !important; }
 
   /* ===================== ANALYZE ===================== */
   async function analyze(){
-  if (window.SEMSEO && window.SEMSEO.BUSY) return;
+  // Require login if gated
+  if (window.APP && window.APP.loggedIn === false) {
+    const s=document.getElementById('analyzeStatus'); if(s) s.textContent='Please login to analyze.'; return; }
+if (window.SEMSEO && window.SEMSEO.BUSY) return;
   // reset score badges & row severity (but keep checkbox state)
   try{
     for(var _i=1; _i<=25; _i++){
