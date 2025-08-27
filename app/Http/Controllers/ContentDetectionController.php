@@ -1,114 +1,132 @@
-<?php
+use Illuminate\Support\Facades\Http;
+// use Illuminate\Support\Str; // uncomment if you use Str::limit
 
-namespace App\Http\Controllers;
-
-use App\Models\ContentDetection;
-use App\Services\ContentDetectionService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-
-class ContentDetectionController extends Controller
+public function detectUrl(Request $request)
 {
-    protected ContentDetectionService $svc;
+    $v = Validator::make($request->all(), [
+        'url' => ['required', 'url', 'max:2048'],
+    ]);
 
-    public function __construct(ContentDetectionService $svc)
-    {
-        $this->svc = $svc;
+    if ($v->fails()) {
+        return response()->json(['ok' => false, 'errors' => $v->errors()], 422);
     }
 
-    public function detect(Request $request)
-    {
-        $v = Validator::make($request->all(), [
-            'content' => ['required', 'string', 'min:20', 'max:' . config('content-detection.limits.max_chars')],
-        ]);
+    $url = (string) $request->input('url');
 
-        if ($v->fails()) {
-            return response()->json(['ok' => false, 'errors' => $v->errors()], 422);
+    try {
+        // Fetch the page (10s timeout, sane UA)
+        $res = Http::withHeaders([
+                'User-Agent' => 'Mozilla/5.0 (compatible; MultiModelDetector/1.0; +https://yourdomain.example)',
+                'Accept' => 'text/html,application/xhtml+xml'
+            ])
+            ->timeout(10)
+            ->get($url);
+
+        if (!$res->successful()) {
+            return response()->json(['ok' => false, 'error' => 'Fetch failed: HTTP '.$res->status()], 502);
         }
 
-        $content = (string) $request->input('content');
+        $html = $res->body();
+        $text = $this->extractMainText($html);
 
-        try {
-            $result = $this->svc->detect($content);
+        // Enforce max length from config
+        $max = (int) config('content-detection.limits.max_chars', 20000);
+        $text = mb_substr(trim(preg_replace('/\s+/u',' ', $text)), 0, $max);
 
-            // Save to DB (encrypt content to meet GDPR-ish requirement)
-            $det = new ContentDetection();
-            $det->content = encrypt($content);
-            $det->ai_score = $result['final_score'];
-            $det->confidence = $result['confidence'];
-            $det->model_used = implode('+', $result['used']);
-            $det->features = $result['stats']['features'] ?? [];
-            $det->verdict = $result['verdict'];
-            $det->save();
+        if (mb_strlen($text) < 20) {
+            return response()->json(['ok' => false, 'error' => 'Insufficient textual content extracted.'], 422);
+        }
 
-            return response()->json(['ok' => true, 'data' => $result, 'id' => $det->id]);
-        } catch (\Throwable $e) {
-            Log::error('Detect failed', ['e' => $e]);
-            return response()->json(['ok' => false, 'error' => 'Detection failed: ' . $e->getMessage()], 500);
+        $result = $this->svc->detect($text);
+
+        // Save to DB like /detect
+        $det = new \App\Models\ContentDetection();
+        $det->content = encrypt($text);
+        $det->ai_score = $result['final_score'];
+        $det->confidence = $result['confidence'];
+        $det->model_used = implode('+', $result['used']);
+        $det->features = $result['stats']['features'] ?? [];
+        $det->verdict = $result['verdict'];
+        $det->save();
+
+        return response()->json([
+            'ok' => true,
+            'data' => $result,
+            // Send a trimmed copy for the UI textarea:
+            'extracted' => mb_substr($text, 0, 20000),
+            'id' => $det->id
+        ]);
+    } catch (\Throwable $e) {
+        Log::error('detectUrl failed', ['e' => $e->getMessage()]);
+        return response()->json(['ok' => false, 'error' => 'URL analysis failed: '.$e->getMessage()], 500);
+    }
+}
+
+/**
+ * Very lightweight main-text extractor: strips scripts/styles,
+ * prefers <article>, <main>, and long <p> blocks, with fallbacks.
+ */
+protected function extractMainText(string $html): string
+{
+    // Remove scripts/styles/noscripts
+    $clean = preg_replace('#<(script|style|noscript)[^>]*>.*?</\\1>#si', ' ', $html);
+    // Grab title/og:description quickly
+    $title = '';
+    if (preg_match('#<title[^>]*>(.*?)</title>#si', $clean, $m)) {
+        $title = trim(html_entity_decode(strip_tags($m[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+    $og = '';
+    if (preg_match('#<meta[^>]+property=["\']og:description["\'][^>]*content=["\']([^"\']+)["\'][^>]*>#si', $clean, $m)) {
+        $og = trim(html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    // Prefer <article> or <main>
+    $candidates = [];
+    foreach (['article','main'] as $tag) {
+        if (preg_match("#<{$tag}[^>]*>(.*?)</{$tag}>#si", $clean, $m)) {
+            $candidates[] = $m[1];
         }
     }
 
-    public function detectBatch(Request $request)
-    {
-        $v = Validator::make($request->all(), [
-            'contents' => ['required', 'array', 'min:1', 'max:100'],
-            'contents.*' => ['required', 'string', 'min:20', 'max:' . config('content-detection.limits.max_chars')],
-        ]);
-
-        if ($v->fails()) {
-            return response()->json(['ok' => false, 'errors' => $v->errors()], 422);
+    // If no article/main, fall back to body content
+    if (empty($candidates)) {
+        if (preg_match('#<body[^>]*>(.*?)</body>#si', $clean, $m)) {
+            $candidates[] = $m[1];
+        } else {
+            $candidates[] = $clean;
         }
+    }
 
-        $contents = $request->input('contents');
+    // Extract paragraphs that are likely content (longer than 60 chars)
+    $pick = '';
+    $bestScore = -1;
+    foreach ($candidates as $chunk) {
+        $chunk = preg_replace('#<(header|footer|nav|aside)[^>]*>.*?</\\1>#si', ' ', $chunk);
+        $chunk = preg_replace('#<figure[^>]*>.*?</figure>#si', ' ', $chunk);
+        $chunk = preg_replace('#<[^>]+>#', ' ', $chunk);
+        $chunk = html_entity_decode($chunk, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $chunk = preg_replace('/\s+/u', ' ', $chunk);
+        $paragraphs = preg_split('/(?<=\.)\s+/', $chunk);
 
-        $results = $this->svc->detectBatch($contents);
-
-        // Save each to DB
-        foreach ($contents as $i => $content) {
-            try {
-                $r = $results[$i] ?? null;
-                if (!$r || !($r['ok'] ?? false)) continue;
-
-                $det = new ContentDetection();
-                $det->content = encrypt($content);
-                $det->ai_score = $r['final_score'];
-                $det->confidence = $r['confidence'];
-                $det->model_used = implode('+', $r['used']);
-                $det->features = $r['stats']['features'] ?? [];
-                $det->verdict = $r['verdict'];
-                $det->save();
-            } catch (\Throwable $e) {
-                Log::warning('Batch save error', ['i' => $i, 'e' => $e->getMessage()]);
+        $score = 0;
+        $collected = [];
+        foreach ($paragraphs as $p) {
+            $p = trim($p);
+            if (mb_strlen($p) >= 60) {
+                $collected[] = $p;
+                $score += mb_strlen($p);
             }
         }
-
-        return response()->json(['ok' => true, 'data' => $results]);
-    }
-
-    public function history(Request $request)
-    {
-        $items = ContentDetection::latest()->paginate(20);
-        // Decrypt content for view
-        foreach ($items as $item) {
-            try {
-                $item->content_plain = decrypt($item->content);
-            } catch (\Throwable $e) {
-                $item->content_plain = '—';
-            }
+        if ($score > $bestScore) {
+            $bestScore = $score;
+            $pick = implode(' ', $collected);
         }
-        return view('detection.history', compact('items'));
     }
 
-    public function show($id)
-    {
-        $det = ContentDetection::findOrFail($id);
-        try {
-            $det->content_plain = decrypt($det->content);
-        } catch (\Throwable $e) {
-            $det->content_plain = '—';
-        }
-        return response()->json(['ok' => true, 'data' => $det]);
-    }
+    $base = trim($pick);
+    // Prefix title/og if useful
+    $prefix = trim($title . (strlen($og) ? ' — ' . $og : ''));
+    $text = trim($prefix . (strlen($base) ? "\n\n" . $base : ''));
+
+    return $text !== '' ? $text : trim(strip_tags($clean));
 }
