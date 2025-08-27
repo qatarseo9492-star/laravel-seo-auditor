@@ -14,9 +14,12 @@
 
   // Use fully-qualified facade in Blade to avoid "use ... inside function" fatal error
   $analyzeJsonUrl  = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
-  $semanticAnalyzerUrl = url('/');
-  $topicClustersUrl  = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create') ? route('seo.topic-clusters.create') : url('seo/topic-clusters');
   $analyzeUrl      = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
+// Primary nav targets
+  $semanticAnalyzerUrl = url('/');
+  $topicClustersUrl  = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create')
+      ? route('seo.topic-clusters.create')
+      : url('seo/topic-clusters');
   $psiProxyUrl     = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
   // NEW: backend detector endpoint or fallback
   $detectUrl       = \Illuminate\Support\Facades\Route::has('detect')       ? route('detect')       : url('api/detect');
@@ -494,7 +497,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (max-width:520px){.share-btn .share-label{display:none}}
 .category-icon i{font-size:24px;line-height:1}
 /* ================================================ */
-
 /* === Main Menu (added 2025-08-27) === */
 header.site{gap:1rem}
 .main-menu{flex:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:0 1rem}
@@ -671,12 +673,12 @@ h2.section-title, .cl-title {
   <header class="site">
     <div class="brand">
       <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
-<div>
+      <div>
         <div class="hero-heading">Semantic SEO Master Analyzer</div>
         <div class="hero-sub">Analyze URLs, get scores & colorful insights</div>
       </div>
     </div>
-    
+
     <nav class="main-menu" aria-label="Primary navigation">
       <a href="{{ $semanticAnalyzerUrl }}" class="menu-link {{ url()->current() === $semanticAnalyzerUrl ? 'active' : '' }}">
         <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
@@ -687,7 +689,8 @@ h2.section-title, .cl-title {
         <span>Topic Cluster Identification &amp; Mapping</span>
       </a>
     </nav>
-<div class="header-actions">
+  
+    <div class="header-actions">
       <button class="btn btn-print" id="printTop"><i class="fa-solid fa-print"></i> Print</button>
     </div>
   </header>
