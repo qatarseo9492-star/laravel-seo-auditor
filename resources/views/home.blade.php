@@ -553,6 +553,69 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
           opacity: .95;
         }
 
+      
+        /* ===== Modernized look & better layering ===== */
+        .hvai2-wrapper {
+          --bg: color-mix(in oklab, #0a0c14 94%, #10162b 6%);
+          --surface: color-mix(in oklab, #0f1322 80%, #0b0f1a 20%);
+          --glass: rgba(255,255,255,.04);
+          --border: rgba(255,255,255,.10);
+          --border-strong: rgba(255,255,255,.18);
+          --muted: #9aa4b2;
+          --text: #e9edf7;
+          --ok: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+          --brand1: #7c3aed; --brand2: #06b6d4; --brand3: #f43f5e;
+          background: radial-gradient(1200px 800px at 15% -10%, rgba(124,58,237,.12), transparent 55%),
+                      radial-gradient(1000px 800px at 90% 10%, rgba(6,182,212,.10), transparent 60%),
+                      var(--bg);
+        }
+        .hvai2-header .hvai2-title {
+          display: inline-grid; gap: .2rem; padding: .2rem .6rem;
+          border-radius: 14px; position: relative;
+        }
+        .hvai2-header .hvai2-title::after {
+          content:'';
+          height: 2px; width: 100%;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          border-radius: 2px; margin-top: .35rem;
+        }
+        .hvai2-inputcard, .hvai2-output {
+          position: relative; overflow: hidden;
+          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          box-shadow: 0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .hvai2-inputcard > *:not(.hvai2-techwrap),
+        .hvai2-output > *:not(.hvai2-techwrap) { position: relative; z-index: 1; }
+        .hvai2-techwrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* Gradient border shimmer */
+        .hvai2-inputcard::before, .hvai2-output::before {
+          content:''; position:absolute; inset:-1px;
+          border-radius: inherit; padding: 1px; pointer-events: none;
+          background: linear-gradient(120deg, rgba(124,58,237,.5), rgba(6,182,212,.4), rgba(244,63,94,.5));
+          -webkit-mask: 
+            linear-gradient(#000 0 0) content-box, 
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: .65;
+        }
+
+        /* Modern chips & bars */
+        .hvai2-chip { background: rgba(255,255,255,.05); border-color: var(--border-strong); }
+        .hvai2-bar { background: rgba(255,255,255,.08); }
+        .hvai2-bar > span { background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
+
+        /* Header sparkles toned & modern */
+        .hvai2-sparkles .sparkle { opacity: .18; }
+
+        /* Bridge polish */
+        .hvai2-urlpill { background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+
+        /* Gauge numbers larger */
+        #hvai2-ensemble-score { font-size: 1.6rem; }
+
       </style>
 
 <style>
@@ -641,6 +704,69 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
           filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
           opacity: .95;
         }
+
+      
+        /* ===== Modernized look & better layering ===== */
+        .hvai2-wrapper {
+          --bg: color-mix(in oklab, #0a0c14 94%, #10162b 6%);
+          --surface: color-mix(in oklab, #0f1322 80%, #0b0f1a 20%);
+          --glass: rgba(255,255,255,.04);
+          --border: rgba(255,255,255,.10);
+          --border-strong: rgba(255,255,255,.18);
+          --muted: #9aa4b2;
+          --text: #e9edf7;
+          --ok: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+          --brand1: #7c3aed; --brand2: #06b6d4; --brand3: #f43f5e;
+          background: radial-gradient(1200px 800px at 15% -10%, rgba(124,58,237,.12), transparent 55%),
+                      radial-gradient(1000px 800px at 90% 10%, rgba(6,182,212,.10), transparent 60%),
+                      var(--bg);
+        }
+        .hvai2-header .hvai2-title {
+          display: inline-grid; gap: .2rem; padding: .2rem .6rem;
+          border-radius: 14px; position: relative;
+        }
+        .hvai2-header .hvai2-title::after {
+          content:'';
+          height: 2px; width: 100%;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          border-radius: 2px; margin-top: .35rem;
+        }
+        .hvai2-inputcard, .hvai2-output {
+          position: relative; overflow: hidden;
+          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          box-shadow: 0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .hvai2-inputcard > *:not(.hvai2-techwrap),
+        .hvai2-output > *:not(.hvai2-techwrap) { position: relative; z-index: 1; }
+        .hvai2-techwrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* Gradient border shimmer */
+        .hvai2-inputcard::before, .hvai2-output::before {
+          content:''; position:absolute; inset:-1px;
+          border-radius: inherit; padding: 1px; pointer-events: none;
+          background: linear-gradient(120deg, rgba(124,58,237,.5), rgba(6,182,212,.4), rgba(244,63,94,.5));
+          -webkit-mask: 
+            linear-gradient(#000 0 0) content-box, 
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: .65;
+        }
+
+        /* Modern chips & bars */
+        .hvai2-chip { background: rgba(255,255,255,.05); border-color: var(--border-strong); }
+        .hvai2-bar { background: rgba(255,255,255,.08); }
+        .hvai2-bar > span { background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
+
+        /* Header sparkles toned & modern */
+        .hvai2-sparkles .sparkle { opacity: .18; }
+
+        /* Bridge polish */
+        .hvai2-urlpill { background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+
+        /* Gauge numbers larger */
+        #hvai2-ensemble-score { font-size: 1.6rem; }
 
       </style>
 
@@ -794,6 +920,69 @@ h2.section-title, .cl-title {
           filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
           opacity: .95;
         }
+
+      
+        /* ===== Modernized look & better layering ===== */
+        .hvai2-wrapper {
+          --bg: color-mix(in oklab, #0a0c14 94%, #10162b 6%);
+          --surface: color-mix(in oklab, #0f1322 80%, #0b0f1a 20%);
+          --glass: rgba(255,255,255,.04);
+          --border: rgba(255,255,255,.10);
+          --border-strong: rgba(255,255,255,.18);
+          --muted: #9aa4b2;
+          --text: #e9edf7;
+          --ok: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+          --brand1: #7c3aed; --brand2: #06b6d4; --brand3: #f43f5e;
+          background: radial-gradient(1200px 800px at 15% -10%, rgba(124,58,237,.12), transparent 55%),
+                      radial-gradient(1000px 800px at 90% 10%, rgba(6,182,212,.10), transparent 60%),
+                      var(--bg);
+        }
+        .hvai2-header .hvai2-title {
+          display: inline-grid; gap: .2rem; padding: .2rem .6rem;
+          border-radius: 14px; position: relative;
+        }
+        .hvai2-header .hvai2-title::after {
+          content:'';
+          height: 2px; width: 100%;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          border-radius: 2px; margin-top: .35rem;
+        }
+        .hvai2-inputcard, .hvai2-output {
+          position: relative; overflow: hidden;
+          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          box-shadow: 0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .hvai2-inputcard > *:not(.hvai2-techwrap),
+        .hvai2-output > *:not(.hvai2-techwrap) { position: relative; z-index: 1; }
+        .hvai2-techwrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* Gradient border shimmer */
+        .hvai2-inputcard::before, .hvai2-output::before {
+          content:''; position:absolute; inset:-1px;
+          border-radius: inherit; padding: 1px; pointer-events: none;
+          background: linear-gradient(120deg, rgba(124,58,237,.5), rgba(6,182,212,.4), rgba(244,63,94,.5));
+          -webkit-mask: 
+            linear-gradient(#000 0 0) content-box, 
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: .65;
+        }
+
+        /* Modern chips & bars */
+        .hvai2-chip { background: rgba(255,255,255,.05); border-color: var(--border-strong); }
+        .hvai2-bar { background: rgba(255,255,255,.08); }
+        .hvai2-bar > span { background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
+
+        /* Header sparkles toned & modern */
+        .hvai2-sparkles .sparkle { opacity: .18; }
+
+        /* Bridge polish */
+        .hvai2-urlpill { background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+
+        /* Gauge numbers larger */
+        #hvai2-ensemble-score { font-size: 1.6rem; }
 
       </style>
 <!-- ===== /New Neo‑Glass Aurora Skin ===== -->
@@ -994,7 +1183,6 @@ h2.section-title, .cl-title {
 
 <!-- HUMAN vs AI Content (Ensemble) — v26 PRISM (forcefix) -->
 
-    {-- Multi-Model Ensemble Content Detection (Upgraded) --}
     {-- Rebuilt on 2025-08-27 10:39:37 --}
     <section id="hvai-ensemble-v2" class="hvai2-wrapper">
       <div class="hvai2-container">
@@ -1254,6 +1442,69 @@ h2.section-title, .cl-title {
           filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
           opacity: .95;
         }
+
+      
+        /* ===== Modernized look & better layering ===== */
+        .hvai2-wrapper {
+          --bg: color-mix(in oklab, #0a0c14 94%, #10162b 6%);
+          --surface: color-mix(in oklab, #0f1322 80%, #0b0f1a 20%);
+          --glass: rgba(255,255,255,.04);
+          --border: rgba(255,255,255,.10);
+          --border-strong: rgba(255,255,255,.18);
+          --muted: #9aa4b2;
+          --text: #e9edf7;
+          --ok: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+          --brand1: #7c3aed; --brand2: #06b6d4; --brand3: #f43f5e;
+          background: radial-gradient(1200px 800px at 15% -10%, rgba(124,58,237,.12), transparent 55%),
+                      radial-gradient(1000px 800px at 90% 10%, rgba(6,182,212,.10), transparent 60%),
+                      var(--bg);
+        }
+        .hvai2-header .hvai2-title {
+          display: inline-grid; gap: .2rem; padding: .2rem .6rem;
+          border-radius: 14px; position: relative;
+        }
+        .hvai2-header .hvai2-title::after {
+          content:'';
+          height: 2px; width: 100%;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          border-radius: 2px; margin-top: .35rem;
+        }
+        .hvai2-inputcard, .hvai2-output {
+          position: relative; overflow: hidden;
+          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          box-shadow: 0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .hvai2-inputcard > *:not(.hvai2-techwrap),
+        .hvai2-output > *:not(.hvai2-techwrap) { position: relative; z-index: 1; }
+        .hvai2-techwrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* Gradient border shimmer */
+        .hvai2-inputcard::before, .hvai2-output::before {
+          content:''; position:absolute; inset:-1px;
+          border-radius: inherit; padding: 1px; pointer-events: none;
+          background: linear-gradient(120deg, rgba(124,58,237,.5), rgba(6,182,212,.4), rgba(244,63,94,.5));
+          -webkit-mask: 
+            linear-gradient(#000 0 0) content-box, 
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: .65;
+        }
+
+        /* Modern chips & bars */
+        .hvai2-chip { background: rgba(255,255,255,.05); border-color: var(--border-strong); }
+        .hvai2-bar { background: rgba(255,255,255,.08); }
+        .hvai2-bar > span { background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
+
+        /* Header sparkles toned & modern */
+        .hvai2-sparkles .sparkle { opacity: .18; }
+
+        /* Bridge polish */
+        .hvai2-urlpill { background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+
+        /* Gauge numbers larger */
+        #hvai2-ensemble-score { font-size: 1.6rem; }
 
       </style>
 
@@ -2964,6 +3215,69 @@ window.addEventListener('error', function(e){
           opacity: .95;
         }
 
+      
+        /* ===== Modernized look & better layering ===== */
+        .hvai2-wrapper {
+          --bg: color-mix(in oklab, #0a0c14 94%, #10162b 6%);
+          --surface: color-mix(in oklab, #0f1322 80%, #0b0f1a 20%);
+          --glass: rgba(255,255,255,.04);
+          --border: rgba(255,255,255,.10);
+          --border-strong: rgba(255,255,255,.18);
+          --muted: #9aa4b2;
+          --text: #e9edf7;
+          --ok: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+          --brand1: #7c3aed; --brand2: #06b6d4; --brand3: #f43f5e;
+          background: radial-gradient(1200px 800px at 15% -10%, rgba(124,58,237,.12), transparent 55%),
+                      radial-gradient(1000px 800px at 90% 10%, rgba(6,182,212,.10), transparent 60%),
+                      var(--bg);
+        }
+        .hvai2-header .hvai2-title {
+          display: inline-grid; gap: .2rem; padding: .2rem .6rem;
+          border-radius: 14px; position: relative;
+        }
+        .hvai2-header .hvai2-title::after {
+          content:'';
+          height: 2px; width: 100%;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          border-radius: 2px; margin-top: .35rem;
+        }
+        .hvai2-inputcard, .hvai2-output {
+          position: relative; overflow: hidden;
+          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          box-shadow: 0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .hvai2-inputcard > *:not(.hvai2-techwrap),
+        .hvai2-output > *:not(.hvai2-techwrap) { position: relative; z-index: 1; }
+        .hvai2-techwrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* Gradient border shimmer */
+        .hvai2-inputcard::before, .hvai2-output::before {
+          content:''; position:absolute; inset:-1px;
+          border-radius: inherit; padding: 1px; pointer-events: none;
+          background: linear-gradient(120deg, rgba(124,58,237,.5), rgba(6,182,212,.4), rgba(244,63,94,.5));
+          -webkit-mask: 
+            linear-gradient(#000 0 0) content-box, 
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: .65;
+        }
+
+        /* Modern chips & bars */
+        .hvai2-chip { background: rgba(255,255,255,.05); border-color: var(--border-strong); }
+        .hvai2-bar { background: rgba(255,255,255,.08); }
+        .hvai2-bar > span { background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
+
+        /* Header sparkles toned & modern */
+        .hvai2-sparkles .sparkle { opacity: .18; }
+
+        /* Bridge polish */
+        .hvai2-urlpill { background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+
+        /* Gauge numbers larger */
+        #hvai2-ensemble-score { font-size: 1.6rem; }
+
       </style>
 <script>
 
@@ -3172,6 +3486,69 @@ window.addEventListener('error', function(e){
           opacity: .95;
         }
 
+      
+        /* ===== Modernized look & better layering ===== */
+        .hvai2-wrapper {
+          --bg: color-mix(in oklab, #0a0c14 94%, #10162b 6%);
+          --surface: color-mix(in oklab, #0f1322 80%, #0b0f1a 20%);
+          --glass: rgba(255,255,255,.04);
+          --border: rgba(255,255,255,.10);
+          --border-strong: rgba(255,255,255,.18);
+          --muted: #9aa4b2;
+          --text: #e9edf7;
+          --ok: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+          --brand1: #7c3aed; --brand2: #06b6d4; --brand3: #f43f5e;
+          background: radial-gradient(1200px 800px at 15% -10%, rgba(124,58,237,.12), transparent 55%),
+                      radial-gradient(1000px 800px at 90% 10%, rgba(6,182,212,.10), transparent 60%),
+                      var(--bg);
+        }
+        .hvai2-header .hvai2-title {
+          display: inline-grid; gap: .2rem; padding: .2rem .6rem;
+          border-radius: 14px; position: relative;
+        }
+        .hvai2-header .hvai2-title::after {
+          content:'';
+          height: 2px; width: 100%;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          border-radius: 2px; margin-top: .35rem;
+        }
+        .hvai2-inputcard, .hvai2-output {
+          position: relative; overflow: hidden;
+          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          box-shadow: 0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .hvai2-inputcard > *:not(.hvai2-techwrap),
+        .hvai2-output > *:not(.hvai2-techwrap) { position: relative; z-index: 1; }
+        .hvai2-techwrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* Gradient border shimmer */
+        .hvai2-inputcard::before, .hvai2-output::before {
+          content:''; position:absolute; inset:-1px;
+          border-radius: inherit; padding: 1px; pointer-events: none;
+          background: linear-gradient(120deg, rgba(124,58,237,.5), rgba(6,182,212,.4), rgba(244,63,94,.5));
+          -webkit-mask: 
+            linear-gradient(#000 0 0) content-box, 
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: .65;
+        }
+
+        /* Modern chips & bars */
+        .hvai2-chip { background: rgba(255,255,255,.05); border-color: var(--border-strong); }
+        .hvai2-bar { background: rgba(255,255,255,.08); }
+        .hvai2-bar > span { background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
+
+        /* Header sparkles toned & modern */
+        .hvai2-sparkles .sparkle { opacity: .18; }
+
+        /* Bridge polish */
+        .hvai2-urlpill { background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+
+        /* Gauge numbers larger */
+        #hvai2-ensemble-score { font-size: 1.6rem; }
+
       </style>
 <div id="clModal" class="cl-modal" aria-hidden="true" role="dialog" aria-label="Checklist improvement tips">
   <div class="cl-back" data-close="1"></div>
@@ -3372,6 +3749,69 @@ window.addEventListener('error', function(e){
           filter: drop-shadow(0 8px 24px rgba(0,0,0,.35));
           opacity: .95;
         }
+
+      
+        /* ===== Modernized look & better layering ===== */
+        .hvai2-wrapper {
+          --bg: color-mix(in oklab, #0a0c14 94%, #10162b 6%);
+          --surface: color-mix(in oklab, #0f1322 80%, #0b0f1a 20%);
+          --glass: rgba(255,255,255,.04);
+          --border: rgba(255,255,255,.10);
+          --border-strong: rgba(255,255,255,.18);
+          --muted: #9aa4b2;
+          --text: #e9edf7;
+          --ok: #22c55e; --warn: #f59e0b; --bad: #ef4444;
+          --brand1: #7c3aed; --brand2: #06b6d4; --brand3: #f43f5e;
+          background: radial-gradient(1200px 800px at 15% -10%, rgba(124,58,237,.12), transparent 55%),
+                      radial-gradient(1000px 800px at 90% 10%, rgba(6,182,212,.10), transparent 60%),
+                      var(--bg);
+        }
+        .hvai2-header .hvai2-title {
+          display: inline-grid; gap: .2rem; padding: .2rem .6rem;
+          border-radius: 14px; position: relative;
+        }
+        .hvai2-header .hvai2-title::after {
+          content:'';
+          height: 2px; width: 100%;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          border-radius: 2px; margin-top: .35rem;
+        }
+        .hvai2-inputcard, .hvai2-output {
+          position: relative; overflow: hidden;
+          background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+          border-radius: 20px;
+          border: 1px solid var(--border);
+          box-shadow: 0 18px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .hvai2-inputcard > *:not(.hvai2-techwrap),
+        .hvai2-output > *:not(.hvai2-techwrap) { position: relative; z-index: 1; }
+        .hvai2-techwrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+        /* Gradient border shimmer */
+        .hvai2-inputcard::before, .hvai2-output::before {
+          content:''; position:absolute; inset:-1px;
+          border-radius: inherit; padding: 1px; pointer-events: none;
+          background: linear-gradient(120deg, rgba(124,58,237,.5), rgba(6,182,212,.4), rgba(244,63,94,.5));
+          -webkit-mask: 
+            linear-gradient(#000 0 0) content-box, 
+            linear-gradient(#000 0 0);
+          -webkit-mask-composite: xor; mask-composite: exclude;
+          opacity: .65;
+        }
+
+        /* Modern chips & bars */
+        .hvai2-chip { background: rgba(255,255,255,.05); border-color: var(--border-strong); }
+        .hvai2-bar { background: rgba(255,255,255,.08); }
+        .hvai2-bar > span { background: linear-gradient(90deg, #22c55e, #f59e0b, #ef4444); }
+
+        /* Header sparkles toned & modern */
+        .hvai2-sparkles .sparkle { opacity: .18; }
+
+        /* Bridge polish */
+        .hvai2-urlpill { background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+
+        /* Gauge numbers larger */
+        #hvai2-ensemble-score { font-size: 1.6rem; }
 
       </style>
 <script>
