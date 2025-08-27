@@ -1,10 +1,5 @@
-<?php
-
-use Illuminate\Support\Facades\Route;
+// routes/api.php  (or a file included by your RouteServiceProvider)
 use App\Http\Controllers\ContentDetectionController;
 
-Route::middleware(['throttle:content-detection'])->group(function () {
-    Route::post('/detect', [ContentDetectionController::class, 'detect']);
-    Route::post('/detect/batch', [ContentDetectionController::class, 'detectBatch']);
-    Route::get('/detections/{id}', [ContentDetectionController::class, 'show']);
-});
+Route::post('/detect', [ContentDetectionController::class, 'detect']);      // returns JSON
+Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']); // returns JSON
