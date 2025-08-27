@@ -1049,17 +1049,20 @@ Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</c
   const verdictEl = root.querySelector('.mmecd__verdict');
   const confEl = root.querySelector('.mmecd__confidence');
   const sigEl  = root.querySelector('.mmecd__signals');
-  const modelsGrid = root.querySelector('.mmecd__modelsGrid');
-  const statsGrid  = root.querySelector('.mmecd__statsGrid');
+  const modelsGrid = root.querySelector('.mmecd__modelsGrid') || root.querySelector('.mmecd__models');
+  const statsGrid  = root.querySelector('.mmecd__statsGrid')  || root.querySelector('.mmecd__stats');
   const sparks   = root.querySelector('.mmecd__sparks');
   const statusPill = root.querySelector('.mmecd__pill--status');
 
-  const epDetect    = root.getAttribute('data-endpoint-detect') || '/api/detect';
-  const epDetectUrl = root.getAttribute('data-endpoint-detect-url') || '/api/detect/url';
+  // API endpoints; if not present, we treat as no-API mode
+  const epDetect    = root.getAttribute('data-endpoint-detect') || '';
+  const epDetectUrl = root.getAttribute('data-endpoint-detect-url') || '';
   const csrf = document.querySelector('meta[name=csrf-token]')?.content || '';
 
   // Build ticks
   (function buildTicks(){
+    if(!ticks) return;
+    if(ticks.childNodes.length>0) return;
     const cx=70, cy=70, r=58, N=40;
     for(let i=0;i<N;i++){
       const a = (i/N) * 2*Math.PI;
@@ -1080,9 +1083,10 @@ Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</c
   })();
 
   const CIRC = 2 * Math.PI * 58;
-  prog.style.strokeDasharray = CIRC;
+  if(prog){ prog.style.strokeDasharray = CIRC; }
 
   function colorBurst(){
+    if(!sparks) return;
     const N=14;
     for(let i=0;i<N;i++){
       const el = document.createElement('div');
@@ -1114,8 +1118,10 @@ Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</c
     scoreEl.textContent = pct + '%';
     const thAI = 0.70, thHuman = 0.30;
     verdictEl.textContent = s >= thAI ? 'ai-like' : (s <= thHuman ? 'human-like' : 'uncertain');
-    const offset = CIRC * (1 - s);
-    prog.style.strokeDashoffset = offset;
+    if(prog){
+      const offset = CIRC * (1 - s);
+      prog.style.strokeDashoffset = offset;
+    }
     const [c1,c2,c3] = colorForScore(s);
     const grad = root.querySelector('#mmecdGrad');
     if(grad){
@@ -1126,39 +1132,224 @@ Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</c
     colorBurst();
   }
 
-  function enable(disabled){ btn.disabled = disabled; btnU.disabled = disabled; }
-
-  function setStatusPill(ok, text){
-    statusPill.textContent = text || (ok ? 'Connected' : 'Not Connected');
-    statusPill.style.background = ok ? 'rgba(16,185,129,.18)' : 'rgba(239,68,68,.18)';
-    statusPill.style.borderColor = ok ? 'rgba(16,185,129,.45)' : 'rgba(239,68,68,.45)';
-    statusPill.style.color = ok ? '#bbf7d0' : '#fecaca';
+  function enable(disabled){
+    if(btn) btn.disabled = disabled;
+    if(btnU) btnU.disabled = disabled;
   }
 
-  function showError(json, status, text){
-    let msg = 'Non-JSON response';
-    if(json){
-      if(json.error) msg = json.error;
-      else if(json.errors){
-        const first = Object.values(json.errors)[0];
-        if(Array.isArray(first) && first.length) msg = first[0];
-      }else if(typeof json === 'string'){
-        msg = json.slice(0, 180);
-      }else if(json.details){
-        msg = String(json.details).slice(0,180);
+  function renderModels(by){
+    if(!modelsGrid) return;
+    // Pro grid card layout (if present)
+    if(modelsGrid.classList.contains('mmecd__modelsGrid')){
+      modelsGrid.innerHTML = '';
+      const keys = Object.keys(by||{});
+      if(!keys.length){
+        modelsGrid.innerHTML = `
+          <div class="mmecd__empty" data-slot="models">
+            <div class="mmecd__emptyIcon">📊</div>
+            <div class="mmecd__emptyTitle">No model scores (local mode)</div>
+            <div class="mmecd__emptyText">Using only on-device statistics. Connect API for per-model probabilities.</div>
+          </div>`;
+          return;
       }
-    }else if(text){
-      msg = (text || '').slice(0, 180);
+      keys.forEach(name=>{
+        const val = by[name] || {};
+        const prob = typeof val.prob_ai === 'number' ? Math.max(0, Math.min(1, val.prob_ai)) : 0;
+        const weight = val.weight ?? 0;
+        const card = document.createElement('div');
+        card.className = 'mmecd__modelCard';
+        card.innerHTML = `
+          <div class="name">${name}</div>
+          <div class="meta">p(ai) ${Math.round(prob*100)}% • w=${weight}</div>
+          <div class="bar"><i style="width:${Math.round(prob*100)}%"></i></div>`;
+        modelsGrid.appendChild(card);
+      });
+    }else{
+      // Legacy <ul> list
+      modelsGrid.innerHTML = '';
+      const bym = by || {};
+      for(const k in bym){
+        const li = document.createElement('li');
+        const pct = (typeof bym[k].prob_ai === 'number') ? Math.round(bym[k].prob_ai*100)+'%' : '—';
+        li.innerHTML = `<strong>${k}</strong> → ${pct}`;
+        modelsGrid.appendChild(li);
+      }
+      if(!Object.keys(bym).length){
+        const li = document.createElement('li'); li.textContent = 'Local mode: no remote models';
+        modelsGrid.appendChild(li);
+      }
     }
-    if(status === 404) msg = 'Endpoint not found (404). Check routes.';
-    if(status === 401) msg = 'Unauthorized (401). Remove auth from API route.';
-    if(status === 419) msg = 'CSRF/session (419). Use API routes or include token.';
-    if(status === 429) msg = 'Rate limit (429). Try later.';
-    st.textContent = msg;
-    setStatusPill(false, 'Not Connected');
   }
 
-  async function parseResponse(res){
+  function renderStats(features){
+    if(!statsGrid) return;
+    if(statsGrid.classList.contains('mmecd__statsGrid')){
+      statsGrid.innerHTML = '';
+      const keys = features ? Object.keys(features) : [];
+      if(!keys.length){
+        statsGrid.innerHTML = `
+          <div class="mmecd__empty" data-slot="stats">
+            <div class="mmecd__emptyIcon">📐</div>
+            <div class="mmecd__emptyTitle">No statistical summary</div>
+            <div class="mmecd__emptyText">Paste text or analyze a URL (with content already extracted) to see local metrics.</div>
+          </div>`;
+        return;
+      }
+      const pretty = {
+        'perplexity':'Perplexity (char entropy)',
+        'burstiness':'Burstiness (sent var)',
+        'ttr':'Type-Token Ratio',
+        'honore':'Honore’s Statistic',
+        'flesch_kincaid':'Flesch-Kincaid',
+        'gunning_fog':'Gunning Fog',
+        'punct_ratio':'Punctuation Ratio',
+        'avg_sentence':'Avg Sentence Length',
+        'avg_syllables':'Avg Syllables/Word'
+      };
+      keys.forEach(k=>{
+        const v = features[k];
+        const card = document.createElement('div');
+        card.className = 'mmecd__stat';
+        card.innerHTML = `<div class="k">${pretty[k] || k}</div><div class="v">${(typeof v==='number')? (Math.round(v*100)/100) : v}</div>`;
+        statsGrid.appendChild(card);
+      });
+    }else{
+      // Legacy <pre> fallback
+      statsGrid.textContent = JSON.stringify(features, null, 2);
+    }
+  }
+
+  // ---- Local (no-API) analysis ----
+  function tokenizeWords(text){
+    return (text.toLowerCase().match(/[a-zA-ZÀ-ÖØ-öø-ÿ']+/g) || []);
+  }
+  function splitSentences(text){
+    return (text.match(/[^.!?]+[.!?]*/g) || []).map(s=>s.trim()).filter(Boolean);
+  }
+  function countSyllables(word){
+    word = word.toLowerCase().replace(/[^a-z]/g,'');
+    if(!word) return 0;
+    const vowels = 'aeiouy';
+    let syll = 0, prev=false;
+    for(let i=0;i<word.length;i++){
+      const isV = vowels.includes(word[i]);
+      if(isV && !prev){ syll++; prev=true; } else if(!isV){ prev=false; }
+    }
+    if(word.endsWith('e')) syll--;
+    if(word.endsWith('le') && word.length>2 && !vowels.includes(word[word.length-3])) syll++;
+    return Math.max(1, syll);
+  }
+  function charEntropy(text){
+    if(!text) return 0;
+    const counts = {};
+    for(const ch of text){ counts[ch] = (counts[ch]||0)+1; }
+    const N = text.length;
+    let H = 0;
+    for(const k in counts){
+      const p = counts[k]/N;
+      H -= p * (Math.log(p)/Math.log(2));
+    }
+    return H; // bits/char
+  }
+  function localAnalyze(text){
+    const sentences = splitSentences(text);
+    const words = tokenizeWords(text);
+    const N = words.length;
+    const S = Math.max(1, sentences.length);
+    const chars = text.length;
+
+    // Sentence lengths
+    const lens = sentences.map(s => (s.match(/[a-zA-ZÀ-ÖØ-öø-ÿ']+/g)||[]).length);
+    const mean = lens.reduce((a,b)=>a+b,0)/S;
+    const sd = Math.sqrt(lens.reduce((a,b)=>a + Math.pow(b-mean,2),0)/S);
+    const burst = mean>0 ? sd/mean : 0;
+
+    // Lexical stats
+    const freq = {};
+    words.forEach(w => freq[w] = (freq[w]||0)+1);
+    const V = Object.keys(freq).length;
+    const V1 = Object.values(freq).filter(c=>c===1).length;
+    const ttr = N>0 ? V/N : 0;
+    const honore = (1 - (V1/Math.max(1,V))) !== 0 ? 100 * Math.log(Math.max(1,N)) / (1 - (V1/Math.max(1,V))) : 0;
+
+    // Syllables and readability
+    let syllables = 0, complex=0;
+    for(const w of words){
+      const s = countSyllables(w);
+      syllables += s;
+      if(s >= 3) complex++;
+    }
+    const wl = N>0 ? syllables/N : 0;
+    const sl = S>0 ? N/S : 0;
+    const fk = 0.39 * sl + 11.8 * wl - 15.59;
+    const gf = 0.4 * (sl + 100 * (N>0 ? complex/N : 0));
+    const fre = 206.835 - 1.015 * sl - 84.6 * wl;
+
+    // Punctuation
+    const punct = (text.match(/[,\.;:!\?\(\)\[\]—\-]/g) || []).length;
+    const punctRatio = chars>0 ? punct/chars : 0;
+
+    // Pseudo-perplexity via char entropy
+    const H = charEntropy(text); // ~3.5-5.0 typical
+    const ppl = Math.pow(2, H);
+
+    const features = {
+      perplexity: ppl,
+      burstiness: burst,
+      ttr: ttr,
+      honore: honore,
+      flesch_kincaid: fk,
+      gunning_fog: gf,
+      punct_ratio: punctRatio,
+      avg_sentence: sl,
+      avg_syllables: wl
+    };
+
+    // Heuristic AI-likeness
+    function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+    const ai_entropy = clamp01((4.2 - H) / 1.5);       // lower entropy => more AI-like
+    const ai_burst   = clamp01((0.35 - burst) / 0.35); // lower variation => more AI-like
+    const ai_ttr     = clamp01((0.50 - ttr) / 0.50);   // low lexical diversity => AI-like
+    const ai_punct   = clamp01((0.02 - punctRatio) / 0.02); // very low punctuation => AI-like
+    const ai_read    = clamp01(Math.abs(10 - fk) < 2 ? 0.2 : 0.0); // tiny nudge near grade ~10
+
+    const final = clamp01(
+        0.30*ai_entropy +
+        0.25*ai_burst   +
+        0.20*ai_ttr     +
+        0.15*ai_punct   +
+        0.10*ai_read
+    );
+
+    return {
+      ok: true,
+      data: {
+        final_score: final,
+        confidence: 0.55 + 0.25*(1 - Math.abs(0.5-final)), // modest confidence
+        used: ['local-stats'],
+        verdict: final>=0.7 ? 'ai-like' : (final<=0.3 ? 'human-like' : 'uncertain'),
+        by_model: {}, // none in local mode
+        stats: { features }
+      }
+    };
+  }
+
+  function setStatus(mode, ok){
+    if(!statusPill) return;
+    if(mode==='local'){
+      statusPill.textContent = 'Local mode';
+      statusPill.style.background = 'rgba(59,130,246,.18)';
+      statusPill.style.borderColor = 'rgba(59,130,246,.45)';
+      statusPill.style.color = '#bfdbfe';
+    }else{
+      statusPill.textContent = ok ? 'Connected' : 'Not Connected';
+      statusPill.style.background = ok ? 'rgba(16,185,129,.18)' : 'rgba(239,68,68,.18)';
+      statusPill.style.borderColor = ok ? 'rgba(16,185,129,.45)' : 'rgba(239,68,68,.45)';
+      statusPill.style.color = ok ? '#bbf7d0' : '#fecaca';
+    }
+  }
+
+  async function parseJsonResponse(res){
     const ct = res.headers.get('content-type') || '';
     if (ct.includes('application/json')) {
       try { return await res.json(); } catch { return {ok:false, error:'Invalid JSON body'}; }
@@ -1166,57 +1357,6 @@ Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</c
       const txt = await res.text();
       return { ok:false, error:'Non-JSON response', details: txt.slice(0, 500) };
     }
-  }
-
-  function renderModels(by){
-    modelsGrid.innerHTML = '';
-    const keys = Object.keys(by||{});
-    if(!keys.length){
-      modelsGrid.innerHTML = `
-        <div class="mmecd__empty" data-slot="models">
-          <div class="mmecd__emptyIcon">📊</div>
-          <div class="mmecd__emptyTitle">No model scores yet</div>
-          <div class="mmecd__emptyText">Paste content or analyze a URL to see per‑model probabilities and weights.</div>
-        </div>`;
-        return;
-    }
-    keys.forEach(name=>{
-      const val = by[name] || {};
-      const prob = typeof val.prob_ai === 'number' ? Math.max(0, Math.min(1, val.prob_ai)) : 0;
-      const weight = val.weight ?? 0;
-      const card = document.createElement('div');
-      card.className = 'mmecd__modelCard';
-      card.innerHTML = `
-        <div class="name">${name}</div>
-        <div class="meta">p(ai) ${Math.round(prob*100)}% • w=${weight}</div>
-        <div class="bar"><i style="width:${Math.round(prob*100)}%"></i></div>`;
-      modelsGrid.appendChild(card);
-    });
-  }
-
-  function renderStats(features){
-    statsGrid.innerHTML = '';
-    const keys = features ? Object.keys(features) : [];
-    if(!keys.length){
-      statsGrid.innerHTML = `
-        <div class="mmecd__empty" data-slot="stats">
-          <div class="mmecd__emptyIcon">📐</div>
-          <div class="mmecd__emptyTitle">No statistical summary yet</div>
-          <div class="mmecd__emptyText">We’ll show perplexity, burstiness, lexical diversity, readability and more here.</div>
-        </div>`;
-      return;
-    }
-    const pretty = {
-      'perplexity':'Perplexity','burstiness':'Burstiness','ttr':'Type‑Token Ratio',
-      'honore':'Honore’s Statistic','flesch_kincaid':'Flesch‑Kincaid','gunning_fog':'Gunning Fog'
-    };
-    keys.forEach(k=>{
-      const v = features[k];
-      const card = document.createElement('div');
-      card.className = 'mmecd__stat';
-      card.innerHTML = `<div class="k">${pretty[k] || k}</div><div class="v">${v}</div>`;
-      statsGrid.appendChild(card);
-    });
   }
 
   async function postJson(url, payload){
@@ -1231,20 +1371,22 @@ Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</c
       credentials: 'same-origin',
       body: JSON.stringify(payload || {})
     });
-    const parsed = await parseResponse(res);
+    const parsed = await parseJsonResponse(res);
     return { res, parsed };
   }
 
   async function handleResult(json){
-    if(!json || !json.ok){ showError(json, undefined, json?.details); return; }
+    if(!json || !json.ok){
+      st.textContent = json?.error || 'Analysis failed';
+      return;
+    }
     const d = json.data;
     setScore(d.final_score ?? 0.5);
     confEl.textContent = Math.round((d.confidence ?? 0) * 100) + '%';
     sigEl.textContent  = 'Signals: ' + (Array.isArray(d.used) ? d.used.join(', ') : '—');
     renderModels(d.by_model || {});
     renderStats(d?.stats?.features || {});
-    st.textContent = 'Done'; setTimeout(()=>{ st.textContent=''; }, 1400);
-    setStatusPill(true, 'Connected');
+    st.textContent = 'Done'; setTimeout(()=>{ st.textContent=''; }, 1200);
   }
 
   async function detect(){
@@ -1252,61 +1394,103 @@ Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</c
     if (text.length < 20) { st.textContent = 'Please paste at least 20 characters.'; return; }
     enable(true); st.textContent = 'Analyzing…';
     try{
-      const {res, parsed} = await postJson(epDetect, {content:text});
-      if(!res.ok){ showError(parsed, res.status, parsed?.details); }
-      else { await handleResult(parsed); }
-    }catch(e){ console.error(e); st.textContent='Network error'; setStatusPill(false,'Not Connected'); }
-    finally{ enable(false); }
+      if(!epDetect){
+        setStatus('local');
+        await handleResult(localAnalyze(text));
+      }else{
+        const {res, parsed} = await postJson(epDetect, {content:text});
+        if(!res.ok){ // fallback to local
+          setStatus('local');
+          await handleResult(localAnalyze(text));
+        }else{
+          setStatus('api', true);
+          await handleResult(parsed);
+        }
+      }
+    }catch(e){
+      console.error(e);
+      setStatus('local');
+      await handleResult(localAnalyze(text));
+    }finally{
+      enable(false);
+    }
   }
 
   async function detectFromUrl(u){
     if(!u) return;
+    // No-API: we cannot fetch cross-origin due to CORS; expect another script to dispatch the extracted content via event.
+    if(!epDetectUrl){
+      st.textContent = 'No API: Please paste the extracted text, or integrate your URL extractor to dispatch "semantic:urlAnalyzed".';
+      setStatus('local');
+      return;
+    }
     enable(true); st.textContent = 'Fetching & analyzing URL…';
     try{
       const {res, parsed} = await postJson(epDetectUrl, {url:u});
       if(parsed && parsed.extracted){
         ta.value = parsed.extracted;
-        btn.disabled = (ta.value.trim().length < 20);
+        if(btn) btn.disabled = (ta.value.trim().length < 20);
       }
-      if(!res.ok){ showError(parsed, res.status, parsed?.details); }
-      else { await handleResult(parsed); }
-    }catch(e){ console.error(e); st.textContent='Network error'; setStatusPill(false,'Not Connected'); }
-    finally{ enable(false); }
+      if(!res.ok){
+        // fallback to local if we at least got extracted text
+        if(parsed && parsed.extracted){
+          setStatus('local');
+          await handleResult(localAnalyze(parsed.extracted));
+        }else{
+          st.textContent = parsed?.error || 'URL analyze failed';
+        }
+      }else{
+        setStatus('api', true);
+        await handleResult(parsed);
+      }
+    }catch(e){
+      console.error(e);
+      setStatus('local');
+      st.textContent = 'No API: paste content or integrate a URL extractor.';
+    }finally{
+      enable(false);
+    }
   }
 
   // Wire up UI
-  btn.addEventListener('click', detect);
-  btnU.addEventListener('click', ()=>{
-    const u = (urlI.value||'').trim();
+  if(btn) btn.addEventListener('click', detect);
+  if(btnU) btnU.addEventListener('click', ()=>{
+    const u = (urlI?.value||'').trim();
     if(!u) { st.textContent = 'Enter a URL to analyze.'; return; }
     detectFromUrl(u);
   });
-  ta.addEventListener('input', ()=>{ btn.disabled = (ta.value.trim().length < 20); });
-  btn.disabled = true;
+  if(ta){
+    ta.addEventListener('input', ()=>{ if(btn) btn.disabled = (ta.value.trim().length < 20); });
+    if(btn) btn.disabled = true;
+  }
 
-  // Connectivity sanity check (HEAD-like via POST with ping mode, if backend ignores it we still continue)
+  // Connectivity check
   (async()=>{
+    if(!epDetect){
+      setStatus('local');
+      return;
+    }
     try{
       const {res} = await postJson(epDetect, {ping:true});
-      setStatusPill(res.ok, res.ok?'Connected':'Not Connected');
+      setStatus('api', !!res.ok);
     }catch(_){
-      setStatusPill(false,'Not Connected');
+      setStatus('local');
     }
   })();
 
-  // Auto-run: query param ?analyze_url=...
+  // Auto-run URL param
   try{
     const params = new URLSearchParams(location.search);
     const u = params.get('analyze_url');
     if(u){ detectFromUrl(u); }
   }catch(_){}
 
-  // Auto-run: global event
+  // Auto-run global event
   window.addEventListener('semantic:urlAnalyzed', (e)=>{
     const detail = e?.detail || {};
     if(detail.content && detail.content.length >= 20){
       ta.value = detail.content.slice(0, 20000);
-      btn.disabled = false;
+      if(btn) btn.disabled = false;
       detect();
     }else if(detail.url){
       detectFromUrl(detail.url);
