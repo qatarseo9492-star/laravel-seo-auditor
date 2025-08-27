@@ -2633,12 +2633,23 @@ window.addEventListener('error', function(e){
     setTimeout(()=> s.remove(), 950);
   }
   function bindStickers(){
-    document.addEventListener('change', (e)=>{
-      const cb = e.target.closest && e.target.closest('.checklist input[type="checkbox"]');
-      if(cb && cb.checked){
-        const r = cb.getBoundingClientRect();
+
+  document.addEventListener('change', (e)=>{
+    const cb = e.target && e.target.closest && e.target.closest('.checklist input[type="checkbox"]');
+    if(!cb) return;
+
+    // existing fun confetti when a box is checked
+    if (cb.checked) {
+      const r = cb.getBoundingClientRect();
+      try {
         sticker(r.left + r.width/2, r.top + window.scrollY, ['✨','✅','📈','🌈'][Math.floor(Math.random()*4)]);
-      }
+      } catch(e) { /* sticker not available? ignore */ }
+    }
+
+    // Always refresh category meters & X/Y counts
+    try { if (window.updateCategoryBars) window.updateCategoryBars(); } catch(e){}
+  });
+}
     });
   }
   function watchScore(){
@@ -2658,6 +2669,26 @@ window.addEventListener('error', function(e){
 })();
 </script>
 <!-- ===== /Unique Aurora Liquid Wheel block ===== -->
+
+
+<script>
+// --- Checklist live-sync patch (auto-refresh category meters) ---
+(function(){
+  function refresh(){ try{ if (window.updateCategoryBars) window.updateCategoryBars(); }catch(e){} }
+  // One-time after DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refresh, { once: true });
+  } else { refresh(); }
+  // Observe dynamic changes to checklist DOM
+  try {
+    var root = document.querySelector('.checklist');
+    if (root && 'MutationObserver' in window) {
+      var mo = new MutationObserver(function(m){ refresh(); });
+      mo.observe(root, { childList: true, subtree: true });
+    }
+  } catch(e){}
+})();
+</script>
 
 </body>
 </html>
