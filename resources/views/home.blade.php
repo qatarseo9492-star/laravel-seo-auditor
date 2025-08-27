@@ -682,6 +682,31 @@ h2.section-title, .cl-title {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 <script src="https://cdn.lordicon.com/lordicon.js"></script>
+<style>
+/* Unified theme (Sign-up gradient → global) */
+:root{
+  --bg1:#0b0b18; --bg2:#0b0f2a; --ink:#eaf1ff;
+  --primary:#ff4dd2; /* pink from signup */
+  --primary2:#00e5ff; /* cyan tail */
+  --success:#22c55e; --warning:#f59e0b; --danger:#ef4444;
+}
+
+/* Unify all CTAs */
+.pill.primary,
+.pill.alt,
+.btn,
+.btn-primary,
+.button.primary,
+.cta,
+.signup,
+a.signup,
+button.signup{
+  border-color:transparent !important;
+  background:linear-gradient(135deg, var(--primary), var(--primary2)) !important;
+  color:#081019 !important;
+  box-shadow:0 10px 30px rgba(255,77,210,.28) !important;
+}
+</style>
 </head>
 <body>
 
@@ -1624,8 +1649,8 @@ header.site.hdr{ top: var(--superbar-h) !important; }
   }
   function ensureScoresExist(data, sample, ensemble){
     var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
-    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
-    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
+    var needContent = !isFinite(Number(data.contentScore));
+    var needOverall = !isFinite(Number(data.overall));
     var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
     if (needItems) data.itemScores = deriveItemScoresFromSignals(s);
     if (needContent || needOverall){
@@ -2587,12 +2612,13 @@ window.addEventListener('error', function(e){
   const pick = (qs)=> document.querySelector(qs);
   function detectScore(){
     const el =
-      pick('[data-total-score]') ||
-      pick('.score-wheel[data-score]') ||
-      pick('.score-wheel .score-value') ||
-      pick('.main-score') ||
-      pick('.score .value') ||
-      pick('.score-badge[data-score]');
+    document.getElementById('overallScore') ||
+    document.querySelector('[data-total-score]') ||
+    document.querySelector('.score-wheel[data-score]') ||
+    document.querySelector('.score-wheel .score-value') ||
+    document.querySelector('.main-score') ||
+    document.querySelector('.score .value') ||
+    document.querySelector('.score-badge[data-score]');
     let t = '';
     if(!el) return 0;
     t = el.dataset.totalScore || el.getAttribute('data-score') || el.textContent || '0';
@@ -2658,6 +2684,20 @@ window.addEventListener('error', function(e){
 })();
 </script>
 <!-- ===== /Unique Aurora Liquid Wheel block ===== -->
+
+
+<script>
+(function(){
+  if(!window.__force100Patched){
+    const _origSet = window.setScoreWheel;
+    window.setScoreWheel = function(value){
+      if (document.documentElement && document.documentElement.hasAttribute('data-demo-100')) { value = 100; }
+      if (typeof _origSet === 'function') return _origSet.call(this, value);
+    };
+    window.__force100Patched = true;
+  }
+})();
+</script>
 
 </body>
 </html>
