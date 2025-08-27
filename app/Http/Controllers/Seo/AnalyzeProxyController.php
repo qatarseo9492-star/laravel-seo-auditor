@@ -12,12 +12,7 @@ class AnalyzeProxyController extends Controller
 {
     public function __invoke(Request $request, UrlAnalysisService $svc)
     {
-        $this->middleware('auth');
-
-        $data = $request->validate([
-            'url' => ['required','url'],
-        ]);
-
+        $data = $request->validate([ 'url' => ['required','url'] ]);
         try {
             $out = $svc->analyzeUrl($data['url'], Auth::id());
             return response()->json($out);
