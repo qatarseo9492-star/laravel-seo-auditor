@@ -811,698 +811,141 @@ h2.section-title, .cl-title {
 
 <!-- HUMAN vs AI Content (Ensemble) — v26 PRISM (forcefix) -->
 <section id="hvai" class="hvai hvai-v26" aria-label="Human vs AI Content (Ensemble)">
+  <style>
+  .hvai.hvai-v26{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
+  .hvai.hvai-v26 *{box-sizing:border-box}
+  .hvai.hvai-v26 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
+    background:
+      linear-gradient(135deg, rgba(0,255,255,.10) 1px, transparent 1px) 0 0/18px 18px,
+      linear-gradient(45deg, rgba(255,0,180,.08) 1px, transparent 1px) 0 0/20px 20px,
+      radial-gradient(800px 600px at 85% 10%, rgba(67,169,255,.08), transparent 60%),
+      radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
+  }
+  .hvai.hvai-v26 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(220px, clamp(220px, 24vw, 320px)); align-items:center}
+  @media (max-width:1100px){ .hvai.hvai-v26 .grid{grid-template-columns:1fr} .hvai.hvai-v26 .wheel{order:-1; margin:6px auto 14px} }
+  .hvai.hvai-v26 .wheel{ display:flex; align-items:center; justify-content:center; }
 
-  
+  .hvai.hvai-v26 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
+  .hvai.hvai-v26 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  .hvai.hvai-v26 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
+  @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 
+  .hvai.hvai-v26 .status{margin:6px 0 12px}
+  .hvai.hvai-v26 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
+  .hvai.hvai-v26 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
+  .hvai.hvai-v26 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
+  .hvai.hvai-v26 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
+  .hvai.hvai-v26 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
 
-{{-- BEGIN: Multi-Model Ensemble Content Detection (STYLISH PRO v1) --}}
-<div class="mmecd" data-component="multi-ensemble-detector"
-     data-endpoint-detect="/api/detect"
-     data-endpoint-detect-url="/api/detect/url">
-  <div class="mmecd__head">
-    <div class="mmecd__titleWrap">
-      <svg class="mmecd__titleIcon" viewBox="0 0 64 64" aria-hidden="true">
-        <defs>
-          <linearGradient id="mmecdStarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#60a5fa"/>
-            <stop offset="50%" stop-color="#34d399"/>
-            <stop offset="100%" stop-color="#f59e0b"/>
-          </linearGradient>
-        </defs>
-        <g class="mmecd__titleIconSpin">
-          <path d="M32 6l6.2 12.6 13.9 2-10 9.7 2.4 13.8L32 38.8 19.5 44.1 21.9 30.3 12 20.6l13.9-2L32 6z" fill="url(#mmecdStarGrad)" opacity="0.95"/>
-          <circle cx="32" cy="32" r="6" fill="#fff" opacity=".9"/>
-        </g>
-      </svg>
-      <h3 class="mmecd__title">Multi-Model Ensemble Content Detection</h3>
-      <span class="mmecd__pill mmecd__pill--status" title="API status">Checking…</span>
+  .hvai.hvai-v26 .row2{display:flex; gap:18px; flex-wrap:wrap}
+  .hvai.hvai-v26 .bar{flex:1 1 360px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:260px}
+  .hvai.hvai-v26 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
+  .hvai.hvai-v26 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
+  .hvai.hvai-v26 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
+  .hvai.hvai-v26 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
+  .hvai.hvai-v26 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
+
+  /* Improve panel */
+  .hvai.hvai-v26 .improve{margin-top:16px; padding:14px; border-radius:14px; background:linear-gradient(180deg, rgba(0,255,200,.06), rgba(0,140,255,.05)); border:1px solid rgba(255,255,255,.10)}
+  .hvai.hvai-v26 .improve.hidden{display:none}
+  .hvai.hvai-v26 .improve-head{font:800 15px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; margin-bottom:8px}
+  .hvai.hvai-v26 .improve-list{margin:0; padding-left:16px}
+  .hvai.hvai-v26 .improve-list li{margin:6px 0; line-height:1.35}
+
+  /* Prism wheel (compact) */
+  .prism-wheel{position:relative; width:var(--wheel-size, clamp(200px, 22vw, 300px)); aspect-ratio:1; margin:0 auto}
+  .prism-wheel .track{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) calc(50% - var(--thick,14px)), transparent calc(50% - var(--thick,14px)), transparent 100%)}
+  .prism-wheel .arc{position:absolute; inset:0; border-radius:50%;
+    background: conic-gradient(from -90deg, #ff6a00 0%, #ffb700 10%, #ffd300 20%, #96e21a 30%, #2ad1a3 40%, #1aa6ff 50%, #5a6bff 60%, #9659ff 70%, #ff6aff 80%, #ff6a00 100%);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,14px)), #000 calc(100% - var(--thick,14px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
+            mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,14px)), #000 calc(100% - var(--thick,14px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
+  }
+  .prism-wheel .pointer{position:absolute; inset:0; transform: rotate(calc(var(--p)*3.6deg)); transform-origin:50% 50%}
+  .prism-wheel .pointer::after{content:""; position:absolute; left:50%; top: calc(var(--thick,14px)/2); transform: translateX(-50%); width:12px; height:12px; border-radius:50%; background:#00f5c4; box-shadow:0 0 0 4px rgba(0,245,196,.15)}
+  .prism-wheel .center{position:absolute; inset:calc(var(--thick,14px) + 16px); border-radius:50%; display:grid; place-items:center; background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.06), rgba(10,12,20,.55))}
+  .prism-wheel .kv{display:grid; gap:6px; text-align:center}
+  .prism-wheel .kv .row{display:flex; align-items:center; gap:6px; justify-content:center; font: 700 13px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; color:#eaf1ff}
+  .prism-wheel .kv .val{font-weight:900; font-size:17px}
+  .prism-wheel .kv .dot{width:8px; height:8px; border-radius:50%}
+  .prism-wheel .kv .dot.ai{background:#7c5bff}
+  .prism-wheel .kv .dot.h{background:#00f5c4}
+
+  /* Hide any legacy wheel nodes inside .wheel */
+  .hvai.hvai-v26 .wheel > *:not(.prism-wheel){ display:none !important; }
+  </style>
+
+  <div class="tech" aria-hidden="true"></div>
+
+  <div class="grid">
+    <div class="left">
+      <div class="title"><div class="txt"><span class="rainbow">Human vs AI Content (Ensemble)</span></div></div>
+
+      <div id="hvaiStatus" class="status neutral" aria-live="polite">
+        <span class="status-badge"><span class="ico">⌛</span><span class="txt">Waiting for analysis…</span></span>
+      </div>
+
+      <div class="badges">
+        <div class="badge">🛡️ <strong>Confidence:</strong> <span id="hvaiConf">0</span>%</div>
+        <div class="badge">ℹ️ Higher bar = more AI-like</div>
+      </div>
+
+      <div class="row2" id="hvaiBars">
+        <div class="bar" data-key="humanLike"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div></div>
+        <div class="bar" data-key="lexical"><div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div><div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div></div>
+        <div class="bar" data-key="burst"><div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div><div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div></div>
+        <div class="bar" data-key="digits"><div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div><div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div></div>
+        <div class="bar" data-key="repetition"><div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div><div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div></div>
+        <div class="bar" data-key="entropy"><div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div><div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div></div>
+      </div>
+
+      <div id="hvaiImprove" class="improve hidden" aria-live="polite">
+        <div class="improve-head">How to raise your score</div>
+        <ul class="improve-list" id="hvaiImproveList"></ul>
+      </div>
+
+      <small>Source: local ensemble (no external APIs).</small>
     </div>
-    <p class="mmecd__subtitle">Colorful, animated & professional UI. Hugging Face ensemble + local stats. Paste text or analyze a URL.</p>
-<pre class="mmecd__routesCode"><code>use App\Http\Controllers\ContentDetectionController;
-Route::post('/detect', [ContentDetectionController::class, 'detect']);
-Route::post('/detect/url', [ContentDetectionController::class, 'detectUrl']);</code></pre>
-    </div>
 
-    <div class="mmecd__icons">
-      <svg class="mmecd__ico mmecd__ico--pulse" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3 12h5l2-5 4 10 2-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <svg class="mmecd__ico mmecd__ico--float" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/>
-      </svg>
-      <svg class="mmecd__ico mmecd__ico--spin" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
+    <div class="wheel">
+      <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;">
+        <div class="track"></div><div class="arc"></div><div class="pointer"></div>
+        <div class="center"><div class="kv">
+          <div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div>
+          <div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div>
+        </div></div>
+      </div>
     </div>
   </div>
 
-  <div class="mmecd__grid">
-    <div class="mmecd__left">
-      <div class="mmecd__inputWrap">
-        <textarea class="mmecd__input" rows="8" placeholder="Paste content here… (min 20 characters)"></textarea>
-        <div class="mmecd__inputHalo"></div>
-      </div>
+  <script>
+  (function(){
+    console.log('HVAI v26 loaded');
+    var confLocked=false;
+    function clamp(v){ return Math.max(0,Math.min(100,Math.round(v||0))); }
+    function setBadge(h){ var st=document.getElementById('hvaiStatus'); if(!st) return; var txt=st.querySelector('.txt'); var ico=st.querySelector('.ico'); st.classList.remove('neutral','good','warn','bad'); if(h>=80){ st.classList.add('good'); if(txt) txt.textContent='Great Work'; if(ico) ico.textContent='✅'; } else if(h>=60){ st.classList.add('warn'); if(txt) txt.textContent='Need More Hard work on content'; if(ico) ico.textContent='🟡'; } else { st.classList.add('bad'); if(txt) txt.textContent='Needs Rewrite the Content'; if(ico) ico.textContent='✍️'; } }
+    function setConfidence(v){ var el=document.getElementById('hvaiConf'); if(el) el.textContent=clamp(v); }
+    function deriveConfFromAI(pAI){ return 60 + (Math.abs(50 - pAI) / 50) * 30; }
+    function updateBars(subs){ if(!subs) return; var map=[['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],['hvaiBarLex','hvaiValLex', subs.lexical],['hvaiBarBurst','hvaiValBurst', subs.burst],['hvaiBarDigits','hvaiValDigits', subs.digits],['hvaiBarRep','hvaiValRep', subs.repetition],['hvaiBarEnt','hvaiValEnt', subs.entropy],]; map.forEach(function(r){ var f=document.getElementById(r[0]); var n=document.getElementById(r[1]); var v=clamp(r[2]); if(f) f.style.width=v+'%'; if(n) n.textContent=v; }); }
+    function deriveSubs(pAI){ var h=100-pAI, c=v=>Math.max(0,Math.min(100,Math.round(v))); return { humanLike:c(h), lexical:c(35+h*0.55), burst:c(25+h*0.7), digits:c(10+(100-h)*0.3), repetition:c(60-h*0.4), entropy:c(35+h*0.45) }; }
+    function showImprovements(subs){ var box=document.getElementById('hvaiImprove'); var ul=document.getElementById('hvaiImproveList'); if(!box||!ul) return; var tips=[], h=subs.humanLike||0; function add(t){ if(t) tips.push(t); } if(h<80) add('Overall Human-like is ' + h + '%. Aim for ≥ 80 by applying the tips below.'); if(subs.lexical<75) add('Lexical Diversity is low ('+subs.lexical+'%). Add domain-specific terms and vary phrasing.'); if(subs.burst<70) add('Burstiness is low ('+subs.burst+'%). Mix short and long sentences.'); if(subs.repetition<70) add('Repetition (3‑gram) is high ('+subs.repetition+'%). Rephrase repeated chunks.'); if(subs.entropy<70) add('Character Entropy is low ('+subs.entropy+'%). Add varied punctuation and specific names.'); if(subs.digits>80) add('Digits Density is high ('+subs.digits+'%). Remove unnecessary numbers.'); if(tips.length<=1 && h<80) add('Add concrete examples and personal/brand perspective.'); ul.innerHTML=''; tips.slice(0,8).forEach(function(t){ var li=document.createElement('li'); li.textContent=t; ul.appendChild(li); }); box.classList.toggle('hidden', !(h<80 || tips.length>0)); }
+    window.updateHVAIScore=function(pAI){ var p=clamp(pAI), h=100-p; var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p); var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p; var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h; setBadge(h); if(!confLocked) setConfidence(deriveConfFromAI(p)); var subs=deriveSubs(p); updateBars(subs); showImprovements(subs); };
+    function detectUltra(text){ text=(text||'').replace(/\s+/g,' ').trim(); var len=text.length; if(len<40) return {ai:0,conf:60,subs:deriveSubs(0)}; var s=text.split(/(?<=[.!?])\s+/).filter(Boolean); var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]); var types=new Set(t); var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100; var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;} var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100; var sl=s.map(x=>(x.match(/\\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length); var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100; var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; } for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100; var digits=(text.match(/\\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100; function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));} var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words)); var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100; var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15; var ai=Math.max(0,Math.min(100,100-human)); var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) }; var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length; var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length; var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10)); return {ai:Math.round(ai), conf:Math.round(conf), subs}; }
+    window.hvaiCompute=function(text){ try{ var r=detectUltra(text||''); confLocked=true; updateHVAIScore(r.ai); updateBars(r.subs); setConfidence(r.conf); showImprovements(r.subs); return r; }catch(e){ console.warn('hvaiCompute error',e); return null; } };
 
-      <div class="mmecd__urlbar">
-        <input type="url" class="mmecd__url" placeholder="https://example.com/article…" inputmode="url">
-        <button type="button" class="mmecd__btnUrl">Analyze URL</button>
-      </div>
+    // Force-inject Prism wheel markup if old wheel is present
+    (function ensureWheel(){
+      var wrap=document.querySelector('#hvai.hvai-v26 .wheel');
+      if(!wrap) return;
+      var hasPrism = !!wrap.querySelector('.prism-wheel');
+      if(!hasPrism){
+        wrap.innerHTML = '<div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;"><div class="track"></div><div class="arc"></div><div class="pointer"></div><div class="center"><div class="kv"><div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div><div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div></div></div></div>';
+      }
+    })();
 
-      <div class="mmecd__actions">
-        <button class="mmecd__btn" type="button">
-          <span class="mmecd__btnIcon">▶</span>
-          Detect
-        </button>
-        <span class="mmecd__status" aria-live="polite"></span>
-      </div>
-    </div>
-
-    <div class="mmecd__right">
-      <div class="mmecd__wheel">
-        <svg viewBox="0 0 140 140" class="mmecd__svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="mmecdGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"   stop-color="#22d3ee"/>
-              <stop offset="50%"  stop-color="#10b981"/>
-              <stop offset="100%" stop-color="#f59e0b"/>
-            </linearGradient>
-            <filter id="mmecdGlow">
-              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-
-          <g class="mmecd__ticks"></g>
-          <circle cx="70" cy="70" r="58" fill="none" stroke="currentColor" class="mmecd__track"/>
-          <circle cx="70" cy="70" r="58" fill="none" class="mmecd__progress" stroke="url(#mmecdGrad)" stroke-linecap="round" filter="url(#mmecdGlow)" transform="rotate(-90 70 70)"/>
-          <circle cx="70" cy="70" r="58" fill="none" class="mmecd__sweep" stroke="url(#mmecdGrad)" transform="rotate(-90 70 70)"/>
-        </svg>
-        <div class="mmecd__scorewrap">
-          <div class="mmecd__score">--%</div>
-          <div class="mmecd__verdict">—</div>
-        </div>
-        <div class="mmecd__sparks"></div>
-      </div>
-
-      <div class="mmecd__meta">
-        <div>Confidence: <strong class="mmecd__confidence">—</strong></div>
-        <div class="mmecd__signals">Signals: —</div>
-      </div>
-    </div>
-  </div>
-
-  <details class="mmecd__panel">
-    <summary>Model breakdown</summary>
-    <div class="mmecd__modelsGrid">
-      <div class="mmecd__empty" data-slot="models">
-        <div class="mmecd__emptyIcon">📊</div>
-        <div class="mmecd__emptyTitle">No model scores yet</div>
-        <div class="mmecd__emptyText">Paste content or analyze a URL to see per‑model probabilities and weights.</div>
-      </div>
-    </div>
-  </details>
-
-  <details class="mmecd__panel">
-    <summary>Statistical features</summary>
-    <div class="mmecd__statsGrid">
-      <div class="mmecd__empty" data-slot="stats">
-        <div class="mmecd__emptyIcon">📐</div>
-        <div class="mmecd__emptyTitle">No statistical summary yet</div>
-        <div class="mmecd__emptyText">We’ll show perplexity, burstiness, lexical diversity, readability and more here.</div>
-      </div>
-    </div>
-  </details>
-</div>
-
-<style>
-  .mmecd{--bg:rgba(255,255,255,.05);--bd:rgba(255,255,255,.12);--fg:#e5e7eb;--muted:#a1a1aa;--accent:#7c3aed;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444}
-  .mmecd *{box-sizing:border-box}
-  .mmecd__head{margin-bottom:1rem}
-  .mmecd__titleWrap{display:flex;align-items:center;gap:.65rem;flex-wrap:wrap}
-  .mmecd__titleIcon{width:34px;height:34px;opacity:.95}
-  .mmecd__titleIconSpin{transform-origin:32px 32px;animation:mmecd-spin 8s linear infinite}
-  .mmecd__title{
-    margin:0;
-    font-size:clamp(20px,2.6vw,26px);
-    font-weight:900;
-    background: linear-gradient(90deg,#60a5fa,#34d399,#f59e0b,#f43f5e,#60a5fa);
-    background-size:300% 300%;
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    animation:mmecd-gradient 10s ease infinite;
-    letter-spacing:.2px;
-  }
-  .mmecd__pill{display:inline-flex;align-items:center;gap:.4rem;padding:.28rem .55rem;border-radius:999px;font-size:.78rem;font-weight:700}
-  .mmecd__pill--status{background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.35);color:#e9d5ff}
-  .mmecd__subtitle{margin:.35rem 0 0;color:var(--muted);font-size:.98rem}
-  .mmecd__icons{display:flex;gap:.6rem;margin-top:.6rem}
-  .mmecd__ico{width:18px;height:18px;color:#a5b4fc;opacity:.95}
-  .mmecd__ico--pulse{animation:mmecd-pulse 2.2s ease-in-out infinite}
-  .mmecd__ico--float{animation:mmecd-float 3.4s ease-in-out infinite}
-  .mmecd__ico--spin{animation:mmecd-spin 6s linear infinite}
-.mmecd__grid{display:grid;gap:16px;grid-template-columns: minmax(280px,1fr) 360px;align-items:stretch}
-  @media (max-width:900px){.mmecd__grid{grid-template-columns:1fr}}
-
-  .mmecd__inputWrap{position:relative}
-  .mmecd__input{width:100%;border-radius:16px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);padding:12px 14px;min-height:200px;outline:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}
-  .mmecd__input:focus + .mmecd__inputHalo{opacity:1;transform:scale(1)}
-  .mmecd__inputHalo{position:absolute;inset:-6px;border-radius:20px;pointer-events:none;
-    background: radial-gradient(600px 120px at 20% 0%, rgba(124,58,237,.35), transparent 60%),
-                radial-gradient(600px 120px at 80% 0%, rgba(16,185,129,.35), transparent 60%);
-    filter: blur(12px); opacity:0; transform:scale(.98); transition:all .25s ease}
-
-  .mmecd__urlbar{display:flex;gap:10px;margin-top:10px}
-  .mmecd__url{flex:1 1 auto;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);padding:10px 12px;outline:none}
-  .mmecd__btnUrl{appearance:none;border:0;border-radius:12px;background:linear-gradient(90deg,#22d3ee,#10b981);color:white;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(34,211,238,.25)}
-
-  .mmecd__actions{display:flex;align-items:center;gap:10px;margin-top:8px}
-  .mmecd__btn{appearance:none;border:0;border-radius:12px;background:linear-gradient(90deg,#6366f1,#22d3ee);color:white;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(99,102,241,.25)}
-  .mmecd__btn:hover,.mmecd__btnUrl:hover{filter:brightness(1.05)}
-  .mmecd__btnIcon{display:inline-block;margin-right:6px;transform:translateY(1px)}
-  .mmecd__status{color:var(--muted);font-size:.95rem;min-height:1.1em}
-
-  .mmecd__wheel{position:relative;width:220px;height:220px;margin:0 auto}
-  .mmecd__svg{width:220px;height:220px;display:block;animation:mmecd-hue 18s linear infinite}
-  .mmecd__track{stroke-width:14;opacity:.2}
-  .mmecd__progress{stroke-width:14;stroke-dasharray:364.42;stroke-dashoffset:364.42;transition:stroke-dashoffset .9s cubic-bezier(.22,1,.36,1)}
-  .mmecd__sweep{stroke-width:4;stroke-dasharray:30 360;stroke-linecap:round;opacity:.6;animation:mmecd-sweep 2.4s linear infinite}
-  .mmecd__ticks line{stroke:rgba(255,255,255,.18);stroke-width:2}
-  .mmecd__ticks line.major{stroke:rgba(255,255,255,.35);stroke-width:3}
-
-  .mmecd__scorewrap{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
-  .mmecd__score{font-weight:900;font-size:1.6rem;letter-spacing:.5px}
-  .mmecd__verdict{font-size:.85rem;color:var(--muted);margin-top:.25rem}
-  .mmecd__sparks{position:absolute;inset:0;pointer-events:none}
-
-  .mmecd__meta{font-size:.98rem;color:var(--muted);text-align:center;margin-top:.5rem}
-  .mmecd__panel{margin-top:.75rem;background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:.6rem 1rem}
-  .mmecd__panel summary{cursor:pointer;font-weight:700}
-
-  .mmecd__modelsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:.6rem}
-  .mmecd__modelCard{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:.7rem}
-  .mmecd__modelCard .name{font-weight:800;font-size:.95rem}
-  .mmecd__modelCard .meta{font-size:.85rem;color:var(--muted);margin-top:.25rem}
-  .mmecd__modelCard .bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);margin-top:.45rem;overflow:hidden}
-  .mmecd__modelCard .bar > i{display:block;height:100%;background:linear-gradient(90deg,#22d3ee,#10b981,#f59e0b);width:0}
-
-  .mmecd__statsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:.6rem}
-  .mmecd__stat{background:rgba(255,255,255,.04);border:1px solid var(--bd);border-radius:12px;padding:.6rem}
-  .mmecd__stat .k{font-weight:800;font-size:.9rem}
-  .mmecd__stat .v{font-size:.95rem;margin-top:.25rem}
-
-  .mmecd__empty{border:1px dashed rgba(255,255,255,.18);border-radius:12px;padding:1rem;text-align:center;color:var(--muted);background:rgba(255,255,255,.03)}
-  .mmecd__emptyIcon{font-size:1.3rem;opacity:.9}
-  .mmecd__emptyTitle{font-weight:800;margin-top:.35rem}
-  .mmecd__emptyText{font-size:.92rem;margin-top:.2rem}
-
-  @keyframes mmecd-gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-  @keyframes mmecd-pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.15);opacity:1}}
-  @keyframes mmecd-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-  @keyframes mmecd-spin{to{transform:rotate(360deg)}}
-  @keyframes mmecd-hue{to{filter:hue-rotate(360deg)}}
-  @keyframes mmecd-sweep{to{stroke-dashoffset:-390}}
-  @keyframes mmecd-pop{0%{transform:scale(.6);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:scale(1.2);opacity:0}}
-</style>
-
-<script>
-(function(){
-  const scriptEl = document.currentScript;
-  let root = scriptEl.previousElementSibling;
-  if(!(root && root.classList && root.classList.contains('mmecd'))){
-    root = document.querySelector('.mmecd[data-component="multi-ensemble-detector"]');
-  }
-  if(!root) return;
-
-  const ta   = root.querySelector('.mmecd__input');
-  const btn  = root.querySelector('.mmecd__btn');
-  const st   = root.querySelector('.mmecd__status');
-  const urlI = root.querySelector('.mmecd__url');
-  const btnU = root.querySelector('.mmecd__btnUrl');
-  const svg  = root.querySelector('.mmecd__svg');
-  const ticks= root.querySelector('.mmecd__ticks');
-  const prog = root.querySelector('.mmecd__progress');
-  const scoreEl = root.querySelector('.mmecd__score');
-  const verdictEl = root.querySelector('.mmecd__verdict');
-  const confEl = root.querySelector('.mmecd__confidence');
-  const sigEl  = root.querySelector('.mmecd__signals');
-  const modelsGrid = root.querySelector('.mmecd__modelsGrid') || root.querySelector('.mmecd__models');
-  const statsGrid  = root.querySelector('.mmecd__statsGrid')  || root.querySelector('.mmecd__stats');
-  const sparks   = root.querySelector('.mmecd__sparks');
-  const statusPill = root.querySelector('.mmecd__pill--status');
-
-  // API endpoints; if not present, we treat as no-API mode
-  const epDetect    = root.getAttribute('data-endpoint-detect') || '';
-  const epDetectUrl = root.getAttribute('data-endpoint-detect-url') || '';
-  const csrf = document.querySelector('meta[name=csrf-token]')?.content || '';
-
-  // Build ticks
-  (function buildTicks(){
-    if(!ticks) return;
-    if(ticks.childNodes.length>0) return;
-    const cx=70, cy=70, r=58, N=40;
-    for(let i=0;i<N;i++){
-      const a = (i/N) * 2*Math.PI;
-      const outer = r + 6;
-      const inner = r + (i%5==0 ? -2 : 2);
-      const x1 = cx + Math.cos(a)*outer;
-      const y1 = cy + Math.sin(a)*outer;
-      const x2 = cx + Math.cos(a)*(inner);
-      const y2 = cy + Math.sin(a)*(inner);
-      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-      line.setAttribute('x1', x1.toFixed(1));
-      line.setAttribute('y1', y1.toFixed(1));
-      line.setAttribute('x2', x2.toFixed(1));
-      line.setAttribute('y2', y2.toFixed(1));
-      if(i%5==0) line.setAttribute('class','major');
-      ticks.appendChild(line);
-    }
+    // init
+    updateHVAIScore(0);
   })();
-
-  const CIRC = 2 * Math.PI * 58;
-  if(prog){ prog.style.strokeDasharray = CIRC; }
-
-  function colorBurst(){
-    if(!sparks) return;
-    const N=14;
-    for(let i=0;i<N;i++){
-      const el = document.createElement('div');
-      el.className = 'spark';
-      const ang = (Math.random()*360)|0;
-      const dist = 90 + Math.random()*18;
-      const size = 6 + Math.random()*6;
-      el.style.position='absolute';
-      el.style.left='50%'; el.style.top='50%';
-      el.style.width=size+'px'; el.style.height=size+'px';
-      el.style.background='radial-gradient(circle,#fff,transparent 60%)';
-      el.style.borderRadius='50%';
-      el.style.transform=`rotate(${ang}deg) translate(${dist}px) rotate(-${ang}deg)`;
-      el.style.animation='mmecd-pop 900ms ease-out forwards';
-      sparks.appendChild(el);
-      setTimeout(()=>el.remove(), 950);
-    }
-  }
-
-  function colorForScore(s){
-    if (s >= 0.8) return ['#ef4444', '#f43f5e', '#fb7185'];
-    if (s >= 0.6) return ['#f59e0b', '#fbbf24', '#f59e0b'];
-    if (s >= 0.4) return ['#10b981', '#34d399', '#10b981'];
-    return ['#22d3ee', '#60a5fa', '#22d3ee'];
-  }
-
-  function setScore(s){
-    const pct = Math.round(s * 100);
-    scoreEl.textContent = pct + '%';
-    const thAI = 0.70, thHuman = 0.30;
-    verdictEl.textContent = s >= thAI ? 'ai-like' : (s <= thHuman ? 'human-like' : 'uncertain');
-    if(prog){
-      const offset = CIRC * (1 - s);
-      prog.style.strokeDashoffset = offset;
-    }
-    const [c1,c2,c3] = colorForScore(s);
-    const grad = root.querySelector('#mmecdGrad');
-    if(grad){
-      grad.children[0]?.setAttribute('stop-color', c1);
-      grad.children[1]?.setAttribute('stop-color', c2);
-      grad.children[2]?.setAttribute('stop-color', c3);
-    }
-    colorBurst();
-  }
-
-  function enable(disabled){
-    if(btn) btn.disabled = disabled;
-    if(btnU) btnU.disabled = disabled;
-  }
-
-  function renderModels(by){
-    if(!modelsGrid) return;
-    // Pro grid card layout (if present)
-    if(modelsGrid.classList.contains('mmecd__modelsGrid')){
-      modelsGrid.innerHTML = '';
-      const keys = Object.keys(by||{});
-      if(!keys.length){
-        modelsGrid.innerHTML = `
-          <div class="mmecd__empty" data-slot="models">
-            <div class="mmecd__emptyIcon">📊</div>
-            <div class="mmecd__emptyTitle">No model scores (local mode)</div>
-            <div class="mmecd__emptyText">Using only on-device statistics. Connect API for per-model probabilities.</div>
-          </div>`;
-          return;
-      }
-      keys.forEach(name=>{
-        const val = by[name] || {};
-        const prob = typeof val.prob_ai === 'number' ? Math.max(0, Math.min(1, val.prob_ai)) : 0;
-        const weight = val.weight ?? 0;
-        const card = document.createElement('div');
-        card.className = 'mmecd__modelCard';
-        card.innerHTML = `
-          <div class="name">${name}</div>
-          <div class="meta">p(ai) ${Math.round(prob*100)}% • w=${weight}</div>
-          <div class="bar"><i style="width:${Math.round(prob*100)}%"></i></div>`;
-        modelsGrid.appendChild(card);
-      });
-    }else{
-      // Legacy <ul> list
-      modelsGrid.innerHTML = '';
-      const bym = by || {};
-      for(const k in bym){
-        const li = document.createElement('li');
-        const pct = (typeof bym[k].prob_ai === 'number') ? Math.round(bym[k].prob_ai*100)+'%' : '—';
-        li.innerHTML = `<strong>${k}</strong> → ${pct}`;
-        modelsGrid.appendChild(li);
-      }
-      if(!Object.keys(bym).length){
-        const li = document.createElement('li'); li.textContent = 'Local mode: no remote models';
-        modelsGrid.appendChild(li);
-      }
-    }
-  }
-
-  function renderStats(features){
-    if(!statsGrid) return;
-    if(statsGrid.classList.contains('mmecd__statsGrid')){
-      statsGrid.innerHTML = '';
-      const keys = features ? Object.keys(features) : [];
-      if(!keys.length){
-        statsGrid.innerHTML = `
-          <div class="mmecd__empty" data-slot="stats">
-            <div class="mmecd__emptyIcon">📐</div>
-            <div class="mmecd__emptyTitle">No statistical summary</div>
-            <div class="mmecd__emptyText">Paste text or analyze a URL (with content already extracted) to see local metrics.</div>
-          </div>`;
-        return;
-      }
-      const pretty = {
-        'perplexity':'Perplexity (char entropy)',
-        'burstiness':'Burstiness (sent var)',
-        'ttr':'Type-Token Ratio',
-        'honore':'Honore’s Statistic',
-        'flesch_kincaid':'Flesch-Kincaid',
-        'gunning_fog':'Gunning Fog',
-        'punct_ratio':'Punctuation Ratio',
-        'avg_sentence':'Avg Sentence Length',
-        'avg_syllables':'Avg Syllables/Word'
-      };
-      keys.forEach(k=>{
-        const v = features[k];
-        const card = document.createElement('div');
-        card.className = 'mmecd__stat';
-        card.innerHTML = `<div class="k">${pretty[k] || k}</div><div class="v">${(typeof v==='number')? (Math.round(v*100)/100) : v}</div>`;
-        statsGrid.appendChild(card);
-      });
-    }else{
-      // Legacy <pre> fallback
-      statsGrid.textContent = JSON.stringify(features, null, 2);
-    }
-  }
-
-  // ---- Local (no-API) analysis ----
-  function tokenizeWords(text){
-    return (text.toLowerCase().match(/[a-zA-ZÀ-ÖØ-öø-ÿ']+/g) || []);
-  }
-  function splitSentences(text){
-    return (text.match(/[^.!?]+[.!?]*/g) || []).map(s=>s.trim()).filter(Boolean);
-  }
-  function countSyllables(word){
-    word = word.toLowerCase().replace(/[^a-z]/g,'');
-    if(!word) return 0;
-    const vowels = 'aeiouy';
-    let syll = 0, prev=false;
-    for(let i=0;i<word.length;i++){
-      const isV = vowels.includes(word[i]);
-      if(isV && !prev){ syll++; prev=true; } else if(!isV){ prev=false; }
-    }
-    if(word.endsWith('e')) syll--;
-    if(word.endsWith('le') && word.length>2 && !vowels.includes(word[word.length-3])) syll++;
-    return Math.max(1, syll);
-  }
-  function charEntropy(text){
-    if(!text) return 0;
-    const counts = {};
-    for(const ch of text){ counts[ch] = (counts[ch]||0)+1; }
-    const N = text.length;
-    let H = 0;
-    for(const k in counts){
-      const p = counts[k]/N;
-      H -= p * (Math.log(p)/Math.log(2));
-    }
-    return H; // bits/char
-  }
-  function localAnalyze(text){
-    const sentences = splitSentences(text);
-    const words = tokenizeWords(text);
-    const N = words.length;
-    const S = Math.max(1, sentences.length);
-    const chars = text.length;
-
-    // Sentence lengths
-    const lens = sentences.map(s => (s.match(/[a-zA-ZÀ-ÖØ-öø-ÿ']+/g)||[]).length);
-    const mean = lens.reduce((a,b)=>a+b,0)/S;
-    const sd = Math.sqrt(lens.reduce((a,b)=>a + Math.pow(b-mean,2),0)/S);
-    const burst = mean>0 ? sd/mean : 0;
-
-    // Lexical stats
-    const freq = {};
-    words.forEach(w => freq[w] = (freq[w]||0)+1);
-    const V = Object.keys(freq).length;
-    const V1 = Object.values(freq).filter(c=>c===1).length;
-    const ttr = N>0 ? V/N : 0;
-    const honore = (1 - (V1/Math.max(1,V))) !== 0 ? 100 * Math.log(Math.max(1,N)) / (1 - (V1/Math.max(1,V))) : 0;
-
-    // Syllables and readability
-    let syllables = 0, complex=0;
-    for(const w of words){
-      const s = countSyllables(w);
-      syllables += s;
-      if(s >= 3) complex++;
-    }
-    const wl = N>0 ? syllables/N : 0;
-    const sl = S>0 ? N/S : 0;
-    const fk = 0.39 * sl + 11.8 * wl - 15.59;
-    const gf = 0.4 * (sl + 100 * (N>0 ? complex/N : 0));
-    const fre = 206.835 - 1.015 * sl - 84.6 * wl;
-
-    // Punctuation
-    const punct = (text.match(/[,\.;:!\?\(\)\[\]—\-]/g) || []).length;
-    const punctRatio = chars>0 ? punct/chars : 0;
-
-    // Pseudo-perplexity via char entropy
-    const H = charEntropy(text); // ~3.5-5.0 typical
-    const ppl = Math.pow(2, H);
-
-    const features = {
-      perplexity: ppl,
-      burstiness: burst,
-      ttr: ttr,
-      honore: honore,
-      flesch_kincaid: fk,
-      gunning_fog: gf,
-      punct_ratio: punctRatio,
-      avg_sentence: sl,
-      avg_syllables: wl
-    };
-
-    // Heuristic AI-likeness
-    function clamp01(x){ return Math.max(0, Math.min(1, x)); }
-    const ai_entropy = clamp01((4.2 - H) / 1.5);       // lower entropy => more AI-like
-    const ai_burst   = clamp01((0.35 - burst) / 0.35); // lower variation => more AI-like
-    const ai_ttr     = clamp01((0.50 - ttr) / 0.50);   // low lexical diversity => AI-like
-    const ai_punct   = clamp01((0.02 - punctRatio) / 0.02); // very low punctuation => AI-like
-    const ai_read    = clamp01(Math.abs(10 - fk) < 2 ? 0.2 : 0.0); // tiny nudge near grade ~10
-
-    const final = clamp01(
-        0.30*ai_entropy +
-        0.25*ai_burst   +
-        0.20*ai_ttr     +
-        0.15*ai_punct   +
-        0.10*ai_read
-    );
-
-    return {
-      ok: true,
-      data: {
-        final_score: final,
-        confidence: 0.55 + 0.25*(1 - Math.abs(0.5-final)), // modest confidence
-        used: ['local-stats'],
-        verdict: final>=0.7 ? 'ai-like' : (final<=0.3 ? 'human-like' : 'uncertain'),
-        by_model: {}, // none in local mode
-        stats: { features }
-      }
-    };
-  }
-
-  function setStatus(mode, ok){
-    if(!statusPill) return;
-    if(mode==='local'){
-      statusPill.textContent = 'Local mode';
-      statusPill.style.background = 'rgba(59,130,246,.18)';
-      statusPill.style.borderColor = 'rgba(59,130,246,.45)';
-      statusPill.style.color = '#bfdbfe';
-    }else{
-      statusPill.textContent = ok ? 'Connected' : 'Not Connected';
-      statusPill.style.background = ok ? 'rgba(16,185,129,.18)' : 'rgba(239,68,68,.18)';
-      statusPill.style.borderColor = ok ? 'rgba(16,185,129,.45)' : 'rgba(239,68,68,.45)';
-      statusPill.style.color = ok ? '#bbf7d0' : '#fecaca';
-    }
-  }
-
-  async function parseJsonResponse(res){
-    const ct = res.headers.get('content-type') || '';
-    if (ct.includes('application/json')) {
-      try { return await res.json(); } catch { return {ok:false, error:'Invalid JSON body'}; }
-    } else {
-      const txt = await res.text();
-      return { ok:false, error:'Non-JSON response', details: txt.slice(0, 500) };
-    }
-  }
-
-  async function postJson(url, payload){
-    const res = await fetch(url, {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'Accept':'application/json',
-        'X-Requested-With':'XMLHttpRequest',
-        'X-CSRF-TOKEN': csrf
-      },
-      credentials: 'same-origin',
-      body: JSON.stringify(payload || {})
-    });
-    const parsed = await parseJsonResponse(res);
-    return { res, parsed };
-  }
-
-  async function handleResult(json){
-    if(!json || !json.ok){
-      st.textContent = json?.error || 'Analysis failed';
-      return;
-    }
-    const d = json.data;
-    setScore(d.final_score ?? 0.5);
-    confEl.textContent = Math.round((d.confidence ?? 0) * 100) + '%';
-    sigEl.textContent  = 'Signals: ' + (Array.isArray(d.used) ? d.used.join(', ') : '—');
-    renderModels(d.by_model || {});
-    renderStats(d?.stats?.features || {});
-    st.textContent = 'Done'; setTimeout(()=>{ st.textContent=''; }, 1200);
-  }
-
-  async function detect(){
-    const text = ta.value.trim();
-    if (text.length < 20) { st.textContent = 'Please paste at least 20 characters.'; return; }
-    enable(true); st.textContent = 'Analyzing…';
-    try{
-      if(!epDetect){
-        setStatus('local');
-        await handleResult(localAnalyze(text));
-      }else{
-        const {res, parsed} = await postJson(epDetect, {content:text});
-        if(!res.ok){ // fallback to local
-          setStatus('local');
-          await handleResult(localAnalyze(text));
-        }else{
-          setStatus('api', true);
-          await handleResult(parsed);
-        }
-      }
-    }catch(e){
-      console.error(e);
-      setStatus('local');
-      await handleResult(localAnalyze(text));
-    }finally{
-      enable(false);
-    }
-  }
-
-  async function detectFromUrl(u){
-    if(!u) return;
-    // No-API: we cannot fetch cross-origin due to CORS; expect another script to dispatch the extracted content via event.
-    if(!epDetectUrl){
-      st.textContent = 'No API: Please paste the extracted text, or integrate your URL extractor to dispatch "semantic:urlAnalyzed".';
-      setStatus('local');
-      return;
-    }
-    enable(true); st.textContent = 'Fetching & analyzing URL…';
-    try{
-      const {res, parsed} = await postJson(epDetectUrl, {url:u});
-      if(parsed && parsed.extracted){
-        ta.value = parsed.extracted;
-        if(btn) btn.disabled = (ta.value.trim().length < 20);
-      }
-      if(!res.ok){
-        // fallback to local if we at least got extracted text
-        if(parsed && parsed.extracted){
-          setStatus('local');
-          await handleResult(localAnalyze(parsed.extracted));
-        }else{
-          st.textContent = parsed?.error || 'URL analyze failed';
-        }
-      }else{
-        setStatus('api', true);
-        await handleResult(parsed);
-      }
-    }catch(e){
-      console.error(e);
-      setStatus('local');
-      st.textContent = 'No API: paste content or integrate a URL extractor.';
-    }finally{
-      enable(false);
-    }
-  }
-
-  // Wire up UI
-  if(btn) btn.addEventListener('click', detect);
-  if(btnU) btnU.addEventListener('click', ()=>{
-    const u = (urlI?.value||'').trim();
-    if(!u) { st.textContent = 'Enter a URL to analyze.'; return; }
-    detectFromUrl(u);
-  });
-  if(ta){
-    ta.addEventListener('input', ()=>{ if(btn) btn.disabled = (ta.value.trim().length < 20); });
-    if(btn) btn.disabled = true;
-  }
-
-  // Connectivity check
-  (async()=>{
-    if(!epDetect){
-      setStatus('local');
-      return;
-    }
-    try{
-      const {res} = await postJson(epDetect, {ping:true});
-      setStatus('api', !!res.ok);
-    }catch(_){
-      setStatus('local');
-    }
-  })();
-
-  // Auto-run URL param
-  try{
-    const params = new URLSearchParams(location.search);
-    const u = params.get('analyze_url');
-    if(u){ detectFromUrl(u); }
-  }catch(_){}
-
-  // Auto-run global event
-  window.addEventListener('semantic:urlAnalyzed', (e)=>{
-    const detail = e?.detail || {};
-    if(detail.content && detail.content.length >= 20){
-      ta.value = detail.content.slice(0, 20000);
-      if(btn) btn.disabled = false;
-      detect();
-    }else if(detail.url){
-      detectFromUrl(detail.url);
-    }
-  });
-})();
-</script>
-{{-- END: Multi-Model Ensemble Content Detection --}}
-
-
-
-
+  </script>
 </section>
 
 
