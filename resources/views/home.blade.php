@@ -1004,7 +1004,6 @@ h2.section-title, .cl-title {
   const statsEl  = root.querySelector('.mmecd__stats');
   const sparks   = root.querySelector('.mmecd__sparks');
 
-  // API endpoints (absolute)
   const epDetect    = root.getAttribute('data-endpoint-detect') || '/api/detect';
   const epDetectUrl = root.getAttribute('data-endpoint-detect-url') || '/api/detect/url';
   const csrf = document.querySelector('meta[name=csrf-token]')?.content || '';
@@ -1079,23 +1078,38 @@ h2.section-title, .cl-title {
 
   function enable(disabled){ btn.disabled = disabled; }
 
-  function showError(json, status){
-    let msg = 'Detection failed';
+  function showError(json, status, text){
+    let msg = 'Invalid JSON response';
     if(json){
       if(json.error) msg = json.error;
       else if(json.errors){
-        // pick first error message
         const first = Object.values(json.errors)[0];
         if(Array.isArray(first) && first.length) msg = first[0];
+      }else if(typeof json === 'string'){
+        msg = json.slice(0, 180);
       }
+    }else if(text){
+      msg = (text || '').slice(0, 180);
     }
-    if(status === 429) msg = 'Rate limit exceeded (try again later)';
-    if(status === 419) msg = 'Session/CSRF issue; use API routes or include CSRF token';
+    if(status === 404) msg = 'Endpoint not found (404). Check your routes.';
+    if(status === 401) msg = 'Unauthorized (auth middleware?); ensure API route is public.';
+    if(status === 419) msg = 'Session/CSRF issue; ensure API route or include CSRF token.';
+    if(status === 429) msg = 'Rate limit exceeded (try again later).';
     st.textContent = msg;
   }
 
+  async function parseResponse(res){
+    const ct = res.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      try { return await res.json(); } catch { return {ok:false, error:'Invalid JSON body'}; }
+    } else {
+      const txt = await res.text();
+      return { ok:false, error:'Non-JSON response', details: txt.slice(0, 500) };
+    }
+  }
+
   async function handleResult(json){
-    if(!json || !json.ok){ showError(json); return; }
+    if(!json || !json.ok){ showError(json, undefined, json?.details); return; }
     const d = json.data;
     setScore(d.final_score ?? 0.5);
     confEl.textContent = Math.round((d.confidence ?? 0) * 100) + '%';
@@ -1109,21 +1123,33 @@ h2.section-title, .cl-title {
       modelsEl.appendChild(li);
     }
     statsEl.textContent = d?.stats?.features ? JSON.stringify(d.stats.features, null, 2) : '—';
-    st.textContent = 'Done'; setTimeout(()=>{ st.textContent=''; }, 1200);
+    st.textContent = 'Done'; setTimeout(()=>{ st.textContent=''; }, 1400);
+  }
+
+  async function postJson(url, payload){
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Accept':'application/json',
+        'X-Requested-With':'XMLHttpRequest',
+        'X-CSRF-TOKEN': csrf
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify(payload || {})
+    });
+    const parsed = await parseResponse(res);
+    return { res, parsed };
   }
 
   async function detect(){
     const text = ta.value.trim();
-    if (text.length < 20) return;
+    if (text.length < 20) { st.textContent = 'Please paste at least 20 characters.'; return; }
     enable(true); st.textContent = 'Analyzing…';
     try{
-      const res = await fetch(epDetect, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': csrf},
-        body: JSON.stringify({content:text})
-      });
-      const json = await res.json().catch(()=>({ok:false,error:'Invalid JSON response'}));
-      if(!res.ok) { showError(json, res.status); } else { await handleResult(json); }
+      const {res, parsed} = await postJson(epDetect, {content:text});
+      if(!res.ok){ showError(parsed, res.status, parsed?.details); }
+      else { await handleResult(parsed); }
     }catch(e){ console.error(e); st.textContent='Network error'; }
     finally{ enable(false); }
   }
@@ -1132,17 +1158,13 @@ h2.section-title, .cl-title {
     if(!u) return;
     enable(true); st.textContent = 'Fetching & analyzing URL…';
     try{
-      const res = await fetch(epDetectUrl, {
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': csrf},
-        body: JSON.stringify({url:u})
-      });
-      const json = await res.json().catch(()=>({ok:false,error:'Invalid JSON response'}));
-      if(json && json.extracted){
-        ta.value = json.extracted;
+      const {res, parsed} = await postJson(epDetectUrl, {url:u});
+      if(parsed && parsed.extracted){
+        ta.value = parsed.extracted;
         btn.disabled = (ta.value.trim().length < 20);
       }
-      if(!res.ok) { showError(json, res.status); } else { await handleResult(json); }
+      if(!res.ok){ showError(parsed, res.status, parsed?.details); }
+      else { await handleResult(parsed); }
     }catch(e){ console.error(e); st.textContent='Network error'; }
     finally{ enable(false); }
   }
