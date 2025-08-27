@@ -704,15 +704,6 @@ h2.section-title, .cl-title {
   }
 </script>
 
-<!-- Share dock -->
-<div class="share-dock" aria-label="Share">
-  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow" aria-label="Share on Facebook"><span class="ico" aria-hidden="true"></span><span class="share-label">Facebook</span></a>
-  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow" aria-label="Share on X (Twitter)"><span class="ico" aria-hidden="true"></span><span class="share-label">X</span></a>
-  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow" aria-label="Share on LinkedIn"><span class="ico" aria-hidden="true"></span><span class="share-label">LinkedIn</span></a>
-  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow" aria-label="Share on WhatsApp"><span class="ico" aria-hidden="true"></span><span class="share-label">WhatsApp</span></a>
-  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener" aria-label="Share via Email"><span class="ico" aria-hidden="true"></span><span class="share-label">Email</span></a>
-</div>
-
 <div class="wrap">
   
 
@@ -765,7 +756,7 @@ h2.section-title, .cl-title {
 
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-/* === Performance Mode: animations disabled === */
+
 <style id="no-anim-style">
 .no-anim, .no-anim * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 </style>
@@ -2146,18 +2137,6 @@ header.site.hdr{ top: var(--superbar-h) !important; }
 <!-- B) Non-critical UI -->
 <script>
 try{
-  // Hue drift disabled
-// Share links
-  (function(){
-    var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
-    var fb = document.getElementById('shareFb'), x = document.getElementById('shareX'), ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'), em = document.getElementById('shareEm');
-    if(fb) fb.href = 'https://www.facebook.com/sharer/sharer.php?u='+url;
-    if(x)  x.href  = 'https://twitter.com/intent/tweet?text='+title+'&url='+url;
-    if(ln) ln.href = 'https://www.linkedin.com/sharing/share-offsite/?url='+url;
-    if(wa) wa.href = 'https://wa.me/?text='+title+'%20'+url;
-    if(em) em.href = 'mailto:?subject='+title+'&body='+url;
-  })();
-
   // Reset / Export / Import / Print / UI misc
   (function(){
     function updateCategoryBars(){ if (window.updateCategoryBars) window.updateCategoryBars(); }
@@ -2689,6 +2668,21 @@ window.addEventListener('error', function(e){
   window.requestAnimationFrame = function(cb){ /* disabled */ return 0; };
   window.cancelAnimationFrame = function(){ /* disabled */ };
 })();</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    var btn = document.getElementById('analyzeBtn');
+    if(btn){ btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); if (typeof analyze==='function') analyze(); }); }
+    var input = document.getElementById('analyzeUrl');
+    if(input){ input.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); if (typeof analyze==='function') analyze(); }}); }
+    // If there's a form wrapper, stop default submit
+    var f = document.getElementById('analyzerForm') || (input && input.form);
+    if(f){ f.addEventListener('submit', function(e){ e.preventDefault(); if (typeof analyze==='function') analyze(); }); }
+  }catch(_){}
+});
+</script>
 
 </body>
 </html>
