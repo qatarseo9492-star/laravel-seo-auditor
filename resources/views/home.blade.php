@@ -1,63 +1,7 @@
 {{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
-<!-- Lightweight build v2025-08-27: animations removed, icons simplified, JS trimmed -->
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
-
-<style>
-/* ico placeholder */
-.ico{display:inline-block;width:.9em;height:1em;vertical-align:-0.15em}
-
-
-/* lightweight mode: reduce motion */
-@media (prefers-reduced-motion:no-preference){
-  .floaty, .stars { animation: none !important; }
-}
-
-:root{
-  --bg1:#0b0b18; --bg2:#0b0f2a; --ink:#eaf1ff;
-  --accent:#7c4dff; --accent2:#00e5ff; --accent3:#ff4dd2;
-  --glass: rgba(255,255,255,.06);
-  --border: rgba(255,255,255,.14);
-}
-body{background: radial-gradient(1200px 700px at 10% 0%, #12122a 0%, #0b0b18 60%), #0b0b18; color: var(--ink);}
-header.site.hdr{display:flex;align-items:center;gap:1rem;padding:12px 18px;position:sticky;top:0;z-index:40;background:linear-gradient(0deg,rgba(11,11,24,.35),rgba(11,11,24,.35));backdrop-filter: blur(6px)}
-.brand{display:flex;align-items:center;gap:.8rem}
-.brand-badge{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#081019;box-shadow:0 8px 28px rgba(0,229,255,.25)}
-.brand-badge i{font-size:1.15rem}
-.hero-heading{font-weight:800;letter-spacing:.2px}
-.hero-sub{font-size:.85rem;opacity:.7}
-/* removed .toolbelt styles */
-/* removed .tool styles */
-/* removed .tool:hover */
-/* removed .tool.active */
-/* removed .tool.locked */
-/* removed .tool i */
-.hdr-actions{display:flex;align-items:center;gap:.6rem}
-.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.52rem .9rem;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--ink);text-decoration:none}
-.btn.ghost:hover{border-color:#9aa4c7}
-.btn.primary{background:linear-gradient(135deg,var(--accent3),var(--accent2)); color:#07101a; border-color:transparent; box-shadow:0 10px 30px rgba(255,77,210,.25)}
-.btn.primary:hover{transform:translateY(-1px)}
-.aurora-wrap{position:relative;overflow:hidden}
-.bg-aurora, .stars{position:absolute;inset:0;z-index:-2}
-.bg-aurora{
-  background:
-    radial-gradient(800px 400px at 20% 20%, rgba(124,77,255,.25), transparent 60%),
-    radial-gradient(900px 500px at 80% 30%, rgba(0,229,255,.22), transparent 60%),
-    radial-gradient(700px 350px at 60% 80%, rgba(255,77,210,.18), transparent 60%),
-    radial-gradient(1200px 700px at 50% -10%, rgba(255,255,255,.06), transparent 55%);
-  filter: blur(35px);
-  animation: floaty 18s ease-in-out infinite alternate;
-}
-.stars{
-  background-image: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.6), transparent 40%),
-                    radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,.6), transparent 40%),
-                    radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,.4), transparent 40%);
-  opacity:.35; animation: twinkle 6s linear infinite;
-}
-/* keyframes removed */ }
-/* keyframes removed */ }
-</style>
-
+<head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -71,11 +15,6 @@ header.site.hdr{display:flex;align-items:center;gap:1rem;padding:12px 18px;posit
   // Use fully-qualified facade in Blade to avoid "use ... inside function" fatal error
   $analyzeJsonUrl  = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
   $analyzeUrl      = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
-// Primary nav targets
-  $semanticAnalyzerUrl = url('/');
-  $topicClustersUrl  = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create')
-      ? route('seo.topic-clusters.create')
-      : url('seo/topic-clusters');
   $psiProxyUrl     = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
   // NEW: backend detector endpoint or fallback
   $detectUrl       = \Illuminate\Support\Facades\Route::has('detect')       ? route('detect')       : url('api/detect');
@@ -104,6 +43,8 @@ header.site.hdr{display:flex;align-items:center;gap:1rem;padding:12px 18px;posit
 body{margin:0;color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,Segoe UI,Roboto;background:
   radial-gradient(1200px 700px at 0% -10%,#201046 0%,transparent 55%),
   radial-gradient(1100px 800px at 110% 0%,#1a0f2a 0%,transparent 50%),var(--bg);overflow-x:hidden}
+#linesCanvas,#smokeCanvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+#linesCanvas{opacity:.55}#smokeCanvas{opacity:.9;mix-blend-mode:screen}
 .wrap{position:relative;z-index:2;max-width:var(--container);margin:0 auto;padding:28px 5%}
 header.site{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:14px 0 22px;border-bottom:1px solid rgba(255,255,255,.08)}
 .brand{display:flex;align-items:center;gap:.8rem;min-width:0}
@@ -113,7 +54,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .btn{display:inline-flex;align-items:center;gap:.55rem;cursor:pointer;padding:.6rem .95rem;border-radius:14px;border:1px solid rgba(255,255,255,.16);color:#fff;font-weight:900;letter-spacing:.2px;position:relative;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.25)}
 .btn::after{content:"";position:absolute;inset:-2px;border-radius:inherit;opacity:.0;background:linear-gradient(120deg,transparent,rgba(255,255,255,.22),transparent 60%);transform:translateX(-120%);transition:opacity .2s}
 .btn:hover::after{opacity:1;animation:btnSweep 2.6s linear infinite}
-/* keyframes removed */100%{transform:translateX(120%)}}
+@keyframes btnSweep{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 .btn-analyze{background:linear-gradient(135deg,#10b981,#22c55e);border-color:#20d391}
 .btn-print{background:linear-gradient(135deg,#3b82f6,#6366f1);border-color:#5b77ef}
 .btn-reset{background:linear-gradient(135deg,#f59e0b,#f97316);border-color:#f59e0b}
@@ -126,7 +67,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .score-gauge{position:relative;width:100%;aspect-ratio:1/1}.gauge-svg{width:100%;height:auto;display:block}
 .score-mask-rect{transition:all .6s cubic-bezier(.22,1,.36,1)}
 .score-wave1{animation:scoreWave 8s linear infinite}.score-wave2{animation:scoreWave 11s linear infinite reverse}
-/* keyframes removed */to{transform:translateX(-210px)}}
+@keyframes scoreWave{from{transform:translateX(0)}to{transform:translateX(-210px)}}
 .score-text{font-size:clamp(2.2rem,4.2vw,3.1rem);font-weight:1000;fill:#fff;text-shadow:0 0 18px rgba(255,32,69,.25)}
 .multiHueFast{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
 .chip{padding:.25rem .6rem;border-radius:999px;font-weight:800;background:rgba(155,92,255,.14);border:1px solid rgba(155,92,255,.28);display:inline-flex;align-items:center;gap:.5rem}
@@ -151,7 +92,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .water-overlay{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120px 60px at 20% -20%,rgba(255,255,255,.18),transparent 60%),linear-gradient(0deg,rgba(255,255,255,.05),transparent 40%,transparent 60%,rgba(255,255,255,.06));mix-blend-mode:screen;z-index:2}
 .water-pct{position:absolute;inset:0;display:grid;place-items:center;font-weight:1000;font-size:1.05rem;text-shadow:0 1px 0 rgba(0,0,0,.45);letter-spacing:.4px;z-index:4}
 .wave1{animation:waveX 7s linear infinite}.wave2{animation:waveX 10s linear infinite reverse;opacity:.7}
-/* keyframes removed */100%{transform:translateX(-600px)}}
+@keyframes waveX{0%{transform:translateX(0)}100%{transform:translateX(-600px)}}
 .multiHue{filter:hue-rotate(var(--hue)) saturate(140%);will-change:filter}
 .progress-wrap{margin-top:1rem;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
 .comp-water{position:relative;height:52px;border-radius:16px;overflow:hidden;background:#0b0d21;border:1px solid rgba(255,255,255,.1)}
@@ -161,7 +102,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .analyzer-grid{margin-top:1.1rem;display:grid;grid-template-columns:repeat(12,1fr);gap:1rem}
 .category-card{position:relative;grid-column:span 6;background:var(--panel-2);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:16px;box-shadow:var(--shadow);overflow:hidden;isolation:isolate}
 .category-card::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:2px;background:linear-gradient(120deg,rgba(61,226,255,.4),rgba(155,92,255,.4),rgba(255,32,69,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:borderGlow 6s linear infinite;pointer-events:none;z-index:0}
-/* keyframes removed */100%{filter:hue-rotate(360deg)}}
+@keyframes borderGlow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
 .category-head{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center}
 .category-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3de2ff33,#9b5cff33);color:#fff;font-size:1.1rem;border:1px solid rgba(255,255,255,.18)}
 .category-title{margin:0;font-size:1.08rem;background:linear-gradient(90deg,#3de2ff,#9b5cff,#ff2045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900}
@@ -169,7 +110,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .cat-water{grid-column:1/-1;margin-top:.55rem;position:relative;height:22px}
 .cat-svg{display:block;width:100%;height:22px}
 .cat-wave1{animation:catWave 7s linear infinite}.cat-wave2{animation:catWave 10s linear infinite reverse}
-/* keyframes removed */to{transform:translateX(-640px)}}
+@keyframes catWave{from{transform:translateX(0)}to{transform:translateX(-640px)}}
 .cat-water-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:rgba(255,255,255,.9);text-shadow:0 1px 0 rgba(0,0,0,.55);pointer-events:none}
 .checklist{list-style:none;margin:10px 0 0;padding:0}
 .checklist-item{display:grid;grid-template-columns:1fr auto auto auto;gap:.6rem;align-items:center;padding:.7rem .75rem;border-radius:14px;border:1px solid rgba(255,255,255,.10);background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)),radial-gradient(100% 120% at 0% 0%,rgba(61,226,255,.06),transparent 30%),radial-gradient(120% 100% at 100% 0%,rgba(155,92,255,.05),transparent 35%);transition:box-shadow .25s,background .25s,transform .12s}
@@ -183,7 +124,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .checklist-item input[type="checkbox"]::after{content:"";width:7px;height:12px;border:3px solid transparent;border-left:0;border-top:0;transform:rotate(45deg) scale(.7);transition:.18s}
 .checklist-item input[type="checkbox"]:checked{border-color:transparent;background:linear-gradient(135deg,#22c55e,#3de2ff,#9b5cff);background-size:200% 200%;animation:tickHue 2s linear infinite;box-shadow:0 6px 18px rgba(61,226,255,.25),inset 0 0 0 2px rgba(255,255,255,.25)}
 .checklist-item input[type="checkbox"]:checked::after{border-color:#fff;filter:drop-shadow(0 1px 0 rgba(0,0,0,.4));transform:rotate(45deg) scale(1)}
-/* keyframes removed */100%{background-position:200% 50%}}
+@keyframes tickHue{0%{background-position:0% 50%}100%{background-position:200% 50%}}
 .score-badge{font-weight:900;font-size:.95rem;padding:.3rem .65rem;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);min-width:52px;text-align:center}
 .score-good{background:rgba(22,193,114,.22);border-color:rgba(22,193,114,.45)}
 .score-mid{background:rgba(245,158,11,.22);border-color:rgba(245,158,11,.45)}
@@ -191,7 +132,7 @@ header.site{display:flex;align-items:center;justify-content:space-between;gap:1r
 .improve-btn{position:relative;overflow:hidden;padding:.45rem .8rem;border-radius:999px;border:1px solid rgba(255,255,255,.14);background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));font-weight:900;cursor:pointer;transition:.2s;isolation:isolate;min-width:88px}
 .improve-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.1)}
 .improve-btn::before{content:"";position:absolute;inset:-2px;border-radius:inherit;z-index:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.18) 45%,transparent 50%,transparent 100%);transform:translateX(-120%);animation:btnSheen 3.2s linear infinite}
-/* keyframes removed */60%{transform:translateX(120%)}100%{transform:translateX(120%)}}
+@keyframes btnSheen{0%{transform:translateX(-120%)}60%{transform:translateX(120%)}100%{transform:translateX(120%)}}
 .share-dock{position:fixed;right:16px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:.5rem;z-index:85;background:rgba(10,12,28,.35);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:.5rem;backdrop-filter:blur(8px)}
 .share-btn{width:42px;height:42px;border-radius:12px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;color:#fff;cursor:pointer;text-decoration:none;position:relative;overflow:hidden;transition:transform .15s,box-shadow .15s}
 .share-btn:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.35)}
@@ -203,7 +144,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (max-width:768px){.wrap{padding:18px 4%}header.site{flex-direction:column;align-items:flex-start;gap:.6rem}.score-area{flex-direction:column;align-items:flex-start;gap:.8rem}.score-container{width:170px}.analyze-row{grid-template-columns:1fr}.analyze-row .btn{width:100%;justify-content:center}.share-dock{top:auto;bottom:10px;right:50%;transform:translateX(50%);flex-direction:row;padding:.35rem .45rem;border-radius:999px;gap:.4rem;background:rgba(10,12,28,.55)}.share-btn{width:44px;height:44px;border-radius:999px}.checklist-item{grid-template-columns:1fr auto auto}.checklist-item .improve-btn{grid-column:1/-1;justify-self:flex-start;margin-top:.25rem}}
 @media (max-width:480px){.score-container{width:150px}.category-icon{width:40px;height:40px}.category-title{font-size:1rem}}
 @media (prefers-reduced-motion: reduce){.score-wave1,.score-wave2,.wave1,.wave2,.cat-wave1,.cat-wave2,.comp-wave1,.comp-wave2{animation:none!important}.multiHue,.multiHueFast{filter:none!important}}
-@media print{.share-dock,#backTop,}
+@media print{.share-dock,#backTop,#linesCanvas,#smokeCanvas{display:none!important}}
 
 /* ==== Human vs AI (Ensemble) — upgraded ==== */
 
@@ -220,7 +161,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   .hvai .label{display:flex; align-items:center; gap:8px; justify-content:space-between}
   .hvai .label .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00, #ffd300, #2ad1a3, #1aa6ff, #9659ff, #ff6a00); animation: spin 6s linear infinite; box-shadow:0 0 10px rgba(255,255,255,.25)}
   .hvai .label .num{font-weight:900; opacity:.9}
-  /* keyframes removed */}
+  @keyframes spin{to{transform:rotate(1turn)}}
 
 .hvai{margin-top:14px;background:linear-gradient(135deg,rgba(60,220,255,.06),rgba(155,92,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px}
 .hvai-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
@@ -288,8 +229,8 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   filter:blur(.2px); opacity:.45; animation:floatDots 28s linear infinite;
   pointer-events:none;
 }
-/* keyframes removed */}
-/* keyframes removed */}
+@keyframes readGlow{to{transform:rotate(360deg)}}
+@keyframes floatDots{to{transform:translate3d(-8%, -6%, 0)}}
 
 .read-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem}
 .read-head h4{margin:0;font-size:1.18rem;letter-spacing:.2px}
@@ -320,7 +261,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   background:radial-gradient(120px 40px at 0% 0%, rgba(255,255,255,.18), transparent 60%);
   animation:chipShine 6s ease-in-out infinite;
 }
-/* keyframes removed */}
+@keyframes chipShine{50%{transform:translateX(40%)}}
 
 /* bad & mid variants without touching your JS/HTML */
 .read-chip.bad{background:linear-gradient(135deg, rgba(239,68,68,.22), rgba(245,158,11,.20))}
@@ -359,7 +300,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   transition:transform .18s ease;
 }
 .read-card:hover .metric i{ transform:translateZ(12px) scale(1.06) }
-/* keyframes removed */}
+@keyframes spinGrad{to{transform:rotate(360deg)}}
 
 /* per-card palettes (no HTML change) */
 .read-grid .read-card:nth-child(2) .metric i{filter:hue-rotate(40deg)}
@@ -401,7 +342,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
   background:radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.1) 45%);
   box-shadow:0 0 0 3px rgba(61,226,255,.25), 0 0 30px rgba(61,226,255,.45);
 }
-/* keyframes removed */}
+@keyframes meterSheen{to{transform:translateX(120%)}}
 
 /* suggestions with neon ticks and connecting stems */
 .read-suggest{
@@ -478,10 +419,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .psi-issues li{margin:.22rem 0}
 @media (max-width:768px){.psi-card{grid-column:span 12}}
 
+
 /* color states */
 .burn-wheel.good{ --ring:#22c55e; --ring2:#16a34a; --glow:rgba(34,197,94,.6); }
 .burn-wheel.mid{  --ring:#f59e0b; --ring2:#d97706; --glow:rgba(245,158,11,.6); }
 .burn-wheel.bad{  --ring:#ef4444; --ring2:#dc2626; --glow:rgba(239,68,68,.6); }
+
 
 /* ===== HVAI v2 Stylish Gauge ===== */
 .card.glassy{ background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 18px; backdrop-filter: blur(8px); box-shadow: 0 8px 30px rgba(0,0,0,.25) inset, 0 8px 20px rgba(0,0,0,.28); }
@@ -490,7 +433,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 .hvai-v2-head .badge-model{ display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#a6f7ff; background:linear-gradient(90deg, rgba(22,163,74,.18), rgba(99,102,241,.18)); border:1px solid rgba(166,247,255,.25); padding:6px 10px; border-radius:999px; letter-spacing:.2px; }
 .hvai-v2-head .badge-model .dot{ width:9px; height:9px; border-radius:50%; background:radial-gradient(#a6f7ff,#60a5fa); box-shadow:0 0 8px #60a5fa; animation:pulseDot 2.6s ease-in-out infinite; }
 .hvai-v2-head .model-note{ color:#9fb6ff; font-size:.85rem; opacity:.9 }
-/* keyframes removed */ 50%{ transform:scale(1.25); opacity:1 } }
+@keyframes pulseDot{ 0%,100%{ transform:scale(1); opacity:.9 } 50%{ transform:scale(1.25); opacity:1 } }
 
 .neon-gauge{ position:relative; width:240px; height:240px; margin: 8px auto 0; }
 .neon-gauge .g{ transform: rotate(-90deg); width:100%; height:100%; }
@@ -515,11 +458,12 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 /* Confetti */
 .neon-gauge .confetti{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
 .neon-gauge .confetti i{ position:absolute; width:6px; height:10px; transform: translate(-50%,-50%); border-radius:2px; opacity:0; animation: conf 1.6s ease-out forwards; }
-/* keyframes removed */ 100%{ opacity:0; transform: translate(-50%,-90vh) rotate(220deg); } }
+@keyframes conf{ 0%{ opacity:1; } 100%{ opacity:0; transform: translate(-50%,-90vh) rotate(220deg); } }
 
 /* Animated colorful heading icon */
 .hvai .hvai-head .ico{ background: linear-gradient(135deg,#60a5fa,#a78bfa,#34d399,#f59e0b); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 10px rgba(99,102,241,.5)); animation: spinPulse 8s linear infinite; }
-/* keyframes removed */ 100%{ transform: rotate(360deg);} }
+@keyframes spinPulse{ 0%{ transform: rotate(0deg);} 100%{ transform: rotate(360deg);} }
+
 
     /* DEBUG badge to confirm the updated view is live */
     .hvai-version-badge{
@@ -538,7 +482,7 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
       box-shadow: 0 8px 22px rgba(0,0,0,.45);
       border: 1px solid rgba(255,255,255,.35);
     }
-    /* keyframes removed */ 100%{ background-position:100% 0 } }
+    @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
 
   
 /* === FIX: Social share labels + FA icons visible === */
@@ -548,19 +492,6 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (max-width:520px){.share-btn .share-label{display:none}}
 .category-icon i{font-size:24px;line-height:1}
 /* ================================================ */
-/* === Main Menu (added 2025-08-27) === */
-header.site{gap:1rem}
-.main-menu{flex:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:0 1rem}
-.menu-link{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem .9rem;border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);text-decoration:none;color:var(--text);background:rgba(255,255,255,.04);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:.2s ease;white-space:nowrap}
-.menu-link:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.32)}
-.menu-link.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b15;border-color:transparent;box-shadow:0 6px 20px rgba(0,0,0,.35)}
-header.site .header-actions{display:flex;align-items:center;gap:.6rem}
-@media (max-width: 860px){
-  .main-menu{order:3;width:100%;justify-content:flex-start;margin-top:10px}
-  header.site{flex-wrap:wrap}
-}
 </style>
 
 <style>
@@ -587,9 +518,10 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
       box-shadow: 0 8px 22px rgba(0,0,0,.45);
       border: 1px solid rgba(255,255,255,.35);
     }
-    /* keyframes removed */ 100%{ background-position:100% 0 } }
+    @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
 
   </style>
+
 
 <!-- ===== New Neo‑Glass Aurora Skin (global) ===== -->
 <style>
@@ -681,10 +613,16 @@ h2.section-title, .cl-title {
   border-radius: calc(var(--radius) + 1px);
 }
 </style>
-<!-- ===== /New Neo‑Glass Aurora Skin ===== --></head>
+<!-- ===== /New Neo‑Glass Aurora Skin ===== -->
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+</head>
 <body>
 
 <!-- Background canvases -->
+<canvas id="linesCanvas"></canvas>
+<canvas id="smokeCanvas"></canvas>
+
 <script>
   window.SEMSEO = window.SEMSEO || {};
   window.SEMSEO.ENDPOINTS = {
@@ -706,131 +644,26 @@ h2.section-title, .cl-title {
 
 <!-- Share dock -->
 <div class="share-dock" aria-label="Share">
-  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow" aria-label="Share on Facebook"><span class="ico" aria-hidden="true"></span><span class="share-label">Facebook</span></a>
-  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow" aria-label="Share on X (Twitter)"><span class="ico" aria-hidden="true"></span><span class="share-label">X</span></a>
-  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow" aria-label="Share on LinkedIn"><span class="ico" aria-hidden="true"></span><span class="share-label">LinkedIn</span></a>
-  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow" aria-label="Share on WhatsApp"><span class="ico" aria-hidden="true"></span><span class="share-label">WhatsApp</span></a>
-  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener" aria-label="Share via Email"><span class="ico" aria-hidden="true"></span><span class="share-label">Email</span></a>
+  <a id="shareFb" class="share-btn share-fb" target="_blank" rel="noopener nofollow" aria-label="Share on Facebook"><i class="fa-brands fa-facebook-f"></i><span class="share-label">Facebook</span></a>
+  <a id="shareX"  class="share-btn share-x"  target="_blank" rel="noopener nofollow" aria-label="Share on X (Twitter)"><i class="fa-brands fa-x-twitter"></i><span class="share-label">X</span></a>
+  <a id="shareLn" class="share-btn share-ln" target="_blank" rel="noopener nofollow" aria-label="Share on LinkedIn"><i class="fa-brands fa-linkedin-in"></i><span class="share-label">LinkedIn</span></a>
+  <a id="shareWa" class="share-btn share-wa" target="_blank" rel="noopener nofollow" aria-label="Share on WhatsApp"><i class="fa-brands fa-whatsapp"></i><span class="share-label">WhatsApp</span></a>
+  <a id="shareEm" class="share-btn share-em" target="_blank" rel="noopener" aria-label="Share via Email"><i class="fa-solid fa-envelope"></i><span class="share-label">Email</span></a>
 </div>
 
 <div class="wrap">
-  
-
-<div class="superbar" role="navigation" aria-label="Main menu">
-  <div class="cont">
-    <div class="sb-left">
-      <a href="{{ route('home') }}" class="pill {{ request()->routeIs('home') ? 'primary' : '' }}">
-        <span class="ico" aria-hidden="true"></span>
-        <span>Semantic SEO Analyzer</span>
-      </a>
-
-      @php
-        $hasTopicRoute = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create');
-        $topicUrl = $hasTopicRoute ? route('seo.topic-clusters.create') : url('/seo/topic-clusters');
-      @endphp
-      <a href="{{ auth()->check() ? $topicUrl : ( \Illuminate\Support\Facades\Route::has('login') ? route('login') : url('/login') ) }}"
-         class="pill {{ request()->is('seo/topic-clusters*') ? 'primary' : '' }}">
-        <span class="ico" aria-hidden="true"></span>
-        <span>Topic Cluster Identification</span>
-      </a>
+  <header class="site">
+    <div class="brand">
+      <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
+      <div>
+        <div class="hero-heading">Semantic SEO Master Analyzer</div>
+        <div class="hero-sub">Analyze URLs, get scores & colorful insights</div>
+      </div>
     </div>
-
-    <div class="sb-right">
-      @guest
-        <a href="{{ \Illuminate\Support\Facades\Route::has('login') ? route('login') : url('/login') }}" class="pill">
-          <span class="ico" aria-hidden="true"></span> <span>Sign in</span>
-        </a>
-        <a href="{{ \Illuminate\Support\Facades\Route::has('register') ? route('register') : url('/register') }}"
-           class="pill alt">
-          <span class="ico" aria-hidden="true"></span> <span>Sign up</span>
-        </a>
-      @else
-        <form method="POST" action="{{ \Illuminate\Support\Facades\Route::has('logout') ? route('logout') : url('/logout') }}">
-          @csrf
-          <button type="submit" class="pill">
-            <span class="ico" aria-hidden="true"></span> <span>Logout</span>
-          </button>
-        </form>
-      @endguest
+    <div class="header-actions">
+      <button class="btn btn-print" id="printTop"><i class="fa-solid fa-print"></i> Print</button>
     </div>
-  </div>
-</div>
-
-<header class="site hdr">
-
-<style id="cv-auto-panels">
-/* Defer rendering for heavy sections */
-.section, .panel, .card, .widget, .module { content-visibility:auto; contain-intrinsic-size: 800px 1200px; }
-</style>
-
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-
-
-<style id="no-anim-style">
-.no-anim, .no-anim * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-</style>
-<script id="no-anim-boot">(function(){ document.documentElement.classList.add('no-anim'); })();</script>
-
-<style>
-:root{ --superbar-h: 64px; }
-
-.superbar{
-  position: sticky;
-  top: 0;
-  z-index: 70;
-  border-bottom: 1px solid var(--border);
-  background:
-    linear-gradient(180deg, rgba(10,11,22,.72), rgba(10,11,22,.50)),
-    radial-gradient(800px 400px at 10% 0%, rgba(124,77,255,.12), transparent 60%),
-    radial-gradient(700px 350px at 90% 0%, rgba(0,229,255,.10), transparent 60%);
-  backdrop-filter: blur(12px);
-}
-.superbar .cont{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 10px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.sb-left, .sb-right{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-.pill{
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.55rem .95rem;border-radius:999px;
-  border:1px solid rgba(255,255,255,.14);
-  color:var(--ink); text-decoration:none; white-space:nowrap;
-  background: rgba(255,255,255,.06);
-  transition:.18s ease; backdrop-filter: blur(6px);
-}
-.pill:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.28)}
-.pill.primary{border-color:transparent;
-  background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#081019;
-  box-shadow:0 10px 30px rgba(124,77,255,.32);
-}
-.pill.alt{border-color:transparent;
-  background:linear-gradient(135deg, var(--accent3), var(--accent2)); color:#081019;
-  box-shadow:0 10px 30px rgba(255,77,210,.28);
-}
-.pill i, .pill lord-icon{font-size:1rem}
-
-/* push header down so it doesn't collide with superbar */
-header.site.hdr{ top: var(--superbar-h) !important; }
-@media (max-width: 600px){ :root{ --superbar-h: 60px; } }
-</style>
-
-  <div class="brand">
-    <div class="brand-badge"><span class="ico" aria-hidden="true"></span></div>
-    <div class="brand-text">
-      <div class="hero-heading">Semantic SEO Master Analyzer</div>
-      <div class="hero-sub">Smart SEO tools for modern sites</div>
-    </div>
-  </div>
-
-  <!-- removed old in-header menu (toolbelt) -->
-
-  <!-- removed old header actions; now handled by superbar -->
-</header>
+  </header>
 
   <main class="analyzer" id="analyzer" role="main">
     <h2 class="section-title">Analyze a URL</h2>
@@ -883,12 +716,12 @@ header.site.hdr{ top: var(--superbar-h) !important; }
 
       <div style="display:flex;flex-direction:column;gap:.5rem">
         <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-          <span class="chip" id="overallChip"><span class="ico" aria-hidden="true"></span> Overall: <b id="overallScoreInline">0</b>/100</span>
-          <span class="chip" id="contentScoreChip"><span class="ico" aria-hidden="true"></span> Content: <b id="contentScoreInline">0</b>/100</span>
-          <span class="chip" id="aiBadge" title="Detection summary"><span class="ico" aria-hidden="true"></span> Writer: <b>—</b></span>
-          <button id="viewHumanBtn" class="btn btn-ghost"><span class="ico" aria-hidden="true"></span> Human-like: <b id="humanPct">—</b>%</button>
-          <button id="viewAIBtn" class="btn btn-ghost"><span class="ico" aria-hidden="true"></span> AI-like: <b id="aiPct">—</b>%</button>
-          <button id="copyQuick" class="btn btn-ghost"><span class="ico" aria-hidden="true"></span> Copy report</button>
+          <span class="chip" id="overallChip"><i class="fa-solid fa-gauge-high ico"></i> Overall: <b id="overallScoreInline">0</b>/100</span>
+          <span class="chip" id="contentScoreChip"><i class="fa-solid fa-file-lines ico"></i> Content: <b id="contentScoreInline">0</b>/100</span>
+          <span class="chip" id="aiBadge" title="Detection summary"><i class="fa-solid fa-user-check ico ico-green"></i> Writer: <b>—</b></span>
+          <button id="viewHumanBtn" class="btn btn-ghost"><i class="fa-solid fa-user ico ico-green"></i> Human-like: <b id="humanPct">—</b>%</button>
+          <button id="viewAIBtn" class="btn btn-ghost"><i class="fa-solid fa-robot ico ico-red"></i> AI-like: <b id="aiPct">—</b>%</button>
+          <button id="copyQuick" class="btn btn-ghost"><i class="fa-regular fa-copy ico ico-cyan"></i> Copy report</button>
         </div>
         <small style="color:var(--text-dim)">If the backend returns no scores, a local ensemble + heuristics derive stable scores so the UI always reflects reality.</small>
       </div>
@@ -898,9 +731,9 @@ header.site.hdr{ top: var(--superbar-h) !important; }
       <form id="analyzeForm" onsubmit="event.preventDefault(); analyze(); return false;">
         <label for="analyzeUrl" style="display:inline-block;font-weight:900;margin-bottom:.35rem">Page URL</label>
         <div class="url-field" id="urlField">
-          <span class="ico" aria-hidden="true"></span>
+          <i class="fa-solid fa-globe url-icon"></i>
           <input id="analyzeUrl" name="url" type="url" inputmode="url" autocomplete="url" placeholder="https://example.com/page or example.com/page" aria-describedby="analyzeStatus"/>
-          <button type="button" class="url-mini url-clear" id="clearUrl" title="Clear"><span class="ico" aria-hidden="true"></span></button>
+          <button type="button" class="url-mini url-clear" id="clearUrl" title="Clear"><i class="fa-solid fa-xmark"></i></button>
           <button type="button" class="url-mini" id="pasteUrl" title="Paste">Paste</button>
           <span class="url-border" aria-hidden="true"></span>
         </div>
@@ -914,13 +747,13 @@ header.site.hdr{ top: var(--superbar-h) !important; }
           </div>
 
           <button id="analyzeBtn" type="button" onclick="SEMSEO_go()" class="btn btn-analyze">
-            <span class="ico" aria-hidden="true"></span> Analyze
+            <i class="fa-solid fa-magnifying-glass"></i> Analyze
           </button>
 
-          <button class="btn btn-print" id="printChecklist" type="button"><span class="ico" aria-hidden="true"></span> Print</button>
-          <button class="btn btn-reset" id="resetChecklist" type="button"><span class="ico" aria-hidden="true"></span> Reset</button>
-          <button class="btn btn-export" id="exportChecklist" type="button" title="Export checklist JSON"><span class="ico" aria-hidden="true"></span> Export</button>
-          <button class="btn btn-export" id="importChecklist" type="button" title="Import checklist JSON"><span class="ico" aria-hidden="true"></span> Import</button>
+          <button class="btn btn-print" id="printChecklist" type="button"><i class="fa-solid fa-print"></i> Print</button>
+          <button class="btn btn-reset" id="resetChecklist" type="button"><i class="fa-solid fa-rotate"></i> Reset</button>
+          <button class="btn btn-export" id="exportChecklist" type="button" title="Export checklist JSON"><i class="fa-solid fa-file-export"></i> Export</button>
+          <button class="btn btn-export" id="importChecklist" type="button" title="Import checklist JSON"><i class="fa-solid fa-file-import"></i> Import</button>
           <input type="file" id="importFile" accept="application/json" style="display:none">
         </div>
 
@@ -995,7 +828,7 @@ header.site.hdr{ top: var(--superbar-h) !important; }
   .hvai.hvai-v26 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
   .hvai.hvai-v26 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
   .hvai.hvai-v26 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
-  /* keyframes removed */100%{background-position:100% 50%}}
+  @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
 
   .hvai.hvai-v26 .status{margin:6px 0 12px}
   .hvai.hvai-v26 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
@@ -1115,15 +948,22 @@ header.site.hdr{ top: var(--superbar-h) !important; }
   </script>
 </section>
 
+
+
+
+
+
+
+
     <!-- 2) READABILITY INSIGHTS (Upgraded) -->
     <section class="readability" id="readabilityPanel" style="display:none">
       <div class="read-head">
-        <span class="ico" aria-hidden="true"></span>
+        <i class="fa-solid fa-book-open-reader ico ico-cyan"></i>
         <h4>Readability Insights</h4>
       </div>
       <div class="read-summary">
         <span class="read-chip" id="readChip">
-          <span class="ico" aria-hidden="true"></span>
+          <i class="fa-solid fa-graduation-cap"></i>
           <span id="readGradeChip">Grade —</span>
         </span>
         <div class="read-caption" id="readSummary">We’ll estimate the reading level and show what to fix.</div>
@@ -1131,42 +971,42 @@ header.site.hdr{ top: var(--superbar-h) !important; }
 
       <div class="read-grid">
         <div class="read-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> Flesch Reading Ease</span><b id="mFlesch">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-face-smile"></i> Flesch Reading Ease</span><b id="mFlesch">—</b></div>
           <div class="meter"><span id="mFleschBar"></span></div>
         </div>
         <div class="read-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> Avg Sentence Length</span><b id="mASL">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-align-left"></i> Avg Sentence Length</span><b id="mASL">—</b></div>
           <div class="meter"><span id="mASLBar"></span></div>
         </div>
         <div class="read-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> Words</span><b id="mWords">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-font"></i> Words</span><b id="mWords">—</b></div>
           <div class="meter"><span id="mWordsBar"></span></div>
         </div>
         <div class="read-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> Syllables / Word</span><b id="mSPW">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-language"></i> Syllables / Word</span><b id="mSPW">—</b></div>
           <div class="meter"><span id="mSPWBar"></span></div>
         </div>
         <div class="read-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> Lexical Diversity (TTR)</span><b id="mTTR">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-shuffle"></i> Lexical Diversity (TTR)</span><b id="mTTR">—</b></div>
           <div class="meter"><span id="mTTRBar"></span></div>
         </div>
         <div class="read-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> Repetition (tri-gram)</span><b id="mRep">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-repeat"></i> Repetition (tri-gram)</span><b id="mRep">—</b></div>
           <div class="meter"><span id="mRepBar"></span></div>
         </div>
         <div class="read-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> Digits / 100 words</span><b id="mDigits">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-hashtag"></i> Digits / 100 words</span><b id="mDigits">—</b></div>
           <div class="meter"><span id="mDigitsBar"></span></div>
         </div>
       </div>
 
       <div class="read-suggest">
-        <div class="title"><span class="ico" aria-hidden="true"></span> Simple Fixes</div>
+        <div class="title"><i class="fa-solid fa-lightbulb"></i> Simple Fixes</div>
         <ul id="readSuggest"></ul>
       </div>
 
       <div class="read-plain">
-        <div class="title"><span class="ico" aria-hidden="true"></span> Easy to read (Grade 7)</div>
+        <div class="title"><i class="fa-solid fa-child-reaching"></i> Easy to read (Grade 7)</div>
         <div id="readPlain">We’ll write a friendly one-line summary here.</div>
       </div>
     </section>
@@ -1174,32 +1014,32 @@ header.site.hdr{ top: var(--superbar-h) !important; }
     <!-- 3) ENTITIES & TOPICS (Upgraded) -->
     <section class="entities" id="entitiesPanel" style="display:none">
       <div class="entities-head">
-        <span class="ico" aria-hidden="true"></span>
+        <i class="fa-solid fa-database ico ico-cyan"></i>
         <h4>Entities & Topics</h4>
       </div>
       <div class="entity-groups">
         <div class="entity-card">
-          <div class="entity-title"><span class="ico" aria-hidden="true"></span> People</div>
+          <div class="entity-title"><i class="fa-solid fa-person"></i> People</div>
           <div class="entity-chips" id="entPeople"></div>
         </div>
         <div class="entity-card">
-          <div class="entity-title"><span class="ico" aria-hidden="true"></span> Organizations</div>
+          <div class="entity-title"><i class="fa-solid fa-building"></i> Organizations</div>
           <div class="entity-chips" id="entOrgs"></div>
         </div>
         <div class="entity-card">
-          <div class="entity-title"><span class="ico" aria-hidden="true"></span> Places</div>
+          <div class="entity-title"><i class="fa-solid fa-location-dot"></i> Places</div>
           <div class="entity-chips" id="entPlaces"></div>
         </div>
         <div class="entity-card">
-          <div class="entity-title"><span class="ico" aria-hidden="true"></span> Topics</div>
+          <div class="entity-title"><i class="fa-solid fa-tags"></i> Topics</div>
           <div class="entity-chips" id="entTopics"></div>
         </div>
         <div class="entity-card">
-          <div class="entity-title"><span class="ico" aria-hidden="true"></span> Software / APK</div>
+          <div class="entity-title"><i class="fa-solid fa-microchip"></i> Software / APK</div>
           <div class="entity-chips" id="entSoftware"></div>
         </div>
         <div class="entity-card">
-          <div class="entity-title"><span class="ico" aria-hidden="true"></span> Games</div>
+          <div class="entity-title"><i class="fa-solid fa-gamepad"></i> Games</div>
           <div class="entity-chips" id="entGames"></div>
         </div>
       </div>
@@ -1208,35 +1048,35 @@ header.site.hdr{ top: var(--superbar-h) !important; }
     <!-- 4) SITE SPEED & CORE WEB VITALS (End) -->
     <section class="psi" id="psiPanel" style="display:none">
       <div class="psi-head">
-        <span class="ico" aria-hidden="true"></span>
+        <i class="fa-solid fa-gauge-simple-high ico ico-cyan"></i>
         <h4>Site Speed & Core Web Vitals</h4>
       </div>
       <div class="psi-meta">
-        <span class="psi-chip"><span class="ico" aria-hidden="true"></span> Strategy: <b id="psiStrategy">mobile</b></span>
-        <span class="psi-chip"><span class="ico" aria-hidden="true"></span> Performance: <b id="psiPerf">—</b></span>
+        <span class="psi-chip"><i class="fa-solid fa-mobile-screen-button"></i> Strategy: <b id="psiStrategy">mobile</b></span>
+        <span class="psi-chip"><i class="fa-solid fa-chart-simple"></i> Performance: <b id="psiPerf">—</b></span>
       </div>
 
       <div class="psi-grid">
         <div class="psi-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> LCP (s)</span><b id="psiLcp">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-stopwatch-20"></i> LCP (s)</span><b id="psiLcp">—</b></div>
           <div class="psi-meter"><span id="psiLcpBar"></span></div>
         </div>
         <div class="psi-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> INP (ms)</span><b id="psiInp">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-arrow-pointer"></i> INP (ms)</span><b id="psiInp">—</b></div>
           <div class="psi-meter"><span id="psiInpBar"></span></div>
         </div>
         <div class="psi-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> CLS</span><b id="psiCls">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-expand"></i> CLS</span><b id="psiCls">—</b></div>
           <div class="psi-meter"><span id="psiClsBar"></span></div>
         </div>
         <div class="psi-card">
-          <div class="metric"><span><span class="ico" aria-hidden="true"></span> TTFB (ms)</span><b id="psiTtfb">—</b></div>
+          <div class="metric"><span><i class="fa-solid fa-rocket"></i> TTFB (ms)</span><b id="psiTtfb">—</b></div>
           <div class="psi-meter"><span id="psiTtfbBar"></span></div>
         </div>
       </div>
 
       <div class="psi-issues">
-        <div class="title"><span class="ico" aria-hidden="true"></span> How to Improve</div>
+        <div class="title"><i class="fa-solid fa-screwdriver-wrench"></i> How to Improve</div>
         <ul id="psiAdvice"></ul>
       </div>
       <div id="psiNote" style="color:var(--text-dim);margin-top:.4rem"></div>
@@ -1289,7 +1129,7 @@ header.site.hdr{ top: var(--superbar-h) !important; }
       ] as $c)
         <article class="category-card" data-cat-i="{{ $loop->index }}" style="background-image: {{ $c[4] }}; background-blend-mode: lighten;">
           <header class="category-head">
-            <span class="category-icon" aria-hidden="true"><span class="ico" aria-hidden="true"></span></span>
+            <span class="category-icon" aria-hidden="true"><i class="fa-solid {{ $c[3] }}"></i></span>
             <div>
               <h3 class="category-title">{{ $c[0] }}</h3>
               <p class="category-sub">—</p>
@@ -1340,7 +1180,7 @@ header.site.hdr{ top: var(--superbar-h) !important; }
   </div>
 </footer>
 
-<button id="backTop" title="Back to top" aria-label="Back to top"><span class="ico" aria-hidden="true"></span></button>
+<button id="backTop" title="Back to top" aria-label="Back to top"><i class="fa-solid fa-arrow-up"></i></button>
 
 <!-- A) Analyze + core logic -->
 <script>
@@ -1824,8 +1664,8 @@ header.site.hdr{ top: var(--superbar-h) !important; }
     return res;
   }
   function chipify(list, cls){
-    if(!list || !list.length) return '<span class="echip misc"><span class="ico" aria-hidden="true"></span> none</span>';
-    return list.map(v=>`<span class="echip ${cls||'misc'}"><span class="ico" aria-hidden="true"></span> ${v}</span>`).join(' ');
+    if(!list || !list.length) return '<span class="echip misc"><i class="fa-solid fa-circle-minus"></i> none</span>';
+    return list.map(v=>`<span class="echip ${cls||'misc'}"><i class="fa-solid fa-tag"></i> ${v}</span>`).join(' ');
   }
   function renderEntitiesTopics(sample){
     var p = document.getElementById('entitiesPanel'); if(!p) return;
@@ -2026,8 +1866,10 @@ header.site.hdr{ top: var(--superbar-h) !important; }
 <!-- B) Non-critical UI -->
 <script>
 try{
-  // Hue drift disabled
-// Share links
+  // Hue drift
+  (function(){ var root=document.documentElement; var start=performance.now(); function frame(now){ root.style.setProperty('--hue', (((now-start)/4)%360) + 'deg'); requestAnimationFrame(frame);} requestAnimationFrame(frame); })();
+
+  // Share links
   (function(){
     var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
     var fb = document.getElementById('shareFb'), x = document.getElementById('shareX'), ln = document.getElementById('shareLn'), wa = document.getElementById('shareWa'), em = document.getElementById('shareEm');
@@ -2093,10 +1935,70 @@ try{
 
     var toTop=document.getElementById('toTopLink'), backTop=document.getElementById('backTop');
     if(toTop){ toTop.addEventListener('click', function(e){ e.preventDefault(); window.scrollTo({top:0,behavior:'smooth'});}); }
-    window.addEventListener('scroll', function(, {passive:true}){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
+    window.addEventListener('scroll', function(){ if(backTop) backTop.style.display = (window.scrollY>500)?'grid':'none'; });
   })();
 
 } catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (UI) error: '+e.message; }
+</script>
+
+<!-- C) Background: tech lines + smoke -->
+<script>
+try{
+  (function(){
+    var c=document.getElementById('linesCanvas'); if(!c) return; var ctx=c.getContext('2d'); var dpr=Math.min(2,window.devicePixelRatio||1);
+    function resize(){ c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0) }
+    function draw(t){ ctx.clearRect(0,0,window.innerWidth,window.innerHeight); var w=window.innerWidth,h=window.innerHeight,rows=16,spacing=Math.max(54,h/rows);
+      for(var i=-2;i<rows+2;i++){ var y=i*spacing+((t*0.025)%spacing); var g=ctx.createLinearGradient(0,y,w,y+90);
+        g.addColorStop(0,'rgba(61,226,255,0.14)'); g.addColorStop(0.5,'rgba(155,92,255,0.16)'); g.addColorStop(1,'rgba(255,32,69,0.14)');
+        ctx.strokeStyle=g; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(-120,y); ctx.lineTo(w+120,y+90); ctx.stroke(); }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+  })();
+
+  (function(){
+    var c=document.getElementById('smokeCanvas'); if(!c) return; var ctx=c.getContext('2d');
+    var dpr=Math.min(2,window.devicePixelRatio||1), blobs=[], last=performance.now();
+    var PERIOD = window.SEMSEO && window.SEMSEO.SMOKE_HUE_PERIOD_MS ? window.SEMSEO.SMOKE_HUE_PERIOD_MS : 1000000000;
+    function resize(){
+      c.width=Math.floor(window.innerWidth*dpr); c.height=Math.floor(window.innerHeight*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+      var W=window.innerWidth, H=window.innerHeight;
+      var N = 76;
+      blobs=new Array(N).fill(0).map(function(_,i){
+        var px = W*0.65 + Math.random()*W*0.45;
+        var py = H*0.65 + Math.random()*H*0.45;
+        var r  = 120 + Math.random()*260;
+        var speed = 0.18 + Math.random()*0.22;
+        return {
+          x:px, y:py, r:r,
+          vx: -speed*(0.6+Math.random()*0.8),
+          vy: -speed*(0.6+Math.random()*0.8),
+          baseHue: (i*37)%360,
+          alpha: .26 + .20*Math.random()
+        };
+      });
+      last=performance.now();
+    }
+    function draw(now){
+      var W=window.innerWidth, H=window.innerHeight;
+      ctx.clearRect(0,0,W,H);
+      ctx.globalCompositeOperation='screen';
+      var dt = now - last; last = now;
+      for(var i=0;i<blobs.length;i++){
+        var b=blobs[i];
+        b.x += b.vx * dt; b.y += b.vy * dt;
+        if(b.x < -360 || b.y < -360){ b.x = W + Math.random()*260; b.y = H + Math.random()*260; }
+        var hue = (b.baseHue + (now % PERIOD) * (360/PERIOD)) % 360;
+        var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);
+        g.addColorStop(0,'hsla('+hue+',88%,68%,'+b.alpha+')');
+        g.addColorStop(1,'hsla('+((hue+70)%360)+',88%,50%,0)');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+      }
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize',resize,{passive:true}); resize(); requestAnimationFrame(draw);
+  })();
+} catch(e){ var s=document.getElementById('analyzeStatus'); if(s) s.textContent='JS (smoke) error: '+e.message; }
 </script>
 
 <!-- D) Error sink -->
@@ -2205,6 +2107,7 @@ window.addEventListener('error', function(e){
 })();
 </script>
   
+
 
 <!-- Checklist Suggest Patch -->
 <style>
@@ -2322,7 +2225,7 @@ window.addEventListener('error', function(e){
     input.addEventListener('input', deb);
     input.addEventListener('focus', ()=>{ place(portal, input); deb(); });
     window.addEventListener('resize', ()=> portal && portal.style.display!=='none' && place(portal, input));
-    window.addEventListener('scroll', (, {passive:true})=> portal && portal.style.display!=='none' && place(portal, input), true);
+    window.addEventListener('scroll', ()=> portal && portal.style.display!=='none' && place(portal, input), true);
 
     input.addEventListener('keydown', (e)=>{
       const items = portal.querySelectorAll('.' + S.ITEM);
@@ -2361,6 +2264,7 @@ window.addEventListener('error', function(e){
 })();
 
 </script>
+
 
 <!-- ===== Checklist Improve Modal (lightweight, no deps) ===== -->
 <style>
@@ -2479,6 +2383,7 @@ window.addEventListener('error', function(e){
 </script>
 <!-- ===== /Checklist Improve Modal ===== -->
 
+
 <!-- ===== Unique Aurora Liquid Wheel + Ambient Glow + Stickers ===== -->
 <style>
   :root { --fx-spin: 0deg; --fx-h: 120; }
@@ -2510,7 +2415,8 @@ window.addEventListener('error', function(e){
     background: linear-gradient(90deg, hsl(var(--fx-h) 90% 65%), hsl(calc(var(--fx-h)+50) 90% 65%)); opacity:.6; }
   .fx-sticker{ position: fixed; z-index: 99999; font-size: 22px; pointer-events:none;
     transform: translate(-50%, -50%) scale(.9); animation: sticker-pop 900ms cubic-bezier(.2,.8,.2,1) forwards; }
-  /* keyframes removed */
+  @keyframes sticker-pop{
+    0%{ opacity:0; transform: translate(-50%,-30%) scale(.7) rotate(-8deg); }
     30%{ opacity:1; transform: translate(-50%,-50%) scale(1) rotate(0deg); }
     70%{ opacity:1; transform: translate(-50%,-70%) scale(1.02) rotate(2deg); }
     100%{ opacity:0; transform: translate(-50%,-90%) scale(.96) rotate(6deg); }
@@ -2535,9 +2441,26 @@ window.addEventListener('error', function(e){
     return clamp(parseInt(m ? m[0] : '0', 10)||0, 0, 100);
   }
   const scoreToHue = s => Math.round(120 * (s/100));
-  /* startSpin removed */, 1000);
+  function startSpin(){
+    let angle = 0;
+    setInterval(()=> {
+      angle = (angle + 18) % 360;
+      document.documentElement.style.setProperty('--fx-spin', angle + 'deg');
+    }, 1000);
   }
-  /* skinWheel removed */
+  function skinWheel(){
+    const wheel =
+      pick('.score-wheel') ||
+      pick('[data-total-score]') ||
+      pick('.main-score') ||
+      pick('.score');
+    if(!wheel) return;
+    if(!wheel.classList.contains('fx-wheel')){
+      wheel.classList.add('fx-wheel');
+      const halo = document.createElement('span');
+      halo.className = 'wheel-halo';
+      wheel.appendChild(halo);
+    }
     document.body.classList.add('fx-ambient');
     const score = detectScore();
     document.documentElement.style.setProperty('--fx-h', scoreToHue(score));
@@ -2550,25 +2473,32 @@ window.addEventListener('error', function(e){
     document.body.appendChild(s);
     setTimeout(()=> s.remove(), 950);
   }
-  /* bindStickers removed */
+  function bindStickers(){
+    document.addEventListener('change', (e)=>{
+      const cb = e.target.closest && e.target.closest('.checklist input[type="checkbox"]');
+      if(cb && cb.checked){
+        const r = cb.getBoundingClientRect();
+        sticker(r.left + r.width/2, r.top + window.scrollY, ['✨','✅','📈','🌈'][Math.floor(Math.random()*4)]);
+      }
     });
   }
-  /* watchScore removed */
+  function watchScore(){
+    let last = detectScore();
+    setInterval(()=>{
+      const now = detectScore();
+      if(now !== last){
+        document.documentElement.style.setProperty('--fx-h', Math.round(120 * (now/100)));
+        last = now;
+      }
     }, 1500);
   }
-  /* skinWheel call removed */
-  /* bindStickers call removed */
-  // startSpin disabled
-  /* watchScore call removed */
+  skinWheel();
+  bindStickers();
+  startSpin();
+  watchScore();
 })();
 </script>
 <!-- ===== /Unique Aurora Liquid Wheel block ===== -->
-
-<script id="raf-patch">(function(){
-  var _raf = window.requestAnimationFrame;
-  window.requestAnimationFrame = function(cb){ /* disabled */ return 0; };
-  window.cancelAnimationFrame = function(){ /* disabled */ };
-})();</script>
 
 </body>
 </html>
