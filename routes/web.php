@@ -1,28 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AnalyzeController;
+use App\Http\Controllers\Seo\TopicAnalysisController;
+use App\Models\TopicAnalysis;
 
-Route::get('/', function () {
-    return view('home'); // resources/views/home.blade.php
-})->name('home');
+// Topic Cluster Analyzer
+Route::get('/seo/topic-clusters', [TopicAnalysisController::class, 'create'])
+    ->name('seo.topic-clusters.create');
 
-/**
- * Analyzer endpoints
- * - UI first tries GET /analyze-json
- * - then POST /analyze (CSRF)
- * - then GET /analyze as fallback
- */
-Route::get('/analyze-json', [AnalyzeController::class, 'analyzeJson'])->name('analyze.json');
-Route::match(['POST', 'GET'], '/analyze', [AnalyzeController::class, 'analyze'])->name('analyze');
+Route::post('/seo/topic-clusters', [TopicAnalysisController::class, 'store'])
+    ->name('seo.topic-clusters.store');
 
-/**
- * PageSpeed Insights proxy (server-side API key)
- * Throttled to avoid abuse.
- */
-Route::get('/psi-proxy', [AnalyzeController::class, 'psiProxy'])
-    ->name('psi.proxy')
-    ->middleware('throttle:20,1');
-
-/* Optional quick health check */
-Route::get('/ping', fn() => response()->json(['ok' => true, 'time' => now()->toIso8601String()]));
+// Results page via simple route-model binding (keeps controller with only 2 methods)
+Route::get('/seo/topic-clusters/results/{analysis}', function (TopicAnalysis $analysis) {
+    return view('seo.topic-analysis-results', ['analysis' => $analysis]);
+})->name('seo.topic-clusters.results');
