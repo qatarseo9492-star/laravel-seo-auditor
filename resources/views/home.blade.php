@@ -17,12 +17,12 @@ header.site.hdr{display:flex;align-items:center;gap:1rem;padding:12px 18px;posit
 .brand-badge i{font-size:1.15rem}
 .hero-heading{font-weight:800;letter-spacing:.2px}
 .hero-sub{font-size:.85rem;opacity:.7}
-.toolbelt{flex:1;display:flex;gap:.6rem;overflow:auto;padding:.3rem .4rem;border-radius:16px;background:var(--glass);border:1px solid var(--border);backdrop-filter: blur(8px)}
-.tool{display:inline-flex;align-items:center;gap:.45rem;padding:.52rem .9rem;border-radius:999px;border:1px solid transparent;text-decoration:none;color:var(--ink);white-space:nowrap;position:relative;transition:.2s ease; background:rgba(255,255,255,.02)}
-.tool:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.25)}
-.tool.active{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#07101a; box-shadow:0 10px 30px rgba(124,77,255,.35)}
-.tool.locked{opacity:.65;cursor:not-allowed}
-.tool i{font-size:.95rem}
+/* removed .toolbelt styles */
+/* removed .tool styles */
+/* removed .tool:hover */
+/* removed .tool.active */
+/* removed .tool.locked */
+/* removed .tool i */
 .hdr-actions{display:flex;align-items:center;gap:.6rem}
 .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.52rem .9rem;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--ink);text-decoration:none}
 .btn.ghost:hover{border-color:#9aa4c7}
@@ -720,7 +720,97 @@ h2.section-title, .cl-title {
 
 <div class="wrap">
   
+
+<div class="superbar" role="navigation" aria-label="Main menu">
+  <div class="cont">
+    <div class="sb-left">
+      <a href="{{ route('home') }}" class="pill {{ request()->routeIs('home') ? 'primary' : '' }}">
+        <lord-icon src="https://cdn.lordicon.com/lecprnjb.json" trigger="loop" delay="2000" style="width:20px;height:20px"></lord-icon>
+        <span>Semantic SEO Analyzer</span>
+      </a>
+
+      @php
+        $hasTopicRoute = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create');
+        $topicUrl = $hasTopicRoute ? route('seo.topic-clusters.create') : url('/seo/topic-clusters');
+      @endphp
+      <a href="{{ auth()->check() ? $topicUrl : ( \Illuminate\Support\Facades\Route::has('login') ? route('login') : url('/login') ) }}"
+         class="pill {{ request()->is('seo/topic-clusters*') ? 'primary' : '' }}">
+        <lord-icon src="https://cdn.lordicon.com/wmwqvixz.json" trigger="loop" delay="2000" style="width:20px;height:20px"></lord-icon>
+        <span>Topic Cluster Identification</span>
+      </a>
+    </div>
+
+    <div class="sb-right">
+      @guest
+        <a href="{{ \Illuminate\Support\Facades\Route::has('login') ? route('login') : url('/login') }}" class="pill">
+          <i class="fa-solid fa-right-to-bracket"></i> <span>Sign in</span>
+        </a>
+        <a href="{{ \Illuminate\Support\Facades\Route::has('register') ? route('register') : url('/register') }}"
+           class="pill alt">
+          <i class="fa-solid fa-user-plus"></i> <span>Sign up</span>
+        </a>
+      @else
+        <form method="POST" action="{{ \Illuminate\Support\Facades\Route::has('logout') ? route('logout') : url('/logout') }}">
+          @csrf
+          <button type="submit" class="pill">
+            <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+          </button>
+        </form>
+      @endguest
+    </div>
+  </div>
+</div>
+
 <header class="site hdr">
+
+<style>
+:root{ --superbar-h: 64px; }
+
+.superbar{
+  position: sticky;
+  top: 0;
+  z-index: 70;
+  border-bottom: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(10,11,22,.72), rgba(10,11,22,.50)),
+    radial-gradient(800px 400px at 10% 0%, rgba(124,77,255,.12), transparent 60%),
+    radial-gradient(700px 350px at 90% 0%, rgba(0,229,255,.10), transparent 60%);
+  backdrop-filter: blur(12px);
+}
+.superbar .cont{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sb-left, .sb-right{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.pill{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.55rem .95rem;border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  color:var(--ink); text-decoration:none; white-space:nowrap;
+  background: rgba(255,255,255,.06);
+  transition:.18s ease; backdrop-filter: blur(6px);
+}
+.pill:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.28)}
+.pill.primary{border-color:transparent;
+  background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#081019;
+  box-shadow:0 10px 30px rgba(124,77,255,.32);
+}
+.pill.alt{border-color:transparent;
+  background:linear-gradient(135deg, var(--accent3), var(--accent2)); color:#081019;
+  box-shadow:0 10px 30px rgba(255,77,210,.28);
+}
+.pill i, .pill lord-icon{font-size:1rem}
+
+/* push header down so it doesn't collide with superbar */
+header.site.hdr{ top: var(--superbar-h) !important; }
+@media (max-width: 600px){ :root{ --superbar-h: 60px; } }
+</style>
+
   <div class="brand">
     <div class="brand-badge"><i class="fa-solid fa-brain"></i></div>
     <div class="brand-text">
@@ -729,54 +819,9 @@ h2.section-title, .cl-title {
     </div>
   </div>
 
-  <nav class="toolbelt" aria-label="Main menu">
-    <a href="{{ route('home') }}" class="tool {{ request()->routeIs('home') ? 'active' : '' }}">
-      <lord-icon src="https://cdn.lordicon.com/lecprnjb.json" trigger="loop" delay="2000" style="width:22px;height:22px"></lord-icon>
-      <span>Analyzer</span>
-    </a>
+  <!-- removed old in-header menu (toolbelt) -->
 
-    @php
-      $hasTopicRoute = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create');
-      $topicUrl = $hasTopicRoute ? route('seo.topic-clusters.create') : url('/seo/topic-clusters');
-    @endphp
-
-    @auth
-      <a href="{{ $topicUrl }}" class="tool {{ request()->is('seo/topic-clusters*') ? 'active' : '' }}">
-        <lord-icon src="https://cdn.lordicon.com/wmwqvixz.json" trigger="loop" delay="2000" style="width:22px;height:22px"></lord-icon>
-        <span>Topic Clusters</span>
-      </a>
-      <a href="#" class="tool">
-        <lord-icon src="https://cdn.lordicon.com/abndcdne.json" trigger="loop" delay="2400" style="width:22px;height:22px"></lord-icon>
-        <span>Keyword Mapper</span>
-      </a>
-      <a href="#" class="tool">
-        <lord-icon src="https://cdn.lordicon.com/jjoolpwc.json" trigger="loop" delay="2600" style="width:22px;height:22px"></lord-icon>
-        <span>Entity Extractor</span>
-      </a>
-    @else
-      <a href="{{ route('login') }}" class="tool locked" title="Sign in to use">
-        <i class="fa-solid fa-lock"></i> <span>Topic Clusters</span>
-      </a>
-      <a href="{{ route('login') }}" class="tool locked" title="Sign in to use">
-        <i class="fa-solid fa-lock"></i> <span>Keyword Mapper</span>
-      </a>
-      <a href="{{ route('login') }}" class="tool locked" title="Sign in to use">
-        <i class="fa-solid fa-lock"></i> <span>Entity Extractor</span>
-      </a>
-    @endauth
-  </nav>
-
-  <div class="hdr-actions">
-    @auth
-      <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button class="btn ghost" type="submit"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
-      </form>
-    @else
-      <a href="{{ route('login') }}" class="btn ghost"><i class="fa-solid fa-right-to-bracket"></i> Sign in</a>
-      <a href="{{ route('register') }}" class="btn primary"><i class="fa-solid fa-user-plus"></i> Sign up</a>
-    @endauth
-  </div>
+  <!-- removed old header actions; now handled by superbar -->
 </header>
 
 
