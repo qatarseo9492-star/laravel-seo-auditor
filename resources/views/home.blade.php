@@ -812,195 +812,359 @@ h2.section-title, .cl-title {
 <!-- HUMAN vs AI Content (Ensemble) — v26 PRISM (forcefix) -->
 <section id="hvai" class="hvai hvai-v26" aria-label="Human vs AI Content (Ensemble)">
 
-  {{-- BEGIN: Multi-Model Ensemble Content Detection (replaces legacy HVAI inner) --}}
-  <div class="mmecd" data-component="multi-ensemble-detector">
-    <div class="mmecd__head">
-      <h3 class="mmecd__title">Multi-Model Ensemble Content Detection</h3>
-      <p class="mmecd__subtitle">Hugging Face ensemble + local statistics. Paste your text and click Detect.</p>
+  
+{{-- BEGIN: Multi-Model Ensemble Content Detection (stylish v2) --}}
+<div class="mmecd" data-component="multi-ensemble-detector">
+  <div class="mmecd__head">
+    <div class="mmecd__titleWrap">
+      <svg class="mmecd__titleIcon" viewBox="0 0 64 64" aria-hidden="true">
+        <defs>
+          <linearGradient id="mmecdStarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#60a5fa"/>
+            <stop offset="50%" stop-color="#34d399"/>
+            <stop offset="100%" stop-color="#f59e0b"/>
+          </linearGradient>
+        </defs>
+        <g class="mmecd__titleIconSpin">
+          <path d="M32 6l6.2 12.6 13.9 2-10 9.7 2.4 13.8L32 38.8 19.5 44.1 21.9 30.3 12 20.6l13.9-2L32 6z" fill="url(#mmecdStarGrad)" opacity="0.95"/>
+          <circle cx="32" cy="32" r="6" fill="#fff" opacity=".9"/>
+        </g>
+      </svg>
+      <h3 class="mmecd__title">Multi‑Model Ensemble Content Detection</h3>
     </div>
-
-    <div class="mmecd__grid">
-      <div class="mmecd__left">
-        <textarea class="mmecd__input" rows="8" placeholder="Paste content here… (min 20 characters)"></textarea>
-        <div class="mmecd__actions">
-          <button class="mmecd__btn" type="button">Detect</button>
-          <span class="mmecd__status" aria-live="polite"></span>
-        </div>
-      </div>
-
-      <div class="mmecd__right">
-        <div class="mmecd__wheel">
-          <svg viewBox="0 0 120 120" class="mmecd__svg" aria-hidden="true">
-            <defs>
-              <linearGradient id="mmecdGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stop-color="#22d3ee"/>
-                <stop offset="50%"  stop-color="#10b981"/>
-                <stop offset="100%" stop-color="#f59e0b"/>
-              </linearGradient>
-              <filter id="mmecdGlow">
-                <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" class="mmecd__track"/>
-            <circle cx="60" cy="60" r="52" fill="none" class="mmecd__progress" stroke="url(#mmecdGrad)" stroke-linecap="round" filter="url(#mmecdGlow)" transform="rotate(-90 60 60)"/>
-          </svg>
-          <div class="mmecd__scorewrap">
-            <div class="mmecd__score">--%</div>
-            <div class="mmecd__verdict">—</div>
-          </div>
-        </div>
-
-        <div class="mmecd__meta">
-          <div>Confidence: <strong class="mmecd__confidence">—</strong></div>
-          <div class="mmecd__signals">Signals: —</div>
-        </div>
-      </div>
+    <p class="mmecd__subtitle">Colorful, animated results. Hugging Face ensemble + local statistics. Paste text, Analyze a URL, or let it auto‑run from your URL analyzer.</p>
+    <div class="mmecd__icons">
+      <svg class="mmecd__ico mmecd__ico--pulse" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M3 12h5l2-5 4 10 2-5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <svg class="mmecd__ico mmecd__ico--float" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/>
+      </svg>
+      <svg class="mmecd__ico mmecd__ico--spin" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2v4M12 18v4M2 12h4M18 12h4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
     </div>
-
-    <details class="mmecd__panel">
-      <summary>Model breakdown</summary>
-      <ul class="mmecd__models"></ul>
-    </details>
-
-    <details class="mmecd__panel">
-      <summary>Statistical features</summary>
-      <pre class="mmecd__stats"></pre>
-    </details>
   </div>
 
-  <style>
-    .mmecd{--bg:rgba(255,255,255,.05);--bd:rgba(255,255,255,.1);--fg:#e5e7eb;--muted:#9ca3af;--accent:#6366f1;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444}
-    .mmecd *{box-sizing:border-box}
-    .mmecd__head{margin-bottom:.75rem}
-    .mmecd__title{margin:0 0 .25rem 0;font-size:clamp(18px,2.4vw,22px);font-weight:800}
-    .mmecd__subtitle{margin:0;color:var(--muted);font-size:.95rem}
-    .mmecd__grid{display:grid;gap:16px;grid-template-columns: minmax(260px,1fr) 300px;align-items:stretch}
-    @media (max-width:860px){.mmecd__grid{grid-template-columns:1fr}}
-    .mmecd__left{display:flex;flex-direction:column;gap:10px}
-    .mmecd__input{width:100%;border-radius:14px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);padding:12px 14px;min-height:180px;outline:none}
-    .mmecd__input:focus{box-shadow:0 0 0 3px rgba(99,102,241,.25)}
-    .mmecd__actions{display:flex;align-items:center;gap:10px}
-    .mmecd__btn{appearance:none;border:0;border-radius:12px;background:var(--accent);color:white;padding:10px 14px;font-weight:700;cursor:pointer}
-    .mmecd__btn[disabled]{opacity:.5;cursor:not-allowed}
-    .mmecd__status{color:var(--muted);font-size:.9rem}
-    .mmecd__right{display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center}
-    .mmecd__wheel{position:relative;width:160px;height:160px}
-    .mmecd__svg{width:160px;height:160px;display:block}
-    .mmecd__track{stroke-width:12;opacity:.2}
-    .mmecd__progress{stroke-width:12;stroke-dasharray:326.73;stroke-dashoffset:326.73;transition:stroke-dashoffset .7s cubic-bezier(.22,1,.36,1)}
-    .mmecd__scorewrap{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
-    .mmecd__score{font-weight:800;font-size:1.4rem}
-    .mmecd__verdict{font-size:.8rem;color:var(--muted);margin-top:.25rem}
-    .mmecd__meta{font-size:.95rem;color:var(--muted);text-align:center}
-    .mmecd__panel{margin-top:.75rem;background:var(--bg);border:1px solid var(--bd);border-radius:14px;padding:.5rem 1rem}
-    .mmecd__panel summary{cursor:pointer;font-weight:600}
-    .mmecd__models{margin:.5rem 0 0 0;padding-left:1.1rem}
-    .mmecd__models li{margin:.25rem 0}
-  </style>
+  <div class="mmecd__grid">
+    <div class="mmecd__left">
+      <div class="mmecd__inputWrap">
+        <textarea class="mmecd__input" rows="8" placeholder="Paste content here… (min 20 characters)"></textarea>
+        <div class="mmecd__inputHalo"></div>
+      </div>
+      <div class="mmecd__actions">
+        <button class="mmecd__btn" type="button">
+          <span class="mmecd__btnIcon">▶</span>
+          Detect
+        </button>
+        <span class="mmecd__status" aria-live="polite"></span>
+      </div>
+    </div>
 
-  <script>
-  (function(){
-    const scriptEl = document.currentScript;
-    let root = scriptEl.previousElementSibling;
-    if(!(root && root.classList && root.classList.contains('mmecd'))){
-      root = document.querySelector('.mmecd[data-component="multi-ensemble-detector"]');
+    <div class="mmecd__right">
+      <div class="mmecd__wheel">
+        <svg viewBox="0 0 140 140" class="mmecd__svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="mmecdGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%"   stop-color="#22d3ee"/>
+              <stop offset="50%"  stop-color="#10b981"/>
+              <stop offset="100%" stop-color="#f59e0b"/>
+            </linearGradient>
+            <filter id="mmecdGlow">
+              <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- tick marks (drawn via JS for 40 ticks) -->
+          <g class="mmecd__ticks"></g>
+
+          <!-- background track -->
+          <circle cx="70" cy="70" r="58" fill="none" stroke="currentColor" class="mmecd__track"/>
+
+          <!-- progress arc -->
+          <circle cx="70" cy="70" r="58" fill="none" class="mmecd__progress" stroke="url(#mmecdGrad)" stroke-linecap="round" filter="url(#mmecdGlow)" transform="rotate(-90 70 70)"/>
+          <!-- animated sweep accent -->
+          <circle cx="70" cy="70" r="58" fill="none" class="mmecd__sweep" stroke="url(#mmecdGrad)" transform="rotate(-90 70 70)"/>
+        </svg>
+        <div class="mmecd__scorewrap">
+          <div class="mmecd__score">--%</div>
+          <div class="mmecd__verdict">—</div>
+        </div>
+        <div class="mmecd__sparks"></div>
+      </div>
+
+      <div class="mmecd__meta">
+        <div>Confidence: <strong class="mmecd__confidence">—</strong></div>
+        <div class="mmecd__signals">Signals: —</div>
+      </div>
+    </div>
+  </div>
+
+  <details class="mmecd__panel">
+    <summary>Model breakdown</summary>
+    <ul class="mmecd__models"></ul>
+  </details>
+
+  <details class="mmecd__panel">
+    <summary>Statistical features</summary>
+    <pre class="mmecd__stats"></pre>
+  </details>
+</div>
+
+<style>
+  .mmecd{--bg:rgba(255,255,255,.05);--bd:rgba(255,255,255,.12);--fg:#e5e7eb;--muted:#a1a1aa;--accent:#7c3aed;--ok:#10b981;--warn:#f59e0b;--bad:#ef4444}
+  .mmecd *{box-sizing:border-box}
+  .mmecd__head{margin-bottom:1rem}
+  .mmecd__titleWrap{display:flex;align-items:center;gap:.65rem}
+  .mmecd__titleIcon{width:34px;height:34px;opacity:.95}
+  .mmecd__titleIconSpin{transform-origin:32px 32px;animation:mmecd-spin 8s linear infinite}
+  .mmecd__title{
+    margin:0;
+    font-size:clamp(20px,2.6vw,26px);
+    font-weight:900;
+    background: linear-gradient(90deg,#60a5fa,#34d399,#f59e0b,#f43f5e,#60a5fa);
+    background-size:300% 300%;
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    animation:mmecd-gradient 10s ease infinite;
+    letter-spacing:.2px;
+  }
+  .mmecd__subtitle{margin:.35rem 0 0;color:var(--muted);font-size:.98rem}
+  .mmecd__icons{display:flex;gap:.6rem;margin-top:.6rem}
+  .mmecd__ico{width:18px;height:18px;color:#a5b4fc;opacity:.95}
+  .mmecd__ico--pulse{animation:mmecd-pulse 2.2s ease-in-out infinite}
+  .mmecd__ico--float{animation:mmecd-float 3.4s ease-in-out infinite}
+  .mmecd__ico--spin{animation:mmecd-spin 6s linear infinite}
+
+  .mmecd__grid{display:grid;gap:16px;grid-template-columns: minmax(280px,1fr) 360px;align-items:stretch}
+  @media (max-width:900px){.mmecd__grid{grid-template-columns:1fr}}
+
+  .mmecd__inputWrap{position:relative}
+  .mmecd__input{width:100%;border-radius:16px;border:1px solid var(--bd);background:var(--bg);color:var(--fg);padding:12px 14px;min-height:200px;outline:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}
+  .mmecd__input:focus + .mmecd__inputHalo{opacity:1;transform:scale(1)}
+  .mmecd__inputHalo{position:absolute;inset:-6px;border-radius:20px;pointer-events:none;
+    background: radial-gradient(600px 120px at 20% 0%, rgba(124,58,237,.35), transparent 60%),
+                radial-gradient(600px 120px at 80% 0%, rgba(16,185,129,.35), transparent 60%);
+    filter: blur(12px); opacity:0; transform:scale(.98); transition:all .25s ease}
+
+  .mmecd__actions{display:flex;align-items:center;gap:10px;margin-top:8px}
+  .mmecd__btn{appearance:none;border:0;border-radius:12px;background:linear-gradient(90deg,#6366f1,#22d3ee);color:white;padding:10px 14px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(99,102,241,.25)}
+  .mmecd__btn:hover{filter:brightness(1.05)}
+  .mmecd__btnIcon{display:inline-block;margin-right:6px;transform:translateY(1px)}
+  .mmecd__status{color:var(--muted);font-size:.95rem}
+
+  .mmecd__wheel{position:relative;width:220px;height:220px;margin:0 auto}
+  .mmecd__svg{width:220px;height:220px;display:block;animation:mmecd-hue 18s linear infinite}
+  .mmecd__track{stroke-width:14;opacity:.2}
+  .mmecd__progress{stroke-width:14;stroke-dasharray:364.42;stroke-dashoffset:364.42;transition:stroke-dashoffset .9s cubic-bezier(.22,1,.36,1)}
+  .mmecd__sweep{stroke-width:4;stroke-dasharray:30 360;stroke-linecap:round;opacity:.6;animation:mmecd-sweep 2.4s linear infinite}
+  .mmecd__ticks line{stroke:rgba(255,255,255,.18);stroke-width:2}
+  .mmecd__ticks line.major{stroke:rgba(255,255,255,.35);stroke-width:3}
+
+  .mmecd__scorewrap{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+  .mmecd__score{font-weight:900;font-size:1.6rem;letter-spacing:.5px}
+  .mmecd__verdict{font-size:.85rem;color:var(--muted);margin-top:.25rem}
+  .mmecd__sparks{position:absolute;inset:0;pointer-events:none}
+
+  .mmecd__meta{font-size:.98rem;color:var(--muted);text-align:center;margin-top:.5rem}
+  .mmecd__panel{margin-top:.75rem;background:var(--bg);border:1px solid var(--bd);border-radius:16px;padding:.6rem 1rem}
+  .mmecd__panel summary{cursor:pointer;font-weight:700}
+
+  @keyframes mmecd-gradient{
+    0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}
+  }
+  @keyframes mmecd-pulse{
+    0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.15);opacity:1}
+  }
+  @keyframes mmecd-float{
+    0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}
+  }
+  @keyframes mmecd-spin{to{transform:rotate(360deg)}}
+  @keyframes mmecd-hue{to{filter:hue-rotate(360deg)}}
+  @keyframes mmecd-sweep{to{stroke-dashoffset:-390}}
+  @keyframes mmecd-pop{0%{transform:scale(.6);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:scale(1.2);opacity:0}}
+</style>
+
+<script>
+(function(){
+  const scriptEl = document.currentScript;
+  let root = scriptEl.previousElementSibling;
+  if(!(root && root.classList && root.classList.contains('mmecd'))){
+    root = document.querySelector('.mmecd[data-component="multi-ensemble-detector"]');
+  }
+  if(!root) return;
+
+  const ta   = root.querySelector('.mmecd__input');
+  const btn  = root.querySelector('.mmecd__btn');
+  const st   = root.querySelector('.mmecd__status');
+  const svg  = root.querySelector('.mmecd__svg');
+  const ticks= root.querySelector('.mmecd__ticks');
+  const prog = root.querySelector('.mmecd__progress');
+  const scoreEl = root.querySelector('.mmecd__score');
+  const verdictEl = root.querySelector('.mmecd__verdict');
+  const confEl = root.querySelector('.mmecd__confidence');
+  const sigEl  = root.querySelector('.mmecd__signals');
+  const modelsEl = root.querySelector('.mmecd__models');
+  const statsEl  = root.querySelector('.mmecd__stats');
+  const sparks   = root.querySelector('.mmecd__sparks');
+
+  // Build ticks (40 with 8 majors)
+  (function buildTicks(){
+    const cx=70, cy=70, r=58, N=40;
+    for(let i=0;i<N;i++){
+      const a = (i/N) * 2*Math.PI;
+      const outer = r + 6;
+      const inner = r + (i%5==0 ? -2 : 2);
+      const x1 = cx + Math.cos(a)*outer;
+      const y1 = cy + Math.sin(a)*outer;
+      const x2 = cx + Math.cos(a)*(inner);
+      const y2 = cy + Math.sin(a)*(inner);
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', x1.toFixed(1));
+      line.setAttribute('y1', y1.toFixed(1));
+      line.setAttribute('x2', x2.toFixed(1));
+      line.setAttribute('y2', y2.toFixed(1));
+      if(i%5==0) line.setAttribute('class','major');
+      ticks.appendChild(line);
     }
-    if(!root) return;
-
-    const ta   = root.querySelector('.mmecd__input');
-    const btn  = root.querySelector('.mmecd__btn');
-    const st   = root.querySelector('.mmecd__status');
-    const prog = root.querySelector('.mmecd__progress');
-    const scoreEl = root.querySelector('.mmecd__score');
-    const verdictEl = root.querySelector('.mmecd__verdict');
-    const confEl = root.querySelector('.mmecd__confidence');
-    const sigEl  = root.querySelector('.mmecd__signals');
-    const modelsEl = root.querySelector('.mmecd__models');
-    const statsEl  = root.querySelector('.mmecd__stats');
-
-    const CIRC = 2 * Math.PI * 52;
-    prog.style.strokeDasharray = CIRC;
-
-    function colorForScore(s){
-      if (s >= 0.8) return ['#ef4444', '#f43f5e', '#fb7185'];
-      if (s >= 0.6) return ['#f59e0b', '#fbbf24', '#f59e0b'];
-      if (s >= 0.4) return ['#10b981', '#34d399', '#10b981'];
-      return ['#22d3ee', '#60a5fa', '#22d3ee'];
-    }
-
-    function setScore(s){
-      const pct = Math.round(s * 100);
-      scoreEl.textContent = pct + '%';
-      const thAI = 0.70, thHuman = 0.30;
-      verdictEl.textContent = s >= thAI ? 'ai-like' : (s <= thHuman ? 'human-like' : 'uncertain');
-
-      const offset = CIRC * (1 - s);
-      prog.style.strokeDashoffset = offset;
-
-      const [c1,c2,c3] = colorForScore(s);
-      const grad = root.querySelector('#mmecdGrad');
-      if(grad){
-        grad.children[0]?.setAttribute('stop-color', c1);
-        grad.children[1]?.setAttribute('stop-color', c2);
-        grad.children[2]?.setAttribute('stop-color', c3);
-      }
-    }
-
-    function enable(disabled){ btn.disabled = disabled; }
-
-    async function detect(){
-      const text = ta.value.trim();
-      if (text.length < 20) return;
-      enable(true);
-      st.textContent = 'Analyzing…';
-      try{
-        const res = await fetch('/api/detect', {
-          method:'POST',
-          headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
-          body: JSON.stringify({content:text})
-        });
-        const json = await res.json();
-
-        if(!json.ok){
-          st.textContent = (json.error || 'Detection failed');
-          return;
-        }
-
-        const d = json.data;
-        setScore(d.final_score ?? 0.5);
-        confEl.textContent = Math.round((d.confidence ?? 0) * 100) + '%';
-        sigEl.textContent  = 'Signals: ' + (Array.isArray(d.used) ? d.used.join(', ') : '—');
-
-        modelsEl.innerHTML = '';
-        const by = d.by_model || {};
-        for(const [name,val] of Object.entries(by)){
-          const li = document.createElement('li');
-          const pct = (val && typeof val.prob_ai === 'number') ? Math.round(val.prob_ai*100)+'%' : '—';
-          li.innerHTML = `<strong>${name}</strong> → ${pct} <span style="opacity:.7">(w=${val?.weight ?? 0})</span>`;
-          modelsEl.appendChild(li);
-        }
-
-        statsEl.textContent = d?.stats?.features ? JSON.stringify(d.stats.features, null, 2) : '—';
-        st.textContent = 'Done';
-        setTimeout(()=>{ st.textContent=''; }, 1200);
-      }catch(e){
-        console.error(e);
-        st.textContent = 'Detection failed';
-      }finally{
-        enable(false);
-      }
-    }
-
-    btn.addEventListener('click', detect);
-    ta.addEventListener('input', ()=>{ btn.disabled = (ta.value.trim().length < 20); });
-    btn.disabled = true;
   })();
-  </script>
-  {{-- END: Multi-Model Ensemble Content Detection --}}
+
+  const CIRC = 2 * Math.PI * 58; // r=58 -> 364.42
+  prog.style.strokeDasharray = CIRC;
+
+  function colorBurst(){
+    // confetti sparks around the wheel on completion
+    const N=14;
+    for(let i=0;i<N;i++){
+      const el = document.createElement('div');
+      el.className = 'spark';
+      const ang = (Math.random()*360)|0;
+      const dist = 90 + Math.random()*18;
+      const size = 6 + Math.random()*6;
+      el.style.position='absolute';
+      el.style.left='50%'; el.style.top='50%';
+      el.style.width=size+'px'; el.style.height=size+'px';
+      el.style.background='radial-gradient(circle,#fff,transparent 60%)';
+      el.style.borderRadius='50%';
+      el.style.transform=`rotate(${ang}deg) translate(${dist}px) rotate(-${ang}deg)`;
+      el.style.animation='mmecd-pop 900ms ease-out forwards';
+      sparks.appendChild(el);
+      setTimeout(()=>el.remove(), 950);
+    }
+  }
+
+  function colorForScore(s){
+    if (s >= 0.8) return ['#ef4444', '#f43f5e', '#fb7185'];
+    if (s >= 0.6) return ['#f59e0b', '#fbbf24', '#f59e0b'];
+    if (s >= 0.4) return ['#10b981', '#34d399', '#10b981'];
+    return ['#22d3ee', '#60a5fa', '#22d3ee'];
+  }
+
+  function setScore(s){
+    const pct = Math.round(s * 100);
+    scoreEl.textContent = pct + '%';
+    const thAI = 0.70, thHuman = 0.30;
+    verdictEl.textContent = s >= thAI ? 'ai-like' : (s <= thHuman ? 'human-like' : 'uncertain');
+
+    const offset = CIRC * (1 - s);
+    prog.style.strokeDashoffset = offset;
+
+    const [c1,c2,c3] = colorForScore(s);
+    const grad = root.querySelector('#mmecdGrad');
+    if(grad){
+      grad.children[0]?.setAttribute('stop-color', c1);
+      grad.children[1]?.setAttribute('stop-color', c2);
+      grad.children[2]?.setAttribute('stop-color', c3);
+    }
+    colorBurst();
+  }
+
+  function enable(disabled){ btn.disabled = disabled; }
+
+  async function handleResult(json){
+    if(!json || !json.ok){ st.textContent = (json?.error || 'Detection failed'); return; }
+    const d = json.data;
+    setScore(d.final_score ?? 0.5);
+    confEl.textContent = Math.round((d.confidence ?? 0) * 100) + '%';
+    sigEl.textContent  = 'Signals: ' + (Array.isArray(d.used) ? d.used.join(', ') : '—');
+    modelsEl.innerHTML = '';
+    const by = d.by_model || {};
+    for(const [name,val] of Object.entries(by)){
+      const li = document.createElement('li');
+      const pct = (val && typeof val.prob_ai === 'number') ? Math.round(val.prob_ai*100)+'%' : '—';
+      li.innerHTML = `<strong>${name}</strong> → ${pct} <span style="opacity:.7">(w=${val?.weight ?? 0})</span>`;
+      modelsEl.appendChild(li);
+    }
+    statsEl.textContent = d?.stats?.features ? JSON.stringify(d.stats.features, null, 2) : '—';
+    st.textContent = 'Done'; setTimeout(()=>{ st.textContent=''; }, 1200);
+  }
+
+  async function detect(){
+    const text = ta.value.trim();
+    if (text.length < 20) return;
+    enable(true); st.textContent = 'Analyzing…';
+    try{
+      const res = await fetch('/api/detect', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+        body: JSON.stringify({content:text})
+      });
+      await handleResult(await res.json());
+    }catch(e){ console.error(e); st.textContent='Detection failed'; }
+    finally{ enable(false); }
+  }
+
+  async function detectFromUrl(u){
+    if(!u) return;
+    enable(true); st.textContent = 'Fetching & analyzing URL…';
+    try{
+      const res = await fetch('/api/detect/url', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+        body: JSON.stringify({url:u})
+      });
+      const json = await res.json();
+      if(json && json.extracted){
+        ta.value = json.extracted;
+        btn.disabled = (ta.value.trim().length < 20);
+      }
+      await handleResult(json);
+    }catch(e){ console.error(e); st.textContent='URL analyze failed'; }
+    finally{ enable(false); }
+  }
+
+  // Wire up UI
+  btn.addEventListener('click', detect);
+  ta.addEventListener('input', ()=>{ btn.disabled = (ta.value.trim().length < 20); });
+  btn.disabled = true;
+
+  // Auto-run: 1) URL param ?analyze_url=...
+  try{
+    const params = new URLSearchParams(location.search);
+    const u = params.get('analyze_url');
+    if(u){ detectFromUrl(u); }
+  }catch(_){}
+
+  // Auto-run: 2) Global event from your existing URL analyzer JS
+  window.addEventListener('semantic:urlAnalyzed', (e)=>{
+    const detail = e?.detail || {};
+    if(detail.content && detail.content.length >= 20){
+      ta.value = detail.content.slice(0, 20000);
+      btn.disabled = false;
+      detect();
+    }else if(detail.url){
+      detectFromUrl(detail.url);
+    }
+  });
+})();
+</script>
+{{-- END: Multi-Model Ensemble Content Detection --}}
+
 
 </section>
 
