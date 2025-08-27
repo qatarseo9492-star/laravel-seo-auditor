@@ -1,7 +1,54 @@
 {{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
-<head>
+\1
+
+<style>
+:root{
+  --bg1:#0b0b18; --bg2:#0b0f2a; --ink:#eaf1ff;
+  --accent:#7c4dff; --accent2:#00e5ff; --accent3:#ff4dd2;
+  --glass: rgba(255,255,255,.06);
+  --border: rgba(255,255,255,.14);
+}
+body{background: radial-gradient(1200px 700px at 10% 0%, #12122a 0%, #0b0b18 60%), #0b0b18; color: var(--ink);}
+header.site.hdr{display:flex;align-items:center;gap:1rem;padding:12px 18px;position:sticky;top:0;z-index:40;background:linear-gradient(0deg,rgba(11,11,24,.35),rgba(11,11,24,.35));backdrop-filter: blur(6px)}
+.brand{display:flex;align-items:center;gap:.8rem}
+.brand-badge{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#081019;box-shadow:0 8px 28px rgba(0,229,255,.25)}
+.brand-badge i{font-size:1.15rem}
+.hero-heading{font-weight:800;letter-spacing:.2px}
+.hero-sub{font-size:.85rem;opacity:.7}
+.toolbelt{flex:1;display:flex;gap:.6rem;overflow:auto;padding:.3rem .4rem;border-radius:16px;background:var(--glass);border:1px solid var(--border);backdrop-filter: blur(8px)}
+.tool{display:inline-flex;align-items:center;gap:.45rem;padding:.52rem .9rem;border-radius:999px;border:1px solid transparent;text-decoration:none;color:var(--ink);white-space:nowrap;position:relative;transition:.2s ease; background:rgba(255,255,255,.02)}
+.tool:hover{transform: translateY(-1px); border-color: rgba(255,255,255,.25)}
+.tool.active{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:#07101a; box-shadow:0 10px 30px rgba(124,77,255,.35)}
+.tool.locked{opacity:.65;cursor:not-allowed}
+.tool i{font-size:.95rem}
+.hdr-actions{display:flex;align-items:center;gap:.6rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.52rem .9rem;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--ink);text-decoration:none}
+.btn.ghost:hover{border-color:#9aa4c7}
+.btn.primary{background:linear-gradient(135deg,var(--accent3),var(--accent2)); color:#07101a; border-color:transparent; box-shadow:0 10px 30px rgba(255,77,210,.25)}
+.btn.primary:hover{transform:translateY(-1px)}
+.aurora-wrap{position:relative;overflow:hidden}
+.bg-aurora, .stars{position:absolute;inset:0;z-index:-2}
+.bg-aurora{
+  background:
+    radial-gradient(800px 400px at 20% 20%, rgba(124,77,255,.25), transparent 60%),
+    radial-gradient(900px 500px at 80% 30%, rgba(0,229,255,.22), transparent 60%),
+    radial-gradient(700px 350px at 60% 80%, rgba(255,77,210,.18), transparent 60%),
+    radial-gradient(1200px 700px at 50% -10%, rgba(255,255,255,.06), transparent 55%);
+  filter: blur(35px);
+  animation: floaty 18s ease-in-out infinite alternate;
+}
+.stars{
+  background-image: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.6), transparent 40%),
+                    radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,.6), transparent 40%),
+                    radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,.4), transparent 40%);
+  opacity:.35; animation: twinkle 6s linear infinite;
+}
+@keyframes floaty { to { transform: translateY(-10px) translateX(6px) scale(1.02); } }
+@keyframes twinkle { 50% { opacity:.2 } }
+</style>
+
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -634,6 +681,8 @@ h2.section-title, .cl-title {
 <!-- ===== /New Neo‑Glass Aurora Skin ===== -->
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 <body>
 
@@ -670,30 +719,66 @@ h2.section-title, .cl-title {
 </div>
 
 <div class="wrap">
-  <header class="site">
-    <div class="brand">
-      <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
-      <div>
-        <div class="hero-heading">Semantic SEO Master Analyzer</div>
-        <div class="hero-sub">Analyze URLs, get scores & colorful insights</div>
-      </div>
-    </div>
-
-    <nav class="main-menu" aria-label="Primary navigation">
-      <a href="{{ $semanticAnalyzerUrl }}" class="menu-link {{ url()->current() === $semanticAnalyzerUrl ? 'active' : '' }}">
-        <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
-        <span>Semantic SEO Analyzer</span>
-      </a>
-      <a href="{{ $topicClustersUrl }}" class="menu-link {{ request()->is('seo/topic-clusters*') ? 'active' : '' }}">
-        <i class="fa-solid fa-diagram-project" aria-hidden="true"></i>
-        <span>Topic Cluster Identification &amp; Mapping</span>
-      </a>
-    </nav>
   
-    <div class="header-actions">
-      <button class="btn btn-print" id="printTop"><i class="fa-solid fa-print"></i> Print</button>
+<header class="site hdr">
+  <div class="brand">
+    <div class="brand-badge"><i class="fa-solid fa-brain"></i></div>
+    <div class="brand-text">
+      <div class="hero-heading">Semantic SEO Master Analyzer</div>
+      <div class="hero-sub">Smart SEO tools for modern sites</div>
     </div>
-  </header>
+  </div>
+
+  <nav class="toolbelt" aria-label="Main menu">
+    <a href="{{ route('home') }}" class="tool {{ request()->routeIs('home') ? 'active' : '' }}">
+      <lord-icon src="https://cdn.lordicon.com/lecprnjb.json" trigger="loop" delay="2000" style="width:22px;height:22px"></lord-icon>
+      <span>Analyzer</span>
+    </a>
+
+    @php
+      $hasTopicRoute = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create');
+      $topicUrl = $hasTopicRoute ? route('seo.topic-clusters.create') : url('/seo/topic-clusters');
+    @endphp
+
+    @auth
+      <a href="{{ $topicUrl }}" class="tool {{ request()->is('seo/topic-clusters*') ? 'active' : '' }}">
+        <lord-icon src="https://cdn.lordicon.com/wmwqvixz.json" trigger="loop" delay="2000" style="width:22px;height:22px"></lord-icon>
+        <span>Topic Clusters</span>
+      </a>
+      <a href="#" class="tool">
+        <lord-icon src="https://cdn.lordicon.com/abndcdne.json" trigger="loop" delay="2400" style="width:22px;height:22px"></lord-icon>
+        <span>Keyword Mapper</span>
+      </a>
+      <a href="#" class="tool">
+        <lord-icon src="https://cdn.lordicon.com/jjoolpwc.json" trigger="loop" delay="2600" style="width:22px;height:22px"></lord-icon>
+        <span>Entity Extractor</span>
+      </a>
+    @else
+      <a href="{{ route('login') }}" class="tool locked" title="Sign in to use">
+        <i class="fa-solid fa-lock"></i> <span>Topic Clusters</span>
+      </a>
+      <a href="{{ route('login') }}" class="tool locked" title="Sign in to use">
+        <i class="fa-solid fa-lock"></i> <span>Keyword Mapper</span>
+      </a>
+      <a href="{{ route('login') }}" class="tool locked" title="Sign in to use">
+        <i class="fa-solid fa-lock"></i> <span>Entity Extractor</span>
+      </a>
+    @endauth
+  </nav>
+
+  <div class="hdr-actions">
+    @auth
+      <form method="POST" action="{{ route('logout') }}">
+        @csrf
+        <button class="btn ghost" type="submit"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </form>
+    @else
+      <a href="{{ route('login') }}" class="btn ghost"><i class="fa-solid fa-right-to-bracket"></i> Sign in</a>
+      <a href="{{ route('register') }}" class="btn primary"><i class="fa-solid fa-user-plus"></i> Sign up</a>
+    @endauth
+  </div>
+</header>
+
 
   <main class="analyzer" id="analyzer" role="main">
     <h2 class="section-title">Analyze a URL</h2>
