@@ -1603,10 +1603,25 @@ header.site.hdr{ top: var(--superbar-h) !important; }
     window.SEMSEO.BUSY = true;
 
     var input = document.getElementById('analyzeUrl');
-    var url = normalizeUrl(input ? input.value : '');
-    if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
-
-    if (window.Water) window.Water.start();
+    \1
+    // Call backend proxy (avoids CORS issues)
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    let data = null;
+    try {
+      const resp = await fetch('{{ route('api.analyze.url') }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+        body: JSON.stringify({ url })
+      });
+      data = await resp.json();
+      if (!resp.ok) throw new Error(data && data.error ? data.error : 'Analyze failed');
+    } catch (e) {
+      window.SEMSEO.BUSY=false;
+      if (window.Water) window.Water.finish();
+      if (statusEl) statusEl.textContent = (e && e.message) ? e.message : 'Failed to analyze URL';
+      return;
+    }
+if (window.Water) window.Water.start();
     var statusEl = document.getElementById('analyzeStatus');
     if (statusEl) statusEl.textContent = 'Fetching & analyzing…';
     var report = document.getElementById('analyzeReport'); if (report) report.style.display = 'none';
