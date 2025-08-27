@@ -1905,9 +1905,11 @@ header.site.hdr{ top: var(--superbar-h) !important; }
     
     // Call backend proxy (avoids CORS and login redirects)
     const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    const ANALYZE_URL = '{{ route('ajax.analyze.url') }}';
+    try{ console.log('ANALYZE_URL =>', ANALYZE_URL); }catch(e){}
     let data = null;
     try {
-      const resp = await fetch('{{ route('api.analyze.url') }}', {
+      const resp = await fetch(ANALYZE_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
