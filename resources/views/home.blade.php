@@ -684,7 +684,6 @@ h2.section-title, .cl-title {
 <script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 <body>
-<script>window.APP = { loggedIn: @auth true @else false @endauth };</script>
 
 <!-- Background canvases -->
 <canvas id="linesCanvas"></canvas>
@@ -1902,38 +1901,6 @@ header.site.hdr{ top: var(--superbar-h) !important; }
 
     var input = document.getElementById('analyzeUrl');
     var url = normalizeUrl(input ? input.value : '');
-    
-    // Call backend proxy (avoids CORS and login redirects)
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-    let data = null;
-    try {
-      const resp = await fetch('{{ route('api.analyze.url') }}', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-CSRF-TOKEN': csrf
-        },
-        credentials: 'same-origin',
-        body: JSON.stringify({ url })
-      });
-      const ctype = resp.headers.get('Content-Type') || '';
-      if (!resp.ok) {
-        throw new Error(resp.status === 401 ? 'Please login to analyze.' :
-                        resp.status === 419 ? 'Session expired. Refresh and login again.' :
-                        'Analyze failed ('+resp.status+').');
-      }
-      if (ctype.indexOf('application/json') === -1) {
-        throw new Error('Please login to analyze this URL.');
-      }
-      data = await resp.json();
-    } catch (e) {
-      window.SEMSEO = window.SEMSEO || {}; window.SEMSEO.BUSY=false;
-      if (window.Water) window.Water.finish();
-      var statusEl = document.getElementById('analyzeStatus');
-      if (statusEl) statusEl.textContent = (e && e.message) ? e.message : 'Failed to analyze URL';
-      return;
-    }
     if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
 
     if (window.Water) window.Water.start();
