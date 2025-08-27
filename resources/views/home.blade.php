@@ -492,7 +492,48 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (max-width:520px){.share-btn .share-label{display:none}}
 .category-icon i{font-size:24px;line-height:1}
 /* ================================================ */
-</style>
+
+        /* Badge styles */
+        .hvai2-badge { 
+          position: absolute; 
+          top: -12px; 
+          right: -12px; 
+          display: inline-flex; 
+          align-items: center; 
+          gap: .4rem; 
+          padding: .35rem .6rem; 
+          border-radius: 999px; 
+          font-weight: 800; 
+          font-size: .8rem;
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 6px 18px rgba(0,0,0,.25);
+          transform-origin: 50% 50%;
+          animation: popIn .6s ease forwards;
+        }
+        .hvai2-badge .ico { width: 18px; height: 18px; display: inline-flex; }
+        .hvai2-badge .ico svg { width: 100%; height: 100%; animation: wiggle 2.4s ease-in-out infinite; }
+        .hvai2-badge .text { white-space: nowrap; }
+        .hvai2-badge-hidden { display: none !important; }
+        .badge-good { background: linear-gradient(90deg, #22c55e, #16a34a); color: #06130a; }
+        .badge-okay { background: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0d00; }
+        .badge-low  { background: linear-gradient(90deg, #ef4444, #dc2626); color: #160404; }
+
+        @keyframes popIn { 0% { transform: scale(.8); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+        @keyframes wiggle { 0%,100% { transform: rotate(0deg) } 25% { transform: rotate(7deg) } 75% { transform: rotate(-7deg) } }
+
+        /* Tech lines background */
+        .hvai2-techwrap {
+          position: absolute; inset: 0;
+          z-index: -1; pointer-events: none; overflow: hidden;
+          border-radius: 16px;
+        }
+        canvas.hvai2-tech {
+          width: 100%; height: 100%;
+          display: block; opacity: .45;
+        }
+
+      </style>
 
 <style>
 /* Fallback colorful panel */
@@ -520,7 +561,48 @@ rgba(255,255,255,.035);border:1px solid rgba(166,247,255,.10)}
     }
     @keyframes badgeShift { 0%{ background-position:0% 0 } 100%{ background-position:100% 0 } }
 
-  </style>
+  
+        /* Badge styles */
+        .hvai2-badge { 
+          position: absolute; 
+          top: -12px; 
+          right: -12px; 
+          display: inline-flex; 
+          align-items: center; 
+          gap: .4rem; 
+          padding: .35rem .6rem; 
+          border-radius: 999px; 
+          font-weight: 800; 
+          font-size: .8rem;
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 6px 18px rgba(0,0,0,.25);
+          transform-origin: 50% 50%;
+          animation: popIn .6s ease forwards;
+        }
+        .hvai2-badge .ico { width: 18px; height: 18px; display: inline-flex; }
+        .hvai2-badge .ico svg { width: 100%; height: 100%; animation: wiggle 2.4s ease-in-out infinite; }
+        .hvai2-badge .text { white-space: nowrap; }
+        .hvai2-badge-hidden { display: none !important; }
+        .badge-good { background: linear-gradient(90deg, #22c55e, #16a34a); color: #06130a; }
+        .badge-okay { background: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0d00; }
+        .badge-low  { background: linear-gradient(90deg, #ef4444, #dc2626); color: #160404; }
+
+        @keyframes popIn { 0% { transform: scale(.8); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+        @keyframes wiggle { 0%,100% { transform: rotate(0deg) } 25% { transform: rotate(7deg) } 75% { transform: rotate(-7deg) } }
+
+        /* Tech lines background */
+        .hvai2-techwrap {
+          position: absolute; inset: 0;
+          z-index: -1; pointer-events: none; overflow: hidden;
+          border-radius: 16px;
+        }
+        canvas.hvai2-tech {
+          width: 100%; height: 100%;
+          display: block; opacity: .45;
+        }
+
+      </style>
 
 
 <!-- ===== New Neo‑Glass Aurora Skin (global) ===== -->
@@ -612,7 +694,48 @@ h2.section-title, .cl-title {
   padding: 1px;
   border-radius: calc(var(--radius) + 1px);
 }
-</style>
+
+        /* Badge styles */
+        .hvai2-badge { 
+          position: absolute; 
+          top: -12px; 
+          right: -12px; 
+          display: inline-flex; 
+          align-items: center; 
+          gap: .4rem; 
+          padding: .35rem .6rem; 
+          border-radius: 999px; 
+          font-weight: 800; 
+          font-size: .8rem;
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 6px 18px rgba(0,0,0,.25);
+          transform-origin: 50% 50%;
+          animation: popIn .6s ease forwards;
+        }
+        .hvai2-badge .ico { width: 18px; height: 18px; display: inline-flex; }
+        .hvai2-badge .ico svg { width: 100%; height: 100%; animation: wiggle 2.4s ease-in-out infinite; }
+        .hvai2-badge .text { white-space: nowrap; }
+        .hvai2-badge-hidden { display: none !important; }
+        .badge-good { background: linear-gradient(90deg, #22c55e, #16a34a); color: #06130a; }
+        .badge-okay { background: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0d00; }
+        .badge-low  { background: linear-gradient(90deg, #ef4444, #dc2626); color: #160404; }
+
+        @keyframes popIn { 0% { transform: scale(.8); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+        @keyframes wiggle { 0%,100% { transform: rotate(0deg) } 25% { transform: rotate(7deg) } 75% { transform: rotate(-7deg) } }
+
+        /* Tech lines background */
+        .hvai2-techwrap {
+          position: absolute; inset: 0;
+          z-index: -1; pointer-events: none; overflow: hidden;
+          border-radius: 16px;
+        }
+        canvas.hvai2-tech {
+          width: 100%; height: 100%;
+          display: block; opacity: .45;
+        }
+
+      </style>
 <!-- ===== /New Neo‑Glass Aurora Skin ===== -->
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
@@ -810,143 +933,638 @@ h2.section-title, .cl-title {
 <!-- HUMAN vs AI Content (Ensemble) — v22 PRISM (scoped, full) -->
 
 <!-- HUMAN vs AI Content (Ensemble) — v26 PRISM (forcefix) -->
-<section id="hvai" class="hvai hvai-v26" aria-label="Human vs AI Content (Ensemble)">
-  <style>
-  .hvai.hvai-v26{position:relative; isolation:isolate; padding:28px; border-radius:16px; background:rgba(8,10,18,.55); overflow:hidden; content-visibility:auto; contain:layout paint style}
-  .hvai.hvai-v26 *{box-sizing:border-box}
-  .hvai.hvai-v26 .tech{position:absolute; inset:-2px; z-index:0; pointer-events:none;
-    background:
-      linear-gradient(135deg, rgba(0,255,255,.10) 1px, transparent 1px) 0 0/18px 18px,
-      linear-gradient(45deg, rgba(255,0,180,.08) 1px, transparent 1px) 0 0/20px 20px,
-      radial-gradient(800px 600px at 85% 10%, rgba(67,169,255,.08), transparent 60%),
-      radial-gradient(700px 500px at 8% 95%, rgba(238,99,255,.08), transparent 60%);
-  }
-  .hvai.hvai-v26 .grid{position:relative; z-index:1; display:grid; gap:24px; grid-template-columns:1fr minmax(220px, clamp(220px, 24vw, 320px)); align-items:center}
-  @media (max-width:1100px){ .hvai.hvai-v26 .grid{grid-template-columns:1fr} .hvai.hvai-v26 .wheel{order:-1; margin:6px auto 14px} }
-  .hvai.hvai-v26 .wheel{ display:flex; align-items:center; justify-content:center; }
 
-  .hvai.hvai-v26 .title{display:flex; align-items:center; gap:12px; margin:0 0 8px}
-  .hvai.hvai-v26 .title .txt{font:800 clamp(22px,2.6vw,34px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
-  .hvai.hvai-v26 .title .txt .rainbow{background:linear-gradient(90deg,#6bf,#9f6,#fb6,#9af,#6bf); background-size:300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: rainbowShift 7s linear infinite}
-  @keyframes rainbowShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+    {-- Multi-Model Ensemble Content Detection (Upgraded) --}
+    {-- Rebuilt on 2025-08-27 10:39:37 --}
+    <section id="hvai-ensemble-v2" class="hvai2-wrapper">
+      <div class="hvai2-container">
+        <header class="hvai2-header">
+          <div class="hvai2-titlewrap">
+            <h2 class="hvai2-title">
+              <span class="hvai2-gradient">Multi-Model Ensemble Content</span>
+              <span class="hvai2-sub">Per‑model scores + final verdict</span>
+            </h2>
+            <div class="hvai2-sparkles" aria-hidden="true">
+              <svg class="sparkle s1" viewBox="0 0 24 24"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg>
+              <svg class="sparkle s2" viewBox="0 0 24 24"><path d="M12 3l1.6 4.8L19 9l-5.4 1.2L12 15 10.4 10.2 5 9l5.4-1.2z"/></svg>
+              <svg class="sparkle s3" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+          </div>
+          <p class="hvai2-kicker">Paste text below → analyze → see per‑model scores and the final ensemble verdict.</p>
+        </header>
 
-  .hvai.hvai-v26 .status{margin:6px 0 12px}
-  .hvai.hvai-v26 .badge{display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10)}
-  .hvai.hvai-v26 .status .status-badge{display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:999px; font-weight:900; letter-spacing:.01em; border:1px solid rgba(255,255,255,.12)}
-  .hvai.hvai-v26 .status.good .status-badge{background:linear-gradient(90deg,#00ffb380,#00e0ff80); border-color:#00ffd5}
-  .hvai.hvai-v26 .status.warn .status-badge{background:linear-gradient(90deg,#ffd86b80,#ff9d3f80); border-color:#ffb347}
-  .hvai.hvai-v26 .status.bad  .status-badge{background:linear-gradient(90deg,#ff6aa580,#ff494980); border-color:#ff4d6d}
+        <div class="hvai2-grid">
+          <div class="hvai2-inputcard">
+            <div class="hvai2-techwrap"><canvas class="hvai2-tech"></canvas></div>
+            <div class="hvai2-toolbar">
+              <button type="button" class="hvai2-btn" id="hvai2-btn-sample">
+                <span class="ico">
+                  <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h12v2H3z"/></svg>
+                </span>
+                Sample
+              </button>
+              <button type="button" class="hvai2-btn" id="hvai2-btn-clear">
+                <span class="ico">
+                  <svg viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 1-2-2V7h16v10a2 2 0 0 1-2 2H6zM9 3h6l1 2H8l1-2z"/></svg>
+                </span>
+                Clear
+              </button>
+              <button type="button" class="hvai2-btn hvai2-primary" id="hvai2-btn-analyze">
+                <span class="ico spin">
+                  <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1-7.07 2.93" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </span>
+                Analyze
+              </button>
+            </div>
+            <textarea id="hvai2-text" class="hvai2-textarea" rows="10" placeholder="Paste or start typing your content here...">@isset($ai_text){ $ai_text }@endisset</textarea>
+            <div class="hvai2-meta">
+              <span id="hvai2-count">0 chars • 0 words • 0 sentences</span>
+              <span id="hvai2-lang">lang: auto</span>
+            </div>
+          </div>
 
-  .hvai.hvai-v26 .row2{display:flex; gap:18px; flex-wrap:wrap}
-  .hvai.hvai-v26 .bar{flex:1 1 360px; background:#141724; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.06); min-width:260px}
-  .hvai.hvai-v26 .bar .label{display:flex; align-items:center; justify-content:space-between; gap:8px; font-weight:800}
-  .hvai.hvai-v26 .bar .ico{width:12px; height:12px; border-radius:50%; background:conic-gradient(#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff,#ff6a00)}
-  .hvai.hvai-v26 .bar .num{font-weight:900; color:#e9efff; font-variant-numeric:tabular-nums}
-  .hvai.hvai-v26 .track{height:14px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; margin-top:8px}
-  .hvai.hvai-v26 .fill{height:100%; width:0%; background:linear-gradient(90deg,#ff6a00,#ffd300,#2ad1a3,#1aa6ff,#9659ff)}
+          <div class="hvai2-output">
+            <div class="hvai2-techwrap"><canvas class="hvai2-tech"></canvas></div>
+            <div class="hvai2-ensemble">
+              <div class="hvai2-gauge" aria-label="Ensemble score">
+                <svg viewBox="0 0 120 120">
+                  <defs>
+                    <linearGradient id="hvai2-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="var(--ok)"/>
+                      <stop offset="50%" stop-color="var(--warn)"/>
+                      <stop offset="100%" stop-color="var(--bad)"/>
+                    </linearGradient>
+                  </defs>
+                  <circle cx="60" cy="60" r="52" class="track"/>
+                  <circle cx="60" cy="60" r="52" class="progress" stroke="url(#hvai2-grad)"/>
+                </svg>
+                <div class="hvai2-gauge-center">
+                  <div id="hvai2-badge" class="hvai2-badge hvai2-badge-hidden">
+                    <span class="ico" aria-hidden="true">
+                      <svg viewBox="0 0 24 24"><path d="M12 2l2.5 5.2L20 8l-4 3.9L17 18l-5-2.6L7 18l1-6.1L4 8l5.5-.8z" fill="currentColor"/></svg>
+                    </span>
+                    <span class="text"></span>
+                  </div>
+                  <div id="hvai2-ensemble-score">0%</div>
+                  <div id="hvai2-ensemble-label" class="muted">—</div>
+                </div>
+              </div>
+              <ul class="hvai2-legend">
+                <li><span class="dot ok"></span>More likely Human (0–39%)</li>
+                <li><span class="dot mid"></span>Mixed / Uncertain (40–59%)</li>
+                <li><span class="dot bad"></span>More likely AI (60–100%)</li>
+              </ul>
+            </div>
 
-  /* Improve panel */
-  .hvai.hvai-v26 .improve{margin-top:16px; padding:14px; border-radius:14px; background:linear-gradient(180deg, rgba(0,255,200,.06), rgba(0,140,255,.05)); border:1px solid rgba(255,255,255,.10)}
-  .hvai.hvai-v26 .improve.hidden{display:none}
-  .hvai.hvai-v26 .improve-head{font:800 15px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; margin-bottom:8px}
-  .hvai.hvai-v26 .improve-list{margin:0; padding-left:16px}
-  .hvai.hvai-v26 .improve-list li{margin:6px 0; line-height:1.35}
+            <div class="hvai2-models" id="hvai2-models">
+              <!-- Per-model score cards will render here -->
+            </div>
+          </div>
+        </div>
 
-  /* Prism wheel (compact) */
-  .prism-wheel{position:relative; width:var(--wheel-size, clamp(200px, 22vw, 300px)); aspect-ratio:1; margin:0 auto}
-  .prism-wheel .track{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.12) 0, rgba(255,255,255,.12) calc(50% - var(--thick,14px)), transparent calc(50% - var(--thick,14px)), transparent 100%)}
-  .prism-wheel .arc{position:absolute; inset:0; border-radius:50%;
-    background: conic-gradient(from -90deg, #ff6a00 0%, #ffb700 10%, #ffd300 20%, #96e21a 30%, #2ad1a3 40%, #1aa6ff 50%, #5a6bff 60%, #9659ff 70%, #ff6aff 80%, #ff6a00 100%);
-    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,14px)), #000 calc(100% - var(--thick,14px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
-            mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick,14px)), #000 calc(100% - var(--thick,14px))), conic-gradient(from -90deg, #000 0 calc(var(--p)*1%), transparent calc(var(--p)*1%));
-  }
-  .prism-wheel .pointer{position:absolute; inset:0; transform: rotate(calc(var(--p)*3.6deg)); transform-origin:50% 50%}
-  .prism-wheel .pointer::after{content:""; position:absolute; left:50%; top: calc(var(--thick,14px)/2); transform: translateX(-50%); width:12px; height:12px; border-radius:50%; background:#00f5c4; box-shadow:0 0 0 4px rgba(0,245,196,.15)}
-  .prism-wheel .center{position:absolute; inset:calc(var(--thick,14px) + 16px); border-radius:50%; display:grid; place-items:center; background: radial-gradient(120px 120px at 60% 40%, rgba(255,255,255,.06), rgba(10,12,20,.55))}
-  .prism-wheel .kv{display:grid; gap:6px; text-align:center}
-  .prism-wheel .kv .row{display:flex; align-items:center; gap:6px; justify-content:center; font: 700 13px/1.2 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; color:#eaf1ff}
-  .prism-wheel .kv .val{font-weight:900; font-size:17px}
-  .prism-wheel .kv .dot{width:8px; height:8px; border-radius:50%}
-  .prism-wheel .kv .dot.ai{background:#7c5bff}
-  .prism-wheel .kv .dot.h{background:#00f5c4}
-
-  /* Hide any legacy wheel nodes inside .wheel */
-  .hvai.hvai-v26 .wheel > *:not(.prism-wheel){ display:none !important; }
-  </style>
-
-  <div class="tech" aria-hidden="true"></div>
-
-  <div class="grid">
-    <div class="left">
-      <div class="title"><div class="txt"><span class="rainbow">Human vs AI Content (Ensemble)</span></div></div>
-
-      <div id="hvaiStatus" class="status neutral" aria-live="polite">
-        <span class="status-badge"><span class="ico">⌛</span><span class="txt">Waiting for analysis…</span></span>
+        <details class="hvai2-note">
+          <summary>How the multi‑model ensemble works</summary>
+          <p>We compute several independent signals (burstiness, repetition, entropy proxy, readability, rarity, stop‑word rhythm, and type–token ratio). Each “model” converts its signal into a 0–100 “AI‑likelihood” score. The ensemble then combines them with calibrated weights and confidence caps. These are heuristic proxies designed for on‑device use and do <em>not</em> call external services.</p>
+        </details>
       </div>
 
-      <div class="badges">
-        <div class="badge">🛡️ <strong>Confidence:</strong> <span id="hvaiConf">0</span>%</div>
-        <div class="badge">ℹ️ Higher bar = more AI-like</div>
-      </div>
+      <style>
+        /* ===== Scoped Styles: hvai2 ===== */
+        .hvai2-wrapper {
+          --bg: var(--card, #0b0e1a);
+          --muted: #9aa4b2;
+          --text: var(--fg, #e7ebf3);
+          --ok: #22c55e;
+          --warn: #f59e0b;
+          --bad: #ef4444;
+          --brand1: #7c3aed;
+          --brand2: #06b6d4;
+          --brand3: #f43f5e;
+          padding: 2rem 0;
+          position: relative;
+          isolation: isolate;
+        }
+        .hvai2-container { max-width: 1100px; margin: 0 auto; padding: 0 1rem; }
+        .hvai2-header { text-align: center; margin-bottom: 1rem; position: relative; }
+        .hvai2-title { margin: 0; line-height: 1.1; }
+        .hvai2-gradient {
+          font-size: clamp(1.4rem, 2vw + 1rem, 2rem);
+          font-weight: 800;
+          background: linear-gradient(90deg, var(--brand1), var(--brand2), var(--brand3));
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          letter-spacing: .4px;
+          display: inline-block;
+        }
+        .hvai2-sub { display: block; color: var(--muted); font-weight: 600; margin-top: .25rem; }
+        .hvai2-kicker { color: var(--muted); margin: .35rem 0 1.25rem; }
 
-      <div class="row2" id="hvaiBars">
-        <div class="bar" data-key="humanLike"><div class="label"><span class="ico"></span> Human-like <span class="num" id="hvaiValHumanBar">0</span></div><div class="track"><div class="fill" id="hvaiBarHuman" style="width:0%"></div></div></div>
-        <div class="bar" data-key="lexical"><div class="label"><span class="ico"></span> Lexical Diversity <span class="num" id="hvaiValLex">0</span></div><div class="track"><div class="fill" id="hvaiBarLex" style="width:0%"></div></div></div>
-        <div class="bar" data-key="burst"><div class="label"><span class="ico"></span> Burstiness <span class="num" id="hvaiValBurst">0</span></div><div class="track"><div class="fill" id="hvaiBarBurst" style="width:0%"></div></div></div>
-        <div class="bar" data-key="digits"><div class="label"><span class="ico"></span> Digits Density <span class="num" id="hvaiValDigits">0</span></div><div class="track"><div class="fill" id="hvaiBarDigits" style="width:0%"></div></div></div>
-        <div class="bar" data-key="repetition"><div class="label"><span class="ico"></span> Repetition (3‑gram) <span class="num" id="hvaiValRep">0</span></div><div class="track"><div class="fill" id="hvaiBarRep" style="width:0%"></div></div></div>
-        <div class="bar" data-key="entropy"><div class="label"><span class="ico"></span> Character Entropy <span class="num" id="hvaiValEnt">0</span></div><div class="track"><div class="fill" id="hvaiBarEnt" style="width:0%"></div></div></div>
-      </div>
+        .hvai2-sparkles { position: absolute; inset: 0; pointer-events: none; }
+        .hvai2-sparkles .sparkle { position: absolute; opacity: .25; width: 22px; height: 22px; fill: currentColor; color: var(--brand2); }
+        .hvai2-sparkles .s1 { top: -6px; left: 10%; animation: float 6s ease-in-out infinite; }
+        .hvai2-sparkles .s2 { top: 4px; right: 18%; color: var(--brand1); animation: twirl 8s linear infinite; }
+        .hvai2-sparkles .s3 { bottom: -6px; left: 50%; color: var(--brand3); animation: pulse 5s ease-in-out infinite; }
 
-      <div id="hvaiImprove" class="improve hidden" aria-live="polite">
-        <div class="improve-head">How to raise your score</div>
-        <ul class="improve-list" id="hvaiImproveList"></ul>
-      </div>
+        @keyframes float { 0% { transform: translateY(0) } 50% { transform: translateY(-6px) } 100% { transform: translateY(0) } }
+        @keyframes twirl { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+        @keyframes pulse { 0%,100% { transform: scale(1) } 50% { transform: scale(1.15) } }
 
-      <small>Source: local ensemble (no external APIs).</small>
-    </div>
+        .hvai2-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1rem; align-items: start; }
+        @media (max-width: 900px) { .hvai2-grid { grid-template-columns: 1fr; } }
 
-    <div class="wheel">
-      <div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;">
-        <div class="track"></div><div class="arc"></div><div class="pointer"></div>
-        <div class="center"><div class="kv">
-          <div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div>
-          <div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div>
-        </div></div>
-      </div>
-    </div>
-  </div>
+        .hvai2-inputcard, .hvai2-output {
+          background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 16px;
+          padding: 1rem;
+          box-shadow: 0 10px 30px rgba(0,0,0,.25);
+          backdrop-filter: blur(6px);
+        }
 
-  <script>
-  (function(){
-    console.log('HVAI v26 loaded');
-    var confLocked=false;
-    function clamp(v){ return Math.max(0,Math.min(100,Math.round(v||0))); }
-    function setBadge(h){ var st=document.getElementById('hvaiStatus'); if(!st) return; var txt=st.querySelector('.txt'); var ico=st.querySelector('.ico'); st.classList.remove('neutral','good','warn','bad'); if(h>=80){ st.classList.add('good'); if(txt) txt.textContent='Great Work'; if(ico) ico.textContent='✅'; } else if(h>=60){ st.classList.add('warn'); if(txt) txt.textContent='Need More Hard work on content'; if(ico) ico.textContent='🟡'; } else { st.classList.add('bad'); if(txt) txt.textContent='Needs Rewrite the Content'; if(ico) ico.textContent='✍️'; } }
-    function setConfidence(v){ var el=document.getElementById('hvaiConf'); if(el) el.textContent=clamp(v); }
-    function deriveConfFromAI(pAI){ return 60 + (Math.abs(50 - pAI) / 50) * 30; }
-    function updateBars(subs){ if(!subs) return; var map=[['hvaiBarHuman','hvaiValHumanBar', subs.humanLike],['hvaiBarLex','hvaiValLex', subs.lexical],['hvaiBarBurst','hvaiValBurst', subs.burst],['hvaiBarDigits','hvaiValDigits', subs.digits],['hvaiBarRep','hvaiValRep', subs.repetition],['hvaiBarEnt','hvaiValEnt', subs.entropy],]; map.forEach(function(r){ var f=document.getElementById(r[0]); var n=document.getElementById(r[1]); var v=clamp(r[2]); if(f) f.style.width=v+'%'; if(n) n.textContent=v; }); }
-    function deriveSubs(pAI){ var h=100-pAI, c=v=>Math.max(0,Math.min(100,Math.round(v))); return { humanLike:c(h), lexical:c(35+h*0.55), burst:c(25+h*0.7), digits:c(10+(100-h)*0.3), repetition:c(60-h*0.4), entropy:c(35+h*0.45) }; }
-    function showImprovements(subs){ var box=document.getElementById('hvaiImprove'); var ul=document.getElementById('hvaiImproveList'); if(!box||!ul) return; var tips=[], h=subs.humanLike||0; function add(t){ if(t) tips.push(t); } if(h<80) add('Overall Human-like is ' + h + '%. Aim for ≥ 80 by applying the tips below.'); if(subs.lexical<75) add('Lexical Diversity is low ('+subs.lexical+'%). Add domain-specific terms and vary phrasing.'); if(subs.burst<70) add('Burstiness is low ('+subs.burst+'%). Mix short and long sentences.'); if(subs.repetition<70) add('Repetition (3‑gram) is high ('+subs.repetition+'%). Rephrase repeated chunks.'); if(subs.entropy<70) add('Character Entropy is low ('+subs.entropy+'%). Add varied punctuation and specific names.'); if(subs.digits>80) add('Digits Density is high ('+subs.digits+'%). Remove unnecessary numbers.'); if(tips.length<=1 && h<80) add('Add concrete examples and personal/brand perspective.'); ul.innerHTML=''; tips.slice(0,8).forEach(function(t){ var li=document.createElement('li'); li.textContent=t; ul.appendChild(li); }); box.classList.toggle('hidden', !(h<80 || tips.length>0)); }
-    window.updateHVAIScore=function(pAI){ var p=clamp(pAI), h=100-p; var wheel=document.getElementById('prismWheel'); if(wheel) wheel.style.setProperty('--p', p); var a=document.getElementById('hvaiAIVal'); if(a) a.textContent=p; var b=document.getElementById('hvaiHumanVal'); if(b) b.textContent=h; setBadge(h); if(!confLocked) setConfidence(deriveConfFromAI(p)); var subs=deriveSubs(p); updateBars(subs); showImprovements(subs); };
-    function detectUltra(text){ text=(text||'').replace(/\s+/g,' ').trim(); var len=text.length; if(len<40) return {ai:0,conf:60,subs:deriveSubs(0)}; var s=text.split(/(?<=[.!?])\s+/).filter(Boolean); var t=(text.toLowerCase().match(/[a-zA-ZÀ-ÿ0-9']+/g)||[]); var types=new Set(t); var ttr=types.size/Math.max(1,t.length), ttrS=(1-Math.abs(0.52-Math.min(0.95,ttr))/0.52)*100; var tri={}, repS; for(let i=0;i<t.length-2;i++){let g=t.slice(i,i+3).join(' '); tri[g]=(tri[g]||0)+1;} var repR=Object.values(tri).filter(v=>v>1).length/Math.max(1,Object.keys(tri).length); repS=(1-Math.min(0.6,repR)/0.6)*100; var sl=s.map(x=>(x.match(/\\w+/g)||[]).length), avg=sl.reduce((a,b)=>a+b,0)/Math.max(1,s.length); var sd=Math.sqrt(sl.reduce((a,b)=>a+Math.pow(b-avg,2),0)/Math.max(1,s.length)); var cov=avg?sd/avg:0; var burstS=Math.min(1,cov/0.8)*100; var freq={},H=0,N=0; for(let ch of text){ if(ch<' '||ch>'~') continue; freq[ch]=(freq[ch]||0)+1; N++; } for(let k in freq){ let p=freq[k]/N; H+=-p*Math.log2(p); } var entS=(1-Math.abs(3.8-Math.min(6,H))/3.8)*100; var digits=(text.match(/\\d/g)||[]).length/Math.max(1,len); var digS=(1-Math.max(0,0.06-digits)/0.06)*100; function syl(w){return Math.max(1,(w.match(/[aeiouy]+/gi)||[]).length-(w.match(/(?:e|ed|es)\\b/gi)||[]).length+(w.match(/le\\b/gi)?1:0));} var words=t.length||1, syls=t.reduce((a,w)=>a+syl(w),0); var FRE=206.835-(1.015*(words/Math.max(1,s.length)))-(84.6*(syls/words)); var readS=(1-Math.abs(60-Math.max(0,Math.min(100,FRE)))/60)*100; var human=ttrS*.18 + repS*.15 + burstS*.18 + entS*.12 + digS*.10 + readS*.15; var ai=Math.max(0,Math.min(100,100-human)); var subs={ humanLike:Math.round(100-ai), lexical:Math.round(ttrS), burst:Math.round(burstS), digits:Math.round(digS), repetition:Math.round(repS), entropy:Math.round(entS) }; var varSignals=[ttrS,repS,burstS,entS,digS,readS], mean=varSignals.reduce((a,b)=>a+b,0)/varSignals.length; var variance=varSignals.reduce((a,b)=>a+Math.pow(b-mean,2),0)/varSignals.length; var conf=Math.max(50,Math.min(98,60+Math.log10(len+1)*8+Math.sqrt(variance)/10)); return {ai:Math.round(ai), conf:Math.round(conf), subs}; }
-    window.hvaiCompute=function(text){ try{ var r=detectUltra(text||''); confLocked=true; updateHVAIScore(r.ai); updateBars(r.subs); setConfidence(r.conf); showImprovements(r.subs); return r; }catch(e){ console.warn('hvaiCompute error',e); return null; } };
+        .hvai2-toolbar { display: flex; gap: .5rem; justify-content: flex-end; margin-bottom: .5rem; }
+        .hvai2-btn {
+          display: inline-flex; align-items: center; gap: .5rem;
+          padding: .55rem .9rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.1);
+          color: var(--text); background: rgba(255,255,255,.06); cursor: pointer;
+          transition: transform .06s ease, background .2s ease, box-shadow .2s ease;
+        }
+        .hvai2-btn:hover { background: rgba(255,255,255,.12); box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+        .hvai2-btn:active { transform: translateY(1px) scale(.98); }
+        .hvai2-btn .ico { display: inline-flex; width: 18px; height: 18px; }
+        .hvai2-btn .ico svg { width: 100%; height: 100%; }
+        .hvai2-btn .ico.spin svg { animation: spin 1.4s linear infinite; transform-origin: center; }
+        .hvai2-primary { background: linear-gradient(90deg, var(--brand1), var(--brand2)); border-color: transparent; }
 
-    // Force-inject Prism wheel markup if old wheel is present
-    (function ensureWheel(){
-      var wrap=document.querySelector('#hvai.hvai-v26 .wheel');
-      if(!wrap) return;
-      var hasPrism = !!wrap.querySelector('.prism-wheel');
-      if(!hasPrism){
-        wrap.innerHTML = '<div class="prism-wheel" id="prismWheel" style="--p:0; --thick:14px;"><div class="track"></div><div class="arc"></div><div class="pointer"></div><div class="center"><div class="kv"><div class="row"><span class="dot ai"></span> AI‑like <span class="val"><span id="hvaiAIVal">0</span>%</span></div><div class="row"><span class="dot h"></span> Human‑like <span class="val"><span id="hvaiHumanVal">0</span>%</span></div></div></div></div>';
-      }
-    })();
+        @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
 
-    // init
-    updateHVAIScore(0);
-  })();
-  </script>
-</section>
+        .hvai2-textarea {
+          width: 100%; resize: vertical; min-height: 220px;
+          background: rgba(0,0,0,.35); color: var(--text);
+          border-radius: 12px; border: 1px solid rgba(255,255,255,.1);
+          padding: .9rem 1rem; line-height: 1.5;
+          font: 500 15px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, "Apple Color Emoji","Segoe UI Emoji";
+        }
+        .hvai2-meta { display: flex; justify-content: space-between; color: var(--muted); font-size: .9rem; margin-top: .5rem; }
+
+        .hvai2-ensemble { display: grid; grid-template-columns: 140px 1fr; gap: 1rem; align-items: center; }
+        @media (max-width: 500px) { .hvai2-ensemble { grid-template-columns: 1fr; } }
+
+        .hvai2-gauge { width: 140px; height: 140px; position: relative; }
+        .hvai2-gauge svg { width: 100%; height: 100%; display: block; }
+        .hvai2-gauge .track { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 10; }
+        .hvai2-gauge .progress { fill: none; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 326.72; stroke-dashoffset: 326.72; transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset .6s ease; }
+
+        .hvai2-gauge-center { position: absolute; inset: 0; display: grid; place-items: center; gap: .1rem; text-align: center; }
+        #hvai2-ensemble-score { font-weight: 800; font-size: 1.35rem; }
+        #hvai2-ensemble-label { color: var(--muted); font-weight: 600; }
+
+        .hvai2-legend { list-style: none; padding: 0; margin: 0; display: flex; gap: 1rem; flex-wrap: wrap; }
+        .hvai2-legend .dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .35rem; vertical-align: middle; }
+        .hvai2-legend .ok { background: var(--ok); } .hvai2-legend .mid { background: var(--warn); } .hvai2-legend .bad { background: var(--bad); }
+
+        .hvai2-models { margin-top: 1rem; display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; }
+        @media (max-width: 700px) { .hvai2-models { grid-template-columns: 1fr; } }
+
+        .hvai2-card {
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.08);
+          border-radius: 12px;
+          padding: .8rem .9rem;
+          position: relative;
+          overflow: hidden;
+        }
+        .hvai2-card h4 { margin: 0 0 .35rem; font-size: 1rem; display: flex; align-items: center; gap: .5rem; }
+        .hvai2-chip { font-size: .75rem; padding: .25rem .5rem; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); color: var(--muted); }
+        .hvai2-bar { height: 8px; background: rgba(255,255,255,.09); border-radius: 999px; overflow: hidden; margin: .35rem 0 .25rem; }
+        .hvai2-bar > span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--ok), var(--warn), var(--bad)); transition: width .6s ease; }
+        .hvai2-row { display: flex; justify-content: space-between; align-items: center; }
+        .hvai2-score { font-weight: 800; }
+        .hvai2-desc { color: var(--muted); font-size: .85rem; }
+
+        .hvai2-note { margin-top: 1rem; color: var(--muted); }
+        .hvai2-note summary { cursor: pointer; font-weight: 700; }
+
+      
+        /* Badge styles */
+        .hvai2-badge { 
+          position: absolute; 
+          top: -12px; 
+          right: -12px; 
+          display: inline-flex; 
+          align-items: center; 
+          gap: .4rem; 
+          padding: .35rem .6rem; 
+          border-radius: 999px; 
+          font-weight: 800; 
+          font-size: .8rem;
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 6px 18px rgba(0,0,0,.25);
+          transform-origin: 50% 50%;
+          animation: popIn .6s ease forwards;
+        }
+        .hvai2-badge .ico { width: 18px; height: 18px; display: inline-flex; }
+        .hvai2-badge .ico svg { width: 100%; height: 100%; animation: wiggle 2.4s ease-in-out infinite; }
+        .hvai2-badge .text { white-space: nowrap; }
+        .hvai2-badge-hidden { display: none !important; }
+        .badge-good { background: linear-gradient(90deg, #22c55e, #16a34a); color: #06130a; }
+        .badge-okay { background: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0d00; }
+        .badge-low  { background: linear-gradient(90deg, #ef4444, #dc2626); color: #160404; }
+
+        @keyframes popIn { 0% { transform: scale(.8); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+        @keyframes wiggle { 0%,100% { transform: rotate(0deg) } 25% { transform: rotate(7deg) } 75% { transform: rotate(-7deg) } }
+
+        /* Tech lines background */
+        .hvai2-techwrap {
+          position: absolute; inset: 0;
+          z-index: -1; pointer-events: none; overflow: hidden;
+          border-radius: 16px;
+        }
+        canvas.hvai2-tech {
+          width: 100%; height: 100%;
+          display: block; opacity: .45;
+        }
+
+      </style>
+
+      <script>
+      (function(){
+        const $ = (q, el=document) => el.querySelector(q);
+        const $$ = (q, el=document) => Array.from(el.querySelectorAll(q));
+        const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+        const lerp = (a,b,t)=>a+(b-a)*t;
+
+        const txt = $("#hvai2-text");
+        const count = $("#hvai2-count");
+        const lang = $("#hvai2-lang");
+        const btnAnalyze = $("#hvai2-btn-analyze");
+        const btnClear = $("#hvai2-btn-clear");
+        const btnSample = $("#hvai2-btn-sample");
+        const modelsEl = $("#hvai2-models");
+        const gauge = $(".hvai2-gauge .progress");
+        const gScore = $("#hvai2-ensemble-score");
+        const gLabel = $("#hvai2-ensemble-label");
+
+        // === Badge + thresholds ===
+        const badge = $("#hvai2-badge");
+        const badgeText = $(".text", badge);
+        function setBadge(v){
+          badge.classList.remove('badge-good','badge-okay','badge-low','hvai2-badge-hidden');
+          if(v >= 80){
+            badge.classList.add('badge-good');
+            badgeText.textContent = "Great Work — Keep it Up!";
+          } else if(v >= 60){
+            badge.classList.add('badge-okay');
+            badgeText.textContent = "Need More Hard Work";
+          } else {
+            badge.classList.add('badge-low');
+            badgeText.textContent = "Rewrite the Content";
+          }
+        }
+
+        // === Tech lines canvas: lightweight particle network with mouse dance ===
+        function initTechCanvas(scope){
+          const cvs = scope.querySelector("canvas.hvai2-tech");
+          if(!cvs) return;
+          const ctx = cvs.getContext("2d");
+          let W = cvs.clientWidth, H = cvs.clientHeight;
+          let DPR = window.devicePixelRatio || 1;
+          function resize(){
+            W = cvs.clientWidth; H = cvs.clientHeight; DPR = window.devicePixelRatio||1;
+            cvs.width = Math.floor(W * DPR);
+            cvs.height = Math.floor(H * DPR);
+          }
+          resize();
+          const POINTS = Math.max(24, Math.floor((W*H)/18000));
+          const pts = [];
+          const rand = (a,b)=>a+Math.random()*(b-a);
+          for(let i=0;i<POINTS;i++){
+            pts.push({
+              x: rand(0,W), y: rand(0,H),
+              vx: rand(-.4,.4), vy: rand(-.4,.4)
+            });
+          }
+          const mouse = {x: W/2, y: H/2, active: false};
+          scope.addEventListener('mousemove', e=>{
+            const rect = scope.getBoundingClientRect();
+            mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; mouse.active = true;
+          });
+          scope.addEventListener('mouseleave', ()=> mouse.active=false);
+          window.addEventListener('resize', resize);
+
+          function step(){
+            ctx.clearRect(0,0,cvs.width,cvs.height);
+            ctx.save();
+            ctx.scale(DPR,DPR);
+            // animate
+            for(const p of pts){
+              p.x += p.vx; p.y += p.vy;
+              if(mouse.active){
+                const dx = p.x - mouse.x, dy = p.y - mouse.y;
+                const d2 = dx*dx + dy*dy;
+                const f = Math.min(1.5, 12000/Math.max(100,d2));
+                p.vx += -dx * 0.00002 * f;
+                p.vy += -dy * 0.00002 * f;
+              }
+              if(p.x<0||p.x>W) p.vx*=-1;
+              if(p.y<0||p.y>H) p.vy*=-1;
+            }
+            // draw lines
+            for(let i=0;i<pts.length;i++){
+              for(let j=i+1;j<pts.length;j++){
+                const a=pts[i], b=pts[j];
+                const dx=a.x-b.x, dy=a.y-b.y;
+                const d2=dx*dx+dy*dy;
+                if(d2< 140*140){
+                  const aFade = 1 - (Math.sqrt(d2)/140);
+                  const grd = ctx.createLinearGradient(a.x,a.y,b.x,b.y);
+                  grd.addColorStop(0, "rgba(124,58,237,"+ (0.15+0.35*aFade) +")");
+                  grd.addColorStop(1, "rgba(6,182,212,"+ (0.15+0.35*aFade) +")");
+                  ctx.strokeStyle = grd;
+                  ctx.lineWidth = 1;
+                  ctx.beginPath();
+                  ctx.moveTo(a.x, a.y);
+                  ctx.lineTo(b.x, b.y);
+                  ctx.stroke();
+                }
+              }
+            }
+            // draw points
+            for(const p of pts){
+              ctx.beginPath();
+              ctx.arc(p.x,p.y,1.2,0,Math.PI*2);
+              ctx.fillStyle = "rgba(244,63,94,.7)";
+              ctx.fill();
+            }
+            ctx.restore();
+            requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        }
+
+
+
+        const TWO_PI_R = 2 * Math.PI * 52; // circumference for r=52
+
+        const COMMON_STOP = new Set("a,an,the,and,or,but,to,of,in,on,for,with,as,at,by,from,that,this,these,those,is,are,was,were,be,been,being,it,its,if,then,so,because,about,into,over,under,more,most,very,can,could,should,would,will,just,not,do,does,did,have,has,had,which,who,whom,where,when,why,how".split(","));
+        const PUNCT = /[.,;:!?()\[\]{}'"“”‘’—–-]/g;
+
+        function splitSentences(s){
+          return s.replace(/\s+/g,' ').trim().split(/(?<=[.!?\u06D4])\s+/); // ۔ is Urdu end mark
+        }
+        function words(s){
+          return s.toLowerCase().replace(/\d+/g,'').replace(PUNCT,' ').split(/\s+/).filter(Boolean);
+        }
+        function charEntropy(s){
+          if(!s) return 0;
+          const map = new Map();
+          for(const ch of s){
+            map.set(ch, (map.get(ch)||0)+1);
+          }
+          let H = 0; const n = s.length;
+          for(const v of map.values()){ const p=v/n; H += -p*Math.log2(p); }
+          return H; // bits per char
+        }
+        function ttr(ws){ // type-token ratio
+          const set = new Set(ws);
+          return set.size / Math.max(1, ws.length);
+        }
+        function stopwordRatio(ws){
+          let sw = 0;
+          for(const w of ws) if(COMMON_STOP.has(w)) sw++;
+          return sw / Math.max(1, ws.length);
+        }
+        function repetitionScore(ws){
+          // 2-gram repetition
+          const grams = new Map();
+          for(let i=0;i<ws.length-1;i++) {
+            const g = ws[i]+" "+ws[i+1];
+            grams.set(g, (grams.get(g)||0)+1);
+          }
+          let rep = 0, total = grams.size;
+          grams.forEach(v => { if(v>1) rep += v-1; });
+          return total? rep / (rep+total) : 0;
+        }
+        function sentenceVar(sents){
+          const lens = sents.map(s => words(s).length);
+          if(lens.length<2) return 0;
+          const mean = lens.reduce((a,b)=>a+b,0)/lens.length;
+          const v = lens.reduce((a,b)=>a+(b-mean)*(b-mean),0)/lens.length;
+          return v;
+        }
+        function readability(ws, sents){
+          // Simple Flesch proxy that is language agnostic-ish
+          const wordsN = ws.length;
+          const sentsN = Math.max(1, sents.length);
+          const syllables = ws.reduce((a,w)=> a + Math.max(1, (w.match(/[aeiouy]+/g)||[]).length), 0);
+          const flesch = 206.835 - 1.015*(wordsN/sentsN) - 84.6*(syllables/Math.max(1, wordsN));
+          return flesch; // higher = easier
+        }
+        function rarity(ws){
+          // rarity proxy: share of tokens longer than 8 or containing digits/symbols (techy/jargon)
+          let rare = 0;
+          for(const w of ws) if(w.length>=9 || /[^a-z\u0600-\u06FF]/i.test(w)) rare++;
+          return rare / Math.max(1, ws.length);
+        }
+        function punctuationRhythm(text, sents){
+          const puncts = (text.match(PUNCT)||[]).length;
+          return puncts / Math.max(1, sents.length); // avg punct marks per sentence
+        }
+        function stopwordRhythm(sents){
+          const ratios = sents.map(s=> stopwordRatio(words(s)));
+          if(ratios.length<2) return 0;
+          const mean = ratios.reduce((a,b)=>a+b,0)/ratios.length;
+          const v = ratios.reduce((a,b)=>a+(b-mean)*(b-mean),0)/ratios.length;
+          return Math.sqrt(v);
+        }
+        function detectLang(s){
+          // very rough: check for Arabic script -> 'ur'
+          if(/[\u0600-\u06FF]/.test(s)) return 'ur';
+          return 'en';
+        }
+
+        const MODEL_DEFS = [
+          {
+            id: 'perplexityProxy', name: 'Entropy/Perplexity Proxy', weight: 1.2,
+            desc: 'Character entropy as a loose proxy for perplexity.',
+            score(text, ws, sents){
+              const H = charEntropy(text.replace(/\s+/g,''));
+              // High entropy => more human-like; normalize [2..5] bits/char
+              const t = clamp((H - 2)/3, 0, 1);
+              return (1 - t) * 100; // lower H => more AI-like
+            }
+          },
+          {
+            id: 'burstiness', name: 'Burstiness Model', weight: 1.0,
+            desc: 'Variance of sentence length (humans vary more).',
+            score(text, ws, sents){
+              const v = sentenceVar(sents);
+              const t = 1 - Math.tanh(v/80); // higher variance => more human
+              return clamp(t*100,0,100);
+            }
+          },
+          {
+            id: 'repetition', name: 'Repetition Model', weight: 1.0,
+            desc: 'N‑gram repetition and looping.',
+            score(text, ws, sents){
+              const r = repetitionScore(ws);
+              return clamp(r*160, 0, 100); // more repetition => AI-like
+            }
+          },
+          {
+            id: 'readability', name: 'Readability Model', weight: .8,
+            desc: 'Flesch proxy (extremes can indicate AI).',
+            score(text, ws, sents){
+              const f = readability(ws, sents);
+              // Extremely high or extremely low readability might be AI-ish
+              const dev = Math.abs(60 - clamp(f, -20, 120));
+              const t = clamp(dev/60, 0, 1);
+              return t*100;
+            }
+          },
+          {
+            id: 'rarity', name: 'Rarity/Jargon Model', weight: .7,
+            desc: 'Rare/long token share.',
+            score(text, ws, sents){
+              const r = rarity(ws);
+              // too low rarity => bland (AI-ish), too high => technical (neutral)
+              const t = Math.max(0, .28 - r) / .28;
+              return clamp(t*100,0,100);
+            }
+          },
+          {
+            id: 'stopwordRhythm', name: 'Stop‑word Rhythm Model', weight: .9,
+            desc: 'Variation of stop‑word ratios across sentences.',
+            score(text, ws, sents){
+              const sd = stopwordRhythm(sents);
+              // More variation => human-like
+              const t = 1 - clamp(sd/.12, 0, 1);
+              return t*100;
+            }
+          },
+          {
+            id: 'ttr', name: 'Type–Token Ratio Model', weight: .8,
+            desc: 'Lexical variety vs length.',
+            score(text, ws, sents){
+              const TTR = ttr(ws);
+              const adj = TTR * Math.log10(Math.max(10, ws.length));
+              const t = 1 - clamp(adj/.9, 0, 1);
+              return t*100;
+            }
+          },
+          {
+            id: 'punct', name: 'Punctuation Rhythm', weight: .6,
+            desc: 'Punctuation per sentence.',
+            score(text, ws, sents){
+              const pr = punctuationRhythm(text, sents);
+              const t = Math.max(0, .8 - pr) / .8;
+              return clamp(t*100,0,100);
+            }
+          },
+        ];
+
+        function renderModelCard(m) {
+          const card = document.createElement('div');
+          card.className = 'hvai2-card';
+          card.innerHTML = `
+            <h4>
+              <span class="ico">
+                <svg viewBox="0 0 24 24"><path d="M12 2l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z" fill="currentColor"/></svg>
+              </span>
+              <span>\${m.name}</span>
+              <span class="hvai2-chip" title="Weight in ensemble">w=\${m.weight}</span>
+            </h4>
+            <div class="hvai2-bar"><span></span></div>
+            <div class="hvai2-row">
+              <div class="hvai2-desc">\${m.desc}</div>
+              <div class="hvai2-score">0%</div>
+            </div>
+          `;
+          return card;
+        }
+
+        const modelCards = MODEL_DEFS.map(def => {
+          const node = renderModelCard(def);
+          modelsEl.appendChild(node);
+          return { def, node, bar: $('.hvai2-bar > span', node), score: $('.hvai2-score', node) };
+        });
+
+        function updateCounts() {
+          const t = txt.value;
+          const ws = words(t);
+          const sents = splitSentences(t).filter(Boolean);
+          count.textContent = \`\${t.length} chars • \${ws.length} words • \${sents.length} sentences\`;
+          lang.textContent = 'lang: ' + detectLang(t);
+        }
+
+        function analyze() {
+          const t = txt.value.trim();
+          updateCounts();
+          if(!t) {
+            setGauge(0, '—');
+            modelCards.forEach(m=>{ m.bar.style.width='0%'; m.score.textContent='0%'; });
+            return;
+          }
+          const ws = words(t);
+          const sents = splitSentences(t).filter(Boolean);
+
+          let totalW = 0, sum = 0;
+          const perModel = [];
+
+          for(const mc of modelCards){
+            const s = clamp(mc.def.score(t, ws, sents), 0, 100);
+            mc.bar.style.width = s.toFixed(0)+'%';
+            mc.score.textContent = s.toFixed(0)+'%';
+            perModel.push({ id: mc.def.id, score: s, weight: mc.def.weight });
+            totalW += mc.def.weight;
+            sum += s * mc.def.weight;
+          }
+
+          // Confidence cap: short texts are unreliable
+          const len = ws.length;
+          const conf = clamp((len-40)/160, 0, 1); // 0 at <=40 words, ~1 after 200 words
+          const ensemble = (sum / Math.max(1e-6, totalW)) * (0.6 + 0.4*conf);
+
+          const label = ensemble<40? 'More likely Human' : ensemble<60? 'Mixed / Uncertain' : 'More likely AI';
+          setGauge(ensemble, label);
+
+          // attach raw to element for possible back-end logging
+          modelsEl.dataset.results = JSON.stringify({ ensemble: ensemble, confidence: conf, perModel });
+        }
+
+        function setGauge(v, label){
+          setBadge(v);
+          const offset = TWO_PI_R * (1 - clamp(v,0,100)/100);
+          gauge.style.strokeDashoffset = offset;
+          gScore.textContent = v.toFixed(0) + '%';
+          gLabel.textContent = label;
+        }
+
+        // Wire events
+        txt.addEventListener('input', updateCounts);
+        btnAnalyze.addEventListener('click', analyze);
+        btnClear.addEventListener('click', ()=>{ txt.value=''; analyze(); });
+        btnSample.addEventListener('click', ()=>{
+          txt.value = `Humans often weave ideas together with small detours, surprising turns, and uneven sentence lengths. 
+Meanwhile, many AI systems tend to produce even, balanced phrasing with fewer rough edges. 
+This paragraph intentionally mixes both styles—some short lines, then a much longer sentence that carries multiple clauses, 
+so we can observe how the multi‑model ensemble reacts to burstiness, repetition, and lexical variety.`;
+          analyze();
+        });
+
+        // initial
+        updateCounts();
+        // init tech backgrounds on cards
+        $$('.hvai2-inputcard, .hvai2-output').forEach(initTechCanvas);
+
+        // If server provided text, auto-run
+        if(txt.value.trim().length>0) analyze();
+
+      })();
+      </script>
+    </section>
+    
 
 
 
@@ -2134,7 +2752,48 @@ window.addEventListener('error', function(e){
   background: linear-gradient(90deg, #00ffc822, #6bf7ff22);
 }
 
-</style>
+
+        /* Badge styles */
+        .hvai2-badge { 
+          position: absolute; 
+          top: -12px; 
+          right: -12px; 
+          display: inline-flex; 
+          align-items: center; 
+          gap: .4rem; 
+          padding: .35rem .6rem; 
+          border-radius: 999px; 
+          font-weight: 800; 
+          font-size: .8rem;
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 6px 18px rgba(0,0,0,.25);
+          transform-origin: 50% 50%;
+          animation: popIn .6s ease forwards;
+        }
+        .hvai2-badge .ico { width: 18px; height: 18px; display: inline-flex; }
+        .hvai2-badge .ico svg { width: 100%; height: 100%; animation: wiggle 2.4s ease-in-out infinite; }
+        .hvai2-badge .text { white-space: nowrap; }
+        .hvai2-badge-hidden { display: none !important; }
+        .badge-good { background: linear-gradient(90deg, #22c55e, #16a34a); color: #06130a; }
+        .badge-okay { background: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0d00; }
+        .badge-low  { background: linear-gradient(90deg, #ef4444, #dc2626); color: #160404; }
+
+        @keyframes popIn { 0% { transform: scale(.8); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+        @keyframes wiggle { 0%,100% { transform: rotate(0deg) } 25% { transform: rotate(7deg) } 75% { transform: rotate(-7deg) } }
+
+        /* Tech lines background */
+        .hvai2-techwrap {
+          position: absolute; inset: 0;
+          z-index: -1; pointer-events: none; overflow: hidden;
+          border-radius: 16px;
+        }
+        canvas.hvai2-tech {
+          width: 100%; height: 100%;
+          display: block; opacity: .45;
+        }
+
+      </style>
 <script>
 
 /*! checklist-suggest-patch-v1
@@ -2281,7 +2940,48 @@ window.addEventListener('error', function(e){
   .cl-close{position:absolute;top:10px;right:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#eaf1ff;
     font:700 12px/1 Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;padding:.4rem .55rem;border-radius:10px;cursor:pointer}
   .cl-close:hover{background:rgba(255,255,255,.08)}
-</style>
+
+        /* Badge styles */
+        .hvai2-badge { 
+          position: absolute; 
+          top: -12px; 
+          right: -12px; 
+          display: inline-flex; 
+          align-items: center; 
+          gap: .4rem; 
+          padding: .35rem .6rem; 
+          border-radius: 999px; 
+          font-weight: 800; 
+          font-size: .8rem;
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 6px 18px rgba(0,0,0,.25);
+          transform-origin: 50% 50%;
+          animation: popIn .6s ease forwards;
+        }
+        .hvai2-badge .ico { width: 18px; height: 18px; display: inline-flex; }
+        .hvai2-badge .ico svg { width: 100%; height: 100%; animation: wiggle 2.4s ease-in-out infinite; }
+        .hvai2-badge .text { white-space: nowrap; }
+        .hvai2-badge-hidden { display: none !important; }
+        .badge-good { background: linear-gradient(90deg, #22c55e, #16a34a); color: #06130a; }
+        .badge-okay { background: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0d00; }
+        .badge-low  { background: linear-gradient(90deg, #ef4444, #dc2626); color: #160404; }
+
+        @keyframes popIn { 0% { transform: scale(.8); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+        @keyframes wiggle { 0%,100% { transform: rotate(0deg) } 25% { transform: rotate(7deg) } 75% { transform: rotate(-7deg) } }
+
+        /* Tech lines background */
+        .hvai2-techwrap {
+          position: absolute; inset: 0;
+          z-index: -1; pointer-events: none; overflow: hidden;
+          border-radius: 16px;
+        }
+        canvas.hvai2-tech {
+          width: 100%; height: 100%;
+          display: block; opacity: .45;
+        }
+
+      </style>
 <div id="clModal" class="cl-modal" aria-hidden="true" role="dialog" aria-label="Checklist improvement tips">
   <div class="cl-back" data-close="1"></div>
   <div class="cl-card" role="document">
@@ -2421,7 +3121,48 @@ window.addEventListener('error', function(e){
     70%{ opacity:1; transform: translate(-50%,-70%) scale(1.02) rotate(2deg); }
     100%{ opacity:0; transform: translate(-50%,-90%) scale(.96) rotate(6deg); }
   }
-</style>
+
+        /* Badge styles */
+        .hvai2-badge { 
+          position: absolute; 
+          top: -12px; 
+          right: -12px; 
+          display: inline-flex; 
+          align-items: center; 
+          gap: .4rem; 
+          padding: .35rem .6rem; 
+          border-radius: 999px; 
+          font-weight: 800; 
+          font-size: .8rem;
+          backdrop-filter: blur(6px);
+          border: 1px solid rgba(255,255,255,.18);
+          box-shadow: 0 6px 18px rgba(0,0,0,.25);
+          transform-origin: 50% 50%;
+          animation: popIn .6s ease forwards;
+        }
+        .hvai2-badge .ico { width: 18px; height: 18px; display: inline-flex; }
+        .hvai2-badge .ico svg { width: 100%; height: 100%; animation: wiggle 2.4s ease-in-out infinite; }
+        .hvai2-badge .text { white-space: nowrap; }
+        .hvai2-badge-hidden { display: none !important; }
+        .badge-good { background: linear-gradient(90deg, #22c55e, #16a34a); color: #06130a; }
+        .badge-okay { background: linear-gradient(90deg, #f59e0b, #f97316); color: #1a0d00; }
+        .badge-low  { background: linear-gradient(90deg, #ef4444, #dc2626); color: #160404; }
+
+        @keyframes popIn { 0% { transform: scale(.8); opacity: 0 } 100% { transform: scale(1); opacity: 1 } }
+        @keyframes wiggle { 0%,100% { transform: rotate(0deg) } 25% { transform: rotate(7deg) } 75% { transform: rotate(-7deg) } }
+
+        /* Tech lines background */
+        .hvai2-techwrap {
+          position: absolute; inset: 0;
+          z-index: -1; pointer-events: none; overflow: hidden;
+          border-radius: 16px;
+        }
+        canvas.hvai2-tech {
+          width: 100%; height: 100%;
+          display: block; opacity: .45;
+        }
+
+      </style>
 <script>
 (function(){
   const clamp = (n,min,max)=> Math.max(min, Math.min(max,n));
