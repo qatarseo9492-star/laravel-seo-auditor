@@ -765,7 +765,7 @@ h2.section-title, .cl-title {
 
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 
-/* === Performance Mode: animations disabled === */
+
 <style id="no-anim-style">
 .no-anim, .no-anim * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 </style>
