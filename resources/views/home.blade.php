@@ -15,6 +15,11 @@
   // Use fully-qualified facade in Blade to avoid "use ... inside function" fatal error
   $analyzeJsonUrl  = \Illuminate\Support\Facades\Route::has('analyze.json') ? route('analyze.json') : url('analyze-json');
   $analyzeUrl      = \Illuminate\Support\Facades\Route::has('analyze')      ? route('analyze')      : url('analyze');
+// Primary nav targets
+  $semanticAnalyzerUrl = url('/');
+  $topicClustersUrl  = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create')
+      ? route('seo.topic-clusters.create')
+      : url('seo/topic-clusters');
   $psiProxyUrl     = \Illuminate\Support\Facades\Route::has('psi.proxy')    ? route('psi.proxy')    : url('api/psi'); // server proxy keeps API key hidden
   // NEW: backend detector endpoint or fallback
   $detectUrl       = \Illuminate\Support\Facades\Route::has('detect')       ? route('detect')       : url('api/detect');
@@ -492,6 +497,19 @@ footer.site{margin-top:28px;padding:18px 5%;background:rgba(255,255,255,.04);bor
 @media (max-width:520px){.share-btn .share-label{display:none}}
 .category-icon i{font-size:24px;line-height:1}
 /* ================================================ */
+/* === Main Menu (added 2025-08-27) === */
+header.site{gap:1rem}
+.main-menu{flex:1;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:.6rem;margin:0 1rem}
+.menu-link{display:inline-flex;align-items:center;gap:.45rem;padding:.5rem .9rem;border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);text-decoration:none;color:var(--text);background:rgba(255,255,255,.04);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:.2s ease;white-space:nowrap}
+.menu-link:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.32)}
+.menu-link.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b15;border-color:transparent;box-shadow:0 6px 20px rgba(0,0,0,.35)}
+header.site .header-actions{display:flex;align-items:center;gap:.6rem}
+@media (max-width: 860px){
+  .main-menu{order:3;width:100%;justify-content:flex-start;margin-top:10px}
+  header.site{flex-wrap:wrap}
+}
 </style>
 
 <style>
@@ -660,6 +678,18 @@ h2.section-title, .cl-title {
         <div class="hero-sub">Analyze URLs, get scores & colorful insights</div>
       </div>
     </div>
+
+    <nav class="main-menu" aria-label="Primary navigation">
+      <a href="{{ $semanticAnalyzerUrl }}" class="menu-link {{ url()->current() === $semanticAnalyzerUrl ? 'active' : '' }}">
+        <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+        <span>Semantic SEO Analyzer</span>
+      </a>
+      <a href="{{ $topicClustersUrl }}" class="menu-link {{ request()->is('seo/topic-clusters*') ? 'active' : '' }}">
+        <i class="fa-solid fa-diagram-project" aria-hidden="true"></i>
+        <span>Topic Cluster Identification &amp; Mapping</span>
+      </a>
+    </nav>
+  
     <div class="header-actions">
       <button class="btn btn-print" id="printTop"><i class="fa-solid fa-print"></i> Print</button>
     </div>
