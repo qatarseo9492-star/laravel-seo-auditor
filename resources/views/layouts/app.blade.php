@@ -5,13 +5,17 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>@yield('title','Semantic SEO')</title>
 
+  <!-- CSRF (handy if you ever hit web routes) -->
+  <meta name="csrf-token" content="{{ csrf_token() }}"/>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     /* Hide any legacy canvases */
     canvas#bgCanvas, canvas#techCanvas { display:none !important; }
 
-    /* Dark neon base + subtle radial lights */
+    /* Dark neon base + subtle radial lights (no animation) */
     body{
       background:
         radial-gradient(80vw 60vh at 20% 20%, rgba(255,46,136,.14), transparent 60%),
@@ -32,24 +36,28 @@
 
     .glass { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
   </style>
+
   @stack('head')
 </head>
 <body class="text-slate-100 antialiased">
   <div id="neon-bg" aria-hidden="true"></div>
 
+  <!-- Top Nav -->
   <header class="sticky top-0 z-40 bg-black/30 backdrop-blur border-b border-white/10">
     <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
       <a href="{{ route('home') }}" class="font-semibold">Semantic SEO</a>
+
       <nav class="hidden md:flex gap-6 text-sm">
         <a href="{{ route('semantic') }}" class="hover:text-white">Semantic Analyzer</a>
         <a href="{{ route('aiChecker') }}" class="hover:text-white">AI Content Checker</a>
         <a href="{{ route('topicCluster') }}" class="hover:text-white">Topic Cluster</a>
       </nav>
-      <div>
+
+      <div class="flex items-center gap-2">
         @auth
-          <a href="{{ route('dashboard') }}" class="px-3 py-1 rounded-lg bg-white/10">Dashboard</a>
+          <a href="{{ route('dashboard') }}" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/15">Dashboard</a>
         @else
-          <a href="{{ route('login') }}" class="px-3 py-1 rounded-lg bg-white/10">Login</a>
+          <a href="{{ route('login') }}" class="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/15">Login</a>
         @endauth
       </div>
     </div>
@@ -58,6 +66,74 @@
   <main class="min-h-[calc(100vh-3.5rem)]">
     @yield('content')
   </main>
+
+  <!-- Global JSON helpers so all analyzer pages send proper headers -->
+  <script>
+    (function () {
+      const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+      // POST JSON with the right headers (prevents HTML redirects on /api/*)
+      window.postJSON = async (url, data = {}, options = {}) => {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',         // <-- IMPORTANT
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            ...(csrf ? { 'X-CSRF-TOKEN': csrf } : {}),
+            ...(options.headers || {})
+          },
+          body: JSON.stringify(data),
+          ...options
+        });
+
+        // If the API ever sends non-2xx, surface a clear error
+        const ct = res.headers.get('content-type') || '';
+        if (!res.ok) {
+          let msg = `HTTP ${res.status}`;
+          if (ct.includes('application/json')) {
+            const j = await res.json().catch(() => ({}));
+            msg = j.error || j.message || msg;
+          } else {
+            const t = await res.text().catch(() => '');
+            // If Laravel tried to redirect to home/login, show a friendly hint:
+            if (t && t.includes('<!DOCTYPE html')) {
+              msg = 'Unexpected HTML response (did you include Accept: application/json?)';
+            }
+          }
+          throw new Error(msg);
+        }
+
+        // Parse JSON normally
+        if (ct.includes('application/json')) return res.json();
+        // Fallback if server forgets the content-type
+        const text = await res.text();
+        try { return JSON.parse(text); } catch { return { ok:false, error:'Invalid JSON response', raw:text }; }
+      };
+
+      // GET JSON helper (rarely needed for these endpoints)
+      window.getJSON = async (url, options = {}) => {
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            ...(options.headers || {})
+          },
+          ...options
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      };
+
+      // Convenience API wrapper you can call from any page:
+      window.api = {
+        semanticAnalyze: (payload) => postJSON('/api/semantic-analyze', payload),
+        aiCheck:         (payload) => postJSON('/api/ai-check', payload),
+        topicCluster:    (payload) => postJSON('/api/topic-cluster', payload),
+      };
+    })();
+  </script>
 
   @stack('scripts')
 </body>
