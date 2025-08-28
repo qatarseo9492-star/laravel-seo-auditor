@@ -3,80 +3,87 @@
 
 @push('head')
 <style>
-  /* ===== Global background ===== */
+  /* Site background stays pure black */
   html, body { background:#000 !important; }
 
-  /* ===== Small UI tokens (keep your colorful look) ===== */
+  /* ===== Primitives ===== */
   .glass { background: rgba(255,255,255,.06); backdrop-filter: blur(10px); }
   .card  { border-radius: 16px; padding: 18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
-  .pill  { padding:4px 8px; border-radius:9999px; font-size:12px; font-weight:700; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.08); color:#e5e7eb; }
-  .chip  { padding:6px 10px; border-radius:12px; font-weight:800; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#e5e7eb; }
-  .btn   { padding:10px 16px; border-radius:14px; font-weight:800; border:1px solid rgba(255,255,255,.12); }
-  .btn-ghost { background:rgba(255,255,255,.06); color:#fff; }
-  .btn-green { background:#22c55e; color:#091409; border:none; }
-  .btn-blue  { background:#3b82f6; color:#061325; border:none; }
-  .btn-orange{ background:#f59e0b; color:#2b1a03; border:none; }
-  .btn-purple{ background:linear-gradient(90deg,#a78bfa,#f472b6); color:#140616; border:none; }
+  .pill  { padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:700; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.08); color:#e5e7eb; }
+  .chip  { padding:10px 14px; border-radius:14px; font-weight:900; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#e5e7eb; }
+
+  /* ===== Analyze toolbar wrapper (your request) ===== */
+  .analyze-wrap{
+    border-radius: 18px;
+    background:#020114;               /* << requested background */
+    border:1px solid #1b2640;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.04),
+                0 20px 60px rgba(2,1,20,.45);
+  }
+
+  /* ===== Toolbar buttons — glossy / special effect ===== */
+  .btn   { padding:12px 18px; border-radius:14px; font-weight:900; border:1px solid rgba(255,255,255,.12); position:relative; overflow:hidden; }
+  .btn::after{
+    content:""; position:absolute; inset:-2px; border-radius:inherit;
+    background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 30%,transparent 70%,rgba(255,255,255,.18));
+    opacity:.25; pointer-events:none;
+  }
+  .btn-green { background:#22c55e; color:#06180d; border:none; box-shadow:0 8px 26px rgba(34,197,94,.35); }
+  .btn-blue  { background:#3b82f6; color:#071226; border:none; box-shadow:0 8px 26px rgba(59,130,246,.35); }
+  .btn-orange{ background:#f59e0b; color:#2b1a03; border:none; box-shadow:0 8px 26px rgba(245,158,11,.35); }
+  .btn-purple{ background:linear-gradient(90deg,#a78bfa,#f472b6); color:#160216; border:none; box-shadow:0 8px 26px rgba(167,139,250,.35); }
 
   /* ===== Legend pills ===== */
   .lg-green  { background:rgba(16,185,129,.15); color:#a7f3d0; border-color:rgba(16,185,129,.35); }
   .lg-orange { background:rgba(245,158,11,.15); color:#fde68a; border-color:rgba(245,158,11,.35); }
   .lg-red    { background:rgba(239,68,68,.15);  color:#fecaca; border-color:rgba(239,68,68,.35); }
 
-  /* ===== Mega wheel with “liquid” fill ===== */
-  .mega { display:grid; place-items:center; gap:14px; }
-  .mw {
-    --v: 0;  /* 0..100 overall score */
-    --p: 0;  /* 0..100 liquid fill percent */
-    width: 240px; height: 240px; position:relative;
-  }
-  .mw-ring {
+  /* ===== Mega wheel with water color by score ===== */
+  .mega { display:grid; place-items:center; gap:12px; }
+  .mw { --v:0; --ring:#f59e0b; --p:0; width:260px; height:260px; position:relative; }
+  .mw-ring{
     position:absolute; inset:0; border-radius:50%;
-    background:
-      conic-gradient(#f59e0b calc(var(--v)*1%), rgba(255,255,255,.08) 0);
-    -webkit-mask: radial-gradient(circle 92px, transparent 90px, #000 90px);
-            mask: radial-gradient(circle 92px, transparent 90px, #000 90px);
-    box-shadow: inset 0 0 0 10px rgba(255,255,255,.06);
+    background: conic-gradient(var(--ring) calc(var(--v)*1%), rgba(255,255,255,.08) 0);
+    -webkit-mask: radial-gradient(circle 102px, transparent 100px, #000 100px);
+            mask: radial-gradient(circle 102px, transparent 100px, #000 100px);
+    box-shadow: inset 0 0 0 12px rgba(255,255,255,.06);
   }
-  .mw-fill {
-    position:absolute; inset:20px; border-radius:50%;
-    overflow:hidden;
-    background:
-      linear-gradient(to top, #ffb02e 0%, #f59e0b 60%, #f59e0b 100%);
+  .mw-fill{
+    position:absolute; inset:24px; border-radius:50%; overflow:hidden;
+    background: var(--fill, linear-gradient(to top,#f59e0b 0%,#fbbf24 70%,#fde68a 100%));
   }
-  /* “liquid” level simulated by a black overlay that slides up */
-  .mw-fill::after{
-    content:""; position:absolute; left:0; right:0;
-    height:100%; top: calc(100% - var(--p)*1%);
-    background: #000; transition: top .9s ease;
-    /* add a very subtle wave edge */
-    -webkit-mask: radial-gradient(120px 20px at 50% 0,#0000 98%,#000 100%);
-            mask: radial-gradient(120px 20px at 50% 0,#0000 98%,#000 100%);
+  .mw-fill::after{ /* liquid level */
+    content:""; position:absolute; left:0; right:0; height:100%;
+    top: calc(100% - var(--p)*1%);
+    background:#000; transition: top .9s ease;
+    -webkit-mask: radial-gradient(140px 22px at 50% 0,#0000 98%,#000 100%);
+            mask: radial-gradient(140px 22px at 50% 0,#0000 98%,#000 100%);
   }
-  .mw-center {
+  .mw.good { --ring:#22c55e; --fill:linear-gradient(to top,#16a34a 0%,#22c55e 60%,#86efac 100%); }
+  .mw.warn { --ring:#f59e0b; --fill:linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%); }
+  .mw.bad  { --ring:#ef4444; --fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%); }
+  .mw-center{
     position:absolute; inset:0; display:grid; place-items:center;
-    font-size:56px; font-weight:900; color:#fff;
-    text-shadow: 0 6px 20px rgba(0,0,0,.45);
+    font-size:58px; font-weight:900; color:#fff; text-shadow:0 6px 22px rgba(0,0,0,.45);
   }
 
-  /* ===== Toolbar ===== */
-  .urlbox { background:#0b0b0b; border:1px solid rgba(255,255,255,.12); }
-  .urlbox input { color:#e5e7eb; }
-  .toolbar .btn { min-width:112px; }
+  /* ===== Overall water bar with % + color by score ===== */
+  .waterbox{ position:relative; height:22px; border-radius:9999px; overflow:hidden; border:1px solid rgba(255,255,255,.12); background:#0b0b0b; }
+  .waterbox .fill{ position:absolute; inset:0; width:0%; transition:width .9s ease; }
+  .waterbox.good .fill{ background:linear-gradient(90deg,#16a34a,#22c55e,#86efac); }
+  .waterbox.warn .fill{ background:linear-gradient(90deg,#f59e0b,#fbbf24,#fde68a); }
+  .waterbox.bad  .fill{ background:linear-gradient(90deg,#ef4444,#f87171,#fecaca); }
+  .waterbox .label{ position:absolute; inset:0; display:grid; place-items:center; font-weight:900; color:#e5e7eb; font-size:12px; text-shadow:0 2px 10px rgba(0,0,0,.45); }
 
-  /* ===== Small bar beneath title ===== */
-  #waterbar { height: 10px; border-radius: 9999px; background: rgba(255,255,255,.08); overflow: hidden; border:1px solid rgba(255,255,255,.08); }
-  #waterbar span { display:block; height:100%; width:0%; background: linear-gradient(90deg,#ef4444,#f59e0b,#22c55e); transition: width .9s ease; }
-
-  /* ===== Status chips row ===== */
+  /* ===== Status chips ===== */
   .status-row{ display:flex; flex-wrap:wrap; gap:10px; }
   .status-chip{ padding:10px 14px; border-radius:22px; font-weight:900; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#e5e7eb; }
 
-  /* ===== Section titles (multi-color) ===== */
+  /* ===== Section title gradient ===== */
   .t-grad{ background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
-  /* ===== Ground slab (kept from your previous version) ===== */
-  .ground-slab{ border-radius:24px; padding:22px; background:#0D0E1E; border:1px solid #1b2640; position:relative; overflow:hidden; }
+  /* ===== Ground slab (unchanged look) ===== */
+  .ground-slab{ border-radius:24px; padding:22px; background:#0D0E1E; border:1px solid #1b2640; }
   .ground-slab .cat-card{ border-radius:18px; padding:18px; background:#111E2F; border:1px solid rgba(255,255,255,.12); }
   .ground-slab .cat-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
   .ground-slab .cat-title{ font-size:22px; font-weight:900; background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
@@ -89,7 +96,7 @@
   .score-pill--red    { background: rgba(239,68,68,.18);  border-color: rgba(239,68,68,.35);  color:#fecaca; }
   .improve-btn{ padding:6px 10px; border-radius:10px; background:linear-gradient(135deg,#a78bfa,#60a5fa); color:#fff; font-weight:700; }
 
-  /* Dialog */
+  /* Improve dialog */
   dialog[open]{ display:block; }
   dialog::backdrop{ background:rgba(0,0,0,.6); }
   #improveModal .card{ background:#0D0E1E; border:1px solid #1b2640; }
@@ -110,10 +117,10 @@
     </div>
   </div>
 
-  <!-- Top row: Wheel + score chips -->
-  <div class="grid lg:grid-cols-[300px,1fr] gap-6 items-center">
+  <!-- Wheel + chips -->
+  <div class="grid lg:grid-cols-[320px,1fr] gap-6 items-center">
     <div class="mega">
-      <div class="mw" id="mw">
+      <div class="mw warn" id="mw">  <!-- class will switch to .good / .bad -->
         <div class="mw-ring" id="mwRing" style="--v:0"></div>
         <div class="mw-fill" id="mwFill" style="--p:0"></div>
         <div class="mw-center" id="mwNum">0%</div>
@@ -123,22 +130,32 @@
     <div class="space-y-3">
       <div class="flex flex-wrap gap-2">
         <span id="chipOverall" class="chip">Overall: 0 /100</span>
-        <span id="chipContent" class="chip">Content: —</span>
+
+        <!-- “Content” box — glossy effect -->
+        <span id="chipContent" class="chip" style="position:relative;overflow:hidden;">
+          <span style="position:absolute;inset:-2px;border-radius:inherit;background:linear-gradient(120deg,rgba(167,139,250,.22),transparent 35%,transparent 65%,rgba(251,113,133,.22));opacity:.35;"></span>
+          <span style="position:relative">Content: —</span>
+        </span>
+
         <span id="chipWriter"  class="chip">Writer: —</span>
         <span id="chipHuman"   class="chip">Human-like: — %</span>
         <span id="chipAI"      class="chip">AI-like: — %</span>
       </div>
-      <button id="copyReport" class="btn btn-ghost">📋 Copy report</button>
-      <div id="waterbar" class="mt-2"><span style="width:0%"></span></div>
+
+      <!-- Overall water bar with % text & color by score -->
+      <div id="overallBar" class="waterbox warn">
+        <div class="fill" id="overallFill" style="width:0%"></div>
+        <div class="label"><span id="overallPct">0%</span></div>
+      </div>
       <p class="text-xs text-slate-400">Wheel + water bars fill with your scores.</p>
     </div>
   </div>
 
-  <!-- URL toolbar -->
-  <div class="card space-y-3">
-    <label class="urlbox flex items-center gap-2 rounded-xl px-3 py-2">
+  <!-- Analyze toolbar -->
+  <div class="analyze-wrap p-4 space-y-3">
+    <label class="flex items-center gap-2 rounded-xl px-3 py-2" style="background:#0b0b0b;border:1px solid rgba(255,255,255,.12);">
       <span class="opacity-70">🌐</span>
-      <input id="urlInput" name="url" type="url" placeholder="https://example.com" class="w-full bg-transparent outline-none" />
+      <input id="urlInput" name="url" type="url" placeholder="https://example.com" class="w-full bg-transparent outline-none text-slate-100 placeholder:text-slate-400" />
       <button id="pasteBtn" class="pill">✕ Paste</button>
     </label>
 
@@ -158,7 +175,7 @@
       <button id="exportBtn"  class="btn btn-purple">⬇︎ Export</button>
     </div>
 
-    <!-- status chips -->
+    <!-- summary chips -->
     <div id="statusChips" class="status-row mt-2">
       <div class="status-chip" id="chipHttp">HTTP: —</div>
       <div class="status-chip" id="chipTitle">Title: —</div>
@@ -267,13 +284,11 @@
 
 @push('scripts')
 <script>
-/* === Shortcuts === */
 const $ = s => document.querySelector(s);
-const $$ = s => document.querySelectorAll(s);
 
-/* Wheel + water */
-const mwRing=$('#mwRing'), mwFill=$('#mwFill'), mwNum=$('#mwNum');
-const water=$('#waterbar span');
+/* Wheel + bar */
+const mw = $('#mw'), mwRing=$('#mwRing'), mwFill=$('#mwFill'), mwNum=$('#mwNum');
+const overallBar = $('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
 
 /* Chips + toolbar */
 const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'),
@@ -281,26 +296,26 @@ const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$
 const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'),
       pasteBtn=$('#pasteBtn'), importBtn=$('#importBtn'), importFile=$('#importFile'),
       printBtn=$('#printBtn'), resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn'),
-      autoCheck=$('#autoCheck'), copyBtn=$('#copyReport');
+      autoCheck=$('#autoCheck');
 
-/* Quick stats & structure DOM */
+/* Stats & structure */
 const statF=$('#statFlesch'), statG=$('#statGrade'), statInt=$('#statInt'), statExt=$('#statExt'), statRatio=$('#statRatio');
 const titleVal=$('#titleVal'), metaVal=$('#metaVal'), headingMap=$('#headingMap'), recsEl=$('#recs'), catsEl=$('#cats');
 
 /* Status chips */
 const chipHttp=$('#chipHttp'), chipTitle=$('#chipTitle'), chipMeta=$('#chipMeta'),
       chipCanon=$('#chipCanon'), chipRobots=$('#chipRobots'), chipViewport=$('#chipViewport'),
-      chipH=$('#chipH'), chipInt=$('#chipInt'), chipSchema=$('#chipSchema'), chipAuto=$('#chipAuto');
+      chipH=$('#chipH'), chipIntChip=$('#chipInt'), chipSchema=$('#chipSchema'), chipAuto=$('#chipAuto');
 
-/* Improve modal */
+/* Modal */
 const modal=$('#improveModal');
 const mTitle=$('#improveTitle'), mCat=$('#improveCategory'), mScore=$('#improveScore'), mBand=$('#improveBand'),
       mWhy=$('#improveWhy'), mTips=$('#improveTips'), mLink=$('#improveSearch');
 
-const band=(s)=> s>=80?'green':(s>=60?'orange':'red');
+const clamp01 = (n)=> Math.max(0, Math.min(100, n));
+const band = (s)=> s>=80?'good':(s>=60?'warn':'bad');
 const pillClassBy=(s)=> s>=80?'score-pill--green':(s>=60?'score-pill--orange':'score-pill--red');
 const bandLabel=(s)=> s>=80?'Good (≥80)':(s>=60?'Needs work (60–79)':'Low (<60)');
-const labelBy=(s)=> s>=80?'Great Work — Well Optimized':(s>=60?'Needs Optimization':'Needs Significant Optimization');
 
 function tipsFor(catName){
   switch (catName) {
@@ -314,11 +329,7 @@ function tipsFor(catName){
   }
 }
 
-/* Helpers to format & compute */
-const clamp01 = (n)=> Math.max(0, Math.min(100, n));
-const len = (s)=> (s||'').length||0;
-
-/* UI hookups */
+/* Actions */
 pasteBtn.addEventListener('click', async (e)=>{
   e.preventDefault();
   try{ const txt=await navigator.clipboard.readText(); if (txt) urlInput.value=txt.trim(); }catch{}
@@ -335,62 +346,60 @@ importFile.addEventListener('change', (e)=>{
   r.readAsText(f);
 });
 printBtn.addEventListener('click', ()=> window.print());
-resetBtn.addEventListener('click', ()=>{
-  location.reload();
-});
-
-copyBtn.addEventListener('click', async ()=>{
-  const text = document.getElementById('reportText')?.textContent || document.body.innerText.slice(0,4000);
-  try{ await navigator.clipboard.writeText(text); copyBtn.textContent='Copied ✓'; setTimeout(()=>copyBtn.textContent='📋 Copy report',1200);}catch{}
-});
-
+resetBtn.addEventListener('click', ()=> location.reload());
 exportBtn.addEventListener('click', ()=>{
   if (!window.__lastData) { alert('Run an analysis first.'); return; }
   const blob = new Blob([JSON.stringify(window.__lastData, null, 2)], {type:'application/json'});
   const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='semantic-report.json'; a.click(); URL.revokeObjectURL(a.href);
 });
 
-/* Main analyze */
+/* Analyze */
 analyzeBtn.addEventListener('click', async ()=>{
   const url = (urlInput.value||'').trim();
   if (!url) { alert('Enter a URL to analyze.'); return; }
 
-  // start bars
-  water.style.width='0%'; setTimeout(()=> water.style.width='100%', 30);
+  // reset visuals
+  mw.classList.remove('good','warn','bad'); mw.classList.add('warn');
   mwRing.style.setProperty('--v', 0); mwFill.style.setProperty('--p', 0); mwNum.textContent='0%';
+  overallBar.classList.remove('good','warn','bad'); overallBar.classList.add('warn');
+  overallFill.style.width='0%'; overallPct.textContent='0%';
 
   let data={};
   try{
     const res = await fetch('/api/semantic-analyze', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'},
       body: JSON.stringify({url, target_keyword:''})
     });
     data = await res.json();
     if (!res.ok || data.error) throw new Error(data.error || ('HTTP '+res.status));
   }catch(err){
     alert('Analyzer failed: '+err.message);
-    water.style.width='0%';
     return;
   }
   window.__lastData = {...data, url};
 
-  // Overall + wheel
+  /* Overall score & colors */
   const score = clamp01( parseInt(data.overall_score||0,10) );
+  const bandName = band(score);
+  mw.classList.remove('good','warn','bad'); mw.classList.add(bandName);
   mwRing.style.setProperty('--v', score);
   mwFill.style.setProperty('--p', score);
   mwNum.textContent = score + '%';
+
+  overallBar.classList.remove('good','warn','bad'); overallBar.classList.add(bandName);
+  overallFill.style.width = score + '%';
+  overallPct.textContent  = score + '%';
+
   chipOverall.textContent = `Overall: ${score} /100`;
 
-  // Content score (avg of Content & Keywords and Content Quality if both present)
-  const cmap = {};
-  (data.categories||[]).forEach(c => cmap[c.name]= c.score ?? 0);
-  let present=0, sum=0;
-  ['Content & Keywords','Content Quality'].forEach(k=>{ if (cmap[k]!=null){ sum+=cmap[k]; present++; } });
-  const contentScore = present ? Math.round(sum/present) : (cmap['Content & Keywords'] ?? cmap['Content Quality'] ?? '—');
-  chipContent.textContent = `Content: ${contentScore === '—' ? '—' : contentScore+' /100'}`;
+  /* Content score = avg(Content & Keywords, Content Quality) */
+  const cmap = {}; (data.categories||[]).forEach(c => cmap[c.name]= c.score ?? 0);
+  let present=0, sum=0; ['Content & Keywords','Content Quality'].forEach(k=>{ if (cmap[k]!=null){ sum+=cmap[k]; present++; } });
+  const contentScore = present ? Math.round(sum/present) : (cmap['Content & Keywords'] ?? cmap['Content Quality'] ?? 0);
+  chipContent.querySelector('span:last-child')?.remove;
+  chipContent.textContent = `Content: ${contentScore} /100`;
 
-  // Human-like / AI-like (heuristic from readability)
+  /* Simple Human-like/AI-like heuristic from readability */
   const r = data.readability || {};
   let human = clamp01( Math.round( 70 + (r.score||0)/5 - (r.passive_ratio||0)/3 ) );
   let ai    = clamp01( 100 - human );
@@ -398,46 +407,38 @@ analyzeBtn.addEventListener('click', async ()=>{
   chipAI.textContent    = `AI-like: ${ai} %`;
   chipWriter.textContent= human>=60 ? 'Writer: Likely Human' : 'Writer: Possibly AI';
 
-  // Quick stats
+  /* Quick stats */
   statF.textContent = r.flesch ?? '—';
   statG.textContent = 'Grade ' + (r.grade ?? '—');
   statInt.textContent = data.quick_stats?.internal_links ?? 0;
   statExt.textContent = data.quick_stats?.external_links ?? 0;
   statRatio.textContent = (data.quick_stats?.text_to_html_ratio ?? 0) + '%';
 
-  // Structure
+  /* Structure */
   titleVal.textContent = data.content_structure?.title || '—';
   metaVal.textContent  = data.content_structure?.meta_description || '—';
-  headingMap.innerHTML='';
   const h = data.content_structure?.headings || {};
-  Object.entries(h).forEach(([lvl,arr])=>{
+  headingMap.innerHTML=''; Object.entries(h).forEach(([lvl,arr])=>{
     if (!arr || !arr.length) return;
-    const box = document.createElement('div');
-    box.className='card';
+    const box = document.createElement('div'); box.className='card';
     box.innerHTML = `<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>` + arr.map(t=>`<div>• ${t}</div>`).join('');
     headingMap.appendChild(box);
   });
 
-  // Recommendations
-  recsEl.innerHTML='';
-  (data.recommendations||[]).forEach(rec=>{
-    const d = document.createElement('div');
-    d.className='card'; d.innerHTML=`<span class="pill mr-2">${rec.severity}</span>${rec.text}`;
+  /* Recommendations */
+  recsEl.innerHTML=''; (data.recommendations||[]).forEach(rec=>{
+    const d = document.createElement('div'); d.className='card';
+    d.innerHTML=`<span class="pill mr-2">${rec.severity}</span>${rec.text}`;
     recsEl.appendChild(d);
   });
 
-  // Ground categories
-  catsEl.innerHTML='';
-  let autoChecked = 0;
+  /* Ground categories */
+  catsEl.innerHTML=''; let autoChecked=0;
   (data.categories||[]).forEach(cat=>{
-    const total = (cat.checks||[]).length;
-    const passed = (cat.checks||[]).filter(ch=> (ch.score||0) >= 80).length;
-    autoChecked += passed;
-    const pct = Math.round((passed/Math.max(1,total))*100);
-
-    const card = document.createElement('div');
-    card.className='cat-card';
-    card.innerHTML = `
+    const total=(cat.checks||[]).length, passed=(cat.checks||[]).filter(ch=>(ch.score||0)>=80).length;
+    autoChecked += passed; const pct=Math.round((passed/Math.max(1,total))*100);
+    const card=document.createElement('div'); card.className='cat-card';
+    card.innerHTML=`
       <div class="cat-head">
         <div class="flex items-center gap-3">
           <div style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25));border:1px solid rgba(255,255,255,.12);">★</div>
@@ -451,11 +452,9 @@ analyzeBtn.addEventListener('click', async ()=>{
       <div class="progress mb-3"><span style="width:${pct}%"></span></div>
       <div class="space-y-2" id="list"></div>
     `;
-    const list = card.querySelector('#list');
-
+    const list=card.querySelector('#list');
     (cat.checks||[]).forEach(ch=>{
-      const row=document.createElement('div');
-      row.className='check';
+      const row=document.createElement('div'); row.className='check';
       row.innerHTML=`
         <div class="flex items-center gap-3">
           <span class="w-3 h-3 rounded-full" style="background:${(ch.score||0)>=80?'#10b981':(ch.score||0)>=60?'#f59e0b':'#ef4444'}"></span>
@@ -468,15 +467,12 @@ analyzeBtn.addEventListener('click', async ()=>{
       `;
       row.querySelector('.improve-btn').addEventListener('click', ()=>{
         mTitle.textContent = ch.label;
-        mCat.textContent = cat.name;
+        mCat.textContent   = cat.name;
         mScore.textContent = ch.score ?? '—';
-        mBand.textContent = bandLabel(ch.score||0);
-        mBand.className = 'pill '+pillClassBy(ch.score||0);
-        mWhy.textContent = ch.why || 'This item impacts topical authority, UX and eligibility for rich results.';
-        mTips.innerHTML='';
-        (ch.tips||tipsFor(cat.name)).forEach(t=>{
-          const li=document.createElement('li'); li.textContent=t; mTips.appendChild(li);
-        });
+        mBand.textContent  = bandLabel(ch.score||0);
+        mBand.className    = 'pill '+pillClassBy(ch.score||0);
+        mWhy.textContent   = ch.why || 'This item impacts topical authority, UX and eligibility for rich results.';
+        mTips.innerHTML=''; (ch.tips||tipsFor(cat.name)).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; mTips.appendChild(li); });
         mLink.href = ch.improve_search_url || ('https://www.google.com/search?q='+encodeURIComponent(ch.label+' SEO best practices'));
         if (typeof modal.showModal==='function') modal.showModal(); else modal.setAttribute('open','');
       });
@@ -485,24 +481,20 @@ analyzeBtn.addEventListener('click', async ()=>{
     catsEl.appendChild(card);
   });
 
-  // status chips content
-  chipTitle.textContent = `Title: ${len(data.content_structure?.title||'')}`;
-  chipMeta.textContent  = `Meta desc: ${len(data.content_structure?.meta_description||'')}`;
+  /* status chips */
+  chipTitle.textContent = `Title: ${(data.content_structure?.title||'').length}`;
+  chipMeta.textContent  = `Meta desc: ${(data.content_structure?.meta_description||'').length}`;
   chipCanon.textContent = `Canonical: ${new URL(url).origin || '—'}`;
   chipRobots.textContent= `Robots: —`;
   chipViewport.textContent=`Viewport: —`;
   chipH.textContent      = `H1/H2/H3: H1:${(h.H1||[]).length} · H2:${(h.H2||[]).length} · H3:${(h.H3||[]).length}`;
-  chipInt.textContent    = `Internal links: ${data.quick_stats?.internal_links ?? 0}`;
-  chipSchema.textContent = `Schema: ${data.readability ? (data.schema_count || 0) : (data.schema_count || 0)}`;
+  chipIntChip.textContent= `Internal links: ${data.quick_stats?.internal_links ?? 0}`;
+  chipSchema.textContent = `Schema: ${data.schema_count ?? 0}`;
   chipAuto.textContent   = `Auto-checked: ${autoChecked}`;
-  chipHttp.textContent   = `HTTP: 200`; // backend doesn’t return status; show 200 when fetch succeeded
-
-  // finish waterbar at actual score
-  setTimeout(()=>{ water.style.width = score+'%'; }, 120);
-
+  chipHttp.textContent   = `HTTP: 200`; // assume OK if fetch succeeded
 });
 
-/* Close modal when clicking outside content */
+/* Close modal clicking backdrop */
 if (modal) {
   modal.addEventListener('click', (e)=>{
     const rect = modal.getBoundingClientRect();
