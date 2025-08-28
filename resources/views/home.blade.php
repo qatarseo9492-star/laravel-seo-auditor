@@ -1,6 +1,7 @@
 {{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
+\1
 
 <style>
 :root{
@@ -1371,12 +1372,11 @@ header.site.hdr{ top: var(--superbar-h) !important; }
 
   /* === Category bars + completion === */
   function updateCategoryBars(){
-  try{
     var cards=[].slice.call(document.querySelectorAll('.category-card'));
     var total=0, checked=0;
     cards.forEach(function(card,idx){
-      var inputs=[].slice.call(card.querySelectorAll('.checklist input[type="checkbox"]'));
-      var t=inputs.length, done=inputs.filter(function(c){ return c && c.checked; }).length;
+      var items=[].slice.call(card.querySelectorAll('.checklist-item'));
+      var t=items.length, done=items.filter(function(li){ var c=li.querySelector('input'); return c && c.checked; }).length;
       total+=t; checked+=done;
       var pct=t?Math.round(done*100/t):0;
       var fill=document.getElementById('catFillRect-'+idx); if(fill) fill.setAttribute('width', String(6*pct));
@@ -1387,7 +1387,316 @@ header.site.hdr{ top: var(--superbar-h) !important; }
       var c1=pct>=80?'#22c55e':(pct>=60?'#f59e0b':'#ef4444'); var c2=pct>=80?'#16a34a':(pct>=60?'#fb923c':'#b91c1c');
       if(stop1) stop1.setAttribute('stop-color',c1); if(stop2) stop2.setAttribute('stop-color',c2);
     });
-  }catch(e){ /* silent */}
+    var pctAll = total? Math.round(checked*100/total) : 0;
+    var comp=document.getElementById('compClipRect'); if(comp) comp.setAttribute('width', String(6*pctAll));
+    setText('compPct', pctAll + '%'); setText('progressCaption', checked+' of '+total+' items completed');
+  }
+  window.updateCategoryBars = updateCategoryBars;
+
+  /* === Auto-tick by item scores === */
+  function autoTickByScores(map){
+    var autoCount=0;
+    for(var i=1;i<=25;i++){
+      var scVal=Number((map && map[i]!==undefined)? map[i] : NaN);
+      var badge=document.getElementById('sc-'+i);
+      var cb=document.getElementById('ck-'+i);
+      var row=cb ? cb.closest('.checklist-item') : null;
+      if (!badge) continue;
+      if (!isNaN(scVal)) {
+        badge.textContent = Math.round(scVal);
+        badgeTone(badge, scVal);
+        if (document.getElementById('autoApply') && document.getElementById('autoApply').checked && scVal>=80) {
+          if (cb && !cb.checked) { cb.checked=true; autoCount++; }
+          if(row){ row.classList.remove('sev-mid','sev-bad'); row.classList.add('sev-good'); }
+        } else if (scVal>=60) { if(row){ row.classList.remove('sev-bad','sev-good'); row.classList.add('sev-mid'); } }
+        else { if(row){ row.classList.remove('sev-mid','sev-good'); row.classList.add('sev-bad'); } }
+      } else {
+        badge.textContent='—'; badge.classList.remove('score-good','score-mid','score-bad');
+      }
+    }
+    setText('rAutoCount', autoCount);
+    updateCategoryBars();
+  }
+  window.autoTickByScores = autoTickByScores;
+
+  /* === Water progress === */
+  var Water=(function(){
+    var wrapId=function(){ return document.getElementById('waterWrap'); };
+    var clipId=function(){ return document.getElementById('waterClipRect'); };
+    var pctId=function(){ return document.getElementById('waterPct'); };
+    var t=null, value=0;
+    function show(){ var w=wrapId(); if(w) w.style.display='block'; }
+    function hide(){ var w=wrapId(); if(w) w.style.display='none'; }
+    function set(v){ value=Math.max(0,Math.min(100,v)); var y=200 - (200*value/100); var clip=clipId(); if(clip) clip.setAttribute('y', String(y)); var p=pctId(); if(p) p.textContent = Math.round(value) + '%'; }
+    return {
+      start:function(){ show(); set(0); if(t) clearInterval(t); t=setInterval(function(){ if(value<88) set(value+2); }, 80); },
+      finish:function(){ if(t) clearInterval(t); setTimeout(function(){ set(100); }, 150); setTimeout(function(){ hide(); }, 800); },
+      reset:function(){ if(t) clearInterval(t); set(0); hide(); }
+    };
+  })();
+  window.Water = Water;
+
+  /* ===================== Fetch helpers ===================== */
+  function normalizeUrl(u) {
+    if (!u) return '';
+    u = u.trim();
+    if (/^https?:\/\//i.test(u)) { try { new URL(u); return u; } catch(e) { return ''; } }
+    var guess = 'https://' + u.replace(/^\/+/, '');
+    try { new URL(guess); return guess; } catch(e) { return ''; }
+  }
+
+  async function fetchBackend(url){
+    let data=null, ok=false, status=0, text='';
+    const qs=new URLSearchParams({url}).toString();
+    try{
+      const r1=await fetch((window.SEMSEO.ENDPOINTS.analyzeJson||'analyze-json')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+      status=r1.status; text=await r1.text(); try{ data=JSON.parse(text);}catch(_){}
+      if(r1.ok && data) ok=true;
+    }catch(_){}
+    if(!ok){
+      try{
+        const r2=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF},body:JSON.stringify({url,_token:CSRF})});
+        status=r2.status; text=await r2.text(); try{ data=JSON.parse(text);}catch(_){}
+        if(r2.ok && data) ok=true;
+      }catch(_){}
+    }
+    if(!ok){
+      try{
+        const r3=await fetch((window.SEMSEO.ENDPOINTS.analyze||'analyze')+'?'+qs,{headers:{'Accept':'application/json','X-Requested-With':'XMLHttpRequest'}});
+        status=r3.status; text=await r3.text(); try{ data=JSON.parse(text);}catch(_){}
+        if(r3.ok && data) ok=true;
+      }catch(_){}
+    }
+    return {ok,data,status};
+  }
+
+  // NEW: backend multi-detector (works with or without API keys; server may compute local ensemble)
+  async function fetchDetect(text, url){
+    try{
+      const r = await fetch((window.SEMSEO.ENDPOINTS.detect || '/api/detect'),{
+        method:'POST',
+        headers:{
+          'Accept':'application/json',
+          'Content-Type':'application/json',
+          'X-Requested-With':'XMLHttpRequest',
+          'X-CSRF-TOKEN': CSRF
+        },
+        body: JSON.stringify({ text, url })
+      });
+      if(!r.ok) return null;
+      const j = await r.json();
+      return (j && j.ok) ? j : null;
+    }catch(_){ return null; }
+  }
+
+  async function fetchRawHtml(url){
+    try{
+      const r=await fetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});
+      if(r.ok){ const html=await r.text(); if(html && html.length>200) return html; }
+    }catch(_){}
+    return '';
+  }
+
+  async function fetchReadableText(url){
+    try{
+      const httpsR = await fetch('https://r.jina.ai/http/'+url.replace(/^https?:\/\//,''));
+      if(httpsR.ok){ const t = await httpsR.text(); if(t && t.length>200) return t; }
+    }catch(e){}
+    try{
+      const altR = await fetch('https://r.jina.ai/'+url);
+      if(altR.ok){ const t = await altR.text(); if(t && t.length>200) return t; }
+    }catch(e){}
+    return '';
+  }
+
+  function extractMetaFromHtml(html, baseUrl){
+    try{
+      var d=(new DOMParser()).parseFromString(html,'text/html');
+      var q=(s,a)=>{var el=d.querySelector(s);return el?(a?el.getAttribute(a)||'':(el.textContent||'')) : '';};
+      var title=(q('title')||'').trim();
+      var metaDesc=(q('meta[name="description"]','content')||'').trim();
+      var canonical=(q('link[rel="canonical"]','href')||'').trim()||baseUrl;
+      var robots=(q('meta[name="robots"]','content')||'').trim()||'n/a';
+      var viewport=(q('meta[name="viewport"]','content')||'').trim()||'n/a';
+      var h1=d.querySelectorAll('h1').length, h2=d.querySelectorAll('h2').length, h3=d.querySelectorAll('h3').length;
+      var origin=''; try{ origin=new URL(baseUrl).origin; }catch(_){}
+      var internal=0; d.querySelectorAll('a[href]').forEach(function(a){ try{ var u=new URL(a.getAttribute('href'), baseUrl); if(!origin || u.origin===origin) internal++; }catch(_){} });
+      var schema = !!(d.querySelector('script[type="application/ld+json"]') || d.querySelector('[itemscope],[itemtype*="schema.org"]'));
+      var main=d.querySelector('article,main,[role="main"]'); var sample=main? (main.textContent||''): '';
+      if(!sample){ sample=[].slice.call(d.querySelectorAll('p')).slice(0,12).map(function(p){return p.textContent;}).join('\n\n'); }
+      sample=(sample||'').replace(/\s{2,}/g,' ').trim();
+      return { titleLen: title?title.length:null, metaLen: metaDesc?metaDesc.length:null, canonical, robots, viewport, headings:(h1+'/'+h2+'/'+h3), internalLinks:internal, schema: schema?'yes':'no', sampleText: sample };
+    }catch(_){ return {}; }
+  }
+
+  function mergeMeta(into, add){
+    if(!into) into={};
+    var keys=['titleLen','metaLen','canonical','robots','viewport','headings','internalLinks','schema','sampleText'];
+    keys.forEach(function(k){
+      if((into[k]===undefined || into[k]===null || into[k]==='—' || into[k]==='' ) && add && add[k]!==undefined && add[k]!==null){
+        into[k]=add[k];
+      }
+    });
+    return into;
+  }
+
+  /* ===================== Stylometry & Readability ===================== */
+  function clamp(v,min,max){ return v<min?min:(v>max?max:v); }
+  function _countSyllables(word){
+    var w=(word||'').toLowerCase().replace(/[^a-z]/g,''); if(!w) return 0;
+    var m=(w.match(/[aeiouy]+/g)||[]).length; if(/(ed|es)$/.test(w)) m--; if(/^y/.test(w)) m--; return Math.max(1,m);
+  }
+  function _syllableStats(text){
+    var wordRe=/[A-Za-z\u00C0-\u024f']+/g;
+    var words=(text.match(wordRe)||[]);
+    var syll=0;
+    for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
+    var spw = words.length ? (syll/words.length) : 0;
+    return { syllables: syll, spw: spw, words: words.length };
+  }
+  function _flesch(text){
+    var sents = (text.match(/[.!?]+/g)||[]).length || 1;
+    var words = (text.match(/[A-Za-z\u00C0-\u024f']+/g)||[]); var wN = words.length||1;
+    var syll = 0; for(var i=0;i<words.length;i++){ syll += _countSyllables(words[i]); }
+    return clamp(206.835 - 1.015*(wN/sents) - 84.6*(syll/wN), -20, 120);
+  }
+  function _fkGradeLevel(text){
+    var sents = (text.match(/[.!?]+/g)||[]).length || 1;
+    var st = _syllableStats(text);
+    var words = st.words || 1;
+    var grade = 0.39 * (words / sents) + 11.8 * (st.spw || 0) - 15.59;
+    return Math.max(0, Math.min(18, grade));
+  }
+  function _prep(text){
+    text=(text||'')+''; text=text.replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
+    var wordRe=/[A-Za-z\u00C0-\u024f0-9']+/g; var words=(text.match(wordRe)||[]).map(function(w){return w.toLowerCase();});
+    var sents=text.split(/(?<=[.!?])\s+|\n+(?=\S)/g).filter(Boolean); var tokens=words.length||1;
+    var freq=Object.create(null); words.forEach(function(w){freq[w]=(freq[w]||0)+1;});
+    var types=Object.keys(freq).length, hapax=0; for(var k in freq){ if(freq[k]===1) hapax++; }
+    var lens=sents.map(function(s){return (s.match(wordRe)||[]).length;}).filter(function(v){return v>0;});
+    var mean=lens.reduce(function(a,b){return a+b;},0)/(lens.length||1);
+    var variance=lens.reduce(function(a,b){return a+Math.pow(b-mean,2);},0)/(lens.length||1);
+    var cov=mean?Math.sqrt(variance)/mean:0;
+    var tri={}, triT=0, triR=0; for(var i=0;i<tokens-2;i++){ var g=words[i]+' '+words[i+1]+' '+words[i+2]; tri[g]=(tri[g]||0)+1; triT++; } for(var kk in tri){ if(tri[kk]>1) triR+=tri[kk]-1; }
+    var digits=(text.match(/\d/g)||[]).length*100/(tokens||1);
+    var avgLen=tokens? (words.join('').length/tokens):0;
+    var longRatio=(lens.filter(function(L){return L>=28;}).length)/(lens.length||1);
+    var TTR=types/(tokens||1);
+    var asl=mean||0;
+    return { text, wordCount:tokens, flesch:_flesch(text), cov, longRatio, triRepeatRatio: triT?triR/triT:0, TTR, hapaxRatio: types?hapax/types:0, avgWordLen:avgLen, digitsPer100:digits, asl: asl };
+  }
+
+  function detectUltra(text){
+    var s=_prep(text||'');
+    if (s.wordCount < 40){ var aiQuick = clamp(70 - s.wordCount*0.8, 20, 70); return { humanPct: 100-aiQuick, aiPct: aiQuick, confidence: 46, detectors: [] , _s:s }; }
+    var ai=10; var covT=0.45; if(s.cov<covT) ai+=clamp((covT-s.cov)/covT,0,1)*25; var ttrT=0.45; if(s.TTR<ttrT) ai+=clamp((ttrT-s.TTR)/ttrT,0,1)*18;
+    var conf = clamp(50 + Math.min(45, Math.log((s.wordCount||1)+1)*7), 45, 95);
+    return { humanPct: 100-clamp(Math.round(ai),0,100), aiPct: clamp(Math.round(ai),0,100), confidence: conf, detectors: [{key:'stylometry',label:'Stylometry',ai:clamp(Math.round(ai),0,100),w:1}], _s:s };
+  }
+
+  function deriveItemScoresFromSignals(s){
+    function pct(x){ return clamp(Math.round(x),0,100); }
+    function band(x,l,h){ if (x<=l) return 0; if (x>=h) return 100; return (x-l)*100/(h-l); }
+    var read=pct(band(s.flesch,35,75)), rep=pct(100*(1 - s.triRepeatRatio)), ttr=pct(band(s.TTR,0.30,0.65)), longS=pct(band(1-s.longRatio, 0.6, 0.95)), avgLen=pct(band(s.avgWordLen,4.2,5.8)), digits=pct(100*(1 - s.digitsPer100/20));
+    var i=[];
+    i[1]=pct(.5*read+.5*ttr); i[2]=pct(.6*ttr+.4*avgLen); i[3]=pct(.4*ttr+.6*read); i[4]=pct(.7*read+.3*rep); i[5]=pct(.5*read+.5*avgLen);
+    i[6]=pct(.4*ttr+.6*read); i[7]=pct(.4*read+.6*rep); i[8]=pct(.6*rep+.4*digits); i[9]=pct(.6*avgLen+.4*digits); i[10]=pct(.6*avgLen+.4*ttr);
+    i[11]=pct(.5*ttr+.5*rep); i[12]=pct(.6*rep+.4*digits); i[13]=pct(.6*read+.4*rep); i[14]=pct(.6*read+.4*ttr); i[15]=pct(.5*ttr+.5*read);
+    i[16]=pct(.6*digits+.4*read); i[17]=pct(.5*avgLen+.5*ttr); i[18]=pct(.5*read+.5*longS); i[19]=pct(.6*rep+.4*avgLen); i[20]=pct(.5*longS+.5*avgLen);
+    i[21]=pct(.7*read+.3*ttr); i[22]=pct(.6*ttr+.4*avgLen); i[23]=pct(.6*ttr+.4*avgLen); i[24]=pct(.6*avgLen+.4*ttr); i[25]=pct(.6*ttr+.4*digits);
+    var map={}; for(var k=1;k<=25;k++){ map[k]=i[k]; } return map;
+  }
+  function deriveSummaryScoresFromItems(itemMap){
+    var all=[]; for(var i=1;i<=25;i++){ if(isFinite(itemMap[i])) all.push(itemMap[i]); }
+    var avg = function(a){ return a.length? Math.round(a.reduce(function(x,y){return x+y;},0)/a.length) : 0; };
+    return { contentScore: avg(all.slice(0,13)), overall: avg(all) };
+  }
+
+  function buildSampleFromData(data){
+    var parts = [];
+    ['textSample','extractedText','plainText','body','sample','content','text'].forEach(function(k){ if(typeof data?.[k]==='string' && data[k].length>0) parts.push(data[k]); });
+    ['title','meta','description','ogDescription','firstParagraph','snippet','h1','h2','h3'].forEach(function(k){
+      var v = data?.[k];
+      if (typeof v === 'string' && v.trim()) parts.push(v);
+      if (Array.isArray(v)) parts.push(v.join('. '));
+    });
+    var txt = parts.join('\n\n').replace(/\s{2,}/g,' ').trim();
+    return txt.length>140000 ? txt.slice(0,140000) : txt;
+  }
+  function ensureScoresExist(data, sample, ensemble){
+    var needItems = !data.itemScores || Object.keys(data.itemScores).length===0;
+    var needContent = typeof data.contentScore!=='number' || isNaN(data.contentScore);
+    var needOverall = typeof data.overall!=='number' || isNaN(data.overall);
+    var s = (ensemble && ensemble._s) ? ensemble._s : _prep(sample||'');
+    if (needItems) data.itemScores = deriveItemScoresFromSignals(s);
+    if (needContent || needOverall){
+      var sums = deriveSummaryScoresFromItems(data.itemScores||{});
+      if (needContent) data.contentScore = sums.contentScore;
+      if (needOverall) data.overall = sums.overall;
+    }
+    return data;
+  }
+
+  
+  
+/* === HVAI v2 Gauge logic === */
+(function(){
+  function clamp(n,min=0,max=100){ return Math.max(min, Math.min(max, n||0)); }
+
+  function computeEnsembleV2(res){
+    const human = Number(res?.humanPct ?? 0);
+    const ai    = Number(res?.aiPct ?? (res?.aiLikePct ?? 0));
+    const sty   = Number(res?.stylometry ?? 50); // neutral
+    const score = 0.7*human + 0.2*(100 - ai) + 0.1*(100 - Math.min(100, Math.max(0, sty)));
+    return clamp(Math.round(score));
+  }
+
+  function paintGauge(score){
+    const circ = 2*Math.PI*48;
+    const s = clamp(score);
+    const prog = document.querySelector('.neon-gauge .prog');
+    const num  = document.getElementById('hvaiScore');
+    const msg  = document.getElementById('hvaiMsg');
+    if (!prog) return;
+    prog.style.strokeDasharray = String(circ);
+    prog.style.strokeDashoffset = String(circ - (circ*s/100));
+    prog.classList.remove('good','mid','bad');
+    if (s >= 80){ prog.classList.add('good'); msg && (msg.textContent = 'Great work — looks human!'); celebrate(); }
+    else if (s >= 60){ prog.classList.add('mid'); msg && (msg.textContent = 'Pretty close — a few tweaks.'); }
+    else { prog.classList.add('bad'); msg && (msg.textContent = 'Red zone — sounds AI-ish.'); }
+    if (num) num.textContent = s;
+  }
+
+  function celebrate(){
+    const root = document.querySelector('.neon-gauge .confetti');
+    if (!root) return;
+    root.innerHTML = '';
+    const colors = ['#22c55e','#a78bfa','#60a5fa','#f59e0b','#f43f5e','#34d399'];
+    for(let i=0;i<24;i++){
+      const p = document.createElement('i');
+      const x = Math.random()*100, y = 50+Math.random()*10;
+      p.style.left = x+'%'; p.style.top = y+'%';
+      p.style.background = colors[Math.floor(Math.random()*colors.length)];
+      p.style.transform += ` rotate(${Math.floor(Math.random()*360)}deg)`;
+      p.style.animationDelay = (Math.random()*0.3)+'s';
+      root.appendChild(p);
+    }
+    setTimeout(()=>{ root.innerHTML=''; }, 2000);
+  }
+
+  window.HVAI_V2 = {
+    compute: computeEnsembleV2,
+    paint: paintGauge,
+    update: function(res){
+      try{
+        const s = computeEnsembleV2(res||{});
+        paintGauge(s);
+        const h = document.getElementById('metaHuman'); if(h) h.textContent = ((res?.humanPct??0)|0)+'%';
+        const a = document.getElementById('metaAI');    if(a) a.textContent = ((res?.aiPct??res?.aiLikePct??0)|0)+'%';
+        const c = document.getElementById('metaConf');  if(c) c.textContent = (res?.confidence? Math.round(res.confidence*100):'—');
+      }catch(e){}
+    }
+  };
 })();
 
 /* === Human vs AI rendering === */
@@ -1588,18 +1897,7 @@ header.site.hdr{ top: var(--superbar-h) !important; }
 
   /* ===================== ANALYZE ===================== */
   async function analyze(){
-  if (window.SEMSEO && window.SEMSEO.BUSY) return;
-  // reset score badges & row severity (but keep checkbox state)
-  try{
-    for(var _i=1; _i<=25; _i++){
-      var _b=document.getElementById('sc-'+_i);
-      if(_b){ _b.textContent='—'; _b.classList.remove('score-good','score-mid','score-bad'); }
-      var _cb=document.getElementById('ck-'+_i);
-      var _row=_cb && _cb.closest ? _cb.closest('.checklist-item') : null;
-      if(_row){ _row.classList.remove('sev-good','sev-mid','sev-bad'); }
-    }
-  }catch(e){}
-  if (window.SEMSEO.BUSY) return;
+    if (window.SEMSEO.BUSY) return;
     window.SEMSEO.BUSY = true;
 
     var input = document.getElementById('analyzeUrl');
@@ -1654,15 +1952,7 @@ header.site.hdr{ top: var(--superbar-h) !important; }
     var contentScore = Number(data.contentScore || 0);
     window.setScoreWheel(overall||0);
     setText('contentScoreInline', Math.round(contentScore||0));
-    
-    try{
-      var _el=document.getElementById('contentScoreInline');
-      var _val=_el? parseInt(_el.textContent,10) : 0;
-      if (window.setScoreWheel && (!('overall' in (typeof data!=='undefined'?data:{})) || isNaN(data.overall))) {
-        window.setScoreWheel(_val);
-      }
-    }catch(e){} 
-setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
+    setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
 
     // Meta chips
     setText('rStatus',    data.httpStatus ? data.httpStatus : '200?');
@@ -1701,9 +1991,7 @@ setChipTone(document.getElementById('contentScoreChip'), contentScore||0);
     // Checklist scores + autotick
     window.autoTickByScores(data.itemScores || {});
 
-    
-    if (window.updateCategoryBars) try{ window.updateCategoryBars(); }catch(e){}
-if (window.Water) window.Water.finish();
+    if (window.Water) window.Water.finish();
     if (statusEl) statusEl.textContent = 'Analysis complete';
     if (report) report.style.display = 'block';
 
@@ -2371,13 +2659,6 @@ window.addEventListener('error', function(e){
 })();
 </script>
 <!-- ===== /Unique Aurora Liquid Wheel block ===== -->
-
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  try{ if (window.updateCategoryBars) window.updateCategoryBars(); }catch(e){}
-}, { once: true });
-</script>
 
 </body>
 </html>
