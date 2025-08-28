@@ -2,74 +2,107 @@
 
 @section('content')
 <style>
-  /* ===== Streamit-like dark neon theme + dancing tech lines ===== */
+  /* ===== Brand palette (Coolors) ===== */
+  :root{
+    --c1:#006466; --c2:#065a60; --c3:#0b525b; --c4:#144552; --c5:#1b3a4b;
+    --c6:#212f45; --c7:#272640; --c8:#312244; --c9:#3e1f47; --c10:#4d194d;
+  }
+
+  /* Page background (static, no animation) */
   body{
     background:
-      radial-gradient(1200px 700px at -10% -10%, rgba(255,102,196,.28), transparent 60%),
-      radial-gradient(1000px 600px at 110% 0%, rgba(96,165,250,.28), transparent 60%),
-      radial-gradient(1400px 900px at 50% 120%, rgba(6,214,160,.20), transparent 65%),
-      linear-gradient(120deg, #0b0f1e, #0a0e1a 50%, #090c18);
+      radial-gradient(1200px 800px at -10% -10%, rgba(0,100,102,.30), transparent 60%),
+      radial-gradient(900px 600px at 110% 0%, rgba(49,34,68,.28), transparent 60%),
+      linear-gradient(135deg, var(--c6), var(--c7) 35%, var(--c8));
   }
-  #bgLines { position:fixed; inset:0; z-index:0; pointer-events:none; }
-  .glass { background: linear-gradient(180deg, rgba(15,23,42,.65), rgba(2,6,23,.55)); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
-  .card  { background: #0f172a; border:1px solid rgba(255,255,255,.08); }
-  .shadow-soft { box-shadow: 0 16px 60px rgba(0,0,0,.28); }
-  .chip { font-size:.7rem; padding:.2rem .5rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); }
 
-  /* Buttons (no @apply so CDN works) */
-  .btn { padding:.6rem 1rem; border-radius:.8rem; font-weight:700; transition:.2s ease; border:1px solid transparent; }
-  .btn-brand { color:#fff; background-image:linear-gradient(135deg,#ff66c4,#60a5fa); }
-  .btn-brand:hover { filter: brightness(1.06); }
-  .btn-ghost { color:#e5e7eb; background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); }
+  .glass { background: linear-gradient(180deg, rgba(17,24,39,.55), rgba(9,12,24,.55)); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(8px); }
+  .card  { background: rgba(18,22,40,.75); border:1px solid rgba(255,255,255,.08); }
+  .shadow-soft { box-shadow: 0 16px 60px rgba(0,0,0,.28); }
+  .kicker { letter-spacing:.14em; font-size:.7rem; text-transform:uppercase; color:#98c1d9; }
+
+  /* Buttons */
+  .btn { padding:.65rem 1rem; border-radius:1rem; font-weight:800; border:1px solid transparent; transition:.2s ease; }
+  .btn:hover { filter:brightness(1.06); }
+  .btn-brand {
+    color:#fff;
+    background-image:linear-gradient(135deg,var(--c10),var(--c9),var(--c4));
+    border-color:rgba(255,255,255,.12);
+  }
+  .btn-ghost {
+    color:#e5e7eb; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+  }
   .btn-ghost:hover { background: rgba(255,255,255,.1); }
 
-  .badge-good, .badge-warn, .badge-bad {
-    display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .75rem;
-    border-radius:9999px; font-size:.75rem; font-weight:700; border:1px solid;
+  /* Inputs */
+  .field {
+    background:#fff; color:#0f172a; border:1px solid #cbd5e1; border-radius: 14px; padding:.7rem .9rem;
+    outline:none; width:100%;
   }
-  .badge-good { background: rgba(16,185,129,.15); color:#34d399; border-color:rgba(16,185,129,.35); }
-  .badge-warn { background: rgba(245,158,11,.15); color:#f59e0b; border-color:rgba(245,158,11,.35); }
-  .badge-bad  { background: rgba(239,68,68,.15);  color:#ef4444; border-color:rgba(239,68,68,.35); }
+  .field:focus{ box-shadow:0 0 0 3px rgba(99,102,241,.25); border-color:#818cf8; }
 
-  .kicker { letter-spacing:.14em; font-size:.7rem; text-transform:uppercase; color:#a5b4fc; }
+  /* Score wheel */
+  .badge-good, .badge-warn, .badge-bad, .badge-na{
+    display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .75rem;
+    border-radius:9999px; font-size:.75rem; font-weight:800; border:1px solid;
+  }
+  .badge-good{ background:rgba(16,185,129,.14); color:#10b981; border-color:rgba(16,185,129,.35); }
+  .badge-warn{ background:rgba(245,158,11,.14); color:#f59e0b; border-color:rgba(245,158,11,.35); }
+  .badge-bad { background:rgba(239,68,68,.14);  color:#ef4444; border-color:rgba(239,68,68,.35); }
+  .badge-na  { background:rgba(148,163,184,.14);color:#cbd5e1; border-color:rgba(148,163,184,.35); }
 
-  /* Category header ribbons */
-  .cat-head { padding:.45rem .9rem; border-radius:9999px; display:inline-flex; align-items:center; gap:.5rem; font-weight:800; font-size:.8rem; color:#0b0f1e; }
-  .cat-ck  { background: linear-gradient(90deg,#ff66c4,#ffd166); }
-  .cat-te  { background: linear-gradient(90deg,#06d6a0,#60a5fa); }
-  .cat-sa  { background: linear-gradient(90deg,#60a5fa,#a78bfa); }
-  .cat-ec  { background: linear-gradient(90deg,#ffd166,#06d6a0); }
+  .chip { font-size:.7rem; padding:.2rem .5rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); }
+
+  /* Category ribbons */
+  .ribbon{ padding:.4rem .9rem; border-radius:9999px; display:inline-flex; align-items:center; gap:.5rem; font-weight:900; font-size:.8rem; color:#fff; }
+  .rib-ck{ background: linear-gradient(90deg,var(--c10),var(--c9)); }
+  .rib-te{ background: linear-gradient(90deg,var(--c3),var(--c2)); }
+  .rib-cq{ background: linear-gradient(90deg,var(--c1),var(--c4)); }
+  .rib-sa{ background: linear-gradient(90deg,var(--c5),var(--c6)); }
+  .rib-ux{ background: linear-gradient(90deg,var(--c7),var(--c8)); }
+  .rib-ec{ background: linear-gradient(90deg,var(--c4),var(--c10)); }
+
+  /* Quick stats cards */
+  .qs { position:relative; border-radius: 1rem; overflow:hidden; }
+  .qs:before{
+    content:""; position:absolute; inset:0; border-top:3px solid; border-image:linear-gradient(90deg,var(--c10),var(--c4)) 1;
+    opacity:.75;
+  }
+
+  /* Heading chips */
+  .hchip{ display:inline-block; padding:.25rem .6rem; border-radius:.6rem; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); }
 
   /* Modal */
   .modal-backdrop { position:fixed; inset:0; background:rgba(2,6,23,.6); backdrop-filter: blur(6px); display:none; z-index:50; }
-  .modal { max-width: 40rem; width: 94vw; }
+  .modal { max-width: 42rem; width: 94vw; }
   .modal.show { display:flex; align-items:center; justify-content:center; }
 </style>
 
-<canvas id="bgLines"></canvas>
-
 <section class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-  <!-- HERO / HEADER -->
+  <!-- HERO -->
   <div class="flex items-start justify-between gap-6">
     <div>
       <span class="kicker">Semantic SEO • Analyzer 2.0</span>
       <h1 class="text-3xl md:text-4xl font-extrabold leading-tight mt-1 text-white">
-        Neon-grade audit with <span class="bg-gradient-to-r from-[#ff66c4] via-[#ffd166] to-[#06d6a0] bg-clip-text text-transparent">color score wheel</span> & actionable checklists
+        Pro analysis with multi-color score wheel & actionable checklists
       </h1>
       <p class="text-slate-300 mt-3 max-w-2xl">
-        Paste a URL (and optional keyword). We’ll fetch the page, analyze structure, entities, links, schema & more—then tell you exactly how to improve.
+        Paste a URL (and optional keyword). We’ll analyze structure, links, schema & coverage—then show exactly what to improve.
       </p>
     </div>
   </div>
 
-  <!-- INPUT CARD -->
+  <!-- INPUT -->
   <div class="mt-8 p-6 rounded-2xl glass shadow-soft">
     <h3 class="font-semibold text-white">Analyze a URL</h3>
     <form id="semanticForm" class="mt-4 grid md:grid-cols-[1fr,260px,auto] gap-3">
-      <input name="url" type="url" required placeholder="https://example.com/article"
-             class="w-full px-3 py-2 rounded-xl bg-white text-slate-900 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-      <input name="target_keyword" id="targetKeywordInput" type="text" placeholder="Primary keyword (optional)"
-             class="px-3 py-2 rounded-xl bg-white text-slate-900 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.6" d="M10 21a9 9 0 1 1 9-9"/></svg>
+        </span>
+        <input name="url" type="url" required placeholder="https://example.com/article" class="field pl-9" />
+      </div>
+      <input name="target_keyword" id="targetKeywordInput" type="text" placeholder="Primary keyword (optional)" class="field" />
       <button id="submitBtn" class="btn btn-brand" type="submit">
         <span class="inline-flex items-center gap-2">
           <svg id="spinner" class="hidden h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -91,123 +124,87 @@
 
   <!-- RESULTS -->
   <div id="semanticResult" class="mt-10 hidden">
-    <!-- Score + quick stats -->
-    <div class="grid lg:grid-cols-3 gap-6 items-stretch">
-      <!-- Score Wheel -->
+    <!-- SCORE + QUICK STATS -->
+    <div class="grid lg:grid-cols-[340px,1fr] gap-6 items-stretch">
+      <!-- Overall Score Wheel -->
       <div class="p-6 rounded-2xl glass shadow-soft flex flex-col items-center justify-center">
         <div class="relative">
-          <svg id="scoreWheel" width="220" height="220" viewBox="0 0 220 220">
+          <svg id="scoreWheel" width="260" height="260" viewBox="0 0 260 260">
             <defs>
-              <linearGradient id="gradMulti" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stop-color="#ff66c4"/>
-                <stop offset="35%"  stop-color="#ffd166"/>
-                <stop offset="65%"  stop-color="#06d6a0"/>
-                <stop offset="100%" stop-color="#60a5fa"/>
+              <linearGradient id="gradWheel" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#4d194d"/>
+                <stop offset="25%" stop-color="#3e1f47"/>
+                <stop offset="50%" stop-color="#312244"/>
+                <stop offset="75%" stop-color="#0b525b"/>
+                <stop offset="100%" stop-color="#065a60"/>
               </linearGradient>
             </defs>
-            <circle cx="110" cy="110" r="90" stroke="rgba(255,255,255,.15)" stroke-width="16" fill="none"/>
-            <circle id="progressArc" cx="110" cy="110" r="90"
-                    stroke="url(#gradMulti)" stroke-width="16" fill="none"
-                    stroke-linecap="round" stroke-dasharray="565.48" stroke-dashoffset="565.48"
-                    transform="rotate(-90 110 110)"/>
-            <text id="scoreText" x="110" y="110" dominant-baseline="middle" text-anchor="middle"
-                  font-size="44" font-weight="800" fill="#fff">—</text>
+            <circle cx="130" cy="130" r="105" stroke="rgba(255,255,255,.12)" stroke-width="20" fill="none"/>
+            <circle id="progressArc" cx="130" cy="130" r="105"
+                    stroke="url(#gradWheel)" stroke-width="20" fill="none"
+                    stroke-linecap="round" stroke-dasharray="659.73" stroke-dashoffset="659.73"
+                    transform="rotate(-90 130 130)"/>
+            <text id="scoreText" x="130" y="120" dominant-baseline="middle" text-anchor="middle"
+                  font-size="48" font-weight="900" fill="#fff">—</text>
+            <text x="130" y="150" dominant-baseline="middle" text-anchor="middle"
+                  font-size="12" fill="#cbd5e1" style="letter-spacing:.22em;">OVERALL</text>
           </svg>
-          <div id="badge" class="mt-4 text-center"></div>
         </div>
-        <p class="mt-4 text-slate-300 text-sm text-center max-w-xs">
-          Overall score from analyzer API. Improve checklist items to push this higher.
-        </p>
+        <div id="badge" class="mt-3"></div>
       </div>
 
-      <!-- Quick Stats -->
-      <div class="p-6 rounded-2xl glass shadow-soft">
-        <h3 class="font-semibold text-white">Quick Stats</h3>
-        <div class="mt-4 grid sm:grid-cols-2 gap-3 text-sm">
-          <div class="rounded-xl card p-4">
-            <div class="text-slate-400 text-xs">Readability (Flesch)</div>
-            <div id="readability" class="text-2xl font-semibold text-white mt-1">—</div>
-          </div>
-          <div class="rounded-xl card p-4">
-            <div class="text-slate-400 text-xs">Text / HTML Ratio</div>
-            <div id="ratioVal" class="text-2xl font-semibold text-white mt-1">—%</div>
-          </div>
-          <div class="rounded-xl card p-4">
-            <div class="text-slate-400 text-xs">Internal Links</div>
-            <div class="text-2xl font-semibold text-white mt-1"><span id="internal">0</span></div>
-          </div>
-          <div class="rounded-xl card p-4">
-            <div class="text-slate-400 text-xs">External Links</div>
-            <div class="text-2xl font-semibold text-white mt-1"><span id="external">0</span></div>
-          </div>
+      <!-- Quick Stats (new layout) -->
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="qs card p-5">
+          <div class="text-slate-400 text-xs">Readability (Flesch)</div>
+          <div id="readability" class="text-3xl font-extrabold text-white mt-1">—</div>
+          <div class="mt-3 h-2 bg-white/10 rounded-full overflow-hidden"><div id="readBar" class="h-2" style="width:0%; background:linear-gradient(90deg,#ef4444,#f59e0b,#10b981)"></div></div>
+          <div id="readBadge" class="mt-2 text-sm"></div>
         </div>
-        <div class="mt-4 rounded-xl card p-4 text-sm">
+        <div class="qs card p-5">
+          <div class="text-slate-400 text-xs">Text / HTML Ratio</div>
+          <div id="ratioVal" class="text-3xl font-extrabold text-white mt-1">—%</div>
+          <div class="mt-2 chip">Higher suggests richer content</div>
+        </div>
+        <div class="qs card p-5">
+          <div class="text-slate-400 text-xs">Internal Links</div>
+          <div class="text-3xl font-extrabold text-white mt-1"><span id="internal">0</span></div>
+          <div class="mt-2 chip">Build topical clusters</div>
+        </div>
+        <div class="qs card p-5">
+          <div class="text-slate-400 text-xs">External Links</div>
+          <div class="text-3xl font-extrabold text-white mt-1"><span id="external">0</span></div>
+          <div class="mt-2 chip">Cite authority</div>
+        </div>
+        <div class="qs card p-5 sm:col-span-2 lg:col-span-3">
           <div class="text-slate-400 text-xs">Meta</div>
-          <p class="mt-1"><span class="text-slate-300">Title:</span> <span id="titleVal" class="text-white">—</span></p>
-          <p class="mt-1"><span class="text-slate-300">Description:</span> <span id="metaVal" class="text-white/90">—</span></p>
-        </div>
-      </div>
-
-      <!-- Heading Map -->
-      <div class="p-6 rounded-2xl glass shadow-soft">
-        <h3 class="font-semibold text-white">Heading Map</h3>
-        <div id="headingMap" class="mt-3 text-sm space-y-2 text-slate-300"></div>
-        <div class="mt-4 rounded-xl card p-4 text-sm">
-          <div class="text-slate-400 text-xs">Images</div>
-          <p class="mt-1"><span class="text-slate-300">Missing alt:</span> <span id="imgAlt" class="text-white">—</span></p>
-        </div>
-      </div>
-    </div>
-
-    <!-- READABILITY FOCUS CARD -->
-    <div class="mt-10 p-6 rounded-2xl glass shadow-soft">
-      <div class="flex items-start justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-3">
-          <span class="cat-head" style="color:#0b0f1e;background:linear-gradient(90deg,#60a5fa,#a78bfa)">Readability</span>
-          <span class="text-slate-300 text-sm">Flesch score (0–100). Higher is easier to read.</span>
-        </div>
-        <button class="btn btn-ghost text-sm" data-improve="readability_card">Improve</button>
-      </div>
-
-      <div class="grid md:grid-cols-[220px,1fr] gap-6 mt-6">
-        <!-- mini wheel -->
-        <div class="flex items-center justify-center">
-          <svg id="readWheel" width="180" height="180" viewBox="0 0 220 220">
-            <defs>
-              <linearGradient id="gradRead" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stop-color="#ef4444"/>
-                <stop offset="50%"  stop-color="#f59e0b"/>
-                <stop offset="100%" stop-color="#10b981"/>
-              </linearGradient>
-            </defs>
-            <circle cx="110" cy="110" r="90" stroke="rgba(255,255,255,.15)" stroke-width="16" fill="none"/>
-            <circle id="readArc" cx="110" cy="110" r="90"
-                    stroke="url(#gradRead)" stroke-width="16" fill="none"
-                    stroke-linecap="round" stroke-dasharray="565.48" stroke-dashoffset="565.48"
-                    transform="rotate(-90 110 110)"/>
-            <text id="readText" x="110" y="110" dominant-baseline="middle" text-anchor="middle"
-                  font-size="38" font-weight="800" fill="#fff">—</text>
-          </svg>
-        </div>
-
-        <!-- bar + tips -->
-        <div class="flex flex-col justify-center">
-          <div class="text-sm text-slate-300">Score bar</div>
-          <div class="mt-2 h-3 w-full bg-white/10 rounded-full overflow-hidden">
-            <div id="readBar" class="h-3 rounded-full bg-gradient-to-r from-[#ef4444] via-[#f59e0b] to-[#10b981]" style="width:0%"></div>
+          <div class="grid md:grid-cols-2 gap-3 mt-2">
+            <div><span class="text-slate-300">Title:</span> <span id="titleVal" class="text-white">—</span></div>
+            <div><span class="text-slate-300">Description:</span> <span id="metaVal" class="text-white/90">—</span></div>
           </div>
-          <div id="readBadge" class="mt-3"></div>
-          <p class="text-slate-400 text-sm mt-2">Aim for 50+ for general web audiences.</p>
         </div>
       </div>
     </div>
 
-    <!-- GROUPED CHECKLIST -->
-    <div class="mt-10 space-y-8" id="groupsWrap">
-      <!-- groups will be injected here -->
+    <!-- Heading Map (new layout) -->
+    <div class="mt-10 p-6 rounded-2xl glass shadow-soft">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold text-white">Heading Map</h3>
+        <span class="chip">Hierarchy • Context</span>
+      </div>
+      <div id="headingMap" class="mt-4 grid md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      <div class="mt-4 rounded-xl card p-4 text-sm">
+        <div class="text-slate-400 text-xs">Images</div>
+        <p class="mt-1"><span class="text-slate-300">Missing alt:</span> <span id="imgAlt" class="text-white">—</span></p>
+      </div>
     </div>
 
-    <!-- Recommendations & Anchors -->
+    <!-- CHECKLIST (your requested structure) -->
+    <div class="mt-10 space-y-8" id="checklistWrap">
+      <!-- injected by JS -->
+    </div>
+
+    <!-- Analyzer Recommendations & Anchors -->
     <div class="mt-10 grid lg:grid-cols-2 gap-6">
       <div class="p-6 rounded-2xl glass shadow-soft">
         <h3 class="font-semibold text-white">Analyzer Recommendations</h3>
@@ -215,7 +212,7 @@
       </div>
       <div class="p-6 rounded-2xl glass shadow-soft">
         <h3 class="font-semibold text-white">Anchor Text (Top 100)</h3>
-        <div id="anchors" class="mt-3 text-sm text-slate-300 space-y-1 max-h-[280px] overflow-auto pr-2"></div>
+        <div id="anchors" class="mt-3 text-sm text-slate-300 space-y-1 max-h-[300px] overflow-auto pr-2"></div>
       </div>
     </div>
   </div>
@@ -236,28 +233,17 @@
 </div>
 
 <script>
-  /* ===== Mini DOM helpers ===== */
-  const $  = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const $  = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
 
-  const elForm   = $('#semanticForm');
-  const elWrap   = $('#semanticResult');
-  const errBox   = $('#errorBox');
-  const errMsg   = $('#errorMsg');
-  const btn      = $('#submitBtn');
-  const spinner  = $('#spinner');
-  const btnText  = $('#btnText');
+  const elForm = $('#semanticForm');
+  const elWrap = $('#semanticResult');
+  const errorBox = $('#errorBox'); const errorMsg = $('#errorMsg');
+  const btn = $('#submitBtn'); const spinner = $('#spinner'); const btnText = $('#btnText');
 
-  const scoreText= $('#scoreText');
-  const progressArc = $('#progressArc');
-  const badge    = $('#badge');
-
-  const readText = $('#readText');
-  const readArc  = $('#readArc');
-  const readBar  = $('#readBar');
-  const readBadge= $('#readBadge');
-
-  const groupsWrap = $('#groupsWrap');
+  const scoreText = $('#scoreText'); const progressArc = $('#progressArc'); const badge = $('#badge');
+  const readBar = $('#readBar'); const readBadge = $('#readBadge');
+  const checklistWrap = $('#checklistWrap');
 
   const els = {
     readability: $('#readability'),
@@ -272,214 +258,221 @@
     anchors: $('#anchors'),
   };
 
-  function setLoading(on) {
-    btn.disabled = on;
-    spinner.classList.toggle('hidden', !on);
-    btnText.textContent = on ? 'Analyzing…' : 'Analyze';
-  }
-  function showError(msg) { errMsg.textContent = msg || 'Analysis failed'; errBox.classList.remove('hidden'); }
-  function hideError() { errBox.classList.add('hidden'); }
+  function setLoading(on){ btn.disabled=on; spinner.classList.toggle('hidden',!on); btnText.textContent = on ? 'Analyzing…' : 'Analyze'; }
+  function showError(msg){ errorMsg.textContent = msg || 'Analysis failed'; errorBox.classList.remove('hidden'); }
+  function hideError(){ errorBox.classList.add('hidden'); }
 
   /* ===== Wheels ===== */
-  const PERIM = 2 * Math.PI * 90; // r=90
-  function setWheel(elArc, elText, score) {
-    const clamped = Math.max(0, Math.min(100, Number(score||0)));
-    elText.textContent = clamped;
-    const dash = PERIM * (1 - clamped/100);
-    elArc.setAttribute('stroke-dashoffset', dash.toFixed(2));
-  }
-  function setOverall(score) {
-    setWheel(progressArc, scoreText, score);
-    if (score >= 80) {
-      badge.innerHTML = `<span class="badge-good">🌟 Great Work — Well Optimized</span>`;
-    } else if (score >= 60) {
-      badge.innerHTML = `<span class="badge-warn">⚠️ Need to optimize content</span>`;
-    } else {
-      badge.innerHTML = `<span class="badge-bad">⛳ Need to optimize content</span>`;
-    }
-  }
-  function setReadability(score) {
+  const PERIM = 2 * Math.PI * 105; // r=105
+  function setWheel(elArc, elText, score){
     const s = Math.max(0, Math.min(100, Number(score||0)));
-    setWheel(readArc, readText, s);
+    elText.textContent = s;
+    elArc.setAttribute('stroke-dashoffset', (PERIM * (1 - s/100)).toFixed(2));
+  }
+  function setOverall(score){
+    setWheel(progressArc, scoreText, score);
+    if (score >= 80)      badge.innerHTML = `<span class="badge-good">🌟 Great Work — Well Optimized</span>`;
+    else if (score >= 60) badge.innerHTML = `<span class="badge-warn">⚠️ Need to optimize content</span>`;
+    else                  badge.innerHTML = `<span class="badge-bad">⛳ Need to optimize content</span>`;
+  }
+  function setReadability(s){
+    s = Math.max(0, Math.min(100, Number(s||0)));
+    els.readability.textContent = s;
     readBar.style.width = s + '%';
     readBadge.innerHTML = s >= 60
-      ? `<span class="badge-good">Readable for general web audiences</span>`
+      ? `<span class="badge-good">Readable for general audiences</span>`
       : (s >= 50
           ? `<span class="badge-warn">Acceptable but could be clearer</span>`
           : `<span class="badge-bad">Hard to read — simplify</span>`);
   }
 
-  /* ===== Checklist model with categories and Improve tips ===== */
-  const checklistModel = [
-    // Content & Keywords
-    { id:'keyword_title', cat:'ck', label:'Primary keyword in Title', weight:6,
-      compute: d => d.target_keyword?.in_title ? 1 : 0,
-      improve: () => ['Place the primary keyword near the front of the Title tag.', 'Keep it natural and click-worthy (use numbers / brackets when relevant).']},
-    { id:'keyword_meta', cat:'ck', label:'Primary keyword in Meta description', weight:4,
-      compute: d => d.target_keyword?.in_meta ? 1 : 0,
-      improve: () => ['Mention the primary keyword once in the meta description.', 'Add a benefit + clear call-to-action.']},
-    { id:'keyword_usage', cat:'ck', label:'Keyword appears in content', weight:6,
-      compute: d => (d.target_keyword?.occurrences||0) > 0 ? 1 : 0,
-      improve: () => ['Use the primary keyword in the first paragraph.', 'Sprinkle related terms (synonyms, entities) across sections.']},
+  /* ===== Heading Map (new layout) ===== */
+  function renderHeadingMap(headings){
+    els.map.innerHTML = '';
+    const order = ['h1','h2','h3','h4','h5','h6'];
+    order.forEach(level=>{
+      const arr = headings?.[level] || [];
+      if (!arr.length) return;
+      const card = document.createElement('div');
+      card.className = 'card p-4 rounded-xl';
+      const title = level.toUpperCase();
+      card.innerHTML = `<div class="text-xs text-slate-400">${title}</div>`;
+      const box = document.createElement('div'); box.className = 'mt-2 space-y-1';
+      arr.forEach(t=>{
+        const p = document.createElement('div');
+        p.innerHTML = `<span class="hchip">${escapeHTML(t)}</span>`;
+        box.appendChild(p);
+      });
+      card.appendChild(box);
+      els.map.appendChild(card);
+    });
+  }
 
-    // Technical Elements
-    { id:'title_len', cat:'te', label:'Title length 50–60 chars', weight:8,
-      compute: d => { const len = (d.content_structure?.title || '').trim().length; return (len>=50 && len<=60) ? 1 : 0; },
-      improve: () => ['Aim for ~50–60 characters.', 'Lead with the primary keyword and keep wording compelling.']},
-    { id:'meta_len', cat:'te', label:'Meta description 120–160 chars', weight:6,
-      compute: d => { const len = (d.content_structure?.meta_description || '').trim().length; return (len>=120 && len<=160) ? 1 : 0; },
-      improve: () => ['Write ~150–160 chars.', 'Include primary + secondary keywords naturally.']},
-    { id:'text_ratio', cat:'te', label:'Text/HTML ratio ≥ 10%', weight:4,
-      compute: d => (d.content_structure?.text_to_html_ratio||0) >= 10 ? 1 : 0,
-      improve: () => ['Reduce heavy markup/inline scripts.', 'Add explanatory copy where thin.']},
-    { id:'schema', cat:'te', label:'Structured data present (JSON-LD/Microdata/RDFa)', weight:10,
-      compute: d => (d.technical_seo?.structured_data?.json_ld || d.technical_seo?.structured_data?.microdata || d.technical_seo?.structured_data?.rdfa) ? 1 : 0,
-      improve: () => ['Add suitable schema (Article/FAQ/Product).', 'Validate with Google Rich Results Test.']},
+  /* ===== Checklist model (matches your requested categories) ===== */
+  const LIST = [
+    { catKey:'ck',  catTitle:'1. Content & Keywords', rib:'rib-ck', items:[
+      { id:'ck_intent',        label:'Define search intent & primary topic',
+        compute:d=> !!(d.intent_coverage?.search_intent), improve:()=>[
+          'Match format to top SERP results (guide vs product vs comparison).',
+          'State the primary topic clearly in intro & H1.'
+        ]},
+      { id:'ck_map',           label:'Map target & related keywords (synonyms/PAA)',
+        compute:d=> Array.isArray(d.semantic_core?.topic_cloud) && d.semantic_core.topic_cloud.length>0,
+        improve:()=>['Add related entities, synonyms & PAA questions to sections.']},
+      { id:'ck_h1_kw',         label:'H1 includes primary topic naturally',
+        compute:(d,ctx)=> {
+          const h1 = (d.content_structure?.headings?.h1||[])[0] || '';
+          const kw = (ctx.kw||'').toLowerCase().trim();
+          return kw ? h1.toLowerCase().includes(kw) : !!h1;
+        },
+        improve:()=>['Use a single H1 and include the primary topic naturally.']},
+      { id:'ck_faq',           label:'Integrate FAQs / questions with answers',
+        compute:_=> 'na', improve:()=>['Add an FAQ section; cover PAA-like questions.']},
+      { id:'ck_nlp',           label:'Readable, NLP-friendly language',
+        compute:d=> {
+          const r = Number(d.content_structure?.readability_flesch||0);
+          return r>=60 ? true : (r>=50 ? 'warn' : false);
+        },
+        improve:()=>['Short sentences & paragraphs; prefer active voice; define terms briefly.']},
+    ]},
 
-    // Structure & Architecture
-    { id:'h1_single', cat:'sa', label:'Exactly one H1', weight:6,
-      compute: d => { const h1 = d.content_structure?.headings?.h1 || []; return (Array.isArray(h1) && h1.length===1) ? 1 : 0; },
-      improve: () => ['Ensure exactly one H1.', 'Make it close (not identical) to the Title tag; include the primary topic.']},
-    { id:'headings_order', cat:'sa', label:'Logical heading hierarchy (no skips)', weight:6,
-      compute: d => d.content_structure?.skipped_levels === false ? 1 : 0,
-      improve: () => ['Use H1 → H2 → H3… (avoid jumps).', 'Put secondary keywords in H2/H3 where relevant.']},
-    { id:'internal_links', cat:'sa', label:'≥ 3 internal links', weight:6,
-      compute: d => (d.technical_seo?.links?.internal||0) >= 3 ? 1 : 0,
-      improve: () => ['Link to hub/cluster pages with descriptive anchors.', 'Add “next steps” to deepen topical coverage.']},
-    { id:'external_links', cat:'sa', label:'≥ 1 authoritative external link', weight:4,
-      compute: d => (d.technical_seo?.links?.external||0) >= 1 ? 1 : 0,
-      improve: () => ['Cite reputable sources (.gov, .edu, standards, research).', 'Use precise, descriptive anchor text.']},
+    { catKey:'te',  catTitle:'2. Technical Elements', rib:'rib-te', items:[
+      { id:'te_title_len',     label:'Title tag (≈50–60 chars) w/ primary keyword',
+        compute:d=>{
+          const len = (d.content_structure?.title||'').trim().length;
+          return (len>=50 && len<=60) ? true : (len>=35 && len<=70 ? 'warn' : false);
+        },
+        improve:()=>['Aim ~50–60 chars. Lead with the primary keyword.']},
+      { id:'te_meta_len',      label:'Meta description (≈140–160 chars) + CTA',
+        compute:d=>{
+          const len = (d.content_structure?.meta_description||'').trim().length;
+          return (len>=140 && len<=160) ? true : (len>=110 && len<=180 ? 'warn' : false);
+        },
+        improve:()=>['Write ~150–160 chars; add benefit + CTA; include primary/secondary keywords.']},
+      { id:'te_canonical',     label:'Canonical tag set correctly',
+        compute:_=>'na', improve:()=>['Add a self-referencing canonical tag.']},
+      { id:'te_sitemap',       label:'Indexable & listed in XML sitemap',
+        compute:_=>'na', improve:()=>['Ensure page is indexable and present in sitemap.xml.']},
+    ]},
 
-    // Entities & Context
-    { id:'intent', cat:'ec', label:'Search intent alignment', weight:10,
-      compute: d => d.intent_coverage?.search_intent ? 1 : 0,
-      improve: () => ['Match format to SERP winners (guide vs product vs comparison).', 'Cover PAA questions; add clear CTAs.']},
-    { id:'coverage', cat:'ec', label:'Semantic coverage addressed', weight:16,
-      compute: d => {
-        if (typeof d.intent_coverage?.semantic_coverage_score === 'number') {
-          return d.intent_coverage.semantic_coverage_score >= 60 ? 1 : 0;
-        }
-        return (Array.isArray(d.semantic_core?.topic_cloud) && d.semantic_core.topic_cloud.length>0) ? 1 : 0;
-      },
-      improve: () => ['Add missing entities/subtopics vs top ranking pages.', 'Include FAQs, comparisons, examples to broaden coverage.']},
+    { catKey:'cq',  catTitle:'3. Content Quality', rib:'rib-cq', items:[
+      { id:'cq_eat',           label:'E-E-A-T signals (author, date, expertise)',
+        compute:_=>'na', improve:()=>['Show author bio, updated date, credentials, and references.']},
+      { id:'cq_unique',        label:'Unique value vs. top competitors',
+        compute:_=>'na', improve:()=>['Add original data, examples, comparisons & practical insights.']},
+      { id:'cq_facts',         label:'Facts & citations up to date',
+        compute:_=>'na', improve:()=>['Refresh stats; cite reputable sources.']},
+      { id:'cq_media',         label:'Helpful media (images/video) w/ captions',
+        compute:d=> (d.technical_seo?.image_count||0)>0 ? true : 'warn',
+        improve:()=>['Add annotated images/video with descriptive captions and alt text.']},
+    ]},
 
-    // Virtual item for Readability card Improve button
-    { id:'readability_card', cat:'te', label:'Improve Readability', weight:0,
-      compute: _ => 0,
-      improve: (d) => {
-        const cur = d?.content_structure?.readability_flesch ?? '—';
-        return [
-          `Current Flesch score: ${cur}. Target 50+ for general audiences.`,
-          'Use shorter sentences & paragraphs (1–3 sentences each).',
-          'Prefer active voice and simple words.',
-          'Add lists, sub-headings and descriptive captions.',
-          'Remove filler; explain complex terms when first introduced.'
-        ];
-      }
-    },
+    { catKey:'sa',  catTitle:'4. Structure & Architecture', rib:'rib-sa', items:[
+      { id:'sa_headings',      label:'Logical H2/H3 headings & topic clusters',
+        compute:d=> d.content_structure?.skipped_levels === false ? true : 'warn',
+        improve:()=>['Avoid heading level jumps; group related subtopics under clear H2/H3.']},
+      { id:'sa_internal',      label:'Internal links to hub/related pages',
+        compute:d=> (d.technical_seo?.links?.internal||0) >= 3 ? true : 'warn',
+        improve:()=>['Link to cluster hub & related support pages with descriptive anchors.']},
+      { id:'sa_slug',          label:'Clean, descriptive URL slug',
+        compute:(d,ctx)=>{
+          const u = (ctx.url||'').split('?')[0];
+          return /[^\s]{10,}/.test(u) ? true : 'warn';
+        },
+        improve:()=>['Keep slug human-readable, short, and keyword-descriptive.']},
+      { id:'sa_breadcrumbs',   label:'Breadcrumbs enabled (+ schema)',
+        compute:_=>'na', improve:()=>['Add BreadcrumbList schema and visible breadcrumbs.']},
+    ]},
+
+    { catKey:'ux',  catTitle:'5. User Signals & Experience', rib:'rib-ux', items:[
+      { id:'ux_mobile',        label:'Mobile-friendly, responsive layout',
+        compute:_=>'na', improve:()=>['Verify mobile usability in GSC; fix tap targets & viewport issues.']},
+      { id:'ux_speed',         label:'Optimized speed (compression, lazy-load)',
+        compute:_=>'na', improve:()=>['Compress images, enable caching, defer non-critical JS.']},
+      { id:'ux_webvitals',     label:'Core Web Vitals passing (LCP/INP/CLS)',
+        compute:_=>'na', improve:()=>['Use PSI/Lighthouse to diagnose and improve LCP/INP/CLS.']},
+      { id:'ux_cta',           label:'Clear CTAs and next steps',
+        compute:_=>'na', improve:()=>['Add contextual CTAs guiding users to the next action.']},
+    ]},
+
+    { catKey:'ec',  catTitle:'6. Entities & Context', rib:'rib-ec', items:[
+      { id:'ec_primary',       label:'Primary entity clearly defined',
+        compute:d=> Array.isArray(d.semantic_core?.primary_topics) && d.semantic_core.primary_topics.length>0,
+        improve:()=>['State primary entity early; keep terminology consistent.']},
+      { id:'ec_related',       label:'Related entities covered with context',
+        compute:d=> Array.isArray(d.semantic_core?.topic_cloud) && d.semantic_core.topic_cloud.length>0,
+        improve:()=>['Cover related entities and their relationships in body & headings.']},
+      { id:'ec_schema',        label:'Valid schema markup (Article/FAQ/Product)',
+        compute:d=> (d.technical_seo?.structured_data?.json_ld || d.technical_seo?.structured_data?.microdata || d.technical_seo?.structured_data?.rdfa) ? true : 'warn',
+        improve:()=>['Add JSON-LD for Article/FAQ/etc and validate in Rich Results Test.']},
+      { id:'ec_sameas',        label:'sameAs/Organization details present',
+        compute:_=>'na', improve:()=>['Add Organization schema with sameAs links to authoritative profiles.']},
+    ]},
   ];
 
-  const CATEGORY_META = {
-    ck: { title:'Content & Keywords', class:'cat-ck' },
-    te: { title:'Technical Elements', class:'cat-te' },
-    sa: { title:'Structure & Architecture', class:'cat-sa' },
-    ec: { title:'Entities & Context', class:'cat-ec' },
-  };
-
-  function groupByCategory(items) {
-    const out = {};
-    items.forEach(i => {
-      if (!out[i.cat]) out[i.cat] = [];
-      out[i.cat].push(i);
-    });
-    return out;
+  function statusBadge(status){
+    if (status===true) return `<span class="badge-good">OK</span>`;
+    if (status==='warn') return `<span class="badge-warn">Needs Work</span>`;
+    if (status===false) return `<span class="badge-bad">Needs Work</span>`;
+    return `<span class="badge-na">N/A</span>`;
   }
 
-  function renderGroups(data) {
-    groupsWrap.innerHTML = '';
-    const groups = groupByCategory(checklistModel.filter(i => i.id !== 'readability_card'));
-    Object.entries(groups).forEach(([cat, items]) => {
-      const meta = CATEGORY_META[cat];
-      const section = document.createElement('section');
-      section.className = 'p-6 rounded-2xl glass shadow-soft';
-
-      // header
-      const head = document.createElement('div');
-      head.className = 'flex items-center justify-between gap-3 flex-wrap';
-      head.innerHTML = `
-        <div class="flex items-center gap-3">
-          <span class="cat-head ${meta.class}">${meta.title}</span>
-          <span class="text-slate-300 text-sm">Auto-scored from the URL analysis</span>
+  function renderChecklist(data, ctx){
+    checklistWrap.innerHTML = '';
+    LIST.forEach(group=>{
+      const sec = document.createElement('section');
+      sec.className = 'p-6 rounded-2xl glass shadow-soft';
+      sec.innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <span class="ribbon ${group.rib}">${group.catTitle}</span>
+          <span class="chip">Auto-scored where detectable</span>
         </div>
       `;
-      section.appendChild(head);
-
-      // list
-      const list = document.createElement('div');
-      list.className = 'mt-5 grid md:grid-cols-2 xl:grid-cols-3 gap-4';
-      let gained = 0, total = 0;
-
-      items.forEach(item => {
-        const ok = !!item.compute(data);
-        total += item.weight;
-        if (ok) gained += item.weight;
-        const pts = ok ? item.weight : 0;
-
-        const card = document.createElement('div');
-        card.className = 'p-4 rounded-2xl glass border border-white/10';
-        card.innerHTML = `
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <div class="text-white font-medium">${escapeHTML(item.label)}</div>
-              <div class="text-xs text-slate-400 mt-1">Score: <span class="font-semibold text-white">${pts}</span>/<span class="text-slate-400">${item.weight}</span> pts</div>
+      const ul = document.createElement('ul');
+      ul.className = 'mt-4 space-y-3 text-slate-200';
+      group.items.forEach(item=>{
+        let st;
+        try { st = item.compute(data, ctx); } catch(_){ st='na'; }
+        const li = document.createElement('li');
+        li.className = 'rounded-xl card p-3 border border-white/10';
+        li.innerHTML = `
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="h-2.5 w-2.5 rounded-full" style="background:${st===true?'#10b981':st==='warn'?'#f59e0b':st===false?'#ef4444':'#94a3b8'}"></div>
+              <span>${escapeHTML(item.label)}</span>
             </div>
-            <button class="btn btn-ghost text-xs" data-improve="${item.id}">Improve</button>
+            <div class="flex items-center gap-2">
+              ${statusBadge(st)}
+              <button class="btn btn-ghost text-xs" data-improve="${item.id}">Improve</button>
+            </div>
           </div>
         `;
-        list.appendChild(card);
+        ul.appendChild(li);
       });
-
-      // little progress bar per category
-      const pct = total ? Math.round((gained/total)*100) : 0;
-      const prog = document.createElement('div');
-      prog.className = 'mt-4 text-sm text-slate-300';
-      prog.innerHTML = `
-        <span>Category progress</span>
-        <div class="h-2 w-48 bg-white/10 rounded-full overflow-hidden inline-block align-middle ml-3">
-          <div class="h-2 bg-gradient-to-r from-[#06d6a0] via-[#ffd166] to-[#ff66c4]" style="width:${pct}%"></div>
-        </div>
-        <span class="ml-2 text-white font-semibold">${pct}%</span>
-      `;
-
-      section.appendChild(list);
-      section.appendChild(prog);
-      groupsWrap.appendChild(section);
+      sec.appendChild(ul);
+      checklistWrap.appendChild(sec);
     });
   }
 
-  /* ===== Improve modal (event delegation FIXED) ===== */
+  /* ===== Improve modal ===== */
   const modalBackdrop = $('#modalBackdrop');
   const modalTitle = $('#modalTitle');
   const modalBody = $('#modalBody');
   $('#modalClose').addEventListener('click', closeImprove);
   $('#modalOk').addEventListener('click', closeImprove);
   modalBackdrop.addEventListener('click', (e)=>{ if(e.target===modalBackdrop) closeImprove(); });
-
-  // one listener for all Improve buttons, robust even after re-render
-  document.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-improve]');
-    if (!btn) return;
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-improve]'); if(!btn) return;
     const id = btn.getAttribute('data-improve');
-    openImprove(id, window.__lastData || null);
+    openImprove(id, window.__lastData || {}, window.__ctx || {});
   });
-
-  function openImprove(id, data) {
-    const item = checklistModel.find(x=>x.id===id);
-    if (!item) return;
+  function openImprove(id, data, ctx){
+    const item = LIST.flatMap(g=>g.items).find(x=>x.id===id);
+    if(!item) return;
     modalTitle.textContent = item.label || 'Improve';
-    const tips = (typeof item.improve === 'function') ? item.improve(data) : (item.improve || []);
+    const tips = (typeof item.improve==='function') ? item.improve(data, ctx) : (item.improve || []);
     modalBody.innerHTML = `
-      <div class="text-slate-300">Suggestions to raise your score:</div>
+      <div class="text-slate-300">Suggestions:</div>
       <ul class="mt-2 list-disc pl-5 space-y-1">
         ${(tips||[]).map(t=>`<li>${escapeHTML(t)}</li>`).join('')}
       </ul>
@@ -487,45 +480,38 @@
     modalBackdrop.classList.add('show');
   }
   function closeImprove(){ modalBackdrop.classList.remove('show'); }
-  function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
-  /* ===== Submit handler ===== */
-  elForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideError(); setLoading(true);
-    try {
+  /* ===== Submit & bind data ===== */
+  elForm.addEventListener('submit', async (e)=>{
+    e.preventDefault(); hideError(); setLoading(true);
+    try{
       const fd = new FormData(elForm);
-      const payload = {
-        url: (fd.get('url') || '').trim(),
-        target_keyword: (fd.get('target_keyword') || '').trim()
-      };
+      const ctx = { url: (fd.get('url')||'').trim(), kw:(fd.get('target_keyword')||'').trim() };
+      window.__ctx = ctx;
 
       const res = await fetch('/api/semantic-analyze', {
-        method: 'POST',
-        headers: { 'Accept':'application/json','Content-Type':'application/json','X-Requested-With':'XMLHttpRequest' },
-        body: JSON.stringify(payload)
+        method:'POST',
+        headers:{ 'Accept':'application/json','Content-Type':'application/json','X-Requested-With':'XMLHttpRequest' },
+        body: JSON.stringify({ url: ctx.url, target_keyword: ctx.kw })
       });
 
-      if (!res.ok) {
-        let msg = 'HTTP ' + res.status + ' ' + res.statusText;
-        try { const j = await res.json(); if (j?.error) msg = j.error; } catch(_){}
+      if(!res.ok){
+        let msg = `HTTP ${res.status}`;
+        try{ const j = await res.json(); if(j?.error) msg = j.error; }catch(_){}
         showError(msg); setLoading(false); return;
       }
 
       const data = await res.json();
-      if (!data?.ok) { showError(data?.error || 'Analysis failed'); setLoading(false); return; }
+      if(!data?.ok){ showError(data?.error || 'Analysis failed'); setLoading(false); return; }
 
-      // keep last successful data for Improve modal
       window.__lastData = data;
-
-      // Show results
       elWrap.classList.remove('hidden');
 
-      // Overall
+      // Overall + Readability
       setOverall(data.overall_score);
+      const r = Number(data.content_structure?.readability_flesch||0); setReadability(r);
 
       // Stats
-      els.readability.textContent = data.content_structure?.readability_flesch ?? '—';
       els.ratio.textContent = data.content_structure?.text_to_html_ratio ?? '—';
       els.internal.textContent = data.technical_seo?.links?.internal ?? 0;
       els.external.textContent = data.technical_seo?.links?.external ?? 0;
@@ -533,27 +519,14 @@
       els.meta.textContent  = data.content_structure?.meta_description || '—';
       els.imgAlt.textContent = `${data.technical_seo?.image_alt_missing ?? 0} / ${data.technical_seo?.image_count ?? 0}`;
 
-      // Readability card
-      setReadability(data.content_structure?.readability_flesch ?? 0);
-
       // Headings
-      els.map.innerHTML = '';
-      const headings = data.content_structure?.headings || {};
-      Object.entries(headings).forEach(([level,arr])=>{
-        if (!arr || !arr.length) return;
-        const div = document.createElement('div');
-        div.innerHTML = `<div class="text-xs uppercase text-slate-400">${level}</div>` +
-                        arr.map(t=>`<div class="pl-3 text-slate-200">• ${escapeHTML(t)}</div>`).join('');
-        els.map.appendChild(div);
-      });
+      renderHeadingMap(data.content_structure?.headings || {});
 
       // Recommendations
       els.recs.innerHTML = '';
-      (data.recommendations || []).forEach(r=>{
+      (data.recommendations||[]).forEach(r=>{
         const sev = (r.severity||'').toLowerCase();
-        const c =
-          sev==='critical' ? 'badge-bad' :
-          sev==='warning'  ? 'badge-warn' : 'chip';
+        const c = sev==='critical' ? 'badge-bad' : sev==='warning' ? 'badge-warn' : 'chip';
         const li = document.createElement('li');
         li.innerHTML = `<span class="${c} mr-2">${escapeHTML(r.severity||'Info')}</span>${escapeHTML(r.text||'')}`;
         els.recs.appendChild(li);
@@ -561,49 +534,20 @@
 
       // Anchors
       els.anchors.innerHTML = '';
-      (data.technical_seo?.links?.anchors || []).slice(0,100).forEach(a=>{
+      (data.technical_seo?.links?.anchors||[]).slice(0,100).forEach(a=>{
         const p = document.createElement('p');
-        p.textContent = `[${a.type||'link'}] ${a.text || '(no text)'} → ${a.href||''}`;
+        p.textContent = `[${a.type||'link'}] ${a.text||'(no text)'} → ${a.href||''}`;
         els.anchors.appendChild(p);
       });
 
-      // Grouped checklist
-      renderGroups(data);
+      // Checklist
+      renderChecklist(data, ctx);
 
-    } catch (err) {
-      console.error(err);
-      showError(err?.message || 'Network error');
-    } finally {
-      setLoading(false);
-    }
+    }catch(err){
+      console.error(err); showError(err?.message || 'Network error');
+    }finally{ setLoading(false); }
   });
 
-  /* ===== Tech lines that dance with the mouse ===== */
-  (() => {
-    const c = document.getElementById('bgLines');
-    if (!c) return;
-    const ctx = c.getContext('2d');
-    let dpr = Math.min(2, window.devicePixelRatio || 1);
-    let w=0,h=0,t=0,mx=.5,my=.5;
-    function size(){ w=c.clientWidth; h=c.clientHeight; c.width=w*dpr; c.height=h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
-    function lerp(a,b,x){ return a+(b-a)*x; }
-    function draw(){
-      t+=0.016; ctx.clearRect(0,0,w,h);
-      const lines=Math.max(14,Math.floor(h/50)); const sp=h/(lines-1); const amp=lerp(12,48,my); const freq=0.012; const speed=lerp(.6,1.4,mx);
-      for(let i=0;i<lines;i++){
-        const y0=i*sp;
-        const g=ctx.createLinearGradient(0,y0-20,w,y0+20);
-        g.addColorStop(0,'rgba(255,102,196,0.25)'); g.addColorStop(.5,'rgba(96,165,250,0.45)'); g.addColorStop(1,'rgba(6,214,160,0.25)');
-        ctx.strokeStyle=g; ctx.lineWidth=2+Math.sin((i/lines)*Math.PI)*1.4; ctx.beginPath();
-        for(let x=-30;x<=w+30;x+=70){
-          const y=y0 + Math.sin((x+t*70*speed+i*8)*freq)*amp + Math.cos((x*freq*.8)+t*2)*(mx*10);
-          if(x===-30) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-        } ctx.stroke();
-      } requestAnimationFrame(draw);
-    }
-    window.addEventListener('resize', size, {passive:true});
-    window.addEventListener('pointermove', e=>{ const r=c.getBoundingClientRect(); mx=(e.clientX-r.left)/r.width; my=(e.clientY-r.top)/r.height; }, {passive:true});
-    size(); draw();
-  })();
+  function escapeHTML(s){ return (''+s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 </script>
 @endsection
