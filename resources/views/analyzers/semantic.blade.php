@@ -3,16 +3,17 @@
 
 @push('head')
 <style>
-  /* page bg subtle grid (keeps your dark look) */
+  /* ===== Page tech background ===== */
   .bg-tech {
     position: fixed; inset: 0;
     background:
       radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,.05), transparent),
       repeating-linear-gradient(115deg, transparent 0 18px, rgba(236,72,153,.25) 18px 19px),
-      #000;
+      #000; /* pure black */
     pointer-events:none; z-index:-1;
   }
 
+  /* ===== Shared tokens ===== */
   .card { border-radius: 16px; padding: 20px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
   .pill  { padding:4px 8px; border-radius:9999px; font-size:12px; font-weight:600; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.06); }
   .k-badge{ padding:6px 8px; border-radius:10px; font-size:12px; font-weight:700; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); }
@@ -21,11 +22,11 @@
   .bar > span { display:block; height:100%; border-radius:9999px; transition: width .5s ease; background: linear-gradient(90deg,#22c55e,#60a5fa,#d946ef); }
   .chip { font-size:12px; padding:4px 8px; border-radius:8px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
 
-  /* Water loading bar */
+  /* ===== Water loading bar ===== */
   #waterbar { height: 10px; border-radius: 9999px; background: rgba(255,255,255,.08); overflow: hidden; }
   #waterbar span { display:block; height:100%; width:0%; background: linear-gradient(90deg,#ef4444,#f59e0b,#22c55e); transition: width .8s ease; filter: drop-shadow(0 0 10px rgba(148,163,184,.4)); }
 
-  /* Wheels */
+  /* ===== Wheels ===== */
   .score-wheel { width:180px; height:180px; display:grid; place-items:center; position:relative; }
   .score-wheel .ring {
     --v: 0;
@@ -43,28 +44,82 @@
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
 
-  /* Category cards */
-  .cat-card { border-radius: 18px; padding: 18px; border:1px solid rgba(255,255,255,.10);
-              background: radial-gradient(800px 400px at -10% -10%, rgba(124,58,237,.12), transparent),
-                          linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); }
-  .cat-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
-  .cat-title { font-size:20px; font-weight:900; letter-spacing:.2px; background: linear-gradient(90deg,#67e8f9,#c084fc,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .cat-icon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-weight:800;
-              background: linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25)); border: 1px solid rgba(255,255,255,.12); color:#fff; }
-  .cat-badge { font-size:12px; font-weight:700; padding:6px 8px; border-radius:10px; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); color:#e5e7eb; }
-  .progress { width:100%; height:10px; border-radius:9999px; background: rgba(255,255,255,.08); overflow:hidden; border:1px solid rgba(255,255,255,.10); }
-  .progress > span { display:block; height:100%; border-radius:9999px; background: linear-gradient(90deg,#ef4444,#fde047,#22c55e); transition: width .5s ease; }
+  /* ===== Semantic SEO Ground — slab background & header ===== */
+  .ground-slab{
+    border-radius: 24px;
+    padding: 22px;
+    background:
+      radial-gradient(1200px 600px at -10% -20%, rgba(120,119,198,.14), transparent 55%),
+      radial-gradient(900px 500px at 120% 120%, rgba(236,72,153,.12), transparent 60%),
+      linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+      #0b0b10; /* deep, readable base */
+    border: 1px solid rgba(255,255,255,.10);
+    position: relative;
+    overflow: hidden;
+  }
+  .ground-slab::after{
+    content:"";
+    position:absolute; inset:0; pointer-events:none;
+    background:
+      repeating-linear-gradient(
+        -65deg,
+        rgba(255,255,255,.05) 0 2px,
+        transparent 2px 26px
+      );
+    opacity:.35;
+  }
+  .ground-head{ display:flex; align-items:center; gap:14px; margin-bottom:16px; position:relative; z-index:1; }
+  .gh-icon{
+    width:42px; height:42px; border-radius:12px;
+    display:grid; place-items:center; font-weight:800; color:#fff;
+    background: linear-gradient(135deg, rgba(99,102,241,.32), rgba(236,72,153,.32));
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow: 0 6px 22px rgba(0,0,0,.35) inset, 0 6px 24px rgba(99,102,241,.18);
+  }
+  .gh-title{
+    font-size: clamp(20px, 3.6vw, 28px);
+    font-weight: 900; letter-spacing:.2px; line-height:1.1;
+    background: linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .gh-sub{ font-size: 14px; color:#cbd5e1; }
 
-  .check { display:flex; align-items:center; justify-content:space-between; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.10);
+  /* ===== Category cards inside the slab (more contrast + lines) ===== */
+  .ground-slab .cat-card{
+    border-radius: 18px; padding: 18px; position:relative;
+    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow: 0 12px 30px rgba(0,0,0,.25);
+  }
+  .ground-slab .cat-card::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background: repeating-linear-gradient(-65deg, rgba(255,255,255,.06) 0 2px, transparent 2px 28px);
+    opacity:.25; border-radius: inherit;
+  }
+  .ground-slab .cat-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
+  .ground-slab .cat-title{
+    font-size: 22px; font-weight:900;
+    background: linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .ground-slab .cat-badge{ font-size:12px; font-weight:700; padding:6px 8px; border-radius:10px; background: rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.12); color:#e5e7eb; }
+  .ground-slab .cat-icon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-weight:800;
+    background: linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25)); border: 1px solid rgba(255,255,255,.12); color:#fff; }
+  .ground-slab .progress{ width:100%; height: 12px; border-radius:9999px; background: rgba(255,255,255,.08); overflow:hidden; border:1px solid rgba(255,255,255,.14); }
+  .ground-slab .progress > span{ display:block; height:100%; border-radius:9999px; background: linear-gradient(90deg,#ef4444,#fde047,#22c55e); transition: width .5s ease; }
+
+  /* Checklist rows — larger, clearer */
+  .ground-slab .check{ display:flex; align-items:center; justify-content:space-between; border-radius:14px; padding:14px 16px; border:1px solid rgba(255,255,255,.10);
            background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); }
-  .check + .check { margin-top:8px; }
-  .check .left { display:flex; align-items:center; gap:10px; }
+  .ground-slab .check + .check { margin-top:8px; }
+  .ground-slab .check .left { display:flex; align-items:center; gap:10px; }
+  .ground-slab .check .text{ color:#f8fafc; font-weight:700; font-size: 18px; }
   .dot { width:10px; height:10px; border-radius:9999px; }
   .dot.green{ background:#10b981; box-shadow:0 0 10px rgba(16,185,129,.6); }
   .dot.orange{ background:#f59e0b; box-shadow:0 0 10px rgba(245,158,11,.6); }
   .dot.red{ background:#ef4444; box-shadow:0 0 10px rgba(239,68,68,.6); }
   .score-pill { font-size:12px; font-weight:800; padding:4px 8px; border-radius:10px; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); color:#e5e7eb; }
-  .improve-btn { font-size:12px; font-weight:700; padding:6px 10px; border-radius:10px; background: linear-gradient(135deg,#a78bfa,#60a5fa); color:white; }
+  .improve-btn { font-size:12px; font-weight:700; padding:6px 10px; border-radius:10px; background: linear-gradient(135deg,#a78bfa,#60a5fa); color:white; box-shadow: 0 8px 16px rgba(96,165,250,.25); }
 </style>
 @endpush
 
@@ -94,7 +149,7 @@
   </div>
 
   <div id="resultWrap" class="space-y-8 hidden">
-    <!-- wheel + quick stats -->
+    <!-- Overall + Quick Stats -->
     <div class="grid lg:grid-cols-3 gap-6">
       <div class="card flex items-center gap-6">
         <div class="score-wheel">
@@ -182,10 +237,17 @@
       </div>
     </div>
 
-    <!-- Semantic SEO Ground (ALL categories) -->
-    <div class="space-y-4">
-      <h3 class="text-xl font-extrabold" style="background:linear-gradient(90deg,#67e8f9,#c084fc,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent;">Semantic SEO Ground</h3>
-      <div id="cats" class="grid lg:grid-cols-2 gap-6"></div>
+    <!-- Semantic SEO Ground (icon + multicolor heading, readable slab) -->
+    <div class="ground-slab">
+      <div class="ground-head">
+        <div class="gh-icon">🧭</div>
+        <div>
+          <div class="gh-title">Semantic SEO Ground</div>
+          <div class="gh-sub">Actionable checklists for structure, quality, UX & entities</div>
+        </div>
+      </div>
+
+      <div id="cats" class="grid lg:grid-cols-2 gap-6 relative z-10"></div>
     </div>
   </div>
 
@@ -262,7 +324,6 @@ f.addEventListener('submit', async (e)=>{
     wheel.style.setProperty('--v', score);
     scoreNum.textContent = score;
     badge.textContent = data.wheel?.label || labelBy(score);
-    badge.className = 'k-badge';
 
     // Quick stats
     statF.textContent = data.quick_stats.readability_flesch;
@@ -271,7 +332,7 @@ f.addEventListener('submit', async (e)=>{
     statExt.textContent = data.quick_stats.external_links;
     statRatio.textContent = data.quick_stats.text_to_html_ratio + '%';
 
-    // Readability
+    // Readability (FRE clamped to 0–100 for wheel)
     const rf = Math.max(0, Math.min(100, data.readability.score||0));
     readWheel.style.setProperty('--v', rf);
     readNum.textContent = Math.round(rf);
@@ -294,14 +355,13 @@ f.addEventListener('submit', async (e)=>{
     // Recommendations
     recsEl.innerHTML='';
     (data.recommendations||[]).forEach(r=>{
-      const tone = r.severity==='Critical' ? 'border-rose-500/30' : r.severity==='Warning' ? 'border-amber-500/30' : 'border-white/10';
       const c = document.createElement('div');
-      c.className='card ' + tone;
+      c.className='card';
       c.innerHTML = `<span class="pill mr-2">${r.severity}</span>${r.text}`;
       recsEl.appendChild(c);
     });
 
-    // Categories (large cards with icon + progress)
+    // Categories (large cards with icon + progress inside slab)
     catsEl.innerHTML='';
     (data.categories||[]).forEach(cat=>{
       const total = (cat.checks||[]).length;
@@ -334,7 +394,7 @@ f.addEventListener('submit', async (e)=>{
         row.innerHTML = `
           <div class="left">
             <span class="dot ${color}"></span>
-            <div class="text-slate-100 font-medium">${ch.label}</div>
+            <div class="text text-slate-100">${ch.label}</div>
           </div>
           <div class="flex items-center gap-2">
             <span class="score-pill">${ch.score ?? '—'}</span>
@@ -353,10 +413,10 @@ f.addEventListener('submit', async (e)=>{
       catsEl.appendChild(card);
     });
 
-    // snap water to score
+    // finish waterbar at actual score
     setTimeout(()=>{ water.style.width = (score+'%'); }, 150);
   } catch(err){
-    alert('Request error. See storage/logs/laravel.log');
+    alert('Request error. Check storage/logs/laravel.log');
     water.style.width='0%';
   }
 });
