@@ -24,6 +24,10 @@
       }
     }
   </script>
+
+  <!-- Alpine for the profile dropdown -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
   <style>
     /* Colorful background (rich gradients) */
     body{
@@ -36,6 +40,7 @@
     .glass{ background: linear-gradient(180deg, rgba(15,23,42,.65), rgba(2,6,23,.55)); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
     .chip{ font-size:.7rem; padding:.2rem .5rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); }
     #bgCanvas{ position:fixed; inset:0; z-index:-1; width:100%; height:100%; pointer-events:none; }
+    [x-cloak]{ display:none !important; }
   </style>
 </head>
 <body class="text-slate-100 antialiased overflow-x-hidden">
@@ -47,7 +52,7 @@
       <div class="h-16 flex items-center justify-between">
         <a href="{{ route('home') }}" class="flex items-center gap-3 group">
           <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-hotpink to-sky shadow-soft">
-            <svg class="h-5 w-5 text-white transition-transform group-hover:rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg class="h-5 w-5 text-white transition-transform group-hover:rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v3m0 12v3m9-9h-3M6 12H3m14.95 5.657-2.121-2.121M7.172 7.172 5.05 5.05m12.728 0-2.122 2.122M7.172 16.828 5.05 18.95"/>
             </svg>
           </span>
@@ -57,16 +62,11 @@
           </div>
         </a>
 
+        <!-- Use smart alias routes that auto-redirect guests to login -->
         <nav class="hidden md:flex items-center gap-6 text-sm">
-          @guest
-            <a href="{{ route('login') }}" class="hover:text-white">Semantic Analyzer</a>
-            <a href="{{ route('login') }}" class="hover:text-white">AI Content Checker</a>
-            <a href="{{ route('login') }}" class="hover:text-white">Topic Cluster</a>
-          @else
-            <a href="{{ route('semantic.analyzer') }}" class="hover:text-white">Semantic Analyzer</a>
-            <a href="{{ route('ai.checker') }}" class="hover:text-white">AI Content Checker</a>
-            <a href="{{ route('topic.cluster') }}" class="hover:text-white">Topic Cluster</a>
-          @endguest
+          <a href="{{ route('semantic') }}" class="hover:text-white">Semantic Analyzer</a>
+          <a href="{{ route('aiChecker') }}" class="hover:text-white">AI Content Checker</a>
+          <a href="{{ route('topicCluster') }}" class="hover:text-white">Topic Cluster</a>
           <a href="#about" class="hover:text-white">About</a>
           <a href="#features" class="hover:text-white">Features</a>
         </nav>
@@ -85,17 +85,22 @@
                   $initials = strtoupper(mb_substr($u->name ?? 'U',0,1));
                 @endphp
                 @if($avatar)
-                  <img src="{{ $avatar }}" alt="avatar" class="h-8 w-8 rounded-full object-cover border border-white/20">
+                  <img src="{{ $avatar }}" alt="{{ $u->name }} avatar" class="h-8 w-8 rounded-full object-cover border border-white/20">
                 @else
                   <div class="h-8 w-8 rounded-full grid place-items-center bg-gradient-to-br from-brand-500 to-sky">
                     <span class="text-xs font-bold">{{ $initials }}</span>
                   </div>
                 @endif
                 <span class="text-sm hidden sm:inline">{{ $u->name }}</span>
-                <svg class="h-4 w-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.5" d="M6 9l6 6 6-6"/></svg>
+                <svg class="h-4 w-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-width="1.5" d="M6 9l6 6 6-6"/></svg>
               </button>
-              <div x-show="open" @click.away="open=false" class="absolute right-0 mt-2 w-56 glass rounded-xl p-2 shadow-soft border border-white/10">
-                <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm rounded-lg hover:bg-white/10">Profile & Settings</a>
+              <div x-show="open" @click.away="open=false" x-transition
+                   class="absolute right-0 mt-2 w-56 glass rounded-xl p-2 shadow-soft border border-white/10">
+                @if(\Illuminate\Support\Facades\Route::has('profile.edit'))
+                  <a href="{{ route('profile.edit') }}" class="block px-3 py-2 text-sm rounded-lg hover:bg-white/10">Profile & Settings</a>
+                @else
+                  <a href="/profile" class="block px-3 py-2 text-sm rounded-lg hover:bg-white/10">Profile & Settings</a>
+                @endif
                 <a href="{{ route('dashboard') }}" class="block px-3 py-2 text-sm rounded-lg hover:bg-white/10">Dashboard</a>
                 <form method="POST" action="{{ route('logout') }}" class="mt-1">
                   @csrf
@@ -103,8 +108,6 @@
                 </form>
               </div>
             </div>
-            <!-- Alpine.js (tiny) -->
-            <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
           @endguest
         </div>
       </div>
@@ -129,7 +132,7 @@
               <a href="{{ route('login') }}" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Sign in to use tools</a>
             @else
               <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-lg bg-white text-slate-900 font-semibold shadow-soft hover:opacity-90">Open Dashboard</a>
-              <a href="{{ route('semantic.analyzer') }}" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Semantic Analyzer</a>
+              <a href="{{ route('semantic') }}" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Semantic Analyzer</a>
             @endguest
           </div>
         </div>
