@@ -3,15 +3,18 @@
 
 @push('head')
 <style>
-  /* ------- Page base ------- */
+  /* Base */
   html,body{background:#06021f!important;color:#e5e7eb}
   #app,section{overflow-x:hidden}
-  section hr{display:none} /* hide theme separators that created a thin extra bar */
+
+  /* The “mystery thin bar” was an <hr> printed by the theme.
+     Hide only the one right after the chips/waterbar area, not all <hr> globally. */
+  .hero + hr{display:none!important}
 
   .pill{padding:6px 12px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#e5e7eb}
   .t-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* ------- Hero (locks the order so it can’t drift) ------- */
+  /* ---------- HERO LAYOUT (locked) ---------- */
   .hero{
     display:grid;
     grid-template-areas:
@@ -21,18 +24,20 @@
       "chips"
       "bar"
       "toolbar";
-    row-gap:14px;
+    row-gap:16px;
     justify-items:center;
+    max-width:1100px;
+    margin:0 auto;
   }
-  .hero-heading{grid-area:heading; width:100%;}
-  .hero-legend{grid-area:legend;}
-  .wheel-wrap{grid-area:wheel; display:grid; place-items:center; margin-top:6px;}
-  .chips-row{grid-area:chips; display:flex; flex-wrap:wrap; gap:12px; justify-content:center; width:100%;}
-  .bar-wrap{grid-area:bar; width:100%;}
-  .toolbar-wrap{grid-area:toolbar; width:100%;}
+  .hero-heading{grid-area:heading;width:100%;display:flex;justify-content:center}
+  .hero-legend{grid-area:legend;display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+  .wheel-wrap{grid-area:wheel;display:grid;place-items:center;margin-top:6px;width:100%}
+  .chips-row{grid-area:chips;display:flex;flex-wrap:wrap;gap:12px;justify-content:center;width:100%}
+  .bar-wrap{grid-area:bar;width:100%}
+  .toolbar-wrap{grid-area:toolbar;width:100%}
 
-  /* ------- Score wheel ------- */
-  .mw{--v:0;--ring:#f59e0b;--p:0;width:280px;height:280px;position:relative}
+  /* ---------- Wheel ---------- */
+  .mw{--v:0;--ring:#f59e0b;--p:0;width:280px;height:280px;position:relative;margin:0 auto}
   .mw-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--v)*1%),rgba(255,255,255,.08) 0);
     -webkit-mask:radial-gradient(circle 108px,transparent 100px,#000 100px);
             mask:radial-gradient(circle 108px,transparent 100px,#000 100px);
@@ -47,14 +52,14 @@
   .mw.bad{--ring:#ef4444;--fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%)}
   .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:64px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
 
-  /* ------- Chips ------- */
+  /* ---------- Chips ---------- */
   .chip{padding:12px 16px;border-radius:16px;font-weight:900;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.14);color:#eef2ff}
   .chip i{font-style:normal;font-size:18px}
   .chip.good{background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18));border-color:rgba(34,197,94,.45);color:#eafff3}
   .chip.warn{background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(250,204,21,.18));border-color:rgba(245,158,11,.45);color:#fff7e6}
   .chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(248,113,113,.18));border-color:rgba(239,68,68,.45);color:#ffecec}
 
-  /* ------- Single water bar ------- */
+  /* ---------- One Water Bar ---------- */
   .waterbox{position:relative;height:22px;border-radius:9999px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#0b0b0b;max-width:1100px;margin:0 auto}
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
   .waterbox.good .fill{background:linear-gradient(90deg,#16a34a,#22c55e,#86efac)}
@@ -62,7 +67,7 @@
   .waterbox.bad .fill{background:linear-gradient(90deg,#ef4444,#f87171,#fecaca)}
   .waterbox .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:#e5e7eb;font-size:12px;text-shadow:0 2px 10px rgba(0,0,0,.45)}
 
-  /* ------- Toolbar ------- */
+  /* ---------- Toolbar ---------- */
   .analyze-wrap{border-radius:18px;background:#020114;border:1px solid #1b2640;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 20px 60px rgba(2,1,20,.45)}
   .toolbar-input{display:flex;align-items:center;gap:8px;border-radius:12px;padding:10px 12px;background:#0b0b0b;border:1px solid rgba(255,255,255,.12)}
   .toolbar-input input{width:100%;background:transparent;color:#e5e7eb;outline:none}
@@ -72,7 +77,7 @@
   .btn-orange{background:#f59e0b;box-shadow:0 8px 26px rgba(245,158,11,.35)}
   .btn-purple{background:linear-gradient(90deg,#a78bfa,#f472b6);color:#19041a;box-shadow:0 8px 26px rgba(167,139,250,.35)}
 
-  /* ------- Cards ------- */
+  /* Cards / Ground (unchanged) */
   .card{border-radius:18px;padding:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}
   .ground-slab{border-radius:24px;padding:22px;background:#0D0E1E;border:1px solid #1b2640}
   .cat-card{border-radius:18px;padding:18px;background:#111E2F;border:1px solid rgba(255,255,255,.12)}
@@ -86,14 +91,14 @@
   .score-pill--orange{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#fde68a}
   .score-pill--red{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35);color:#fecaca}
   .improve-btn{padding:6px 10px;border-radius:10px;color:#0b1020;font-weight:800;border:1px solid transparent}
-  .fill-green {background:linear-gradient(135deg,#16a34a,#22c55e,#86efac);color:#05240f}
-  .fill-orange{background:linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a);color:#3a2400}
-  .fill-red   {background:linear-gradient(135deg,#ef4444,#f87171,#fecaca);color:#2f0606}
+  .fill-green{background:linear-gradient(135deg,#16a34a,#22c55e,#86efac)}
+  .fill-orange{background:linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a)}
+  .fill-red{background:linear-gradient(135deg,#ef4444,#f87171,#fecaca)}
   .outline-green{border-color:rgba(34,197,94,.85)!important;box-shadow:0 0 0 2px rgba(34,197,94,.55) inset,0 0 16px rgba(34,197,94,.25)}
   .outline-orange{border-color:rgba(245,158,11,.85)!important;box-shadow:0 0 0 2px rgba(245,158,11,.55) inset,0 0 16px rgba(245,158,11,.25)}
   .outline-red{border-color:rgba(239,68,68,.85)!important;box-shadow:0 0 0 2px rgba(239,68,68,.55) inset,0 0 16px rgba(239,68,68,.25)}
 
-  /* ------- Modal ------- */
+  /* Modal */
   dialog[open]{display:block}
   dialog::backdrop{background:rgba(0,0,0,.6)}
   #improveModal .card{background:#0D0E1E;border:1px solid #1b2640}
@@ -102,11 +107,10 @@
 @endpush
 
 @section('content')
-<section class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+<section class="px-4 py-8 space-y-8">
 
-  <!-- HERO (layout locked) -->
+  <!-- HERO -->
   <div class="hero">
-
     <div class="hero-heading">
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold">
         <span class="t-grad">Semantic SEO Master Analyzer</span>
@@ -114,7 +118,7 @@
       </h1>
     </div>
 
-    <div class="hero-legend flex flex-wrap gap-2">
+    <div class="hero-legend">
       <span class="pill" style="background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.35);color:#bbf7d0">Green ≥ 80</span>
       <span class="pill" style="background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#fde68a">Orange 60–79</span>
       <span class="pill" style="background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35);color:#fecaca">Red &lt; 60</span>
@@ -128,7 +132,7 @@
       </div>
     </div>
 
-    <div class="chips-row" id="chipsRow">
+    <div class="chips-row">
       <span id="chipOverall" class="chip warn"><i>🟠</i><span>Overall: 0 /100</span></span>
       <span id="chipContent" class="chip warn"><i>🟠</i><span>Content: —</span></span>
       <span id="chipWriter"  class="chip warn"><i>🟠</i><span>Writer: —</span></span>
@@ -136,6 +140,7 @@
       <span id="chipAI"      class="chip warn"><i>🟠</i><span>AI-like: — %</span></span>
     </div>
 
+    <!-- only ONE water bar -->
     <div class="bar-wrap">
       <div id="overallBar" class="waterbox warn">
         <div class="fill" id="overallFill" style="width:0%"></div>
@@ -179,7 +184,6 @@
         </div>
       </div>
     </div>
-
   </div><!-- /hero -->
 
   <!-- Quick Stats -->
@@ -245,7 +249,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Safety: remove any stray in-page “Dashboard” pill (some old markup injected it)
+  // guard: if some old markup injected a dashboard chip inside <section>, remove it
   document.querySelectorAll('section .pill').forEach(el=>{
     if (el.textContent.trim().toLowerCase() === 'dashboard') el.remove();
   });
@@ -282,13 +286,21 @@ document.addEventListener('DOMContentLoaded', () => {
     el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`;
   }
 
-  /* Clipboard + utility actions */
   pasteBtn?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
   importBtn?.addEventListener('click',()=>importFile.click());
-  importFile?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)})
+  importFile?.addEventListener('change',e=>{
+    const f=e.target.files?.[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}')); if(j.url) urlInput.value=j.url; alert('Imported JSON. Click Analyze to run.');}catch{alert('Invalid JSON file.')}};
+    r.readAsText(f);
+  });
   printBtn?.addEventListener('click',()=>window.print());
   resetBtn?.addEventListener('click',()=>location.reload());
-  exportBtn?.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)})
+  exportBtn?.addEventListener('click',()=>{
+    if(!window.__lastData){alert('Run an analysis first.');return;}
+    const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='semantic-report.json'; a.click(); URL.revokeObjectURL(a.href);
+  });
 
   function setRunning(on){ if(!analyzeBtn)return; analyzeBtn.disabled=on; analyzeBtn.style.opacity=on?.6:1; analyzeBtn.textContent=on?'Analyzing…':'🔍 Analyze'; }
 
@@ -300,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
       res=await fetch('/semantic-analyzer/analyze',{method:'POST',headers:{...headers,'X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url,target_keyword:''})});
       if(res.ok) return res.json();
     }
-    let msg=`HTTP ${res.status}`;try{const j=await res.json();if(j?.error)msg+=' – '+j.error}catch{}throw new Error(msg);
+    let msg=`HTTP ${res.status}`; try{const j=await res.json(); if(j?.error) msg+=' – '+j.error;}catch{}; throw new Error(msg);
   }
 
   analyzeBtn?.addEventListener('click', async e=>{
@@ -316,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if(!data||data.error) throw new Error(data?.error||'Unknown error');
       window.__lastData={...data,url};
 
-      /* Overall */
       const score=Math.max(0,Math.min(100,Number(data.overall_score||0)));
       const band=score>=80?'good':(score>=60?'warn':'bad');
       mw.classList.remove('good','warn','bad'); mw.classList.add(band);
@@ -325,25 +336,20 @@ document.addEventListener('DOMContentLoaded', () => {
       mwRing.style.setProperty('--v',score); mwFill.style.setProperty('--p',score); mwNum.textContent=score+'%';
       overallFill.style.width=score+'%'; overallPct.textContent=score+'%';
 
-      /* “Content” chip = avg(Content & Keywords, Content Quality) */
       const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
-      const c1=cmap['Content & Keywords']??0, c2=cmap['Content Quality']??0;
-      const contentScore=Math.round(((c1||0)+(c2||0))/2);
+      const contentScore=Math.round(((cmap['Content & Keywords']??0)+(cmap['Content Quality']??0))/2);
       setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
 
-      /* Writer/Human/AI chips (light heuristic) */
       const r=data.readability||{}, human=Math.max(0,Math.min(100,Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3))), ai=Math.max(0,Math.min(100,100-human));
       setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
       setChip(chipHuman,'Human-like',`${human} %`,human);
       setChip(chipAI,'AI-like',`${ai} %`,ai);
 
-      /* Quick stats */
       statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
       statInt.textContent=data.quick_stats?.internal_links??0;
       statExt.textContent=data.quick_stats?.external_links??0;
       statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
 
-      /* Structure panel */
       titleVal.textContent=data.content_structure?.title||'—';
       metaVal.textContent=data.content_structure?.meta_description||'—';
       const hs=data.content_structure?.headings||{};
@@ -351,11 +357,10 @@ document.addEventListener('DOMContentLoaded', () => {
       Object.entries(hs).forEach(([lvl,arr])=>{
         if(!arr||!arr.length)return;
         const box=document.createElement('div'); box.className='card';
-        box.innerHTML=`<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>` + arr.map(t=>`<div>• ${t}</div>`).join('');
+        box.innerHTML=`<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');
         headingMap.appendChild(box);
       });
 
-      /* Recommendations */
       recsEl.innerHTML='';
       (data.recommendations||[]).forEach(rec=>{
         const d=document.createElement('div'); d.className='card';
@@ -363,7 +368,6 @@ document.addEventListener('DOMContentLoaded', () => {
         recsEl.appendChild(d);
       });
 
-      /* Ground cards */
       catsEl.innerHTML='';
       (data.categories||[]).forEach(cat=>{
         const total=(cat.checks||[]).length;
@@ -399,7 +403,6 @@ document.addEventListener('DOMContentLoaded', () => {
         catsEl.appendChild(card);
       });
 
-      /* Status chips (summary) */
       chipTitle.textContent=(data.content_structure?.title||'').length||0;
       chipMeta.textContent=(data.content_structure?.meta_description||'').length||0;
       try{chipCanon.textContent=new URL(url).origin}catch{chipCanon.textContent='—'}
@@ -418,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Close modal when clicking outside content
+  // Close modal on backdrop click
   modal?.addEventListener('click',e=>{
     const r=modal.getBoundingClientRect();
     const inside=(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);
