@@ -12,7 +12,7 @@
   .pill{padding:6px 12px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#e5e7eb}
   .t-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* Multi-color glow outline (FASTER: ~1s) */
+  /* Fast multi-color glow outline (~1s spin) */
   .glow-anim{position:relative}
   .glow-anim::before{
     content:"";position:absolute;inset:-2px;border-radius:inherit;
@@ -21,7 +21,7 @@
   }
   @keyframes spinGlow{to{transform:rotate(360deg)}}
 
-  /* Header special: Shoail Kahoker rainbow + gentle dance */
+  /* Header: Shoail Kahoker rainbow + dance */
   .rainbow-dance{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbowSlide 6s linear infinite,bob 2.6s ease-in-out infinite}
   @keyframes rainbowSlide{0%{background-position:0% 50%}100%{background-position:100% 50%}}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
@@ -37,7 +37,7 @@
   .lg-orange{background:rgba(245,158,11,.15);color:#fde68a;border-color:rgba(245,158,11,.35)}
   .lg-red{background:rgba(239,68,68,.15);color:#fecaca;border-color:rgba(239,68,68,.35)}
 
-  /* Score chips with icons */
+  /* Chips with icons */
   .chip{padding:12px 16px;border-radius:16px;font-weight:900;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.14);color:#eef2ff}
   .chip i{font-style:normal;font-size:18px}
   .chip.good{background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18));border-color:rgba(34,197,94,.45);color:#eafff3}
@@ -81,7 +81,7 @@
   .score-pill--orange{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#fde68a}
   .score-pill--red{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35);color:#fecaca}
 
-  /* Improve button: fill color by band (NEW) + outline by band */
+  /* Improve button fill+outline by band */
   .improve-btn{padding:6px 10px;border-radius:10px;color:#0b1020;font-weight:800;border:1px solid transparent;transition:transform .08s ease}
   .improve-btn:active{transform:translateY(1px)}
   .fill-green {background:linear-gradient(135deg,#16a34a,#22c55e,#86efac);color:#05240f}
@@ -139,7 +139,7 @@
         <div class="fill" id="overallFill" style="width:0%"></div>
         <div class="label"><span id="overallPct">0%</span></div>
       </div>
-      <p class="text-xs text-slate-400">Wheel + water bars fill with your scores (colors: green ≥80, orange 60–79, red &lt;60).</p>
+      <p class="text-xs text-slate-400">Wheel + water bars fill with your scores (green ≥80, orange 60–79, red &lt;60).</p>
     </div>
   </div>
 
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const bandIcon=s=>s>=80?'🟢':(s>=60?'🟠':'🔴');
   const pillClassBy=s=>s>=80?'score-pill--green':(s>=60?'score-pill--orange':'score-pill--red');
   const outlineBy=s=>s>=80?'outline-green':(s>=60?'outline-orange':'outline-red');
-  const fillBy=s=>s>=80?'fill-green':(s>=60?'fill-orange':'fill-red'); // NEW: fill color selector
+  const fillBy=s=>s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');
   const bandLabel=s=>s>=80?'Good (≥80)':(s>=60?'Needs work (60–79)':'Low (<60)');
 
   function tipsFor(cat){
@@ -284,11 +284,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function setChip(el,label,value,score){
-    if(!el)return; el.classList.remove('good','warn','bad'); const b=bandName(score);
-    el.classList.add(b); el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`;
+    if(!el)return; el.classList.remove('good','warn','bad');
+    const b=bandName(score); el.classList.add(b);
+    el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`;
   }
 
-  /* Clipboard + basic actions */
+  /* Clipboard + actions */
   pasteBtn?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
   importBtn?.addEventListener('click',()=>importFile.click());
   importFile?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)})
@@ -308,17 +309,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let msg=`HTTP ${res.status}`;try{const j=await res.json();if(j?.error)msg+=' – '+j.error}catch{}throw new Error(msg);
   }
 
-  function setRunning(b){if(!analyzeBtn)return;analyzeBtn.disabled=b;analyzeBtn.style.opacity=b?.6:1;analyzeBtn.textContent=b?'Analyzing…':'🔍 Analyze'}
+  function setRunning(isOn){
+    if(!analyzeBtn)return;
+    analyzeBtn.disabled = isOn;
+    analyzeBtn.style.opacity = isOn ? .6 : 1;   /* <-- fixed syntax */
+    analyzeBtn.textContent = isOn ? 'Analyzing…' : '🔍 Analyze';
+  }
 
   analyzeBtn?.addEventListener('click',async e=>{
     e.preventDefault();
     const url=(urlInput.value||'').trim(); if(!url){alert('Please enter a URL.');return;}
     try{
       setRunning(true);
+
+      /* reset visuals */
       mwRing?.style.setProperty('--v',0); mwFill?.style.setProperty('--p',0); if(mwNum)mwNum.textContent='0%';
       if(overallFill)overallFill.style.width='0%'; if(overallPct)overallPct.textContent='0%';
 
-      const data=await callAnalyzer(url); if(!data||data.error)throw new Error(data?.error||'Unknown error'); window.__lastData={...data,url};
+      const data=await callAnalyzer(url);
+      if(!data||data.error)throw new Error(data?.error||'Unknown error');
+      window.__lastData={...data,url};
 
       /* Overall & chips */
       const score=clamp01(data.overall_score||0), b=bandName(score);
@@ -326,12 +336,16 @@ document.addEventListener('DOMContentLoaded', () => {
       overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add(b);
       chipOverall?.classList.add(b);
       mwRing?.style.setProperty('--v',score); mwFill?.style.setProperty('--p',score);
-      if(mwNum)mwNum.textContent=score+'%'; if(overallFill)overallFill.style.width=score+'%'; if(overallPct)overallPct.textContent=score+'%';
+      if(mwNum)mwNum.textContent=score+'%';
+      if(overallFill)overallFill.style.width=score+'%';
+      if(overallPct)overallPct.textContent=score+'%';
       setChip(chipOverall,'Overall',`${score} /100`,score);
 
-      /* Content score = avg of Content & Keywords and Content Quality */
+      /* Content score = avg(Content & Keywords, Content Quality) */
       const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
-      const contentScore=Math.round(([cmap['Content & Keywords'],cmap['Content Quality']].filter(v=>typeof v==='number').reduce((a,b)=>a+b,0))/2||0);
+      const contentScore=Math.round(([cmap['Content & Keywords'],cmap['Content Quality']]
+                                    .filter(v=>typeof v==='number')
+                                    .reduce((a,b)=>a+b,0))/2||0);
       setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
 
       const r=data.readability||{}, human=clamp01(Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3)), ai=clamp01(100-human);
@@ -341,18 +355,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
       /* Quick stats */
       statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
-      statInt.textContent=data.quick_stats?.internal_links??0; statExt.textContent=data.quick_stats?.external_links??0; statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
+      statInt.textContent=data.quick_stats?.internal_links??0;
+      statExt.textContent=data.quick_stats?.external_links??0;
+      statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
 
       /* Structure */
-      titleVal.textContent=data.content_structure?.title||'—'; metaVal.textContent=data.content_structure?.meta_description||'—';
-      const hs=data.content_structure?.headings||{}; headingMap.innerHTML=''; Object.entries(hs).forEach(([lvl,arr])=>{if(!arr||!arr.length)return;const box=document.createElement('div');box.className='card glow-anim';box.innerHTML=`<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');headingMap.appendChild(box);});
+      titleVal.textContent=data.content_structure?.title||'—';
+      metaVal.textContent=data.content_structure?.meta_description||'—';
+      const hs=data.content_structure?.headings||{};
+      headingMap.innerHTML='';
+      Object.entries(hs).forEach(([lvl,arr])=>{
+        if(!arr||!arr.length)return;
+        const box=document.createElement('div'); box.className='card glow-anim';
+        box.innerHTML=`<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');
+        headingMap.appendChild(box);
+      });
 
       /* Recommendations */
-      recsEl.innerHTML=''; (data.recommendations||[]).forEach(rec=>{const d=document.createElement('div');d.className='card glow-anim';d.innerHTML=`<span class="pill mr-2">${rec.severity}</span>${rec.text}`;recsEl.appendChild(d);});
+      recsEl.innerHTML='';
+      (data.recommendations||[]).forEach(rec=>{
+        const d=document.createElement('div'); d.className='card glow-anim';
+        d.innerHTML=`<span class="pill mr-2">${rec.severity}</span>${rec.text}`;
+        recsEl.appendChild(d);
+      });
 
-      /* Ground with Improve button banded FILL + OUTLINE (NEW) */
-      catsEl.innerHTML=''; (data.categories||[]).forEach(cat=>{
-        const total=(cat.checks||[]).length, passed=(cat.checks||[]).filter(ch=>(ch.score||0)>=80).length, pct=Math.round((passed/Math.max(1,total))*100);
+      /* Ground (Improve buttons get banded fill + outline) */
+      catsEl.innerHTML='';
+      (data.categories||[]).forEach(cat=>{
+        const total=(cat.checks||[]).length;
+        const passed=(cat.checks||[]).filter(ch=>(ch.score||0)>=80).length;
+        const pct=Math.round((passed/Math.max(1,total))*100);
         const card=document.createElement('div'); card.className='cat-card glow-anim';
         card.innerHTML=`<div class="cat-head"><div class="flex items-center gap-3">
             <div class="glow-anim" style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25));border:1px solid rgba(255,255,255,.12)">★</div>
@@ -391,12 +423,20 @@ document.addEventListener('DOMContentLoaded', () => {
       chipSchema.textContent=data.schema_count??0;
       chipAuto.textContent=(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length;
       chipHttp.textContent='200';
-    }catch(err){console.error(err);alert('Analyze failed: '+err.message)}finally{setRunning(false)}
+    }catch(err){
+      console.error(err);
+      alert('Analyze failed: '+err.message);
+    }finally{
+      setRunning(false);
+    }
   });
 
-  /* Close modal by backdrop click */
-  const modal=$('#improveModal');
-  modal?.addEventListener('click',e=>{const r=modal.getBoundingClientRect();const inside=(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);if(!inside){if(typeof modal.close==='function')modal.close();else modal.removeAttribute('open');}})
+  /* Close modal on backdrop click */
+  modal?.addEventListener('click',e=>{
+    const r=modal.getBoundingClientRect();
+    const inside=(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);
+    if(!inside){ if(typeof modal.close==='function')modal.close(); else modal.removeAttribute('open'); }
+  });
 });
 </script>
 @endpush
