@@ -3,14 +3,13 @@
 
 @push('head')
 <style>
-  /* ---- Base ------------------------------------------------- */
+  /* ===== Base ===== */
   html,body{background:#06021f!important;color:#e5e7eb}
-  .glass{background:rgba(255,255,255,.06);backdrop-filter:blur(10px)}
   .card{border-radius:18px;padding:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}
   .pill{padding:6px 12px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#e5e7eb}
   .t-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* ---- Animated outline ------------------------------------ */
+  /* animated outline, softened so it never leaks */
   .glow-anim{position:relative;overflow:hidden}
   .glow-anim::before{
     content:"";position:absolute;inset:-1px;border-radius:inherit;
@@ -19,14 +18,13 @@
   }
   @keyframes spinGlow{to{transform:rotate(360deg)}}
   body,#app,section{overflow-x:hidden}
-  .ground-slab.glow-anim::before{opacity:.14;filter:blur(4px)}
 
-  /* Header “Shoail Kahoker” rainbow + dance */
+  /* header signature */
   .rainbow-dance{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbowSlide 6s linear infinite,bob 2.6s ease-in-out infinite}
   @keyframes rainbowSlide{0%{background-position:0% 50%}100%{background-position:100% 50%}}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
-  /* Toolbar + buttons */
+  /* Buttons / toolbar */
   .analyze-wrap{border-radius:18px;background:#020114;border:1px solid #1b2640;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 20px 60px rgba(2,1,20,.45)}
   .btn{padding:12px 18px;border-radius:14px;font-weight:900;border:1px solid rgba(255,255,255,.12);color:#0b1020}
   .btn-green{background:#22c55e;box-shadow:0 8px 26px rgba(34,197,94,.35)}
@@ -38,14 +36,14 @@
   .lg-orange{background:rgba(245,158,11,.15);color:#fde68a;border-color:rgba(245,158,11,.35)}
   .lg-red{background:rgba(239,68,68,.15);color:#fecaca;border-color:rgba(239,68,68,.35)}
 
-  /* Chips */
   .chip{padding:12px 16px;border-radius:16px;font-weight:900;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.14);color:#eef2ff}
   .chip i{font-style:normal;font-size:18px}
   .chip.good{background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18));border-color:rgba(34,197,94,.45);color:#eafff3}
   .chip.warn{background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(250,204,21,.18));border-color:rgba(245,158,11,.45);color:#fff7e6}
   .chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(248,113,113,.18));border-color:rgba(239,68,68,.45);color:#ffecec}
 
-  /* Score wheel with bottom fill */
+  /* wheel centered like the original */
+  .wheel-wrap{display:grid;place-items:center;margin-top:6px}
   .mw{--v:0;--ring:#f59e0b;--p:0;width:280px;height:280px;position:relative}
   .mw-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--v)*1%),rgba(255,255,255,.08) 0);-webkit-mask:radial-gradient(circle 108px,transparent 100px,#000 100px);mask:radial-gradient(circle 108px,transparent 100px,#000 100px);box-shadow:inset 0 0 0 14px rgba(255,255,255,.06)}
   .mw-fill{position:absolute;inset:26px;border-radius:50%;overflow:hidden;background:#000}
@@ -55,7 +53,10 @@
   .mw.bad{--ring:#ef4444;--fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%)}
   .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:64px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
 
-  /* Water bar */
+  /* chips row under the wheel (original layout) */
+  .chips-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:16px}
+
+  /* water bar */
   .waterbox{position:relative;height:22px;border-radius:9999px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#0b0b0b}
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
   .waterbox.good .fill{background:linear-gradient(90deg,#16a34a,#22c55e,#86efac)}
@@ -63,7 +64,7 @@
   .waterbox.bad .fill{background:linear-gradient(90deg,#ef4444,#f87171,#fecaca)}
   .waterbox .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:#e5e7eb;font-size:12px;text-shadow:0 2px 10px rgba(0,0,0,.45)}
 
-  /* Ground / checklist */
+  /* “Semantic SEO Ground” blocks (unchanged) */
   .ground-slab{border-radius:24px;padding:22px;background:#0D0E1E;border:1px solid #1b2640}
   .cat-card{border-radius:18px;padding:18px;background:#111E2F;border:1px solid rgba(255,255,255,.12)}
   .cat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -75,7 +76,6 @@
   .score-pill--green{background:rgba(16,185,129,.18);border-color:rgba(16,185,129,.35);color:#bbf7d0}
   .score-pill--orange{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#fde68a}
   .score-pill--red{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35);color:#fecaca}
-
   .improve-btn{padding:6px 10px;border-radius:10px;color:#0b1020;font-weight:800;border:1px solid transparent;transition:transform .08s ease}
   .improve-btn:active{transform:translateY(1px)}
   .fill-green {background:linear-gradient(135deg,#16a34a,#22c55e,#86efac);color:#05240f}
@@ -96,7 +96,7 @@
 @section('content')
 <section class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-  <!-- Header (no extra Dashboard button here) -->
+  <!-- Header only (no extra Dashboard chip here) -->
   <div class="flex items-center gap-3 mb-2">
     <div class="glow-anim" style="width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.32),rgba(236,72,153,.32));border:1px solid rgba(255,255,255,.14)">👑</div>
     <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold">
@@ -111,30 +111,30 @@
     <span class="pill lg-red glow-anim">Red &lt; 60</span>
   </div>
 
-  <!-- Wheel + chips -->
-  <div class="grid lg:grid-cols-[340px,1fr] gap-6 items-center">
-    <div class="glow-anim" style="display:grid;place-items:center">
-      <div class="mw warn glow-anim" id="mw">
-        <div class="mw-ring" id="mwRing" style="--v:0"></div>
-        <div class="mw-fill" id="mwFill" style="--p:0"></div>
-        <div class="mw-center" id="mwNum">0%</div>
-      </div>
-    </div>
-    <div class="space-y-3">
-      <div class="flex flex-wrap gap-3">
-        <span id="chipOverall" class="chip warn glow-anim"><i>🟠</i><span>Overall: 0 /100</span></span>
-        <span id="chipContent" class="chip warn glow-anim"><i>🟠</i><span>Content: —</span></span>
-        <span id="chipWriter"  class="chip glow-anim"><i>🟠</i><span>Writer: —</span></span>
-        <span id="chipHuman"   class="chip glow-anim"><i>🟠</i><span>Human-like: — %</span></span>
-        <span id="chipAI"      class="chip glow-anim"><i>🟠</i><span>AI-like: — %</span></span>
-      </div>
-      <div id="overallBar" class="waterbox warn glow-anim">
-        <div class="fill" id="overallFill" style="width:0%"></div>
-        <div class="label"><span id="overallPct">0%</span></div>
-      </div>
-      <p class="text-xs text-slate-400">Wheel + water bars fill with your scores (green ≥80, orange 60–79, red &lt;60).</p>
+  <!-- Wheel centered (original look) -->
+  <div class="wheel-wrap">
+    <div class="mw warn glow-anim" id="mw">
+      <div class="mw-ring" id="mwRing" style="--v:0"></div>
+      <div class="mw-fill" id="mwFill" style="--p:0"></div>
+      <div class="mw-center" id="mwNum">0%</div>
     </div>
   </div>
+
+  <!-- Chips row under the wheel -->
+  <div class="chips-row">
+    <span id="chipOverall" class="chip warn glow-anim"><i>🟠</i><span>Overall: 0 /100</span></span>
+    <span id="chipContent" class="chip warn glow-anim"><i>🟠</i><span>Content: —</span></span>
+    <span id="chipWriter"  class="chip glow-anim"><i>🟠</i><span>Writer: —</span></span>
+    <span id="chipHuman"   class="chip glow-anim"><i>🟠</i><span>Human-like: — %</span></span>
+    <span id="chipAI"      class="chip glow-anim"><i>🟠</i><span>AI-like: — %</span></span>
+  </div>
+
+  <!-- Water bar -->
+  <div id="overallBar" class="waterbox warn glow-anim">
+    <div class="fill" id="overallFill" style="width:0%"></div>
+    <div class="label"><span id="overallPct">0%</span></div>
+  </div>
+  <p class="text-xs text-slate-400 text-center">Wheel + water bars fill with your scores (green ≥80, orange 60–79, red &lt;60).</p>
 
   <!-- Analyze toolbar -->
   <div class="analyze-wrap p-4 space-y-3 glow-anim">
@@ -255,7 +255,6 @@ document.addEventListener('DOMContentLoaded', () => {
         mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
         mTips=$('#improveTips'), mLink=$('#improveSearch');
 
-  /* Helpers */
   const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
   const bandIcon=s=>s>=80?'🟢':(s>=60?'🟠':'🔴');
 
@@ -265,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`;
   }
 
-  /* Clipboard + actions */
   pasteBtn?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
   importBtn?.addEventListener('click',()=>importFile.click());
   importFile?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)})
@@ -273,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
   resetBtn?.addEventListener('click',()=>location.reload());
   exportBtn?.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)})
 
-  /* API call with fallback */
   async function callAnalyzer(url){
     const headers={'Accept':'application/json','Content-Type':'application/json'};
     let res=await fetch('/api/semantic-analyze',{method:'POST',headers,body:JSON.stringify({url,target_keyword:''})});
@@ -285,21 +282,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let msg=`HTTP ${res.status}`;try{const j=await res.json();if(j?.error)msg+=' – '+j.error}catch{}throw new Error(msg);
   }
 
-  function setRunning(isOn){
-    if(!analyzeBtn)return;
-    analyzeBtn.disabled = isOn;
-    analyzeBtn.style.opacity = isOn ? .6 : 1;
-    analyzeBtn.textContent = isOn ? 'Analyzing…' : '🔍 Analyze';
-  }
+  function setRunning(on){analyzeBtn.disabled=on;analyzeBtn.style.opacity=on?.6:1;analyzeBtn.textContent=on?'Analyzing…':'🔍 Analyze'}
 
   analyzeBtn?.addEventListener('click',async e=>{
     e.preventDefault();
     const url=(urlInput.value||'').trim(); if(!url){alert('Please enter a URL.');return;}
     try{
       setRunning(true);
-      // reset visuals
-      $('#mwRing')?.style.setProperty('--v',0); $('#mwFill')?.style.setProperty('--p',0); $('#mwNum').textContent='0%';
-      $('#overallFill').style.width='0%'; $('#overallPct').textContent='0%';
+      mwRing.style.setProperty('--v',0); mwFill.style.setProperty('--p',0); mwNum.textContent='0%';
+      overallFill.style.width='0%'; overallPct.textContent='0%';
 
       const data=await callAnalyzer(url);
       if(!data||data.error)throw new Error(data?.error||'Unknown error');
@@ -307,16 +298,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const score=Math.max(0,Math.min(100,Number(data.overall_score||0)));
       const band=score>=80?'good':(score>=60?'warn':'bad');
-      $('#mw')?.classList.remove('good','warn','bad'); $('#mw')?.classList.add(band);
-      $('#overallBar')?.classList.remove('good','warn','bad'); $('#overallBar')?.classList.add(band);
+      mw.classList.remove('good','warn','bad'); mw.classList.add(band);
+      overallBar.classList.remove('good','warn','bad'); overallBar.classList.add(band);
       setChip(chipOverall,'Overall',`${score} /100`,score);
-      $('#mwRing')?.style.setProperty('--v',score); $('#mwFill')?.style.setProperty('--p',score);
-      $('#mwNum').textContent=score+'%'; $('#overallFill').style.width=score+'%'; $('#overallPct').textContent=score+'%';
+      mwRing.style.setProperty('--v',score); mwFill.style.setProperty('--p',score);
+      mwNum.textContent=score+'%'; overallFill.style.width=score+'%'; overallPct.textContent=score+'%';
 
-      // Content score from two categories
       const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
-      const c1=cmap['Content & Keywords']||0, c2=cmap['Content Quality']||0;
-      const contentScore=Math.round(((c1?c1:0)+(c2?c2:0))/( (c1||c2)?2:1 ));
+      const contentScore=Math.round(((cmap['Content & Keywords']||0)+(cmap['Content Quality']||0))/ ( (cmap['Content & Keywords']||cmap['Content Quality'])?2:1 ));
       setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
 
       const r=data.readability||{}, human=Math.max(0,Math.min(100,Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3))), ai=Math.max(0,Math.min(100,100-human));
@@ -324,33 +313,33 @@ document.addEventListener('DOMContentLoaded', () => {
       setChip(chipHuman,'Human-like',`${human} %`,human);
       setChip(chipAI,'AI-like',`${ai} %`,ai);
 
-      // Quick stats
-      $('#statFlesch').textContent=r.flesch??'—'; $('#statGrade').textContent='Grade '+(r.grade??'—');
-      $('#statInt').textContent=data.quick_stats?.internal_links??0;
-      $('#statExt').textContent=data.quick_stats?.external_links??0;
-      $('#statRatio').textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
+      // quick stats
+      statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
+      statInt.textContent=data.quick_stats?.internal_links??0;
+      statExt.textContent=data.quick_stats?.external_links??0;
+      statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
 
-      // Structure
-      $('#titleVal').textContent=data.content_structure?.title||'—';
-      $('#metaVal').textContent=data.content_structure?.meta_description||'—';
-      const hs=data.content_structure?.headings||{}; const hm=$('#headingMap'); hm.innerHTML='';
+      // structure
+      titleVal.textContent=data.content_structure?.title||'—';
+      metaVal.textContent=data.content_structure?.meta_description||'—';
+      const hs=data.content_structure?.headings||{}; headingMap.innerHTML='';
       Object.entries(hs).forEach(([lvl,arr])=>{
         if(!arr||!arr.length)return;
         const box=document.createElement('div'); box.className='card glow-anim';
         box.innerHTML=`<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');
-        hm.appendChild(box);
+        headingMap.appendChild(box);
       });
 
-      // Recs
-      $('#recs').innerHTML='';
+      // recs
+      recsEl.innerHTML='';
       (data.recommendations||[]).forEach(rec=>{
         const d=document.createElement('div'); d.className='card glow-anim';
         d.innerHTML=`<span class="pill mr-2">${rec.severity}</span>${rec.text}`;
-        $('#recs').appendChild(d);
+        recsEl.appendChild(d);
       });
 
-      // Ground
-      const catsEl=$('#cats'); catsEl.innerHTML='';
+      // ground
+      catsEl.innerHTML='';
       (data.categories||[]).forEach(cat=>{
         const total=(cat.checks||[]).length;
         const passed=(cat.checks||[]).filter(ch=>(ch.score||0)>=80).length;
@@ -372,30 +361,30 @@ document.addEventListener('DOMContentLoaded', () => {
                          <div class="flex items-center gap-2"><span class="score-pill ${(ch.score||0)>=80?'score-pill--green':(ch.score||0)>=60?'score-pill--orange':'score-pill--red'}">${ch.score??'—'}</span>
                          <button class="improve-btn ${fill} ${outline}" type="button">Improve</button></div>`;
           row.querySelector('.improve-btn').addEventListener('click',()=>{
-            $('#improveTitle').textContent=ch.label; $('#improveCategory').textContent=cat.name; $('#improveScore').textContent=ch.score??'—';
+            mTitle.textContent=ch.label; mCat.textContent=cat.name; mScore.textContent=ch.score??'—';
             const band=(ch.score||0)>=80?'score-pill--green':(ch.score||0)>=60?'score-pill--orange':'score-pill--red';
             const bandText=(ch.score||0)>=80?'Good (≥80)':(ch.score||0)>=60?'Needs work (60–79)':'Low (<60)';
-            $('#improveBand').textContent=bandText; $('#improveBand').className='pill '+band;
-            $('#improveWhy').textContent=ch.why||'This item affects topical authority, UX, and rich-result eligibility.';
-            const tips=ch.tips||['Aim for ≥80 (green) and re-run the analyzer.']; const ul=$('#improveTips'); ul.innerHTML=''; tips.forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li);});
-            $('#improveSearch').href=ch.improve_search_url||('https://www.google.com/search?q='+encodeURIComponent(ch.label+' SEO best practices'));
-            const modal=$('#improveModal'); if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','');
+            mBand.textContent=bandText; mBand.className='pill '+band;
+            mWhy.textContent=ch.why||'This item affects topical authority, UX, and rich-result eligibility.';
+            const tips=ch.tips||['Aim for ≥80 (green) and re-run the analyzer.']; mTips.innerHTML=''; tips.forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li);});
+            mLink.href=ch.improve_search_url||('https://www.google.com/search?q='+encodeURIComponent(ch.label+' SEO best practices'));
+            if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','');
           });
           list.appendChild(row);
         });
         catsEl.appendChild(card);
       });
 
-      // Status chips
-      $('#chipTitle').textContent=(data.content_structure?.title||'').length||0;
-      $('#chipMeta').textContent=(data.content_structure?.meta_description||'').length||0;
-      try{$('#chipCanon').textContent=new URL(url).origin}catch{$('#chipCanon').textContent='—'}
-      $('#chipRobots').textContent='—'; $('#chipViewport').textContent='—';
-      const hh=data.content_structure?.headings||{}; $('#chipH').textContent=`H1:${(hh.H1||[]).length} • H2:${(hh.H2||[]).length} • H3:${(hh.H3||[]).length}`;
-      $('#chipInt').textContent=data.quick_stats?.internal_links??0;
-      $('#chipSchema').textContent=data.schema_count??0;
-      $('#chipAuto').textContent=(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length;
-      $('#chipHttp').textContent='200';
+      // status chips
+      chipTitle.textContent=(data.content_structure?.title||'').length||0;
+      chipMeta.textContent=(data.content_structure?.meta_description||'').length||0;
+      try{chipCanon.textContent=new URL(url).origin}catch{chipCanon.textContent='—'}
+      chipRobots.textContent='—'; chipViewport.textContent='—';
+      const hh=data.content_structure?.headings||{}; chipH.textContent=`H1:${(hh.H1||[]).length} • H2:${(hh.H2||[]).length} • H3:${(hh.H3||[]).length}`;
+      chipIntChip.textContent=data.quick_stats?.internal_links??0;
+      chipSchema.textContent=data.schema_count??0;
+      chipAuto.textContent=(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length;
+      chipHttp.textContent='200';
     }catch(err){
       console.error(err);
       alert('Analyze failed: '+err.message);
@@ -404,7 +393,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* Close modal on backdrop click */
   const modal=$('#improveModal');
   modal?.addEventListener('click',e=>{
     const r=modal.getBoundingClientRect();
