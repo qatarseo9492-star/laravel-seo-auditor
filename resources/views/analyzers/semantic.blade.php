@@ -4,32 +4,39 @@
 
 @push('head')
 <style>
-  /* ========= Solid Dark Purple background =========
-     Name: Dark Purple | Hex: #321A37 | RGB: (50, 26, 55) */
-  body{
-    color:#e8eaf6;
-    background:#321A37 !important; /* force over any layout classes */
-    overflow-x:hidden;
+  /* === HARD OVERRIDE: Solid Dark Purple base === */
+  html, body { background:#321A37 !important; }
+  body{ color:#e8eaf6; overflow-x:hidden; }
+
+  /* Paint a solid layer ABOVE any legacy backgrounds, but below our content */
+  body::before{
+    content:""; position:fixed; inset:0; pointer-events:none;
+    background:#321A37;  /* Dark Purple */
+    z-index:0;           /* base layer */
   }
 
-  /* Fixed base layer (ensures the color shows even if body gets another bg) */
-  .app-bg{
-    position:fixed; inset:0; z-index:-2; pointer-events:none;
-    background:#321A37; /* Dark Purple */
+  /* Nuke common gradient/noise backgrounds from the layout (safe) */
+  .bg-gradient, .gradient-bg, .hero-bg, .page-bg, .noise-bg, .grid-overlay,
+  [data-bg], [class*="bg-gradient"], [class*="bg-grid"], [class*="bg-noise"]{
+    background:none !important; box-shadow:none !important;
   }
+  .bg-gradient::before, .bg-gradient::after,
+  .hero-bg::before, .hero-bg::after,
+  body::after{ content:none !important; }
 
-  /* ========= Animated Tech Lines (purple ↔ red strands) ========= */
-  .tech-bg{position:fixed; inset:0; pointer-events:none; opacity:.46; z-index:-1;}
-  .tech-bg svg{width:145%; height:145%; transform:translate(-17%,-18%) rotate(-7deg);}
-  .tech-bg .dash{stroke-dasharray:8 18; animation:dashMove 16s linear infinite;}
+  /* Our layers: content on top, tech lines between content and base */
+  .content-root{ position:relative; z-index:2; }
+  .tech-bg{ position:fixed; inset:0; pointer-events:none; opacity:.46; z-index:1; }
+  .tech-bg svg{ width:145%; height:145%; transform:translate(-17%,-18%) rotate(-7deg); }
+  .tech-bg .dash{ stroke-dasharray:8 18; animation:dashMove 16s linear infinite; }
   .tech-bg .glow{
     filter:
       drop-shadow(0 0 10px rgba(255,64,95,.55))
       drop-shadow(0 0 12px rgba(160,0,255,.45));
   }
-  @keyframes dashMove{to{stroke-dashoffset:-520;}}
+  @keyframes dashMove{ to{ stroke-dashoffset:-520; } }
 
-  /* ========= Minimal utilities (works with or without Tailwind) ========= */
+  /* Minimal utilities */
   .glass{background:rgba(255,255,255,.04); backdrop-filter:blur(6px);}
   .shadow-soft{box-shadow:0 12px 40px rgba(0,0,0,.25);}
   .card { border-radius:1rem; padding:1.25rem; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03);}
@@ -37,74 +44,51 @@
   .k-badge{ padding:.35rem .6rem; border-radius:.75rem; font-size:.78rem; font-weight:700; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); }
   .chip { font-size:.75rem; padding:.125rem .5rem; border-radius:.5rem; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.10); }
 
-  /* ========= Water loading bar ========= */
-  #waterbar { height: 12px; border-radius: 9999px; background: rgba(255,255,255,.08); overflow: hidden; border:1px solid rgba(255,255,255,.10);}
-  #waterbar span {
-    display:block; height:100%; width:0%;
-    background: linear-gradient(90deg,#ff3b6a,#a000ff,#ff3b6a);
-    transition: width .9s ease;
-    filter: drop-shadow(0 0 10px rgba(148,163,184,.4));
-  }
+  /* Water loading bar */
+  #waterbar { height:12px; border-radius:9999px; background:rgba(255,255,255,.08); overflow:hidden; border:1px solid rgba(255,255,255,.10);}
+  #waterbar span { display:block; height:100%; width:0%; background:linear-gradient(90deg,#ff3b6a,#a000ff,#ff3b6a); transition:width .9s ease; filter:drop-shadow(0 0 10px rgba(148,163,184,.4)); }
 
-  /* ========= Wheels & Bars ========= */
+  /* Wheels & bars */
   .score-wheel { width:170px; height:170px; border-radius:50%; display:grid; place-items:center; }
   .score-ring {
-    --v: 0; /* 0..100 */
-    background:
-      conic-gradient(
-        #1ef5a4 calc(var(--v)*1%),
-        #ffcf5a calc(var(--v)*1% + 0.0001%),
-        #ff6b6b 100%
-      );
+    --v:0;
+    background: conic-gradient(#1ef5a4 calc(var(--v)*1%), #ffcf5a calc(var(--v)*1% + .0001%), #ff6b6b 100%);
     mask: radial-gradient(circle 70px, transparent 68%, #000 69%);
   }
-  .bar { height:.75rem; border-radius:9999px; background:rgba(255,255,255,.10); overflow:hidden; border:1px solid rgba(255,255,255,.08);}
-  .bar > span { height:100%; display:block; border-radius:9999px; transition:width .4s ease; background:linear-gradient(90deg,#07f3b0,#60a5fa,#d946ef); }
+  .bar{ height:.75rem; border-radius:9999px; background:rgba(255,255,255,.10); overflow:hidden; border:1px solid rgba(255,255,255,.08);}
+  .bar>span{ height:100%; display:block; border-radius:9999px; transition:width .4s ease; background:linear-gradient(90deg,#07f3b0,#60a5fa,#d946ef); }
 
-  /* ========= Checklist glow bands ========= */
-  .g-green  { box-shadow: 0 0 0 1px rgba(16,185,129,.45) inset, 0 0 25px rgba(16,185,129,.30); }
-  .g-orange { box-shadow: 0 0 0 1px rgba(245,158,11,.40) inset, 0 0 25px rgba(245,158,11,.25); }
-  .g-red    { box-shadow: 0 0 0 1px rgba(239,68,68,.40) inset, 0 0 25px rgba(239,68,68,.25); }
+  /* Checklist glow */
+  .g-green  { box-shadow:0 0 0 1px rgba(16,185,129,.45) inset, 0 0 25px rgba(16,185,129,.30); }
+  .g-orange { box-shadow:0 0 0 1px rgba(245,158,11,.40) inset, 0 0 25px rgba(245,158,11,.25); }
+  .g-red    { box-shadow:0 0 0 1px rgba(239,68,68,.40) inset, 0 0 25px rgba(239,68,68,.25); }
 
-  @media (prefers-reduced-motion: reduce){
-    .tech-bg .dash{animation:none;}
-    #waterbar span{transition:none;}
-  }
+  @media (prefers-reduced-motion:reduce){ .tech-bg .dash{animation:none;} #waterbar span{transition:none;} }
 </style>
 @endpush
 
 @section('content')
-<!-- Fixed base color layer -->
-<div class="app-bg" aria-hidden="true"></div>
-
-<!-- Animated tech lines (purple + red) -->
+<!-- Tech lines (purple ↔ red) -->
 <div class="tech-bg" aria-hidden="true">
   <svg viewBox="0 0 1400 900" preserveAspectRatio="none">
     <defs>
       <linearGradient id="techStroke" x1="0" x2="1">
-        <stop offset="0%"   stop-color="#ff405f" stop-opacity="0.85"/>
+        <stop offset="0%" stop-color="#ff405f" stop-opacity="0.85"/>
         <stop offset="100%" stop-color="#a000ff" stop-opacity="0.85"/>
       </linearGradient>
     </defs>
-
-    {{-- angled grid --}}
     @for($x=-100;$x<=1500;$x+=90)
-      <line x1="{{ $x }}" y1="-50" x2="{{ $x+200 }}" y2="950"
-            stroke="url(#techStroke)" stroke-width="1.2" class="dash glow"/>
+      <line x1="{{ $x }}" y1="-50" x2="{{ $x+200 }}" y2="950" stroke="url(#techStroke)" stroke-width="1.2" class="dash glow"/>
     @endfor
-
-    {{-- flowing strands --}}
     @for($i=0;$i<12;$i++)
       @php $y = 60 + $i*65; @endphp
-      <path d="M -200 {{ $y }}
-               C 200 {{ $y+60 }}, 600 {{ $y-40 }}, 1000 {{ $y+50 }}
-               S 1600 {{ $y-30 }}, 1900 {{ $y+40 }}"
+      <path d="M -200 {{ $y }} C 200 {{ $y+60 }}, 600 {{ $y-40 }}, 1000 {{ $y+50 }} S 1600 {{ $y-30 }}, 1900 {{ $y+40 }}"
             fill="none" stroke="url(#techStroke)" stroke-width="2" class="dash glow"/>
     @endfor
   </svg>
 </div>
 
-<section class="max-w-7xl mx-auto px-4 py-10 space-y-8">
+<section class="content-root max-w-7xl mx-auto px-4 py-10 space-y-8">
 
   <!-- Top: Form + water bar -->
   <div class="flex flex-col gap-4">
@@ -248,11 +232,10 @@
 @endsection
 
 @push('scripts')
-{{-- Resolve endpoint smartly: prefer named web route; fallback to API path --}}
 <script>
 const ANALYZE_URL = @json(\Illuminate\Support\Facades\Route::has('semantic.analyze')
-    ? route('semantic.analyze')
-    : url('/api/semantic-analyze'));
+  ? route('semantic.analyze')
+  : url('/api/semantic-analyze'));
 </script>
 
 <script>
@@ -287,99 +270,34 @@ const mTitle = document.getElementById('improveTitle');
 const mAdvice= document.getElementById('improveAdvice');
 const mLink  = document.getElementById('improveSearch');
 
-function clamp(n,min=0,max=100){ const v = Number(n); return Math.max(min, Math.min(max, isNaN(v)?0:v)); }
+function clamp(n,min=0,max=100){ const v=Number(n); return Math.max(min, Math.min(max, isNaN(v)?0:v)); }
 function band(score){ return score>=80?'g-green':(score>=60?'g-orange':'g-red'); }
 function labelBy(score){ return score>=80?'Great Work — Well Optimized':(score>=60?'Needs Optimization':'Needs Significant Optimization'); }
-function escapeHtml(str){
-  if(str==null) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
-}
+function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 f.addEventListener('submit', async (e)=>{
   e.preventDefault();
-
-  // Water bar animates 0 -> 100 while loading; snap later to real score
-  water.style.width = '0%';
-  requestAnimationFrame(()=>{ water.style.width='100%'; });
+  water.style.width='0%'; requestAnimationFrame(()=>{ water.style.width='100%'; });
 
   const fd = new FormData(f);
   const payload = { url: fd.get('url'), target_keyword: fd.get('target_keyword') || '' };
 
   try{
-    let res, data;
+    let res;
     if (ANALYZE_URL.includes('/api/')) {
-      // API path (no CSRF)
-      res = await fetch(ANALYZE_URL, {
-        method:'POST',
-        headers:{ 'Accept':'application/json','Content-Type':'application/json' },
-        body: JSON.stringify(payload)
-      });
+      res = await fetch(ANALYZE_URL, { method:'POST', headers:{ 'Accept':'application/json','Content-Type':'application/json' }, body: JSON.stringify(payload) });
     } else {
-      // Web route (needs CSRF)
-      res = await fetch(ANALYZE_URL, {
-        method:'POST',
-        headers:{
-          'X-Requested-With':'XMLHttpRequest',
-          'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: fd
-      });
+      res = await fetch(ANALYZE_URL, { method:'POST', headers:{ 'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':'{{ csrf_token() }}' }, body: fd });
     }
-    if(!res.ok){ throw new Error(await res.text() || 'Analysis request failed'); }
-    data = await res.json();
-    renderAll(data);
+    if(!res.ok) throw new Error(await res.text() || 'Analysis request failed');
+    renderAll(await res.json());
   } catch(err){
     console.error(err);
-    // Fallback demo so UI still shows even if backend not ready
-    renderAll({
-      overall_score: 76,
-      wheel: { label: 'Needs Optimization' },
-      quick_stats: {
-        readability_flesch: 82,
-        readability_grade: 8,
-        internal_links: 18,
-        external_links: 5,
-        text_to_html_ratio: 42
-      },
-      content_structure: {
-        title: 'Ultimate Guide to Semantic SEO in 2025',
-        meta_description: 'Learn semantic SEO with actionable steps and pro checklists.',
-        headings: {
-          H1: ['Semantic SEO: Strategies, Tools, and Checklists'],
-          H2: ['Why semantics matter','Entity mapping','FAQ schema best-practices','Internal linking hubs'],
-          H3: ['How to start','Common pitfalls']
-        }
-      },
-      readability: {
-        score: 82, grade: 8.9, flesch: 79.5,
-        avg_sentence_len: 14.6, simple_words_ratio: 68, passive_ratio: 12,
-        note: 'Score blends Flesch and average grade-level into a 0–100 scale.'
-      },
-      recommendations: [
-        { severity: 'Critical', text: 'Add a canonical link to prevent duplicates.' },
-        { severity: 'Warning',  text: '2 images missing alt text.' },
-        { severity: 'Info',     text: 'Consider adding FAQPage schema for rich results.' }
-      ],
-      categories: [
-        { name:'Content & Keywords', score:85, checks:[
-          { label:'Primary keyword in title', score:100, color:'green', advice:'Keep it near the beginning.' },
-          { label:'Entity coverage', score:90,  color:'green', advice:'Include core entities and aliases.' },
-          { label:'Synonyms & variants', score:60, color:'orange', advice:'Add 2–3 natural variants.' }
-        ]},
-        { name:'Technical Elements', score:68, checks:[
-          { label:'Meta description length', score:90, color:'green' },
-          { label:'Image alts', score:60, color:'orange', advice:'Add alt to 2 images.' },
-          { label:'Structured data', score:50, color:'orange', advice:'Add JSON-LD (Article/FAQ/Breadcrumb).' }
-        ]},
-        { name:'Links & Navigation', score:58, checks:[
-          { label:'Internal links to hubs', score:55, color:'orange', advice:'Add 3+ internal links to pillar pages.' },
-          { label:'External authoritative refs', score:35, color:'red', advice:'Cite 2–3 high-authority sources.' }
-        ]},
-        { name:'Experience & Trust', score:80, checks:[
-          { label:'Readable for target audience', score:82, color:'green', advice:'Target Grade 8–10.' },
-          { label:'Author / Last updated visible', score:70, color:'orange', advice:'Show author and update date.' }
-        ]}
-      ]
+    renderAll({ /* demo data */ overall_score:76, wheel:{label:'Needs Optimization'},
+      quick_stats:{ readability_flesch:82, readability_grade:8, internal_links:18, external_links:5, text_to_html_ratio:42 },
+      content_structure:{ title:'Ultimate Guide to Semantic SEO in 2025', meta_description:'Learn semantic SEO with actionable steps and pro checklists.',
+        headings:{ H1:['Semantic SEO: Strategies, Tools, and Checklists'], H2:['Why semantics matter','Entity mapping','FAQ schema best-practices','Internal linking hubs'], H3:['How to start','Common pitfalls'] } },
+      readability:{ score:82, grade:8.9, flesch:79.5, avg_sentence_len:14.6, simple_words_ratio:68, passive_ratio:12 }
     });
   }
 });
@@ -387,17 +305,14 @@ f.addEventListener('submit', async (e)=>{
 function renderAll(data){
   wrap.classList.remove('hidden');
 
-  // OVERALL
   const ov = clamp(data.overall_score);
   wheel.style.setProperty('--v', ov);
   scoreNum.textContent = ov;
-  const badgeText = (data.wheel && data.wheel.label) ? data.wheel.label : labelBy(ov);
-  badge.textContent = badgeText;
+  badge.textContent = (data.wheel && data.wheel.label) ? data.wheel.label : labelBy(ov);
   badge.className = 'k-badge ' + (ov>=80?'bg-emerald-500/20 text-emerald-200 border border-emerald-500/30':
                                    ov>=60?'bg-amber-500/20 text-amber-200 border border-amber-500/30':
                                            'bg-rose-500/20 text-rose-200 border border-rose-500/30');
 
-  // QUICK STATS
   const qs = data.quick_stats || {};
   statF.textContent = (qs.readability_flesch!=null ? Math.round(qs.readability_flesch) : '—');
   statG.textContent = (qs.readability_grade!=null ? ('Grade '+qs.readability_grade) : '—');
@@ -405,12 +320,10 @@ function renderAll(data){
   statExt.textContent = qs.external_links ?? 0;
   statRatio.textContent = (qs.text_to_html_ratio!=null ? (qs.text_to_html_ratio+'%') : '—');
 
-  // READABILITY (use backend's real block)
   const rb = data.readability || {};
   const rScore = clamp(rb.score);
   const rGrade = (rb.grade!=null ? rb.grade : (qs.readability_grade ?? null));
   const rFlesch = (rb.flesch!=null ? rb.flesch : (qs.readability_flesch ?? 0));
-
   readWheel.style.setProperty('--v', rScore);
   readNum.textContent = Math.round(rFlesch||0);
   readBar.style.width = rScore + '%';
@@ -420,7 +333,6 @@ function renderAll(data){
                                                      'bg-rose-500/20 text-rose-200 border border-rose-500/30');
   gradeVal.textContent = (rGrade!=null ? 'Grade ' + rGrade : '—');
 
-  // STRUCTURE
   const st = data.content_structure || {};
   titleVal.textContent = st.title || '—';
   metaVal.textContent  = st.meta_description || '—';
@@ -435,7 +347,6 @@ function renderAll(data){
     headingMap.appendChild(box);
   });
 
-  // RECOMMENDATIONS
   recsEl.innerHTML='';
   (data.recommendations||[]).forEach(r=>{
     const tone = r.severity==='Critical' ? 'bg-rose-500/15 text-rose-200 border-rose-500/30'
@@ -447,7 +358,6 @@ function renderAll(data){
     recsEl.appendChild(c);
   });
 
-  // CHECKLISTS
   catsEl.innerHTML='';
   (data.categories||[]).forEach(cat=>{
     const tone = band(clamp(cat.score));
@@ -462,10 +372,10 @@ function renderAll(data){
     const list = card.lastElementChild;
     const checks = cat.checks || cat.items || [];
     checks.forEach(ch=>{
-      const li = document.createElement('div');
       const sc = clamp(ch.score, 0, 100);
       const col = ch.color || ( sc>=80?'green' : sc>=60?'orange' : 'red' );
       const colDot = col==='green'?'bg-emerald-400':col==='orange'?'bg-amber-400':'bg-rose-400';
+      const li = document.createElement('div');
       li.className = 'glass rounded-lg px-3 py-2 border border-white/10 flex items-center justify-between';
       li.innerHTML = `
         <div class="flex items-center gap-3">
@@ -487,7 +397,6 @@ function renderAll(data){
     catsEl.appendChild(card);
   });
 
-  // Snap water bar to the actual overall score after render
   setTimeout(()=>{ water.style.width = (ov+'%'); }, 120);
 }
 </script>
