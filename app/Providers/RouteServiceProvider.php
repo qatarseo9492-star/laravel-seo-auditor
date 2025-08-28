@@ -12,8 +12,9 @@ class RouteServiceProvider extends ServiceProvider
 {
     /**
      * Where to redirect users after login/registration.
+     * (Used by some auth scaffolds; safe default for this app.)
      */
-    public const HOME = '/home';
+    public const HOME = '/dashboard';
 
     /**
      * Bootstrap any application services.
@@ -23,10 +24,12 @@ class RouteServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
 
         $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api')
+            // API routes (stateless)
+            Route::prefix('api')
+                ->middleware('api')
                 ->group(base_path('routes/api.php'));
 
+            // Web routes (sessions, cookies, CSRF, auth)
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
@@ -40,11 +43,13 @@ class RouteServiceProvider extends ServiceProvider
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?? $request->ip());
+            return Limit::perMinute(60)->by(
+                $request->user()?->id ?? $request->ip()
+            );
         });
 
         RateLimiter::for('seoapi', function (Request $request) {
-            $key = ($request->user()->id ?? 'guest') . '|' . $request->ip();
+            $key = ($request->user()?->id ?? 'guest') . '|' . $request->ip();
             return Limit::perMinute(240)->by($key);
         });
     }
