@@ -1,51 +1,63 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_','-',app()->getLocale()) }}" data-lang="en">
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>@yield('title','Semantic SEO Master • Ultra Tech Global')</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>@yield('title','Semantic SEO Master Analyzer 2.0')</title>
 
-  <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
-
-  <style>
-    :root{
-      --bg:#070812; --panel:#0e1024; --panel-2:#12143a; --line:#1b1f3a;
-      --text:#f3f4ff; --text-dim:#b9bce2; --text-muted:#96a0c9;
-      --primary:#8d69ff; --secondary:#ff3b5c; --accent:#36e6ff;
-      --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
-      --radius:18px; --shadow:0 12px 40px rgba(0,0,0,.55);
-      --container:1180px;
+  <!-- Inter + Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','ui-sans-serif','system-ui'] },
+          colors: {
+            brand: {
+              50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',
+              500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81'
+            }
+          }
+        }
+      }
     }
-    *{box-sizing:border-box} html,body{height:100%}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0; color:var(--text);
-      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
-      background:
-        radial-gradient(1200px 700px at 0% -10%, #1b0f3c 0%, transparent 55%),
-        radial-gradient(1100px 800px at 110% 0%, #0f0f2b 0%, transparent 50%),
-        var(--bg);
-      overflow-x:hidden;
-    }
-    .wrap{position:relative;z-index:3;max-width:var(--container);margin:0 auto;padding:28px 5%}
-  </style>
-
-  @stack('styles')
+  </script>
+  <style>html{scroll-behavior:smooth}</style>
 </head>
-<body>
-  <canvas id="brainCanvas"></canvas>
-  <canvas id="linesCanvas"></canvas>
-  <canvas id="linesCanvas2"></canvas>
-  <canvas id="smokeFX" aria-hidden="true"></canvas>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
 
-  <div class="wrap">
-    @yield('content')
-  </div>
+  <!-- Top Menu Bar (above header) -->
+  <nav class="w-full border-b border-slate-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="h-14 flex items-center justify-between">
+        <a href="{{ url('/') }}" class="flex items-center gap-2 font-semibold">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-brand-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 5v10h-2V7h2zm-1 12a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z"/></svg>
+          <span>Semantic SEO Master Analyzer 2.0</span>
+        </a>
 
-  @stack('scripts')
+        <div class="hidden md:flex items-center gap-6">
+          <a href="{{ url('/semantic-analyzer') }}" class="hover:text-brand-700">Semantic Analyzer</a>
+          <a href="{{ url('/ai-content-checker') }}" class="hover:text-brand-700">AI Content Checker</a>
+          <a href="{{ url('/topic-cluster') }}" class="hover:text-brand-700">Topic Analysis</a>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <a href="{{ url('/login') }}" class="text-sm px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100">Login</a>
+          <a href="{{ url('/register') }}" class="text-sm px-3 py-1.5 rounded-lg bg-brand-600 text-white hover:bg-brand-700">Signup</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  @yield('content')
+
+  <footer class="border-t mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 text-sm text-slate-600">
+      <p>© {{ date('Y') }} Semantic SEO Master Analyzer 2.0 · Built for speed, clarity and action.</p>
+    </div>
+  </footer>
 </body>
 </html>
