@@ -563,7 +563,7 @@ class AnalyzerController extends Controller
         $host   = $p['host'] ?? '';
         if (Str::startsWith($href, ['/'])) return $scheme.'://'.$host.$href;
         $path = isset($p['path']) ? preg_replace('#/[^/]*$#','/', $p['path']) : '/';
-        return $scheme.'://'.$host.$path.$href;
+        return $scheme.'://'.$host.$path+$href;
     }
 
     private function syllableGuess(string $word): int
@@ -629,7 +629,12 @@ class AnalyzerController extends Controller
             if (strtolower($s->getAttribute('type')) === 'application/ld+json') {
                 $json = trim($s->nodeValue ?? '');
                 $data = json_decode($json, true);
-                if (json_last_error() !== JSON_ERROR_NONE) continue;
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    // try to recover from trailing commas
+                    $json = preg_replace('/,\s*([\]}])/m', '$1', $json);
+                    $data = json_decode($json, true);
+                }
+                if (!is_array($data)) continue;
                 $types = $this->collectTypes($data);
                 $out = array_values(array_unique(array_merge($out, $types)));
             }
@@ -659,7 +664,11 @@ class AnalyzerController extends Controller
             if (strtolower($s->getAttribute('type')) === 'application/ld+json') {
                 $json = trim($s->nodeValue ?? '');
                 $data = json_decode($json, true);
-                if (json_last_error() !== JSON_ERROR_NONE) continue;
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $json = preg_replace('/,\s*([\]}])/m', '$1', $json);
+                    $data = json_decode($json, true);
+                }
+                if (!is_array($data)) continue;
 
                 $stack = [$data];
                 while ($stack) {
@@ -698,6 +707,73 @@ class AnalyzerController extends Controller
     private function googleUrl(string $q): string
     {
         return 'https://www.google.com/search?q=' . rawurlencode($q);
+    }
+
+    /**
+     * Detect BreadcrumbList schema via JSON-LD / Microdata / RDFa.
+     * Accepts either a DOMDocument or a DOMXPath for convenience.
+     */
+    private function hasBreadcrumbJsonLd($docOrXp): bool
+    {
+        if ($docOrXp instanceof \DOMXPath) {
+            $xp = $docOrXp;
+        } elseif ($docOrXp instanceof \DOMDocument) {
+            $xp = new \DOMXPath($docOrXp);
+        } else {
+            return false;
+        }
+
+        // 1) JSON-LD
+        foreach ($xp->query("//script[@type='application/ld+json']") as $node) {
+            $json = trim($node->textContent ?? '');
+            if ($json === '') continue;
+
+            $data = json_decode($json, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // try to recover from trailing commas etc.
+                $json = preg_replace('/,\s*([\]}])/m', '$1', $json);
+                $data = json_decode($json, true);
+            }
+            if (!is_array($data)) continue;
+
+            if ($this->jsonHasType($data, 'BreadcrumbList')) {
+                return true;
+            }
+        }
+
+        // 2) Microdata (itemtype)
+        $q1 = "//*[@itemscope and contains(translate(@itemtype,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'breadcrumblist')]";
+        if ($xp->query($q1)->length > 0) return true;
+
+        // 3) RDFa (typeof)
+        $q2 = "//*[@typeof and contains(translate(@typeof,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'breadcrumblist')]";
+        if ($xp->query($q2)->length > 0) return true;
+
+        return false;
+    }
+
+    /**
+     * Recursively search decoded JSON-LD for @type == $type.
+     */
+    private function jsonHasType($data, string $type): bool
+    {
+        if (!is_array($data)) return false;
+
+        if (isset($data['@type'])) {
+            $t = $data['@type'];
+            if (is_string($t) && strcasecmp($t, $type) === 0) return true;
+            if (is_array($t)) {
+                foreach ($t as $v) {
+                    if (is_string($v) && strcasecmp($v, $type) === 0) return true;
+                }
+            }
+        }
+
+        // @graph or nested structures
+        foreach ($data as $v) {
+            if ($this->jsonHasType($v, $type)) return true;
+        }
+        return false;
     }
 
     /* -------------------- Topic/AI helpers -------------------- */
