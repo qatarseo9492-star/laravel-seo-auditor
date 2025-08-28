@@ -12,7 +12,7 @@ use App\Http\Controllers\AnalyzerController;
 */
 
 /**
- * Health check
+ * Quick health check
  */
 Route::get('/status', function () {
     return response()->json([
@@ -25,18 +25,22 @@ Route::get('/status', function () {
 
 /**
  * Main analyzer endpoints
- * Uses a named rate limiter `seoapi` (configured in RouteServiceProvider)
+ * Uses a named rate limiter `seoapi` (define in RouteServiceProvider)
  */
 Route::middleware('throttle:seoapi')->group(function () {
-    Route::post('/semantic-analyze', [AnalyzerController::class, 'semanticAnalyze'])->name('api.semantic');
-    Route::post('/ai-check',         [AnalyzerController::class, 'aiCheck'])->name('api.aicheck');
-    Route::post('/topic-cluster',    [AnalyzerController::class, 'topicClusterAnalyze'])->name('api.topiccluster');
+    Route::post('/semantic-analyze', [AnalyzerController::class, 'semanticAnalyze'])
+        ->name('api.semantic');
+
+    Route::post('/ai-check', [AnalyzerController::class, 'aiCheck'])
+        ->name('api.aicheck');
+
+    Route::post('/topic-cluster', [AnalyzerController::class, 'topicClusterAnalyze'])
+        ->name('api.topiccluster');
 });
 
 /**
- * Optional: CORS preflight catch-all for /api/*
- * (Safe to keep even if you also handle CORS via middleware.)
+ * CORS preflight for any /api/* path (keep even if using CORS middleware)
  */
-Route::options('/{any}', function () {
-    return response()->noContent(204);
-})->where('any', '.*');
+Route::options('/{any}', fn () => response()->noContent(204))
+    ->where('any', '.*')
+    ->name('api.options');
