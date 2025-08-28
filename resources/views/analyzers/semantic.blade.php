@@ -21,16 +21,21 @@
   .card { background: #0f172a; border:1px solid rgba(255,255,255,.08); }
   .shadow-soft { box-shadow: 0 16px 60px rgba(0,0,0,.28); }
   .chip { font-size:.7rem; padding:.2rem .5rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.06); }
-  .btn {
-    @apply px-4 py-2 rounded-xl font-semibold transition;
-  }
-  .btn-brand { @apply text-white; background-image: linear-gradient(135deg,#ff66c4,#60a5fa); }
+
+  /* Buttons (no @apply so it works without build step) */
+  .btn { padding:.5rem 1rem; border-radius:.75rem; font-weight:600; transition:.2s ease; border:1px solid transparent; }
+  .btn-brand { color:#fff; background-image:linear-gradient(135deg,#ff66c4,#60a5fa); }
   .btn-brand:hover { filter: brightness(1.05); }
-  .btn-ghost { @apply text-slate-100; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12); }
+  .btn-ghost { color:#e5e7eb; background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); }
   .btn-ghost:hover { background: rgba(255,255,255,.1); }
-  .badge-good { @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold; background: rgba(16,185,129,.15); color: #34d399; border:1px solid rgba(16,185,129,.35); }
-  .badge-warn { @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold; background: rgba(245,158,11,.15); color: #f59e0b; border:1px solid rgba(245,158,11,.35); }
-  .badge-bad  { @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold; background: rgba(239,68,68,.15);  color: #ef4444; border:1px solid rgba(239,68,68,.35); }
+
+  .badge-good, .badge-warn, .badge-bad {
+    display:inline-flex; align-items:center; gap:.5rem; padding:.25rem .75rem;
+    border-radius:9999px; font-size:.75rem; font-weight:600; border:1px solid;
+  }
+  .badge-good { background: rgba(16,185,129,.15); color:#34d399; border-color:rgba(16,185,129,.35); }
+  .badge-warn { background: rgba(245,158,11,.15); color:#f59e0b; border-color:rgba(245,158,11,.35); }
+  .badge-bad  { background: rgba(239,68,68,.15);  color:#ef4444; border-color:rgba(239,68,68,.35); }
 
   /* Modal */
   .modal-backdrop { position:fixed; inset:0; background:rgba(2,6,23,.6); backdrop-filter: blur(6px); display:none; z-index:50; }
@@ -125,14 +130,11 @@
                 <stop offset="100%" stop-color="#60a5fa"/>
               </linearGradient>
             </defs>
-            <!-- track -->
             <circle cx="110" cy="110" r="90" stroke="rgba(255,255,255,.15)" stroke-width="16" fill="none"/>
-            <!-- progress -->
             <circle id="progressArc" cx="110" cy="110" r="90"
                     stroke="url(#gradMulti)" stroke-width="16" fill="none"
                     stroke-linecap="round" stroke-dasharray="565.48" stroke-dashoffset="565.48"
                     transform="rotate(-90 110 110)"/>
-            <!-- center text -->
             <text id="scoreText" x="110" y="110" dominant-baseline="middle" text-anchor="middle"
                   font-size="44" font-weight="800" fill="#fff">—</text>
           </svg>
@@ -165,9 +167,9 @@
           </div>
         </div>
         <div class="mt-4 rounded-xl card p-4 text-sm">
-          <div class="text-slate-400 text-xs">Meta</div>
-          <p class="mt-1"><span class="text-slate-300">Title:</span> <span id="titleVal" class="text-white">—</span></p>
-          <p class="mt-1"><span class="text-slate-300">Description:</span> <span id="metaVal" class="text-white/90">—</span></p>
+            <div class="text-slate-400 text-xs">Meta</div>
+            <p class="mt-1"><span class="text-slate-300">Title:</span> <span id="titleVal" class="text-white">—</span></p>
+            <p class="mt-1"><span class="text-slate-300">Description:</span> <span id="metaVal" class="text-white/90">—</span></p>
         </div>
       </div>
 
@@ -206,7 +208,7 @@
       </div>
       <div class="p-6 rounded-2xl glass shadow-soft">
         <h3 class="font-semibold text-white">Anchor Text (Top 100)</h3>
-        <div id="anchors" class="mt-3 text-sm text-slate-300 space-y-1 max-h-[280px] overflow-auto pr-2 scrollbar"></div>
+        <div id="anchors" class="mt-3 text-sm text-slate-300 space-y-1 max-h-[280px] overflow-auto pr-2"></div>
       </div>
     </div>
   </div>
@@ -217,7 +219,7 @@
   <div class="modal glass rounded-2xl p-6 shadow-soft border border-white/10 text-slate-100">
     <div class="flex items-center justify-between">
       <h3 id="modalTitle" class="text-lg font-semibold">Improve</h3>
-      <button id="modalClose" class="btn btn-ghost px-2 py-1">✕</button>
+      <button id="modalClose" class="btn btn-ghost" style="padding:.25rem .5rem">✕</button>
     </div>
     <div id="modalBody" class="mt-3 text-sm space-y-2"></div>
     <div class="mt-5 text-right">
@@ -227,9 +229,9 @@
 </div>
 
 <script>
-  // ===== Utility controls =====
-  const $$ = (sel, root=document) => root.querySelector(sel);
-  const $$$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  // ===== Small DOM helpers (FIXED: define $) =====
+  const $  = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
   const elForm   = $('#semanticForm');
   const elWrap   = $('#semanticResult');
@@ -273,8 +275,6 @@
     scoreText.textContent = clamped;
     const dash = PERIM * (1 - clamped/100);
     progressArc.setAttribute('stroke-dashoffset', dash.toFixed(2));
-
-    // Badge
     if (clamped >= 80) {
       badge.innerHTML = `<span class="badge-good">🌟 Great Work — Well Optimized</span>`;
     } else if (clamped >= 60) {
@@ -284,133 +284,72 @@
     }
   }
 
-  // ===== Checklist model (100 pts total) =====
-  // Each item: id, label, weight, compute(data, target)
+  // ===== Checklist (100 pts total) =====
   const checklistModel = [
     { id:'title_len', label:'Title tag length (50–60 chars)', weight:8,
-      compute: (d) => {
-        const len = (d.content_structure?.title || '').trim().length;
-        return (len>=50 && len<=60) ? 1 : 0;
-      },
-      improve: (d) => [
-        'Aim for ~50–60 characters.',
-        'Lead with the primary keyword.',
-        'Use compelling phrasing (numbers, brackets, benefits).'
-      ]
+      compute: (d) => { const len = (d.content_structure?.title || '').trim().length; return (len>=50 && len<=60) ? 1 : 0; },
+      improve: () => ['Aim for ~50–60 characters.','Lead with the primary keyword.','Use compelling phrasing (numbers, brackets, benefits).']
     },
     { id:'meta_len', label:'Meta description present (120–160 chars)', weight:6,
-      compute: (d) => {
-        const len = (d.content_structure?.meta_description || '').trim().length;
-        return (len>=120 && len<=160) ? 1 : 0;
-      },
-      improve: () => [
-        'Write ~150–160 chars, include primary + secondary keywords naturally.',
-        'Treat it like ad copy with value prop + CTA.'
-      ]
+      compute: (d) => { const len = (d.content_structure?.meta_description || '').trim().length; return (len>=120 && len<=160) ? 1 : 0; },
+      improve: () => ['Write ~150–160 chars and include primary + secondary keywords.','Treat it like ad copy with value prop + CTA.']
     },
     { id:'h1_single', label:'Single H1 present', weight:6,
-      compute: (d) => {
-        const h1 = d.content_structure?.headings?.h1 || [];
-        return (Array.isArray(h1) && h1.length===1) ? 1 : 0;
-      },
-      improve: () => [
-        'Ensure exactly one H1.',
-        'Keep it close (not identical) to the Title tag.',
-        'Include the primary topic naturally.'
-      ]
+      compute: (d) => { const h1 = d.content_structure?.headings?.h1 || []; return (Array.isArray(h1) && h1.length===1) ? 1 : 0; },
+      improve: () => ['Ensure exactly one H1.','Keep it close (not identical) to the Title tag.','Include the primary topic naturally.']
     },
     { id:'headings_order', label:'Logical heading hierarchy (no skips)', weight:6,
       compute: (d) => d.content_structure?.skipped_levels === false ? 1 : 0,
-      improve: () => [
-        'Follow H1 → H2 → H3… (avoid H1 → H3 jumps).',
-        'Use H2 for main sections and H3 for sub-sections.'
-      ]
+      improve: () => ['Follow H1 → H2 → H3… (avoid H1 → H3 jumps).','Use H2 for main sections and H3 for sub-sections.']
     },
     { id:'keyword_title', label:'Primary keyword in Title', weight:6,
       compute: (d) => d.target_keyword?.in_title ? 1 : 0,
-      improve: () => [
-        'Place primary keyword near the front of the Title.',
-        'Keep wording natural and click-worthy.'
-      ]
+      improve: () => ['Place primary keyword near the front of the Title.','Keep wording natural and click-worthy.']
     },
     { id:'keyword_meta', label:'Primary keyword in Meta description', weight:4,
       compute: (d) => d.target_keyword?.in_meta ? 1 : 0,
-      improve: () => [
-        'Mention primary keyword once, naturally.',
-        'Add a benefit-oriented call to action.'
-      ]
+      improve: () => ['Mention primary keyword once, naturally.','Add a benefit-oriented call to action.']
     },
     { id:'keyword_usage', label:'Keyword appears in content', weight:6,
       compute: (d) => (d.target_keyword?.occurrences||0) > 0 ? 1 : 0,
-      improve: () => [
-        'Use the primary keyword in the first paragraph.',
-        'Sprinkle related terms (synonyms, entities) throughout.'
-      ]
+      improve: () => ['Use the primary keyword in the first paragraph.','Sprinkle related terms (synonyms, entities) throughout.']
     },
     { id:'readability', label:'Readability Flesch ≥ 50', weight:6,
       compute: (d) => (d.content_structure?.readability_flesch||0) >= 50 ? 1 : 0,
-      improve: () => [
-        'Shorter sentences and paragraphs.',
-        'Use plain, active language and bullets.'
-      ]
+      improve: () => ['Shorter sentences and paragraphs.','Use plain, active language and bullets.']
     },
     { id:'text_ratio', label:'Text/HTML ratio ≥ 10%', weight:4,
       compute: (d) => (d.content_structure?.text_to_html_ratio||0) >= 10 ? 1 : 0,
-      improve: () => [
-        'Reduce excessive markup and inline scripts.',
-        'Add explanatory copy where thin.'
-      ]
+      improve: () => ['Reduce excessive markup and inline scripts.','Add explanatory copy where thin.']
     },
     { id:'img_alts', label:'Images have alt text (no missing)', weight:6,
       compute: (d) => (d.technical_seo?.image_alt_missing||0) === 0 ? 1 : 0,
-      improve: (d) => [
-        `${d.technical_seo?.image_alt_missing||0} images missing alt.`,
-        'Use concise, descriptive alt text; include entities only if relevant.'
-      ]
+      improve: (d) => [`${d.technical_seo?.image_alt_missing||0} images missing alt.`,`Use concise, descriptive alt text; include entities only if relevant.`]
     },
     { id:'internal_links', label:'≥ 3 internal links', weight:6,
       compute: (d) => (d.technical_seo?.links?.internal||0) >= 3 ? 1 : 0,
-      improve: () => [
-        'Link to hub/cluster pages with descriptive anchors.',
-        'Add “next steps” links to deepen topical coverage.'
-      ]
+      improve: () => ['Link to hub/cluster pages with descriptive anchors.','Add “next steps” links to deepen topical coverage.']
     },
     { id:'external_links', label:'≥ 1 authoritative external link', weight:4,
       compute: (d) => (d.technical_seo?.links?.external||0) >= 1 ? 1 : 0,
-      improve: () => [
-        'Cite reputable sources (standards, research, gov, .edu).',
-        'Use precise anchor text.'
-      ]
+      improve: () => ['Cite reputable sources (standards, research, gov, .edu).','Use precise anchor text.']
     },
     { id:'schema', label:'Structured data present (JSON-LD / Microdata / RDFa)', weight:10,
       compute: (d) => (d.technical_seo?.structured_data?.json_ld || d.technical_seo?.structured_data?.microdata || d.technical_seo?.structured_data?.rdfa) ? 1 : 0,
-      improve: () => [
-        'Add appropriate schema (Article, FAQ, Product, Breadcrumb).',
-        'Validate with Google Rich Results Test.'
-      ]
+      improve: () => ['Add appropriate schema (Article, FAQ, Product, Breadcrumb).','Validate with Google Rich Results Test.']
     },
     { id:'intent', label:'Search intent alignment', weight:10,
-      compute: (d) => {
-        // Consider aligned if analyzer detected any intent (best-effort)
-        return d.intent_coverage?.search_intent ? 1 : 0;
-      },
-      improve: () => [
-        'Match the format competitors use for this query (guide vs. product vs. comparison).',
-        'Cover user questions (FAQs, PAA) and add clear CTAs.'
-      ]
+      compute: (d) => d.intent_coverage?.search_intent ? 1 : 0,
+      improve: () => ['Match competitor formats (guide vs product vs comparison).','Cover PAA questions and add clear CTAs.']
     },
     { id:'coverage', label:'Semantic coverage / topic cluster addressed', weight:16,
       compute: (d) => {
-        // If analyzer provided a coverage score or non-empty topic cloud, consider pass
         if (typeof d.intent_coverage?.semantic_coverage_score === 'number') {
           return d.intent_coverage.semantic_coverage_score >= 60 ? 1 : 0;
         }
         return (Array.isArray(d.semantic_core?.topic_cloud) && d.semantic_core.topic_cloud.length>0) ? 1 : 0;
       },
-      improve: () => [
-        'Add missing entities/subtopics compared to top ranking pages.',
-        'Include FAQs, comparisons, and examples to broaden coverage.'
-      ]
+      improve: () => ['Add missing entities/subtopics vs top ranking pages.','Include FAQs, comparisons, examples to broaden coverage.']
     },
   ];
 
@@ -443,10 +382,8 @@
     checkProgress.style.width = pct + '%';
     checkPoints.textContent = `${gained}/100`;
 
-    // Wire up improve buttons
-    $$$('[data-improve]').forEach(btn => {
-      btn.addEventListener('click', () => openImprove(btn.getAttribute('data-improve'), data));
-    });
+    // Improve buttons
+    $$('[data-improve]').forEach(b => b.addEventListener('click', () => openImprove(b.getAttribute('data-improve'), data)));
   }
 
   // ===== Improve modal =====
@@ -461,7 +398,6 @@
     const item = checklistModel.find(x=>x.id===id);
     if (!item) return;
     modalTitle.textContent = item.label;
-
     const tips = (typeof item.improve === 'function') ? item.improve(data) : (item.improve || []);
     modalBody.innerHTML = `
       <div class="text-slate-300">Suggestions to raise your score:</div>
@@ -474,15 +410,15 @@
   function closeImprove(){ modalBackdrop.classList.remove('show'); }
   function escapeHTML(s){ return (s||'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
-  // ===== Submit handler =====
+  // ===== Submit handler (FIXED: now binds correctly) =====
   elForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideError(); setLoading(true);
 
-    // Sync “Pre-Analysis primary keyword” to input if empty
-    const pk = ($('#primaryKeyword').value || '').trim();
+    // Fill target keyword from Pre-Analysis if empty
+    const pk = ($('#primaryKeyword')?.value || '').trim();
     const tkInput = $('#targetKeywordInput');
-    if (!tkInput.value.trim() && pk) tkInput.value = pk;
+    if (tkInput && !tkInput.value.trim() && pk) tkInput.value = pk;
 
     try {
       const fd = new FormData(elForm);
@@ -493,11 +429,7 @@
 
       const res = await fetch('/api/semantic-analyze', {
         method: 'POST',
-        headers: {
-          'Accept':'application/json',
-          'Content-Type':'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
+        headers: { 'Accept':'application/json','Content-Type':'application/json','X-Requested-With':'XMLHttpRequest' },
         body: JSON.stringify(payload)
       });
 
@@ -510,7 +442,7 @@
       const data = await res.json();
       if (!data?.ok) { showError(data?.error || 'Analysis failed'); setLoading(false); return; }
 
-      // Reveal section
+      // Show results
       elWrap.classList.remove('hidden');
 
       // Wheel + badge
@@ -521,10 +453,8 @@
       els.ratio.textContent = data.content_structure?.text_to_html_ratio ?? '—';
       els.internal.textContent = data.technical_seo?.links?.internal ?? 0;
       els.external.textContent = data.technical_seo?.links?.external ?? 0;
-
       els.title.textContent = data.content_structure?.title || '—';
       els.meta.textContent  = data.content_structure?.meta_description || '—';
-
       els.imgAlt.textContent = `${data.technical_seo?.image_alt_missing ?? 0} / ${data.technical_seo?.image_count ?? 0}`;
 
       // Headings
@@ -558,10 +488,11 @@
         els.anchors.appendChild(p);
       });
 
-      // Checklist (auto-tick)
+      // Checklist
       renderChecklist(data);
 
     } catch (err) {
+      console.error(err);
       showError(err?.message || 'Network error');
     } finally {
       setLoading(false);
