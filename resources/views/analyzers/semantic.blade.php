@@ -3,40 +3,43 @@
 
 @push('head')
 <style>
-  /* Site background stays pure black */
-  html, body { background:#000 !important; }
+  /* ===== Global background ===== */
+  html, body { background:#030124 !important; }
 
   /* ===== Primitives ===== */
   .glass { background: rgba(255,255,255,.06); backdrop-filter: blur(10px); }
   .card  { border-radius: 16px; padding: 18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
-  .pill  { padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:700; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.08); color:#e5e7eb; }
-  .chip  { padding:10px 14px; border-radius:14px; font-weight:900; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#e5e7eb; }
+  .pill  { padding:6px 12px; border-radius:9999px; font-size:12px; font-weight:800; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.08); color:#e5e7eb; }
+  .chip  { padding:12px 16px; border-radius:16px; font-weight:900; position:relative; overflow:hidden; color:#eef2ff; border:1px solid rgba(255,255,255,.14); }
+  .chip::after{ content:""; position:absolute; inset:-2px; border-radius:inherit; background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 30%,transparent 70%,rgba(255,255,255,.18)); opacity:.2; pointer-events:none; }
 
-  /* ===== Analyze toolbar wrapper (your request) ===== */
+  /* Banded chips (Overall/Content) */
+  .chip.good  { background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18)); border-color:rgba(34,197,94,.45); color:#eafff3; }
+  .chip.warn  { background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(250,204,21,.18)); border-color:rgba(245,158,11,.45); color:#fff7e6; }
+  .chip.bad   { background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(248,113,113,.18)); border-color:rgba(239,68,68,.45); color:#ffecec; }
+
+  /* Legend pills */
+  .lg-green  { background:rgba(16,185,129,.15); color:#a7f3d0; border-color:rgba(16,185,129,.35); }
+  .lg-orange { background:rgba(245,158,11,.15); color:#fde68a; border-color:rgba(245,158,11,.35); }
+  .lg-red    { background:rgba(239,68,68,.15);  color:#fecaca; border-color:rgba(239,68,68,.35); }
+
+  /* ===== Analyze toolbar wrapper ===== */
   .analyze-wrap{
     border-radius: 18px;
-    background:#020114;               /* << requested background */
+    background:#020114;            /* requested strip color */
     border:1px solid #1b2640;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.04),
-                0 20px 60px rgba(2,1,20,.45);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 20px 60px rgba(2,1,20,.45);
   }
-
-  /* ===== Toolbar buttons — glossy / special effect ===== */
   .btn   { padding:12px 18px; border-radius:14px; font-weight:900; border:1px solid rgba(255,255,255,.12); position:relative; overflow:hidden; }
   .btn::after{
     content:""; position:absolute; inset:-2px; border-radius:inherit;
-    background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 30%,transparent 70%,rgba(255,255,255,.18));
+    background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 35%,transparent 65%,rgba(255,255,255,.18));
     opacity:.25; pointer-events:none;
   }
   .btn-green { background:#22c55e; color:#06180d; border:none; box-shadow:0 8px 26px rgba(34,197,94,.35); }
   .btn-blue  { background:#3b82f6; color:#071226; border:none; box-shadow:0 8px 26px rgba(59,130,246,.35); }
   .btn-orange{ background:#f59e0b; color:#2b1a03; border:none; box-shadow:0 8px 26px rgba(245,158,11,.35); }
   .btn-purple{ background:linear-gradient(90deg,#a78bfa,#f472b6); color:#160216; border:none; box-shadow:0 8px 26px rgba(167,139,250,.35); }
-
-  /* ===== Legend pills ===== */
-  .lg-green  { background:rgba(16,185,129,.15); color:#a7f3d0; border-color:rgba(16,185,129,.35); }
-  .lg-orange { background:rgba(245,158,11,.15); color:#fde68a; border-color:rgba(245,158,11,.35); }
-  .lg-red    { background:rgba(239,68,68,.15);  color:#fecaca; border-color:rgba(239,68,68,.35); }
 
   /* ===== Mega wheel with water color by score ===== */
   .mega { display:grid; place-items:center; gap:12px; }
@@ -75,14 +78,20 @@
   .waterbox.bad  .fill{ background:linear-gradient(90deg,#ef4444,#f87171,#fecaca); }
   .waterbox .label{ position:absolute; inset:0; display:grid; place-items:center; font-weight:900; color:#e5e7eb; font-size:12px; text-shadow:0 2px 10px rgba(0,0,0,.45); }
 
-  /* ===== Status chips ===== */
-  .status-row{ display:flex; flex-wrap:wrap; gap:10px; }
-  .status-chip{ padding:10px 14px; border-radius:22px; font-weight:900; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#e5e7eb; }
+  /* ===== Status chips (rounded glossy) ===== */
+  .status-row{ display:flex; flex-wrap:wrap; gap:12px; }
+  .status-chip{
+    padding:12px 18px; border-radius:26px; font-weight:900;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.10);
+    color:#eef2ff; position:relative; overflow:hidden;
+  }
+  .status-chip::after{ content:""; position:absolute; inset:-2px; border-radius:inherit; background:linear-gradient(120deg,rgba(255,255,255,.2),transparent 40%,transparent 60%,rgba(255,255,255,.15)); opacity:.18; }
 
-  /* ===== Section title gradient ===== */
+  /* ===== Section titles ===== */
   .t-grad{ background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
-  /* ===== Ground slab (unchanged look) ===== */
+  /* ===== Ground slab ===== */
   .ground-slab{ border-radius:24px; padding:22px; background:#0D0E1E; border:1px solid #1b2640; }
   .ground-slab .cat-card{ border-radius:18px; padding:18px; background:#111E2F; border:1px solid rgba(255,255,255,.12); }
   .ground-slab .cat-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
@@ -120,7 +129,7 @@
   <!-- Wheel + chips -->
   <div class="grid lg:grid-cols-[320px,1fr] gap-6 items-center">
     <div class="mega">
-      <div class="mw warn" id="mw">  <!-- class will switch to .good / .bad -->
+      <div class="mw warn" id="mw">  <!-- will switch to .good / .bad -->
         <div class="mw-ring" id="mwRing" style="--v:0"></div>
         <div class="mw-fill" id="mwFill" style="--p:0"></div>
         <div class="mw-center" id="mwNum">0%</div>
@@ -128,26 +137,20 @@
     </div>
 
     <div class="space-y-3">
-      <div class="flex flex-wrap gap-2">
-        <span id="chipOverall" class="chip">Overall: 0 /100</span>
-
-        <!-- “Content” box — glossy effect -->
-        <span id="chipContent" class="chip" style="position:relative;overflow:hidden;">
-          <span style="position:absolute;inset:-2px;border-radius:inherit;background:linear-gradient(120deg,rgba(167,139,250,.22),transparent 35%,transparent 65%,rgba(251,113,133,.22));opacity:.35;"></span>
-          <span style="position:relative">Content: —</span>
-        </span>
-
+      <div class="flex flex-wrap gap-3">
+        <span id="chipOverall" class="chip warn">Overall: 0 /100</span>
+        <span id="chipContent" class="chip warn">Content: —</span>
         <span id="chipWriter"  class="chip">Writer: —</span>
         <span id="chipHuman"   class="chip">Human-like: — %</span>
         <span id="chipAI"      class="chip">AI-like: — %</span>
       </div>
 
-      <!-- Overall water bar with % text & color by score -->
+      <!-- Overall water bar -->
       <div id="overallBar" class="waterbox warn">
         <div class="fill" id="overallFill" style="width:0%"></div>
         <div class="label"><span id="overallPct">0%</span></div>
       </div>
-      <p class="text-xs text-slate-400">Wheel + water bars fill with your scores.</p>
+      <p class="text-xs text-slate-400">Wheel + water bars fill with your scores (colors: green ≥80, orange 60–79, red &lt;60).</p>
     </div>
   </div>
 
@@ -286,7 +289,7 @@
 <script>
 const $ = s => document.querySelector(s);
 
-/* Wheel + bar */
+/* Wheel + water bar */
 const mw = $('#mw'), mwRing=$('#mwRing'), mwFill=$('#mwFill'), mwNum=$('#mwNum');
 const overallBar = $('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
 
@@ -313,10 +316,11 @@ const mTitle=$('#improveTitle'), mCat=$('#improveCategory'), mScore=$('#improveS
       mWhy=$('#improveWhy'), mTips=$('#improveTips'), mLink=$('#improveSearch');
 
 const clamp01 = (n)=> Math.max(0, Math.min(100, n));
-const band = (s)=> s>=80?'good':(s>=60?'warn':'bad');
+const bandName = (s)=> s>=80?'good':(s>=60?'warn':'bad');
 const pillClassBy=(s)=> s>=80?'score-pill--green':(s>=60?'score-pill--orange':'score-pill--red');
 const bandLabel=(s)=> s>=80?'Good (≥80)':(s>=60?'Needs work (60–79)':'Low (<60)');
 
+/* Small tips by category */
 function tipsFor(catName){
   switch (catName) {
     case 'Technical Elements': return ['Title ~50–60 chars incl. primary keyword.','Meta 140–160 chars + clear CTA.','Set canonical, avoid duplicates.','Ensure in XML sitemap.'];
@@ -329,7 +333,6 @@ function tipsFor(catName){
   }
 }
 
-/* Actions */
 pasteBtn.addEventListener('click', async (e)=>{
   e.preventDefault();
   try{ const txt=await navigator.clipboard.readText(); if (txt) urlInput.value=txt.trim(); }catch{}
@@ -358,10 +361,10 @@ analyzeBtn.addEventListener('click', async ()=>{
   const url = (urlInput.value||'').trim();
   if (!url) { alert('Enter a URL to analyze.'); return; }
 
-  // reset visuals
-  mw.classList.remove('good','warn','bad'); mw.classList.add('warn');
+  // Reset visuals
+  ['good','warn','bad'].forEach(c=>{ mw.classList.remove(c); overallBar.classList.remove(c); chipOverall.classList.remove(c); chipContent.classList.remove(c); });
+  mw.classList.add('warn'); overallBar.classList.add('warn'); chipOverall.classList.add('warn'); chipContent.classList.add('warn');
   mwRing.style.setProperty('--v', 0); mwFill.style.setProperty('--p', 0); mwNum.textContent='0%';
-  overallBar.classList.remove('good','warn','bad'); overallBar.classList.add('warn');
   overallFill.style.width='0%'; overallPct.textContent='0%';
 
   let data={};
@@ -378,28 +381,25 @@ analyzeBtn.addEventListener('click', async ()=>{
   }
   window.__lastData = {...data, url};
 
-  /* Overall score & colors */
+  /* Overall */
   const score = clamp01( parseInt(data.overall_score||0,10) );
-  const bandName = band(score);
-  mw.classList.remove('good','warn','bad'); mw.classList.add(bandName);
+  const b = bandName(score);
+  mw.classList.add(b); overallBar.classList.add(b); chipOverall.classList.add(b);
   mwRing.style.setProperty('--v', score);
   mwFill.style.setProperty('--p', score);
   mwNum.textContent = score + '%';
-
-  overallBar.classList.remove('good','warn','bad'); overallBar.classList.add(bandName);
   overallFill.style.width = score + '%';
   overallPct.textContent  = score + '%';
-
   chipOverall.textContent = `Overall: ${score} /100`;
 
   /* Content score = avg(Content & Keywords, Content Quality) */
   const cmap = {}; (data.categories||[]).forEach(c => cmap[c.name]= c.score ?? 0);
   let present=0, sum=0; ['Content & Keywords','Content Quality'].forEach(k=>{ if (cmap[k]!=null){ sum+=cmap[k]; present++; } });
   const contentScore = present ? Math.round(sum/present) : (cmap['Content & Keywords'] ?? cmap['Content Quality'] ?? 0);
-  chipContent.querySelector('span:last-child')?.remove;
+  chipContent.classList.add( bandName(contentScore) );
   chipContent.textContent = `Content: ${contentScore} /100`;
 
-  /* Simple Human-like/AI-like heuristic from readability */
+  /* Human-like/AI-like (heuristic) */
   const r = data.readability || {};
   let human = clamp01( Math.round( 70 + (r.score||0)/5 - (r.passive_ratio||0)/3 ) );
   let ai    = clamp01( 100 - human );
@@ -420,14 +420,14 @@ analyzeBtn.addEventListener('click', async ()=>{
   const h = data.content_structure?.headings || {};
   headingMap.innerHTML=''; Object.entries(h).forEach(([lvl,arr])=>{
     if (!arr || !arr.length) return;
-    const box = document.createElement('div'); box.className='card';
-    box.innerHTML = `<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>` + arr.map(t=>`<div>• ${t}</div>`).join('');
+    const box=document.createElement('div'); box.className='card';
+    box.innerHTML=`<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');
     headingMap.appendChild(box);
   });
 
   /* Recommendations */
   recsEl.innerHTML=''; (data.recommendations||[]).forEach(rec=>{
-    const d = document.createElement('div'); d.className='card';
+    const d=document.createElement('div'); d.className='card';
     d.innerHTML=`<span class="pill mr-2">${rec.severity}</span>${rec.text}`;
     recsEl.appendChild(d);
   });
@@ -484,13 +484,13 @@ analyzeBtn.addEventListener('click', async ()=>{
   /* status chips */
   chipTitle.textContent = `Title: ${(data.content_structure?.title||'').length}`;
   chipMeta.textContent  = `Meta desc: ${(data.content_structure?.meta_description||'').length}`;
-  chipCanon.textContent = `Canonical: ${new URL(url).origin || '—'}`;
+  try { chipCanon.textContent = `Canonical: ${new URL(url).origin}`; } catch { chipCanon.textContent='Canonical: —'; }
   chipRobots.textContent= `Robots: —`;
   chipViewport.textContent=`Viewport: —`;
-  chipH.textContent      = `H1/H2/H3: H1:${(h.H1||[]).length} · H2:${(h.H2||[]).length} · H3:${(h.H3||[]).length}`;
+  chipH.textContent      = `H1/H2/H3: H1:${(h.H1||[]).length} • H2:${(h.H2||[]).length} • H3:${(h.H3||[]).length}`;
   chipIntChip.textContent= `Internal links: ${data.quick_stats?.internal_links ?? 0}`;
   chipSchema.textContent = `Schema: ${data.schema_count ?? 0}`;
-  chipAuto.textContent   = `Auto-checked: ${autoChecked}`;
+  chipAuto.textContent   = `Auto-checked: ${(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length}`;
   chipHttp.textContent   = `HTTP: 200`; // assume OK if fetch succeeded
 });
 
