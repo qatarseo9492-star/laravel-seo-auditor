@@ -1,336 +1,337 @@
 @extends('layouts.app')
 @section('title','Semantic SEO Master Analyzer 2.0')
 
-@section('content')
+@push('head')
 <style>
-  :root{
-    /* Coolors palette */
-    --c1:#006466; --c2:#065a60; --c3:#0b525b; --c4:#144552; --c5:#1b3a4b;
-    --c6:#212f45; --c7:#272640; --c8:#312244; --c9:#3e1f47; --c10:#4d194d;
-
-    --ink:#0b1220; --muted:#9aa4b2; --card:#111827; --glass:rgba(255,255,255,.06);
-  }
-  .bg-app{ background: radial-gradient(1000px 700px at 20% -10%, rgba(77,25,77,.18), transparent 55%),
-                         radial-gradient(900px 600px at 110% 10%, rgba(0,100,102,.18), transparent 55%),
-                         linear-gradient(180deg, var(--c7), var(--c8) 55%, var(--c9)); }
-  .glass { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(8px); }
-  .soft-shadow{ box-shadow: 0 10px 40px rgba(0,0,0,.35); }
-  .pill{ font-size:.7rem; padding:.22rem .55rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); }
-
-  /* Score wheel */
-  .wheel{ --v:0; width:170px; height:170px; border-radius:50%;
+  .card { @apply glass rounded-2xl p-5; }
+  .pill  { @apply px-2 py-0.5 rounded-full text-xs font-medium; }
+  .k-badge{ @apply px-2 py-1 rounded-lg text-xs font-semibold; }
+  .score-wheel { width:160px; height:160px; border-radius:50%; display:grid; place-items:center; }
+  .score-ring {
+    --v: 0; /* 0..100 */
     background:
-      conic-gradient(#22c55e calc(var(--v)*1%), transparent 0),
-      conic-gradient(#f59e0b 0 0),
-      conic-gradient(#ef4444 0 0);
-    position:relative;
+      conic-gradient(
+        #1ef5a4 calc(var(--v)*1%), 
+        #ffcf5a calc(var(--v)*1% + 0.0001%), 
+        #ff6b6b 100%
+      );
+    mask: radial-gradient(circle 64px, transparent 62%, #000 63%);
   }
-  .wheel::before{ content:""; position:absolute; inset:8px; border-radius:50%; background:linear-gradient(180deg, #0f172a, #0b1325); border:1px solid rgba(255,255,255,.06); }
-  .wheel.badge-green{ background:
-      conic-gradient(#22c55e calc(var(--v)*1%), rgba(34,197,94,.15) 0);
-  }
-  .wheel.badge-orange{ background:
-      conic-gradient(#f59e0b calc(var(--v)*1%), rgba(245,158,11,.15) 0);
-  }
-  .wheel.badge-red{ background:
-      conic-gradient(#ef4444 calc(var(--v)*1%), rgba(239,68,68,.15) 0);
-  }
-  .wheel .num{ position:absolute; inset:0; display:grid; place-items:center; font-weight:900; font-size:2.8rem; letter-spacing:-1px; }
-  .score-chip{ font-size:.70rem; padding:.2rem .5rem; border-radius:.5rem; }
-  .score-green{ color:#22c55e; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.25); }
-  .score-orange{ color:#f59e0b; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); }
-  .score-red{ color:#ef4444; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25); }
-  .score-neutral{ color:#93c5fd; background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.2); }
+  .shadow-soft { box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  .bar { @apply h-3 rounded-full bg-white/10 overflow-hidden; }
+  .bar > span { @apply h-full block rounded-full transition-all; background: linear-gradient(90deg,#07f3b0,#60a5fa,#d946ef); }
+  .chip { @apply text-xs px-2 py-0.5 rounded-md bg-white/10 border border-white/10; }
 
-  .btn-cta{ background: linear-gradient(135deg, #38bdf8, #8b5cf6); color:#fff; }
-  .btn-cta:hover{ filter:brightness(1.05); }
-
-  .btn-analyze{
-    --tw-ring-color: rgba(56,189,248,.35);
-    background: linear-gradient(135deg, #06b6d4, #22c55e);
-    color:#051016; font-weight:700; border:1px solid rgba(255,255,255,.15);
+  /* Water loading bar */
+  #waterbar { height: 12px; border-radius: 9999px; background: rgba(255,255,255,.08); overflow: hidden; }
+  #waterbar span {
+    display:block; height:100%; width:0%;
+    background: linear-gradient(90deg,#06d6a0,#60a5fa,#d946ef);
+    transition: width .8s ease, filter .3s ease;
+    filter: drop-shadow(0 0 10px rgba(148,163,184,.4));
   }
-  .btn-analyze:hover{ filter:brightness(1.05); }
+
+  /* glow by color */
+  .g-green  { box-shadow: 0 0 0 1px rgba(16,185,129,.4) inset, 0 0 25px rgba(16,185,129,.35); }
+  .g-orange { box-shadow: 0 0 0 1px rgba(245,158,11,.35) inset, 0 0 25px rgba(245,158,11,.30); }
+  .g-red    { box-shadow: 0 0 0 1px rgba(239,68,68,.35) inset, 0 0 25px rgba(239,68,68,.30); }
 </style>
+@endpush
 
-<div class="bg-app min-h-screen text-slate-100">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+@section('content')
+<section class="max-w-7xl mx-auto px-4 py-10 space-y-8">
 
-    <!-- Page Head -->
-    <div class="flex items-center justify-between">
-      <div>
-        <span class="pill">Analyzer 2.0</span>
-        <h1 class="mt-3 text-4xl sm:text-5xl font-extrabold tracking-tight">Semantic SEO Master</h1>
-        <p class="mt-2 text-slate-300">Analyze any page’s semantic structure, technical elements, and content quality—then get precise improvements.</p>
+  <div class="flex flex-col gap-4">
+    <div class="chip w-max">Analyzer 2.0</div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Semantic SEO Master</h1>
+
+    <form id="semanticForm" class="w-full grid lg:grid-cols-[1fr,320px] gap-3">
+      <div class="glass rounded-xl p-1.5 flex items-center">
+        <input name="url" type="url" required placeholder="Paste a URL (e.g. https://example.com/page)"
+               class="w-full bg-transparent px-3 py-2 outline-none text-slate-100 placeholder:text-slate-400">
+        <input name="target_keyword" type="text" placeholder="Target keyword (optional)"
+               class="w-72 max-w-[50%] bg-transparent px-3 py-2 outline-none text-slate-100 placeholder:text-slate-400 hidden md:block">
       </div>
-    </div>
-
-    <!-- Analyze Bar -->
-    <form id="semanticForm" class="mt-8 glass rounded-2xl soft-shadow">
-      <div class="grid md:grid-cols-[1fr,320px,150px] gap-2 p-2">
-        <div class="flex items-center gap-2 bg-black/30 rounded-xl px-3 py-2 border border-white/10">
-          <svg class="h-4 w-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.4" d="m21 21-4.3-4.3M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg>
-          <input name="url" type="url" required placeholder="Paste a URL (e.g. https://example.com/page)" class="w-full bg-transparent outline-none placeholder:text-slate-400">
-        </div>
-        <input name="target_keyword" type="text" placeholder="Target keyword (optional)" class="w-full bg-black/30 rounded-xl px-3 py-2 border border-white/10 outline-none placeholder:text-slate-400">
-        <button id="btnAnalyze" class="btn-analyze rounded-xl px-4 py-2 flex items-center justify-center gap-2">
-          <span class="hidden sm:inline">Analyze URL</span>
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </button>
-      </div>
-      <p class="px-4 pb-4 text-xs text-slate-400">We’ll fetch the page and compute a detailed semantic report.</p>
+      <button class="rounded-xl shadow-soft bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 hover:opacity-95 px-5 text-white font-semibold">
+        Analyze URL
+      </button>
     </form>
 
-    <!-- Results -->
-    <section id="results" class="mt-10 hidden space-y-8">
+    <!-- water bar -->
+    <div id="waterbar" class="shadow-soft"><span style="width:0%"></span></div>
+    <p class="text-xs text-slate-300">Tip: we fetch the page server-side and compute a detailed semantic report.</p>
+  </div>
 
-      <!-- Score + Quick stats -->
-      <div class="grid lg:grid-cols-[260px,1fr] gap-6">
-        <div class="glass rounded-2xl p-6 border border-white/10 soft-shadow flex flex-col items-center justify-center">
-          <div id="wheel" class="wheel badge-red" style="--v:0;">
-            <div class="num" id="scoreNum">0</div>
+  <!-- Results -->
+  <div id="resultWrap" class="space-y-8 hidden">
+
+    <!-- top row: wheel + quick stats -->
+    <div class="grid lg:grid-cols-3 gap-6">
+      <div class="card flex items-center gap-5">
+        <div class="score-wheel score-ring shadow-soft" id="wheel" style="--v:0">
+          <div class="text-center">
+            <div id="scoreNum" class="text-4xl font-extrabold">0</div>
+            <div class="text-xs text-slate-300">Overall</div>
           </div>
-          <div id="wheelBadge" class="mt-4 text-center text-sm text-slate-300">—</div>
         </div>
-
-        <div class="glass rounded-2xl p-6 border border-white/10 soft-shadow">
-          <div class="flex items-center justify-between">
-            <h3 class="text-lg font-semibold">Quick Stats</h3>
-            <span id="readabilityChip" class="score-chip score-neutral">Readability —</span>
-          </div>
-          <div class="mt-4 grid sm:grid-cols-3 lg:grid-cols-6 gap-3 text-sm">
-            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
-              <div class="text-slate-400">Words</div>
-              <div id="statWords" class="text-2xl font-bold">—</div>
-            </div>
-            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
-              <div class="text-slate-400">Images</div>
-              <div id="statImages" class="text-2xl font-bold">—</div>
-            </div>
-            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
-              <div class="text-slate-400">Internal</div>
-              <div id="statInternal" class="text-2xl font-bold">—</div>
-            </div>
-            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
-              <div class="text-slate-400">External</div>
-              <div id="statExternal" class="text-2xl font-bold">—</div>
-            </div>
-            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
-              <div class="text-slate-400">Readability</div>
-              <div id="statRead" class="text-2xl font-bold">—</div>
-            </div>
-            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
-              <div class="text-slate-400">Text/HTML %</div>
-              <div id="statRatio" class="text-2xl font-bold">—</div>
-            </div>
-          </div>
+        <div class="space-y-2">
+          <div id="badge" class="k-badge bg-white/10 border border-white/10 text-slate-100">—</div>
+          <div class="text-xs text-slate-300">Great ≥80 • Needs work 60–79 • Red <60</div>
         </div>
       </div>
 
-      <!-- Structure -->
-      <div class="grid lg:grid-cols-2 gap-6">
-        <div class="glass rounded-2xl p-6 border border-white/10 soft-shadow">
-          <h3 class="text-lg font-semibold">Content Structure</h3>
-          <dl class="mt-4 space-y-2 text-sm">
-            <div><dt class="text-slate-400">Title</dt><dd id="titleVal" class="font-medium text-slate-100">—</dd></div>
-            <div><dt class="text-slate-400">Meta description</dt><dd id="metaVal" class="font-medium text-slate-100">—</dd></div>
-          </dl>
-          <div class="mt-5">
-            <div class="text-sm text-slate-400 mb-2">Heading Map</div>
-            <div id="headingMap" class="grid sm:grid-cols-2 gap-2"></div>
+      <div class="card lg:col-span-2">
+        <h3 class="font-semibold mb-3">Quick Stats</h3>
+        <div class="grid sm:grid-cols-3 gap-4 text-sm">
+          <div class="glass rounded-xl p-4 border border-white/10">
+            <div class="text-slate-300 text-xs">Readability (Flesch)</div>
+            <div id="statFlesch" class="text-2xl font-bold">—</div>
+            <div id="statGrade" class="text-xs text-slate-400">—</div>
+          </div>
+          <div class="glass rounded-xl p-4 border border-white/10">
+            <div class="text-slate-300 text-xs">Links (int / ext)</div>
+            <div class="text-2xl font-bold"><span id="statInt">0</span> / <span id="statExt">0</span></div>
+          </div>
+          <div class="glass rounded-xl p-4 border border-white/10">
+            <div class="text-slate-300 text-xs">Text/HTML Ratio</div>
+            <div id="statRatio" class="text-2xl font-bold">—</div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <div class="glass rounded-2xl p-6 border border-white/10 soft-shadow">
-          <h3 class="text-lg font-semibold">Recommendations</h3>
-          <ul id="recs" class="mt-3 space-y-2 text-sm"></ul>
-          <div class="mt-6 text-xs text-slate-400">Severity legend: <span class="text-red-300">Critical</span> · <span class="text-amber-300">Warning</span> · <span class="text-slate-300">Info</span></div>
+    <!-- Readability -->
+    <div class="card">
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold">Readability</h3>
+        <span id="readBadge" class="pill bg-white/10 border border-white/10">—</span>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6 mt-4">
+        <div class="flex items-center gap-6">
+          <div class="score-wheel score-ring shadow-soft" id="readWheel" style="--v:0">
+            <div class="text-center">
+              <div id="readNum" class="text-3xl font-extrabold">0</div>
+              <div class="text-xs text-slate-300">Flesch</div>
+            </div>
+          </div>
+          <div class="flex-1 space-y-3">
+            <div>
+              <div class="text-xs text-slate-300 mb-1">Overall</div>
+              <div class="bar"><span id="readBar" style="width:0%"></span></div>
+            </div>
+            <div class="text-xs text-slate-300">Grade level: <span id="gradeVal">—</span> (approx. school grade needed to understand)</div>
+          </div>
+        </div>
+        <div class="glass rounded-xl p-4 border border-white/10">
+          <div class="text-xs text-slate-300">How to improve</div>
+          <ul class="mt-2 list-disc pl-5 text-sm text-slate-200 space-y-1">
+            <li>Use shorter sentences and active voice.</li>
+            <li>Prefer common words over jargon; define terms.</li>
+            <li>Break up long paragraphs with sub-headings and bullets.</li>
+            <li>Add images or examples to clarify complex ideas.</li>
+          </ul>
         </div>
       </div>
-
-      <!-- Categories & Checklists -->
-      <div id="categoriesWrap" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
-
-    </section>
-  </div>
-</div>
-
-<!-- Improve Modal -->
-<div id="improveModal" class="hidden fixed inset-0 z-50">
-  <div class="absolute inset-0 bg-black/60"></div>
-  <div class="relative max-w-xl mx-auto mt-28 glass rounded-2xl border border-white/10 p-6 soft-shadow">
-    <div class="flex items-start justify-between gap-4">
-      <h4 id="improveTitle" class="text-lg font-semibold">Improve</h4>
-      <button id="improveClose" class="text-slate-300 hover:text-white">
-        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.6" d="M6 6l12 12M6 18L18 6"/></svg>
-      </button>
     </div>
-    <p id="improveAdvice" class="mt-3 text-slate-200 text-sm">—</p>
-    <div class="mt-5">
-      <a id="improveLink" href="#" target="_blank" rel="nofollow noopener" class="btn-cta inline-flex items-center gap-2 px-4 py-2 rounded-xl">
-        Search on Google
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.7" d="M7 17L17 7M9 7h8v8"/></svg>
-      </a>
+
+    <!-- Recommendations -->
+    <div class="card">
+      <h3 class="font-semibold mb-3">Recommendations</h3>
+      <div id="recs" class="grid md:grid-cols-2 gap-3"></div>
+    </div>
+
+    <!-- Content Structure -->
+    <div class="card">
+      <h3 class="font-semibold">Content Structure</h3>
+      <div class="grid md:grid-cols-2 gap-6 mt-4">
+        <div class="glass rounded-xl p-4 border border-white/10">
+          <div class="text-xs text-slate-300">Title</div>
+          <div id="titleVal" class="font-semibold text-slate-100">—</div>
+          <div class="text-xs text-slate-300 mt-3">Meta Description</div>
+          <div id="metaVal" class="text-slate-200">—</div>
+        </div>
+        <div class="glass rounded-xl p-4 border border-white/10">
+          <div class="text-xs text-slate-300 mb-2">Heading Map</div>
+          <div id="headingMap" class="text-sm space-y-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checklists -->
+    <div class="space-y-4">
+      <h3 class="text-xl font-bold">Semantic SEO Ground</h3>
+      <div id="cats" class="grid lg:grid-cols-2 gap-6"></div>
     </div>
   </div>
-</div>
 
+  <!-- Improve Modal -->
+  <dialog id="improveModal" class="backdrop:bg-black/60 rounded-2xl p-0 w-[min(560px,95vw)]">
+    <div class="glass rounded-2xl p-5 border border-white/10">
+      <div class="flex items-start justify-between">
+        <h4 id="improveTitle" class="font-semibold">Improve</h4>
+        <form method="dialog"><button class="pill bg-white/10">Close</button></form>
+      </div>
+      <p id="improveAdvice" class="mt-3 text-sm text-slate-200">—</p>
+      <a id="improveSearch" target="_blank" class="inline-block mt-4 px-3 py-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-sky-500 text-white text-sm">Search guidance</a>
+    </div>
+  </dialog>
+
+</section>
+
+@push('scripts')
 <script>
-  const $ = s => document.querySelector(s);
-  const elForm = $('#semanticForm');
-  const btnAnalyze = $('#btnAnalyze');
-  const section = $('#results');
-  const elWheel = $('#wheel');
-  const elScore = $('#scoreNum');
-  const elBadge = $('#wheelBadge');
+const f = document.getElementById('semanticForm');
+const water = document.querySelector('#waterbar span');
+const wrap = document.getElementById('resultWrap');
 
-  const stat = {
-    words: $('#statWords'), images: $('#statImages'),
-    internal: $('#statInternal'), external: $('#statExternal'),
-    read: $('#statRead'), ratio: $('#statRatio'),
-    readChip: $('#readabilityChip')
+const wheel = document.getElementById('wheel');
+const scoreNum = document.getElementById('scoreNum');
+const badge = document.getElementById('badge');
+
+const statF = document.getElementById('statFlesch');
+const statG = document.getElementById('statGrade');
+const statInt = document.getElementById('statInt');
+const statExt = document.getElementById('statExt');
+const statRatio = document.getElementById('statRatio');
+
+const readWheel = document.getElementById('readWheel');
+const readNum = document.getElementById('readNum');
+const readBar = document.getElementById('readBar');
+const readBadge = document.getElementById('readBadge');
+const gradeVal = document.getElementById('gradeVal');
+
+const headingMap = document.getElementById('headingMap');
+const titleVal = document.getElementById('titleVal');
+const metaVal = document.getElementById('metaVal');
+const recsEl = document.getElementById('recs');
+const catsEl = document.getElementById('cats');
+
+const modal = document.getElementById('improveModal');
+const mTitle = document.getElementById('improveTitle');
+const mAdvice= document.getElementById('improveAdvice');
+const mLink  = document.getElementById('improveSearch');
+
+function colorBy(score){ return score>=80?'g-green':(score>=60?'g-orange':'g-red'); }
+function labelBy(score){ return score>=80?'Great Work — Well Optimized':(score>=60?'Needs Optimization':'Needs Significant Optimization'); }
+
+f.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  // water bar animates 0 -> 100 while loading
+  water.style.width = '0%';
+  setTimeout(()=>water.style.width='100%', 30);
+
+  const fd = new FormData(f);
+  const payload = {
+    url: fd.get('url'),
+    target_keyword: fd.get('target_keyword') || ''
   };
 
-  const structure = { title: $('#titleVal'), meta: $('#metaVal'), map: $('#headingMap'), recs: $('#recs') };
-  const catsWrap = $('#categoriesWrap');
+  try{
+    const res = await fetch('/api/semantic-analyze', {
+      method:'POST',
+      headers:{ 'Accept':'application/json','Content-Type':'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if(!data.ok){ alert(data.error || 'Analysis failed'); water.style.width='0%'; return; }
 
-  function chipColor(score){
-    if(score==null) return 'score-neutral';
-    if(score>=80) return 'score-green';
-    if(score>=60) return 'score-orange';
-    return 'score-red';
-  }
-  function wheelColor(score){
-    if(score>=80) return 'badge-green';
-    if(score>=60) return 'badge-orange';
-    return 'badge-red';
-  }
-  function headingBlock(level, arr){
-    const bg = 'bg-black/30';
-    const border = 'border border-white/10';
-    return `<div class="rounded-xl ${bg} ${border} p-3">
-      <div class="text-xs uppercase text-slate-400">${level}</div>
-      <div class="mt-1 space-y-1">${(arr||[]).map(t=>`<div class="text-sm">• ${t}</div>`).join('')}</div>
-    </div>`;
-  }
+    wrap.classList.remove('hidden');
 
-  function openModal(title, advice, url){
-    $('#improveTitle').textContent = title;
-    $('#improveAdvice').textContent = advice;
-    $('#improveLink').href = url || '#';
-    $('#improveModal').classList.remove('hidden');
-  }
-  $('#improveClose').addEventListener('click', ()=> $('#improveModal').classList.add('hidden'));
-  $('#improveModal').addEventListener('click', (e)=>{ if(e.target.id==='improveModal') e.currentTarget.classList.add('hidden'); });
+    // Overall
+    const score = data.overall_score||0;
+    wheel.style.setProperty('--v', score);
+    scoreNum.textContent = score;
+    badge.textContent = data.wheel?.label || labelBy(score);
+    badge.className = 'k-badge ' + (score>=80?'bg-emerald-500/20 text-emerald-200 border-emerald-500/30':
+                                     score>=60?'bg-amber-500/20 text-amber-200 border-amber-500/30':
+                                               'bg-rose-500/20 text-rose-200 border-rose-500/30');
 
-  elForm.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const fd = new FormData(elForm);
-    const payload = { url: fd.get('url'), target_keyword: fd.get('target_keyword') || null };
-    btnAnalyze.disabled = true; btnAnalyze.classList.add('opacity-60');
-    try{
-      const res = await fetch('/api/semantic-analyze', {
-        method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'},
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if(!data.ok){ alert(data.error || 'Analysis failed'); return; }
-      // Show section
-      section.classList.remove('hidden');
+    // Quick stats
+    statF.textContent = data.quick_stats.readability_flesch;
+    statG.textContent = 'Grade ' + data.quick_stats.readability_grade;
+    statInt.textContent = data.quick_stats.internal_links;
+    statExt.textContent = data.quick_stats.external_links;
+    statRatio.textContent = data.quick_stats.text_to_html_ratio + '%';
 
-      // Wheel + badge
-      const s = parseInt(data.overall_score||0,10);
-      elWheel.style.setProperty('--v', s);
-      elWheel.classList.remove('badge-red','badge-orange','badge-green');
-      elWheel.classList.add(wheelColor(s));
-      elScore.textContent = s;
-      elBadge.textContent = (data.wheel && data.wheel.label) ? data.wheel.label
-                         : (s>=80 ? 'Great Work — Well Optimized' : (s>=60 ? 'Needs Optimization' : 'Needs Significant Optimization'));
+    // Readability
+    const rf = data.quick_stats.readability_flesch;
+    readWheel.style.setProperty('--v', rf);
+    readNum.textContent = rf;
+    readBar.style.width = rf + '%';
+    gradeVal.textContent = 'Grade ' + data.quick_stats.readability_grade;
+    readBadge.textContent = labelBy(rf);
+    readBadge.className = 'pill ' + (rf>=80?'bg-emerald-500/20 text-emerald-200':
+                                           rf>=60?'bg-amber-500/20 text-amber-200':
+                                                   'bg-rose-500/20 text-rose-200');
 
-      // Stats
-      stat.words.textContent   = (data.quick_stats?.word_count ?? '—');
-      stat.images.textContent  = (data.quick_stats?.image_count ?? '—');
-      stat.internal.textContent= (data.quick_stats?.internal_links ?? '—');
-      stat.external.textContent= (data.quick_stats?.external_links ?? '—');
-      const read = (data.quick_stats?.readability_flesch ?? null);
-      stat.read.textContent    = (read ?? '—');
-      stat.ratio.textContent   = (data.quick_stats?.text_to_html_ratio ?? '—');
-      stat.readChip.textContent= `Readability ${read ?? '—'}`;
-      stat.readChip.className  = `score-chip ${chipColor(read)}`;
+    // Structure
+    titleVal.textContent = data.content_structure.title || '—';
+    metaVal.textContent  = data.content_structure.meta_description || '—';
+    headingMap.innerHTML='';
+    Object.entries(data.content_structure.headings||{}).forEach(([lvl,arr])=>{
+      if(!arr || !arr.length) return;
+      const box = document.createElement('div');
+      box.className='glass rounded-lg p-3 border border-white/10';
+      box.innerHTML = `<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>` +
+                      arr.map(t=>`<div>• ${t}</div>`).join('');
+      headingMap.appendChild(box);
+    });
 
-      // Structure
-      structure.title.textContent = data.content_structure?.title || '—';
-      structure.meta.textContent  = data.content_structure?.meta_description || '—';
-      const hs = data.content_structure?.headings || {};
-      structure.map.innerHTML =
-        headingBlock('H1', hs.h1) + headingBlock('H2', hs.h2) + headingBlock('H3', hs.h3) +
-        headingBlock('H4', hs.h4) + headingBlock('H5', hs.h5) + headingBlock('H6', hs.h6);
+    // Recommendations
+    recsEl.innerHTML='';
+    (data.recommendations||[]).forEach(r=>{
+      const c = document.createElement('div');
+      const tone = r.severity==='Critical' ? 'bg-rose-500/15 text-rose-200 border-rose-500/30'
+                 : r.severity==='Warning' ? 'bg-amber-500/15 text-amber-200 border-amber-500/30'
+                 : 'bg-slate-500/15 text-slate-200 border-white/10';
+      c.className='glass rounded-xl p-3 border ' + tone;
+      c.innerHTML = `<span class="pill ${tone} mr-2">${r.severity}</span>${r.text}`;
+      recsEl.appendChild(c);
+    });
 
-      // Recs
-      structure.recs.innerHTML = (data.recommendations||[]).map(r=>{
-        const color = r.severity==='Critical' ? 'text-red-300' : (r.severity==='Warning' ? 'text-amber-300' : 'text-slate-300');
-        return `<li class="rounded-lg bg-black/30 border border-white/10 px-3 py-2">
-          <span class="${color} font-medium mr-2">${r.severity}</span>${r.text}
-        </li>`;
-      }).join('');
-
-      // Categories
-      catsWrap.innerHTML = '';
-      (data.categories||[]).forEach(cat=>{
-        const catScore = cat.score;
-        const catColor = chipColor(catScore).replace('score-','');
-        const headColor =
-          catColor==='green' ? 'from-emerald-500/25 to-emerald-500/5' :
-          catColor==='orange'? 'from-amber-500/25 to-amber-500/5' :
-          catColor==='red'   ? 'from-rose-500/25 to-rose-500/5' : 'from-sky-500/20 to-sky-500/5';
-        const catCard = document.createElement('div');
-        catCard.className = 'glass rounded-2xl p-5 border border-white/10 soft-shadow flex flex-col';
-
-        catCard.innerHTML = `
-          <div class="rounded-xl bg-gradient-to-br ${headColor} border border-white/10 p-4 flex items-center justify-between">
-            <div class="font-semibold">${cat.name}</div>
-            <span class="score-chip ${chipColor(catScore)}">${catScore ?? '—'}</span>
+    // Categories & checks
+    catsEl.innerHTML='';
+    (data.categories||[]).forEach(cat=>{
+      const card = document.createElement('div');
+      const tone = colorBy(cat.score??60);
+      card.className = 'card ' + tone;
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <div class="font-semibold">${cat.name}</div>
+          <div class="pill bg-white/10 border border-white/10">${cat.score ?? '—'}</div>
+        </div>
+        <div class="space-y-2"></div>`;
+      const list = card.lastElementChild;
+      (cat.checks||[]).forEach(ch=>{
+        const li = document.createElement('div');
+        li.className = 'glass rounded-lg px-3 py-2 border border-white/10 flex items-center justify-between';
+        li.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-2.5 h-2.5 rounded-full ${ch.color==='green'?'bg-emerald-400':ch.color==='orange'?'bg-amber-400':'bg-rose-400'}"></span>
+            <div class="text-sm">${ch.label}</div>
           </div>
-          <div class="mt-3 space-y-2" />
-        `;
-        const listWrap = catCard.querySelector('div.space-y-2');
-        (cat.checks||[]).forEach(ch=>{
-          const c = chipColor(ch.score);
-          const passIcon = ch.pass===true ? '✅' : (ch.pass===false ? '⚠️' : '•');
-          const row = document.createElement('div');
-          row.className = 'rounded-xl bg-black/30 border border-white/10 p-3';
-          row.innerHTML = `
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2 text-sm">
-                <span class="opacity-90">${passIcon}</span>
-                <span class="font-medium">${ch.label}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="score-chip ${c}">${ch.score ?? '—'}</span>
-                <button data-title="${ch.label}" data-advice="${(ch.advice||'').replace(/"/g,'&quot;')}" data-url="${ch.improve_search_url||'#'}"
-                  class="px-3 py-1 rounded-lg btn-cta text-xs">Improve</button>
-              </div>
-            </div>
-          `;
-          listWrap.appendChild(row);
+          <div class="flex items-center gap-2">
+            <span class="pill bg-white/10">${ch.score ?? '—'}</span>
+            <button class="px-3 py-1 rounded-lg text-xs bg-gradient-to-r from-fuchsia-500 to-sky-500">Improve</button>
+          </div>`;
+        li.querySelector('button').addEventListener('click', ()=>{
+          mTitle.textContent = ch.label;
+          mAdvice.textContent = ch.advice || 'Suggested improvements';
+          mLink.href = ch.improve_search_url || 'https://www.google.com/';
+          modal.showModal();
         });
-        catsWrap.appendChild(catCard);
+        list.appendChild(li);
       });
+      catsEl.appendChild(card);
+    });
 
-      // Delegate: Improve buttons
-      catsWrap.querySelectorAll('button.btn-cta').forEach(b=>{
-        b.addEventListener('click', (e)=>{
-          const t = e.currentTarget;
-          openModal(t.dataset.title || 'Improve', t.dataset.advice || 'Suggestions not available.', t.dataset.url || '#');
-        });
-      });
-
-    }catch(err){
-      console.error(err);
-      alert('Network or server error.');
-    }finally{
-      btnAnalyze.disabled = false; btnAnalyze.classList.remove('opacity-60');
-    }
-  });
+    // end: snap water bar to actual score
+    setTimeout(()=>{ water.style.width = (score+'%'); }, 150);
+  } catch(err){
+    alert('Fetch error. Check routes/api.php and storage/logs/laravel.log');
+    water.style.width='0%';
+  }
+});
 </script>
+@endpush
 @endsection
