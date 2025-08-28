@@ -3,17 +3,17 @@
 
 @push('head')
 <style>
-  /* ===== Page tech background ===== */
+  /* Page tech background (kept) */
   .bg-tech {
     position: fixed; inset: 0;
     background:
       radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,.05), transparent),
       repeating-linear-gradient(115deg, transparent 0 18px, rgba(236,72,153,.25) 18px 19px),
-      #000; /* pure black */
+      #000;
     pointer-events:none; z-index:-1;
   }
 
-  /* ===== Shared tokens ===== */
+  /* Shared tokens */
   .card { border-radius: 16px; padding: 20px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
   .pill  { padding:4px 8px; border-radius:9999px; font-size:12px; font-weight:600; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.06); }
   .k-badge{ padding:6px 8px; border-radius:10px; font-size:12px; font-weight:700; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); }
@@ -22,17 +22,16 @@
   .bar > span { display:block; height:100%; border-radius:9999px; transition: width .5s ease; background: linear-gradient(90deg,#22c55e,#60a5fa,#d946ef); }
   .chip { font-size:12px; padding:4px 8px; border-radius:8px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
 
-  /* ===== Water loading bar ===== */
+  /* Water loading bar */
   #waterbar { height: 10px; border-radius: 9999px; background: rgba(255,255,255,.08); overflow: hidden; }
   #waterbar span { display:block; height:100%; width:0%; background: linear-gradient(90deg,#ef4444,#f59e0b,#22c55e); transition: width .8s ease; filter: drop-shadow(0 0 10px rgba(148,163,184,.4)); }
 
-  /* ===== Wheels ===== */
+  /* Wheels */
   .score-wheel { width:180px; height:180px; display:grid; place-items:center; position:relative; }
   .score-wheel .ring {
     --v: 0;
     width: 100%; height: 100%; border-radius: 50%;
-    background:
-      conic-gradient(#22c55e calc(var(--v)*1%), #f59e0b calc(var(--v)*1% + .0001%), #ef4444 100%);
+    background: conic-gradient(#22c55e calc(var(--v)*1%), #f59e0b calc(var(--v)*1% + .0001%), #ef4444 100%);
     -webkit-mask: radial-gradient(circle 60px, transparent 58%, #000 60%);
             mask: radial-gradient(circle 60px, transparent 58%, #000 60%);
     box-shadow: inset 0 0 0 6px rgba(255,255,255,.06);
@@ -44,29 +43,20 @@
     -webkit-background-clip:text; background-clip:text; color:transparent;
   }
 
-  /* ===== Semantic SEO Ground — slab background & header ===== */
+  /* === Semantic SEO Ground — your requested colors === */
   .ground-slab{
     border-radius: 24px;
     padding: 22px;
-    background:
-      radial-gradient(1200px 600px at -10% -20%, rgba(120,119,198,.14), transparent 55%),
-      radial-gradient(900px 500px at 120% 120%, rgba(236,72,153,.12), transparent 60%),
-      linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
-      #0b0b10; /* deep, readable base */
-    border: 1px solid rgba(255,255,255,.10);
+    background:#0D0E1E;                 /* section bg */
+    border: 1px solid #1b2640;
     position: relative;
     overflow: hidden;
   }
   .ground-slab::after{
     content:"";
     position:absolute; inset:0; pointer-events:none;
-    background:
-      repeating-linear-gradient(
-        -65deg,
-        rgba(255,255,255,.05) 0 2px,
-        transparent 2px 26px
-      );
-    opacity:.35;
+    background:repeating-linear-gradient(-65deg, rgba(255,255,255,.04) 0 2px, transparent 2px 28px);
+    opacity:.25;
   }
   .ground-head{ display:flex; align-items:center; gap:14px; margin-bottom:16px; position:relative; z-index:1; }
   .gh-icon{
@@ -84,17 +74,17 @@
   }
   .gh-sub{ font-size: 14px; color:#cbd5e1; }
 
-  /* ===== Category cards inside the slab (more contrast + lines) ===== */
+  /* Category cards inside the slab (boxes) */
   .ground-slab .cat-card{
     border-radius: 18px; padding: 18px; position:relative;
-    background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    background:#111E2F;                 /* box bg */
     border:1px solid rgba(255,255,255,.12);
     box-shadow: 0 12px 30px rgba(0,0,0,.25);
   }
   .ground-slab .cat-card::before{
     content:""; position:absolute; inset:0; pointer-events:none;
     background: repeating-linear-gradient(-65deg, rgba(255,255,255,.06) 0 2px, transparent 2px 28px);
-    opacity:.25; border-radius: inherit;
+    opacity:.20; border-radius: inherit;
   }
   .ground-slab .cat-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px; }
   .ground-slab .cat-title{
@@ -108,18 +98,20 @@
   .ground-slab .progress{ width:100%; height: 12px; border-radius:9999px; background: rgba(255,255,255,.08); overflow:hidden; border:1px solid rgba(255,255,255,.14); }
   .ground-slab .progress > span{ display:block; height:100%; border-radius:9999px; background: linear-gradient(90deg,#ef4444,#fde047,#22c55e); transition: width .5s ease; }
 
-  /* Checklist rows — larger, clearer */
-  .ground-slab .check{ display:flex; align-items:center; justify-content:space-between; border-radius:14px; padding:14px 16px; border:1px solid rgba(255,255,255,.10);
-           background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); }
+  /* Checklist rows */
+  .ground-slab .check{ display:flex; align-items:center; justify-content:space-between; border-radius:14px; padding:14px 16px; border:1px solid rgba(255,255,255,.10); background:#0F1A29; }
   .ground-slab .check + .check { margin-top:8px; }
   .ground-slab .check .left { display:flex; align-items:center; gap:10px; }
   .ground-slab .check .text{ color:#f8fafc; font-weight:700; font-size: 18px; }
   .dot { width:10px; height:10px; border-radius:9999px; }
-  .dot.green{ background:#10b981; box-shadow:0 0 10px rgba(16,185,129,.6); }
+  .dot.green{  background:#10b981; box-shadow:0 0 10px rgba(16,185,129,.6); }
   .dot.orange{ background:#f59e0b; box-shadow:0 0 10px rgba(245,158,11,.6); }
-  .dot.red{ background:#ef4444; box-shadow:0 0 10px rgba(239,68,68,.6); }
+  .dot.red{    background:#ef4444; box-shadow:0 0 10px rgba(239,68,68,.6); }
   .score-pill { font-size:12px; font-weight:800; padding:4px 8px; border-radius:10px; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); color:#e5e7eb; }
   .improve-btn { font-size:12px; font-weight:700; padding:6px 10px; border-radius:10px; background: linear-gradient(135deg,#a78bfa,#60a5fa); color:white; box-shadow: 0 8px 16px rgba(96,165,250,.25); }
+
+  /* Improve modal uses your section bg */
+  #improveModal .card{ background:#0D0E1E; border:1px solid #1b2640; }
 </style>
 @endpush
 
@@ -252,14 +244,43 @@
   </div>
 
   <!-- Improve Modal -->
-  <dialog id="improveModal" class="backdrop:bg-black/60 rounded-2xl p-0 w-[min(560px,95vw)]">
+  <dialog id="improveModal" class="backdrop:bg-black/60 rounded-2xl p-0 w-[min(680px,95vw)]">
     <div class="card">
       <div class="flex items-start justify-between">
-        <h4 id="improveTitle" class="font-semibold">Improve</h4>
+        <div>
+          <h4 id="improveTitle" class="font-semibold text-slate-100">Improve</h4>
+          <div class="text-xs text-slate-400 mt-1">Checklist details & tips to raise your score</div>
+        </div>
         <form method="dialog"><button class="pill">Close</button></form>
       </div>
-      <p id="improveAdvice" class="mt-3 text-sm text-slate-200">—</p>
-      <a id="improveSearch" target="_blank" class="inline-block mt-4 px-3 py-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-sky-500 text-white text-sm">Search guidance</a>
+
+      <div class="grid md:grid-cols-3 gap-3 mt-4">
+        <div class="card">
+          <div class="text-xs text-slate-400">Category</div>
+          <div id="improveCategory" class="font-semibold">—</div>
+        </div>
+        <div class="card">
+          <div class="text-xs text-slate-400">Score</div>
+          <div class="flex items-center gap-2 mt-1">
+            <span id="improveScore" class="score-pill">—</span>
+            <span id="improveBand" class="pill">—</span>
+          </div>
+        </div>
+        <a id="improveSearch" target="_blank"
+           class="card hover:opacity-90 transition text-center flex items-center justify-center bg-gradient-to-r from-fuchsia-500/20 to-sky-500/20 border border-white/10">
+          <span class="text-sm text-slate-200">Search guidance</span>
+        </a>
+      </div>
+
+      <div class="mt-4">
+        <div class="text-xs text-slate-400">Why this matters</div>
+        <p id="improveWhy" class="text-sm text-slate-200 mt-1">—</p>
+      </div>
+
+      <div class="mt-4">
+        <div class="text-xs text-slate-400">How to improve</div>
+        <ul id="improveTips" class="mt-2 list-disc pl-5 text-sm text-slate-200 space-y-1"></ul>
+      </div>
     </div>
   </dialog>
 
@@ -298,6 +319,39 @@ const mTitle = document.getElementById('improveTitle');
 const mAdvice= document.getElementById('improveAdvice');
 const mLink  = document.getElementById('improveSearch');
 
+const band = (s) => (s>=80 ? 'green' : (s>=60 ? 'orange' : 'red'));
+const bandLabel = (s) => (s>=80 ? 'Good (≥80)' : (s>=60 ? 'Needs work (60–79)' : 'Low (<60)'));
+function tipsFor(catName, label){
+  const base = ['Aim for ≥80 (green) and re-run the analyzer after changes.'];
+  switch (catName) {
+    case 'Technical Elements':
+      return [
+        'Keep title ~50–60 chars with the primary keyword.',
+        'Write a 140–160 char meta description with a clear CTA.',
+        'Verify canonical is set; avoid duplicates.',
+        'Ensure the page exists in your XML sitemap.'
+      ].concat(base);
+    case 'Content & Keywords':
+      return [
+        'State search intent and the primary topic in the intro.',
+        'Use natural keyword variants and PAA-style questions.',
+        'Use a single, descriptive H1 including the topic.',
+        'Add an FAQ block with concise answers.',
+        'Prefer clear, NLP-friendly language.'
+      ].concat(base);
+    case 'Structure & Architecture':
+      return ['Use logical H2/H3 topic clusters.', 'Link to hub/related pages.', 'Use clean, descriptive URLs.', 'Add breadcrumbs (with schema).'].concat(base);
+    case 'Content Quality':
+      return ['Show E-E-A-T (author, date, expertise).', 'Demonstrate unique value vs competitors.', 'Cite recent, authoritative sources.', 'Use helpful media with captions.'].concat(base);
+    case 'User Signals & Experience':
+      return ['Responsive layout for mobile.', 'Optimize speed (compression, lazy-load).', 'Watch Core Web Vitals (LCP/INP/CLS).', 'Make CTAs obvious.'].concat(base);
+    case 'Entities & Context':
+      return ['Define a clear primary entity.', 'Cover related entities with context.', 'Add valid schema (Article/FAQ/Product).', 'Add sameAs/organization details.'].concat(base);
+    default:
+      return base;
+  }
+}
+
 function labelBy(score){ return score>=80?'Great Work — Well Optimized':(score>=60?'Needs Optimization':'Needs Significant Optimization'); }
 
 f.addEventListener('submit', async (e)=>{
@@ -332,7 +386,7 @@ f.addEventListener('submit', async (e)=>{
     statExt.textContent = data.quick_stats.external_links;
     statRatio.textContent = data.quick_stats.text_to_html_ratio + '%';
 
-    // Readability (FRE clamped to 0–100 for wheel)
+    // Readability (wheel uses 0–100)
     const rf = Math.max(0, Math.min(100, data.readability.score||0));
     readWheel.style.setProperty('--v', rf);
     readNum.textContent = Math.round(rf);
@@ -388,7 +442,7 @@ f.addEventListener('submit', async (e)=>{
 
       const list = card.querySelector('#list');
       (cat.checks||[]).forEach(ch=>{
-        const color = ch.color==='green'?'green':(ch.color==='orange'?'orange':'red');
+        const color = band(ch.score ?? 0);
         const row = document.createElement('div');
         row.className = 'check';
         row.innerHTML = `
@@ -401,12 +455,31 @@ f.addEventListener('submit', async (e)=>{
             <button class="improve-btn">Improve</button>
           </div>
         `;
+
         row.querySelector('.improve-btn').addEventListener('click', ()=>{
+          const s = ch.score ?? 0;
           mTitle.textContent = ch.label;
-          mAdvice.textContent = ch.advice || 'Suggested improvements.';
-          mLink.href = ch.improve_search_url || 'https://www.google.com';
+          document.getElementById('improveCategory').textContent = cat.name || '—';
+          document.getElementById('improveScore').textContent = s;
+          const bandEl = document.getElementById('improveBand');
+          bandEl.textContent = bandLabel(s);
+          bandEl.className = 'pill ' + (s>=80 ? 'bg-emerald-500/20 text-emerald-200 border-emerald-500/30'
+                                              : s>=60 ? 'bg-amber-500/20 text-amber-200 border-amber-500/30'
+                                                      : 'bg-rose-500/20 text-rose-200 border-rose-500/30');
+
+          document.getElementById('improveWhy').textContent =
+            ch.why || 'This checklist affects topical authority, UX, and eligibility for rich results.';
+
+          const tips = ch.tips || tipsFor(cat.name, ch.label);
+          const ul = document.getElementById('improveTips'); ul.innerHTML = '';
+          tips.forEach(t => { const li = document.createElement('li'); li.textContent = t; ul.appendChild(li); });
+
+          mAdvice.textContent = ch.advice || 'Follow the tips below to raise the score.';
+          mLink.href = ch.improve_search_url || 'https://www.google.com/search?q='+encodeURIComponent(ch.label+' SEO best practices');
+
           modal.showModal();
         });
+
         list.appendChild(row);
       });
 
