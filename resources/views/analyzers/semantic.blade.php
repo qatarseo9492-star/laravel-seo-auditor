@@ -4,18 +4,18 @@
 
 @push('head')
 <style>
-  /* === HARD OVERRIDE: Solid Dark Purple base === */
-  html, body { background:#321A37 !important; }
+  /* === HARD OVERRIDE: Solid Black background === */
+  html, body { background:#000 !important; }
   body{ color:#e8eaf6; overflow-x:hidden; }
 
-  /* Paint a solid layer ABOVE any legacy backgrounds, but below our content */
+  /* Solid layer above any legacy backgrounds, below our content */
   body::before{
     content:""; position:fixed; inset:0; pointer-events:none;
-    background:#321A37;  /* Dark Purple */
-    z-index:0;           /* base layer */
+    background:#000;   /* Black */
+    z-index:0;         /* base layer */
   }
 
-  /* Nuke common gradient/noise backgrounds from the layout (safe) */
+  /* Nuke common gradient/noise backgrounds from layout */
   .bg-gradient, .gradient-bg, .hero-bg, .page-bg, .noise-bg, .grid-overlay,
   [data-bg], [class*="bg-gradient"], [class*="bg-grid"], [class*="bg-noise"]{
     background:none !important; box-shadow:none !important;
@@ -24,8 +24,10 @@
   .hero-bg::before, .hero-bg::after,
   body::after{ content:none !important; }
 
-  /* Our layers: content on top, tech lines between content and base */
+  /* Our layers: content top, tech lines between content and base */
   .content-root{ position:relative; z-index:2; }
+
+  /* Animated tech lines (purple ↔ red) */
   .tech-bg{ position:fixed; inset:0; pointer-events:none; opacity:.46; z-index:1; }
   .tech-bg svg{ width:145%; height:145%; transform:translate(-17%,-18%) rotate(-7deg); }
   .tech-bg .dash{ stroke-dasharray:8 18; animation:dashMove 16s linear infinite; }
@@ -38,7 +40,7 @@
 
   /* Minimal utilities */
   .glass{background:rgba(255,255,255,.04); backdrop-filter:blur(6px);}
-  .shadow-soft{box-shadow:0 12px 40px rgba(0,0,0,.25);}
+  .shadow-soft{box-shadow:0 12px 40px rgba(0,0,0,.45);}
   .card { border-radius:1rem; padding:1.25rem; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03);}
   .pill  { padding:.125rem .5rem; border-radius:9999px; font-size:.75rem; font-weight:600; border:1px solid rgba(255,255,255,.10); }
   .k-badge{ padding:.35rem .6rem; border-radius:.75rem; font-size:.78rem; font-weight:700; border:1px solid rgba(255,255,255,.15); background:rgba(255,255,255,.06); }
