@@ -281,4 +281,85 @@ f.addEventListener('submit', async (e)=>{
 
     // Structure
     titleVal.textContent = data.content_structure.title || '—';
-    metaVal.textContent  = data.
+    metaVal.textContent  = data.content_structure.meta_description || '—';
+    headingMap.innerHTML='';
+    Object.entries(data.content_structure.headings||{}).forEach(([lvl,arr])=>{
+      if(!arr || !arr.length) return;
+      const box = document.createElement('div');
+      box.className='card';
+      box.innerHTML = `<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>` + arr.map(t=>`<div>• ${t}</div>`).join('');
+      headingMap.appendChild(box);
+    });
+
+    // Recommendations
+    recsEl.innerHTML='';
+    (data.recommendations||[]).forEach(r=>{
+      const tone = r.severity==='Critical' ? 'border-rose-500/30' : r.severity==='Warning' ? 'border-amber-500/30' : 'border-white/10';
+      const c = document.createElement('div');
+      c.className='card ' + tone;
+      c.innerHTML = `<span class="pill mr-2">${r.severity}</span>${r.text}`;
+      recsEl.appendChild(c);
+    });
+
+    // Categories (large cards with icon + progress)
+    catsEl.innerHTML='';
+    (data.categories||[]).forEach(cat=>{
+      const total = (cat.checks||[]).length;
+      const passed = (cat.checks||[]).filter(ch => (ch.score||0) >= 80).length;
+      const pct = Math.round((passed/Math.max(1,total))*100);
+
+      const card = document.createElement('div');
+      card.className = 'cat-card';
+
+      card.innerHTML = `
+        <div class="cat-head">
+          <div class="flex items-center gap-3">
+            <div class="cat-icon">${cat.icon||'★'}</div>
+            <div>
+              <div class="cat-title">${cat.name||'Category'}</div>
+              <div class="text-slate-300 text-sm">Keep improving</div>
+            </div>
+          </div>
+          <div class="cat-badge">${passed} / ${total}</div>
+        </div>
+        <div class="progress mb-3"><span style="width:${pct}%"></span></div>
+        <div class="space-y-2" id="list"></div>
+      `;
+
+      const list = card.querySelector('#list');
+      (cat.checks||[]).forEach(ch=>{
+        const color = ch.color==='green'?'green':(ch.color==='orange'?'orange':'red');
+        const row = document.createElement('div');
+        row.className = 'check';
+        row.innerHTML = `
+          <div class="left">
+            <span class="dot ${color}"></span>
+            <div class="text-slate-100 font-medium">${ch.label}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="score-pill">${ch.score ?? '—'}</span>
+            <button class="improve-btn">Improve</button>
+          </div>
+        `;
+        row.querySelector('.improve-btn').addEventListener('click', ()=>{
+          mTitle.textContent = ch.label;
+          mAdvice.textContent = ch.advice || 'Suggested improvements.';
+          mLink.href = ch.improve_search_url || 'https://www.google.com';
+          modal.showModal();
+        });
+        list.appendChild(row);
+      });
+
+      catsEl.appendChild(card);
+    });
+
+    // snap water to score
+    setTimeout(()=>{ water.style.width = (score+'%'); }, 150);
+  } catch(err){
+    alert('Request error. See storage/logs/laravel.log');
+    water.style.width='0%';
+  }
+});
+</script>
+@endpush
+@endsection
