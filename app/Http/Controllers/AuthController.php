@@ -2,21 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 
 class AuthController extends Controller
 {
     public function showLogin()
     {
-        return view('auth.login');
-    }
-
-    public function showRegister()
-    {
-        return view('auth.register');
+        return view('auth.login'); // resources/views/auth/login.blade.php
     }
 
     public function login(Request $request)
@@ -30,18 +25,25 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('home'));
+            return redirect()->intended(route('dashboard'));
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials'])->onlyInput('email');
+        return back()
+            ->withErrors(['email' => 'Invalid credentials.'])
+            ->onlyInput('email');
+    }
+
+    public function showRegister()
+    {
+        return view('auth.register'); // resources/views/auth/register.blade.php
     }
 
     public function register(Request $request)
     {
         $data = $request->validate([
-            'name'                  => ['required', 'string', 'max:100'],
-            'email'                 => ['required', 'email', 'max:150', 'unique:users,email'],
-            'password'              => ['required', 'string', 'min:6', 'confirmed'],
+            'name'     => ['required','string','max:120'],
+            'email'    => ['required','email','max:190','unique:users,email'],
+            'password' => ['required','string','min:8','confirmed'],
         ]);
 
         $user = User::create([
@@ -53,14 +55,6 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home'));
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect()->route('home');
+        return redirect()->route('dashboard');
     }
 }
