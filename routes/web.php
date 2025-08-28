@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,29 +16,36 @@ use App\Http\Controllers\ProfileController;
 | - resources/views/analyzers/ai.blade.php
 | - resources/views/analyzers/topic.blade.php
 | - resources/views/profile/edit.blade.php
-| - resources/views/auth/login.blade.php      (placeholder if you don't use Breeze/Jetstream)
-| - resources/views/auth/register.blade.php   (placeholder if you don't use Breeze/Jetstream)
+| - resources/views/auth/login.blade.php
+| - resources/views/auth/register.blade.php
 */
 
 /*
-| Public homepage (marketing-only; tools not exposed here)
+| Public homepage (marketing-only)
 */
 Route::view('/', 'home')->name('home');
 
 /*
-| Auth-protected app pages
-| Anyone hitting these while not logged in will be redirected to route('login').
+| Auth pages
+| GET shows forms; POST processes them.
+*/
+Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+
+Route::get('/register',  [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+
+/*
+| Auth-protected app
 */
 Route::middleware('auth')->group(function () {
-    // Dashboard
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
-    // Tool shells (views should exist)
     Route::view('/semantic-analyzer', 'analyzers.semantic')->name('semantic.analyzer');
     Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
     Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
 
-    // Profile & Settings
+    // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
@@ -53,38 +61,18 @@ Route::middleware('auth')->group(function () {
 });
 
 /*
-| Optional placeholders if you don’t have auth scaffolding installed.
-| Remove these two lines if Breeze/Jetstream or your own auth already registers /login and /register.
+| Convenience redirects / legacy aliases
 */
-Route::view('/login', 'auth.login')->name('login');
-Route::view('/register', 'auth.register')->name('register');
+Route::get('/semantic', fn () => redirect()->route(auth()->check() ? 'semantic.analyzer' : 'login'))->name('semantic');
+Route::get('/ai-checker', fn () => redirect()->route(auth()->check() ? 'ai.checker' : 'login'))->name('aiChecker');
+Route::get('/topic', fn () => redirect()->route(auth()->check() ? 'topic.cluster' : 'login'))->name('topicCluster');
 
 /*
-| Convenience redirects / legacy aliases (keeps old links working)
-| These detect auth and send users to the right place (or to login).
-*/
-Route::get('/semantic', function () {
-    return redirect()->route(auth()->check() ? 'semantic.analyzer' : 'login');
-})->name('semantic');
-
-Route::get('/ai-checker', function () {
-    return redirect()->route(auth()->check() ? 'ai.checker' : 'login');
-})->name('aiChecker');
-
-Route::get('/topic', function () {
-    return redirect()->route(auth()->check() ? 'topic.cluster' : 'login');
-})->name('topicCluster');
-
-/*
-| Uptime/health check (handy for Cloudways monitors)
+| Uptime
 */
 Route::get('/_up', fn () => response('OK', 200))->name('_up');
 
 /*
-| Fallback: redirect unknown pages to home (or swap for a 404 view if you prefer)
+| Fallback
 */
-Route::fallback(function () {
-    return redirect()->route('home');
-    // If you have resources/views/errors/404.blade.php and prefer a 404:
-    // return response()->view('errors.404', [], 404);
-});
+Route::fallback(fn () => redirect()->route('home'));
