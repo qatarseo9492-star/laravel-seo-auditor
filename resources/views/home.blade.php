@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Semantic SEO Master Analyzer 2.0</title>
 
-  <!-- Tailwind via CDN (simple + no build step needed) -->
+  <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -17,21 +17,38 @@
               500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9',800:'#5b21b6',900:'#4c1d95'
             }
           },
-          boxShadow: {
-            soft: '0 8px 30px rgba(0,0,0,.08)'
-          },
-          backdropBlur: { xs: '2px' }
+          boxShadow: { soft: '0 10px 40px rgba(0,0,0,.15)' }
         }
       }
     }
   </script>
 
-  <!-- Minimal icons (Heroicons inline SVG used below) -->
+  <style>
+    /* Subtle gradient glow behind canvas */
+    .bg-neon {
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(139,92,246,.25), transparent 60%),
+        radial-gradient(900px 500px at 110% 10%, rgba(79,70,229,.25), transparent 60%),
+        radial-gradient(900px 900px at 50% 120%, rgba(14,165,233,.20), transparent 60%),
+        #0b0f1a;
+    }
+    /* Glass card effect */
+    .glass {
+      background: linear-gradient(180deg, rgba(15,23,42,.65), rgba(2,6,23,.55));
+      border: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(8px);
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased">
+<body class="text-slate-100 bg-neon min-h-screen relative overflow-x-hidden">
 
-  <!-- Top Bar -->
-  <header class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-white/10">
+  <!-- Animated tech-lines canvas -->
+  <div class="pointer-events-none absolute inset-0 -z-10">
+    <canvas id="techLines" class="w-full h-full"></canvas>
+  </div>
+
+  <!-- Header / Nav -->
+  <header class="sticky top-0 z-40 border-b border-white/10 bg-black/30 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="h-16 flex items-center justify-between">
         <a href="/" class="flex items-center gap-3">
@@ -48,15 +65,27 @@
         </a>
 
         <nav class="hidden md:flex items-center gap-6 text-sm">
-          <a href="#semantic" class="hover:text-white text-slate-300">Semantic Analyzer</a>
-          <a href="#ai-check" class="hover:text-white text-slate-300">AI Content Checker</a>
-          <a href="#topic-cluster" class="hover:text-white text-slate-300">Topic Cluster</a>
-          <a href="/semantic-analyzer" class="hover:text-white text-slate-300">Full App</a>
+          <!-- Tools require auth; send guests to login -->
+          @auth
+            <a href="/semantic-analyzer" class="hover:text-white text-slate-300">Semantic Analyzer</a>
+            <a href="/ai-content-checker" class="hover:text-white text-slate-300">AI Content Checker</a>
+            <a href="/topic-cluster" class="hover:text-white text-slate-300">Topic Cluster</a>
+          @else
+            <a href="/login" class="hover:text-white text-slate-300">Semantic Analyzer</a>
+            <a href="/login" class="hover:text-white text-slate-300">AI Content Checker</a>
+            <a href="/login" class="hover:text-white text-slate-300">Topic Cluster</a>
+          @endauth
+          <a href="#about" class="hover:text-white text-slate-300">About</a>
+          <a href="#features" class="hover:text-white text-slate-300">Features</a>
         </nav>
 
         <div class="flex items-center gap-2">
-          <a href="/login" class="px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-white/5">Log in</a>
-          <a href="/register" class="px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-brand-500 to-indigo-500 hover:from-brand-400 hover:to-indigo-400 text-white shadow-soft">Sign up</a>
+          @guest
+            <a href="/login" class="px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-white/5">Log in</a>
+            <a href="/register" class="px-3 py-2 rounded-lg text-sm bg-gradient-to-r from-brand-500 to-indigo-500 hover:from-brand-400 hover:to-indigo-400 text-white shadow-soft">Sign up</a>
+          @else
+            <a href="/dashboard" class="px-3 py-2 rounded-lg text-sm text-slate-200 hover:bg-white/5">Dashboard</a>
+          @endguest
         </div>
       </div>
     </div>
@@ -64,136 +93,143 @@
 
   <!-- HERO -->
   <section class="relative overflow-hidden">
-    <div class="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.25),transparent_60%)]"></div>
-    <div class="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-gradient-to-br from-brand-600/30 to-indigo-600/30 blur-3xl"></div>
-
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
-      <div class="grid lg:grid-cols-2 gap-10 items-center">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
         <div>
           <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight tracking-tight">
-            Ship content that ranks.<br>
-            <span class="bg-gradient-to-r from-brand-400 to-indigo-400 bg-clip-text text-transparent">Semantic SEO Analyzer 2.0</span>
+            Build content that <span class="bg-gradient-to-r from-brand-400 to-indigo-300 bg-clip-text text-transparent">earns rankings</span>.
           </h1>
           <p class="mt-4 text-slate-300 max-w-2xl">
-            Instantly audit structure, entities, intent, and technical signals. Identify content gaps, cluster topics, and validate AI-likeness in seconds.
+            Semantic SEO Master Analyzer 2.0 transforms unstructured pages into structured insight. It surfaces entities, topics, and intent, validates technical signals, and reveals the gaps that keep you off page one.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
-            <a href="/semantic-analyzer" class="px-4 py-2 rounded-lg bg-white text-slate-900 font-medium shadow-soft hover:opacity-90">Open Semantic Analyzer</a>
-            <a href="/ai-content-checker" class="px-4 py-2 rounded-lg bg-slate-800/60 border border-white/10 hover:bg-slate-800">Try AI Checker</a>
-            <a href="/topic-cluster" class="px-4 py-2 rounded-lg bg-slate-800/60 border border-white/10 hover:bg-slate-800">Topic Clusters</a>
+            @guest
+              <a href="/register" class="px-4 py-2 rounded-lg bg-white text-slate-900 font-medium shadow-soft hover:opacity-90">Get started — free</a>
+              <a href="/login" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Sign in</a>
+            @else
+              <a href="/semantic-analyzer" class="px-4 py-2 rounded-lg bg-white text-slate-900 font-medium shadow-soft hover:opacity-90">Open Semantic Analyzer</a>
+              <a href="/dashboard" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Go to Dashboard</a>
+            @endguest
           </div>
-
           <dl class="mt-8 grid grid-cols-2 gap-6 text-sm text-slate-300">
-            <div class="p-4 rounded-xl bg-slate-900/40 border border-white/10">
-              <dt class="font-semibold text-white">Entity & Topic Core</dt>
-              <dd>TF-IDF, NER, keyphrases, semantic coverage.</dd>
+            <div class="p-4 rounded-xl glass">
+              <dt class="font-semibold text-white">Entity Intelligence</dt>
+              <dd>Extract key entities & topics with TF-IDF, NER, and keyphrase scoring.</dd>
             </div>
-            <div class="p-4 rounded-xl bg-slate-900/40 border border-white/10">
-              <dt class="font-semibold text-white">Structure & Tech SEO</dt>
-              <dd>Headings, ratios, links, schema hints.</dd>
+            <div class="p-4 rounded-xl glass">
+              <dt class="font-semibold text-white">Structure & Signals</dt>
+              <dd>Headings, internal/external links, meta, schema hints & ratios.</dd>
             </div>
           </dl>
         </div>
 
-        <!-- Quick Semantic Analyzer Widget -->
-        <div id="quick-widget" class="rounded-2xl p-6 bg-slate-900/50 border border-white/10 shadow-soft backdrop-blur-xs">
-          <h3 class="text-lg font-semibold">Quick Audit</h3>
-          <p class="text-sm text-slate-300 mb-4">Run a lightweight analysis right from the homepage.</p>
-
-          <form id="semanticForm" class="space-y-3">
-            <div>
-              <label class="text-xs text-slate-400">URL</label>
-              <input name="url" type="url" required placeholder="https://example.com/article"
-                     class="mt-1 w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500" />
-            </div>
-            <div>
-              <label class="text-xs text-slate-400">Target keyword (optional)</label>
-              <input name="target_keyword" type="text" placeholder="e.g., semantic seo"
-                     class="mt-1 w-full rounded-lg bg-slate-800/70 border border-white/10 px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500" />
-            </div>
-            <button type="submit" id="semanticBtn"
-              class="w-full inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 bg-gradient-to-r from-brand-500 to-indigo-500 hover:from-brand-400 hover:to-indigo-400 text-white font-medium shadow-soft">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6l4 2" />
-              </svg>
-              Analyze
-            </button>
-          </form>
-
-          <div id="semanticResult" class="mt-4 text-sm hidden">
-            <!-- results render here -->
+        <!-- Visual card stack -->
+        <div class="relative">
+          <div class="absolute -inset-6 -z-10 bg-gradient-to-br from-brand-500/20 via-indigo-500/10 to-cyan-400/10 blur-2xl rounded-3xl"></div>
+          <div class="rotate-3 translate-y-4 rounded-2xl border border-white/10 glass p-5 shadow-soft">
+            <div class="text-xs text-slate-300">Overview</div>
+            <div class="mt-2 text-2xl font-bold">Semantic Snapshot</div>
+            <ul class="mt-4 space-y-2 text-sm text-slate-300">
+              <li>• Primary Topics & Entities</li>
+              <li>• Heading Hierarchy Map</li>
+              <li>• Link Context Summary</li>
+            </ul>
+          </div>
+          <div class="-rotate-2 -translate-y-6 ml-10 mt-5 rounded-2xl border border-white/10 glass p-5 shadow-soft">
+            <div class="text-xs text-slate-300">Insights</div>
+            <div class="mt-2 text-2xl font-bold">Actionable Recs</div>
+            <ul class="mt-4 space-y-2 text-sm text-slate-300">
+              <li>• Missing sections & questions</li>
+              <li>• Title & meta improvements</li>
+              <li>• Schema & coverage gaps</li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Three Analyzers -->
-  <section class="py-14">
+  <!-- ABOUT (rich copy in stylish boxes) -->
+  <section id="about" class="py-12 sm:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl font-bold tracking-tight mb-6">Analyze, detect, and cluster — beautifully</h2>
-      <div class="grid md:grid-cols-3 gap-6">
-        <!-- Card 1 -->
-        <a href="/semantic-analyzer" id="semantic" class="block group rounded-2xl p-6 bg-slate-900/50 border border-white/10 hover:border-brand-500/60 hover:bg-slate-900/70 transition shadow-soft">
-          <div class="flex items-center justify-between">
-            <h3 class="font-semibold">Semantic SEO Master Analyzer 2.0</h3>
-            <span class="text-xs px-2 py-1 rounded bg-brand-500/20 text-brand-200 border border-brand-500/40">Pro</span>
-          </div>
-          <p class="mt-2 text-slate-300 text-sm">Entities, topics, structure, readability, links, schema & recommendations.</p>
-          <div class="mt-4 text-brand-300 text-sm group-hover:translate-x-1 transition">
-            Open →
-          </div>
-        </a>
+      <h2 class="text-3xl font-bold tracking-tight">What is <span class="text-brand-300">Semantic SEO</span>?</h2>
 
-        <!-- Card 2 -->
-        <a href="/ai-content-checker" id="ai-check" class="block group rounded-2xl p-6 bg-slate-900/50 border border-white/10 hover:border-brand-500/60 hover:bg-slate-900/70 transition shadow-soft">
-          <h3 class="font-semibold">AI Content Checker</h3>
-          <p class="mt-2 text-slate-300 text-sm">Heuristics that estimate AI-likeness with linguistic signals.</p>
-          <div class="mt-4 text-brand-300 text-sm group-hover:translate-x-1 transition">
-            Try →
-          </div>
-        </a>
+      <div class="mt-6 grid lg:grid-cols-3 gap-6">
+        <article class="p-6 rounded-2xl glass">
+          <h3 class="text-xl font-semibold">From Keywords → Concepts</h3>
+          <p class="mt-2 text-slate-300 text-sm leading-relaxed">
+            Semantic SEO focuses on meanings, not just exact-match terms. It models how topics, entities, and relationships form a knowledge layer that search engines use to interpret relevance and intent.
+          </p>
+        </article>
 
-        <!-- Card 3 -->
-        <a href="/topic-cluster" id="topic-cluster" class="block group rounded-2xl p-6 bg-slate-900/50 border border-white/10 hover:border-brand-500/60 hover:bg-slate-900/70 transition shadow-soft">
-          <h3 class="font-semibold">Topic Cluster Identification</h3>
-          <p class="mt-2 text-slate-300 text-sm">TF-IDF terms grouped into clusters for content hubs & briefs.</p>
-          <div class="mt-4 text-brand-300 text-sm group-hover:translate-x-1 transition">
-            Explore →
-          </div>
-        </a>
+        <article class="p-6 rounded-2xl glass">
+          <h3 class="text-xl font-semibold">Signals Search Understands</h3>
+          <p class="mt-2 text-slate-300 text-sm leading-relaxed">
+            Well-structured headings, descriptive anchors, consistent entities, and valid schema mark up your content for discovery. These signals anchor your page within a topic graph—boosting topical authority.
+          </p>
+        </article>
+
+        <article class="p-6 rounded-2xl glass">
+          <h3 class="text-xl font-semibold">Coverage & Intent Fit</h3>
+          <p class="mt-2 text-slate-300 text-sm leading-relaxed">
+            Semantic SEO rewards completeness. By covering subtopics, answering adjacent questions, and matching the searcher’s intent, you reduce ambiguity and increase the likelihood of ranking for clusters—not just a term.
+          </p>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- Feature Bullets -->
-  <section class="pb-20">
+  <!-- FEATURES GRID -->
+  <section id="features" class="pb-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-3 gap-6">
-        <div class="rounded-2xl p-6 bg-slate-900/40 border border-white/10">
-          <h4 class="font-semibold mb-2">Data Acquisition</h4>
-          <ul class="text-sm text-slate-300 space-y-1">
-            <li>• UA spoofing & redirects</li>
-            <li>• Readability extraction</li>
-            <li>• JSON-LD & meta parsing</li>
-          </ul>
+      <h2 class="text-2xl font-bold tracking-tight mb-6">What you’ll get with Analyzer 2.0</h2>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="p-6 rounded-2xl glass">
+          <div class="text-sm text-brand-300">Semantic Core</div>
+          <h3 class="font-semibold mt-1">Entities & Topic Cloud</h3>
+          <p class="text-sm text-slate-300 mt-2">TF-IDF weighting, NER, and keyphrase extraction surface the core concepts your content communicates.</p>
         </div>
-        <div class="rounded-2xl p-6 bg-slate-900/40 border border-white/10">
-          <h4 class="font-semibold mb-2">Semantic & NLP</h4>
-          <ul class="text-sm text-slate-300 space-y-1">
-            <li>• Tokenization, lemmatization</li>
-            <li>• NER & keyphrase extraction</li>
-            <li>• Topic clustering</li>
-          </ul>
+
+        <div class="p-6 rounded-2xl glass">
+          <div class="text-sm text-brand-300">Structure</div>
+          <h3 class="font-semibold mt-1">Headings & Link Context</h3>
+          <p class="text-sm text-slate-300 mt-2">Map heading hierarchy, spot skipped levels, and analyze internal/external links with anchor semantics.</p>
         </div>
-        <div class="rounded-2xl p-6 bg-slate-900/40 border border-white/10">
-          <h4 class="font-semibold mb-2">Insights & Tech SEO</h4>
-          <ul class="text-sm text-slate-300 space-y-1">
-            <li>• Coverage & gaps</li>
-            <li>• Headings, ratios, links</li>
-            <li>• Actionable recs</li>
-          </ul>
+
+        <div class="p-6 rounded-2xl glass">
+          <div class="text-sm text-brand-300">Technical SEO</div>
+          <h3 class="font-semibold mt-1">Meta & Schema Checks</h3>
+          <p class="text-sm text-slate-300 mt-2">Title/meta length, presence audits, text-to-HTML ratio, and structured data detection.</p>
         </div>
+
+        <div class="p-6 rounded-2xl glass">
+          <div class="text-sm text-brand-300">Intent</div>
+          <h3 class="font-semibold mt-1">Search Intent Classifier</h3>
+          <p class="text-sm text-slate-300 mt-2">Assess informational, commercial, navigational, or transactional fit to align with user journeys.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl glass">
+          <div class="text-sm text-brand-300">Competitive</div>
+          <h3 class="font-semibold mt-1">Content Gap Analysis</h3>
+          <p class="text-sm text-slate-300 mt-2">Compare coverage vs. competitors to identify missing entities, FAQs, and subtopics worth adding.</p>
+        </div>
+
+        <div class="p-6 rounded-2xl glass">
+          <div class="text-sm text-brand-300">Insights</div>
+          <h3 class="font-semibold mt-1">Actionable Recommendations</h3>
+          <p class="text-sm text-slate-300 mt-2">Prioritized fixes & opportunities—from headings to schema—to improve clarity and topical authority.</p>
+        </div>
+      </div>
+
+      <div class="mt-10 flex flex-wrap gap-3">
+        @guest
+          <a href="/register" class="px-4 py-2 rounded-lg bg-white text-slate-900 font-medium shadow-soft hover:opacity-90">Create account to use tools</a>
+          <a href="/login" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Sign in</a>
+        @else
+          <a href="/semantic-analyzer" class="px-4 py-2 rounded-lg bg-white text-slate-900 font-medium shadow-soft hover:opacity-90">Open Semantic Analyzer</a>
+          <a href="/dashboard" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Dashboard</a>
+        @endguest
       </div>
     </div>
   </section>
@@ -202,73 +238,102 @@
     © {{ date('Y') }} Semantic SEO Master Analyzer 2.0 — All rights reserved.
   </footer>
 
-  <!-- Minimal JS for the quick widget -->
+  <!-- Canvas Animation: BIG “tech lines” that dance with the mouse -->
   <script>
-    async function safeJson(res){
-      const text = await res.text();
-      try { return [res.ok, JSON.parse(text)]; }
-      catch { return [res.ok, { ok:false, error:`HTTP ${res.status} — ${text.slice(0,200)}` }]; }
-    }
+    (function(){
+      const canvas = document.getElementById('techLines');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w, h, dpr;
+      let time = 0;
+      let mouseX = 0.5, mouseY = 0.5;
+      let paused = false;
 
-    const form = document.getElementById('semanticForm');
-    const btn  = document.getElementById('semanticBtn');
-    const out  = document.getElementById('semanticResult');
-
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      out.classList.remove('hidden');
-      out.innerHTML = `<div class="p-3 rounded-lg bg-slate-800/60 border border-white/10">Analyzing…</div>`;
-      btn.disabled = true; btn.classList.add('opacity-70','cursor-not-allowed');
-
-      const fd = new FormData(form);
-      const payload = {
-        url: fd.get('url'),
-        target_keyword: (fd.get('target_keyword')||'').trim()
+      const setup = () => {
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        w = canvas.clientWidth;
+        h = canvas.clientHeight;
+        canvas.width = Math.floor(w * dpr);
+        canvas.height = Math.floor(h * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.lineCap = 'round';
       };
 
-      try {
-        const res = await fetch('/api/semantic-analyze', {
-          method:'POST',
-          headers:{ 'Accept':'application/json','Content-Type':'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const [ok, data] = await safeJson(res);
-        if (!ok || !data.ok) throw new Error(data.error || `HTTP ${res.status}`);
+      const lerp = (a,b,t)=>a+(b-a)*t;
+      const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
 
-        // Render compact summary
-        const h = data.content_structure || {};
-        const tech = data.technical_seo || { links:{internal:0,external:0} };
-        const recs = (data.recommendations||[]).slice(0,4).map(r => `<li><span class="text-xs px-2 py-0.5 rounded bg-white/5 border border-white/10 mr-2">${r.severity}</span>${r.text}</li>`).join('') || '<li>No recommendations</li>';
+      // Draw thick neon diagonal wave lines, responsive to pointer
+      const draw = (t) => {
+        if (paused) return;
+        time += 0.016;
+        ctx.clearRect(0,0,w,h);
 
-        out.innerHTML = `
-          <div class="rounded-xl border border-white/10 bg-slate-900/50 p-4">
-            <div class="flex flex-wrap items-center gap-4">
-              <div class="text-3xl font-extrabold">${data.overall_score ?? '—'}</div>
-              <div class="text-slate-300">Overall Score</div>
-            </div>
-            <div class="grid md:grid-cols-2 gap-4 mt-4 text-sm">
-              <div class="space-y-1">
-                <div><span class="text-slate-400">Title:</span> <span class="text-white">${h.title || '—'}</span></div>
-                <div><span class="text-slate-400">Meta:</span> <span class="text-slate-200">${h.meta_description || '—'}</span></div>
-                <div class="text-slate-300">Readability: <span class="text-white">${h.readability_flesch ?? '—'}</span> · Text/HTML: <span class="text-white">${h.text_to_html_ratio ?? '—'}%</span></div>
-              </div>
-              <div class="space-y-1">
-                <div class="text-slate-300">Links — Internal: <span class="text-white">${tech.links?.internal ?? 0}</span>, External: <span class="text-white">${tech.links?.external ?? 0}</span></div>
-                <div class="text-slate-300">Schema: <span class="text-white">${(tech.structured_data?.json_ld||tech.structured_data?.microdata||tech.structured_data?.rdfa) ? 'Detected' : 'Missing'}</span></div>
-              </div>
-            </div>
-            <div class="mt-4">
-              <div class="font-semibold mb-2">Top Recommendations</div>
-              <ul class="space-y-1 text-slate-200">${recs}</ul>
-            </div>
-          </div>
-        `;
-      } catch (err) {
-        out.innerHTML = `<div class="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-200">❌ ${err.message || 'Analysis failed'}</div>`;
-      } finally {
-        btn.disabled = false; btn.classList.remove('opacity-70','cursor-not-allowed');
+        // background subtle vignette
+        const grd = ctx.createLinearGradient(0,0,w,h);
+        grd.addColorStop(0,'rgba(124,58,237,0.06)');
+        grd.addColorStop(1,'rgba(14,165,233,0.04)');
+        ctx.fillStyle = grd;
+        ctx.fillRect(0,0,w,h);
+
+        const lines = Math.max(10, Math.floor(h / 60)); // big, spaced lines
+        const spacing = h / (lines-1);
+        const baseAmp = lerp(12, 48, mouseY); // bigger waves when mouse low
+        const speed = lerp(0.6, 1.4, mouseX);
+        const freq = 0.012;
+        const seg = 80; // segment length
+
+        for (let i=0;i<lines;i++){
+          const y0 = i*spacing;
+          // neon stroke
+          const g = ctx.createLinearGradient(0, y0-20, w, y0+20);
+          g.addColorStop(0, 'rgba(139,92,246,0.35)');
+          g.addColorStop(0.5, 'rgba(99,102,241,0.55)');
+          g.addColorStop(1, 'rgba(34,211,238,0.35)');
+          ctx.strokeStyle = g;
+
+          ctx.lineWidth = lerp(1.6, 3.2, Math.sin((i/lines)*Math.PI)); // “bigger lines”
+          ctx.beginPath();
+          for (let x=-40; x<=w+40; x+=seg){
+            const phase = (i*0.9) + (time*60*speed);
+            const offset = Math.sin((x+phase)*freq) * baseAmp;
+            const mouseWobble = Math.cos((x*freq*0.8) + time*2) * (mouseX*10);
+            const y = y0 + offset + mouseWobble;
+            if (x===-40) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+
+        // subtle glows crossing
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = 'rgba(99,102,241,0.04)';
+        ctx.beginPath();
+        ctx.ellipse(w*mouseX, h*mouseY, 220, 120, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalCompositeOperation = 'source-over';
+
+        requestAnimationFrame(draw);
+      };
+
+      const onMove = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+        mouseX = clamp(x,0,1);
+        mouseY = clamp(y,0,1);
+      };
+
+      // resize & RDM
+      window.addEventListener('resize', () => { setup(); }, {passive:true});
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        paused = true;
       }
-    });
+
+      setup();
+      requestAnimationFrame(draw);
+      window.addEventListener('pointermove', onMove, {passive:true});
+      window.addEventListener('pointerdown', onMove, {passive:true});
+    })();
   </script>
 </body>
 </html>
