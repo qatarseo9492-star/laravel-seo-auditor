@@ -1,460 +1,284 @@
-{{-- resources/views/analyzers/semantic.blade.php --}}
 @extends('layouts.app')
-@section('title','Semantic SEO Master — Analyzer')
+@section('title','Semantic SEO Master Analyzer 2.0')
 
 @push('head')
 <style>
-  :root{
-    --bg:#000; --card:#0b0b10; --card-2:#101018; --border:#26262b;
-    --muted:#9aa0aa; --text:#ECEFF4; --text-dim:#C8CDD5;
-    --accent:#22d3ee; --accent-2:#a78bfa; --accent-3:#f43f5e;
-    --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
+  /* page bg subtle grid (keeps your dark look) */
+  .bg-tech {
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(255,255,255,.05), transparent),
+      repeating-linear-gradient(115deg, transparent 0 18px, rgba(236,72,153,.25) 18px 19px),
+      #000;
+    pointer-events:none; z-index:-1;
   }
-  html,body{background:var(--bg)!important;color:var(--text);overflow-x:hidden}
 
-  /* gradient text for headings */
-  .h-multi{background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .t-multi{font-weight:800;font-size:.95rem;background:linear-gradient(90deg,var(--accent-2),var(--accent),var(--accent-3));
-    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .card { border-radius: 16px; padding: 20px; background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
+  .pill  { padding:4px 8px; border-radius:9999px; font-size:12px; font-weight:600; border:1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.06); }
+  .k-badge{ padding:6px 8px; border-radius:10px; font-size:12px; font-weight:700; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); }
+  .shadow-soft { box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  .bar { height:12px; border-radius:9999px; background: rgba(255,255,255,.08); overflow:hidden; }
+  .bar > span { display:block; height:100%; border-radius:9999px; transition: width .5s ease; background: linear-gradient(90deg,#22c55e,#60a5fa,#d946ef); }
+  .chip { font-size:12px; padding:4px 8px; border-radius:8px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
 
-  /* faint tech lines */
-  .tech-bg{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.10}
-  .tech-bg svg{width:160%;height:160%;transform:translate(-20%,-22%) rotate(-8deg)}
-  .tech-bg .dash{stroke-dasharray:10 22;animation:dashMove 18s linear infinite}
-  @keyframes dashMove{to{stroke-dashoffset:-640}}
-  .content-root{position:relative;z-index:2}
+  /* Water loading bar */
+  #waterbar { height: 10px; border-radius: 9999px; background: rgba(255,255,255,.08); overflow: hidden; }
+  #waterbar span { display:block; height:100%; width:0%; background: linear-gradient(90deg,#ef4444,#f59e0b,#22c55e); transition: width .8s ease; filter: drop-shadow(0 0 10px rgba(148,163,184,.4)); }
 
-  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.55)}
-  .glass{background:var(--card-2);border:1px solid var(--border);border-radius:16px}
-  .pill{font-size:.72rem;padding:.2rem .55rem;border:1px solid var(--border);border-radius:999px;color:var(--text-dim);display:inline-flex;align-items:center;gap:.45rem}
-  .chip{font-size:.72rem;padding:.2rem .55rem;border-radius:8px;background:#12131a;border:1px solid var(--border);color:var(--text-dim)}
-  .k-badge{font-size:.78rem;padding:.45rem .6rem;border-radius:10px;background:#14151d;border:1px solid var(--border);font-weight:700}
-  .small{font-size:.82rem}.muted{color:var(--muted)}
+  /* Wheels */
+  .score-wheel { width:180px; height:180px; display:grid; place-items:center; position:relative; }
+  .score-wheel .ring {
+    --v: 0;
+    width: 100%; height: 100%; border-radius: 50%;
+    background:
+      conic-gradient(#22c55e calc(var(--v)*1%), #f59e0b calc(var(--v)*1% + .0001%), #ef4444 100%);
+    -webkit-mask: radial-gradient(circle 60px, transparent 58%, #000 60%);
+            mask: radial-gradient(circle 60px, transparent 58%, #000 60%);
+    box-shadow: inset 0 0 0 6px rgba(255,255,255,.06);
+  }
+  .score-wheel .center {
+    position:absolute; inset:0; display:grid; place-items:center;
+    font-weight:800; font-size:46px;
+    background: linear-gradient(90deg,#67e8f9,#c084fc,#fb7185);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
 
-  .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));color:#fff;border:none;border-radius:12px;padding:.85rem 1rem;font-weight:700;transition:transform .05s,opacity .2s}
-  .btn-primary:hover{opacity:.95;transform:translateY(-1px)}
-  .btn-ghost{background:#14151d;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:.5rem .75rem}
+  /* Category cards */
+  .cat-card { border-radius: 18px; padding: 18px; border:1px solid rgba(255,255,255,.10);
+              background: radial-gradient(800px 400px at -10% -10%, rgba(124,58,237,.12), transparent),
+                          linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); }
+  .cat-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .cat-title { font-size:20px; font-weight:900; letter-spacing:.2px; background: linear-gradient(90deg,#67e8f9,#c084fc,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .cat-icon { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-weight:800;
+              background: linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25)); border: 1px solid rgba(255,255,255,.12); color:#fff; }
+  .cat-badge { font-size:12px; font-weight:700; padding:6px 8px; border-radius:10px; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); color:#e5e7eb; }
+  .progress { width:100%; height:10px; border-radius:9999px; background: rgba(255,255,255,.08); overflow:hidden; border:1px solid rgba(255,255,255,.10); }
+  .progress > span { display:block; height:100%; border-radius:9999px; background: linear-gradient(90deg,#ef4444,#fde047,#22c55e); transition: width .5s ease; }
 
-  #waterbar{height:14px;border-radius:999px;background:#12131a;border:1px solid var(--border);overflow:hidden}
-  #waterbar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));transition:width .9s ease}
-
-  /* ====== OVERALL WHEEL (unchanged) ====== */
-  .score-wheel{width:180px;height:180px;border-radius:50%;display:grid;place-items:center}
-  .score-ring{--v:0;width:100%;height:100%;
-    background:conic-gradient(var(--good) calc(var(--v)*1%),var(--warn) calc(var(--v)*1% + .0001%),var(--bad) 100%);
-    mask:radial-gradient(circle 74px,transparent 66%,#000 67%);border-radius:50%;box-shadow:inset 0 0 0 8px #0e1016,0 6px 24px rgba(0,0,0,.5)}
-
-  /* ====== NEW READABILITY WHEEL (number centered) ====== */
-  .radial{--p:0;--thick:18px;--track:#1a1c22; position:relative;width:240px;height:240px;border-radius:50%}
-  .radial::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--track);
-    mask:radial-gradient(farthest-side,transparent calc(100% - var(--thick)),#000 0)}
-  .radial>.slice{position:absolute;inset:0;border-radius:50%;
-    background:conic-gradient(var(--ring-color,#22d3ee) calc(var(--p)*1%), transparent 0);
-    mask:radial-gradient(farthest-side,transparent calc(100% - var(--thick)),#000 0);
-    filter:drop-shadow(0 0 10px rgba(167,139,250,.35))}
-  .radial .center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
-  .radial .score{font-size:48px;line-height:1;font-weight:900;
-    background:linear-gradient(90deg,var(--accent),var(--accent-2));
-    -webkit-background-clip:text;background-clip:text;color:transparent}
-  .radial .label{font-size:12px;color:var(--muted);margin-top:6px}
-  .ring-good{--ring-color:var(--good)} .ring-warn{--ring-color:var(--warn)} .ring-bad{--ring-color:var(--bad)}
-
-  /* bars */
-  .bar{height:10px;border-radius:999px;background:#12131a;border:1px solid var(--border);overflow:hidden}
-  .bar>span{display:block;height:100%;width:0;border-radius:999px;transition:width .4s ease;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
-
-  /* readability insights */
-  .readable-grid{display:grid;grid-template-columns:260px 1fr;gap:18px}
-  @media(max-width:900px){.readable-grid{grid-template-columns:1fr}}
-  .insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-  @media(max-width:900px){.insights{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  .insight{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:0 10px 22px rgba(0,0,0,.35)}
-  .insight .title{display:flex;align-items:center;gap:.5rem}
-  .insight .value{font-size:1.35rem;font-weight:800;margin-top:2px}
-  .mini-bar{height:8px;border-radius:999px;background:#11131a;border:1px solid var(--border);overflow:hidden;margin-top:8px}
-  .mini-bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:999px;transition:width .4s ease}
-  .fixes{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:14px}
-  .banner{padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(90deg,rgba(239,68,68,.22),rgba(167,139,250,.08))}
-  .banner--warn{background:linear-gradient(90deg,rgba(245,158,11,.2),rgba(167,139,250,.10))}
-  .banner--good{background:linear-gradient(90deg,rgba(34,211,238,.15),rgba(167,139,250,.12))}
+  .check { display:flex; align-items:center; justify-content:space-between; border-radius:14px; padding:12px 14px; border:1px solid rgba(255,255,255,.10);
+           background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02)); }
+  .check + .check { margin-top:8px; }
+  .check .left { display:flex; align-items:center; gap:10px; }
+  .dot { width:10px; height:10px; border-radius:9999px; }
+  .dot.green{ background:#10b981; box-shadow:0 0 10px rgba(16,185,129,.6); }
+  .dot.orange{ background:#f59e0b; box-shadow:0 0 10px rgba(245,158,11,.6); }
+  .dot.red{ background:#ef4444; box-shadow:0 0 10px rgba(239,68,68,.6); }
+  .score-pill { font-size:12px; font-weight:800; padding:4px 8px; border-radius:10px; background: rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); color:#e5e7eb; }
+  .improve-btn { font-size:12px; font-weight:700; padding:6px 10px; border-radius:10px; background: linear-gradient(135deg,#a78bfa,#60a5fa); color:white; }
 </style>
 @endpush
 
 @section('content')
-<!-- subtle dashed bg -->
-<div class="tech-bg" aria-hidden="true">
-  <svg viewBox="0 0 1400 900" preserveAspectRatio="none">
-    <defs><linearGradient id="techStroke" x1="0" x2="1"><stop offset="0%" stop-color="#a78bfa" stop-opacity="0.85"/><stop offset="100%" stop-color="#22d3ee" stop-opacity="0.85"/></linearGradient></defs>
-    @for($x=-100;$x<=1500;$x+=90)
-      <line x1="{{ $x }}" y1="-50" x2="{{ $x+200 }}" y2="950" stroke="url(#techStroke)" stroke-width="1.2" class="dash"/>
-    @endfor
-  </svg>
-</div>
+<div class="bg-tech"></div>
 
-<section class="content-root max-w-7xl mx-auto px-4 py-10 space-y-8">
+<section class="max-w-7xl mx-auto px-4 py-10 space-y-8 text-slate-100">
 
   <div class="flex flex-col gap-4">
-    <div class="chip w-max">Analyzer 3.0</div>
-    <h1 class="text-4xl font-black tracking-tight h-multi">Semantic SEO Master</h1>
+    <div class="chip w-max">Analyzer 2.0</div>
+    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Semantic SEO Master</h1>
 
-    <form id="semanticForm" class="w-full grid lg:grid-cols-[1fr,280px,160px] gap-3">
-      <div class="glass p-1.5 flex items-center">
-        <input name="url" type="url" required placeholder="https://example.com/page"
-               class="w-full bg-transparent px-3 py-2 outline-none text-[15px] text-white placeholder:muted">
-      </div>
-      <div class="glass p-1.5 items-center hidden md:flex">
+    <form id="semanticForm" class="w-full grid lg:grid-cols-[1fr,320px] gap-3">
+      <div class="card flex items-center gap-2">
+        <input name="url" type="url" required placeholder="Paste a URL (e.g. https://example.com/page)"
+               class="w-full bg-transparent px-3 py-2 outline-none text-slate-100 placeholder:text-slate-400">
         <input name="target_keyword" type="text" placeholder="Target keyword (optional)"
-               class="w-full bg-transparent px-3 py-2 outline-none text-[15px] text-white placeholder:muted">
+               class="w-72 max-w-[50%] bg-transparent px-3 py-2 outline-none text-slate-100 placeholder:text-slate-400 hidden md:block">
       </div>
-      <button type="submit" class="btn-primary">Analyze URL</button>
+      <button class="rounded-xl shadow-soft bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 hover:opacity-95 px-5 text-white font-semibold">
+        Analyze URL
+      </button>
     </form>
 
-    <div id="waterbar"><span style="width:0%"></span></div>
-    <p class="small muted">Tip: we fetch the page server-side and compute a detailed semantic & readability report.</p>
+    <div id="waterbar" class="shadow-soft"><span style="width:0%"></span></div>
+    <p class="text-xs text-slate-400">Tip: we fetch the page server-side and compute a detailed semantic & readability report.</p>
   </div>
 
   <div id="resultWrap" class="space-y-8 hidden">
-
-    <!-- overall -->
+    <!-- wheel + quick stats -->
     <div class="grid lg:grid-cols-3 gap-6">
-      <div class="card flex items-center gap-5">
-        <div id="wheel" class="score-wheel score-ring" style="--v:0">
-          <div class="text-center">
-            <div id="scoreNum" class="text-4xl font-extrabold">0</div>
-            <div class="small muted">Overall</div>
-          </div>
+      <div class="card flex items-center gap-6">
+        <div class="score-wheel">
+          <div id="wheel" class="ring" style="--v:0"></div>
+          <div id="scoreNum" class="center">0</div>
         </div>
         <div class="space-y-2">
           <div id="badge" class="k-badge">—</div>
-          <div class="small muted">Great ≥80 · Needs work 60–79 · Red &lt;60</div>
+          <div class="text-xs text-slate-400">Great ≥80 • Needs work 60–79 • Red &lt;60</div>
         </div>
       </div>
 
       <div class="card lg:col-span-2">
-        <h3 class="font-semibold h-multi mb-3">Quick Stats</h3>
+        <h3 class="font-semibold mb-3" style="background:linear-gradient(90deg,#67e8f9,#c084fc,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent;">Quick Stats</h3>
         <div class="grid sm:grid-cols-3 gap-4 text-sm">
-          <div class="glass p-4">
-            <div class="small t-multi">Readability (Flesch)</div>
+          <div class="card">
+            <div class="text-slate-300 text-xs">Readability (Flesch)</div>
             <div id="statFlesch" class="text-2xl font-bold">—</div>
-            <div id="statGrade" class="small muted">—</div>
+            <div id="statGrade" class="text-xs text-slate-400">—</div>
           </div>
-          <div class="glass p-4">
-            <div class="small t-multi">Links (int / ext)</div>
+          <div class="card">
+            <div class="text-slate-300 text-xs">Links (int / ext)</div>
             <div class="text-2xl font-bold"><span id="statInt">0</span> / <span id="statExt">0</span></div>
           </div>
-          <div class="glass p-4">
-            <div class="small t-multi">Text/HTML Ratio</div>
+          <div class="card">
+            <div class="text-slate-300 text-xs">Text/HTML Ratio</div>
             <div id="statRatio" class="text-2xl font-bold">—</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- readability insights -->
+    <!-- Readability -->
     <div class="card">
-      <div class="flex items-center justify-between gap-4 mb-3">
-        <h3 class="font-extrabold text-xl h-multi flex items-center gap-2">
-          <span style="width:22px;height:22px;border-radius:6px;display:inline-grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#001015;font-weight:900">✦</span>
-          Readability Insights
-        </h3>
-        <span id="gradePill" class="pill">Grade —</span>
+      <div class="flex items-center justify-between">
+        <h3 class="font-semibold" style="background:linear-gradient(90deg,#67e8f9,#c084fc,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent;">Readability</h3>
+        <span id="readBadge" class="pill">—</span>
       </div>
-      <p id="readDesc" class="small muted mb-4">—</p>
-
-      <div class="readable-grid">
-        <!-- NEW wheel -->
-        <div class="glass p-4 flex flex-col items-center justify-center">
-          <div id="readRadial" class="radial ring-bad" style="--p:0">
-            <div class="slice"></div>
-            <div class="center">
-              <div id="readNum" class="score">0</div>
-              <div class="label">Readability</div>
-            </div>
+      <div class="grid md:grid-cols-2 gap-6 mt-4">
+        <div class="flex items-center gap-6">
+          <div class="score-wheel">
+            <div id="readWheel" class="ring" style="--v:0"></div>
+            <div id="readNum" class="center" style="font-size:40px">0</div>
           </div>
-          <div class="bar w-full mt-4"><span id="readBar" style="width:0%"></span></div>
+          <div class="flex-1 space-y-3">
+            <div>
+              <div class="text-xs text-slate-300 mb-1">Overall</div>
+              <div class="bar"><span id="readBar" style="width:0%"></span></div>
+            </div>
+            <div class="text-xs text-slate-300">Grade level: <span id="gradeVal">—</span></div>
+          </div>
         </div>
-
-        <!-- tiles -->
-        <div class="insights">
-          <div class="insight"><div class="title t-multi">Flesch Reading Ease</div>
-            <div id="fleschVal" class="value">—</div><div class="mini-bar"><span id="fleschBar"></span></div></div>
-          <div class="insight"><div class="title t-multi">Avg Sentence Length</div>
-            <div class="value"><span id="aslVal">—</span></div><div class="mini-bar"><span id="aslBar"></span></div></div>
-          <div class="insight"><div class="title t-multi">Words</div>
-            <div id="wordsVal" class="value">—</div><div class="mini-bar"><span id="wordsBar"></span></div></div>
-          <div class="insight"><div class="title t-multi">Syllables / Word</div>
-            <div id="spwVal" class="value">—</div><div class="mini-bar"><span id="spwBar"></span></div></div>
-          <div class="insight"><div class="title t-multi">Lexical Diversity (TTR)</div>
-            <div id="ttrVal" class="value">—</div><div class="mini-bar"><span id="ttrBar"></span></div></div>
-          <div class="insight"><div class="title t-multi">Repetition (tri-gram)</div>
-            <div id="triVal" class="value">—</div><div class="mini-bar"><span id="triBar"></span></div></div>
-          <div class="insight"><div class="title t-multi">Digits / 100 words</div>
-            <div id="digitsVal" class="value">—</div><div class="mini-bar"><span id="digitsBar"></span></div></div>
+        <div class="card">
+          <div class="text-xs text-slate-300">How to improve</div>
+          <ul class="mt-2 list-disc pl-5 text-sm text-slate-200 space-y-1">
+            <li>Use shorter sentences and active voice.</li>
+            <li>Prefer common words; define jargon.</li>
+            <li>Break up long paragraphs with headings and bullets.</li>
+            <li>Add examples or visuals for complex ideas.</li>
+          </ul>
         </div>
-      </div>
-
-      <div class="fixes mt-4">
-        <div class="small muted mb-2">Simple Fixes</div>
-        <ul id="fixList" class="list-disc pl-5 text-sm space-y-1 text-white/90"></ul>
-      </div>
-
-      <div id="gradeBanner" class="banner mt-3 small">
-        <strong id="gradeGoal">Target: Grade 7–9.</strong>
-        <span id="gradeNote" class="ml-1">—</span>
       </div>
     </div>
 
-    <!-- structure -->
+    <!-- Recommendations -->
     <div class="card">
-      <h3 class="font-semibold h-multi">Content Structure</h3>
+      <h3 class="font-semibold mb-3" style="background:linear-gradient(90deg,#67e8f9,#c084fc,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent;">Recommendations</h3>
+      <div id="recs" class="grid md:grid-cols-2 gap-3"></div>
+    </div>
+
+    <!-- Content Structure -->
+    <div class="card">
+      <h3 class="font-semibold" style="background:linear-gradient(90deg,#67e8f9,#c084fc,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent;">Content Structure</h3>
       <div class="grid md:grid-cols-2 gap-6 mt-4">
-        <div class="glass p-4">
-          <div class="small muted">Title</div>
-          <div id="titleVal" class="font-semibold">—</div>
-          <div class="small muted mt-3">Meta Description</div>
-          <div id="metaVal" class="text-white/90">—</div>
+        <div class="card">
+          <div class="text-xs text-slate-300">Title</div>
+          <div id="titleVal" class="font-semibold text-slate-100">—</div>
+          <div class="text-xs text-slate-300 mt-3">Meta Description</div>
+          <div id="metaVal" class="text-slate-200">—</div>
         </div>
-        <div class="glass p-4">
-          <div class="small muted mb-2">Heading Map</div>
+        <div class="card">
+          <div class="text-xs text-slate-300 mb-2">Heading Map</div>
           <div id="headingMap" class="text-sm space-y-2"></div>
         </div>
       </div>
     </div>
 
-    <!-- recommendations -->
-    <div class="card">
-      <h3 class="font-semibold h-multi mb-3">Recommendations</h3>
-      <div id="recs" class="grid md:grid-cols-2 gap-3"></div>
-    </div>
-
-    <!-- checklists -->
+    <!-- Semantic SEO Ground (ALL categories) -->
     <div class="space-y-4">
-      <h3 class="text-xl font-bold h-multi">Semantic SEO Ground</h3>
+      <h3 class="text-xl font-extrabold" style="background:linear-gradient(90deg,#67e8f9,#c084fc,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent;">Semantic SEO Ground</h3>
       <div id="cats" class="grid lg:grid-cols-2 gap-6"></div>
     </div>
   </div>
 
-  <dialog id="improveModal" class="backdrop:bg-black/70 rounded-2xl p-0 w-[min(560px,95vw)]">
+  <!-- Improve Modal -->
+  <dialog id="improveModal" class="backdrop:bg-black/60 rounded-2xl p-0 w-[min(560px,95vw)]">
     <div class="card">
       <div class="flex items-start justify-between">
-        <h4 id="improveTitle" class="font-semibold h-multi">Improve</h4>
-        <form method="dialog"><button class="btn-ghost small">Close</button></form>
+        <h4 id="improveTitle" class="font-semibold">Improve</h4>
+        <form method="dialog"><button class="pill">Close</button></form>
       </div>
-      <p id="improveAdvice" class="mt-3 text-sm">—</p>
-      <a id="improveSearch" target="_blank" class="btn-primary inline-block mt-4 text-sm">Search guidance</a>
+      <p id="improveAdvice" class="mt-3 text-sm text-slate-200">—</p>
+      <a id="improveSearch" target="_blank" class="inline-block mt-4 px-3 py-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-sky-500 text-white text-sm">Search guidance</a>
     </div>
   </dialog>
 
 </section>
-@endsection
 
 @push('scripts')
 <script>
-const ANALYZE_URL = @json(\Illuminate\Support\Facades\Route::has('semantic.analyze')
-  ? route('semantic.analyze') : url('/api/semantic-analyze'));
+const f = document.getElementById('semanticForm');
+const water = document.querySelector('#waterbar span');
+const wrap = document.getElementById('resultWrap');
 
-const $ = (id)=>document.getElementById(id);
-const f = $('semanticForm'), water = document.querySelector('#waterbar span'), wrap = $('resultWrap');
+const wheel = document.getElementById('wheel');
+const scoreNum = document.getElementById('scoreNum');
+const badge = document.getElementById('badge');
 
-const wheel = $('wheel'), scoreNum = $('scoreNum'), badge = $('badge');
-const statF = $('statFlesch'), statG = $('statGrade'), statInt = $('statInt'), statExt = $('statExt'), statRatio = $('statRatio');
+const statF = document.getElementById('statFlesch');
+const statG = document.getElementById('statGrade');
+const statInt = document.getElementById('statInt');
+const statExt = document.getElementById('statExt');
+const statRatio = document.getElementById('statRatio');
 
-const readRadial = $('readRadial'), readBar = $('readBar'), readNum = $('readNum'), gradePill = $('gradePill'), readDesc = $('readDesc');
+const readWheel = document.getElementById('readWheel');
+const readNum = document.getElementById('readNum');
+const readBar = document.getElementById('readBar');
+const readBadge = document.getElementById('readBadge');
+const gradeVal = document.getElementById('gradeVal');
 
-const fVal=$('fleschVal'), fBar=$('fleschBar');
-const aslVal=$('aslVal'), aslBar=$('aslBar');
-const wordsVal=$('wordsVal'), wordsBar=$('wordsBar');
-const spwVal=$('spwVal'), spwBar=$('spwBar');
-const ttrVal=$('ttrVal'), ttrBar=$('ttrBar');
-const triVal=$('triVal'), triBar=$('triBar');
-const digitsVal=$('digitsVal'), digitsBar=$('digitsBar');
+const headingMap = document.getElementById('headingMap');
+const titleVal = document.getElementById('titleVal');
+const metaVal = document.getElementById('metaVal');
+const recsEl = document.getElementById('recs');
+const catsEl = document.getElementById('cats');
 
-const gradeBanner=$('gradeBanner'), gradeGoal=$('gradeGoal'), gradeNote=$('gradeNote');
-const headingMap=$('headingMap'), titleVal=$('titleVal'), metaVal=$('metaVal'), recsEl=$('recs'), catsEl=$('cats');
-const modal=$('improveModal');
+const modal = document.getElementById('improveModal');
+const mTitle = document.getElementById('improveTitle');
+const mAdvice= document.getElementById('improveAdvice');
+const mLink  = document.getElementById('improveSearch');
 
-const clamp=(n,min=0,max=100)=>{const v=Number(n);return Math.max(min,Math.min(max,isNaN(v)?0:v));};
-const labelBy=(s)=>s>=80?'Great Work — Well Optimized':(s>=60?'Needs Optimization':'Needs Significant Optimization');
-const band=(s)=>s>=80?'g-green':(s>=60?'g-orange':'g-red');
-const esc=(s)=>s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
-
-function computeReadability(data){
-  const rb = data.readability || {}, qs = data.quick_stats || {};
-  const S = rb.sentence_count ?? rb.sentences;
-  const W = rb.word_count ?? rb.words;
-  const SYL = rb.syllable_count ?? rb.syllables;
-
-  let flesch = rb.flesch ?? qs.readability_flesch;
-  let grade  = rb.grade ?? qs.readability_grade;
-
-  if (S>0 && W>0 && SYL>0){
-    const ASL = W/S;
-    const ASW = SYL/W;
-    flesch = 206.835 - 1.015*ASL - 84.6*ASW;
-    grade  = 0.39*ASL + 11.8*ASW - 15.59;
-  }
-
-  const score = clamp(Math.round(flesch)); // wheel wants 0..100
-  return {
-    score, flesch: flesch!=null?Math.round(flesch*10)/10:null,
-    grade: grade!=null?Math.round(grade*10)/10:null,
-    asl: rb.avg_sentence_len ?? (W&&S?W/S:null),
-    words: W ?? null,
-    spw: rb.syllables_per_word ?? (SYL&&W?SYL/W:null),
-    ttr: rb.lexical_diversity ?? rb.ttr ?? null,
-    tri: rb.repetition_trigram ?? rb.repetition ?? null,
-    digits: rb.digits_per_100_words ?? rb.numeric_density ?? null
-  };
-}
-const pctForASL=(asl)=>{ if(!asl) return 0; const a=Math.max(8,Math.min(35,Number(asl))); return Math.round(a<=17?100:Math.max(0,100-((a-17)*4))); };
-const pctForSPW=(s)=>{ if(!s) return 0; const v=Math.max(1,Math.min(3,Number(s))); return Math.round(100-(v-1.2)*62); };
-const pctForWords=(w)=> w? Math.min(100, Math.round(Math.min(Number(w),600)/6)) : 0;
-const pctForTTR=(t)=>{ let p=Number(t); if(p<=1) p*=100; return clamp(p); };
-const pctForRep=(r)=>{ let p=Number(r); if(p<=1) p*=100; return clamp(100-p); };
-const setTile=(val,bar,text,pct)=>{ val.textContent=text; bar.style.width=(isNaN(pct)?0:pct)+'%'; };
-
-function setRadial(el, p){
-  const bandClass = p>=80?'ring-good':(p>=60?'ring-warn':'ring-bad');
-  el.style.setProperty('--p', clamp(p));
-  el.classList.remove('ring-good','ring-warn','ring-bad');
-  el.classList.add(bandClass);
-}
+function labelBy(score){ return score>=80?'Great Work — Well Optimized':(score>=60?'Needs Optimization':'Needs Significant Optimization'); }
 
 f.addEventListener('submit', async (e)=>{
   e.preventDefault();
-  water.style.width='0%'; requestAnimationFrame(()=>{ water.style.width='100%'; });
+  water.style.width = '0%';
+  setTimeout(()=>water.style.width='100%', 30);
+
   const fd = new FormData(f);
-  const payload = { url: fd.get('url'), target_keyword: fd.get('target_keyword')||'' };
+  const payload = { url: fd.get('url'), target_keyword: fd.get('target_keyword') || '' };
 
   try{
-    const viaApi = ANALYZE_URL.includes('/api/');
-    const res = await fetch(ANALYZE_URL, viaApi ? {
-      method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'}, body:JSON.stringify(payload)
-    } : {
-      method:'POST', headers:{'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':'{{ csrf_token() }}'}, body:fd
+    const res = await fetch('/api/semantic-analyze', {
+      method:'POST',
+      headers:{ 'Accept':'application/json','Content-Type':'application/json' },
+      body: JSON.stringify(payload)
     });
-    if(!res.ok) throw new Error(await res.text()||'Analysis failed');
-    renderAll(await res.json());
-  }catch(err){
-    console.error(err);
-    // demo fallback
-    renderAll({
-      overall_score:72, wheel:{label:'Needs Optimization'},
-      quick_stats:{readability_flesch:9, readability_grade:18, internal_links:12, external_links:4, text_to_html_ratio:38},
-      readability:{words:487, sentence_count:7, syllable_count:954, avg_sentence_len:69.6, lexical_diversity:.54, repetition_trigram:.09, digits_per_100_words:15},
-      content_structure:{title:'Sample: Semantic SEO Guide', meta_description:'Demo description.', headings:{H2:['Entities','Schema','Clusters']}},
-      recommendations:[{severity:'Warning', text:'Split very long sentences.'}]
-    });
-  }
-});
+    const data = await res.json();
+    if(!data.ok){ alert(data.error || 'Analysis failed'); water.style.width='0%'; return; }
 
-function renderAll(data){
-  wrap.classList.remove('hidden');
+    wrap.classList.remove('hidden');
 
-  // Overall
-  const ov = clamp(data.overall_score);
-  wheel.style.setProperty('--v', ov); scoreNum.textContent = ov;
-  badge.textContent = (data.wheel && data.wheel.label) ? data.wheel.label : labelBy(ov);
-  badge.className = 'k-badge ' + (ov>=80?'bg-emerald-500/15 text-emerald-300 border-emerald-700/40':ov>=60?'bg-amber-500/15 text-amber-300 border-amber-700/40':'bg-rose-500/15 text-rose-300 border-rose-700/40');
+    // Overall
+    const score = data.overall_score||0;
+    wheel.style.setProperty('--v', score);
+    scoreNum.textContent = score;
+    badge.textContent = data.wheel?.label || labelBy(score);
+    badge.className = 'k-badge';
 
-  // Quick stats
-  const qs = data.quick_stats || {};
-  statF.textContent = (qs.readability_flesch!=null ? Math.round(qs.readability_flesch) : '—');
-  statG.textContent = (qs.readability_grade!=null ? 'Grade '+qs.readability_grade : '—');
-  statInt.textContent = qs.internal_links ?? 0; statExt.textContent = qs.external_links ?? 0;
-  statRatio.textContent = (qs.text_to_html_ratio!=null ? qs.text_to_html_ratio+'%' : '—');
+    // Quick stats
+    statF.textContent = data.quick_stats.readability_flesch;
+    statG.textContent = 'Grade ' + data.quick_stats.readability_grade;
+    statInt.textContent = data.quick_stats.internal_links;
+    statExt.textContent = data.quick_stats.external_links;
+    statRatio.textContent = data.quick_stats.text_to_html_ratio + '%';
 
-  // Readability (real)
-  const R = computeReadability(data);
-  setRadial(readRadial, R.score);
-  readNum.textContent = R.score;
-  readBar.style.width = R.score + '%';
-  gradePill.textContent = 'Grade ' + (R.grade ?? '—');
+    // Readability
+    const rf = Math.max(0, Math.min(100, data.readability.score||0));
+    readWheel.style.setProperty('--v', rf);
+    readNum.textContent = Math.round(rf);
+    readBar.style.width = rf + '%';
+    gradeVal.textContent = 'Grade ' + data.readability.grade;
+    readBadge.textContent = labelBy(rf);
 
-  if(R.grade==null) readDesc.textContent = 'Readability grade unavailable.';
-  else if(R.grade<=7){ readDesc.textContent = 'Easy reading level. Great for broad audiences.'; gradeBanner.className='banner banner--good'; }
-  else if(R.grade<=10){ readDesc.textContent = 'Fair reading level. Try trimming sentences and simplifying words.'; gradeBanner.className='banner banner--warn'; }
-  else { readDesc.textContent = 'Complex reading level. Use shorter sentences and simpler vocabulary.'; gradeBanner.className='banner'; }
-
-  // Tiles (values + bars)
-  setTile(fVal, fBar, (R.flesch!=null?R.flesch:'—'), clamp(R.flesch??0));
-  setTile(aslVal, aslBar, (R.asl!=null?R.asl.toFixed(1):'—'), pctForASL(R.asl));
-  setTile(wordsVal, wordsBar, (R.words!=null?String(R.words):'—'), pctForWords(R.words));
-  setTile(spwVal, spwBar, (R.spw!=null?R.spw.toFixed(2):'—'), pctForSPW(R.spw));
-  setTile(ttrVal, ttrBar, (R.ttr!=null?(pctForTTR(R.ttr)+'%'):'—'), pctForTTR(R.ttr));
-  setTile(triVal, triBar, (R.tri!=null?((R.tri<=1?R.tri*100:R.tri).toFixed(0)+'%'):'—'), pctForRep(R.tri));
-  setTile(digitsVal, digitsBar, (R.digits!=null?String(R.digits):'—'), clamp(100 - Math.min(100, Number(R.digits||0)*3)));
-
-  // Fixes
-  const fixes=[];
-  if(R.asl!=null && R.asl>20) fixes.push('Break long sentences into 12–16 words.');
-  if(R.spw!=null && R.spw>1.6) fixes.push('Prefer common words (simpler synonyms).');
-  if(R.digits!=null && R.digits>10) fixes.push('Reduce numeric density; round or group numbers.');
-  if(R.ttr!=null && pctForTTR(R.ttr)<45) fixes.push('Increase lexical variety (use synonyms and specific nouns).');
-  if(R.tri!=null && ((R.tri<=1?R.tri*100:R.tri)>12)) fixes.push('Reduce phrase repetition; vary transitions.');
-  if(!fixes.length) fixes.push('Nice! Metrics look solid — keep sentences concise and vocabulary familiar.');
-  $('fixList').innerHTML = fixes.map(x=>`<li>${esc(x)}</li>`).join('');
-
-  // Structure
-  const st = data.content_structure || {};
-  titleVal.textContent = st.title || '—';
-  metaVal.textContent  = st.meta_description || '—';
-  headingMap.innerHTML='';
-  Object.entries(st.headings || {}).forEach(([lvl,arr])=>{
-    if(!arr || !arr.length) return;
-    const box = document.createElement('div');
-    box.className='glass p-3';
-    box.innerHTML = `<div class="small muted mb-1">${esc(lvl)}</div>` + arr.map(t=>`<div>• ${esc(t)}</div>`).join('');
-    headingMap.appendChild(box);
-  });
-
-  // Recommendations
-  recsEl.innerHTML='';
-  (data.recommendations||[]).forEach(r=>{
-    const tone = r.severity==='Critical' ? 'bg-rose-500/15 text-rose-200 border-rose-700/40'
-               : r.severity==='Warning'  ? 'bg-amber-500/15 text-amber-200 border-amber-700/40'
-               : 'bg-slate-500/15 text-slate-200 border-slate-700/40';
-    const c = document.createElement('div');
-    c.className='glass p-3 '+tone; c.style.borderColor='transparent';
-    c.innerHTML = `<span class="pill ${tone} mr-2">${esc(r.severity||'Info')}</span>${esc(r.text||'Recommendation')}`;
-    recsEl.appendChild(c);
-  });
-
-  // Categories
-  catsEl.innerHTML='';
-  (data.categories||[]).forEach(cat=>{
-    const card = document.createElement('div');
-    const tone = band(clamp(cat.score||60));
-    card.className='card '+tone;
-    card.innerHTML=`<div class="flex items-center justify-between mb-3">
-        <div class="font-semibold h-multi">${esc(cat.name||'Checklist')}</div>
-        <div class="pill">${cat.score ?? '—'}</div></div><div class="space-y-2"></div>`;
-    const list = card.lastElementChild;
-
-    (cat.checks||[]).forEach(ch=>{
-      const sc = clamp(ch.score ?? 0);
-      const col = ch.color || (sc>=80?'green':sc>=60?'orange':'red');
-      const dot = col==='green'?'#34d399':col==='orange'?'#fbbf24':'#f87171';
-      const li=document.createElement('div'); li.className='glass px-3 py-2 flex items-center justify-between';
-      li.innerHTML=`<div class="flex items-center gap-3">
-          <span class="w-2.5 h-2.5 rounded-full" style="background:${dot}"></span>
-          <div class="text-sm">${esc(ch.label||'Check')}</div>
-        </div>
-        <div class="flex items-center gap-2"><span class="pill">${sc}</span>
-          <button class="btn-ghost small">Improve</button></div>`;
-      li.querySelector('button').addEventListener('click', ()=>{
-        $('improveTitle').textContent=ch.label||'Improve';
-        $('improveAdvice').textContent=ch.advice||'Suggested improvements';
-        $('improveSearch').href=ch.improve_search_url||('https://www.google.com/search?q='+encodeURIComponent((cat.name||'SEO')+' '+(ch.label||'improvement')));
-        modal.showModal();
-      });
-      list.appendChild(li);
-    });
-    catsEl.appendChild(card);
-  });
-
-  setTimeout(()=>{ water.style.width = (ov+'%'); },150);
-}
-</script>
-@endpush
+    // Structure
+    titleVal.textContent = data.content_structure.title || '—';
+    metaVal.textContent  = data.
