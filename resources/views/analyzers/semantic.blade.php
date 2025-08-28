@@ -5,29 +5,24 @@
 @push('head')
 <style>
   :root{
-    --bg:#000;
-    --card:#0b0b10;
-    --card-2:#101018;
-    --border:#26262b;
-    --muted:#9aa0aa;
-    --text:#ECEFF4;
-    --text-dim:#C8CDD5;
+    --bg:#000; --card:#0b0b10; --card-2:#101018; --border:#26262b;
+    --muted:#9aa0aa; --text:#ECEFF4; --text-dim:#C8CDD5;
     --accent:#22d3ee; --accent-2:#a78bfa; --accent-3:#f43f5e;
     --good:#10b981; --warn:#f59e0b; --bad:#ef4444;
   }
   html,body{background:var(--bg)!important;color:var(--text);overflow-x:hidden}
 
-  /* multicolor headings */
+  /* gradient text for headings */
   .h-multi{background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));
     -webkit-background-clip:text;background-clip:text;color:transparent}
+  .t-multi{font-weight:800;font-size:.95rem;background:linear-gradient(90deg,var(--accent-2),var(--accent),var(--accent-3));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* BG tech lines (subtle) */
+  /* faint tech lines */
   .tech-bg{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.10}
   .tech-bg svg{width:160%;height:160%;transform:translate(-20%,-22%) rotate(-8deg)}
   .tech-bg .dash{stroke-dasharray:10 22;animation:dashMove 18s linear infinite}
-  .tech-bg .glow{filter:drop-shadow(0 0 4px rgba(167,139,250,.3))}
   @keyframes dashMove{to{stroke-dashoffset:-640}}
-
   .content-root{position:relative;z-index:2}
 
   .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.55)}
@@ -42,15 +37,28 @@
   .btn-ghost{background:#14151d;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:.5rem .75rem}
 
   #waterbar{height:14px;border-radius:999px;background:#12131a;border:1px solid var(--border);overflow:hidden}
-  #waterbar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));transition:width .9s ease;filter:drop-shadow(0 0 8px rgba(79,209,255,.25))}
+  #waterbar span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3));transition:width .9s ease}
 
-  /* wheels */
+  /* ====== OVERALL WHEEL (unchanged) ====== */
   .score-wheel{width:180px;height:180px;border-radius:50%;display:grid;place-items:center}
   .score-ring{--v:0;width:100%;height:100%;
     background:conic-gradient(var(--good) calc(var(--v)*1%),var(--warn) calc(var(--v)*1% + .0001%),var(--bad) 100%);
     mask:radial-gradient(circle 74px,transparent 66%,#000 67%);border-radius:50%;box-shadow:inset 0 0 0 8px #0e1016,0 6px 24px rgba(0,0,0,.5)}
-  .wheel-lg{width:220px;height:220px}
-  .wheel-lg .score-ring{mask:radial-gradient(circle 90px,transparent 80%,#000 81%)}
+
+  /* ====== NEW READABILITY WHEEL (number centered) ====== */
+  .radial{--p:0;--thick:18px;--track:#1a1c22; position:relative;width:240px;height:240px;border-radius:50%}
+  .radial::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--track);
+    mask:radial-gradient(farthest-side,transparent calc(100% - var(--thick)),#000 0)}
+  .radial>.slice{position:absolute;inset:0;border-radius:50%;
+    background:conic-gradient(var(--ring-color,#22d3ee) calc(var(--p)*1%), transparent 0);
+    mask:radial-gradient(farthest-side,transparent calc(100% - var(--thick)),#000 0);
+    filter:drop-shadow(0 0 10px rgba(167,139,250,.35))}
+  .radial .center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+  .radial .score{font-size:48px;line-height:1;font-weight:900;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .radial .label{font-size:12px;color:var(--muted);margin-top:6px}
+  .ring-good{--ring-color:var(--good)} .ring-warn{--ring-color:var(--warn)} .ring-bad{--ring-color:var(--bad)}
 
   /* bars */
   .bar{height:10px;border-radius:999px;background:#12131a;border:1px solid var(--border);overflow:hidden}
@@ -62,28 +70,24 @@
   .insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
   @media(max-width:900px){.insights{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .insight{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:0 10px 22px rgba(0,0,0,.35)}
-  .insight .title{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:.5rem}
+  .insight .title{display:flex;align-items:center;gap:.5rem}
   .insight .value{font-size:1.35rem;font-weight:800;margin-top:2px}
   .mini-bar{height:8px;border-radius:999px;background:#11131a;border:1px solid var(--border);overflow:hidden;margin-top:8px}
   .mini-bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:999px;transition:width .4s ease}
   .fixes{background:var(--card-2);border:1px solid var(--border);border-radius:14px;padding:14px}
-  .banner{padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(90deg,rgba(34,211,238,.15),rgba(167,139,250,.12))}
+  .banner{padding:14px 16px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(90deg,rgba(239,68,68,.22),rgba(167,139,250,.08))}
   .banner--warn{background:linear-gradient(90deg,rgba(245,158,11,.2),rgba(167,139,250,.10))}
-  .banner--bad{background:linear-gradient(90deg,rgba(239,68,68,.22),rgba(167,139,250,.08))}
-  .icon{width:22px;height:22px;border-radius:6px;display:inline-grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#001015;font-weight:900}
+  .banner--good{background:linear-gradient(90deg,rgba(34,211,238,.15),rgba(167,139,250,.12))}
 </style>
 @endpush
 
 @section('content')
-<!-- background lines -->
+<!-- subtle dashed bg -->
 <div class="tech-bg" aria-hidden="true">
   <svg viewBox="0 0 1400 900" preserveAspectRatio="none">
-    <defs><linearGradient id="techStroke" x1="0" x2="1">
-      <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.85"/>
-      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.85"/>
-    </linearGradient></defs>
+    <defs><linearGradient id="techStroke" x1="0" x2="1"><stop offset="0%" stop-color="#a78bfa" stop-opacity="0.85"/><stop offset="100%" stop-color="#22d3ee" stop-opacity="0.85"/></linearGradient></defs>
     @for($x=-100;$x<=1500;$x+=90)
-      <line x1="{{ $x }}" y1="-50" x2="{{ $x+200 }}" y2="950" stroke="url(#techStroke)" stroke-width="1.2" class="dash glow"/>
+      <line x1="{{ $x }}" y1="-50" x2="{{ $x+200 }}" y2="950" stroke="url(#techStroke)" stroke-width="1.2" class="dash"/>
     @endfor
   </svg>
 </div>
@@ -131,16 +135,16 @@
         <h3 class="font-semibold h-multi mb-3">Quick Stats</h3>
         <div class="grid sm:grid-cols-3 gap-4 text-sm">
           <div class="glass p-4">
-            <div class="small muted">Readability (Flesch)</div>
+            <div class="small t-multi">Readability (Flesch)</div>
             <div id="statFlesch" class="text-2xl font-bold">—</div>
             <div id="statGrade" class="small muted">—</div>
           </div>
           <div class="glass p-4">
-            <div class="small muted">Links (int / ext)</div>
+            <div class="small t-multi">Links (int / ext)</div>
             <div class="text-2xl font-bold"><span id="statInt">0</span> / <span id="statExt">0</span></div>
           </div>
           <div class="glass p-4">
-            <div class="small muted">Text/HTML Ratio</div>
+            <div class="small t-multi">Text/HTML Ratio</div>
             <div id="statRatio" class="text-2xl font-bold">—</div>
           </div>
         </div>
@@ -149,42 +153,43 @@
 
     <!-- readability insights -->
     <div class="card">
-      <div class="flex items-center justify-between gap-4 mb-4">
-        <h3 class="font-semibold flex items-center gap-2 h-multi">
-          <span class="icon">✦</span> Readability Insights
+      <div class="flex items-center justify-between gap-4 mb-3">
+        <h3 class="font-extrabold text-xl h-multi flex items-center gap-2">
+          <span style="width:22px;height:22px;border-radius:6px;display:inline-grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#001015;font-weight:900">✦</span>
+          Readability Insights
         </h3>
         <span id="gradePill" class="pill">Grade —</span>
       </div>
       <p id="readDesc" class="small muted mb-4">—</p>
 
       <div class="readable-grid">
-        <!-- wheel -->
+        <!-- NEW wheel -->
         <div class="glass p-4 flex flex-col items-center justify-center">
-          <div class="score-wheel wheel-lg">
-            <div id="readWheel" class="score-ring" style="--v:0"></div>
-          </div>
-          <div class="text-center -mt-16">
-            <div id="readNum" class="text-4xl font-extrabold">0</div>
-            <div class="small muted">Readability score</div>
+          <div id="readRadial" class="radial ring-bad" style="--p:0">
+            <div class="slice"></div>
+            <div class="center">
+              <div id="readNum" class="score">0</div>
+              <div class="label">Readability</div>
+            </div>
           </div>
           <div class="bar w-full mt-4"><span id="readBar" style="width:0%"></span></div>
         </div>
 
         <!-- tiles -->
         <div class="insights">
-          <div class="insight"><div class="title"><span class="icon">☺</span> Flesch Reading Ease</div>
+          <div class="insight"><div class="title t-multi">Flesch Reading Ease</div>
             <div id="fleschVal" class="value">—</div><div class="mini-bar"><span id="fleschBar"></span></div></div>
-          <div class="insight"><div class="title"><span class="icon">↔</span> Avg Sentence Length</div>
+          <div class="insight"><div class="title t-multi">Avg Sentence Length</div>
             <div class="value"><span id="aslVal">—</span></div><div class="mini-bar"><span id="aslBar"></span></div></div>
-          <div class="insight"><div class="title"><span class="icon">A</span> Words</div>
+          <div class="insight"><div class="title t-multi">Words</div>
             <div id="wordsVal" class="value">—</div><div class="mini-bar"><span id="wordsBar"></span></div></div>
-          <div class="insight"><div class="title"><span class="icon">語</span> Syllables / Word</div>
+          <div class="insight"><div class="title t-multi">Syllables / Word</div>
             <div id="spwVal" class="value">—</div><div class="mini-bar"><span id="spwBar"></span></div></div>
-          <div class="insight"><div class="title"><span class="icon">∿</span> Lexical Diversity (TTR)</div>
+          <div class="insight"><div class="title t-multi">Lexical Diversity (TTR)</div>
             <div id="ttrVal" class="value">—</div><div class="mini-bar"><span id="ttrBar"></span></div></div>
-          <div class="insight"><div class="title"><span class="icon">⟲</span> Repetition (tri-gram)</div>
+          <div class="insight"><div class="title t-multi">Repetition (tri-gram)</div>
             <div id="triVal" class="value">—</div><div class="mini-bar"><span id="triBar"></span></div></div>
-          <div class="insight"><div class="title"><span class="icon">#</span> Digits / 100 words</div>
+          <div class="insight"><div class="title t-multi">Digits / 100 words</div>
             <div id="digitsVal" class="value">—</div><div class="mini-bar"><span id="digitsBar"></span></div></div>
         </div>
       </div>
@@ -200,7 +205,7 @@
       </div>
     </div>
 
-    <!-- content structure -->
+    <!-- structure -->
     <div class="card">
       <h3 class="font-semibold h-multi">Content Structure</h3>
       <div class="grid md:grid-cols-2 gap-6 mt-4">
@@ -250,47 +255,36 @@ const ANALYZE_URL = @json(\Illuminate\Support\Facades\Route::has('semantic.analy
   ? route('semantic.analyze') : url('/api/semantic-analyze'));
 
 const $ = (id)=>document.getElementById(id);
-const f = $('semanticForm');
-const water = document.querySelector('#waterbar span');
-const wrap = $('resultWrap');
+const f = $('semanticForm'), water = document.querySelector('#waterbar span'), wrap = $('resultWrap');
 
-const wheel = $('wheel'); const scoreNum = $('scoreNum'); const badge = $('badge');
-const statF = $('statFlesch'); const statG = $('statGrade'); const statInt = $('statInt');
-const statExt = $('statExt'); const statRatio = $('statRatio');
+const wheel = $('wheel'), scoreNum = $('scoreNum'), badge = $('badge');
+const statF = $('statFlesch'), statG = $('statGrade'), statInt = $('statInt'), statExt = $('statExt'), statRatio = $('statRatio');
 
-const readWheel = $('readWheel'); const readNum = $('readNum'); const readBar = $('readBar');
-const gradePill = $('gradePill'); const readDesc = $('readDesc');
+const readRadial = $('readRadial'), readBar = $('readBar'), readNum = $('readNum'), gradePill = $('gradePill'), readDesc = $('readDesc');
 
-const fVal = $('fleschVal'), fBar = $('fleschBar');
-const aslVal = $('aslVal'), aslBar = $('aslBar');
-const wordsVal = $('wordsVal'), wordsBar = $('wordsBar');
-const spwVal = $('spwVal'), spwBar = $('spwBar');
-const ttrVal = $('ttrVal'), ttrBar = $('ttrBar');
-const triVal = $('triVal'), triBar = $('triBar');
-const digitsVal = $('digitsVal'), digitsBar = $('digitsBar');
+const fVal=$('fleschVal'), fBar=$('fleschBar');
+const aslVal=$('aslVal'), aslBar=$('aslBar');
+const wordsVal=$('wordsVal'), wordsBar=$('wordsBar');
+const spwVal=$('spwVal'), spwBar=$('spwBar');
+const ttrVal=$('ttrVal'), ttrBar=$('ttrBar');
+const triVal=$('triVal'), triBar=$('triBar');
+const digitsVal=$('digitsVal'), digitsBar=$('digitsBar');
 
-const gradeBanner = $('gradeBanner'); const gradeGoal = $('gradeGoal'); const gradeNote = $('gradeNote');
+const gradeBanner=$('gradeBanner'), gradeGoal=$('gradeGoal'), gradeNote=$('gradeNote');
+const headingMap=$('headingMap'), titleVal=$('titleVal'), metaVal=$('metaVal'), recsEl=$('recs'), catsEl=$('cats');
+const modal=$('improveModal');
 
-const headingMap = $('headingMap'); const titleVal = $('titleVal'); const metaVal = $('metaVal');
-const recsEl = $('recs'); const catsEl = $('cats');
-
-const modal = $('improveModal'); const mTitle = $('improveTitle');
-const mAdvice= $('improveAdvice'); const mLink  = $('improveSearch');
-
-/* helpers */
 const clamp=(n,min=0,max=100)=>{const v=Number(n);return Math.max(min,Math.min(max,isNaN(v)?0:v));};
 const labelBy=(s)=>s>=80?'Great Work — Well Optimized':(s>=60?'Needs Optimization':'Needs Significant Optimization');
 const band=(s)=>s>=80?'g-green':(s>=60?'g-orange':'g-red');
 const esc=(s)=>s==null?'':String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;');
 
-/* compute a correct readability score */
 function computeReadability(data){
-  const rb = data.readability || {};
-  const qs = data.quick_stats || {};
-  // Prefer raw counts if present
+  const rb = data.readability || {}, qs = data.quick_stats || {};
   const S = rb.sentence_count ?? rb.sentences;
   const W = rb.word_count ?? rb.words;
   const SYL = rb.syllable_count ?? rb.syllables;
+
   let flesch = rb.flesch ?? qs.readability_flesch;
   let grade  = rb.grade ?? qs.readability_grade;
 
@@ -301,22 +295,18 @@ function computeReadability(data){
     grade  = 0.39*ASL + 11.8*ASW - 15.59;
   }
 
-  // Normalize to 0..100 for UI wheel
-  const score = clamp(Math.round(flesch));
+  const score = clamp(Math.round(flesch)); // wheel wants 0..100
   return {
-    score,
-    flesch: Math.round((flesch ?? 0)*10)/10,
-    grade: grade!=null ? Math.round(grade*10)/10 : null,
-    asl: rb.avg_sentence_len ?? (W && S ? Math.round((W/S)*10)/10 : null),
-    words: W ?? rb.word_count ?? null,
-    spw: rb.syllables_per_word ?? (SYL && W ? Math.round((SYL/W)*100)/100 : null),
+    score, flesch: flesch!=null?Math.round(flesch*10)/10:null,
+    grade: grade!=null?Math.round(grade*10)/10:null,
+    asl: rb.avg_sentence_len ?? (W&&S?W/S:null),
+    words: W ?? null,
+    spw: rb.syllables_per_word ?? (SYL&&W?SYL/W:null),
     ttr: rb.lexical_diversity ?? rb.ttr ?? null,
     tri: rb.repetition_trigram ?? rb.repetition ?? null,
     digits: rb.digits_per_100_words ?? rb.numeric_density ?? null
   };
 }
-
-/* tile score helpers */
 const pctForASL=(asl)=>{ if(!asl) return 0; const a=Math.max(8,Math.min(35,Number(asl))); return Math.round(a<=17?100:Math.max(0,100-((a-17)*4))); };
 const pctForSPW=(s)=>{ if(!s) return 0; const v=Math.max(1,Math.min(3,Number(s))); return Math.round(100-(v-1.2)*62); };
 const pctForWords=(w)=> w? Math.min(100, Math.round(Math.min(Number(w),600)/6)) : 0;
@@ -324,7 +314,13 @@ const pctForTTR=(t)=>{ let p=Number(t); if(p<=1) p*=100; return clamp(p); };
 const pctForRep=(r)=>{ let p=Number(r); if(p<=1) p*=100; return clamp(100-p); };
 const setTile=(val,bar,text,pct)=>{ val.textContent=text; bar.style.width=(isNaN(pct)?0:pct)+'%'; };
 
-/* submit */
+function setRadial(el, p){
+  const bandClass = p>=80?'ring-good':(p>=60?'ring-warn':'ring-bad');
+  el.style.setProperty('--p', clamp(p));
+  el.classList.remove('ring-good','ring-warn','ring-bad');
+  el.classList.add(bandClass);
+}
+
 f.addEventListener('submit', async (e)=>{
   e.preventDefault();
   water.style.width='0%'; requestAnimationFrame(()=>{ water.style.width='100%'; });
@@ -342,7 +338,7 @@ f.addEventListener('submit', async (e)=>{
     renderAll(await res.json());
   }catch(err){
     console.error(err);
-    // minimal demo fallback
+    // demo fallback
     renderAll({
       overall_score:72, wheel:{label:'Needs Optimization'},
       quick_stats:{readability_flesch:9, readability_grade:18, internal_links:12, external_links:4, text_to_html_ratio:38},
@@ -356,35 +352,33 @@ f.addEventListener('submit', async (e)=>{
 function renderAll(data){
   wrap.classList.remove('hidden');
 
-  /* OVERALL */
+  // Overall
   const ov = clamp(data.overall_score);
-  wheel.style.setProperty('--v', ov);
-  scoreNum.textContent = ov;
-  badge.textContent = (data.wheel && data.wheel.label) ? data.wheel.label : (ov>=80?'Great Work — Well Optimized':ov>=60?'Needs Optimization':'Needs Significant Optimization');
+  wheel.style.setProperty('--v', ov); scoreNum.textContent = ov;
+  badge.textContent = (data.wheel && data.wheel.label) ? data.wheel.label : labelBy(ov);
   badge.className = 'k-badge ' + (ov>=80?'bg-emerald-500/15 text-emerald-300 border-emerald-700/40':ov>=60?'bg-amber-500/15 text-amber-300 border-amber-700/40':'bg-rose-500/15 text-rose-300 border-rose-700/40');
 
-  /* QUICK STATS */
+  // Quick stats
   const qs = data.quick_stats || {};
   statF.textContent = (qs.readability_flesch!=null ? Math.round(qs.readability_flesch) : '—');
   statG.textContent = (qs.readability_grade!=null ? 'Grade '+qs.readability_grade : '—');
-  statInt.textContent = qs.internal_links ?? 0;
-  statExt.textContent = qs.external_links ?? 0;
+  statInt.textContent = qs.internal_links ?? 0; statExt.textContent = qs.external_links ?? 0;
   statRatio.textContent = (qs.text_to_html_ratio!=null ? qs.text_to_html_ratio+'%' : '—');
 
-  /* READABILITY (real connection) */
+  // Readability (real)
   const R = computeReadability(data);
-  readWheel.style.setProperty('--v', R.score);
+  setRadial(readRadial, R.score);
   readNum.textContent = R.score;
   readBar.style.width = R.score + '%';
   gradePill.textContent = 'Grade ' + (R.grade ?? '—');
 
   if(R.grade==null) readDesc.textContent = 'Readability grade unavailable.';
-  else if(R.grade<=7) readDesc.textContent = 'Easy reading level. Great for broad audiences.';
-  else if(R.grade<=10) readDesc.textContent = 'Fair reading level. Try trimming sentences and simplifying words.';
-  else readDesc.textContent = 'Complex reading level. Use shorter sentences and simpler vocabulary.';
+  else if(R.grade<=7){ readDesc.textContent = 'Easy reading level. Great for broad audiences.'; gradeBanner.className='banner banner--good'; }
+  else if(R.grade<=10){ readDesc.textContent = 'Fair reading level. Try trimming sentences and simplifying words.'; gradeBanner.className='banner banner--warn'; }
+  else { readDesc.textContent = 'Complex reading level. Use shorter sentences and simpler vocabulary.'; gradeBanner.className='banner'; }
 
-  // Tiles
-  setTile(fVal, fBar, (R.flesch ?? '—'), clamp(R.flesch));
+  // Tiles (values + bars)
+  setTile(fVal, fBar, (R.flesch!=null?R.flesch:'—'), clamp(R.flesch??0));
   setTile(aslVal, aslBar, (R.asl!=null?R.asl.toFixed(1):'—'), pctForASL(R.asl));
   setTile(wordsVal, wordsBar, (R.words!=null?String(R.words):'—'), pctForWords(R.words));
   setTile(spwVal, spwBar, (R.spw!=null?R.spw.toFixed(2):'—'), pctForSPW(R.spw));
@@ -395,18 +389,14 @@ function renderAll(data){
   // Fixes
   const fixes=[];
   if(R.asl!=null && R.asl>20) fixes.push('Break long sentences into 12–16 words.');
-  if(R.spw!=null && R.spw>1.6) fixes.push('Prefer shorter words (use simpler synonyms).');
+  if(R.spw!=null && R.spw>1.6) fixes.push('Prefer common words (simpler synonyms).');
   if(R.digits!=null && R.digits>10) fixes.push('Reduce numeric density; round or group numbers.');
   if(R.ttr!=null && pctForTTR(R.ttr)<45) fixes.push('Increase lexical variety (use synonyms and specific nouns).');
   if(R.tri!=null && ((R.tri<=1?R.tri*100:R.tri)>12)) fixes.push('Reduce phrase repetition; vary transitions.');
   if(!fixes.length) fixes.push('Nice! Metrics look solid — keep sentences concise and vocabulary familiar.');
   $('fixList').innerHTML = fixes.map(x=>`<li>${esc(x)}</li>`).join('');
 
-  if(R.grade!=null && R.grade<=7){ gradeBanner.className='banner'; gradeGoal.textContent='Easy to read (Grade 7).'; gradeNote.textContent='Excellent — keep sentences tight and vocabulary familiar.'; }
-  else if(R.grade!=null && R.grade<=10){ gradeBanner.className='banner banner--warn'; gradeGoal.textContent='Target: Grade 7–9.'; gradeNote.textContent='Trim sentence length and simplify some word choices.'; }
-  else { gradeBanner.className='banner banner--bad'; gradeGoal.textContent='Target: Grade 7–9.'; gradeNote.textContent='Shorten sentences, prefer common words, reduce clause stacking.'; }
-
-  /* Structure */
+  // Structure
   const st = data.content_structure || {};
   titleVal.textContent = st.title || '—';
   metaVal.textContent  = st.meta_description || '—';
@@ -419,7 +409,7 @@ function renderAll(data){
     headingMap.appendChild(box);
   });
 
-  /* Recommendations */
+  // Recommendations
   recsEl.innerHTML='';
   (data.recommendations||[]).forEach(r=>{
     const tone = r.severity==='Critical' ? 'bg-rose-500/15 text-rose-200 border-rose-700/40'
@@ -431,7 +421,7 @@ function renderAll(data){
     recsEl.appendChild(c);
   });
 
-  /* Categories */
+  // Categories
   catsEl.innerHTML='';
   (data.categories||[]).forEach(cat=>{
     const card = document.createElement('div');
@@ -441,20 +431,18 @@ function renderAll(data){
         <div class="font-semibold h-multi">${esc(cat.name||'Checklist')}</div>
         <div class="pill">${cat.score ?? '—'}</div></div><div class="space-y-2"></div>`;
     const list = card.lastElementChild;
+
     (cat.checks||[]).forEach(ch=>{
       const sc = clamp(ch.score ?? 0);
       const col = ch.color || (sc>=80?'green':sc>=60?'orange':'red');
       const dot = col==='green'?'#34d399':col==='orange'?'#fbbf24':'#f87171';
-      const li=document.createElement('div');
-      li.className='glass px-3 py-2 flex items-center justify-between';
+      const li=document.createElement('div'); li.className='glass px-3 py-2 flex items-center justify-between';
       li.innerHTML=`<div class="flex items-center gap-3">
           <span class="w-2.5 h-2.5 rounded-full" style="background:${dot}"></span>
           <div class="text-sm">${esc(ch.label||'Check')}</div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="pill">${sc}</span>
-          <button class="btn-ghost small">Improve</button>
-        </div>`;
+        <div class="flex items-center gap-2"><span class="pill">${sc}</span>
+          <button class="btn-ghost small">Improve</button></div>`;
       li.querySelector('button').addEventListener('click', ()=>{
         $('improveTitle').textContent=ch.label||'Improve';
         $('improveAdvice').textContent=ch.advice||'Suggested improvements';
