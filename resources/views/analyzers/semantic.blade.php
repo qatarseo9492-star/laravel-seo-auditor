@@ -4,22 +4,37 @@
 
 @push('head')
 <style>
-  /* ========= Dark Purple + Red Background (no images) ========= */
+  /* ========= FORCE Dark Purple + Red Background (no images) =========
+     NOTE: Ensure your layouts/app.blade.php has @stack('head') in <head>. */
   body{
     color:#e8eaf6;
     background:
-      radial-gradient(1200px 700px at 85% -10%, rgba(255, 64, 95, .22), transparent 60%),
-      radial-gradient(900px 600px at   0%   0%, rgba(160, 0, 255, .20), transparent 60%),
-      radial-gradient(700px 500px at 100% 100%, rgba(255, 18,  18, .14), transparent 60%),
-      linear-gradient(180deg, #1a0b2e, #120822 60%, #0b0816);
+      radial-gradient(1200px 700px at 85% -10%, rgba(255, 64, 95, .30), transparent 60%),
+      radial-gradient(900px 600px at   0%   0%, rgba(160,  0, 255, .28), transparent 60%),
+      radial-gradient(700px 500px at 100% 100%, rgba(255, 18,  18,  .18), transparent 60%),
+      linear-gradient(180deg, #210a37, #160726 60%, #0b0714) !important; /* force over layout */
     overflow-x:hidden;
   }
 
-  /* ========= Animated Tech Lines (styled like your reference pin) ========= */
-  .tech-bg{position:fixed; inset:0; pointer-events:none; opacity:.42; z-index:-1;}
-  .tech-bg svg{width:140%; height:140%; transform:translate(-15%,-18%) rotate(-6deg);}
+  /* Fixed gradient layer (shows even if body has old bg class) */
+  .app-bg{
+    position:fixed; inset:0; z-index:-2; pointer-events:none;
+    background:
+      radial-gradient(1200px 700px at 85% -10%, rgba(255, 64, 95, .30), transparent 60%),
+      radial-gradient(900px 600px at   0%   0%, rgba(160,  0, 255, .28), transparent 60%),
+      radial-gradient(700px 500px at 100% 100%, rgba(255, 18,  18,  .18), transparent 60%),
+      linear-gradient(180deg, #210a37, #160726 60%, #0b0714);
+  }
+
+  /* ========= Animated Tech Lines (styled like the reference pin) ========= */
+  .tech-bg{position:fixed; inset:0; pointer-events:none; opacity:.46; z-index:-1;}
+  .tech-bg svg{width:145%; height:145%; transform:translate(-17%,-18%) rotate(-7deg);}
   .tech-bg .dash{stroke-dasharray:8 18; animation:dashMove 16s linear infinite;}
-  .tech-bg .glow{filter:drop-shadow(0 0 8px rgba(255,64,95,.55)) drop-shadow(0 0 10px rgba(160,0,255,.45));}
+  .tech-bg .glow{
+    filter:
+      drop-shadow(0 0 10px rgba(255,64,95,.55))
+      drop-shadow(0 0 12px rgba(160,0,255,.45));
+  }
   @keyframes dashMove{to{stroke-dashoffset:-520;}}
 
   /* ========= Minimal utilities (works with or without Tailwind) ========= */
@@ -67,6 +82,9 @@
 @endpush
 
 @section('content')
+<!-- Fixed gradient background layer (ensures new theme shows) -->
+<div class="app-bg" aria-hidden="true"></div>
+
 <!-- Animated tech lines (purple + red) -->
 <div class="tech-bg" aria-hidden="true">
   <svg viewBox="0 0 1400 900" preserveAspectRatio="none">
@@ -389,7 +407,6 @@ function renderAll(data){
 
   // QUICK STATS
   const qs = data.quick_stats || {};
-  const flesch = clamp(qs.readability_flesch);
   statF.textContent = (qs.readability_flesch!=null ? Math.round(qs.readability_flesch) : '—');
   statG.textContent = (qs.readability_grade!=null ? ('Grade '+qs.readability_grade) : '—');
   statInt.textContent = qs.internal_links ?? 0;
@@ -405,11 +422,11 @@ function renderAll(data){
   readWheel.style.setProperty('--v', rScore);
   readNum.textContent = Math.round(rFlesch||0);
   readBar.style.width = rScore + '%';
-  gradeVal.textContent = (rGrade!=null ? 'Grade ' + rGrade : '—');
   readBadge.textContent = labelBy(rScore);
   readBadge.className = 'pill ' + (rScore>=80?'bg-emerald-500/20 text-emerald-200 border border-emerald-500/30':
                                          rScore>=60?'bg-amber-500/20 text-amber-200 border border-amber-500/30':
                                                      'bg-rose-500/20 text-rose-200 border border-rose-500/30');
+  gradeVal.textContent = (rGrade!=null ? 'Grade ' + rGrade : '—');
 
   // STRUCTURE
   const st = data.content_structure || {};
