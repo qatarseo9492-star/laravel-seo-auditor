@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AnalyzerController; // <-- added
 
 /*
 |--------------------------------------------------------------------------
@@ -41,10 +42,15 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::middleware('auth')->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
+    // UI pages
     Route::view('/semantic-analyzer', 'analyzers.semantic')->name('semantic.analyzer');
     Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
     Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
 
+    // Analyzer JSON endpoint (used by the Blade fetch() call)
+    Route::post('/semantic-analyzer/analyze', [AnalyzerController::class, 'semanticAnalyze'])
+        ->name('semantic.analyze'); // <-- added (fixes Route [semantic.analyze] not defined)
+    
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
