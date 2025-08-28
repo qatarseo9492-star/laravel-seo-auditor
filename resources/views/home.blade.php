@@ -1,7 +1,53 @@
 {{-- resources/views/home.blade.php — v2025-08-25 (Human-vs-AI first; upgraded Readability; Entities & Topics; PSI auto-start; colorful, responsive) --}}
 <!DOCTYPE html>
 <html lang="en" data-lang="en">
-<head>
+
+<style>
+:root{
+  --bg1:#0b0b18; --bg2:#0b0f2a; --ink:#eaf1ff;
+  --accent:#7c4dff; --accent2:#00e5ff; --accent3:#ff4dd2;
+  --glass: rgba(255,255,255,.06);
+  --border: rgba(255,255,255,.14);
+}
+body{background: radial-gradient(1200px 700px at 10% 0%, #12122a 0%, #0b0b18 60%), #0b0b18; color: var(--ink);}
+header.site.hdr{display:flex;align-items:center;gap:1rem;padding:12px 18px;position:sticky;top:0;z-index:40;background:linear-gradient(0deg,rgba(11,11,24,.35),rgba(11,11,24,.35));backdrop-filter: blur(6px)}
+.brand{display:flex;align-items:center;gap:.8rem}
+.brand-badge{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#081019;box-shadow:0 8px 28px rgba(0,229,255,.25)}
+.brand-badge i{font-size:1.15rem}
+.hero-heading{font-weight:800;letter-spacing:.2px}
+.hero-sub{font-size:.85rem;opacity:.7}
+/* removed .toolbelt styles */
+/* removed .tool styles */
+/* removed .tool:hover */
+/* removed .tool.active */
+/* removed .tool.locked */
+/* removed .tool i */
+.hdr-actions{display:flex;align-items:center;gap:.6rem}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.52rem .9rem;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--ink);text-decoration:none}
+.btn.ghost:hover{border-color:#9aa4c7}
+.btn.primary{background:linear-gradient(135deg,var(--accent3),var(--accent2)); color:#07101a; border-color:transparent; box-shadow:0 10px 30px rgba(255,77,210,.25)}
+.btn.primary:hover{transform:translateY(-1px)}
+.aurora-wrap{position:relative;overflow:hidden}
+.bg-aurora, .stars{position:absolute;inset:0;z-index:-2}
+.bg-aurora{
+  background:
+    radial-gradient(800px 400px at 20% 20%, rgba(124,77,255,.25), transparent 60%),
+    radial-gradient(900px 500px at 80% 30%, rgba(0,229,255,.22), transparent 60%),
+    radial-gradient(700px 350px at 60% 80%, rgba(255,77,210,.18), transparent 60%),
+    radial-gradient(1200px 700px at 50% -10%, rgba(255,255,255,.06), transparent 55%);
+  filter: blur(35px);
+  animation: floaty 18s ease-in-out infinite alternate;
+}
+.stars{
+  background-image: radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.6), transparent 40%),
+                    radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,.6), transparent 40%),
+                    radial-gradient(1px 1px at 50% 50%, rgba(255,255,255,.4), transparent 40%);
+  opacity:.35; animation: twinkle 6s linear infinite;
+}
+@keyframes floaty { to { transform: translateY(-10px) translateX(6px) scale(1.02); } }
+@keyframes twinkle { 50% { opacity:.2 } }
+</style>
+
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -634,8 +680,11 @@ h2.section-title, .cl-title {
 <!-- ===== /New Neo‑Glass Aurora Skin ===== -->
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 <body>
+<script>window.APP = { loggedIn: @auth true @else false @endauth };</script>
 
 <!-- Background canvases -->
 <canvas id="linesCanvas"></canvas>
@@ -670,30 +719,111 @@ h2.section-title, .cl-title {
 </div>
 
 <div class="wrap">
-  <header class="site">
-    <div class="brand">
-      <div class="brand-badge" aria-hidden="true"><i class="fa-solid fa-brain"></i></div>
-      <div>
-        <div class="hero-heading">Semantic SEO Master Analyzer</div>
-        <div class="hero-sub">Analyze URLs, get scores & colorful insights</div>
-      </div>
-    </div>
+  
 
-    <nav class="main-menu" aria-label="Primary navigation">
-      <a href="{{ $semanticAnalyzerUrl }}" class="menu-link {{ url()->current() === $semanticAnalyzerUrl ? 'active' : '' }}">
-        <i class="fa-solid fa-gauge-high" aria-hidden="true"></i>
+<div class="superbar" role="navigation" aria-label="Main menu">
+  <div class="cont">
+    <div class="sb-left">
+      <a href="{{ route('home') }}" class="pill {{ request()->routeIs('home') ? 'primary' : '' }}">
+        <lord-icon src="https://cdn.lordicon.com/lecprnjb.json" trigger="loop" delay="2000" style="width:20px;height:20px"></lord-icon>
         <span>Semantic SEO Analyzer</span>
       </a>
-      <a href="{{ $topicClustersUrl }}" class="menu-link {{ request()->is('seo/topic-clusters*') ? 'active' : '' }}">
-        <i class="fa-solid fa-diagram-project" aria-hidden="true"></i>
-        <span>Topic Cluster Identification &amp; Mapping</span>
+
+      @php
+        $hasTopicRoute = \Illuminate\Support\Facades\Route::has('seo.topic-clusters.create');
+        $topicUrl = $hasTopicRoute ? route('seo.topic-clusters.create') : url('/seo/topic-clusters');
+      @endphp
+      <a href="{{ auth()->check() ? $topicUrl : ( \Illuminate\Support\Facades\Route::has('login') ? route('login') : url('/login') ) }}"
+         class="pill {{ request()->is('seo/topic-clusters*') ? 'primary' : '' }}">
+        <lord-icon src="https://cdn.lordicon.com/wmwqvixz.json" trigger="loop" delay="2000" style="width:20px;height:20px"></lord-icon>
+        <span>Topic Cluster Identification</span>
       </a>
-    </nav>
-  
-    <div class="header-actions">
-      <button class="btn btn-print" id="printTop"><i class="fa-solid fa-print"></i> Print</button>
     </div>
-  </header>
+
+    <div class="sb-right">
+      @guest
+        <a href="{{ \Illuminate\Support\Facades\Route::has('login') ? route('login') : url('/login') }}" class="pill">
+          <i class="fa-solid fa-right-to-bracket"></i> <span>Sign in</span>
+        </a>
+        <a href="{{ \Illuminate\Support\Facades\Route::has('register') ? route('register') : url('/register') }}"
+           class="pill alt">
+          <i class="fa-solid fa-user-plus"></i> <span>Sign up</span>
+        </a>
+      @else
+        <form method="POST" action="{{ \Illuminate\Support\Facades\Route::has('logout') ? route('logout') : url('/logout') }}">
+          @csrf
+          <button type="submit" class="pill">
+            <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+          </button>
+        </form>
+      @endguest
+    </div>
+  </div>
+</div>
+
+<header class="site hdr">
+
+<style>
+:root{ --superbar-h: 64px; }
+
+.superbar{
+  position: sticky;
+  top: 0;
+  z-index: 70;
+  border-bottom: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(10,11,22,.72), rgba(10,11,22,.50)),
+    radial-gradient(800px 400px at 10% 0%, rgba(124,77,255,.12), transparent 60%),
+    radial-gradient(700px 350px at 90% 0%, rgba(0,229,255,.10), transparent 60%);
+  backdrop-filter: blur(12px);
+}
+.superbar .cont{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.sb-left, .sb-right{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.pill{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.55rem .95rem;border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  color:var(--ink); text-decoration:none; white-space:nowrap;
+  background: rgba(255,255,255,.06);
+  transition:.18s ease; backdrop-filter: blur(6px);
+}
+.pill:hover{transform:translateY(-1px); border-color:rgba(255,255,255,.28)}
+.pill.primary{border-color:transparent;
+  background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#081019;
+  box-shadow:0 10px 30px rgba(124,77,255,.32);
+}
+.pill.alt{border-color:transparent;
+  background:linear-gradient(135deg, var(--accent3), var(--accent2)); color:#081019;
+  box-shadow:0 10px 30px rgba(255,77,210,.28);
+}
+.pill i, .pill lord-icon{font-size:1rem}
+
+/* push header down so it doesn't collide with superbar */
+header.site.hdr{ top: var(--superbar-h) !important; }
+@media (max-width: 600px){ :root{ --superbar-h: 60px; } }
+</style>
+
+  <div class="brand">
+    <div class="brand-badge"><i class="fa-solid fa-brain"></i></div>
+    <div class="brand-text">
+      <div class="hero-heading">Semantic SEO Master Analyzer</div>
+      <div class="hero-sub">Smart SEO tools for modern sites</div>
+    </div>
+  </div>
+
+  <!-- removed old in-header menu (toolbelt) -->
+
+  <!-- removed old header actions; now handled by superbar -->
+</header>
+
 
   <main class="analyzer" id="analyzer" role="main">
     <h2 class="section-title">Analyze a URL</h2>
@@ -1772,7 +1902,39 @@ h2.section-title, .cl-title {
 
     var input = document.getElementById('analyzeUrl');
     var url = normalizeUrl(input ? input.value : '');
-    if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
+    
+    // Call backend proxy (avoids CORS and login redirects)
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+    let data = null;
+    try {
+      const resp = await fetch('{{ route('api.analyze.url') }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-TOKEN': csrf
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ url })
+      });
+      const ctype = resp.headers.get('Content-Type') || '';
+      if (!resp.ok) {
+        throw new Error(resp.status === 401 ? 'Please login to analyze.' :
+                        resp.status === 419 ? 'Session expired. Refresh and login again.' :
+                        'Analyze failed ('+resp.status+').');
+      }
+      if (ctype.indexOf('application/json') === -1) {
+        throw new Error('Please login to analyze this URL.');
+      }
+      data = await resp.json();
+    } catch (e) {
+      window.SEMSEO = window.SEMSEO || {}; window.SEMSEO.BUSY=false;
+      if (window.Water) window.Water.finish();
+      var statusEl = document.getElementById('analyzeStatus');
+      if (statusEl) statusEl.textContent = (e && e.message) ? e.message : 'Failed to analyze URL';
+      return;
+    }
+if (!url) { if(input) input.focus(); window.SEMSEO.BUSY=false; return; }
 
     if (window.Water) window.Water.start();
     var statusEl = document.getElementById('analyzeStatus');
@@ -2530,5 +2692,13 @@ window.addEventListener('error', function(e){
 </script>
 <!-- ===== /Unique Aurora Liquid Wheel block ===== -->
 
+
+<script>window.SEMSEO_go = function(){ if (typeof analyze==='function') analyze(); };</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  try{ if (window.updateCategoryBars) window.updateCategoryBars(); }catch(e){}
+}, { once: true });
+</script>
 </body>
 </html>
