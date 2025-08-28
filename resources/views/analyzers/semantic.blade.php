@@ -4,31 +4,19 @@
 @push('head')
 <style>
   :root{
-    --bg:#06021f;
-    --panel:#101628;
-    --ink:#e7e9f5;
-    --muted:#a8b0c6;
-    --line:rgba(255,255,255,.10);
-    --chip:rgba(255,255,255,.06);
-
-    --green:#22c55e;
-    --orange:#f59e0b;
-    --red:#ef4444;
+    --bg:#06021f; --panel:#101628; --ink:#e7e9f5; --muted:#a8b0c6; --line:rgba(255,255,255,.10); --chip:rgba(255,255,255,.06);
+    --green:#22c55e; --orange:#f59e0b; --red:#ef4444;
   }
   html,body{background:var(--bg)!important;color:var(--ink)}
   .container{max-width:1180px;margin:0 auto;padding:24px 16px}
 
   /* Heading */
   .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-  .crown{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
-    background:linear-gradient(135deg,rgba(99,102,241,.28),rgba(236,72,153,.28));
-    border:1px solid var(--line);font-size:20px}
+  .crown{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.28),rgba(236,72,153,.28));border:1px solid var(--line);font-size:20px}
   .title{font-weight:900;font-size:28px;letter-spacing:.2px;margin:0}
-  .tgrad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);
-    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .tgrad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
   .by{font-size:14px;color:var(--muted)}
-  .by .name{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);
-    background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:slide 6s linear infinite}
+  .by .name{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:slide 6s linear infinite}
   @keyframes slide{to{background-position:100% 0}}
 
   /* Legend */
@@ -38,12 +26,9 @@
   .legend .o{background:#fbbf24;color:#2b1600}
   .legend .r{background:#f87171;color:#2a0707}
 
-  /* Layout */
-  .split{display:grid;grid-template-columns:300px 1fr;gap:18px}
-  @media(max-width:1024px){.split{grid-template-columns:1fr}}
-
-  /* --- Wheel (small) --- */
-  .wheelbox{width:240px;margin:0 auto}
+  /* ----- Wheel (centered, small) ----- */
+  .top{display:grid;place-items:center;gap:12px;margin-bottom:10px}
+  .wheelbox{width:240px}
   .wheel{--v:0;--ring:var(--orange);--p:0;width:100%;aspect-ratio:1/1;position:relative}
   .w-ring{position:absolute;inset:0;border-radius:50%;
     background:conic-gradient(var(--ring) calc(var(--v)*1%),rgba(255,255,255,.08) 0);
@@ -62,23 +47,22 @@
   .wheel.bad {--ring:var(--red);--fill:linear-gradient(to top,var(--red) 0%,#f87171 60%,#fecaca 100%)}
   .w-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:48px;color:#fff}
 
-  /* Small stat pills with icons */
-  .pills{display:flex;flex-wrap:wrap;gap:8px}
-  .pill{display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;
-    padding:10px 12px;border-radius:12px;background:var(--chip);border:1px solid var(--line);color:#eef2ff}
+  /* Stat pills (small) */
+  .pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .pill{display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;padding:10px 12px;border-radius:12px;background:var(--chip);border:1px solid var(--line);color:#eef2ff}
   .pill.good{background:linear-gradient(135deg,rgba(34,197,94,.28),rgba(16,185,129,.12));color:#ecfff4}
   .pill.warn{background:linear-gradient(135deg,rgba(245,158,11,.28),rgba(250,204,21,.12));color:#fff8e9}
   .pill.bad{background:linear-gradient(135deg,rgba(239,68,68,.28),rgba(248,113,113,.12));color:#ffecec}
 
   /* Water bar */
-  .water{position:relative;height:18px;border-radius:9999px;overflow:hidden;border:1px solid var(--line);background:#0b0b0b;margin:10px 0}
+  .water{position:relative;height:18px;border-radius:9999px;overflow:hidden;border:1px solid var(--line);background:#0b0b0b;margin:8px 0 4px}
   .water .f{position:absolute;inset:0;width:0%;transition:width .9s ease}
   .water.good .f{background:linear-gradient(90deg,var(--green),#4ade80,#86efac)}
   .water.warn .f{background:linear-gradient(90deg,var(--orange),#fbbf24,#fde68a)}
   .water.bad  .f{background:linear-gradient(90deg,var(--red),#f87171,#fecaca)}
   .water .lbl{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:12px;color:#e7e9f0}
 
-  /* Toolbar + chips */
+  /* Toolbar */
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
   .urlrow{display:flex;gap:10px;align-items:center}
   .urlbox{flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#0b1020;padding:10px 12px;border-radius:10px}
@@ -89,15 +73,14 @@
   .o{background:var(--orange);color:#2e1800}
   .p{background:linear-gradient(90deg,#a78bfa,#f472b6);color:#170219}
 
-  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center}
   .chip{padding:8px 12px;border-radius:12px;background:var(--chip);border:1px solid var(--line);font-weight:900;font-size:13px}
   .lbl-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent}
 
   /* Ground / categories */
   .ground{background:#0D0E1E;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:18px}
   .ghead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-  .gicon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
-    background:linear-gradient(135deg,rgba(99,102,241,.28),rgba(236,72,153,.28));border:1px solid var(--line)}
+  .gicon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.28),rgba(236,72,153,.28));border:1px solid var(--line)}
   .gtitle{font-weight:900;font-size:18px}
   .cats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
   @media(max-width:1024px){.cats{grid-template-columns:1fr}}
@@ -143,8 +126,8 @@
     <span class="badge r">Red &lt; 60</span>
   </div>
 
-  <!-- Main -->
-  <div class="split">
+  <!-- ===== Top: Wheel (center) + Pills + Water ===== -->
+  <div class="top">
     <div class="wheelbox">
       <div class="wheel warn" id="wheel">
         <div class="w-ring" id="wRing" style="--v:0"></div>
@@ -153,63 +136,57 @@
       </div>
     </div>
 
-    <div>
-      <div class="pills">
-        <div id="pillOverall" class="pill warn">✅ Overall: <span id="overallVal">0 /100</span></div>
-        <div id="pillContent" class="pill warn">📝 Content: <span id="contentVal">—</span></div>
-        <div id="pillWriter"  class="pill warn">✍️ Writer: <span id="writerVal">—</span></div>
-        <div id="pillHuman"   class="pill warn">🧑 Human-like: <span id="humanVal">— %</span></div>
-        <div id="pillAI"      class="pill warn">🤖 AI-like: <span id="aiVal">— %</span></div>
+    <div class="pills">
+      <div id="pillOverall" class="pill warn">✅ Overall: <span id="overallVal">0 /100</span></div>
+      <div id="pillContent" class="pill warn">📝 Content: <span id="contentVal">—</span></div>
+      <div id="pillWriter"  class="pill warn">✍️ Writer: <span id="writerVal">—</span></div>
+      <div id="pillHuman"   class="pill warn">🧑 Human-like: <span id="humanVal">— %</span></div>
+      <div id="pillAI"      class="pill warn">🤖 AI-like: <span id="aiVal">— %</span></div>
+    </div>
+
+    <div id="bar" class="water warn" style="width:min(900px,100%)">
+      <div class="f" id="barFill" style="width:0%"></div>
+      <div class="lbl" id="barLbl">0%</div>
+    </div>
+    <div style="color:var(--muted);font-size:13px">Wheel + water bars fill with your scores (✅ ≥80, 🟧 60–79, 🔴 &lt;60).</div>
+  </div>
+
+  <!-- ===== Analyze toolbar (now directly below wheel) ===== -->
+  <div class="panel" id="analyzePanel" style="max-width:980px;margin:10px auto 16px">
+    <div class="urlrow">
+      <div class="urlbox" style="width:100%">
+        <span>🌐</span>
+        <input id="urlInput" type="url" placeholder="https://example.com/page">
+        <button class="btn" id="pasteBtn">✕ Paste</button>
       </div>
+    </div>
 
-      <div id="bar" class="water warn">
-        <div class="f" id="barFill" style="width:0%"></div>
-        <div class="lbl" id="barLbl">0%</div>
-      </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;justify-content:center">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input id="autoCheck" type="checkbox" checked> Auto-apply checkmarks (≥ 80)</label>
+      <input id="importFile" type="file" accept="application/json" class="hidden">
+      <button class="btn p" id="importBtn">⬆ Import</button>
+      <button class="btn g" id="analyzeBtn">🔍 Analyze</button>
+      <button class="btn b" id="printBtn">🖨 Print</button>
+      <button class="btn o" id="resetBtn">↻ Reset</button>
+      <button class="btn p" id="exportBtn">⬇ Export</button>
+    </div>
 
-      <div style="color:var(--muted);font-size:13px;margin-bottom:10px">
-        Wheel + water bars fill with your scores (✅ ≥80, 🟧 60–79, 🔴 &lt;60).
-      </div>
-
-      <!-- URL panel -->
-      <div class="panel">
-        <div class="urlrow">
-          <div class="urlbox">
-            <span>🌐</span>
-            <input id="urlInput" type="url" placeholder="https://example.com/page">
-            <button class="btn" id="pasteBtn">✕ Paste</button>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap">
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input id="autoCheck" type="checkbox" checked> Auto-apply checkmarks (≥ 80)</label>
-          <span style="flex:1"></span>
-          <input id="importFile" type="file" accept="application/json" class="hidden">
-          <button class="btn p" id="importBtn">⬆ Import</button>
-          <button class="btn g" id="analyzeBtn">🔍 Analyze</button>
-          <button class="btn b" id="printBtn">🖨 Print</button>
-          <button class="btn o" id="resetBtn">↻ Reset</button>
-          <button class="btn p" id="exportBtn">⬇ Export</button>
-        </div>
-
-        <div class="meta">
-          <div class="chip"><span class="lbl-grad">HTTP:</span>&nbsp;<span id="cHttp">—</span></div>
-          <div class="chip"><span class="lbl-grad">Title:</span>&nbsp;<span id="cTitle">—</span></div>
-          <div class="chip"><span class="lbl-grad">Meta desc:</span>&nbsp;<span id="cMeta">—</span></div>
-          <div class="chip"><span class="lbl-grad">Canonical:</span>&nbsp;<span id="cCanon">—</span></div>
-          <div class="chip"><span class="lbl-grad">Robots:</span>&nbsp;<span id="cRobots">—</span></div>
-          <div class="chip"><span class="lbl-grad">Viewport:</span>&nbsp;<span id="cViewport">—</span></div>
-          <div class="chip"><span class="lbl-grad">H1/H2/H3:</span>&nbsp;<span id="cH">—</span></div>
-          <div class="chip"><span class="lbl-grad">Internal links:</span>&nbsp;<span id="cInt">—</span></div>
-          <div class="chip"><span class="lbl-grad">Schema:</span>&nbsp;<span id="cSchema">—</span></div>
-          <div class="chip"><span class="lbl-grad">Auto-checked:</span>&nbsp;<span id="cAuto">0</span></div>
-        </div>
-      </div>
+    <div class="meta">
+      <div class="chip"><span class="lbl-grad">HTTP:</span>&nbsp;<span id="cHttp">—</span></div>
+      <div class="chip"><span class="lbl-grad">Title:</span>&nbsp;<span id="cTitle">—</span></div>
+      <div class="chip"><span class="lbl-grad">Meta desc:</span>&nbsp;<span id="cMeta">—</span></div>
+      <div class="chip"><span class="lbl-grad">Canonical:</span>&nbsp;<span id="cCanon">—</span></div>
+      <div class="chip"><span class="lbl-grad">Robots:</span>&nbsp;<span id="cRobots">—</span></div>
+      <div class="chip"><span class="lbl-grad">Viewport:</span>&nbsp;<span id="cViewport">—</span></div>
+      <div class="chip"><span class="lbl-grad">H1/H2/H3:</span>&nbsp;<span id="cH">—</span></div>
+      <div class="chip"><span class="lbl-grad">Internal links:</span>&nbsp;<span id="cInt">—</span></div>
+      <div class="chip"><span class="lbl-grad">Schema:</span>&nbsp;<span id="cSchema">—</span></div>
+      <div class="chip"><span class="lbl-grad">Auto-checked:</span>&nbsp;<span id="cAuto">0</span></div>
     </div>
   </div>
 
   <!-- Quick Stats -->
-  <div class="panel" style="margin-top:16px">
+  <div class="panel" style="margin-top:8px">
     <h3 style="margin:0 0 8px 0">Quick Stats</h3>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
       <div class="panel" style="padding:10px"><div style="color:var(--muted);font-size:12px">Readability (Flesch)</div><div id="statF" style="font-weight:900;font-size:20px">—</div><div id="statG" style="color:var(--muted);font-size:12px">—</div></div>
@@ -233,7 +210,7 @@
     <div id="recs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
   </div>
 
-  <!-- Semantic SEO Ground (Categories + Checklists) -->
+  <!-- Semantic SEO Ground -->
   <div class="ground">
     <div class="ghead">
       <div class="gicon">🧭</div>
@@ -390,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recsEl.appendChild(d);
       });
 
-      /* Chips (labels already multicolor) */
+      /* Chips */
       cTitle.textContent=(data.content_structure?.title||'').length||0;
       cMeta.textContent=(data.content_structure?.meta_description||'').length||0;
       try{cCanon.textContent=new URL(url).origin}catch{cCanon.textContent='—'}
@@ -400,7 +377,11 @@ document.addEventListener('DOMContentLoaded', () => {
       cAuto.textContent=(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length;
       cHttp.textContent='200';
 
-      /* ==== Ground: categories & checklists ==== */
+      /* Ground: categories & checklists */
+      const sPill = sc => sc>=80?'sG':(sc>=60?'sO':'sR');
+      const fBtn  = sc => sc>=80?'fG':(sc>=60?'fO':'fR');
+      const label = sc => sc>=80?'Good (≥80)':(sc>=60?'Needs work (60–79)':'Low (<60)');
+
       catsEl.innerHTML='';
       (data.categories||[]).forEach(cat=>{
         const total=(cat.checks||[]).length;
@@ -413,16 +394,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const list=card.querySelector('.list');
 
         (cat.checks||[]).forEach(item=>{
-          const s=item.score??0;
+          const sc=item.score??0;
           const r=document.createElement('div'); r.className='row';
-          r.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${s>=80?'var(--green)':(s>=60?'var(--orange)':'var(--red)')}"></span><div style="font-weight:700">${item.label}</div></div>
+          r.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:${sc>=80?'var(--green)':(sc>=60?'var(--orange)':'var(--red)')}"></span><div style="font-weight:700">${item.label}</div></div>
                        <div style="display:flex;align-items:center;gap:6px">
-                         <span class="score ${sPill(s)}">${s}</span>
-                         <button class="imp ${fBtn(s)}">Improve</button>
+                         <span class="score ${sPill(sc)}">${sc}</span>
+                         <button class="imp ${fBtn(sc)}">Improve</button>
                        </div>`;
           r.querySelector('.imp').addEventListener('click',()=>{
-            mTitle.textContent=item.label; mCat.textContent=cat.name; mScore.textContent=s; mScore.className='score '+sPill(s);
-            mBand.textContent=label(s);
+            mTitle.textContent=item.label; mCat.textContent=cat.name; mScore.textContent=sc; mScore.className='score '+sPill(sc);
+            mBand.textContent=label(sc);
             mWhy.textContent=item.why||'This affects topical authority, UX, and rich-result eligibility.';
             mTips.innerHTML=''; (item.tips||['Aim for ≥80 (green) and re-run the analyzer.']).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});
             mSearch.href=item.improve_search_url || ('https://www.google.com/search?q='+encodeURIComponent(item.label+' SEO best practices'));
