@@ -11,12 +11,18 @@
   .card{border-radius:18px;padding:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}
   .pill{padding:6px 12px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#e5e7eb}
   .t-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* Multi-color glow outline (FASTER: ~1s) */
   .glow-anim{position:relative}
-  .glow-anim::before{content:"";position:absolute;inset:-2px;border-radius:inherit;background:conic-gradient(from 0deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e,#67e8f9);filter:blur(10px);opacity:.35;z-index:-1;animation:spinGlow 8s linear infinite}
+  .glow-anim::before{
+    content:"";position:absolute;inset:-2px;border-radius:inherit;
+    background:conic-gradient(from 0deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e,#67e8f9);
+    filter:blur(10px);opacity:.35;z-index:-1;animation:spinGlow 1s linear infinite;
+  }
   @keyframes spinGlow{to{transform:rotate(360deg)}}
 
-  /* Header special: Shoail Kahoker rainbow + dance */
-  .rainbow-dance{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbowSlide 6s linear infinite, bob 2.6s ease-in-out infinite}
+  /* Header special: Shoail Kahoker rainbow + gentle dance */
+  .rainbow-dance{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbowSlide 6s linear infinite,bob 2.6s ease-in-out infinite}
   @keyframes rainbowSlide{0%{background-position:0% 50%}100%{background-position:100% 50%}}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
@@ -31,7 +37,7 @@
   .lg-orange{background:rgba(245,158,11,.15);color:#fde68a;border-color:rgba(245,158,11,.35)}
   .lg-red{background:rgba(239,68,68,.15);color:#fecaca;border-color:rgba(239,68,68,.35)}
 
-  /* Chips with icons */
+  /* Score chips with icons */
   .chip{padding:12px 16px;border-radius:16px;font-weight:900;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.14);color:#eef2ff}
   .chip i{font-style:normal;font-size:18px}
   .chip.good{background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18));border-color:rgba(34,197,94,.45);color:#eafff3}
@@ -75,11 +81,15 @@
   .score-pill--orange{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#fde68a}
   .score-pill--red{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35);color:#fecaca}
 
-  /* Improve button outlines by band */
-  .improve-btn{padding:6px 10px;border-radius:10px;background:linear-gradient(135deg,#a78bfa,#60a5fa);color:#fff;font-weight:700;border:1px solid rgba(255,255,255,.18)}
-  .outline-green{border-color:rgba(34,197,94,.75)!important;box-shadow:0 0 0 2px rgba(34,197,94,.55) inset,0 0 16px rgba(34,197,94,.25)}
-  .outline-orange{border-color:rgba(245,158,11,.75)!important;box-shadow:0 0 0 2px rgba(245,158,11,.55) inset,0 0 16px rgba(245,158,11,.25)}
-  .outline-red{border-color:rgba(239,68,68,.75)!important;box-shadow:0 0 0 2px rgba(239,68,68,.55) inset,0 0 16px rgba(239,68,68,.25)}
+  /* Improve button: fill color by band (NEW) + outline by band */
+  .improve-btn{padding:6px 10px;border-radius:10px;color:#0b1020;font-weight:800;border:1px solid transparent;transition:transform .08s ease}
+  .improve-btn:active{transform:translateY(1px)}
+  .fill-green {background:linear-gradient(135deg,#16a34a,#22c55e,#86efac);color:#05240f}
+  .fill-orange{background:linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a);color:#3a2400}
+  .fill-red   {background:linear-gradient(135deg,#ef4444,#f87171,#fecaca);color:#2f0606}
+  .outline-green{border-color:rgba(34,197,94,.85)!important;box-shadow:0 0 0 2px rgba(34,197,94,.55) inset,0 0 16px rgba(34,197,94,.25)}
+  .outline-orange{border-color:rgba(245,158,11,.85)!important;box-shadow:0 0 0 2px rgba(245,158,11,.55) inset,0 0 16px rgba(245,158,11,.25)}
+  .outline-red{border-color:rgba(239,68,68,.85)!important;box-shadow:0 0 0 2px rgba(239,68,68,.55) inset,0 0 16px rgba(239,68,68,.25)}
 
   /* Modal */
   dialog[open]{display:block}
@@ -93,7 +103,7 @@
 <section class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
   <!-- Header -->
-  <div class="flex items-center justify-between flex-wrap gap-4">
+  <div class="flex items-center justify-between flex-wrap gap-4 glow-anim">
     <div class="flex items-center gap-3">
       <div class="glow-anim" style="width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.32),rgba(236,72,153,.32));border:1px solid rgba(255,255,255,.14)">👑</div>
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold">
@@ -111,7 +121,7 @@
   <!-- Wheel + chips -->
   <div class="grid lg:grid-cols-[340px,1fr] gap-6 items-center">
     <div class="mega glow-anim">
-      <div class="mw warn" id="mw">
+      <div class="mw warn glow-anim" id="mw">
         <div class="mw-ring" id="mwRing" style="--v:0"></div>
         <div class="mw-fill" id="mwFill" style="--p:0"></div>
         <div class="mw-center" id="mwNum">0%</div>
@@ -135,7 +145,7 @@
 
   <!-- Analyze toolbar -->
   <div class="analyze-wrap p-4 space-y-3 glow-anim">
-    <label class="flex items-center gap-2 rounded-xl px-3 py-2" style="background:#0b0b0b;border:1px solid rgba(255,255,255,.12)">
+    <label class="flex items-center gap-2 rounded-xl px-3 py-2 glow-anim" style="background:#0b0b0b;border:1px solid rgba(255,255,255,.12)">
       <span class="opacity-70">🌐</span>
       <input id="urlInput" name="url" type="url" placeholder="https://example.com" class="w-full bg-transparent outline-none text-slate-100 placeholder:text-slate-400"/>
       <button id="pasteBtn" type="button" class="pill">✕ Paste</button>
@@ -258,6 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const bandIcon=s=>s>=80?'🟢':(s>=60?'🟠':'🔴');
   const pillClassBy=s=>s>=80?'score-pill--green':(s>=60?'score-pill--orange':'score-pill--red');
   const outlineBy=s=>s>=80?'outline-green':(s>=60?'outline-orange':'outline-red');
+  const fillBy=s=>s>=80?'fill-green':(s>=60?'fill-orange':'fill-red'); // NEW: fill color selector
   const bandLabel=s=>s>=80?'Good (≥80)':(s>=60?'Needs work (60–79)':'Low (<60)');
 
   function tipsFor(cat){
@@ -311,10 +322,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       /* Overall & chips */
       const score=clamp01(data.overall_score||0), b=bandName(score);
-      mw?.classList.remove('good','warn','bad'); mw?.classList.add(b); overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add(b); chipOverall?.classList.add(b);
-      mwRing?.style.setProperty('--v',score); mwFill?.style.setProperty('--p',score); if(mwNum)mwNum.textContent=score+'%'; if(overallFill)overallFill.style.width=score+'%'; if(overallPct)overallPct.textContent=score+'%';
+      mw?.classList.remove('good','warn','bad'); mw?.classList.add(b);
+      overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add(b);
+      chipOverall?.classList.add(b);
+      mwRing?.style.setProperty('--v',score); mwFill?.style.setProperty('--p',score);
+      if(mwNum)mwNum.textContent=score+'%'; if(overallFill)overallFill.style.width=score+'%'; if(overallPct)overallPct.textContent=score+'%';
       setChip(chipOverall,'Overall',`${score} /100`,score);
 
+      /* Content score = avg of Content & Keywords and Content Quality */
       const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
       const contentScore=Math.round(([cmap['Content & Keywords'],cmap['Content Quality']].filter(v=>typeof v==='number').reduce((a,b)=>a+b,0))/2||0);
       setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
@@ -335,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
       /* Recommendations */
       recsEl.innerHTML=''; (data.recommendations||[]).forEach(rec=>{const d=document.createElement('div');d.className='card glow-anim';d.innerHTML=`<span class="pill mr-2">${rec.severity}</span>${rec.text}`;recsEl.appendChild(d);});
 
-      /* Ground */
+      /* Ground with Improve button banded FILL + OUTLINE (NEW) */
       catsEl.innerHTML=''; (data.categories||[]).forEach(cat=>{
         const total=(cat.checks||[]).length, passed=(cat.checks||[]).filter(ch=>(ch.score||0)>=80).length, pct=Math.round((passed/Math.max(1,total))*100);
         const card=document.createElement('div'); card.className='cat-card glow-anim';
@@ -347,11 +362,12 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="space-y-2" id="list"></div>`;
         const list=card.querySelector('#list');
         (cat.checks||[]).forEach(ch=>{
-          const outline=outlineBy(ch.score||0), color=(ch.score||0)>=80?'#10b981':(ch.score||0)>=60?'#f59e0b':'#ef4444';
+          const outline=outlineBy(ch.score||0), fill=fillBy(ch.score||0);
+          const color=(ch.score||0)>=80?'#10b981':(ch.score||0)>=60?'#f59e0b':'#ef4444';
           const row=document.createElement('div'); row.className='check glow-anim';
           row.innerHTML=`<div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full" style="background:${color}"></span><div class="font-semibold">${ch.label}</div></div>
                          <div class="flex items-center gap-2"><span class="score-pill ${pillClassBy(ch.score||0)}">${ch.score??'—'}</span>
-                         <button class="improve-btn ${outline}" type="button">Improve</button></div>`;
+                         <button class="improve-btn ${fill} ${outline}" type="button">Improve</button></div>`;
           row.querySelector('.improve-btn').addEventListener('click',()=>{
             mTitle.textContent=ch.label; mCat.textContent=cat.name; mScore.textContent=ch.score??'—';
             mBand.textContent=bandLabel(ch.score||0); mBand.className='pill '+pillClassBy(ch.score||0);
@@ -379,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* Close modal by backdrop click */
+  const modal=$('#improveModal');
   modal?.addEventListener('click',e=>{const r=modal.getBoundingClientRect();const inside=(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);if(!inside){if(typeof modal.close==='function')modal.close();else modal.removeAttribute('open');}})
 });
 </script>
