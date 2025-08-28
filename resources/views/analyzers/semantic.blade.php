@@ -3,74 +3,70 @@
 
 @push('head')
 <style>
-  /* ===== Global background ===== */
-  html, body { background:#030124 !important; }
+  /* ===== App background (updated) ===== */
+  html, body { background:#06021f !important; }
 
-  /* ===== Primitives ===== */
+  /* ===== Basics ===== */
   .glass { background: rgba(255,255,255,.06); backdrop-filter: blur(10px); }
-  .card  { border-radius: 16px; padding: 18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
+  .card  { border-radius: 18px; padding: 18px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); }
   .pill  { padding:6px 12px; border-radius:9999px; font-size:12px; font-weight:800; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.08); color:#e5e7eb; }
-  .chip  { padding:12px 16px; border-radius:16px; font-weight:900; position:relative; overflow:hidden; color:#eef2ff; border:1px solid rgba(255,255,255,.14); }
-  .chip::after{ content:""; position:absolute; inset:-2px; border-radius:inherit; background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 30%,transparent 70%,rgba(255,255,255,.18)); opacity:.2; pointer-events:none; }
 
-  /* Banded chips (Overall/Content) */
-  .chip.good  { background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18)); border-color:rgba(34,197,94,.45); color:#eafff3; }
-  .chip.warn  { background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(250,204,21,.18)); border-color:rgba(245,158,11,.45); color:#fff7e6; }
-  .chip.bad   { background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(248,113,113,.18)); border-color:rgba(239,68,68,.45); color:#ffecec; }
+  /* ===== Animated multi-color glow outline for any box ===== */
+  .glow-anim { position:relative; }
+  .glow-anim::before{
+    content:""; position:absolute; inset:-2px; border-radius: inherit;
+    background: conic-gradient(from 0deg, #67e8f9, #a78bfa, #fb7185, #f59e0b, #22c55e, #67e8f9);
+    filter: blur(10px); opacity:.35; z-index:-1; animation: spinGlow 8s linear infinite;
+  }
+  @keyframes spinGlow{ to { transform: rotate(360deg); } }
 
-  /* Legend pills */
+  /* ===== Gradient text utility ===== */
+  .t-grad{ background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+  /* ===== Analyze toolbar ===== */
+  .analyze-wrap{ border-radius: 18px; background:#020114; border:1px solid #1b2640; box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 20px 60px rgba(2,1,20,.45); }
+  .btn{ padding:12px 18px; border-radius:14px; font-weight:900; border:1px solid rgba(255,255,255,.12); position:relative; overflow:hidden; color:#0b1020; }
+  .btn-green{ background:#22c55e; box-shadow:0 8px 26px rgba(34,197,94,.35); }
+  .btn-blue { background:#3b82f6; box-shadow:0 8px 26px rgba(59,130,246,.35); }
+  .btn-orange{ background:#f59e0b; box-shadow:0 8px 26px rgba(245,158,11,.35); }
+  .btn-purple{ background:linear-gradient(90deg,#a78bfa,#f472b6); color:#19041a; box-shadow:0 8px 26px rgba(167,139,250,.35); }
+
+  /* ===== Legend pills ===== */
   .lg-green  { background:rgba(16,185,129,.15); color:#a7f3d0; border-color:rgba(16,185,129,.35); }
   .lg-orange { background:rgba(245,158,11,.15); color:#fde68a; border-color:rgba(245,158,11,.35); }
   .lg-red    { background:rgba(239,68,68,.15);  color:#fecaca; border-color:rgba(239,68,68,.35); }
 
-  /* ===== Analyze toolbar wrapper ===== */
-  .analyze-wrap{
-    border-radius: 18px;
-    background:#020114;            /* requested strip color */
-    border:1px solid #1b2640;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 20px 60px rgba(2,1,20,.45);
-  }
-  .btn   { padding:12px 18px; border-radius:14px; font-weight:900; border:1px solid rgba(255,255,255,.12); position:relative; overflow:hidden; }
-  .btn::after{
-    content:""; position:absolute; inset:-2px; border-radius:inherit;
-    background:linear-gradient(120deg,rgba(255,255,255,.18),transparent 35%,transparent 65%,rgba(255,255,255,.18));
-    opacity:.25; pointer-events:none;
-  }
-  .btn-green { background:#22c55e; color:#06180d; border:none; box-shadow:0 8px 26px rgba(34,197,94,.35); }
-  .btn-blue  { background:#3b82f6; color:#071226; border:none; box-shadow:0 8px 26px rgba(59,130,246,.35); }
-  .btn-orange{ background:#f59e0b; color:#2b1a03; border:none; box-shadow:0 8px 26px rgba(245,158,11,.35); }
-  .btn-purple{ background:linear-gradient(90deg,#a78bfa,#f472b6); color:#160216; border:none; box-shadow:0 8px 26px rgba(167,139,250,.35); }
+  /* ===== Score chips with icon + color ===== */
+  .chip{ padding:12px 16px; border-radius:16px; font-weight:900; display:inline-flex; align-items:center; gap:10px; border:1px solid rgba(255,255,255,.14); color:#eef2ff; }
+  .chip i{ font-style:normal; font-size:18px; }
+  .chip.good  { background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18)); border-color:rgba(34,197,94,.45); color:#eafff3; }
+  .chip.warn  { background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(250,204,21,.18)); border-color:rgba(245,158,11,.45); color:#fff7e6; }
+  .chip.bad   { background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(248,113,113,.18)); border-color:rgba(239,68,68,.45); color:#ffecec; }
 
-  /* ===== Mega wheel with water color by score ===== */
+  /* ===== Wheel with bottom “water” fill (color by band) ===== */
   .mega { display:grid; place-items:center; gap:12px; }
-  .mw { --v:0; --ring:#f59e0b; --p:0; width:260px; height:260px; position:relative; }
+  .mw { --v:0; --ring:#f59e0b; --p:0; width:280px; height:280px; position:relative; }
   .mw-ring{
     position:absolute; inset:0; border-radius:50%;
     background: conic-gradient(var(--ring) calc(var(--v)*1%), rgba(255,255,255,.08) 0);
-    -webkit-mask: radial-gradient(circle 102px, transparent 100px, #000 100px);
-            mask: radial-gradient(circle 102px, transparent 100px, #000 100px);
-    box-shadow: inset 0 0 0 12px rgba(255,255,255,.06);
+    -webkit-mask: radial-gradient(circle 108px, transparent 100px, #000 100px);
+            mask: radial-gradient(circle 108px, transparent 100px, #000 100px);
+    box-shadow: inset 0 0 0 14px rgba(255,255,255,.06);
   }
-  .mw-fill{
-    position:absolute; inset:24px; border-radius:50%; overflow:hidden;
-    background: var(--fill, linear-gradient(to top,#f59e0b 0%,#fbbf24 70%,#fde68a 100%));
-  }
-  .mw-fill::after{ /* liquid level */
+  .mw-fill{ position:absolute; inset:26px; border-radius:50%; overflow:hidden; background:#000; }
+  .mw-fill::after{
     content:""; position:absolute; left:0; right:0; height:100%;
-    top: calc(100% - var(--p)*1%);
-    background:#000; transition: top .9s ease;
+    top: calc(100% - var(--p)*1%); transition: top .9s ease;
+    background: var(--fill, linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%));
     -webkit-mask: radial-gradient(140px 22px at 50% 0,#0000 98%,#000 100%);
             mask: radial-gradient(140px 22px at 50% 0,#0000 98%,#000 100%);
   }
   .mw.good { --ring:#22c55e; --fill:linear-gradient(to top,#16a34a 0%,#22c55e 60%,#86efac 100%); }
   .mw.warn { --ring:#f59e0b; --fill:linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%); }
   .mw.bad  { --ring:#ef4444; --fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%); }
-  .mw-center{
-    position:absolute; inset:0; display:grid; place-items:center;
-    font-size:58px; font-weight:900; color:#fff; text-shadow:0 6px 22px rgba(0,0,0,.45);
-  }
+  .mw-center{ position:absolute; inset:0; display:grid; place-items:center; font-size:64px; font-weight:900; color:#fff; text-shadow:0 6px 22px rgba(0,0,0,.45); }
 
-  /* ===== Overall water bar with % + color by score ===== */
+  /* ===== Overall water bar ===== */
   .waterbox{ position:relative; height:22px; border-radius:9999px; overflow:hidden; border:1px solid rgba(255,255,255,.12); background:#0b0b0b; }
   .waterbox .fill{ position:absolute; inset:0; width:0%; transition:width .9s ease; }
   .waterbox.good .fill{ background:linear-gradient(90deg,#16a34a,#22c55e,#86efac); }
@@ -78,34 +74,30 @@
   .waterbox.bad  .fill{ background:linear-gradient(90deg,#ef4444,#f87171,#fecaca); }
   .waterbox .label{ position:absolute; inset:0; display:grid; place-items:center; font-weight:900; color:#e5e7eb; font-size:12px; text-shadow:0 2px 10px rgba(0,0,0,.45); }
 
-  /* ===== Status chips (rounded glossy) ===== */
+  /* ===== Status chips ===== */
   .status-row{ display:flex; flex-wrap:wrap; gap:12px; }
-  .status-chip{
-    padding:12px 18px; border-radius:26px; font-weight:900;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.10);
-    color:#eef2ff; position:relative; overflow:hidden;
-  }
-  .status-chip::after{ content:""; position:absolute; inset:-2px; border-radius:inherit; background:linear-gradient(120deg,rgba(255,255,255,.2),transparent 40%,transparent 60%,rgba(255,255,255,.15)); opacity:.18; }
+  .status-chip{ padding:12px 18px; border-radius:26px; font-weight:900; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:#eef2ff; }
+  .status-chip .k{ margin-right:6px; }
 
-  /* ===== Section titles ===== */
-  .t-grad{ background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
-
-  /* ===== Ground slab ===== */
+  /* ===== Ground area ===== */
   .ground-slab{ border-radius:24px; padding:22px; background:#0D0E1E; border:1px solid #1b2640; }
-  .ground-slab .cat-card{ border-radius:18px; padding:18px; background:#111E2F; border:1px solid rgba(255,255,255,.12); }
-  .ground-slab .cat-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-  .ground-slab .cat-title{ font-size:22px; font-weight:900; background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .ground-slab .progress{ width:100%; height:12px; border-radius:9999px; background: rgba(255,255,255,.08); overflow:hidden; border:1px solid rgba(255,255,255,.14); }
-  .ground-slab .progress>span{ display:block; height:100%; border-radius:9999px; background: linear-gradient(90deg,#ef4444,#fde047,#22c55e); transition: width .5s ease; }
-  .ground-slab .check{ display:flex; align-items:center; justify-content:space-between; border-radius:14px; padding:14px 16px; border:1px solid rgba(255,255,255,.10); background:#0F1A29; }
+  .cat-card{ border-radius:18px; padding:18px; background:#111E2F; border:1px solid rgba(255,255,255,.12); }
+  .cat-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .cat-title{ font-size:22px; font-weight:900; background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .progress{ width:100%; height:12px; border-radius:9999px; background: rgba(255,255,255,.08); overflow:hidden; border:1px solid rgba(255,255,255,.14); }
+  .progress>span{ display:block; height:100%; border-radius:9999px; background: linear-gradient(90deg,#ef4444,#fde047,#22c55e); transition: width .5s ease; }
+  .check{ display:flex; align-items:center; justify-content:space-between; border-radius:14px; padding:14px 16px; border:1px solid rgba(255,255,255,.10); background:#0F1A29; }
   .score-pill{ padding:4px 8px; border-radius:10px; font-weight:800; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12); color:#e5e7eb; }
   .score-pill--green  { background: rgba(16,185,129,.18); border-color: rgba(16,185,129,.35); color:#bbf7d0; }
   .score-pill--orange { background: rgba(245,158,11,.18); border-color: rgba(245,158,11,.35); color:#fde68a; }
   .score-pill--red    { background: rgba(239,68,68,.18);  border-color: rgba(239,68,68,.35);  color:#fecaca; }
-  .improve-btn{ padding:6px 10px; border-radius:10px; background:linear-gradient(135deg,#a78bfa,#60a5fa); color:#fff; font-weight:700; }
 
-  /* Improve dialog */
+  /* Improve button base + banded outline variants (NEW) */
+  .improve-btn{ padding:6px 10px; border-radius:10px; background:linear-gradient(135deg,#a78bfa,#60a5fa); color:#fff; font-weight:700; border:1px solid rgba(255,255,255,.18); transition: box-shadow .2s ease, border-color .2s ease; }
+  .outline-green { border-color: rgba(34,197,94,.75)!important; box-shadow: 0 0 0 2px rgba(34,197,94,.55) inset, 0 0 16px rgba(34,197,94,.25); }
+  .outline-orange{ border-color: rgba(245,158,11,.75)!important; box-shadow: 0 0 0 2px rgba(245,158,11,.55) inset, 0 0 16px rgba(245,158,11,.25); }
+  .outline-red   { border-color: rgba(239,68,68,.75)!important;  box-shadow: 0 0 0 2px rgba(239,68,68,.55) inset, 0 0 16px rgba(239,68,68,.25); }
+
   dialog[open]{ display:block; }
   dialog::backdrop{ background:rgba(0,0,0,.6); }
   #improveModal .card{ background:#0D0E1E; border:1px solid #1b2640; }
@@ -116,20 +108,26 @@
 @section('content')
 <section class="max-w-7xl mx-auto px-4 py-8 text-slate-100 space-y-8">
 
-  <!-- Title + legend -->
-  <div class="space-y-3">
-    <h1 class="text-3xl sm:text-4xl font-extrabold">Analyze a URL</h1>
-    <div class="flex flex-wrap gap-2 text-xs">
-      <span class="pill lg-green">Green ≥ 80</span>
-      <span class="pill lg-orange">Orange 60–79</span>
-      <span class="pill lg-red">Red &lt; 60</span>
+  <!-- Header -->
+  <div class="flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-3">
+      <div class="glow-anim" style="width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.32),rgba(236,72,153,.32));border:1px solid rgba(255,255,255,.14);">👑</div>
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold">
+        <span class="t-grad">Semantic SEO Master Analyzer</span>
+        <span class="text-slate-300 text-base md:text-lg">By Shoail Kahoker</span>
+      </h1>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      <span class="pill lg-green glow-anim">Green ≥ 80</span>
+      <span class="pill lg-orange glow-anim">Orange 60–79</span>
+      <span class="pill lg-red glow-anim">Red &lt; 60</span>
     </div>
   </div>
 
   <!-- Wheel + chips -->
-  <div class="grid lg:grid-cols-[320px,1fr] gap-6 items-center">
-    <div class="mega">
-      <div class="mw warn" id="mw">  <!-- will switch to .good / .bad -->
+  <div class="grid lg:grid-cols-[340px,1fr] gap-6 items-center">
+    <div class="mega glow-anim">
+      <div class="mw warn" id="mw">
         <div class="mw-ring" id="mwRing" style="--v:0"></div>
         <div class="mw-fill" id="mwFill" style="--p:0"></div>
         <div class="mw-center" id="mwNum">0%</div>
@@ -138,15 +136,14 @@
 
     <div class="space-y-3">
       <div class="flex flex-wrap gap-3">
-        <span id="chipOverall" class="chip warn">Overall: 0 /100</span>
-        <span id="chipContent" class="chip warn">Content: —</span>
-        <span id="chipWriter"  class="chip">Writer: —</span>
-        <span id="chipHuman"   class="chip">Human-like: — %</span>
-        <span id="chipAI"      class="chip">AI-like: — %</span>
+        <span id="chipOverall" class="chip warn glow-anim"><i>🟠</i><span>Overall: 0 /100</span></span>
+        <span id="chipContent" class="chip warn glow-anim"><i>🟠</i><span>Content: —</span></span>
+        <span id="chipWriter"  class="chip glow-anim"><i>🟠</i><span>Writer: —</span></span>
+        <span id="chipHuman"   class="chip glow-anim"><i>🟠</i><span>Human-like: — %</span></span>
+        <span id="chipAI"      class="chip glow-anim"><i>🟠</i><span>AI-like: — %</span></span>
       </div>
 
-      <!-- Overall water bar -->
-      <div id="overallBar" class="waterbox warn">
+      <div id="overallBar" class="waterbox warn glow-anim">
         <div class="fill" id="overallFill" style="width:0%"></div>
         <div class="label"><span id="overallPct">0%</span></div>
       </div>
@@ -155,7 +152,7 @@
   </div>
 
   <!-- Analyze toolbar -->
-  <div class="analyze-wrap p-4 space-y-3">
+  <div class="analyze-wrap p-4 space-y-3 glow-anim">
     <label class="flex items-center gap-2 rounded-xl px-3 py-2" style="background:#0b0b0b;border:1px solid rgba(255,255,255,.12);">
       <span class="opacity-70">🌐</span>
       <input id="urlInput" name="url" type="url" placeholder="https://example.com" class="w-full bg-transparent outline-none text-slate-100 placeholder:text-slate-400" />
@@ -171,42 +168,41 @@
       <div class="flex-1"></div>
 
       <input id="importFile" type="file" accept="application/json" class="hidden"/>
-      <button id="importBtn" class="btn btn-purple">⇪ Import</button>
-      <button id="analyzeBtn" class="btn btn-green">🔍 Analyze</button>
-      <button id="printBtn"   class="btn btn-blue">🖨️ Print</button>
-      <button id="resetBtn"   class="btn btn-orange">↻ Reset</button>
-      <button id="exportBtn"  class="btn btn-purple">⬇︎ Export</button>
+      <button id="importBtn" class="btn btn-purple glow-anim">⇪ Import</button>
+      <button id="analyzeBtn" class="btn btn-green glow-anim">🔍 Analyze</button>
+      <button id="printBtn"   class="btn btn-blue glow-anim">🖨️ Print</button>
+      <button id="resetBtn"   class="btn btn-orange glow-anim">↻ Reset</button>
+      <button id="exportBtn"  class="btn btn-purple glow-anim">⬇︎ Export</button>
     </div>
 
-    <!-- summary chips -->
     <div id="statusChips" class="status-row mt-2">
-      <div class="status-chip" id="chipHttp">HTTP: —</div>
-      <div class="status-chip" id="chipTitle">Title: —</div>
-      <div class="status-chip" id="chipMeta">Meta desc: —</div>
-      <div class="status-chip" id="chipCanon">Canonical: —</div>
-      <div class="status-chip" id="chipRobots">Robots: —</div>
-      <div class="status-chip" id="chipViewport">Viewport: —</div>
-      <div class="status-chip" id="chipH">H1/H2/H3: —</div>
-      <div class="status-chip" id="chipInt">Internal links: —</div>
-      <div class="status-chip" id="chipSchema">Schema: —</div>
-      <div class="status-chip" id="chipAuto">Auto-checked: 0</div>
+      <div class="status-chip glow-anim"><span class="k t-grad">HTTP:</span> <span id="chipHttp">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">Title:</span> <span id="chipTitle">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">Meta desc:</span> <span id="chipMeta">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">Canonical:</span> <span id="chipCanon">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">Robots:</span> <span id="chipRobots">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">Viewport:</span> <span id="chipViewport">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">H1/H2/H3:</span> <span id="chipH">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">Internal links:</span> <span id="chipInt">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">Schema:</span> <span id="chipSchema">—</span></div>
+      <div class="status-chip glow-anim"><span class="k t-grad">Auto-checked:</span> <span id="chipAuto">0</span></div>
     </div>
   </div>
 
   <!-- Quick Stats -->
-  <div class="card">
+  <div class="card glow-anim">
     <h3 class="t-grad font-extrabold mb-3">Quick Stats</h3>
     <div class="grid sm:grid-cols-3 gap-4 text-sm">
-      <div class="card">
+      <div class="card glow-anim">
         <div class="text-slate-300 text-xs">Readability (Flesch)</div>
         <div id="statFlesch" class="text-2xl font-bold">—</div>
         <div id="statGrade" class="text-xs text-slate-400">—</div>
       </div>
-      <div class="card">
+      <div class="card glow-anim">
         <div class="text-slate-300 text-xs">Links (int / ext)</div>
         <div class="text-2xl font-bold"><span id="statInt">0</span> / <span id="statExt">0</span></div>
       </div>
-      <div class="card">
+      <div class="card glow-anim">
         <div class="text-slate-300 text-xs">Text/HTML Ratio</div>
         <div id="statRatio" class="text-2xl font-bold">—</div>
       </div>
@@ -214,16 +210,16 @@
   </div>
 
   <!-- Content Structure -->
-  <div class="card">
+  <div class="card glow-anim">
     <h3 class="t-grad font-extrabold">Content Structure</h3>
     <div class="grid md:grid-cols-2 gap-6 mt-4">
-      <div class="card">
+      <div class="card glow-anim">
         <div class="text-xs text-slate-300">Title</div>
         <div id="titleVal" class="font-semibold text-slate-100">—</div>
         <div class="text-xs text-slate-300 mt-3">Meta Description</div>
         <div id="metaVal" class="text-slate-200">—</div>
       </div>
-      <div class="card">
+      <div class="card glow-anim">
         <div class="text-xs text-slate-300 mb-2">Heading Map</div>
         <div id="headingMap" class="text-sm space-y-2"></div>
       </div>
@@ -231,15 +227,15 @@
   </div>
 
   <!-- Recommendations -->
-  <div class="card">
+  <div class="card glow-anim">
     <h3 class="t-grad font-extrabold mb-3">Recommendations</h3>
     <div id="recs" class="grid md:grid-cols-2 gap-3"></div>
   </div>
 
   <!-- Semantic SEO Ground -->
-  <div class="ground-slab">
+  <div class="ground-slab glow-anim">
     <div class="flex items-center gap-3 mb-4">
-      <div style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.32),rgba(236,72,153,.32));border:1px solid rgba(255,255,255,.14);">🧭</div>
+      <div class="glow-anim" style="width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.32),rgba(236,72,153,.32));border:1px solid rgba(255,255,255,.14);">🧭</div>
       <div>
         <div class="t-grad text-2xl font-extrabold">Semantic SEO Ground</div>
         <div class="text-sm text-slate-300">Actionable checklists for structure, quality, UX & entities</div>
@@ -250,17 +246,17 @@
 
   <!-- Improve Modal -->
   <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]">
-    <div class="card">
+    <div class="card glow-anim">
       <div class="flex items-start justify-between">
         <h4 id="improveTitle" class="font-semibold text-slate-100">Improve</h4>
         <form method="dialog"><button class="pill">Close</button></form>
       </div>
       <div class="grid md:grid-cols-3 gap-3 mt-4">
-        <div class="card">
+        <div class="card glow-anim">
           <div class="text-xs text-slate-400">Category</div>
           <div id="improveCategory" class="font-semibold">—</div>
         </div>
-        <div class="card">
+        <div class="card glow-anim">
           <div class="text-xs text-slate-400">Score</div>
           <div class="flex items-center gap-2 mt-1">
             <span id="improveScore" class="score-pill">—</span>
@@ -268,7 +264,7 @@
           </div>
         </div>
         <a id="improveSearch" target="_blank"
-           class="card hover:opacity-90 transition text-center flex items-center justify-center bg-gradient-to-r from-fuchsia-500/20 to-sky-500/20 border border-white/10">
+           class="card hover:opacity-90 transition text-center flex items-center justify-center bg-gradient-to-r from-fuchsia-500/20 to-sky-500/20 border border-white/10 glow-anim">
           <span class="text-sm text-slate-200">Search guidance</span>
         </a>
       </div>
@@ -293,19 +289,20 @@ const $ = s => document.querySelector(s);
 const mw = $('#mw'), mwRing=$('#mwRing'), mwFill=$('#mwFill'), mwNum=$('#mwNum');
 const overallBar = $('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
 
-/* Chips + toolbar */
-const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'),
-      chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
-const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'),
-      pasteBtn=$('#pasteBtn'), importBtn=$('#importBtn'), importFile=$('#importFile'),
-      printBtn=$('#printBtn'), resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn'),
-      autoCheck=$('#autoCheck');
+/* Chips */
+const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'),
+      chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
 
-/* Stats & structure */
+/* Toolbar */
+const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn'),
+      importBtn=$('#importBtn'), importFile=$('#importFile'), printBtn=$('#printBtn'),
+      resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn'), autoCheck=$('#autoCheck');
+
+/* Quick stats & structure */
 const statF=$('#statFlesch'), statG=$('#statGrade'), statInt=$('#statInt'), statExt=$('#statExt'), statRatio=$('#statRatio');
 const titleVal=$('#titleVal'), metaVal=$('#metaVal'), headingMap=$('#headingMap'), recsEl=$('#recs'), catsEl=$('#cats');
 
-/* Status chips */
+/* Status chips values */
 const chipHttp=$('#chipHttp'), chipTitle=$('#chipTitle'), chipMeta=$('#chipMeta'),
       chipCanon=$('#chipCanon'), chipRobots=$('#chipRobots'), chipViewport=$('#chipViewport'),
       chipH=$('#chipH'), chipIntChip=$('#chipInt'), chipSchema=$('#chipSchema'), chipAuto=$('#chipAuto');
@@ -315,12 +312,15 @@ const modal=$('#improveModal');
 const mTitle=$('#improveTitle'), mCat=$('#improveCategory'), mScore=$('#improveScore'), mBand=$('#improveBand'),
       mWhy=$('#improveWhy'), mTips=$('#improveTips'), mLink=$('#improveSearch');
 
+/* Helpers */
 const clamp01 = (n)=> Math.max(0, Math.min(100, n));
 const bandName = (s)=> s>=80?'good':(s>=60?'warn':'bad');
+const bandIcon = (s)=> s>=80?'🟢':(s>=60?'🟠':'🔴');
 const pillClassBy=(s)=> s>=80?'score-pill--green':(s>=60?'score-pill--orange':'score-pill--red');
+const outlineBy=(s)=> s>=80?'outline-green':(s>=60?'outline-orange':'outline-red');
 const bandLabel=(s)=> s>=80?'Good (≥80)':(s>=60?'Needs work (60–79)':'Low (<60)');
 
-/* Small tips by category */
+/* Tips per category */
 function tipsFor(catName){
   switch (catName) {
     case 'Technical Elements': return ['Title ~50–60 chars incl. primary keyword.','Meta 140–160 chars + clear CTA.','Set canonical, avoid duplicates.','Ensure in XML sitemap.'];
@@ -333,19 +333,25 @@ function tipsFor(catName){
   }
 }
 
+/* Chip renderer */
+function setChip(el, label, scoreOrText, numericForBand){
+  ['good','warn','bad'].forEach(c=>el.classList.remove(c));
+  const score = typeof numericForBand==='number' ? numericForBand : (typeof scoreOrText==='number'?scoreOrText:0);
+  const band = bandName(score);
+  el.classList.add(band);
+  const icon = bandIcon(score);
+  const valText = (typeof scoreOrText==='number') ? scoreOrText : scoreOrText;
+  el.innerHTML = `<i>${icon}</i><span>${label}: ${valText}</span>`;
+}
+
 pasteBtn.addEventListener('click', async (e)=>{
-  e.preventDefault();
-  try{ const txt=await navigator.clipboard.readText(); if (txt) urlInput.value=txt.trim(); }catch{}
+  e.preventDefault(); try{ const txt=await navigator.clipboard.readText(); if (txt) urlInput.value=txt.trim(); }catch{}
 });
 importBtn.addEventListener('click', ()=> importFile.click());
 importFile.addEventListener('change', (e)=>{
   const f=e.target.files?.[0]; if(!f) return;
   const r=new FileReader();
-  r.onload=()=>{ try{
-    const j=JSON.parse(String(r.result||'{}'));
-    if (j.url) urlInput.value=j.url;
-    alert('Imported JSON. Click Analyze to run.');
-  }catch{ alert('Invalid JSON file.'); } };
+  r.onload=()=>{ try{ const j=JSON.parse(String(r.result||'{}')); if (j.url) urlInput.value=j.url; alert('Imported JSON. Click Analyze to run.'); }catch{ alert('Invalid JSON file.'); } };
   r.readAsText(f);
 });
 printBtn.addEventListener('click', ()=> window.print());
@@ -383,29 +389,28 @@ analyzeBtn.addEventListener('click', async ()=>{
 
   /* Overall */
   const score = clamp01( parseInt(data.overall_score||0,10) );
-  const b = bandName(score);
-  mw.classList.add(b); overallBar.classList.add(b); chipOverall.classList.add(b);
+  const band = score>=80?'good':(score>=60?'warn':'bad');
+  mw.classList.add(band); overallBar.classList.add(band); chipOverall.classList.add(band);
   mwRing.style.setProperty('--v', score);
   mwFill.style.setProperty('--p', score);
   mwNum.textContent = score + '%';
   overallFill.style.width = score + '%';
   overallPct.textContent  = score + '%';
-  chipOverall.textContent = `Overall: ${score} /100`;
+  setChip(chipOverall, 'Overall', `${score} /100`, score);
 
   /* Content score = avg(Content & Keywords, Content Quality) */
   const cmap = {}; (data.categories||[]).forEach(c => cmap[c.name]= c.score ?? 0);
   let present=0, sum=0; ['Content & Keywords','Content Quality'].forEach(k=>{ if (cmap[k]!=null){ sum+=cmap[k]; present++; } });
   const contentScore = present ? Math.round(sum/present) : (cmap['Content & Keywords'] ?? cmap['Content Quality'] ?? 0);
-  chipContent.classList.add( bandName(contentScore) );
-  chipContent.textContent = `Content: ${contentScore} /100`;
+  setChip(chipContent, 'Content', `${contentScore} /100`, contentScore);
 
   /* Human-like/AI-like (heuristic) */
   const r = data.readability || {};
   let human = clamp01( Math.round( 70 + (r.score||0)/5 - (r.passive_ratio||0)/3 ) );
   let ai    = clamp01( 100 - human );
-  chipHuman.textContent = `Human-like: ${human} %`;
-  chipAI.textContent    = `AI-like: ${ai} %`;
-  chipWriter.textContent= human>=60 ? 'Writer: Likely Human' : 'Writer: Possibly AI';
+  setChip(chipWriter, 'Writer', (human>=60 ? 'Likely Human' : 'Possibly AI'), human);
+  setChip(chipHuman, 'Human-like', human, human);
+  setChip(chipAI, 'AI-like', ai, ai);
 
   /* Quick stats */
   statF.textContent = r.flesch ?? '—';
@@ -420,28 +425,28 @@ analyzeBtn.addEventListener('click', async ()=>{
   const h = data.content_structure?.headings || {};
   headingMap.innerHTML=''; Object.entries(h).forEach(([lvl,arr])=>{
     if (!arr || !arr.length) return;
-    const box=document.createElement('div'); box.className='card';
+    const box=document.createElement('div'); box.className='card glow-anim';
     box.innerHTML=`<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');
     headingMap.appendChild(box);
   });
 
   /* Recommendations */
   recsEl.innerHTML=''; (data.recommendations||[]).forEach(rec=>{
-    const d=document.createElement('div'); d.className='card';
+    const d=document.createElement('div'); d.className='card glow-anim';
     d.innerHTML=`<span class="pill mr-2">${rec.severity}</span>${rec.text}`;
     recsEl.appendChild(d);
   });
 
-  /* Ground categories */
-  catsEl.innerHTML=''; let autoChecked=0;
+  /* Ground categories + colored outline Improve button (NEW) */
+  catsEl.innerHTML=''; 
   (data.categories||[]).forEach(cat=>{
     const total=(cat.checks||[]).length, passed=(cat.checks||[]).filter(ch=>(ch.score||0)>=80).length;
-    autoChecked += passed; const pct=Math.round((passed/Math.max(1,total))*100);
-    const card=document.createElement('div'); card.className='cat-card';
+    const pct=Math.round((passed/Math.max(1,total))*100);
+    const card=document.createElement('div'); card.className='cat-card glow-anim';
     card.innerHTML=`
       <div class="cat-head">
         <div class="flex items-center gap-3">
-          <div style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25));border:1px solid rgba(255,255,255,.12);">★</div>
+          <div class="glow-anim" style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25));border:1px solid rgba(255,255,255,.12);">★</div>
           <div>
             <div class="cat-title">${cat.name}</div>
             <div class="text-slate-300 text-sm">Keep improving</div>
@@ -454,7 +459,8 @@ analyzeBtn.addEventListener('click', async ()=>{
     `;
     const list=card.querySelector('#list');
     (cat.checks||[]).forEach(ch=>{
-      const row=document.createElement('div'); row.className='check';
+      const outline = outlineBy(ch.score||0);
+      const row=document.createElement('div'); row.className='check glow-anim';
       row.innerHTML=`
         <div class="flex items-center gap-3">
           <span class="w-3 h-3 rounded-full" style="background:${(ch.score||0)>=80?'#10b981':(ch.score||0)>=60?'#f59e0b':'#ef4444'}"></span>
@@ -462,18 +468,19 @@ analyzeBtn.addEventListener('click', async ()=>{
         </div>
         <div class="flex items-center gap-2">
           <span class="score-pill ${pillClassBy(ch.score||0)}">${ch.score ?? '—'}</span>
-          <button type="button" class="improve-btn">Improve</button>
+          <button class="improve-btn ${outline}" type="button">Improve</button>
         </div>
       `;
       row.querySelector('.improve-btn').addEventListener('click', ()=>{
         mTitle.textContent = ch.label;
-        mCat.textContent   = cat.name;
-        mScore.textContent = ch.score ?? '—';
-        mBand.textContent  = bandLabel(ch.score||0);
-        mBand.className    = 'pill '+pillClassBy(ch.score||0);
-        mWhy.textContent   = ch.why || 'This item impacts topical authority, UX and eligibility for rich results.';
-        mTips.innerHTML=''; (ch.tips||tipsFor(cat.name)).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; mTips.appendChild(li); });
-        mLink.href = ch.improve_search_url || ('https://www.google.com/search?q='+encodeURIComponent(ch.label+' SEO best practices'));
+        document.getElementById('improveCategory').textContent = cat.name;
+        document.getElementById('improveScore').textContent = ch.score ?? '—';
+        const bandPill = document.getElementById('improveBand');
+        bandPill.textContent  = bandLabel(ch.score||0);
+        bandPill.className    = 'pill '+pillClassBy(ch.score||0);
+        document.getElementById('improveWhy').textContent = ch.why || 'This item affects topical authority, UX, and rich-result eligibility.';
+        const ul=document.getElementById('improveTips'); ul.innerHTML=''; (ch.tips||tipsFor(cat.name)).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; ul.appendChild(li); });
+        document.getElementById('improveSearch').href = ch.improve_search_url || ('https://www.google.com/search?q='+encodeURIComponent(ch.label+' SEO best practices'));
         if (typeof modal.showModal==='function') modal.showModal(); else modal.setAttribute('open','');
       });
       list.appendChild(row);
@@ -481,20 +488,21 @@ analyzeBtn.addEventListener('click', async ()=>{
     catsEl.appendChild(card);
   });
 
-  /* status chips */
-  chipTitle.textContent = `Title: ${(data.content_structure?.title||'').length}`;
-  chipMeta.textContent  = `Meta desc: ${(data.content_structure?.meta_description||'').length}`;
-  try { chipCanon.textContent = `Canonical: ${new URL(url).origin}`; } catch { chipCanon.textContent='Canonical: —'; }
-  chipRobots.textContent= `Robots: —`;
-  chipViewport.textContent=`Viewport: —`;
-  chipH.textContent      = `H1/H2/H3: H1:${(h.H1||[]).length} • H2:${(h.H2||[]).length} • H3:${(h.H3||[]).length}`;
-  chipIntChip.textContent= `Internal links: ${data.quick_stats?.internal_links ?? 0}`;
-  chipSchema.textContent = `Schema: ${data.schema_count ?? 0}`;
-  chipAuto.textContent   = `Auto-checked: ${(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length}`;
-  chipHttp.textContent   = `HTTP: 200`; // assume OK if fetch succeeded
+  /* status chips values */
+  chipTitle.textContent = (data.content_structure?.title||'').length || 0;
+  chipMeta.textContent  = (data.content_structure?.meta_description||'').length || 0;
+  try { chipCanon.textContent = new URL(url).origin; } catch { chipCanon.textContent='—'; }
+  chipRobots.textContent= '—';
+  chipViewport.textContent='—';
+  const h = data.content_structure?.headings || {};
+  chipH.textContent      = `H1:${(h.H1||[]).length} • H2:${(h.H2||[]).length} • H3:${(h.H3||[]).length}`;
+  chipIntChip.textContent= data.quick_stats?.internal_links ?? 0;
+  chipSchema.textContent = data.schema_count ?? 0;
+  chipAuto.textContent   = (data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length;
+  chipHttp.textContent   = '200';
 });
 
-/* Close modal clicking backdrop */
+/* Close modal via backdrop click */
 if (modal) {
   modal.addEventListener('click', (e)=>{
     const rect = modal.getBoundingClientRect();
