@@ -4,33 +4,34 @@
 @push('head')
 <style>
   :root{
-    --bg:#06021f; --panel:#101628; --ink:#e7e9f5; --muted:#a8b0c6; --line:rgba(255,255,255,.10); --chip:rgba(255,255,255,.06);
+    --bg:#06021f; --ink:#e8eaf6; --muted:#a9b0c9; --line:rgba(255,255,255,.10);
+    --chip:rgba(255,255,255,.06); --panel:#101628;
     --green:#22c55e; --orange:#f59e0b; --red:#ef4444;
   }
   html,body{background:var(--bg)!important;color:var(--ink)}
   .container{max-width:1180px;margin:0 auto;padding:24px 16px}
 
-  /* Heading */
-  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-  .crown{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.28),rgba(236,72,153,.28));border:1px solid var(--line);font-size:20px}
-  .title{font-weight:900;font-size:28px;letter-spacing:.2px;margin:0}
+  /* ---------- Heading (centered) ---------- */
+  .brand{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:8px;text-align:center}
+  .crown{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.30),rgba(236,72,153,.30));border:1px solid var(--line);font-size:20px}
+  .title{font-weight:900;font-size:34px;letter-spacing:.2px;margin:0;line-height:1.15}
   .tgrad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
-  .by{font-size:14px;color:var(--muted)}
+  .by{font-size:15px;color:var(--muted)}
   .by .name{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:slide 6s linear infinite}
   @keyframes slide{to{background-position:100% 0}}
 
-  /* Legend (solid bg colors as requested) */
-  .legend{display:flex;gap:8px;margin:10px 0 22px}
-  .legend .badge{padding:6px 12px;border-radius:999px;font-weight:900;font-size:12px;color:#101010;border:1px solid var(--line)}
+  /* Legend with solid backgrounds */
+  .legend{display:flex;gap:10px;margin:12px 0 22px;justify-content:center}
+  .legend .badge{padding:8px 14px;border-radius:9999px;font-weight:900;font-size:13px;border:1px solid var(--line)}
   .legend .g{background:#34d399;color:#03140a}
   .legend .o{background:#fbbf24;color:#2b1600}
   .legend .r{background:#f87171;color:#2a0707}
 
-  /* ======= TOP ROW (left wheel, right pills + water) ======= */
+  /* ---------- Top row: wheel left, pills+water right ---------- */
   .toprow{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:center}
   @media(max-width:980px){.toprow{grid-template-columns:1fr;gap:14px}}
 
-  /* Wheel (fill from bottom, compact) */
+  /* Wheel (compact fill-from-bottom) */
   .wheelwrap{width:320px;max-width:100%}
   .wheel{--v:0;--ring:var(--orange);--p:0;width:100%;aspect-ratio:1/1;position:relative}
   .w-ring{position:absolute;inset:0;border-radius:50%;
@@ -43,45 +44,54 @@
     content:"";position:absolute;left:0;right:0;height:100%;
     top:calc(100% - var(--p)*1%);transition:top .9s ease;
     background:var(--fill,linear-gradient(to top,var(--orange) 0%,#fbbf24 60%,#fde68a 100%));
-    -webkit-mask:radial-gradient(160px 24px at 50% 0,#0000 98%,#000 100%);
-            mask:radial-gradient(160px 24px at 50% 0,#0000 98%,#000 100%)}
+    -webkit-mask:radial-gradient(160px 24px at 50% 0,#0000 98%,#000 100%);mask:radial-gradient(160px 24px at 50% 0,#0000 98%,#000 100%)}
   .wheel.good{--ring:var(--green);--fill:linear-gradient(to top,var(--green) 0%,#22c55e 60%,#86efac 100%)}
   .wheel.warn{--ring:var(--orange)}
   .wheel.bad {--ring:var(--red);--fill:linear-gradient(to top,var(--red) 0%,#f87171 60%,#fecaca 100%)}
   .w-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:56px;color:#fff}
 
-  /* Stat pills (small like screenshot) */
+  /* Pills (reduced size) */
   .pills{display:flex;flex-wrap:wrap;gap:10px}
-  .pill{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px;padding:12px 14px;border-radius:14px;background:var(--chip);border:1px solid var(--line);color:#eef2ff}
+  .pill{display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;padding:10px 12px;border-radius:12px;background:var(--chip);border:1px solid var(--line);color:#eef2ff}
   .pill.good{background:linear-gradient(135deg,rgba(34,197,94,.28),rgba(16,185,129,.12));color:#ecfff4}
   .pill.warn{background:linear-gradient(135deg,rgba(245,158,11,.28),rgba(250,204,21,.12));color:#fff8e9}
   .pill.bad{background:linear-gradient(135deg,rgba(239,68,68,.28),rgba(248,113,113,.12));color:#ffecec}
+  .txG{color:#a7f3d0}.txO{color:#fde68a}.txR{color:#fecaca}
 
   /* Water bar under pills */
-  .water{position:relative;height:18px;border-radius:9999px;overflow:hidden;border:1px solid var(--line);background:#0b0b0b;margin-top:12px}
+  .water{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--line);background:#0b0b0b;margin-top:12px}
   .water .f{position:absolute;inset:0;width:0%;transition:width .9s ease}
   .water.good .f{background:linear-gradient(90deg,var(--green),#4ade80,#86efac)}
   .water.warn .f{background:linear-gradient(90deg,var(--orange),#fbbf24,#fde68a)}
   .water.bad  .f{background:linear-gradient(90deg,var(--red),#f87171,#fecaca)}
   .water .lbl{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:12px;color:#e7e9f0}
 
-  /* ======= ANALYZE PANEL (big rounded) ======= */
+  /* ---------- Analyzer panel (pure black) ---------- */
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
-  .urlbox{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#0b1020;padding:12px;border-radius:12px}
-  .urlbox input{flex:1;background:transparent;border:none;outline:none;color:var(--ink)}
-  .paste{padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:var(--chip);font-weight:900}
-  .btn{padding:10px 14px;border-radius:12px;border:1px solid var(--line);font-weight:900;font-size:14px}
-  .g{background:var(--green);color:#07140b}
-  .b{background:#3b82f6;color:#071126}
-  .o{background:var(--orange);color:#2e1800}
-  .p{background:linear-gradient(90deg,#a78bfa,#f472b6);color:#170219}
+  .panel.analyzer{background:#000;border-color:#222}
+  .urlbox{position:relative;display:flex;align-items:center;gap:10px;border:1px solid #222;background:#060606;padding:12px 14px;border-radius:14px}
+  .urlbox input{flex:1;background:transparent;border:none;outline:none;color:#fff;font-weight:600}
+  .urlbox:focus-within{box-shadow:0 0 0 2px #6ee7ff1f,0 0 0 1px #1f2937;border-color:#2b2b2b}
+  .paste{padding:6px 10px;border-radius:10px;border:1px solid #333;background:#121212;color:#d9def2;font-weight:900}
 
+  .btn{padding:10px 14px;border-radius:12px;border:1px solid #2b2b2b;font-weight:900;font-size:14px;letter-spacing:.2px}
+  .btn.g{background:var(--green);color:#07140b;box-shadow:0 6px 20px rgba(34,197,94,.25)}
+  .btn.b{background:#3b82f6;color:#06142e;box-shadow:0 6px 20px rgba(59,130,246,.25)}
+  .btn.o{background:var(--orange);color:#2e1800;box-shadow:0 6px 20px rgba(245,158,11,.25)}
+  .btn.p{background:linear-gradient(90deg,#a78bfa,#f472b6);color:#1a0320;box-shadow:0 6px 20px rgba(167,139,250,.25)}
+
+  /* File chooser (styled) */
+  .filewrap{display:flex;align-items:center;gap:10px}
+  .filebtn{padding:8px 12px;border-radius:10px;border:1px solid #2b2b2b;background:#121212;color:#dbeafe;font-weight:900;cursor:pointer}
+  #fileName{color:var(--muted);font-size:13px}
+
+  /* Analyzer meta chips */
   .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-  .chip{padding:10px 14px;border-radius:9999px;background:var(--chip);border:1px solid var(--line);font-weight:900}
+  .chip{padding:10px 14px;border-radius:9999px;background:#0b0b0b;border:1px solid #222;font-weight:900}
   .lbl-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* Ground / categories */
-  .ground{background:#0D0E1E;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:18px}
+  /* ---------- Ground (slight zoom) ---------- */
+  .ground{background:#0D0E1E;border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:18px;transform:scale(1.01)}
   .ghead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
   .gicon{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.28),rgba(236,72,153,.28));border:1px solid var(--line)}
   .gtitle{font-weight:900;font-size:18px}
@@ -102,23 +112,22 @@
   .fO{background:linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a);color:#3a2400;border-color:#d97706}
   .fR{background:linear-gradient(135deg,#ef4444,#f87171,#fecaca);color:#2f0a0a;border-color:#dc2626}
 
-  /* Modal */
+  /* ---------- Improve modal (higher contrast to read) ---------- */
   dialog[open]{display:block}
   dialog::backdrop{background:rgba(0,0,0,.6)}
-  .modal{background:#0D0E1E;border:1px solid var(--line);border-radius:14px;padding:14px}
+  .modal{background:#0b0b0b;border:1px solid #2b2b2b;border-radius:14px;padding:14px;color:#f3f4f6}
+  .modal .panel{background:#0e0e0e;border-color:#2b2b2b}
 </style>
 @endpush
 
 @section('content')
 <div class="container">
 
-  <!-- Heading -->
+  <!-- Centered heading -->
   <div class="brand">
     <div class="crown">👑</div>
-    <div>
-      <h1 class="title"><span class="tgrad">Semantic SEO Master Analyzer</span></h1>
-      <div class="by">By <span class="name">Shoail Kahoker</span></div>
-    </div>
+    <h1 class="title"><span class="tgrad">Semantic SEO Master Analyzer</span></h1>
+    <div class="by">By <span class="name">Shoail Kahoker</span></div>
   </div>
 
   <!-- Legend -->
@@ -128,7 +137,7 @@
     <span class="badge r">Red &lt; 60</span>
   </div>
 
-  <!-- ===== TOP ROW: wheel left, pills + water right ===== -->
+  <!-- Top row -->
   <div class="toprow">
     <div class="wheelwrap">
       <div class="wheel warn" id="wheel">
@@ -140,11 +149,11 @@
 
     <div>
       <div class="pills">
-        <div id="pillOverall" class="pill warn">✅ Overall: <span id="overallVal">0 /100</span></div>
-        <div id="pillContent" class="pill warn">📝 Content: <span id="contentVal">—</span></div>
-        <div id="pillWriter"  class="pill warn">✍️ Writer: <span id="writerVal">—</span></div>
-        <div id="pillHuman"   class="pill warn">🧑 Human-like: <span id="humanVal">— %</span></div>
-        <div id="pillAI"      class="pill warn">🤖 AI-like: <span id="aiVal">— %</span></div>
+        <div id="pillOverall" class="pill warn">✅ Overall: <span id="overallVal" class="txO">0 /100</span></div>
+        <div id="pillContent" class="pill warn">📝 Content: <span id="contentVal" class="txO">—</span></div>
+        <div id="pillWriter"  class="pill warn">✍️ Writer: <span id="writerVal" class="txO">—</span></div>
+        <div id="pillHuman"   class="pill warn">🧑 Human-like: <span id="humanVal" class="txO">— %</span></div>
+        <div id="pillAI"      class="pill warn">🤖 AI-like: <span id="aiVal" class="txO">— %</span></div>
       </div>
       <div id="bar" class="water warn">
         <div class="f" id="barFill" style="width:0%"></div>
@@ -154,17 +163,26 @@
     </div>
   </div>
 
-  <!-- ===== ANALYZE PANEL (big rounded) BELOW TOP ROW ===== -->
-  <div class="panel" style="margin-top:18px">
+  <!-- Analyzer panel (black background) -->
+  <div class="panel analyzer" style="margin-top:18px">
     <div class="urlbox">
       <span>🌐</span>
       <input id="urlInput" type="url" placeholder="https://example.com/page">
       <button class="paste" id="pasteBtn">✕ Paste</button>
     </div>
 
-    <div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap">
+    <div style="display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap">
       <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input id="autoCheck" type="checkbox" checked> Auto-apply checkmarks (≥ 80)</label>
-      <input id="importFile" type="file" accept="application/json" class="hidden">
+
+      <!-- styled chooser -->
+      <div class="filewrap">
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+        <label for="importFile" class="filebtn">Choose a file</label>
+        <span id="fileName">No file chosen</span>
+      </div>
+
+      <!-- buttons -->
+      <div style="flex:1"></div>
       <button class="btn p" id="importBtn">⬆ Import</button>
       <button class="btn g" id="analyzeBtn">🔍 Analyze</button>
       <button class="btn b" id="printBtn">🖨 Print</button>
@@ -186,7 +204,7 @@
     </div>
   </div>
 
-  <!-- Quick Stats -->
+  <!-- Quick stats -->
   <div class="panel" style="margin-top:12px">
     <h3 style="margin:0 0 8px 0">Quick Stats</h3>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
@@ -211,7 +229,7 @@
     <div id="recs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
   </div>
 
-  <!-- Semantic SEO Ground (categories & checklist) -->
+  <!-- Semantic SEO Ground -->
   <div class="ground">
     <div class="ghead">
       <div class="gicon">🧭</div>
@@ -240,8 +258,8 @@
       </div>
       <a id="mSearch" target="_blank" class="panel" style="padding:10px;text-align:center">Search guidance</a>
     </div>
-    <div style="margin-top:8px"><div style="color:var(--muted);font-size:12px">Why this matters</div><p id="mWhy" style="margin:4px 0 0 0">—</p></div>
-    <div style="margin-top:8px"><div style="color:var(--muted);font-size:12px">How to improve</div><ul id="mTips" style="margin:6px 0 0 18px"></ul></div>
+    <div style="margin-top:8px"><div style="color:var(--muted);font-size:12px">Why this matters</div><p id="mWhy" style="margin:4px 0 0 0;line-height:1.55">—</p></div>
+    <div style="margin-top:8px"><div style="color:var(--muted);font-size:12px">How to improve</div><ul id="mTips" style="margin:6px 0 0 18px;line-height:1.55"></ul></div>
   </dialog>
 
 </div>
@@ -253,32 +271,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const $ = s => document.querySelector(s);
 
   /* Wheel + pills */
-  const wheel = $('#wheel'), wRing = $('#wRing'), wFill = $('#wFill'), wNum = $('#wNum');
-  const pillOverall = $('#pillOverall'), overallVal = $('#overallVal');
-  const pillContent = $('#pillContent'), contentVal = $('#contentVal');
-  const pillWriter  = $('#pillWriter'),  writerVal  = $('#writerVal');
-  const pillHuman   = $('#pillHuman'),   humanVal   = $('#humanVal');
-  const pillAI      = $('#pillAI'),      aiVal      = $('#aiVal');
-  const bar = $('#bar'), barFill = $('#barFill'), barLbl = $('#barLbl');
+  const wheel=$('#wheel'), wRing=$('#wRing'), wFill=$('#wFill'), wNum=$('#wNum');
+  const pillOv=$('#pillOverall'), ovVal=$('#overallVal');
+  const pillCt=$('#pillContent'), ctVal=$('#contentVal');
+  const pillWr=$('#pillWriter'),  wrVal=$('#writerVal');
+  const pillHu=$('#pillHuman'),   huVal=$('#humanVal');
+  const pillAi=$('#pillAI'),      aiVal=$('#aiVal');
+  const bar=$('#bar'), barFill=$('#barFill'), barLbl=$('#barLbl');
 
-  /* URL tools */
-  const urlInput = $('#urlInput'), pasteBtn = $('#pasteBtn'), analyzeBtn = $('#analyzeBtn'),
-        printBtn = $('#printBtn'), resetBtn = $('#resetBtn'), exportBtn = $('#exportBtn'),
-        importBtn = $('#importBtn'), importFile = $('#importFile');
+  /* URL & buttons */
+  const urlInput=$('#urlInput'), pasteBtn=$('#pasteBtn'), analyzeBtn=$('#analyzeBtn'),
+        printBtn=$('#printBtn'), resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn'),
+        importBtn=$('#importBtn'), importFile=$('#importFile'), fileName=$('#fileName');
 
-  /* Quick/structure/recs */
-  const statF = $('#statF'), statG = $('#statG'), qInt = $('#qInt'), qExt = $('#qExt'), qRatio = $('#qRatio');
-  const titleVal = $('#titleVal'), metaVal = $('#metaVal'), headingMap = $('#headingMap'), recsEl = $('#recs');
+  /* Stats/structure */
+  const statF=$('#statF'), statG=$('#statG'), qInt=$('#qInt'), qExt=$('#qExt'), qRatio=$('#qRatio');
+  const titleVal=$('#titleVal'), metaVal=$('#metaVal'), headingMap=$('#headingMap'), recsEl=$('#recs');
 
   /* Chips */
   const cHttp=$('#cHttp'), cTitle=$('#cTitle'), cMeta=$('#cMeta'), cCanon=$('#cCanon'), cRobots=$('#cRobots'), cViewport=$('#cViewport'), cH=$('#cH'), cInt=$('#cInt'), cSchema=$('#cSchema'), cAuto=$('#cAuto');
 
-  /* Ground */
-  const catsEl = $('#cats');
-  const modal = $('#improveModal'), mTitle=$('#mTitle'), mCat=$('#mCat'), mScore=$('#mScore'), mBand=$('#mBand'), mWhy=$('#mWhy'), mTips=$('#mTips'), mSearch=$('#mSearch');
+  /* Ground & modal */
+  const catsEl=$('#cats');
+  const modal=$('#improveModal'), mTitle=$('#mTitle'), mCat=$('#mCat'), mScore=$('#mScore'), mBand=$('#mBand'), mWhy=$('#mWhy'), mTips=$('#mTips'), mSearch=$('#mSearch');
 
-  /* Helpers */
   const band = s => s>=80 ? 'good' : (s>=60 ? 'warn' : 'bad');
+  const clsText = s => s>=80 ? 'txG' : (s>=60 ? 'txO' : 'txR');
   const sPill = s => s>=80 ? 'sG' : (s>=60 ? 'sO' : 'sR');
   const fBtn  = s => s>=80 ? 'fG'  : (s>=60 ? 'fO'  : 'fR');
   const label = s => s>=80 ? 'Good (≥80)' : (s>=60 ? 'Needs work (60–79)' : 'Low (<60)');
@@ -289,16 +307,17 @@ document.addEventListener('DOMContentLoaded', () => {
     analyzeBtn.disabled=on; analyzeBtn.style.opacity=on?.6:1; analyzeBtn.textContent=on?'Analyzing…':'🔍 Analyze';
   }
 
-  /* Actions */
+  /* paste & file */
   pasteBtn.addEventListener('click', async ()=>{ try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
-  printBtn.addEventListener('click',()=>window.print());
-  resetBtn.addEventListener('click',()=>location.reload());
   importBtn.addEventListener('click',()=>importFile.click());
   importFile.addEventListener('change',e=>{
-    const f=e.target.files?.[0]; if(!f) return;
-    const r=new FileReader(); r.onload=()=>{ try{const j=JSON.parse(String(r.result||'{}')); if(j.url) urlInput.value=j.url; alert('Imported. Click Analyze.');}catch{alert('Invalid JSON');} };
+    const f=e.target.files?.[0]; fileName.textContent=f?f.name:'No file chosen';
+    if(!f) return;
+    const r=new FileReader(); r.onload=()=>{ try{const j=JSON.parse(String(r.result||'{}')); if(j.url) urlInput.value=j.url; alert('Imported. Click Analyze.'); }catch{ alert('Invalid JSON'); } };
     r.readAsText(f);
   });
+  printBtn.addEventListener('click',()=>window.print());
+  resetBtn.addEventListener('click',()=>location.reload());
   exportBtn.addEventListener('click',()=>{
     if(!window.__lastData){alert('Run an analysis first.');return;}
     const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});
@@ -329,22 +348,22 @@ document.addEventListener('DOMContentLoaded', () => {
       /* Overall */
       const s=clamp(data.overall_score||0);
       wheel.classList.remove('good','warn','bad'); wheel.classList.add(band(s));
-      setBand(pillOverall,s); overallVal.textContent=`${s} /100`;
+      setBand(pillOv,s); ovVal.className=clsText(s); ovVal.textContent=`${s} /100`;
       wRing.style.setProperty('--v',s); wFill.style.setProperty('--p',s); wNum.textContent=s+'%';
       bar.classList.remove('good','warn','bad'); bar.classList.add(band(s)); barFill.style.width=s+'%'; barLbl.textContent=s+'%';
 
-      /* Content = avg(Content & Keywords, Content Quality) */
+      /* Content average */
       const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
       const cScore=Math.round(((cmap['Content & Keywords']??0)+(cmap['Content Quality']??0))/2);
-      setBand(pillContent,cScore); contentVal.textContent=`${cScore} /100`;
+      setBand(pillCt,cScore); ctVal.className=clsText(cScore); ctVal.textContent=`${cScore} /100`;
 
       /* Writer / likeness */
       const r=data.readability||{}, human=clamp(Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3)), ai=100-human;
-      setBand(pillWriter,human); writerVal.textContent = human>=60?'Likely Human':'Possibly AI';
-      setBand(pillHuman,human); humanVal.textContent = human+' %';
-      setBand(pillAI,ai);       aiVal.textContent    = ai+' %';
+      setBand(pillWr,human); wrVal.className=clsText(human); wrVal.textContent=human>=60?'Likely Human':'Possibly AI';
+      setBand(pillHu,human); huVal.className=clsText(human); huVal.textContent=human+' %';
+      setBand(pillAi,ai);    aiVal.className=clsText(ai);    aiVal.textContent=ai+' %';
 
-      /* Quick stats */
+      /* Stats */
       statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
       qInt.textContent=data.quick_stats?.internal_links??0; qExt.textContent=data.quick_stats?.external_links??0;
       qRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
@@ -378,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cAuto.textContent=(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length;
       cHttp.textContent='200';
 
-      /* Ground: categories & checklists */
+      /* Ground: categories + checklist */
       catsEl.innerHTML='';
       (data.categories||[]).forEach(cat=>{
         const total=(cat.checks||[]).length;
@@ -400,7 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
                        </div>`;
           r.querySelector('.imp').addEventListener('click',()=>{
             mTitle.textContent=item.label; mCat.textContent=cat.name; mScore.textContent=sc; mScore.className='score '+sPill(sc);
-            mBand.textContent=label(sc);
+            mBand.textContent=label(sc); mBand.className='chip '+(sc>=80?'txG':(sc>=60?'txO':'txR'));
             mWhy.textContent=item.why||'This affects topical authority, UX, and rich-result eligibility.';
             mTips.innerHTML=''; (item.tips||['Aim for ≥80 (green) and re-run the analyzer.']).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});
             mSearch.href=item.improve_search_url || ('https://www.google.com/search?q='+encodeURIComponent(item.label+' SEO best practices'));
@@ -419,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* Close modal on click outside */
+  /* Close modal on backdrop click */
   modal?.addEventListener('click',e=>{
     const r=modal.getBoundingClientRect();
     if(!(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom)){
