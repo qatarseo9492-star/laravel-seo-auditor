@@ -4,29 +4,21 @@
 
 @push('head')
 <style>
-  /* ========= FORCE Dark Purple + Red Background (no images) =========
-     NOTE: Ensure your layouts/app.blade.php has @stack('head') in <head>. */
+  /* ========= Solid Dark Purple background =========
+     Name: Dark Purple | Hex: #321A37 | RGB: (50, 26, 55) */
   body{
     color:#e8eaf6;
-    background:
-      radial-gradient(1200px 700px at 85% -10%, rgba(255, 64, 95, .30), transparent 60%),
-      radial-gradient(900px 600px at   0%   0%, rgba(160,  0, 255, .28), transparent 60%),
-      radial-gradient(700px 500px at 100% 100%, rgba(255, 18,  18,  .18), transparent 60%),
-      linear-gradient(180deg, #210a37, #160726 60%, #0b0714) !important; /* force over layout */
+    background:#321A37 !important; /* force over any layout classes */
     overflow-x:hidden;
   }
 
-  /* Fixed gradient layer (shows even if body has old bg class) */
+  /* Fixed base layer (ensures the color shows even if body gets another bg) */
   .app-bg{
     position:fixed; inset:0; z-index:-2; pointer-events:none;
-    background:
-      radial-gradient(1200px 700px at 85% -10%, rgba(255, 64, 95, .30), transparent 60%),
-      radial-gradient(900px 600px at   0%   0%, rgba(160,  0, 255, .28), transparent 60%),
-      radial-gradient(700px 500px at 100% 100%, rgba(255, 18,  18,  .18), transparent 60%),
-      linear-gradient(180deg, #210a37, #160726 60%, #0b0714);
+    background:#321A37; /* Dark Purple */
   }
 
-  /* ========= Animated Tech Lines (styled like the reference pin) ========= */
+  /* ========= Animated Tech Lines (purple ↔ red strands) ========= */
   .tech-bg{position:fixed; inset:0; pointer-events:none; opacity:.46; z-index:-1;}
   .tech-bg svg{width:145%; height:145%; transform:translate(-17%,-18%) rotate(-7deg);}
   .tech-bg .dash{stroke-dasharray:8 18; animation:dashMove 16s linear infinite;}
@@ -82,7 +74,7 @@
 @endpush
 
 @section('content')
-<!-- Fixed gradient background layer (ensures new theme shows) -->
+<!-- Fixed base color layer -->
 <div class="app-bg" aria-hidden="true"></div>
 
 <!-- Animated tech lines (purple + red) -->
