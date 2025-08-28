@@ -4,66 +4,52 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
-    public function edit()
+    public function edit(Request $request)
     {
-        return view('profile.edit');
+        return view('profile.edit', ['user' => $request->user()]);
     }
 
     public function updateProfile(Request $request)
     {
         $user = $request->user();
-
         $data = $request->validate([
-            'name' => ['required','string','max:120'],
+            'name'  => ['required','string','max:120'],
+            'email' => ['required','email','max:190','unique:users,email,'.$user->id],
         ]);
-
-        $user->name = $data['name'];
-        $user->save();
-
-        return back()->with('status', 'Profile updated.');
+        $user->fill($data)->save();
+        return back()->with('ok','Profile updated.');
     }
 
     public function updatePassword(Request $request)
     {
         $user = $request->user();
-
-        $request->validate([
-            'current_password' => ['required','string'],
-            'password' => ['required','string','min:8','confirmed'],
+        $data = $request->validate([
+            'current_password' => ['required'],
+            'password'         => ['required','confirmed', Password::min(8)->mixedCase()->numbers()],
         ]);
-
-        if (! Hash::check($request->input('current_password'), $user->password)) {
-            return back()->withErrors(['current_password' => 'Current password is incorrect.']);
+        if (! Hash::check($data['current_password'], $user->password)) {
+            return back()->withErrors(['current_password'=>'Current password is incorrect.']);
         }
-
-        $user->password = Hash::make($request->input('password'));
+        $user->password = Hash::make($data['password']);
         $user->save();
-
-        return back()->with('status', 'Password updated.');
+        return back()->with('ok','Password changed.');
     }
 
     public function updateAvatar(Request $request)
     {
         $user = $request->user();
-
-        $request->validate([
-            'avatar' => ['required','image','mimes:jpg,jpeg,png,webp','max:2048'],
+        $data = $request->validate([
+            'avatar' => ['required','image','max:2048'], // 2MB
         ]);
-
-        // store to storage/app/public/avatars
-        $path = $request->file('avatar')->store('avatars', 'public');
-
-        // delete previous (optional)
-        if ($user->avatar_path && file_exists(public_path('storage/'.$user->avatar_path))) {
-            @unlink(public_path('storage/'.$user->avatar_path));
-        }
-
-        $user->avatar_path = $path;
+        $path = $request->file('avatar')->store('public/avatars');
+        // store relative path so Storage::url works
+        $user->avatar = $path;
         $user->save();
-
-        return back()->with('status', 'Avatar updated.');
+        return back()->with('ok','Avatar updated.');
     }
 }
