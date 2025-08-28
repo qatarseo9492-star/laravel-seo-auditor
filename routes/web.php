@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -12,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 | - resources/views/analyzers/semantic.blade.php
 | - resources/views/analyzers/ai.blade.php
 | - resources/views/analyzers/topic.blade.php
+| - resources/views/profile/edit.blade.php
 | - resources/views/auth/login.blade.php      (placeholder if you don't use Breeze/Jetstream)
 | - resources/views/auth/register.blade.php   (placeholder if you don't use Breeze/Jetstream)
 */
@@ -26,13 +29,27 @@ Route::view('/', 'home')->name('home');
 | Anyone hitting these while not logged in will be redirected to route('login').
 */
 Route::middleware('auth')->group(function () {
-    // Dashboard (fixes 404 for /dashboard)
+    // Dashboard
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
     // Tool shells (views should exist)
     Route::view('/semantic-analyzer', 'analyzers.semantic')->name('semantic.analyzer');
     Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
     Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
+
+    // Profile & Settings
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::post('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+
+    // Logout (POST)
+    Route::post('/logout', function () {
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        return redirect()->route('home');
+    })->name('logout');
 });
 
 /*
