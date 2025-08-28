@@ -3,49 +3,49 @@
 
 @push('head')
 <style>
-  /* App background */
+  /* ---- Base ------------------------------------------------- */
   html,body{background:#06021f!important;color:#e5e7eb}
-
-  /* Simple utilities */
   .glass{background:rgba(255,255,255,.06);backdrop-filter:blur(10px)}
   .card{border-radius:18px;padding:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}
   .pill{padding:6px 12px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#e5e7eb}
   .t-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* Fast multi-color glow outline (~1s spin) */
-  .glow-anim{position:relative}
+  /* ---- Animated outline (clipped/softened so it never leaks) */
+  .glow-anim{position:relative;overflow:hidden}
   .glow-anim::before{
-    content:"";position:absolute;inset:-2px;border-radius:inherit;
+    content:"";position:absolute;inset:-1px;border-radius:inherit;
     background:conic-gradient(from 0deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e,#67e8f9);
-    filter:blur(10px);opacity:.35;z-index:-1;animation:spinGlow 1s linear infinite;
+    filter:blur(6px);opacity:.22;z-index:-1;animation:spinGlow 1.2s linear infinite;
   }
   @keyframes spinGlow{to{transform:rotate(360deg)}}
+  body,#app,section{overflow-x:hidden}
+  .ground-slab.glow-anim::before{opacity:.14;filter:blur(4px)}
 
-  /* Header: Shoail Kahoker rainbow + dance */
+  /* Header “Shoail Kahoker” rainbow + dance */
   .rainbow-dance{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbowSlide 6s linear infinite,bob 2.6s ease-in-out infinite}
   @keyframes rainbowSlide{0%{background-position:0% 50%}100%{background-position:100% 50%}}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
-  /* Analyze toolbar */
+  /* Toolbar + buttons */
   .analyze-wrap{border-radius:18px;background:#020114;border:1px solid #1b2640;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 20px 60px rgba(2,1,20,.45)}
   .btn{padding:12px 18px;border-radius:14px;font-weight:900;border:1px solid rgba(255,255,255,.12);color:#0b1020}
   .btn-green{background:#22c55e;box-shadow:0 8px 26px rgba(34,197,94,.35)}
   .btn-blue{background:#3b82f6;box-shadow:0 8px 26px rgba(59,130,246,.35)}
   .btn-orange{background:#f59e0b;box-shadow:0 8px 26px rgba(245,158,11,.35)}
   .btn-purple{background:linear-gradient(90deg,#a78bfa,#f472b6);color:#19041a;box-shadow:0 8px 26px rgba(167,139,250,.35)}
+
   .lg-green{background:rgba(16,185,129,.15);color:#a7f3d0;border-color:rgba(16,185,129,.35)}
   .lg-orange{background:rgba(245,158,11,.15);color:#fde68a;border-color:rgba(245,158,11,.35)}
   .lg-red{background:rgba(239,68,68,.15);color:#fecaca;border-color:rgba(239,68,68,.35)}
 
-  /* Chips with icons */
+  /* Chips */
   .chip{padding:12px 16px;border-radius:16px;font-weight:900;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.14);color:#eef2ff}
   .chip i{font-style:normal;font-size:18px}
   .chip.good{background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18));border-color:rgba(34,197,94,.45);color:#eafff3}
   .chip.warn{background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(250,204,21,.18));border-color:rgba(245,158,11,.45);color:#fff7e6}
   .chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(248,113,113,.18));border-color:rgba(239,68,68,.45);color:#ffecec}
 
-  /* Wheel with bottom fill */
-  .mega{display:grid;place-items:center;gap:12px}
+  /* Score wheel with bottom fill */
   .mw{--v:0;--ring:#f59e0b;--p:0;width:280px;height:280px;position:relative}
   .mw-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--v)*1%),rgba(255,255,255,.08) 0);-webkit-mask:radial-gradient(circle 108px,transparent 100px,#000 100px);mask:radial-gradient(circle 108px,transparent 100px,#000 100px);box-shadow:inset 0 0 0 14px rgba(255,255,255,.06)}
   .mw-fill{position:absolute;inset:26px;border-radius:50%;overflow:hidden;background:#000}
@@ -55,7 +55,7 @@
   .mw.bad{--ring:#ef4444;--fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%)}
   .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:64px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
 
-  /* Overall water bar */
+  /* Water bar */
   .waterbox{position:relative;height:22px;border-radius:9999px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#0b0b0b}
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
   .waterbox.good .fill{background:linear-gradient(90deg,#16a34a,#22c55e,#86efac)}
@@ -63,12 +63,7 @@
   .waterbox.bad .fill{background:linear-gradient(90deg,#ef4444,#f87171,#fecaca)}
   .waterbox .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:#e5e7eb;font-size:12px;text-shadow:0 2px 10px rgba(0,0,0,.45)}
 
-  /* Status chips row */
-  .status-row{display:flex;flex-wrap:wrap;gap:12px}
-  .status-chip{padding:12px 18px;border-radius:26px;font-weight:900;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10);color:#eef2ff}
-  .status-chip .k{margin-right:6px}
-
-  /* Ground area */
+  /* Ground / checklist */
   .ground-slab{border-radius:24px;padding:22px;background:#0D0E1E;border:1px solid #1b2640}
   .cat-card{border-radius:18px;padding:18px;background:#111E2F;border:1px solid rgba(255,255,255,.12)}
   .cat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -81,7 +76,6 @@
   .score-pill--orange{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.35);color:#fde68a}
   .score-pill--red{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.35);color:#fecaca}
 
-  /* Improve button fill+outline by band */
   .improve-btn{padding:6px 10px;border-radius:10px;color:#0b1020;font-weight:800;border:1px solid transparent;transition:transform .08s ease}
   .improve-btn:active{transform:translateY(1px)}
   .fill-green {background:linear-gradient(135deg,#16a34a,#22c55e,#86efac);color:#05240f}
@@ -96,14 +90,30 @@
   dialog::backdrop{background:rgba(0,0,0,.6)}
   #improveModal .card{background:#0D0E1E;border:1px solid #1b2640}
   #improveModal .card .card{background:#111E2F;border-color:rgba(255,255,255,.12)}
+
+  /* Avatar chip */
+  .avatar{width:28px;height:28px;border-radius:9999px;object-fit:cover;border:2px solid rgba(255,255,255,.18)}
+  .avatar-fallback{width:28px;height:28px;border-radius:9999px;display:grid;place-items:center;background:#1f2937;color:#e5e7eb;font-weight:900;border:2px solid rgba(255,255,255,.18)}
 </style>
 @endpush
 
 @section('content')
+@php
+  use Illuminate\Support\Facades\Auth;
+  use Illuminate\Support\Facades\Storage;
+
+  $u = Auth::user();
+  $cand = $u?->profile_photo_url ?? $u?->avatar_url ?? $u?->avatar ?? $u?->photo ?? null;
+  if ($cand && str_starts_with($cand,'http')) { $avatarUrl = $cand; }
+  elseif ($cand) { try { $avatarUrl = Storage::url($cand); } catch (\Throwable $e) { $avatarUrl = $cand; } }
+  else { $avatarUrl = null; }
+  $initials = $u ? mb_strtoupper(mb_substr($u->name ?? ($u->email ?? 'U'),0,1,'UTF-8')) : 'U';
+@endphp
+
 <section class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-  <!-- Header -->
-  <div class="flex items-center justify-between flex-wrap gap-4 glow-anim">
+  <!-- Local top bar with Dashboard + avatar (works even if layout doesn’t show photo) -->
+  <div class="flex items-center justify-between mb-2">
     <div class="flex items-center gap-3">
       <div class="glow-anim" style="width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.32),rgba(236,72,153,.32));border:1px solid rgba(255,255,255,.14)">👑</div>
       <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold">
@@ -111,16 +121,28 @@
         <span class="text-slate-300 text-base md:text-lg">&nbsp;By&nbsp;<span class="rainbow-dance">Shoail Kahoker</span></span>
       </h1>
     </div>
-    <div class="flex flex-wrap gap-2">
-      <span class="pill lg-green glow-anim">Green ≥ 80</span>
-      <span class="pill lg-orange glow-anim">Orange 60–79</span>
-      <span class="pill lg-red glow-anim">Red &lt; 60</span>
-    </div>
+
+    @auth
+    <a href="{{ route('dashboard') }}" class="pill glow-anim flex items-center gap-2">
+      @if($avatarUrl)
+        <img class="avatar" src="{{ $avatarUrl }}" alt="Avatar">
+      @else
+        <span class="avatar-fallback">{{ $initials }}</span>
+      @endif
+      <span>Dashboard</span>
+    </a>
+    @endauth
+  </div>
+
+  <div class="flex flex-wrap gap-2">
+    <span class="pill lg-green glow-anim">Green ≥ 80</span>
+    <span class="pill lg-orange glow-anim">Orange 60–79</span>
+    <span class="pill lg-red glow-anim">Red &lt; 60</span>
   </div>
 
   <!-- Wheel + chips -->
   <div class="grid lg:grid-cols-[340px,1fr] gap-6 items-center">
-    <div class="mega glow-anim">
+    <div class="glow-anim" style="display:grid;place-items:center">
       <div class="mw warn glow-anim" id="mw">
         <div class="mw-ring" id="mwRing" style="--v:0"></div>
         <div class="mw-fill" id="mwFill" style="--p:0"></div>
@@ -164,17 +186,17 @@
       <button id="exportBtn"  type="button" class="btn btn-purple glow-anim">⬇︎ Export</button>
     </div>
 
-    <div id="statusChips" class="status-row mt-2">
-      <div class="status-chip glow-anim"><span class="k t-grad">HTTP:</span> <span id="chipHttp">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">Title:</span> <span id="chipTitle">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">Meta desc:</span> <span id="chipMeta">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">Canonical:</span> <span id="chipCanon">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">Robots:</span> <span id="chipRobots">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">Viewport:</span> <span id="chipViewport">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">H1/H2/H3:</span> <span id="chipH">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">Internal links:</span> <span id="chipInt">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">Schema:</span> <span id="chipSchema">—</span></div>
-      <div class="status-chip glow-anim"><span class="k t-grad">Auto-checked:</span> <span id="chipAuto">0</span></div>
+    <div id="statusChips" class="flex flex-wrap gap-2 mt-2">
+      <div class="chip glow-anim"><span class="t-grad">HTTP:</span>&nbsp;<span id="chipHttp">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">Title:</span>&nbsp;<span id="chipTitle">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">Meta desc:</span>&nbsp;<span id="chipMeta">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">Canonical:</span>&nbsp;<span id="chipCanon">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">Robots:</span>&nbsp;<span id="chipRobots">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">Viewport:</span>&nbsp;<span id="chipViewport">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">H1/H2/H3:</span>&nbsp;<span id="chipH">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">Internal links:</span>&nbsp;<span id="chipInt">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">Schema:</span>&nbsp;<span id="chipSchema">—</span></div>
+      <div class="chip glow-anim"><span class="t-grad">Auto-checked:</span>&nbsp;<span id="chipAuto">0</span></div>
     </div>
   </div>
 
@@ -312,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function setRunning(isOn){
     if(!analyzeBtn)return;
     analyzeBtn.disabled = isOn;
-    analyzeBtn.style.opacity = isOn ? .6 : 1;   /* <-- fixed syntax */
+    analyzeBtn.style.opacity = isOn ? .6 : 1;
     analyzeBtn.textContent = isOn ? 'Analyzing…' : '🔍 Analyze';
   }
 
@@ -331,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.__lastData={...data,url};
 
       /* Overall & chips */
-      const score=clamp01(data.overall_score||0), b=bandName(score);
+      const score=Math.max(0,Math.min(100,Number(data.overall_score||0))), b=score>=80?'good':(score>=60?'warn':'bad');
       mw?.classList.remove('good','warn','bad'); mw?.classList.add(b);
       overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add(b);
       chipOverall?.classList.add(b);
@@ -348,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     .reduce((a,b)=>a+b,0))/2||0);
       setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
 
-      const r=data.readability||{}, human=clamp01(Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3)), ai=clamp01(100-human);
+      const r=data.readability||{}, human=Math.max(0,Math.min(100,Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3))), ai=Math.max(0,Math.min(100,100-human));
       setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
       setChip(chipHuman,'Human-like',`${human} %`,human);
       setChip(chipAI,'AI-like',`${ai} %`,ai);
@@ -379,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recsEl.appendChild(d);
       });
 
-      /* Ground (Improve buttons get banded fill + outline) */
+      /* Ground with Improve buttons */
       catsEl.innerHTML='';
       (data.categories||[]).forEach(cat=>{
         const total=(cat.checks||[]).length;
@@ -394,17 +416,19 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="space-y-2" id="list"></div>`;
         const list=card.querySelector('#list');
         (cat.checks||[]).forEach(ch=>{
-          const outline=outlineBy(ch.score||0), fill=fillBy(ch.score||0);
+          const outline=(ch.score||0)>=80?'outline-green':(ch.score||0)>=60?'outline-orange':'outline-red';
+          const fill=(ch.score||0)>=80?'fill-green':(ch.score||0)>=60?'fill-orange':'fill-red';
           const color=(ch.score||0)>=80?'#10b981':(ch.score||0)>=60?'#f59e0b':'#ef4444';
           const row=document.createElement('div'); row.className='check glow-anim';
           row.innerHTML=`<div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full" style="background:${color}"></span><div class="font-semibold">${ch.label}</div></div>
-                         <div class="flex items-center gap-2"><span class="score-pill ${pillClassBy(ch.score||0)}">${ch.score??'—'}</span>
+                         <div class="flex items-center gap-2"><span class="score-pill ${(ch.score||0)>=80?'score-pill--green':(ch.score||0)>=60?'score-pill--orange':'score-pill--red'}">${ch.score??'—'}</span>
                          <button class="improve-btn ${fill} ${outline}" type="button">Improve</button></div>`;
           row.querySelector('.improve-btn').addEventListener('click',()=>{
             mTitle.textContent=ch.label; mCat.textContent=cat.name; mScore.textContent=ch.score??'—';
-            mBand.textContent=bandLabel(ch.score||0); mBand.className='pill '+pillClassBy(ch.score||0);
+            mBand.textContent=(ch.score||0)>=80?'Good (≥80)':(ch.score||0)>=60?'Needs work (60–79)':'Low (<60)';
+            mBand.className='pill '+((ch.score||0)>=80?'score-pill--green':(ch.score||0)>=60?'score-pill--orange':'score-pill--red');
             mWhy.textContent=ch.why||'This item affects topical authority, UX, and rich-result eligibility.';
-            mTips.innerHTML=''; (ch.tips||tipsFor(cat.name)).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li);});
+            mTips.innerHTML=''; (ch.tips||['Aim for ≥80 (green) and re-run the analyzer.',...tipsFor(cat.name)]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li);});
             mLink.href=ch.improve_search_url||('https://www.google.com/search?q='+encodeURIComponent(ch.label+' SEO best practices'));
             if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','');
           });
@@ -418,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
       chipMeta.textContent=(data.content_structure?.meta_description||'').length||0;
       try{chipCanon.textContent=new URL(url).origin}catch{chipCanon.textContent='—'}
       chipRobots.textContent='—'; chipViewport.textContent='—';
+      const hs=data.content_structure?.headings||{};
       chipH.textContent=`H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
       chipIntChip.textContent=data.quick_stats?.internal_links??0;
       chipSchema.textContent=data.schema_count??0;
