@@ -1,131 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ $title ?? 'Semantic SEO Master Analyzer 2.0' }}</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>@yield('title','Semantic SEO')</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
   <style>
-    /* subtle animated background */
-    .bg-grid {
-      background-image:
-        radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px),
-        radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
-      background-size: 20px 20px, 40px 40px;
-      background-position: 0 0, 10px 10px;
+    /* Hide any legacy canvases */
+    canvas#bgCanvas, canvas#techCanvas { display:none !important; }
+
+    /* Dark neon base + subtle radial lights */
+    body{
+      background:
+        radial-gradient(80vw 60vh at 20% 20%, rgba(255,46,136,.14), transparent 60%),
+        radial-gradient(80vw 60vh at 80% 30%, rgba(0,97,255,.14), transparent 60%),
+        radial-gradient(90vw 70vh at 50% 85%, rgba(131,0,255,.12), transparent 70%),
+        linear-gradient(180deg,#0a0f2a,#090e1f 55%,#070a1a) !important;
+      background-attachment: fixed;
     }
+
+    /* Fixed neon waves behind content (no animation) */
+    #neon-bg{
+      position:fixed; inset:0; z-index:-1; pointer-events:none;
+      background:
+        url("data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='none'><defs><linearGradient id='g1' x1='0' y1='0' x2='1' y2='0'><stop offset='0%' stop-color='%23ff2e88'/><stop offset='50%' stop-color='%238300ff'/><stop offset='100%' stop-color='%23006bff'/></linearGradient><filter id='b'><feGaussianBlur stdDeviation='25'/></filter></defs><rect width='1600' height='900' fill='none'/><path d='M0,650 C260,520 370,520 630,650 C900,790 1040,780 1250,650 C1440,540 1540,540 1600,580 L1600,900 L0,900 Z' fill='url(%23g1)' filter='url(%23b)' opacity='.85'/><path d='M0,350 C240,480 380,480 640,350 C910,210 1050,220 1260,350 C1450,460 1540,460 1600,420 L1600,0 L0,0 Z' fill='url(%23g1)' filter='url(%23b)' opacity='.75'/></svg>")
+        center / cover no-repeat;
+      mix-blend-mode: screen;
+    }
+
+    .glass { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(10px); }
   </style>
+  @stack('head')
 </head>
-<body class="min-h-screen bg-slate-900 text-slate-100 bg-grid">
+<body class="text-slate-100 antialiased">
+  <div id="neon-bg" aria-hidden="true"></div>
 
-  <!-- Top Nav (appears on ALL pages) -->
-  <header x-data="{ open:false, userMenu:false }" class="sticky top-0 z-50 bg-slate-900/70 backdrop-blur border-b border-white/10">
-    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <a href="{{ route('home') }}" class="flex items-center gap-2 group">
-          <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-fuchsia-500 via-cyan-400 to-emerald-400 shadow-lg"></span>
-          <span class="font-semibold text-lg tracking-tight">
-            Semantic <span class="text-cyan-300">SEO</span>
-          </span>
-        </a>
-        <div class="hidden md:flex items-center gap-1 ml-6">
-          <a href="{{ route('semantic') }}"
-             class="px-3 py-2 rounded-lg text-sm hover:bg-white/5 {{ request()->routeIs('semantic*') ? 'bg-white/10 text-white' : 'text-slate-300' }}">
-             Semantic Analyzer
-          </a>
-          <a href="{{ route('aiChecker') }}"
-             class="px-3 py-2 rounded-lg text-sm hover:bg-white/5 {{ request()->routeIs('ai*') ? 'bg-white/10 text-white' : 'text-slate-300' }}">
-             AI Content Checker
-          </a>
-          <a href="{{ route('topicCluster') }}"
-             class="px-3 py-2 rounded-lg text-sm hover:bg-white/5 {{ request()->routeIs('topic*') ? 'bg-white/10 text-white' : 'text-slate-300' }}">
-             Topic Cluster
-          </a>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
+  <header class="sticky top-0 z-40 bg-black/30 backdrop-blur border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="{{ route('home') }}" class="font-semibold">Semantic SEO</a>
+      <nav class="hidden md:flex gap-6 text-sm">
+        <a href="{{ route('semantic') }}" class="hover:text-white">Semantic Analyzer</a>
+        <a href="{{ route('aiChecker') }}" class="hover:text-white">AI Content Checker</a>
+        <a href="{{ route('topicCluster') }}" class="hover:text-white">Topic Cluster</a>
+      </nav>
+      <div>
         @auth
-          @php
-            $email = strtolower(trim(auth()->user()->email));
-            $gravatar = 'https://www.gravatar.com/avatar/'.md5($email).'?s=80&d=identicon';
-            $avatar = auth()->user()->avatar_path
-              ? asset('storage/'.auth()->user()->avatar_path)
-              : $gravatar;
-          @endphp
-          <a href="{{ route('dashboard') }}"
-             class="hidden sm:inline-flex px-3 py-2 text-sm rounded-lg bg-white/10 hover:bg-white/20">
-            Dashboard
-          </a>
-
-          <div class="relative">
-            <button @click="userMenu = !userMenu" @click.outside="userMenu=false"
-              class="flex items-center gap-2 rounded-full outline-none focus:ring-2 ring-cyan-400/60">
-              <img src="{{ $avatar }}" alt="Avatar" class="h-9 w-9 rounded-full object-cover border border-white/20">
-              <svg class="h-4 w-4 text-slate-300" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.187l3.71-3.955a.75.75 0 111.08 1.04l-4.24 4.52a.75.75 0 01-1.08 0l-4.24-4.52a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
-              </svg>
-            </button>
-            <div x-show="userMenu" x-transition
-                 class="absolute right-0 mt-2 w-56 rounded-xl bg-slate-800 border border-white/10 shadow-xl overflow-hidden">
-              <div class="px-4 py-3 text-sm">
-                <div class="font-medium">{{ auth()->user()->name }}</div>
-                <div class="text-slate-400 truncate">{{ auth()->user()->email }}</div>
-              </div>
-              <div class="border-t border-white/10"></div>
-              <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm hover:bg-white/5">Profile</a>
-              <a href="{{ route('dashboard') }}" class="block px-4 py-2 text-sm hover:bg-white/5">Dashboard</a>
-              <form method="POST" action="{{ route('logout') }}" class="border-t border-white/10">
-                @csrf
-                <button class="w-full text-left px-4 py-2 text-sm text-red-300 hover:bg-red-500/10">Logout</button>
-              </form>
-            </div>
-          </div>
+          <a href="{{ route('dashboard') }}" class="px-3 py-1 rounded-lg bg-white/10">Dashboard</a>
+        @else
+          <a href="{{ route('login') }}" class="px-3 py-1 rounded-lg bg-white/10">Login</a>
         @endauth
-
-        @guest
-          <a href="{{ route('login') }}"
-             class="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-white text-slate-900 font-semibold text-sm">
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-               d="M15 3h4a2 2 0 012 2v4M21 3l-7 7M7 7h3a4 4 0 014 4v6a2 2 0 01-2 2H7a4 4 0 01-4-4v-4a2 2 0 012-2h2"/>
-            </svg>
-            Login
-          </a>
-          <a href="{{ route('register') }}"
-             class="hidden sm:inline-flex px-3 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm">
-            Register
-          </a>
-        @endguest
-
-        <button class="md:hidden p-2 rounded-lg hover:bg-white/10" @click="open = !open" aria-label="Open menu">
-          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-             d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </button>
-      </div>
-    </nav>
-
-    <!-- Mobile menu -->
-    <div x-show="open" x-transition class="md:hidden border-t border-white/10">
-      <div class="px-4 py-2 space-y-1">
-        <a href="{{ route('semantic') }}" class="block px-3 py-2 rounded-lg hover:bg-white/5">Semantic Analyzer</a>
-        <a href="{{ route('aiChecker') }}" class="block px-3 py-2 rounded-lg hover:bg-white/5">AI Content Checker</a>
-        <a href="{{ route('topicCluster') }}" class="block px-3 py-2 rounded-lg hover:bg-white/5">Topic Cluster</a>
       </div>
     </div>
   </header>
 
-  <!-- Page -->
-  <main class="min-h-[calc(100vh-4rem)]">
+  <main class="min-h-[calc(100vh-3.5rem)]">
     @yield('content')
   </main>
 
-  <footer class="border-t border-white/10 py-8 text-center text-sm text-slate-400">
-    © {{ date('Y') }} Semantic SEO Master Analyzer 2.0
-  </footer>
+  @stack('scripts')
 </body>
 </html>
