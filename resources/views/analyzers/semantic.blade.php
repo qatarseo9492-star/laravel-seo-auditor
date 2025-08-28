@@ -60,7 +60,7 @@
   #waterbar{ height:14px; border-radius:999px; background:#12131a; border:1px solid var(--border); overflow:hidden; }
   #waterbar span{ display:block; height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent-2),var(--accent-3)); transition:width .9s ease; filter:drop-shadow(0 0 8px rgba(79,209,255,.25)); }
 
-  /* Score wheel (thicker ring, crisp colors) */
+  /* Score wheel */
   .score-wheel{ width:180px; height:180px; border-radius:50%; display:grid; place-items:center; }
   .score-ring{
     --v:0;
@@ -289,7 +289,7 @@ const mAdvice= document.getElementById('improveAdvice');
 const mLink  = document.getElementById('improveSearch');
 
 function clamp(n,min=0,max=100){ const v=Number(n); return Math.max(min, Math.min(max, isNaN(v)?0:v)); }
-function colorBand(score){ return score>=80?'g-green':(score>=60?'g-orange':'g-red'); }
+function band(score){ return score>=80?'g-green':(score>=60?'g-orange':'g-red'); }
 function labelBy(score){ return score>=80?'Great Work — Well Optimized':(score>=60?'Needs Optimization':'Needs Significant Optimization'); }
 function escapeHtml(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;').replace(/'/g,'&#39;'); }
 
@@ -313,16 +313,13 @@ f.addEventListener('submit', async (e)=>{
     renderAll(data);
   } catch(err){
     console.error(err);
+    // demo fallback to prove UI
     renderAll({
       overall_score: 72,
       wheel: { label: 'Needs Optimization' },
       quick_stats: { readability_flesch: 78, readability_grade: 8, internal_links: 12, external_links: 4, text_to_html_ratio: 38 },
-      content_structure:{
-        title:'Sample: Semantic SEO Guide',
-        meta_description:'A short demo meta description for visibility.',
-        headings: { H1:['Semantic SEO Master'], H2:['Entities','Schema','Clusters'] }
-      },
-      readability:{ score:78, grade:8.2, flesch:78, avg_sentence_len:15.1 }
+      content_structure:{ title:'Sample: Semantic SEO Guide', meta_description:'A short demo meta description for visibility.', headings:{ H1:['Semantic SEO Master'], H2:['Entities','Schema','Clusters'] } },
+      readability:{ score:78, grade:8.2, flesch:78 }
     });
   }
 });
@@ -335,14 +332,14 @@ function renderAll(data){
   wheel.style.setProperty('--v', ov);
   scoreNum.textContent = ov;
   badge.textContent = (data.wheel && data.wheel.label) ? data.wheel.label : labelBy(ov);
-  badge.className = 'k-badge ' + (ov>=80?'bg-emerald-500/15 text-emerald-300 border-emerald-700/40':'') +
-                                (ov>=60 && ov<80 ? ' bg-amber-500/15 text-amber-300 border-amber-700/40':'' ) +
-                                (ov<60 ? ' bg-rose-500/15 text-rose-300 border-rose-700/40':'' );
+  badge.className = 'k-badge ' + (ov>=80?'bg-emerald-500/15 text-emerald-300 border-emerald-700/40':
+                                   ov>=60?'bg-amber-500/15 text-amber-300 border-amber-700/40':
+                                           'bg-rose-500/15 text-rose-300 border-rose-700/40');
 
-  // QUICK STATS (clamp flesh to 0..100 for display)
+  // QUICK STATS (display clamp 0..100 so UI stays readable)
   const qs = data.quick_stats || {};
   const fleshDisplay = clamp(qs.readability_flesch);
-  statF.textContent = (isNaN(fleshDisplay)? '—' : fleshDisplay);
+  statF.textContent = isNaN(fleshDisplay) ? '—' : fleshDisplay;
   statG.textContent = (qs.readability_grade!=null ? ('Grade '+qs.readability_grade) : '—');
   statInt.textContent = qs.internal_links ?? 0;
   statExt.textContent = qs.external_links ?? 0;
@@ -356,8 +353,8 @@ function renderAll(data){
   readBar.style.width = rScore + '%';
   readBadge.textContent = labelBy(rScore);
   readBadge.className = 'pill ' + (rScore>=80?'bg-emerald-500/15 text-emerald-300 border-emerald-700/40':
-                                    rScore>=60?'bg-amber-500/15 text-amber-300 border-amber-700/40':
-                                                'bg-rose-500/15 text-rose-300 border-rose-700/40');
+                                         rScore>=60?'bg-amber-500/15 text-amber-300 border-amber-700/40':
+                                                     'bg-rose-500/15 text-rose-300 border-rose-700/40');
   gradeVal.textContent = (rb.grade!=null ? 'Grade '+rb.grade : (qs.readability_grade!=null ? 'Grade '+qs.readability_grade : '—'));
 
   // STRUCTURE
@@ -365,8 +362,7 @@ function renderAll(data){
   titleVal.textContent = st.title || '—';
   metaVal.textContent  = st.meta_description || '—';
   headingMap.innerHTML='';
-  const headings = st.headings || {};
-  Object.entries(headings).forEach(([lvl,arr])=>{
+  (Object.entries(st.headings || {})).forEach(([lvl,arr])=>{
     if(!arr || !arr.length) return;
     const box = document.createElement('div');
     box.className='glass p-3';
@@ -390,7 +386,7 @@ function renderAll(data){
   // CATEGORIES & CHECKS
   catsEl.innerHTML='';
   (data.categories||[]).forEach(cat=>{
-    const tone = colorBand(clamp(cat.score||60));
+    const tone = band(clamp(cat.score||60));
     const card = document.createElement('div');
     card.className = 'card '+tone;
     card.innerHTML = `
