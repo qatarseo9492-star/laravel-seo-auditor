@@ -1,430 +1,336 @@
-{{-- resources/views/analyzers/semantic.blade.php --}}
 @extends('layouts.app')
 @section('title','Semantic SEO Master Analyzer 2.0')
 
 @section('content')
-  {{-- Tailwind config extensions just for this page --}}
-  <script>
-    window.tailwind = window.tailwind || {};
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            // Elegant, trendy palette
-            grape:  { 500:'#6d28d9', 600:'#5b21b6' },
-            orchid: { 500:'#7c3aed' },
-            plum:   { 500:'#4c1d95' },
-            blush:  { 500:'#ec4899' },
-            amber:  { 500:'#f59e0b' },
-            mint:   { 500:'#10b981' },
-            coal:   { 900:'#0b1020' },
-          },
-          boxShadow: {
-            soft: '0 10px 30px rgba(0,0,0,.12)',
-            glass:'inset 0 1px 0 rgba(255,255,255,.12), 0 8px 24px rgba(2,6,23,.18)'
-          },
-          borderRadius: { xl2:'1.25rem' }
-        }
-      }
-    }
-  </script>
+<style>
+  :root{
+    /* Coolors palette */
+    --c1:#006466; --c2:#065a60; --c3:#0b525b; --c4:#144552; --c5:#1b3a4b;
+    --c6:#212f45; --c7:#272640; --c8:#312244; --c9:#3e1f47; --c10:#4d194d;
 
-  <style>
-    /* Page surface (no animated bg) */
-    .surface {
-      background:
-        radial-gradient(1200px 800px at 120% -10%, rgba(124,58,237,.15), transparent 60%),
-        radial-gradient(1000px 700px at -20% 120%, rgba(236,72,153,.10), transparent 60%),
-        linear-gradient(160deg, #0b1020 0%, #101426 40%, #0b1020 100%);
-    }
-    .glass {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      backdrop-filter: blur(10px);
-    }
-    /* Score wheel styling */
-    .gauge text { font-variant-numeric: tabular-nums; }
-    .chip { font-size:.7rem; padding:.2rem .55rem; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.15); }
-    .btn-primary {
-      @apply inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-orchid-500 to-blush-500 text-white font-medium shadow-soft hover:opacity-95;
-    }
-    .btn-ghost {
-      @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 text-white hover:bg-white/10 border border-white/10;
-    }
-    .stat {
-      @apply rounded-xl2 glass border border-white/10 p-5 shadow-glass;
-    }
-    .card {
-      @apply rounded-xl2 bg-white border border-slate-200 shadow-soft;
-    }
-    .badge-pass { @apply bg-green-100 text-green-700; }
-    .badge-warn { @apply bg-amber-100 text-amber-700; }
-    .badge-fail { @apply bg-rose-100 text-rose-700; }
-  </style>
+    --ink:#0b1220; --muted:#9aa4b2; --card:#111827; --glass:rgba(255,255,255,.06);
+  }
+  .bg-app{ background: radial-gradient(1000px 700px at 20% -10%, rgba(77,25,77,.18), transparent 55%),
+                         radial-gradient(900px 600px at 110% 10%, rgba(0,100,102,.18), transparent 55%),
+                         linear-gradient(180deg, var(--c7), var(--c8) 55%, var(--c9)); }
+  .glass { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)); border:1px solid rgba(255,255,255,.08); backdrop-filter: blur(8px); }
+  .soft-shadow{ box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+  .pill{ font-size:.7rem; padding:.22rem .55rem; border-radius:.5rem; border:1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.06); }
 
-  <div class="surface text-slate-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  /* Score wheel */
+  .wheel{ --v:0; width:170px; height:170px; border-radius:50%;
+    background:
+      conic-gradient(#22c55e calc(var(--v)*1%), transparent 0),
+      conic-gradient(#f59e0b 0 0),
+      conic-gradient(#ef4444 0 0);
+    position:relative;
+  }
+  .wheel::before{ content:""; position:absolute; inset:8px; border-radius:50%; background:linear-gradient(180deg, #0f172a, #0b1325); border:1px solid rgba(255,255,255,.06); }
+  .wheel.badge-green{ background:
+      conic-gradient(#22c55e calc(var(--v)*1%), rgba(34,197,94,.15) 0);
+  }
+  .wheel.badge-orange{ background:
+      conic-gradient(#f59e0b calc(var(--v)*1%), rgba(245,158,11,.15) 0);
+  }
+  .wheel.badge-red{ background:
+      conic-gradient(#ef4444 calc(var(--v)*1%), rgba(239,68,68,.15) 0);
+  }
+  .wheel .num{ position:absolute; inset:0; display:grid; place-items:center; font-weight:900; font-size:2.8rem; letter-spacing:-1px; }
+  .score-chip{ font-size:.70rem; padding:.2rem .5rem; border-radius:.5rem; }
+  .score-green{ color:#22c55e; background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.25); }
+  .score-orange{ color:#f59e0b; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.25); }
+  .score-red{ color:#ef4444; background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.25); }
+  .score-neutral{ color:#93c5fd; background:rgba(59,130,246,.08); border:1px solid rgba(59,130,246,.2); }
 
-      {{-- Header --}}
-      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-        <div>
-          <div class="chip">Analyzer 2.0</div>
-          <h1 class="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">Semantic SEO Master</h1>
-          <p class="mt-2 text-slate-300 max-w-2xl">Analyze any page’s semantic structure, technical elements, and content quality—then get precise improvements.</p>
-        </div>
-        {{-- Elegant input group --}}
-        <form id="semanticForm" class="w-full lg:w-[52%]">
-          <div class="flex gap-2 items-stretch glass rounded-xl2 p-2 border border-white/10">
-            <div class="flex-1">
-              <input name="url" type="url" required
-                     placeholder="Paste a URL (e.g. https://example.com/article)"
-                     class="w-full bg-transparent text-white placeholder:text-slate-400 px-3 py-2 rounded-lg outline-none">
-            </div>
-            <div class="hidden md:block w-px bg-white/10"></div>
-            <input name="target_keyword" type="text"
-                   placeholder="Target keyword (optional)"
-                   class="hidden md:block bg-transparent text-white placeholder:text-slate-400 px-3 py-2 rounded-lg outline-none">
-            <button class="btn-primary" type="submit" id="analyzeBtn">
-              <svg class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor" fill="none"><path stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M5 11a6 6 0 1 0 12 0A6 6 0 0 0 5 11Z"/></svg>
-              Analyze URL
-            </button>
-          </div>
-          <p class="text-xs text-slate-400 mt-2">We’ll fetch the page and compute a detailed semantic report.</p>
-        </form>
-      </div>
+  .btn-cta{ background: linear-gradient(135deg, #38bdf8, #8b5cf6); color:#fff; }
+  .btn-cta:hover{ filter:brightness(1.05); }
 
-      {{-- RESULTS --}}
-      <section id="semanticResult" class="mt-10 hidden">
+  .btn-analyze{
+    --tw-ring-color: rgba(56,189,248,.35);
+    background: linear-gradient(135deg, #06b6d4, #22c55e);
+    color:#051016; font-weight:700; border:1px solid rgba(255,255,255,.15);
+  }
+  .btn-analyze:hover{ filter:brightness(1.05); }
+</style>
 
-        {{-- Row: Wheel + Readability + Quick Stats --}}
-        <div class="grid lg:grid-cols-3 gap-6">
-          {{-- Score wheel --}}
-          <div class="stat">
-            <div class="flex items-center justify-between">
-              <h3 class="font-semibold">Overall Score</h3>
-              <span id="badge" class="hidden text-xs px-2 py-0.5 rounded"></span>
-            </div>
-            <div class="mt-6 grid place-items-center">
-              <svg class="gauge" viewBox="0 0 120 120" width="220" height="220" aria-label="Overall score gauge">
-                <defs>
-                  <linearGradient id="gradScore" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stop-color="#ef4444"/>
-                    <stop offset="50%" stop-color="#f59e0b"/>
-                    <stop offset="100%" stop-color="#10b981"/>
-                  </linearGradient>
-                </defs>
-                <!-- track -->
-                <circle cx="60" cy="60" r="48" stroke="#e5e7eb" stroke-width="12" fill="none" />
-                <!-- progress -->
-                <circle id="gaugeArc" cx="60" cy="60" r="48" stroke="url(#gradScore)" stroke-width="12" fill="none"
-                        stroke-linecap="round" transform="rotate(-90 60 60)"
-                        stroke-dasharray="301.59" stroke-dashoffset="301.59"/>
-                <!-- label -->
-                <text id="overallScore" x="60" y="65" text-anchor="middle" font-size="28" class="fill-slate-900 font-bold">0</text>
-                <text x="60" y="82" text-anchor="middle" font-size="10" class="fill-slate-500">/100</text>
-              </svg>
-            </div>
-          </div>
+<div class="bg-app min-h-screen text-slate-100">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-          {{-- Readability --}}
-          <div class="stat">
-            <div class="flex items-center justify-between">
-              <h3 class="font-semibold">Readability (Flesch)</h3>
-              <button class="improve-top btn-ghost text-sm" type="button" data-topic="Content Quality">
-                Improve
-              </button>
-            </div>
-            <div class="mt-5">
-              <div class="h-3 w-full bg-white/10 rounded">
-                <div id="readBar" class="h-3 rounded" style="width:0%"></div>
-              </div>
-              <div class="mt-3 flex items-baseline gap-2">
-                <span id="readability" class="text-4xl font-extrabold">—</span>
-                <span class="text-xs text-slate-300">Higher is easier (0–100)</span>
-              </div>
-              <p id="readNote" class="mt-2 text-sm text-slate-300"></p>
-            </div>
-          </div>
-
-          {{-- Quick stats --}}
-          <div class="stat">
-            <h3 class="font-semibold">Quick Stats</h3>
-            <div class="mt-5 grid grid-cols-2 gap-4 text-sm">
-              <div class="rounded-lg bg-white/5 border border-white/10 p-3">
-                <div class="text-slate-300">Text / HTML</div>
-                <div id="ratioVal" class="text-xl font-bold">—%</div>
-              </div>
-              <div class="rounded-lg bg-white/5 border border-white/10 p-3">
-                <div class="text-slate-300">Images (alt missing)</div>
-                <div class="text-xl font-bold"><span id="imgAlt">—</span></div>
-              </div>
-              <div class="rounded-lg bg-white/5 border border-white/10 p-3">
-                <div class="text-slate-300">Links</div>
-                <div class="text-xl font-bold"><span id="internal">0</span> int · <span id="external">0</span> ext</div>
-              </div>
-              <div class="rounded-lg bg-white/5 border border-white/10 p-3">
-                <div class="text-slate-300">Canonical</div>
-                <div id="canonVal" class="text-xl font-bold">—</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {{-- Row: Heading map + Meta --}}
-        <div class="grid lg:grid-cols-2 gap-6 mt-6">
-          <div class="card">
-            <div class="p-6">
-              <h3 class="font-semibold">Heading Map</h3>
-              <div id="headingMap" class="mt-4 text-slate-700 space-y-3"></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="p-6">
-              <h3 class="font-semibold">Meta</h3>
-              <div class="mt-4 text-sm text-slate-700">
-                <p><span class="font-medium">Title:</span> <span id="titleVal">—</span></p>
-                <p class="mt-2"><span class="font-medium">Meta description:</span> <span id="metaVal">—</span></p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {{-- Checklist --}}
-        <div class="card mt-6">
-          <div class="p-6">
-            <div class="flex items-center justify-between">
-              <h3 class="font-semibold">Optimization Checklist</h3>
-              <span class="text-xs text-slate-500">Green ≥ 80 • Orange 60–79 • Red &lt; 60</span>
-            </div>
-            <div id="checklistWrap" class="mt-5 grid lg:grid-cols-2 gap-6"></div>
-          </div>
-        </div>
-      </section>
-    </div>
-  </div>
-
-  {{-- Improve Modal --}}
-  <div id="improveModal" class="fixed inset-0 hidden items-center justify-center bg-black/50 p-4 z-50">
-    <div class="w-full max-w-lg rounded-2xl bg-white shadow-xl">
-      <div class="p-4 border-b flex items-center justify-between">
-        <h4 id="impTitle" class="font-semibold">Improve</h4>
-        <button id="impClose" class="p-2 text-slate-500 hover:text-slate-800">✕</button>
-      </div>
-      <div class="p-5 space-y-4">
-        <ul id="impTips" class="list-disc pl-5 text-sm text-slate-700"></ul>
-        <div>
-          <div class="text-xs uppercase text-slate-500 mb-1">Explore on Google</div>
-          <div id="impLinks" class="flex flex-wrap gap-2"></div>
-        </div>
-      </div>
-      <div class="p-4 border-t text-right">
-        <button id="impOK" class="px-3 py-2 rounded bg-slate-900 text-white text-sm">Close</button>
+    <!-- Page Head -->
+    <div class="flex items-center justify-between">
+      <div>
+        <span class="pill">Analyzer 2.0</span>
+        <h1 class="mt-3 text-4xl sm:text-5xl font-extrabold tracking-tight">Semantic SEO Master</h1>
+        <p class="mt-2 text-slate-300">Analyze any page’s semantic structure, technical elements, and content quality—then get precise improvements.</p>
       </div>
     </div>
-  </div>
 
-  {{-- Page script --}}
-  <script>
-    const elForm = document.getElementById('semanticForm');
-    const btnAnalyze = document.getElementById('analyzeBtn');
-    const elWrap = document.getElementById('semanticResult');
-    const els = {
-      gauge: document.getElementById('gaugeArc'),
-      score: document.getElementById('overallScore'),
-      badge: document.getElementById('badge'),
-      read:  document.getElementById('readability'),
-      readBar: document.getElementById('readBar'),
-      readNote: document.getElementById('readNote'),
-      ratio: document.getElementById('ratioVal'),
-      imgAlt: document.getElementById('imgAlt'),
-      internal: document.getElementById('internal'),
-      external: document.getElementById('external'),
-      canon: document.getElementById('canonVal'),
-      title: document.getElementById('titleVal'),
-      meta: document.getElementById('metaVal'),
-      map: document.getElementById('headingMap'),
-      checklist: document.getElementById('checklistWrap'),
-      modal: document.getElementById('improveModal'),
-      impTitle: document.getElementById('impTitle'),
-      impTips: document.getElementById('impTips'),
-      impLinks: document.getElementById('impLinks'),
-      impClose: document.getElementById('impClose'),
-      impOK: document.getElementById('impOK')
-    };
-    const CIRC = 2 * Math.PI * 48; // 301.59
+    <!-- Analyze Bar -->
+    <form id="semanticForm" class="mt-8 glass rounded-2xl soft-shadow">
+      <div class="grid md:grid-cols-[1fr,320px,150px] gap-2 p-2">
+        <div class="flex items-center gap-2 bg-black/30 rounded-xl px-3 py-2 border border-white/10">
+          <svg class="h-4 w-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.4" d="m21 21-4.3-4.3M11 19a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/></svg>
+          <input name="url" type="url" required placeholder="Paste a URL (e.g. https://example.com/page)" class="w-full bg-transparent outline-none placeholder:text-slate-400">
+        </div>
+        <input name="target_keyword" type="text" placeholder="Target keyword (optional)" class="w-full bg-black/30 rounded-xl px-3 py-2 border border-white/10 outline-none placeholder:text-slate-400">
+        <button id="btnAnalyze" class="btn-analyze rounded-xl px-4 py-2 flex items-center justify-center gap-2">
+          <span class="hidden sm:inline">Analyze URL</span>
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+      <p class="px-4 pb-4 text-xs text-slate-400">We’ll fetch the page and compute a detailed semantic report.</p>
+    </form>
 
-    function setWheel(score){
-      score = Math.max(0, Math.min(100, Number(score)||0));
-      const offset = CIRC * (1 - score/100);
-      els.gauge.setAttribute('stroke-dasharray', CIRC.toFixed(2));
-      els.gauge.setAttribute('stroke-dashoffset', offset.toFixed(2));
-      els.score.textContent = Math.round(score);
-      // Badge
-      if (score >= 80) {
-        els.badge.textContent = 'Great Work — Well Optimized';
-        els.badge.className = 'text-xs px-2 py-0.5 rounded badge-pass';
-        els.badge.classList.remove('hidden');
-      } else if (score < 60) {
-        els.badge.textContent = 'Needs optimization';
-        els.badge.className = 'text-xs px-2 py-0.5 rounded badge-fail';
-        els.badge.classList.remove('hidden');
-      } else {
-        els.badge.textContent = 'Needs optimization';
-        els.badge.className = 'text-xs px-2 py-0.5 rounded badge-warn';
-        els.badge.classList.remove('hidden');
-      }
-    }
-    function barColor(score){
-      return score>=80?'bg-green-500':(score>=60?'bg-amber-500':'bg-rose-500');
-    }
-    function openImprove(pack){
-      els.impTitle.textContent = `Improve — ${pack.topic || 'Checklist'}`;
-      els.impTips.innerHTML = '';
-      (pack.tips||[]).forEach(t=>{
-        const li=document.createElement('li'); li.textContent=t; els.impTips.appendChild(li);
-      });
-      els.impLinks.innerHTML='';
-      (pack.google||[]).forEach(link=>{
-        const a=document.createElement('a');
-        a.href=link; a.target='_blank';
-        a.className='text-xs px-2 py-1 rounded bg-slate-900 text-white hover:opacity-90';
-        try { a.textContent = decodeURIComponent(new URL(link).searchParams.get('q')||'Google'); }
-        catch { a.textContent = 'Google'; }
-        els.impLinks.appendChild(a);
-      });
-      els.modal.classList.remove('hidden');
-    }
-    [els.impClose, els.impOK].forEach(b=>b.addEventListener('click',()=>els.modal.classList.add('hidden')));
+    <!-- Results -->
+    <section id="results" class="mt-10 hidden space-y-8">
 
-    // Fallback pack if server didn't send improve data
-    function fallbackImprove(topic){
-      return {
-        topic,
-        tips: [
-          'Tighten headings; add missing subtopics/FAQs.',
-          'Strengthen internal links with descriptive anchors.',
-          'Ensure Title (~50–60) + meta (~150–160) are compelling.'
-        ],
-        google: [
-          'https://www.google.com/search?q=heading%20hierarchy%20best%20practices',
-          'https://www.google.com/search?q=write%20compelling%20meta%20description',
-          'https://www.google.com/search?q=internal%20linking%20strategy%20seo'
-        ]
-      }
-    }
+      <!-- Score + Quick stats -->
+      <div class="grid lg:grid-cols-[260px,1fr] gap-6">
+        <div class="glass rounded-2xl p-6 border border-white/10 soft-shadow flex flex-col items-center justify-center">
+          <div id="wheel" class="wheel badge-red" style="--v:0;">
+            <div class="num" id="scoreNum">0</div>
+          </div>
+          <div id="wheelBadge" class="mt-4 text-center text-sm text-slate-300">—</div>
+        </div>
 
-    // Analyze submit
-    elForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      // loading state
-      const prev = btnAnalyze.innerHTML;
-      btnAnalyze.disabled = true;
-      btnAnalyze.innerHTML = `<svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10" stroke-width="2" class="opacity-25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-width="2" class="opacity-75"/></svg> Analyzing…`;
-
-      try {
-        const fd = new FormData(elForm);
-        const payload = { url: fd.get('url'), target_keyword: fd.get('target_keyword') };
-        const res = await fetch('/api/semantic-analyze', {
-          method:'POST', headers:{'Accept':'application/json','Content-Type':'application/json'},
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-
-        if (!data.ok) {
-          alert(data.error || 'Analysis failed');
-          return;
-        }
-        elWrap.classList.remove('hidden');
-
-        // Wheel & badge
-        setWheel(data.overall_score ?? 0);
-
-        // Readability
-        const fk = data.content_structure?.readability_flesch ?? data.readability_flesch ?? 0;
-        els.read.textContent = fk;
-        els.readBar.style.width = Math.min(100, Math.max(0, fk)) + '%';
-        els.readBar.className = 'h-3 rounded '+barColor(fk);
-        els.readNote.textContent = fk>=60 ? 'Easy to read—great job.' : (fk>=40 ? 'Readable, but could be clearer.' : 'Hard to read—shorten sentences, simplify wording.');
-
-        // Quick stats
-        els.internal.textContent = data.technical_seo?.links?.internal ?? 0;
-        els.external.textContent = data.technical_seo?.links?.external ?? 0;
-        const ratio = data.content_structure?.text_to_html_ratio ?? data.text_html_ratio ?? 0;
-        els.ratio.textContent = `${ratio}%`;
-        const miss = data.technical_seo?.image_alt_missing ?? 0;
-        const total= data.technical_seo?.image_count ?? 0;
-        els.imgAlt.textContent = `${miss} / ${total}`;
-
-        const canon = data.canonical ?? data.content_structure?.canonical;
-        els.canon.textContent = canon?.present ? (canon.matches ? 'Self' : 'Different URL') : 'Missing';
-
-        // Meta
-        els.title.textContent = data.content_structure?.title || '—';
-        els.meta.textContent  = data.content_structure?.meta_description || '—';
-
-        // Heading map
-        const hm = data.content_structure?.headings || {};
-        els.map.innerHTML='';
-        Object.entries(hm).forEach(([level,arr])=>{
-          if(!arr?.length) return;
-          const block = document.createElement('div');
-          block.innerHTML = `
-            <div class="text-xs uppercase tracking-wide text-slate-500 mb-1">${level}</div>
-            <div class="grid gap-2">
-              ${arr.map(t => `<div class="px-3 py-2 rounded-lg border bg-slate-50">${t}</div>`).join('')}
-            </div>`;
-          els.map.appendChild(block);
-        });
-
-        // Checklist
-        els.checklist.innerHTML='';
-        const list = data.checklist || [];
-        list.forEach(block=>{
-          const state = block.status==='pass' ? 'badge-pass' : (block.status==='warn'?'badge-warn':'badge-fail');
-          const bar  = `
-            <div class="h-2 w-full bg-slate-200 rounded">
-              <div class="h-2 rounded ${barColor(block.score)}" style="width:${block.score}%"></div>
-            </div>`;
-          const checks = (block.checks||[]).map(c=>{
-            const dot = c.ok ? 'bg-green-500' : (c.score>=60?'bg-amber-500':'bg-rose-500');
-            return `<li class="flex items-center gap-2">
-              <span class="h-2.5 w-2.5 rounded-full ${dot}"></span>
-              <span class="flex-1">${c.label}</span>
-              <span class="text-xs font-semibold">${Math.round(c.score)}</span>
-            </li>`;
-          }).join('');
-          const card = document.createElement('div');
-          card.className = 'card p-5';
-          card.innerHTML = `
-            <div class="flex items-center justify-between">
-              <h4 class="font-semibold">${block.category}</h4>
-              <span class="text-xs px-2 py-0.5 rounded ${state}">${block.status?.toUpperCase() || ''}</span>
+        <div class="glass rounded-2xl p-6 border border-white/10 soft-shadow">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-semibold">Quick Stats</h3>
+            <span id="readabilityChip" class="score-chip score-neutral">Readability —</span>
+          </div>
+          <div class="mt-4 grid sm:grid-cols-3 lg:grid-cols-6 gap-3 text-sm">
+            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
+              <div class="text-slate-400">Words</div>
+              <div id="statWords" class="text-2xl font-bold">—</div>
             </div>
-            <div class="mt-3">${bar}</div>
-            <ul class="mt-3 space-y-2 text-sm">${checks}</ul>
-            <div class="mt-4">
-              <button class="btn-primary improve-btn" type="button">Improve</button>
-            </div>`;
-          card.querySelector('.improve-btn').addEventListener('click', ()=>{
-            openImprove(block.improve || fallbackImprove(block.category));
-          });
-          els.checklist.appendChild(card);
-        });
+            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
+              <div class="text-slate-400">Images</div>
+              <div id="statImages" class="text-2xl font-bold">—</div>
+            </div>
+            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
+              <div class="text-slate-400">Internal</div>
+              <div id="statInternal" class="text-2xl font-bold">—</div>
+            </div>
+            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
+              <div class="text-slate-400">External</div>
+              <div id="statExternal" class="text-2xl font-bold">—</div>
+            </div>
+            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
+              <div class="text-slate-400">Readability</div>
+              <div id="statRead" class="text-2xl font-bold">—</div>
+            </div>
+            <div class="rounded-xl bg-black/30 border border-white/10 p-4">
+              <div class="text-slate-400">Text/HTML %</div>
+              <div id="statRatio" class="text-2xl font-bold">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        // Top Improve button (Readability card)
-        document.querySelectorAll('.improve-top').forEach(btn=>{
-          btn.onclick = ()=>{
-            const topic = btn.getAttribute('data-topic') || 'Content Quality';
-            const pack = (list.find(b=>b.category===topic)?.improve) || fallbackImprove(topic);
-            openImprove(pack);
-          };
-        });
+      <!-- Structure -->
+      <div class="grid lg:grid-cols-2 gap-6">
+        <div class="glass rounded-2xl p-6 border border-white/10 soft-shadow">
+          <h3 class="text-lg font-semibold">Content Structure</h3>
+          <dl class="mt-4 space-y-2 text-sm">
+            <div><dt class="text-slate-400">Title</dt><dd id="titleVal" class="font-medium text-slate-100">—</dd></div>
+            <div><dt class="text-slate-400">Meta description</dt><dd id="metaVal" class="font-medium text-slate-100">—</dd></div>
+          </dl>
+          <div class="mt-5">
+            <div class="text-sm text-slate-400 mb-2">Heading Map</div>
+            <div id="headingMap" class="grid sm:grid-cols-2 gap-2"></div>
+          </div>
+        </div>
 
-      } catch (e) {
-        alert('Network or server error.');
-      } finally {
-        btnAnalyze.disabled = false;
-        btnAnalyze.innerHTML = prev;
-      }
-    });
-  </script>
+        <div class="glass rounded-2xl p-6 border border-white/10 soft-shadow">
+          <h3 class="text-lg font-semibold">Recommendations</h3>
+          <ul id="recs" class="mt-3 space-y-2 text-sm"></ul>
+          <div class="mt-6 text-xs text-slate-400">Severity legend: <span class="text-red-300">Critical</span> · <span class="text-amber-300">Warning</span> · <span class="text-slate-300">Info</span></div>
+        </div>
+      </div>
+
+      <!-- Categories & Checklists -->
+      <div id="categoriesWrap" class="grid md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+
+    </section>
+  </div>
+</div>
+
+<!-- Improve Modal -->
+<div id="improveModal" class="hidden fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/60"></div>
+  <div class="relative max-w-xl mx-auto mt-28 glass rounded-2xl border border-white/10 p-6 soft-shadow">
+    <div class="flex items-start justify-between gap-4">
+      <h4 id="improveTitle" class="text-lg font-semibold">Improve</h4>
+      <button id="improveClose" class="text-slate-300 hover:text-white">
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.6" d="M6 6l12 12M6 18L18 6"/></svg>
+      </button>
+    </div>
+    <p id="improveAdvice" class="mt-3 text-slate-200 text-sm">—</p>
+    <div class="mt-5">
+      <a id="improveLink" href="#" target="_blank" rel="nofollow noopener" class="btn-cta inline-flex items-center gap-2 px-4 py-2 rounded-xl">
+        Search on Google
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.7" d="M7 17L17 7M9 7h8v8"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const $ = s => document.querySelector(s);
+  const elForm = $('#semanticForm');
+  const btnAnalyze = $('#btnAnalyze');
+  const section = $('#results');
+  const elWheel = $('#wheel');
+  const elScore = $('#scoreNum');
+  const elBadge = $('#wheelBadge');
+
+  const stat = {
+    words: $('#statWords'), images: $('#statImages'),
+    internal: $('#statInternal'), external: $('#statExternal'),
+    read: $('#statRead'), ratio: $('#statRatio'),
+    readChip: $('#readabilityChip')
+  };
+
+  const structure = { title: $('#titleVal'), meta: $('#metaVal'), map: $('#headingMap'), recs: $('#recs') };
+  const catsWrap = $('#categoriesWrap');
+
+  function chipColor(score){
+    if(score==null) return 'score-neutral';
+    if(score>=80) return 'score-green';
+    if(score>=60) return 'score-orange';
+    return 'score-red';
+  }
+  function wheelColor(score){
+    if(score>=80) return 'badge-green';
+    if(score>=60) return 'badge-orange';
+    return 'badge-red';
+  }
+  function headingBlock(level, arr){
+    const bg = 'bg-black/30';
+    const border = 'border border-white/10';
+    return `<div class="rounded-xl ${bg} ${border} p-3">
+      <div class="text-xs uppercase text-slate-400">${level}</div>
+      <div class="mt-1 space-y-1">${(arr||[]).map(t=>`<div class="text-sm">• ${t}</div>`).join('')}</div>
+    </div>`;
+  }
+
+  function openModal(title, advice, url){
+    $('#improveTitle').textContent = title;
+    $('#improveAdvice').textContent = advice;
+    $('#improveLink').href = url || '#';
+    $('#improveModal').classList.remove('hidden');
+  }
+  $('#improveClose').addEventListener('click', ()=> $('#improveModal').classList.add('hidden'));
+  $('#improveModal').addEventListener('click', (e)=>{ if(e.target.id==='improveModal') e.currentTarget.classList.add('hidden'); });
+
+  elForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const fd = new FormData(elForm);
+    const payload = { url: fd.get('url'), target_keyword: fd.get('target_keyword') || null };
+    btnAnalyze.disabled = true; btnAnalyze.classList.add('opacity-60');
+    try{
+      const res = await fetch('/api/semantic-analyze', {
+        method:'POST', headers:{'Content-Type':'application/json','Accept':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if(!data.ok){ alert(data.error || 'Analysis failed'); return; }
+      // Show section
+      section.classList.remove('hidden');
+
+      // Wheel + badge
+      const s = parseInt(data.overall_score||0,10);
+      elWheel.style.setProperty('--v', s);
+      elWheel.classList.remove('badge-red','badge-orange','badge-green');
+      elWheel.classList.add(wheelColor(s));
+      elScore.textContent = s;
+      elBadge.textContent = (data.wheel && data.wheel.label) ? data.wheel.label
+                         : (s>=80 ? 'Great Work — Well Optimized' : (s>=60 ? 'Needs Optimization' : 'Needs Significant Optimization'));
+
+      // Stats
+      stat.words.textContent   = (data.quick_stats?.word_count ?? '—');
+      stat.images.textContent  = (data.quick_stats?.image_count ?? '—');
+      stat.internal.textContent= (data.quick_stats?.internal_links ?? '—');
+      stat.external.textContent= (data.quick_stats?.external_links ?? '—');
+      const read = (data.quick_stats?.readability_flesch ?? null);
+      stat.read.textContent    = (read ?? '—');
+      stat.ratio.textContent   = (data.quick_stats?.text_to_html_ratio ?? '—');
+      stat.readChip.textContent= `Readability ${read ?? '—'}`;
+      stat.readChip.className  = `score-chip ${chipColor(read)}`;
+
+      // Structure
+      structure.title.textContent = data.content_structure?.title || '—';
+      structure.meta.textContent  = data.content_structure?.meta_description || '—';
+      const hs = data.content_structure?.headings || {};
+      structure.map.innerHTML =
+        headingBlock('H1', hs.h1) + headingBlock('H2', hs.h2) + headingBlock('H3', hs.h3) +
+        headingBlock('H4', hs.h4) + headingBlock('H5', hs.h5) + headingBlock('H6', hs.h6);
+
+      // Recs
+      structure.recs.innerHTML = (data.recommendations||[]).map(r=>{
+        const color = r.severity==='Critical' ? 'text-red-300' : (r.severity==='Warning' ? 'text-amber-300' : 'text-slate-300');
+        return `<li class="rounded-lg bg-black/30 border border-white/10 px-3 py-2">
+          <span class="${color} font-medium mr-2">${r.severity}</span>${r.text}
+        </li>`;
+      }).join('');
+
+      // Categories
+      catsWrap.innerHTML = '';
+      (data.categories||[]).forEach(cat=>{
+        const catScore = cat.score;
+        const catColor = chipColor(catScore).replace('score-','');
+        const headColor =
+          catColor==='green' ? 'from-emerald-500/25 to-emerald-500/5' :
+          catColor==='orange'? 'from-amber-500/25 to-amber-500/5' :
+          catColor==='red'   ? 'from-rose-500/25 to-rose-500/5' : 'from-sky-500/20 to-sky-500/5';
+        const catCard = document.createElement('div');
+        catCard.className = 'glass rounded-2xl p-5 border border-white/10 soft-shadow flex flex-col';
+
+        catCard.innerHTML = `
+          <div class="rounded-xl bg-gradient-to-br ${headColor} border border-white/10 p-4 flex items-center justify-between">
+            <div class="font-semibold">${cat.name}</div>
+            <span class="score-chip ${chipColor(catScore)}">${catScore ?? '—'}</span>
+          </div>
+          <div class="mt-3 space-y-2" />
+        `;
+        const listWrap = catCard.querySelector('div.space-y-2');
+        (cat.checks||[]).forEach(ch=>{
+          const c = chipColor(ch.score);
+          const passIcon = ch.pass===true ? '✅' : (ch.pass===false ? '⚠️' : '•');
+          const row = document.createElement('div');
+          row.className = 'rounded-xl bg-black/30 border border-white/10 p-3';
+          row.innerHTML = `
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-2 text-sm">
+                <span class="opacity-90">${passIcon}</span>
+                <span class="font-medium">${ch.label}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="score-chip ${c}">${ch.score ?? '—'}</span>
+                <button data-title="${ch.label}" data-advice="${(ch.advice||'').replace(/"/g,'&quot;')}" data-url="${ch.improve_search_url||'#'}"
+                  class="px-3 py-1 rounded-lg btn-cta text-xs">Improve</button>
+              </div>
+            </div>
+          `;
+          listWrap.appendChild(row);
+        });
+        catsWrap.appendChild(catCard);
+      });
+
+      // Delegate: Improve buttons
+      catsWrap.querySelectorAll('button.btn-cta').forEach(b=>{
+        b.addEventListener('click', (e)=>{
+          const t = e.currentTarget;
+          openModal(t.dataset.title || 'Improve', t.dataset.advice || 'Suggestions not available.', t.dataset.url || '#');
+        });
+      });
+
+    }catch(err){
+      console.error(err);
+      alert('Network or server error.');
+    }finally{
+      btnAnalyze.disabled = false; btnAnalyze.classList.remove('opacity-60');
+    }
+  });
+</script>
 @endsection
