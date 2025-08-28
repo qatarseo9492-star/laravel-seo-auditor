@@ -19,16 +19,19 @@
   .by .name{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:slide 6s linear infinite}
   @keyframes slide{to{background-position:100% 0}}
 
-  /* Legend */
-  .legend{display:flex;gap:8px;margin:10px 0 18px}
-  .legend .badge{padding:6px 12px;border-radius:999px;font-weight:900;font-size:12px;border:1px solid var(--line);color:#101010}
+  /* Legend (solid bg colors as requested) */
+  .legend{display:flex;gap:8px;margin:10px 0 22px}
+  .legend .badge{padding:6px 12px;border-radius:999px;font-weight:900;font-size:12px;color:#101010;border:1px solid var(--line)}
   .legend .g{background:#34d399;color:#03140a}
   .legend .o{background:#fbbf24;color:#2b1600}
   .legend .r{background:#f87171;color:#2a0707}
 
-  /* ----- Wheel (centered, small) ----- */
-  .top{display:grid;place-items:center;gap:12px;margin-bottom:10px}
-  .wheelbox{width:240px}
+  /* ======= TOP ROW (left wheel, right pills + water) ======= */
+  .toprow{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:center}
+  @media(max-width:980px){.toprow{grid-template-columns:1fr;gap:14px}}
+
+  /* Wheel (fill from bottom, compact) */
+  .wheelwrap{width:320px;max-width:100%}
   .wheel{--v:0;--ring:var(--orange);--p:0;width:100%;aspect-ratio:1/1;position:relative}
   .w-ring{position:absolute;inset:0;border-radius:50%;
     background:conic-gradient(var(--ring) calc(var(--v)*1%),rgba(255,255,255,.08) 0);
@@ -45,36 +48,36 @@
   .wheel.good{--ring:var(--green);--fill:linear-gradient(to top,var(--green) 0%,#22c55e 60%,#86efac 100%)}
   .wheel.warn{--ring:var(--orange)}
   .wheel.bad {--ring:var(--red);--fill:linear-gradient(to top,var(--red) 0%,#f87171 60%,#fecaca 100%)}
-  .w-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:48px;color:#fff}
+  .w-num{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:56px;color:#fff}
 
-  /* Stat pills (small) */
-  .pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
-  .pill{display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;padding:10px 12px;border-radius:12px;background:var(--chip);border:1px solid var(--line);color:#eef2ff}
+  /* Stat pills (small like screenshot) */
+  .pills{display:flex;flex-wrap:wrap;gap:10px}
+  .pill{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14px;padding:12px 14px;border-radius:14px;background:var(--chip);border:1px solid var(--line);color:#eef2ff}
   .pill.good{background:linear-gradient(135deg,rgba(34,197,94,.28),rgba(16,185,129,.12));color:#ecfff4}
   .pill.warn{background:linear-gradient(135deg,rgba(245,158,11,.28),rgba(250,204,21,.12));color:#fff8e9}
   .pill.bad{background:linear-gradient(135deg,rgba(239,68,68,.28),rgba(248,113,113,.12));color:#ffecec}
 
-  /* Water bar */
-  .water{position:relative;height:18px;border-radius:9999px;overflow:hidden;border:1px solid var(--line);background:#0b0b0b;margin:8px 0 4px}
+  /* Water bar under pills */
+  .water{position:relative;height:18px;border-radius:9999px;overflow:hidden;border:1px solid var(--line);background:#0b0b0b;margin-top:12px}
   .water .f{position:absolute;inset:0;width:0%;transition:width .9s ease}
   .water.good .f{background:linear-gradient(90deg,var(--green),#4ade80,#86efac)}
   .water.warn .f{background:linear-gradient(90deg,var(--orange),#fbbf24,#fde68a)}
   .water.bad  .f{background:linear-gradient(90deg,var(--red),#f87171,#fecaca)}
   .water .lbl{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;font-size:12px;color:#e7e9f0}
 
-  /* Toolbar */
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
-  .urlrow{display:flex;gap:10px;align-items:center}
-  .urlbox{flex:1;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#0b1020;padding:10px 12px;border-radius:10px}
-  .urlbox input{background:transparent;border:none;outline:none;color:var(--ink);width:100%}
-  .btn{padding:9px 12px;border-radius:10px;border:1px solid var(--line);font-weight:900;font-size:13px}
+  /* ======= ANALYZE PANEL (big rounded) ======= */
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+  .urlbox{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#0b1020;padding:12px;border-radius:12px}
+  .urlbox input{flex:1;background:transparent;border:none;outline:none;color:var(--ink)}
+  .paste{padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:var(--chip);font-weight:900}
+  .btn{padding:10px 14px;border-radius:12px;border:1px solid var(--line);font-weight:900;font-size:14px}
   .g{background:var(--green);color:#07140b}
   .b{background:#3b82f6;color:#071126}
   .o{background:var(--orange);color:#2e1800}
   .p{background:linear-gradient(90deg,#a78bfa,#f472b6);color:#170219}
 
-  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;justify-content:center}
-  .chip{padding:8px 12px;border-radius:12px;background:var(--chip);border:1px solid var(--line);font-weight:900;font-size:13px}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  .chip{padding:10px 14px;border-radius:9999px;background:var(--chip);border:1px solid var(--line);font-weight:900}
   .lbl-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent}
 
   /* Ground / categories */
@@ -89,7 +92,6 @@
   .ct{font-weight:800;font-size:16px;background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185);-webkit-background-clip:text;background-clip:text;color:transparent}
   .progress{width:100%;height:8px;border-radius:9999px;background:rgba(255,255,255,.08);overflow:hidden;border:1px solid var(--line);margin:6px 0 8px}
   .progress>span{display:block;height:100%;background:linear-gradient(90deg,#ef4444,#fde047,#22c55e);width:0%}
-
   .row{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--line);background:#0f1a2a;border-radius:10px;padding:10px;margin-top:6px}
   .score{padding:2px 7px;border-radius:8px;font-weight:900;font-size:12px;background:rgba(255,255,255,.08);border:1px solid var(--line)}
   .sG{background:rgba(34,197,94,.18);border-color:rgba(34,197,94,.45);color:#caffe1}
@@ -110,7 +112,7 @@
 @section('content')
 <div class="container">
 
-  <!-- Header -->
+  <!-- Heading -->
   <div class="brand">
     <div class="crown">👑</div>
     <div>
@@ -126,9 +128,9 @@
     <span class="badge r">Red &lt; 60</span>
   </div>
 
-  <!-- ===== Top: Wheel (center) + Pills + Water ===== -->
-  <div class="top">
-    <div class="wheelbox">
+  <!-- ===== TOP ROW: wheel left, pills + water right ===== -->
+  <div class="toprow">
+    <div class="wheelwrap">
       <div class="wheel warn" id="wheel">
         <div class="w-ring" id="wRing" style="--v:0"></div>
         <div class="w-fill" id="wFill" style="--p:0"></div>
@@ -136,32 +138,31 @@
       </div>
     </div>
 
-    <div class="pills">
-      <div id="pillOverall" class="pill warn">✅ Overall: <span id="overallVal">0 /100</span></div>
-      <div id="pillContent" class="pill warn">📝 Content: <span id="contentVal">—</span></div>
-      <div id="pillWriter"  class="pill warn">✍️ Writer: <span id="writerVal">—</span></div>
-      <div id="pillHuman"   class="pill warn">🧑 Human-like: <span id="humanVal">— %</span></div>
-      <div id="pillAI"      class="pill warn">🤖 AI-like: <span id="aiVal">— %</span></div>
+    <div>
+      <div class="pills">
+        <div id="pillOverall" class="pill warn">✅ Overall: <span id="overallVal">0 /100</span></div>
+        <div id="pillContent" class="pill warn">📝 Content: <span id="contentVal">—</span></div>
+        <div id="pillWriter"  class="pill warn">✍️ Writer: <span id="writerVal">—</span></div>
+        <div id="pillHuman"   class="pill warn">🧑 Human-like: <span id="humanVal">— %</span></div>
+        <div id="pillAI"      class="pill warn">🤖 AI-like: <span id="aiVal">— %</span></div>
+      </div>
+      <div id="bar" class="water warn">
+        <div class="f" id="barFill" style="width:0%"></div>
+        <div class="lbl" id="barLbl">0%</div>
+      </div>
+      <div style="color:var(--muted);font-size:13px;margin-top:6px">Wheel + water bars fill with your scores (colors: green ≥80, orange 60–79, red &lt;60).</div>
     </div>
-
-    <div id="bar" class="water warn" style="width:min(900px,100%)">
-      <div class="f" id="barFill" style="width:0%"></div>
-      <div class="lbl" id="barLbl">0%</div>
-    </div>
-    <div style="color:var(--muted);font-size:13px">Wheel + water bars fill with your scores (✅ ≥80, 🟧 60–79, 🔴 &lt;60).</div>
   </div>
 
-  <!-- ===== Analyze toolbar (now directly below wheel) ===== -->
-  <div class="panel" id="analyzePanel" style="max-width:980px;margin:10px auto 16px">
-    <div class="urlrow">
-      <div class="urlbox" style="width:100%">
-        <span>🌐</span>
-        <input id="urlInput" type="url" placeholder="https://example.com/page">
-        <button class="btn" id="pasteBtn">✕ Paste</button>
-      </div>
+  <!-- ===== ANALYZE PANEL (big rounded) BELOW TOP ROW ===== -->
+  <div class="panel" style="margin-top:18px">
+    <div class="urlbox">
+      <span>🌐</span>
+      <input id="urlInput" type="url" placeholder="https://example.com/page">
+      <button class="paste" id="pasteBtn">✕ Paste</button>
     </div>
 
-    <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;justify-content:center">
+    <div style="display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap">
       <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input id="autoCheck" type="checkbox" checked> Auto-apply checkmarks (≥ 80)</label>
       <input id="importFile" type="file" accept="application/json" class="hidden">
       <button class="btn p" id="importBtn">⬆ Import</button>
@@ -171,7 +172,7 @@
       <button class="btn p" id="exportBtn">⬇ Export</button>
     </div>
 
-    <div class="meta">
+    <div class="chips">
       <div class="chip"><span class="lbl-grad">HTTP:</span>&nbsp;<span id="cHttp">—</span></div>
       <div class="chip"><span class="lbl-grad">Title:</span>&nbsp;<span id="cTitle">—</span></div>
       <div class="chip"><span class="lbl-grad">Meta desc:</span>&nbsp;<span id="cMeta">—</span></div>
@@ -186,7 +187,7 @@
   </div>
 
   <!-- Quick Stats -->
-  <div class="panel" style="margin-top:8px">
+  <div class="panel" style="margin-top:12px">
     <h3 style="margin:0 0 8px 0">Quick Stats</h3>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
       <div class="panel" style="padding:10px"><div style="color:var(--muted);font-size:12px">Readability (Flesch)</div><div id="statF" style="font-weight:900;font-size:20px">—</div><div id="statG" style="color:var(--muted);font-size:12px">—</div></div>
@@ -210,7 +211,7 @@
     <div id="recs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
   </div>
 
-  <!-- Semantic SEO Ground -->
+  <!-- Semantic SEO Ground (categories & checklist) -->
   <div class="ground">
     <div class="ghead">
       <div class="gicon">🧭</div>
@@ -378,10 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
       cHttp.textContent='200';
 
       /* Ground: categories & checklists */
-      const sPill = sc => sc>=80?'sG':(sc>=60?'sO':'sR');
-      const fBtn  = sc => sc>=80?'fG':(sc>=60?'fO':'fR');
-      const label = sc => sc>=80?'Good (≥80)':(sc>=60?'Needs work (60–79)':'Low (<60)');
-
       catsEl.innerHTML='';
       (data.categories||[]).forEach(cat=>{
         const total=(cat.checks||[]).length;
