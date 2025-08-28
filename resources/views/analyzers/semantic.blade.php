@@ -3,14 +3,26 @@
 
 @push('head')
 <style>
-  /* ---- Base ------------------------------------------------- */
+  /* ===== Base ===== */
   html,body{background:#06021f!important;color:#e5e7eb}
+  body,#app,section{overflow-x:hidden}
   .glass{background:rgba(255,255,255,.06);backdrop-filter:blur(10px)}
   .card{border-radius:18px;padding:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.10)}
-  .pill{padding:6px 12px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#e5e7eb}
   .t-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
 
-  /* ---- Animated outline (clipped/softened so it never leaks) */
+  /* Pills / chips */
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;line-height:1;vertical-align:middle;
+    padding:6px 12px;border-radius:9999px;font-size:12px;font-weight:800;
+    border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#e5e7eb
+  }
+  .chip{padding:12px 16px;border-radius:16px;font-weight:900;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.14);color:#eef2ff}
+  .chip i{font-style:normal;font-size:18px}
+  .chip.good{background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18));border-color:rgba(34,197,94,.45);color:#eafff3}
+  .chip.warn{background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(250,204,21,.18));border-color:rgba(245,158,11,.45);color:#fff7e6}
+  .chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(248,113,113,.18));border-color:rgba(239,68,68,.45);color:#ffecec}
+
+  /* Animated outline (subtle, won’t leak) */
   .glow-anim{position:relative;overflow:hidden}
   .glow-anim::before{
     content:"";position:absolute;inset:-1px;border-radius:inherit;
@@ -18,17 +30,17 @@
     filter:blur(6px);opacity:.22;z-index:-1;animation:spinGlow 1.2s linear infinite;
   }
   @keyframes spinGlow{to{transform:rotate(360deg)}}
-  body,#app,section{overflow-x:hidden}
-  .ground-slab.glow-anim::before{opacity:.14;filter:blur(4px)}
 
-  /* Header “Shoail Kahoker” rainbow + dance */
+  /* Header row fix */
+  .header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap}
   .rainbow-dance{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rainbowSlide 6s linear infinite,bob 2.6s ease-in-out infinite}
   @keyframes rainbowSlide{0%{background-position:0% 50%}100%{background-position:100% 50%}}
   @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
-  /* Toolbar + buttons */
+  /* Buttons */
   .analyze-wrap{border-radius:18px;background:#020114;border:1px solid #1b2640;box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 20px 60px rgba(2,1,20,.45)}
-  .btn{padding:12px 18px;border-radius:14px;font-weight:900;border:1px solid rgba(255,255,255,.12);color:#0b1020}
+  .btn{padding:12px 18px;border-radius:14px;font-weight:900;border:1px solid rgba(255,255,255,.12);color:#0b1020;transition:opacity .15s ease,transform .05s ease}
+  .btn:active{transform:translateY(1px)}
   .btn-green{background:#22c55e;box-shadow:0 8px 26px rgba(34,197,94,.35)}
   .btn-blue{background:#3b82f6;box-shadow:0 8px 26px rgba(59,130,246,.35)}
   .btn-orange{background:#f59e0b;box-shadow:0 8px 26px rgba(245,158,11,.35)}
@@ -38,14 +50,12 @@
   .lg-orange{background:rgba(245,158,11,.15);color:#fde68a;border-color:rgba(245,158,11,.35)}
   .lg-red{background:rgba(239,68,68,.15);color:#fecaca;border-color:rgba(239,68,68,.35)}
 
-  /* Chips */
-  .chip{padding:12px 16px;border-radius:16px;font-weight:900;display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.14);color:#eef2ff}
-  .chip i{font-style:normal;font-size:18px}
-  .chip.good{background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(16,185,129,.18));border-color:rgba(34,197,94,.45);color:#eafff3}
-  .chip.warn{background:linear-gradient(135deg,rgba(245,158,11,.35),rgba(250,204,21,.18));border-color:rgba(245,158,11,.45);color:#fff7e6}
-  .chip.bad{background:linear-gradient(135deg,rgba(239,68,68,.35),rgba(248,113,113,.18));border-color:rgba(239,68,68,.45);color:#ffecec}
+  /* Avatars inside chips */
+  .pill .avatar,.pill .avatar-fallback{
+    width:26px;height:26px;flex:0 0 auto;border-radius:9999px;object-fit:cover;border:2px solid rgba(255,255,255,.18)
+  }
 
-  /* Score wheel with bottom fill */
+  /* Score wheel (fills from bottom) */
   .mw{--v:0;--ring:#f59e0b;--p:0;width:280px;height:280px;position:relative}
   .mw-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--v)*1%),rgba(255,255,255,.08) 0);-webkit-mask:radial-gradient(circle 108px,transparent 100px,#000 100px);mask:radial-gradient(circle 108px,transparent 100px,#000 100px);box-shadow:inset 0 0 0 14px rgba(255,255,255,.06)}
   .mw-fill{position:absolute;inset:26px;border-radius:50%;overflow:hidden;background:#000}
@@ -60,7 +70,7 @@
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
   .waterbox.good .fill{background:linear-gradient(90deg,#16a34a,#22c55e,#86efac)}
   .waterbox.warn .fill{background:linear-gradient(90deg,#f59e0b,#fbbf24,#fde68a)}
-  .waterbox.bad .fill{background:linear-gradient(90deg,#ef4444,#f87171,#fecaca)}
+  .waterbox.bad  .fill{background:linear-gradient(90deg,#ef4444,#f87171,#fecaca)}
   .waterbox .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:#e5e7eb;font-size:12px;text-shadow:0 2px 10px rgba(0,0,0,.45)}
 
   /* Ground / checklist */
@@ -91,7 +101,7 @@
   #improveModal .card{background:#0D0E1E;border:1px solid #1b2640}
   #improveModal .card .card{background:#111E2F;border-color:rgba(255,255,255,.12)}
 
-  /* Avatar chip */
+  /* Avatar standalone (non-chip usage) */
   .avatar{width:28px;height:28px;border-radius:9999px;object-fit:cover;border:2px solid rgba(255,255,255,.18)}
   .avatar-fallback{width:28px;height:28px;border-radius:9999px;display:grid;place-items:center;background:#1f2937;color:#e5e7eb;font-weight:900;border:2px solid rgba(255,255,255,.18)}
 </style>
@@ -112,28 +122,28 @@
 
 <section class="max-w-7xl mx-auto px-4 py-8 space-y-8">
 
-  <!-- Local top bar with Dashboard + avatar (works even if layout doesn’t show photo) -->
-  <div class="flex items-center justify-between mb-2">
-    <div class="flex items-center gap-3">
+  <!-- Header -->
+  <div class="header-row mb-2">
+    <div class="flex items-center gap-3 min-w-0">
       <div class="glow-anim" style="width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.32),rgba(236,72,153,.32));border:1px solid rgba(255,255,255,.14)">👑</div>
-      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold">
+      <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold truncate">
         <span class="t-grad">Semantic SEO Master Analyzer</span>
         <span class="text-slate-300 text-base md:text-lg">&nbsp;By&nbsp;<span class="rainbow-dance">Shoail Kahoker</span></span>
       </h1>
     </div>
-
     @auth
-    <a href="{{ route('dashboard') }}" class="pill glow-anim flex items-center gap-2">
-      @if($avatarUrl)
-        <img class="avatar" src="{{ $avatarUrl }}" alt="Avatar">
-      @else
-        <span class="avatar-fallback">{{ $initials }}</span>
-      @endif
-      <span>Dashboard</span>
-    </a>
+      <a href="{{ route('dashboard') }}" class="pill glow-anim">
+        @if($avatarUrl)
+          <img class="avatar" src="{{ $avatarUrl }}" alt="Avatar">
+        @else
+          <span class="avatar-fallback">{{ $initials }}</span>
+        @endif
+        <span>Dashboard</span>
+      </a>
     @endauth
   </div>
 
+  <!-- Legend -->
   <div class="flex flex-wrap gap-2">
     <span class="pill lg-green glow-anim">Green ≥ 80</span>
     <span class="pill lg-orange glow-anim">Orange 60–79</span>
@@ -169,7 +179,7 @@
   <div class="analyze-wrap p-4 space-y-3 glow-anim">
     <label class="flex items-center gap-2 rounded-xl px-3 py-2 glow-anim" style="background:#0b0b0b;border:1px solid rgba(255,255,255,.12)">
       <span class="opacity-70">🌐</span>
-      <input id="urlInput" name="url" type="url" placeholder="https://example.com" class="w-full bg-transparent outline-none text-slate-100 placeholder:text-slate-400"/>
+      <input id="urlInput" name="url" type="url" placeholder="https://example.com/page" class="w-full bg-transparent outline-none text-slate-100 placeholder:text-slate-400"/>
       <button id="pasteBtn" type="button" class="pill">✕ Paste</button>
     </label>
 
@@ -285,25 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
         mTips=$('#improveTips'), mLink=$('#improveSearch');
 
   /* Helpers */
-  const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
   const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
   const bandIcon=s=>s>=80?'🟢':(s>=60?'🟠':'🔴');
   const pillClassBy=s=>s>=80?'score-pill--green':(s>=60?'score-pill--orange':'score-pill--red');
-  const outlineBy=s=>s>=80?'outline-green':(s>=60?'outline-orange':'outline-red');
-  const fillBy=s=>s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');
-  const bandLabel=s=>s>=80?'Good (≥80)':(s>=60?'Needs work (60–79)':'Low (<60)');
-
-  function tipsFor(cat){
-    switch(cat){
-      case 'Technical Elements':return['Title ~50–60 chars incl. primary keyword.','Meta 140–160 chars + clear CTA.','Set canonical, avoid duplicates.','Ensure in XML sitemap.'];
-      case 'Content & Keywords':return['Clear intent & primary topic early.','Use variants/PAA naturally.','Single descriptive H1.','Add short FAQ answers.','Write simple, NLP-friendly language.'];
-      case 'Structure & Architecture':return['Logical H2/H3 topic clusters.','Internal links to hub pages.','Clean, descriptive URL.','Enable breadcrumbs (+schema).'];
-      case 'Content Quality':return['Show E-E-A-T: author, date, expertise.','Unique value vs competitors.','Cite recent authoritative sources.','Use helpful media with captions.'];
-      case 'User Signals & Experience':return['Responsive layout.','Compression & lazy-load.','Watch LCP/INP/CLS.','Clear CTAs.'];
-      case 'Entities & Context':return['Define primary entity.','Cover related entities.','Add valid schema (Article/FAQ/Product).','Add sameAs/org details.'];
-      default:return['Aim for ≥80 (green) and re-run the analyzer.'];
-    }
-  }
 
   function setChip(el,label,value,score){
     if(!el)return; el.classList.remove('good','warn','bad');
@@ -312,71 +306,95 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* Clipboard + actions */
-  pasteBtn?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
+  pasteBtn?.addEventListener('click',async e=>{
+    e.preventDefault();
+    try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}
+  });
   importBtn?.addEventListener('click',()=>importFile.click());
-  importFile?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)})
+  importFile?.addEventListener('change',e=>{
+    const f=e.target.files?.[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{ try{ const j=JSON.parse(String(r.result||'{}')); if(j.url) urlInput.value=j.url; alert('Imported JSON. Click Analyze to run.'); }catch{ alert('Invalid JSON file.'); } };
+    r.readAsText(f);
+  });
   printBtn?.addEventListener('click',()=>window.print());
   resetBtn?.addEventListener('click',()=>location.reload());
-  exportBtn?.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)})
+  exportBtn?.addEventListener('click',()=>{
+    if(!window.__lastData){alert('Run an analysis first.');return;}
+    const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='semantic-report.json'; a.click(); URL.revokeObjectURL(a.href);
+  });
 
-  /* API call with fallback */
+  /* API call with resilient fallback */
   async function callAnalyzer(url){
     const headers={'Accept':'application/json','Content-Type':'application/json'};
     let res=await fetch('/api/semantic-analyze',{method:'POST',headers,body:JSON.stringify({url,target_keyword:''})});
-    if(res.ok)return res.json();
-    if([404,405,419].includes(res.status)){
-      res=await fetch('/semantic-analyzer/analyze',{method:'POST',headers:{...headers,'X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url,target_keyword:''})});
-      if(res.ok)return res.json();
-    }
-    let msg=`HTTP ${res.status}`;try{const j=await res.json();if(j?.error)msg+=' – '+j.error}catch{}throw new Error(msg);
+    if(res.ok) return res.json();
+    // Fallback to web route with CSRF (some hosts block /api)
+    res = await fetch('/semantic-analyzer/analyze',{
+      method:'POST',
+      headers:{...headers,'X-CSRF-TOKEN':'{{ csrf_token() }}'},
+      body:JSON.stringify({url,target_keyword:''})
+    });
+    if(res.ok) return res.json();
+    let msg=`HTTP ${res.status}`; try{const j=await res.json(); if(j?.error) msg+=' – '+j.error;}catch{}
+    throw new Error(msg);
   }
 
   function setRunning(isOn){
-    if(!analyzeBtn)return;
-    analyzeBtn.disabled = isOn;
-    analyzeBtn.style.opacity = isOn ? .6 : 1;
-    analyzeBtn.textContent = isOn ? 'Analyzing…' : '🔍 Analyze';
+    if(!analyzeBtn) return;
+    analyzeBtn.disabled=isOn;
+    analyzeBtn.style.opacity=isOn?.6:1;
+    analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze';
   }
 
+  /* Analyze */
   analyzeBtn?.addEventListener('click',async e=>{
     e.preventDefault();
-    const url=(urlInput.value||'').trim(); if(!url){alert('Please enter a URL.');return;}
+    const url=(urlInput.value||'').trim();
+    if(!url){alert('Please enter a URL.');return;}
+
     try{
       setRunning(true);
-
-      /* reset visuals */
-      mwRing?.style.setProperty('--v',0); mwFill?.style.setProperty('--p',0); if(mwNum)mwNum.textContent='0%';
-      if(overallFill)overallFill.style.width='0%'; if(overallPct)overallPct.textContent='0%';
+      // Reset wheel/bars
+      mwRing?.style.setProperty('--v',0); mwFill?.style.setProperty('--p',0);
+      if(mwNum) mwNum.textContent='0%';
+      if(overallFill) overallFill.style.width='0%';
+      if(overallPct) overallPct.textContent='0%';
 
       const data=await callAnalyzer(url);
-      if(!data||data.error)throw new Error(data?.error||'Unknown error');
+      if(!data||data.error) throw new Error(data?.error||'Unknown error');
       window.__lastData={...data,url};
 
       /* Overall & chips */
-      const score=Math.max(0,Math.min(100,Number(data.overall_score||0))), b=score>=80?'good':(score>=60?'warn':'bad');
-      mw?.classList.remove('good','warn','bad'); mw?.classList.add(b);
-      overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add(b);
-      chipOverall?.classList.add(b);
+      const score=Math.max(0,Math.min(100,Number(data.overall_score||0)));
+      const band=score>=80?'good':(score>=60?'warn':'bad');
+      mw?.classList.remove('good','warn','bad'); mw?.classList.add(band);
+      overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add(band);
       mwRing?.style.setProperty('--v',score); mwFill?.style.setProperty('--p',score);
-      if(mwNum)mwNum.textContent=score+'%';
-      if(overallFill)overallFill.style.width=score+'%';
-      if(overallPct)overallPct.textContent=score+'%';
+      if(mwNum) mwNum.textContent=score+'%';
+      if(overallFill) overallFill.style.width=score+'%';
+      if(overallPct) overallPct.textContent=score+'%';
       setChip(chipOverall,'Overall',`${score} /100`,score);
 
-      /* Content score = avg(Content & Keywords, Content Quality) */
+      // Content score = average of Content & Keywords and Content Quality
       const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
       const contentScore=Math.round(([cmap['Content & Keywords'],cmap['Content Quality']]
                                     .filter(v=>typeof v==='number')
                                     .reduce((a,b)=>a+b,0))/2||0);
       setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
 
-      const r=data.readability||{}, human=Math.max(0,Math.min(100,Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3))), ai=Math.max(0,Math.min(100,100-human));
+      // Writer/Human/AI (heuristic)
+      const r=data.readability||{};
+      const human=Math.max(0,Math.min(100,Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3)));
+      const ai=Math.max(0,Math.min(100,100-human));
       setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
       setChip(chipHuman,'Human-like',`${human} %`,human);
       setChip(chipAI,'AI-like',`${ai} %`,ai);
 
       /* Quick stats */
-      statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
+      statF.textContent=(r.flesch??'—');
+      statG.textContent='Grade '+(r.grade??'—');
       statInt.textContent=data.quick_stats?.internal_links??0;
       statExt.textContent=data.quick_stats?.external_links??0;
       statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
@@ -387,7 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const hs=data.content_structure?.headings||{};
       headingMap.innerHTML='';
       Object.entries(hs).forEach(([lvl,arr])=>{
-        if(!arr||!arr.length)return;
+        if(!arr||!arr.length) return;
         const box=document.createElement('div'); box.className='card glow-anim';
         box.innerHTML=`<div class="text-xs text-slate-300 mb-1 uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');
         headingMap.appendChild(box);
@@ -401,51 +419,53 @@ document.addEventListener('DOMContentLoaded', () => {
         recsEl.appendChild(d);
       });
 
-      /* Ground with Improve buttons */
+      /* Ground + Improve buttons */
       catsEl.innerHTML='';
       (data.categories||[]).forEach(cat=>{
         const total=(cat.checks||[]).length;
         const passed=(cat.checks||[]).filter(ch=>(ch.score||0)>=80).length;
         const pct=Math.round((passed/Math.max(1,total))*100);
         const card=document.createElement('div'); card.className='cat-card glow-anim';
-        card.innerHTML=`<div class="cat-head"><div class="flex items-center gap-3">
-            <div class="glow-anim" style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25));border:1px solid rgba(255,255,255,.12)">★</div>
-            <div><div class="cat-title">${cat.name}</div><div class="text-slate-300 text-sm">Keep improving</div></div></div>
-            <div class="pill">${passed} / ${total}</div></div>
-            <div class="progress mb-3"><span style="width:${pct}%"></span></div>
-            <div class="space-y-2" id="list"></div>`;
+        card.innerHTML=`<div class="cat-head">
+            <div class="flex items-center gap-3">
+              <div class="glow-anim" style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.25));border:1px solid rgba(255,255,255,.12)">★</div>
+              <div><div class="cat-title">${cat.name}</div><div class="text-slate-300 text-sm">Keep improving</div></div>
+            </div>
+            <div class="pill">${passed} / ${total}</div>
+          </div>
+          <div class="progress mb-3"><span style="width:${pct}%"></span></div>
+          <div class="space-y-2" id="list"></div>`;
         const list=card.querySelector('#list');
         (cat.checks||[]).forEach(ch=>{
-          const outline=(ch.score||0)>=80?'outline-green':(ch.score||0)>=60?'outline-orange':'outline-red';
           const fill=(ch.score||0)>=80?'fill-green':(ch.score||0)>=60?'fill-orange':'fill-red';
           const color=(ch.score||0)>=80?'#10b981':(ch.score||0)>=60?'#f59e0b':'#ef4444';
           const row=document.createElement('div'); row.className='check glow-anim';
           row.innerHTML=`<div class="flex items-center gap-3"><span class="w-3 h-3 rounded-full" style="background:${color}"></span><div class="font-semibold">${ch.label}</div></div>
                          <div class="flex items-center gap-2"><span class="score-pill ${(ch.score||0)>=80?'score-pill--green':(ch.score||0)>=60?'score-pill--orange':'score-pill--red'}">${ch.score??'—'}</span>
-                         <button class="improve-btn ${fill} ${outline}" type="button">Improve</button></div>`;
+                         <button class="improve-btn ${fill}" type="button">Improve</button></div>`;
           row.querySelector('.improve-btn').addEventListener('click',()=>{
             mTitle.textContent=ch.label; mCat.textContent=cat.name; mScore.textContent=ch.score??'—';
             mBand.textContent=(ch.score||0)>=80?'Good (≥80)':(ch.score||0)>=60?'Needs work (60–79)':'Low (<60)';
             mBand.className='pill '+((ch.score||0)>=80?'score-pill--green':(ch.score||0)>=60?'score-pill--orange':'score-pill--red');
             mWhy.textContent=ch.why||'This item affects topical authority, UX, and rich-result eligibility.';
-            mTips.innerHTML=''; (ch.tips||['Aim for ≥80 (green) and re-run the analyzer.',...tipsFor(cat.name)]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li);});
+            mTips.innerHTML='';
+            (ch.tips||defaultTips(cat.name)).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li);});
             mLink.href=ch.improve_search_url||('https://www.google.com/search?q='+encodeURIComponent(ch.label+' SEO best practices'));
-            if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','');
+            if(typeof modal.showModal==='function') modal.showModal(); else modal.setAttribute('open','');
           });
           list.appendChild(row);
         });
         catsEl.appendChild(card);
       });
 
-      /* Status chips */
+      /* Status chips summary */
       chipTitle.textContent=(data.content_structure?.title||'').length||0;
       chipMeta.textContent=(data.content_structure?.meta_description||'').length||0;
       try{chipCanon.textContent=new URL(url).origin}catch{chipCanon.textContent='—'}
       chipRobots.textContent='—'; chipViewport.textContent='—';
-      const hs=data.content_structure?.headings||{};
       chipH.textContent=`H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
       chipIntChip.textContent=data.quick_stats?.internal_links??0;
-      chipSchema.textContent=data.schema_count??0;
+      chipSchema.textContent=(data.schema_count??'—'); // if controller doesn’t send it
       chipAuto.textContent=(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length;
       chipHttp.textContent='200';
     }catch(err){
@@ -456,11 +476,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  function defaultTips(cat){
+    switch(cat){
+      case 'Technical Elements':return['Title ~50–60 chars incl. primary keyword.','Meta 140–160 chars + clear CTA.','Set canonical, avoid duplicates.','Ensure page in XML sitemap.'];
+      case 'Content & Keywords':return['State primary intent early.','Use variants/PAA naturally.','One descriptive H1.','Add concise FAQ answers.','Prefer clearer, simpler words.'];
+      case 'Structure & Architecture':return['Logical H2/H3 topic clusters.','Internal links to hub pages.','Clean, descriptive URL slug.','Breadcrumbs (+schema).'];
+      case 'Content Quality':return['Show E-E-A-T (author/date/expertise).','Offer unique value vs competitors.','Cite recent authoritative sources.','Use helpful media with captions.'];
+      case 'User Signals & Experience':return['Responsive layout.','Compression & lazy-load.','Watch LCP/INP/CLS.','Clear CTAs & next steps.'];
+      case 'Entities & Context':return['Define primary entity.','Cover related entities.','Add valid schema (Article/FAQ/Product).','Add sameAs/org details.'];
+      default:return['Aim for ≥80 (green), then re-run the analyzer.'];
+    }
+  }
+
   /* Close modal on backdrop click */
+  const modal=$('#improveModal');
   modal?.addEventListener('click',e=>{
     const r=modal.getBoundingClientRect();
-    const inside=(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);
-    if(!inside){ if(typeof modal.close==='function')modal.close(); else modal.removeAttribute('open'); }
+    if(!(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom)){
+      if(typeof modal.close==='function') modal.close(); else modal.removeAttribute('open');
+    }
   });
 });
 </script>
