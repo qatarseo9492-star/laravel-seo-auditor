@@ -37,14 +37,13 @@
 
   .analyze-wrap{border-radius:16px;background:#020114;border:1px solid #ffffff20;box-shadow:inset 0 0 0 1px #ffffff0a;padding:12px}
 
-  /* Score wheels (overall + readability) */
+  /* Wheels (overall + readability) */
   .mw{--v:0;--ring:#f59e0b;--p:0;width:200px;height:200px;position:relative}
   .mw-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--v)*1%),#ffffff14 0);-webkit-mask:radial-gradient(circle 76px,transparent 72px,#000 72px);mask:radial-gradient(circle 76px,transparent 72px,#000 72px)}
   .mw-fill{position:absolute;inset:18px;border-radius:50%;overflow:hidden;background:#000}
   .mw-fill::after{content:"";position:absolute;left:0;right:0;height:100%;top:calc(100% - var(--p)*1%);transition:top .9s ease;background:var(--fill,linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%));-webkit-mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%);mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%)}
   .mw.good{--ring:#22c55e;--fill:linear-gradient(to top,#16a34a 0%,#22c55e 60%,#86efac 100%)} .mw.warn{--ring:#f59e0b;--fill:linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%)} .mw.bad{--ring:#ef4444;--fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%)}
   .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
-  /* Smaller wheel for Readability */
   .mw-sm{width:170px;height:170px}
   .mw-sm .mw-ring{-webkit-mask:radial-gradient(circle 64px,transparent 60px,#000 60px);mask:radial-gradient(circle 64px,transparent 60px,#000 60px)}
   .mw-sm .mw-fill{inset:14px}
@@ -76,14 +75,43 @@
 
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#3a0b0b;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
 
-  /* ------------------------------
-     Readability layout overrides
-     ------------------------------ */
-  #readabilityCard{
-    background:#05210c !important;       /* requested background */
-    border:2px solid #1f6f46 !important;  /* clean layout border */
-    box-shadow:none !important;           /* ensure no outline/glow */
+  /* ===================== Readability (new, outlines removed) ===================== */
+  .read-card{
+    position:relative;
+    border-radius:20px;
+    background:#05210c;            /* requested layout background */
+    border:2px solid #1f6f46;      /* clean layout border */
+    padding:16px;
+    box-shadow:none;               /* ensure no glow */
   }
+  /* removed: .read-card::before glow + rbSpin animation */
+
+  .rb-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .rb-title{display:flex;align-items:center;gap:10px}
+  .rb-title .ico{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#22d3ee33,#a78bfa33);border:1px solid #ffffff22}
+  .rb-legend{font-size:12px;color:#aab3c2}
+
+  .rb-grid{display:grid;grid-template-columns:220px 1fr;gap:12px;margin-top:10px}
+  @media (max-width:920px){.rb-grid{grid-template-columns:1fr}}
+
+  .rb-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  @media (max-width:920px){.rb-tiles{grid-template-columns:1fr}}
+
+  .rb-tile{background:#0f1830;border:1px solid #21325c;border-radius:14px;padding:12px}
+  .rb-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b6c2cf;margin:8px 0 6px}
+  .rb-val{color:#e5e7eb;font-weight:800}
+  .rb-meter{height:10px;border-radius:9999px;background:#0c1226;border:1px solid #1b2b51;overflow:hidden}
+  .rb-meter>span{display:block;height:100%;width:0%;transition:width .9s ease;background:linear-gradient(90deg,#ef4444,#fde047,#22c55e)}
+
+  .rb-fixes{background:#0f1830;border:1px solid #21325c;border-radius:14px;padding:14px;margin-top:12px}
+  .rb-fixes h4{margin:0 0 8px 0;font-weight:900}
+  .rb-fixes ul{margin:0;padding-left:18px}
+  .rb-fixes li{margin:6px 0}
+
+  .rb-banner{margin-top:12px;border-radius:14px;padding:12px;font-weight:800}
+  .rb-banner.good{background:#05240f;border:1px solid #126f3f;color:#a7f3d0}
+  .rb-banner.warn{background:#3b2a05;border:1px solid #9a6a10;color:#fde68a}
+  .rb-banner.bad{background:#3a0b0b;border:1px solid #8a1a1a;color:#fecaca}
 </style>
 @endpush
 
@@ -172,14 +200,14 @@
     </div>
   </div>
 
-  <!-- Readability Insights (container uses new bg + border) -->
-  <div class="card" style="margin-top:16px" id="readabilityCard">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="king">📚</div>
+  <!-- ===================== Readability Insights (REPLACED) ===================== -->
+  <div class="read-card" id="readabilityCard" style="margin-top:16px">
+    <div class="rb-head">
+      <div class="rb-title">
+        <div class="ico">📚</div>
         <div>
           <div class="t-grad" style="font-weight:900;">Readability Insights</div>
-          <div class="byline" style="font-size:12px;">Multilingual-friendly scoring</div>
+          <div class="rb-legend" id="rbLegend">Multilingual analysis — English, العربية, Português</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -188,8 +216,8 @@
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:200px 1fr;gap:12px;margin-top:10px">
-      <!-- Wheel (smaller) -->
+    <div class="rb-grid">
+      <!-- Wheel -->
       <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#090916;border:1px solid #ffffff12">
         <div class="mw mw-sm warn" id="readMw">
           <div class="mw-ring" id="readRing" style="--v:0"></div>
@@ -198,34 +226,66 @@
         </div>
       </div>
 
-      <!-- Metrics -->
-      <div>
-        <!-- Flesch -->
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b6c2cf;margin-bottom:6px">
-          <div>🧠 Flesch Reading Ease</div>
-          <div id="rbFleschVal" style="color:#e5e7eb;font-weight:800">—</div>
+      <!-- Metric tiles -->
+      <div class="rb-tiles">
+        <!-- Row 1 -->
+        <div class="rb-tile">
+          <div class="rb-row"><div>😊 Flesch Reading Ease</div><div class="rb-val" id="rbFleschVal">—</div></div>
+          <div class="rb-meter"><span id="rbFleschFill" style="width:0%"></span></div>
         </div>
-        <div id="rbFleschBar" class="waterbox warn">
-          <div class="fill" id="rbFleschFill" style="width:0%"></div>
-          <div class="label"><span id="rbFleschPct">0%</span></div>
+        <div class="rb-tile">
+          <div class="rb-row"><div>🧾 Avg Sentence Length</div><div class="rb-val" id="rbASLVal">—</div></div>
+          <div class="rb-meter"><span id="rbASLFill" style="width:0%"></span></div>
+        </div>
+        <div class="rb-tile">
+          <div class="rb-row"><div>🔤 Words</div><div class="rb-val" id="rbWordsVal">—</div></div>
+          <div class="rb-meter"><span id="rbWordsFill" style="width:0%"></span></div>
         </div>
 
-        <!-- Grade -->
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b6c2cf;margin:10px 0 6px">
-          <div>🎓 Grade Level (lower is easier)</div>
-          <div id="rbGradeVal" style="color:#e5e7eb;font-weight:800">—</div>
+        <!-- Row 2 -->
+        <div class="rb-tile">
+          <div class="rb-row"><div>🅰️ Syllables / Word</div><div class="rb-val" id="rbSyllVal">—</div></div>
+          <div class="rb-meter"><span id="rbSyllFill" style="width:0%"></span></div>
         </div>
-        <div class="progress"><span id="rbGradeFill" style="width:0%"></span></div>
+        <div class="rb-tile">
+          <div class="rb-row"><div>🔀 Lexical Diversity (TTR)</div><div class="rb-val" id="rbTTRVal">—</div></div>
+          <div class="rb-meter"><span id="rbTTRFill" style="width:0%"></span></div>
+        </div>
+        <div class="rb-tile">
+          <div class="rb-row"><div>♻️ Repetition (tri-gram)</div><div class="rb-val" id="rbTriVal">—</div></div>
+          <div class="rb-meter"><span id="rbTriFill" style="width:0%"></span></div>
+        </div>
 
-        <!-- Minis -->
-        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px">
-          <div class="card"><div style="font-size:11px;color:#94a3b8">Avg sentence length</div><div id="rbASL" style="font-weight:800">—</div></div>
-          <div class="card"><div style="font-size:11px;color:#94a3b8">Passive voice</div><div id="rbPassive" style="font-weight:800">—%</div></div>
-          <div class="card"><div style="font-size:11px;color:#94a3b8">Simple words</div><div id="rbSimple" style="font-weight:800">—%</div></div>
+        <!-- Row 3 -->
+        <div class="rb-tile">
+          <div class="rb-row"><div># Digits / 100 words</div><div class="rb-val" id="rbDigitsVal">—</div></div>
+          <div class="rb-meter"><span id="rbDigitsFill" style="width:0%"></span></div>
+        </div>
+        <div class="rb-tile">
+          <div class="rb-row"><div>🗣️ Passive voice</div><div class="rb-val" id="rbPassiveVal">—</div></div>
+          <div class="rb-meter"><span id="rbPassiveFill" style="width:0%"></span></div>
+        </div>
+        <div class="rb-tile">
+          <div class="rb-row"><div>✨ Simple words</div><div class="rb-val" id="rbSimpleVal">—</div></div>
+          <div class="rb-meter"><span id="rbSimpleFill" style="width:0%"></span></div>
         </div>
       </div>
     </div>
+
+    <!-- Fixes -->
+    <div class="rb-fixes">
+      <h4>💡 Simple Fixes</h4>
+      <ul id="rbFixes">
+        <li>Run an analysis to see targeted suggestions.</li>
+      </ul>
+    </div>
+
+    <!-- Grade banner -->
+    <div id="rbBanner" class="rb-banner warn">
+      Readability score helps you target Grade 7–9 for most audiences.
+    </div>
   </div>
+  <!-- =================== /Readability Insights =================== -->
 
   <!-- Content Structure -->
   <div class="card" style="margin-top:16px">
@@ -308,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn'),
         importBtn=$('#importBtn'), importFile=$('#importFile'), printBtn=$('#printBtn'),
-        resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn');
+        resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn']);
 
   const statF=$('#statFlesch'), statG=$('#statGrade'), statInt=$('#statInt'), statExt=$('#statExt'), statRatio=$('#statRatio');
   const titleVal=$('#titleVal'), metaVal=$('#metaVal'), headingMap=$('#headingMap'), recsEl=$('#recs'), catsEl=$('#cats');
@@ -323,12 +383,19 @@ document.addEventListener('DOMContentLoaded', () => {
         mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
         mTips=$('#improveTips'), mLink=$('#improveSearch');
 
-  /* Readability UI */
+  /* Readability UI (new) */
   const readMw=$('#readMw'), readRing=$('#readRing'), readFill=$('#readFill'), readNum=$('#readNum');
-  const readBadge=$('#readBadge'), gradeBadge=$('#gradeBadge');
-  const rbFleschBar=$('#rbFleschBar'), rbFleschFill=$('#rbFleschFill'), rbFleschPct=$('#rbFleschPct'), rbFleschVal=$('#rbFleschVal');
-  const rbGradeVal=$('#rbGradeVal'), rbGradeFill=$('#rbGradeFill');
-  const rbASL=$('#rbASL'), rbPassive=$('#rbPassive'), rbSimple=$('#rbSimple');
+  const readBadge=$('#readBadge'), gradeBadge=$('#gradeBadge'), rbLegend=$('#rbLegend');
+  const rbFleschVal=$('#rbFleschVal'), rbFleschFill=$('#rbFleschFill');
+  const rbASLVal=$('#rbASLVal'), rbASLFill=$('#rbASLFill');
+  const rbWordsVal=$('#rbWordsVal'), rbWordsFill=$('#rbWordsFill');
+  const rbSyllVal=$('#rbSyllVal'), rbSyllFill=$('#rbSyllFill');
+  const rbTTRVal=$('#rbTTRVal'), rbTTRFill=$('#rbTTRFill');
+  const rbTriVal=$('#rbTriVal'), rbTriFill=$('#rbTriFill');
+  const rbDigitsVal=$('#rbDigitsVal'), rbDigitsFill=$('#rbDigitsFill');
+  const rbPassiveVal=$('#rbPassiveVal'), rbPassiveFill=$('#rbPassiveFill');
+  const rbSimpleVal=$('#rbSimpleVal'), rbSimpleFill=$('#rbSimpleFill');
+  const rbFixes=$('#rbFixes'), rbBanner=$('#rbBanner');
 
   /* Helpers */
   const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
@@ -345,14 +412,13 @@ document.addEventListener('DOMContentLoaded', () => {
     el.classList.add(b);
     el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`;
   }
-
   function showError(msg, detail) {
     errorBox.style.display = 'block';
     errorBox.textContent = msg + (detail ? "\n\n" + detail : '');
   }
   function clearError(){ errorBox.style.display='none'; errorBox.textContent=''; }
 
-  /* Category defs (5 checks each) */
+  /* Category defs */
   const CATS = [
     { name:'User Signals & Experience', icon:'📱', checks:[
       'Mobile-friendly, responsive layout',
@@ -392,7 +458,6 @@ document.addEventListener('DOMContentLoaded', () => {
       'Robots directives valid']},
   ];
 
-  /* KB for Improve modal */
   const KB = {
     'Mobile-friendly, responsive layout': {why:'Most traffic is mobile; poor UX kills engagement.', tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'], link:'https://search.google.com/test/mobile-friendly'},
     'Optimized speed (compression, lazy-load)': {why:'Speed affects abandonment and CWV.', tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'], link:'https://web.dev/fast/'},
@@ -426,7 +491,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'Robots directives valid': {why:'Avoid accidental noindex/nofollow.', tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'], link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}
   };
 
-  /* Compute checklist score from API signals */
+  /* Checklist scoring */
   function scoreChecklist(label, data, url, targetKw=''){
     const qs = data.quick_stats||{};
     const cs = data.content_structure||{};
@@ -448,35 +513,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const slugScore = (()=>{ const hasQuery = url.includes('?'); const segs = urlPath.split('/').filter(Boolean); const words = segs.join('-').split('-').filter(Boolean); if (hasQuery) return 55; if (segs.length>6) return 60; if (words.some(w=>w.length>24)) return 65; return 85; })();
 
     switch(label){
-      // User Signals & Experience
       case 'Mobile-friendly, responsive layout': return ps.has_viewport ? 88 : 58;
       case 'Optimized speed (compression, lazy-load)': return 60;
       case 'Core Web Vitals passing (LCP/INP/CLS)':     return 60;
       case 'Clear CTAs and next steps':                 return meta.length>=140 && /learn|get|try|start|buy|sign|download|contact/i.test(meta) ? 80 : 60;
       case 'Accessible basics (alt text, contrast)':    return (data.images_alt_count||0) >= 3 ? 82 : ((data.images_alt_count||0) >= 1 ? 68 : 48);
 
-      // Entities & Context
       case 'sameAs/Organization details present':       return ps.has_org_sameas ? 90 : 55;
       case 'Valid schema markup (Article/FAQ/Product)': return (hasArticle || hasFAQ || schemaTypes.has('Product')) ? 85 : (schemaTypes.size>0?70:50);
       case 'Related entities covered with context':     return external>=2 ? 72 : 60;
       case 'Primary entity clearly defined':            return ps.has_main_entity ? 85 : (h1>0 ? 72 : 58);
       case 'Organization contact/about page visible':   return 60;
 
-      // Structure & Architecture
       case 'Logical H2/H3 headings & topic clusters':   return (h2>=3 && h3>=2) ? 85 : (h2>=2 ? 70 : 55);
       case 'Internal links to hub/related pages':       return internal>=5 ? 85 : (internal>=2 ? 65 : 45);
       case 'Clean, descriptive URL slug':               return slugScore;
       case 'Breadcrumbs enabled (+ schema)':            return ps.has_breadcrumbs ? 85 : 55;
       case 'XML sitemap logical structure':             return 60;
 
-      // Content Quality
+      case 'Content Quality':
       case 'E-E-A-T signals (author, date, expertise)': return ps.has_org_sameas ? 75 : 65;
       case 'Unique value vs. top competitors':          return 60;
       case 'Facts & citations up to date':              return external>=2 ? 78 : 58;
       case 'Helpful media (images/video) w/ captions':  return (data.images_alt_count||0) >= 3 ? 82 : 58;
       case 'Up-to-date examples & screenshots':         return 60;
 
-      // Content & Keywords
       case 'Define search intent & primary topic':      return (title && h1>0) ? 78 : 60;
       case 'Map target & related keywords (synonyms/PAA)': {
         const kw = (targetKw||'').trim();
@@ -494,7 +555,6 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'Integrate FAQs / questions with answers':   return hasFAQ ? 85 : (/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ') + ' ' + (cs.headings?.H3||[]).join(' ')) ? 70 : 55);
       case 'Readable, NLP-friendly language':           return clamp01(r.score||0);
 
-      // Technical Elements
       case 'Title tag (≈50–60 chars) w/ primary keyword': {
         const len = (title||'').length;
         return (len>=50 && len<=60) ? 88 : (len ? 68 : 45);
@@ -596,6 +656,35 @@ document.addEventListener('DOMContentLoaded', () => {
     analyzeBtn.textContent = isOn ? 'Analyzing…' : '🔍 Analyze';
   }
 
+  /* Helpers for readability meters */
+  const pct = (v,min,max,invert=false)=>{
+    if(v===null||v===undefined||isNaN(v)) return 0;
+    let p=(v-min)/Math.max(1,(max-min))*100;
+    p=Math.max(0,Math.min(100,p));
+    return invert?100-p:p;
+  };
+  function setMeter(fillEl,valEl,value,display,range, invert=false){
+    if(!fillEl||!valEl) return;
+    valEl.textContent = (value===null||value===undefined||Number.isNaN(value)) ? '—' : display;
+    const w = pct(Number(value), range[0], range[1], invert);
+    fillEl.style.width = w+'%';
+  }
+
+  function buildFixes(r){
+    const fixes=[];
+    if(typeof r.avg_sentence_len==='number' && r.avg_sentence_len>20) fixes.push('Break long sentences into 12–16 words.');
+    if(typeof r.simple_words_ratio==='number' && r.simple_words_ratio<80) fixes.push('Prefer shorter, simpler words (use clearer synonyms).');
+    if(typeof r.passive_ratio==='number' && r.passive_ratio>15) fixes.push('Reduce passive voice; rewrite in active voice.');
+    if(typeof r.repetition_trigram==='number' && r.repetition_trigram>10) fixes.push('Trim repeated phrases; vary wording and examples.');
+    if(typeof r.digits_per_100w==='number' && r.digits_per_100w>10) fixes.push('Reduce numeric density; round or group numbers where possible.');
+    if(fixes.length<3){
+      fixes.push('Add headings and bullets to chunk information.');
+      fixes.push('Use image captions to explain visuals succinctly.');
+      fixes.push('Front-load key points; keep paragraphs 2–4 lines.');
+    }
+    rbFixes.innerHTML = fixes.slice(0,5).map(x=>`<li>✅ ${x}</li>`).join('');
+  }
+
   /* Paste/import/print/reset/export */
   $('#pasteBtn')?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
   $('#importBtn')?.addEventListener('click',()=>importFile.click());
@@ -613,16 +702,16 @@ document.addEventListener('DOMContentLoaded', () => {
     try{
       setRunning(true);
 
-      // reset wheels/bars
-      mwRing?.style.setProperty('--v',0); mwFill?.style.setProperty('--p',0); mw?.classList.remove('good','warn','bad'); mw?.classList.add('warn');
-      if(mwNum)mwNum.textContent='0%';
+      // reset overall
+      mwRing?.style.setProperty('--v',0); mwFill?.style.setProperty('--p',0); mw?.classList.remove('good','warn','bad'); mw?.classList.add('warn'); mwNum.textContent='0%';
       overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add('warn');
       overallFill.style.width='0%'; overallPct.textContent='0%';
 
-      // reset readability wheel/badges
+      // reset readability
       readRing?.style.setProperty('--v',0); readFill?.style.setProperty('--p',0); readMw?.classList.remove('good','warn','bad'); readMw?.classList.add('warn'); readNum.textContent='0%';
-      rbFleschBar?.classList.remove('good','warn','bad'); rbFleschBar?.classList.add('warn'); rbFleschFill.style.width='0%'; rbFleschPct.textContent='0%'; rbFleschVal.textContent='—';
-      readBadge.textContent='—'; gradeBadge.textContent='Grade —'; rbGradeFill.style.width='0%'; rbGradeVal.textContent='—'; rbASL.textContent='—'; rbPassive.textContent='—%'; rbSimple.textContent='—%';
+      [rbFleschFill,rbASLFill,rbWordsFill,rbSyllFill,rbTTRFill,rbTriFill,rbDigitsFill,rbPassiveFill,rbSimpleFill].forEach(el=>{ if(el) el.style.width='0%'; });
+      [rbFleschVal,rbASLVal,rbWordsVal,rbSyllVal,rbTTRVal,rbTriVal,rbDigitsVal,rbPassiveVal,rbSimpleVal].forEach(el=>{ if(el) el.textContent='—'; });
+      readBadge.textContent='—'; gradeBadge.textContent='Grade —'; rbBanner.className='rb-banner warn'; rbBanner.textContent='Readability score helps you target Grade 7–9 for most audiences.'; rbFixes.innerHTML='<li>Run an analysis to see targeted suggestions.</li>';
 
       const data=await callAnalyzer(url);
       if(!data||data.error) throw new Error(data?.error||'Unknown error');
@@ -632,67 +721,67 @@ document.addEventListener('DOMContentLoaded', () => {
       const score = clamp01(data.overall_score||0), band=bandName(score);
       mw?.classList.remove('good','warn','bad'); mw?.classList.add(band);
       mwRing?.style.setProperty('--v',score); mwFill?.style.setProperty('--p',score);
-      if(mwNum)mwNum.textContent=score+'%';
+      mwNum.textContent=score+'%';
       overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add(band);
       overallFill.style.width=score+'%'; overallPct.textContent=score+'%';
       setChip(chipOverall,'Overall',`${score} /100`,score);
 
-      /* Content score = avg(Content & Keywords, Content Quality) */
+      /* Content score */
       const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
       const contentScore = Math.round(([cmap['Content & Keywords'], cmap['Content Quality']].filter(v=>typeof v==='number').reduce((a,b)=>a+b,0))/2 || 0);
       setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
 
-      /* Writer/Human/AI (heuristic) */
-      const r=data.readability||{};
-      const human = clamp01(Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3));
-      const ai    = clamp01(100-human);
-      setChip(chipWriter,'Writer', human>=60?'Likely Human':'Possibly AI', human);
-      setChip(chipHuman,'Human-like', `${human} %`, human);
-      setChip(chipAI, 'AI-like', `${ai} %`, 100-human);
-
-      /* Quick stats */
-      statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
-      statInt.textContent=data.quick_stats?.internal_links??0;
-      statExt.textContent=data.quick_stats?.external_links??0;
-      statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
-
-      /* Readability Insights fill */
+      /* Readability */
+      const r = data.readability||{};
       const rs = clamp01(r.score||0);
       const rBand = bandName(rs);
       readMw?.classList.remove('good','warn','bad'); readMw?.classList.add(rBand);
       readRing?.style.setProperty('--v',rs); readFill?.style.setProperty('--p',rs);
       readNum.textContent = rs+'%';
 
-      // Badge by score
+      // badges
       const badgeTxt = rs>=80 ? 'Very Easy To Read' : (rs>=60 ? 'Good — Needs More Improvement' : 'Needs Improvement in Content');
       readBadge.textContent = badgeTxt;
       readBadge.className = 'pill ' + (rs>=80?'score-pill--green':rs>=60?'score-pill--orange':'score-pill--red');
-
-      // Badge by Grade
       const grade = (typeof r.grade==='number') ? r.grade : null;
       gradeBadge.textContent = 'Grade ' + (grade ?? '—');
 
-      // Flesch bar
-      const fre = clamp01(r.flesch ?? 0);
-      rbFleschBar.classList.remove('good','warn','bad'); rbFleschBar.classList.add(bandName(fre));
-      rbFleschFill.style.width = fre+'%';
-      rbFleschPct.textContent = fre+'%';
-      rbFleschVal.textContent = (r.flesch ?? '—');
+      // quick stats box
+      statF.textContent = (r.flesch ?? '—');
+      statG.textContent = 'Grade ' + (grade ?? '—');
 
-      // Grade bar (invert: lower grade => wider)
-      if (grade !== null){
-        const gWidth = Math.max(0, Math.min(100, Math.round(((18 - Math.min(18, Math.max(1, grade))) / 17) * 100)));
-        rbGradeFill.style.width = gWidth + '%';
-        rbGradeVal.textContent = grade.toFixed ? grade.toFixed(1) : grade;
-      } else {
-        rbGradeFill.style.width = '0%';
-        rbGradeVal.textContent = '—';
+      // language note
+      rbLegend.textContent = (r.language==='non-latin' ? 'Non-Latin content (LIX-based) — العربية/others supported' : 'Latin-like content — English & similar');
+
+      // meters
+      setMeter(rbFleschFill, rbFleschVal, r.flesch, (r.flesch??'—'), [0,100], false);
+      setMeter(rbASLFill,    rbASLVal,    r.avg_sentence_len, (r.avg_sentence_len??'—'), [10,30], true);
+      setMeter(rbWordsFill,  rbWordsVal,  r.word_count, (r.word_count??'—'), [0,2000], false);
+      setMeter(rbSyllFill,   rbSyllVal,   r.avg_syllables_per_word, (r.avg_syllables_per_word??'—'), [1.2,2.2], true);
+      setMeter(rbTTRFill,    rbTTRVal,    r.ttr, ((r.ttr!=null?r.ttr+'%':'—')), [0,100], false);
+      setMeter(rbTriFill,    rbTriVal,    r.repetition_trigram, ((r.repetition_trigram!=null?r.repetition_trigram+'%':'—')), [0,20], true);
+      setMeter(rbDigitsFill, rbDigitsVal, r.digits_per_100w, (r.digits_per_100w??'—'), [0,20], true);
+      setMeter(rbPassiveFill,rbPassiveVal,r.passive_ratio, ((r.passive_ratio!=null?r.passive_ratio+'%':'—')), [0,30], true);
+      setMeter(rbSimpleFill, rbSimpleVal, r.simple_words_ratio, ((r.simple_words_ratio!=null?r.simple_words_ratio+'%':'—')), [60,100], false);
+
+      // banner text
+      if (grade!==null){
+        const bandCl = grade<=7?'good':(grade<=10?'warn':'bad');
+        rbBanner.className='rb-banner '+bandCl;
+        rbBanner.textContent = grade<=7 ? `Easy to read (Grade ${grade}). Clear and accessible.` :
+                               grade<=10 ? `Good for general audiences (Grade ${grade}).` :
+                               `Complex reading level (Grade ${grade}). Use shorter sentences and simpler vocabulary.`;
       }
 
-      // Minis
-      rbASL.textContent = (r.avg_sentence_len ?? '—');
-      rbPassive.textContent = ((r.passive_ratio ?? '—')) + (typeof r.passive_ratio==='number'?'%':'');
-      rbSimple.textContent  = ((r.simple_words_ratio ?? '—')) + (typeof r.simple_words_ratio==='number'?'%':'');
+      // writer/human/ai chips (heuristic)
+      const human = clamp01(Math.round(70+(rs)/5-(r.passive_ratio||0)/3));
+      const ai    = clamp01(100-human);
+      setChip(chipWriter,'Writer', human>=60?'Likely Human':'Possibly AI', human);
+      setChip(chipHuman,'Human-like', `${human} %`, human);
+      setChip(chipAI, 'AI-like', `${ai} %`, 100-human);
+
+      // fixes
+      buildFixes(r);
 
       /* Structure */
       titleVal.textContent=data.content_structure?.title||'—';
