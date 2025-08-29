@@ -2,35 +2,23 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;   // <-- added
-use Illuminate\Http\Request;          // <-- added
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;   // <-- added
+use Illuminate\Http\Request;
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AnalyzerController; // <-- existing
+use App\Http\Controllers\AnalyzerController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-| Blade views used below:
-| - resources/views/home.blade.php
-| - resources/views/dashboard.blade.php
-| - resources/views/analyzers/semantic.blade.php
-| - resources/views/analyzers/ai.blade.php
-| - resources/views/analyzers/topic.blade.php
-| - resources/views/profile/edit.blade.php
-| - resources/views/auth/login.blade.php
-| - resources/views/auth/register.blade.php
-*/
-
-/*
-| Public homepage (marketing-only)
 */
 Route::view('/', 'home')->name('home');
 
 /*
 | Auth pages
-| GET shows forms; POST processes them.
 */
 Route::get('/login',  [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
@@ -49,40 +37,66 @@ Route::middleware('auth')->group(function () {
     Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
     Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
 
-    // Analyzer JSON endpoint (used by the Blade fetch() call)
+    // Analyzer JSON endpoint
     Route::post('/semantic-analyzer/analyze', [AnalyzerController::class, 'semanticAnalyze'])
-        ->name('semantic.analyze'); // <-- existing
+        ->name('semantic.analyze');
 
-    // ===== PageSpeed Insights proxy (NEW) =====
-    // Keeps PSI key server-side; frontend calls this with { url }
+    // ===== PageSpeed Insights proxy (FIXED) =====
     Route::post('/semantic-analyzer/psi', function (Request $req) {
-        $url = (string) $req->input('url');
+        $url = trim((string) $req->input('url'));
         abort_unless(filter_var($url, FILTER_VALIDATE_URL), 422, 'Invalid URL');
 
-        $key = config('services.psi.key', env('GOOGLE_PSI_KEY'));
+        // Read from services.pagespeed.* (matches your config/services.php)
+        $cfg      = config('services.pagespeed', []);
+        $key      = $cfg['key']       ?? null;  // <-- fixed
+        $endpoint = $cfg['endpoint']  ?? 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+        $timeout  = (int)($cfg['timeout']   ?? 20);
+        $ttl      = (int)($cfg['cache_ttl'] ?? 60);
+
         abort_unless($key, 500, 'PSI key missing');
 
-        $base = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+        $fetch = function (string $strategy) use ($endpoint, $url, $key, $timeout, $ttl) {
+            $cacheKey = "psi:" . $strategy . ":" . md5($url);
+            return Cache::remember($cacheKey, $ttl, function () use ($endpoint, $url, $key, $timeout, $strategy) {
 
-        $fetch = function (string $strategy) use ($base, $url, $key) {
-            $res = Http::retry(2, 200)
-                ->acceptJson()
-                ->get($base, [
-                    'url'       => $url,
-                    'strategy'  => $strategy,           // 'mobile' | 'desktop'
-                    'category'  => 'performance',
-                    'key'       => $key,
-                ]);
+                $res = Http::timeout($timeout)
+                    ->retry(2, 250)
+                    ->acceptJson()
+                    ->get($endpoint, [
+                        'url'      => $url,
+                        'strategy' => $strategy,     // 'mobile' | 'desktop'
+                        'category' => 'performance',
+                        'key'      => $key,
+                    ]);
 
-            if (!$res->ok()) {
+                if (!$res->ok()) {
+                    return [
+                        '_error' => [
+                            'status' => $res->status(),
+                            'body'   => $res->body(),
+                        ],
+                    ];
+                }
+
+                $j        = $res->json();
+                $lr       = $j['lighthouseResult'] ?? [];
+                $audits   = $lr['audits'] ?? [];
+                $perfRaw  = $lr['categories']['performance']['score'] ?? null;
+                $score    = is_null($perfRaw) ? null : round($perfRaw * 100);
+
+                $num = function (string $id) use ($audits) {
+                    return $audits[$id]['numericValue'] ?? null;
+                };
+
                 return [
-                    'error' => [
-                        'status' => $res->status(),
-                        'body'   => $res->body(),
-                    ]
+                    'score'  => $score,
+                    'lcp'    => $num('largest-contentful-paint'),           // seconds
+                    'cls'    => $audits['cumulative-layout-shift']['numericValue'] ?? null,
+                    'inp'    => $num('interaction-to-next-paint'),           // ms
+                    'ttfb'   => $num('server-response-time'),                // ms
+                    'raw'    => $j,                                          // keep full JSON if UI needs more
                 ];
-            }
-            return $res->json();
+            });
         };
 
         return response()->json([
@@ -90,7 +104,7 @@ Route::middleware('auth')->group(function () {
             'desktop' => $fetch('desktop'),
         ]);
     })->name('semantic.psi');
-    // ==========================================
+    // ===========================================
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -98,7 +112,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
 
-    // Logout (POST)
+    // Logout
     Route::post('/logout', function () {
         Auth::logout();
         request()->session()->invalidate();
