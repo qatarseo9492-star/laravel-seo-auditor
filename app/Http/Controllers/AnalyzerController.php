@@ -169,6 +169,20 @@ class AnalyzerController extends Controller
     }
 
     /* ===========================================================
+     | Small DOM helpers (avoid "length on bool")
+     * ===========================================================*/
+    private function xpQuery(\DOMXPath $xp, string $expr): ?\DOMNodeList
+    {
+        $nodes = @$xp->query($expr);
+        return ($nodes instanceof \DOMNodeList) ? $nodes : null;
+    }
+    private function xpLen(\DOMXPath $xp, string $expr): int
+    {
+        $nodes = $this->xpQuery($xp, $expr);
+        return $nodes ? $nodes->length : 0;
+    }
+
+    /* ===========================================================
      | Extraction helpers
      * ===========================================================*/
     private function extractTitle(\DOMDocument $dom): string
@@ -180,11 +194,11 @@ class AnalyzerController extends Controller
     private function extractMeta(\DOMDocument $dom, string $name): string
     {
         $xp = new \DOMXPath($dom);
-        $nodes = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='{$name}']/@content");
+        $nodes = $this->xpQuery($xp, "//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='{$name}']/@content");
         if ($nodes && $nodes->length) return $this->cleanText($nodes->item(0)->nodeValue);
 
         if ($name === 'description') {
-            $nodes = $xp->query("//meta[translate(@property,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='og:description']/@content");
+            $nodes = $this->xpQuery($xp, "//meta[translate(@property,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='og:description']/@content");
             if ($nodes && $nodes->length) return $this->cleanText($nodes->item(0)->nodeValue);
         }
         return '';
@@ -207,14 +221,17 @@ class AnalyzerController extends Controller
     {
         $internal = 0; $external = 0;
         $xp = new \DOMXPath($dom);
-        $nodes = $xp->query('//a[@href]');
-        foreach ($nodes as $a) {
-            $href = $a->getAttribute('href');
-            if (!$href || strpos($href, 'javascript:')===0) continue;
-            $isAbs = preg_match('#^https?://#i', $href);
-            if (!$isAbs) { $internal++; continue; }
-            $h = parse_url($href, PHP_URL_HOST);
-            if ($host && $h && $this->sameHost($host, $h)) $internal++; else $external++;
+        $nodes = $this->xpQuery($xp, '//a[@href]');
+        if ($nodes) {
+            foreach ($nodes as $a) {
+                /** @var \DOMElement $a */
+                $href = $a->getAttribute('href');
+                if (!$href || strpos($href, 'javascript:')===0) continue;
+                $isAbs = preg_match('#^https?://#i', $href);
+                if (!$isAbs) { $internal++; continue; }
+                $h = parse_url($href, PHP_URL_HOST);
+                if ($host && $h && $this->sameHost($host, $h)) $internal++; else $external++;
+            }
         }
         return ['internal'=>$internal, 'external'=>$external];
     }
@@ -230,11 +247,14 @@ class AnalyzerController extends Controller
     private function countImagesWithAlt(\DOMDocument $dom): int
     {
         $xp = new \DOMXPath($dom);
-        $nodes = $xp->query('//img');
+        $nodes = $this->xpQuery($xp, '//img');
         $count = 0;
-        foreach ($nodes as $img) {
-            $alt = trim($img->getAttribute('alt') ?? '');
-            if ($alt !== '') $count++;
+        if ($nodes) {
+            foreach ($nodes as $img) {
+                /** @var \DOMElement $img */
+                $alt = trim($img->getAttribute('alt') ?? '');
+                if ($alt !== '') $count++;
+            }
         }
         return $count;
     }
@@ -249,33 +269,33 @@ class AnalyzerController extends Controller
 
     private function extractCanonical(\DOMXPath $xp): string
     {
-        $nodes = $xp->query("//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='canonical']/@href");
+        $nodes = $this->xpQuery($xp, "//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='canonical']/@href");
         return ($nodes && $nodes->length) ? trim((string)$nodes->item(0)->nodeValue) : '';
     }
 
     private function extractMetaRobots(\DOMXPath $xp): string
     {
-        $nodes = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='robots']/@content");
+        $nodes = $this->xpQuery($xp, "//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='robots']/@content");
         return ($nodes && $nodes->length) ? strtolower(trim((string)$nodes->item(0)->nodeValue)) : '';
     }
 
     private function hasViewport(\DOMXPath $xp): bool
     {
-        $n = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='viewport']");
-        return $n && $n->length > 0;
+        return $this->xpLen($xp, "//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='viewport']") > 0;
     }
 
     private function firstParagraph(\DOMDocument $dom): string
     {
         $xp   = new \DOMXPath($dom);
-        $node = $xp->query('//p[normalize-space(string())!=""]')->item(0);
+        $nodes = $this->xpQuery($xp, '//p[normalize-space(string())!=""]');
+        $node = $nodes && $nodes->length ? $nodes->item(0) : null;
         return $node ? $this->cleanText($node->textContent) : '';
     }
 
     private function countLazyImages(\DOMDocument $dom): int
     {
         $xp = new \DOMXPath($dom);
-        return $xp->query('//img[translate(@loading,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")=\"lazy\"]')->length;
+        return $this->xpLen($xp, '//img[translate(@loading,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="lazy"]');
     }
 
     private function countFigcaptions(\DOMDocument $dom): int
@@ -285,9 +305,9 @@ class AnalyzerController extends Controller
 
     private function hasOpenGraphOrTwitter(\DOMXPath $xp): bool
     {
-        $og = $xp->query("//meta[translate(@property,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='og:title']");
-        $tw = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='twitter:card']");
-        return ($og && $og->length) || ($tw && $tw->length);
+        $og = $this->xpQuery($xp, "//meta[translate(@property,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='og:title']");
+        $tw = $this->xpQuery($xp, "//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='twitter:card']");
+        return (($og && $og->length) || ($tw && $tw->length));
     }
 
     /**
@@ -306,37 +326,37 @@ class AnalyzerController extends Controller
         $hasProduct      = false;
         $hasFAQ          = false;
 
-        $nodes = $xp->query('//script[@type=\"application/ld+json\"]');
-        foreach ($nodes as $node) {
-            $raw = trim((string)$node->nodeValue);
-            if ($raw === '') continue;
-            $json = json_decode($raw, true);
-            if ($json === null) continue;
+        $nodes = $this->xpQuery($xp, '//script[@type="application/ld+json"]');
+        if ($nodes) {
+            foreach ($nodes as $node) {
+                $raw = trim((string)$node->nodeValue);
+                if ($raw === '') continue;
+                $json = json_decode($raw, true);
+                if ($json === null) continue;
 
-            foreach ($this->iterateJsonLd($json) as $obj) {
-                if (!is_array($obj)) continue;
+                foreach ($this->iterateJsonLd($json) as $obj) {
+                    if (!is_array($obj)) continue;
 
-                // @type (string or array)
-                if (isset($obj['@type'])) {
-                    $t = $obj['@type'];
-                    $list = is_array($t) ? $t : [$t];
-                    foreach ($list as $tt) {
-                        $tt = (string)$tt;
-                        $types[] = $tt;
-                        $low = strtolower($tt);
-                        if ($low === 'breadcrumblist') $hasBreadcrumbs = true;
-                        if ($low === 'faqpage')       $hasFAQ = true;
-                        if ($low === 'article' || $low === 'newsarticle' || $low === 'blogposting') $hasArticle = true;
-                        if ($low === 'product')       $hasProduct = true;
-                        if ($low === 'organization') {
-                            if (!empty($obj['sameAs'])) $hasOrgSameAs = true;
+                    // @type (string or array)
+                    if (isset($obj['@type'])) {
+                        $t = $obj['@type'];
+                        $list = is_array($t) ? $t : [$t];
+                        foreach ($list as $tt) {
+                            $tt = (string)$tt;
+                            $types[] = $tt;
+                            $low = strtolower($tt);
+                            if ($low === 'breadcrumblist') $hasBreadcrumbs = true;
+                            if ($low === 'faqpage')       $hasFAQ = true;
+                            if (in_array($low, ['article','newsarticle','blogposting'], true)) $hasArticle = true;
+                            if ($low === 'product')       $hasProduct = true;
+                            if ($low === 'organization' && !empty($obj['sameAs'])) $hasOrgSameAs = true;
                         }
                     }
-                }
 
-                if (isset($obj['mainEntity']) || isset($obj['mainEntityOfPage'])) $hasMainEntity = true;
-                if (isset($obj['author']) || isset($obj['creator'])) $hasAuthor = true;
-                if (isset($obj['datePublished']) || isset($obj['dateModified'])) $hasDatePublished = true;
+                    if (isset($obj['mainEntity']) || isset($obj['mainEntityOfPage'])) $hasMainEntity = true;
+                    if (isset($obj['author']) || isset($obj['creator'])) $hasAuthor = true;
+                    if (isset($obj['datePublished']) || isset($obj['dateModified'])) $hasDatePublished = true;
+                }
             }
         }
 
@@ -374,14 +394,14 @@ class AnalyzerController extends Controller
         $xp = new \DOMXPath($dom);
         $candidates = [
             '//article',
-            '//*[self::main or self::section or self::div][not(@role=\"navigation\")]'
+            '//*[self::main or self::section or self::div][not(@role="navigation")]'
         ];
 
         $bestTxt = '';
         $bestScore = 0;
 
         foreach ($candidates as $q) {
-            $nodes = $xp->query($q);
+            $nodes = $this->xpQuery($xp, $q);
             if (!$nodes) continue;
             foreach ($nodes as $node) {
                 $txt = $this->nodeVisibleText($node);
@@ -611,7 +631,6 @@ class AnalyzerController extends Controller
         string $mainText
     ): array {
         $band = fn(int $s)=> $s>=80?'green':($s>=60?'orange':'red');
-        $colPill = fn(int $s)=> $band($s);
         $hasH1   = !empty($headings['H1']);
         $h2Count = count($headings['H2'] ?? []);
         $h3Count = count($headings['H3'] ?? []);
@@ -623,7 +642,6 @@ class AnalyzerController extends Controller
         $hasCTA    = $this->containsAny($firstParagraph.' '.implode(' ', $headings['H2'] ?? []), $ctaWords);
         $kwLower   = Str::lower($kw);
         $h1HasKW   = $kw ? $this->containsAny(implode(' ', $headings['H1'] ?? []), [$kwLower]) : false;
-        $firstHasKW= $kw ? $this->containsAny(Str::lower($firstParagraph), [$kwLower]) : false;
 
         // -------- 1) User Signals & Experience
         $uxChecks = [];
@@ -910,8 +928,8 @@ class AnalyzerController extends Controller
     private function countSchemaBlocks(\DOMDocument $dom): int
     {
         $xp = new \DOMXPath($dom);
-        $jsonLd = $xp->query('//script[@type=\"application/ld+json\"]')->length;
-        $micro  = $xp->query('//*[@itemscope]')->length;
+        $jsonLd = $this->xpLen($xp, '//script[@type="application/ld+json"]');
+        $micro  = $this->xpLen($xp, '//*[@itemscope]');
         return $jsonLd + $micro;
     }
 
