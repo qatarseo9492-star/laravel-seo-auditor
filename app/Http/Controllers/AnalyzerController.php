@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class AnalyzerController extends Controller
 {
@@ -116,6 +117,48 @@ class AnalyzerController extends Controller
             return response()->json([
                 'error' => 'Analyzer error: '.$e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * GET /semantic-analyzer/psi?url=...
+     * Server-side proxy to Google PageSpeed Insights (v5) for MOBILE & DESKTOP.
+     * Expects PAGESPEED_API_KEY in .env (config/services.php -> 'pagespeed').
+     * Returns 200 with ok=false if key is missing (so UI can show a friendly message).
+     */
+    public function psi(Request $request)
+    {
+        $url = trim((string) $request->query('url', ''));
+        if ($url === '') {
+            return response()->json(['ok' => false, 'error' => 'Missing url'], 422);
+        }
+
+        $cfg      = config('services.pagespeed', []);
+        $key      = $cfg['key'] ?? env('GOOGLE_PSI_KEY');
+        $endpoint = $cfg['endpoint'] ?? 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+        $timeout  = (int)($cfg['timeout']   ?? 25);
+        $ttl      = (int)($cfg['cache_ttl'] ?? 120);
+
+        if (!$key) {
+            return response()->json([
+                'ok'    => false,
+                'error' => 'PSI key missing',
+                'hint'  => 'Set PAGESPEED_API_KEY in .env then: php artisan config:clear',
+            ], 200);
+        }
+
+        try {
+            $mobile  = Cache::remember("psi:m:{$url}", $ttl, fn () => $this->callPsiOnce($endpoint, $key, $timeout, $url, 'MOBILE'));
+            $desktop = Cache::remember("psi:d:{$url}", $ttl, fn () => $this->callPsiOnce($endpoint, $key, $timeout, $url, 'DESKTOP'));
+
+            return response()->json([
+                'ok'      => true,
+                'url'     => $url,
+                'mobile'  => $mobile,
+                'desktop' => $desktop,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'error' => 'PSI request failed: '.$e->getMessage()], 200);
         }
     }
 
@@ -859,7 +902,7 @@ class AnalyzerController extends Controller
     {
         preg_match_all('/\b(20[0-9]{2})\b/', $text, $m);
         $yrs = array_map('intval', $m[1] ?? []);
-        $max = $yrs ? max($yrs) : 0;
+               $max = $yrs ? max($yrs) : 0;
         $current = (int) date('Y');
         if ($max >= $current-1) return 20;
         if ($max >= $current-3) return 10;
@@ -936,5 +979,68 @@ class AnalyzerController extends Controller
     private function searchLink(string $q): string
     {
         return 'https://www.google.com/search?q=' . rawurlencode($q);
+    }
+
+    /* ===========================================================
+     | PageSpeed Insights (server proxy)
+     * ===========================================================*/
+    private function callPsiOnce(string $endpoint, string $key, int $timeout, string $url, string $strategy = 'MOBILE'): array
+    {
+        $params = [
+            'url'      => $url,
+            'key'      => $key,
+            'strategy' => $strategy,     // 'MOBILE' | 'DESKTOP'
+            'category' => 'performance', // we only need performance, others optional
+        ];
+
+        $res = Http::timeout($timeout)->get($endpoint, $params);
+        if (!$res->ok()) {
+            return ['ok' => false, 'status' => $res->status(), 'error' => 'HTTP '.$res->status()];
+        }
+        $json = $res->json() ?: [];
+
+        // Performance score (0–1) => 0–100
+        $perf = null;
+        if (isset($json['lighthouseResult']['categories']['performance']['score'])) {
+            $perf = (int) round(($json['lighthouseResult']['categories']['performance']['score'] ?? 0) * 100);
+        }
+
+        $audits = $json['lighthouseResult']['audits'] ?? [];
+        $field  = $json['loadingExperience']['metrics'] ?? [];
+
+        $lcp_ms  = $audits['largest-contentful-paint']['numericValue']
+                   ?? ($field['LARGEST_CONTENTFUL_PAINT_MS']['percentile'] ?? null);
+
+        $cls_val = $audits['cumulative-layout-shift']['numericValue']
+                   ?? ($field['CUMULATIVE_LAYOUT_SHIFT_SCORE']['percentile'] ?? null);
+
+        $inp_ms  = ($audits['experimental-interaction-to-next-paint']['numericValue'] ?? null)
+                   ?? ($field['INTERACTION_TO_NEXT_PAINT']['percentile'] ?? null);
+
+        // TTFB: either server-response-time or time-to-first-byte
+        $ttfb_ms = $audits['server-response-time']['numericValue']
+                   ?? ($audits['time-to-first-byte']['numericValue'] ?? null);
+
+        // Normalize units
+        $lcp_s   = is_numeric($lcp_ms) ? round($lcp_ms/1000, 2) : null;
+        $inp_val = is_numeric($inp_ms) ? (int) round($inp_ms)   : null;
+        $ttfb    = is_numeric($ttfb_ms)? (int) round($ttfb_ms)  : null;
+
+        // CLS can come as 0–1 or percentile (0–100); normalize to 0–1 when needed
+        if (is_numeric($cls_val)) {
+            $cls_val = $cls_val > 1 ? round($cls_val/100, 3) : round($cls_val, 3);
+        } else {
+            $cls_val = null;
+        }
+
+        return [
+            'ok'       => true,
+            'strategy' => $strategy,
+            'score'    => $perf,     // 0–100
+            'lcp_s'    => $lcp_s,    // seconds
+            'cls'      => $cls_val,  // unitless
+            'inp_ms'   => $inp_val,  // ms
+            'ttfb_ms'  => $ttfb,     // ms
+        ];
     }
 }
