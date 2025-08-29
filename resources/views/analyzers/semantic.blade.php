@@ -37,13 +37,18 @@
 
   .analyze-wrap{border-radius:16px;background:#020114;border:1px solid #ffffff20;box-shadow:inset 0 0 0 1px #ffffff0a;padding:12px}
 
-  /* Wheel small */
+  /* Score wheels (overall + readability) */
   .mw{--v:0;--ring:#f59e0b;--p:0;width:200px;height:200px;position:relative}
   .mw-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--v)*1%),#ffffff14 0);-webkit-mask:radial-gradient(circle 76px,transparent 72px,#000 72px);mask:radial-gradient(circle 76px,transparent 72px,#000 72px)}
   .mw-fill{position:absolute;inset:18px;border-radius:50%;overflow:hidden;background:#000}
   .mw-fill::after{content:"";position:absolute;left:0;right:0;height:100%;top:calc(100% - var(--p)*1%);transition:top .9s ease;background:var(--fill,linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%));-webkit-mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%);mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%)}
   .mw.good{--ring:#22c55e;--fill:linear-gradient(to top,#16a34a 0%,#22c55e 60%,#86efac 100%)} .mw.warn{--ring:#f59e0b;--fill:linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%)} .mw.bad{--ring:#ef4444;--fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%)}
   .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
+  /* Smaller wheel for Readability */
+  .mw-sm{width:170px;height:170px}
+  .mw-sm .mw-ring{-webkit-mask:radial-gradient(circle 64px,transparent 60px,#000 60px);mask:radial-gradient(circle 64px,transparent 60px,#000 60px)}
+  .mw-sm .mw-fill{inset:14px}
+  .mw-sm .mw-center{font-size:28px}
 
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid #ffffff22;background:#0b0b12}
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
@@ -52,6 +57,7 @@
 
   .progress{width:100%;height:10px;border-radius:9999px;background:#ffffff14;overflow:hidden;border:1px solid #ffffff1a}
   .progress>span{display:block;height:100%;border-radius:9999px;background:linear-gradient(90deg,#ef4444,#fde047,#22c55e);transition:width .5s ease}
+
   .check{display:flex;align-items:center;justify-content:space-between;border-radius:12px;padding:10px 12px;border:1px solid #ffffff1a;background:#0F1A29}
   .score-pill{padding:3px 7px;border-radius:10px;font-weight:800;background:#ffffff14;border:1px solid #ffffff22;color:#e5e7eb;font-size:12px}
   .score-pill--green{background:#10b9812e;border-color:#10b98166;color:#bbf7d0}.score-pill--orange{background:#f59e0b2e;border-color:#f59e0b66;color:#fde68a}.score-pill--red{background:#ef44442e;border-color:#ef444466;color:#fecaca}
@@ -75,6 +81,7 @@
 @section('content')
 <section class="maxw px-4 pb-10">
 
+  <!-- Title -->
   <div class="title-wrap">
     <div class="king">👑</div>
     <div style="text-align:center">
@@ -83,8 +90,10 @@
     </div>
   </div>
 
+  <!-- Legend -->
   <div class="legend"><span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span></div>
 
+  <!-- Wheel + chips -->
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#090916;border:1px solid #ffffff12">
       <div class="mw warn" id="mw">
@@ -108,6 +117,7 @@
     </div>
   </div>
 
+  <!-- Analyze toolbar -->
   <div class="analyze-wrap" style="margin-top:12px;">
     <div class="url-row">
       <span style="opacity:.75">🌐</span>
@@ -128,6 +138,7 @@
     </div>
     <div id="errorBox"></div>
 
+    <!-- Status chips -->
     <div id="statusChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
       <div class="chip" id="chipHttpWrap"><span class="t-grad">HTTP:</span>&nbsp;<span id="chipHttp">—</span></div>
       <div class="chip" id="chipTitleWrap"><span class="t-grad">Title:</span>&nbsp;<span id="chipTitle">—</span></div>
@@ -142,6 +153,7 @@
     </div>
   </div>
 
+  <!-- Quick Stats -->
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Quick Stats</h3>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
@@ -151,6 +163,62 @@
     </div>
   </div>
 
+  <!-- Readability Insights (NEW) -->
+  <div class="card" style="margin-top:16px" id="readabilityCard">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="king">📚</div>
+        <div>
+          <div class="t-grad" style="font-weight:900;">Readability Insights</div>
+          <div class="byline" style="font-size:12px;">Multilingual-friendly scoring</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span id="readBadge" class="pill">—</span>
+        <span id="gradeBadge" class="pill">Grade —</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:12px;margin-top:10px">
+      <!-- Wheel (smaller) -->
+      <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#090916;border:1px solid #ffffff12">
+        <div class="mw mw-sm warn" id="readMw">
+          <div class="mw-ring" id="readRing" style="--v:0"></div>
+          <div class="mw-fill" id="readFill" style="--p:0"></div>
+          <div class="mw-center" id="readNum">0%</div>
+        </div>
+      </div>
+
+      <!-- Metrics -->
+      <div>
+        <!-- Flesch -->
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b6c2cf;margin-bottom:6px">
+          <div>🧠 Flesch Reading Ease</div>
+          <div id="rbFleschVal" style="color:#e5e7eb;font-weight:800">—</div>
+        </div>
+        <div id="rbFleschBar" class="waterbox warn">
+          <div class="fill" id="rbFleschFill" style="width:0%"></div>
+          <div class="label"><span id="rbFleschPct">0%</span></div>
+        </div>
+
+        <!-- Grade -->
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b6c2cf;margin:10px 0 6px">
+          <div>🎓 Grade Level (lower is easier)</div>
+          <div id="rbGradeVal" style="color:#e5e7eb;font-weight:800">—</div>
+        </div>
+        <div class="progress"><span id="rbGradeFill" style="width:0%"></span></div>
+
+        <!-- Minis -->
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px">
+          <div class="card"><div style="font-size:11px;color:#94a3b8">Avg sentence length</div><div id="rbASL" style="font-weight:800">—</div></div>
+          <div class="card"><div style="font-size:11px;color:#94a3b8">Passive voice</div><div id="rbPassive" style="font-weight:800">—%</div></div>
+          <div class="card"><div style="font-size:11px;color:#94a3b8">Simple words</div><div id="rbSimple" style="font-weight:800">—%</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Structure -->
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Content Structure</h3>
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
@@ -167,11 +235,13 @@
     </div>
   </div>
 
+  <!-- Recommendations -->
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Recommendations</h3>
     <div id="recs" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"></div>
   </div>
 
+  <!-- Semantic SEO Ground -->
   <div class="ground-slab">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <div class="king">🧭</div>
@@ -183,6 +253,7 @@
     <div id="cats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"></div>
   </div>
 
+  <!-- Improve Modal -->
   <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
     <div class="card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px">
@@ -243,6 +314,13 @@ document.addEventListener('DOMContentLoaded', () => {
         mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
         mTips=$('#improveTips'), mLink=$('#improveSearch');
 
+  /* Readability UI */
+  const readMw=$('#readMw'), readRing=$('#readRing'), readFill=$('#readFill'), readNum=$('#readNum');
+  const readBadge=$('#readBadge'), gradeBadge=$('#gradeBadge');
+  const rbFleschBar=$('#rbFleschBar'), rbFleschFill=$('#rbFleschFill'), rbFleschPct=$('#rbFleschPct'), rbFleschVal=$('#rbFleschVal');
+  const rbGradeVal=$('#rbGradeVal'), rbGradeFill=$('#rbGradeFill');
+  const rbASL=$('#rbASL'), rbPassive=$('#rbPassive'), rbSimple=$('#rbSimple');
+
   /* Helpers */
   const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
   const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
@@ -250,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const pillClassBy=s=>s>=80?'score-pill--green':(s>=60?'score-pill--orange':'score-pill--red');
   const fillBy=s=>s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');
   const outlineBy=s=>s>=80?'outline-green':(s>=60?'outline-orange':'outline-red');
-  const bandLabel=s=>s>=80?'Good (≥80)':(s>=60?'Needs work (60–79)':'Low (<60)');
 
   function setChip(el,label,value,score){
     if(!el)return;
@@ -266,53 +343,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function clearError(){ errorBox.style.display='none'; errorBox.textContent=''; }
 
-  /* Category definitions (exactly 5 per category, with unique icons) */
+  /* Category defs (5 checks each) */
   const CATS = [
     { name:'User Signals & Experience', icon:'📱', checks:[
       'Mobile-friendly, responsive layout',
       'Optimized speed (compression, lazy-load)',
       'Core Web Vitals passing (LCP/INP/CLS)',
       'Clear CTAs and next steps',
-      'Accessible basics (alt text, contrast)' // added to make 5
-    ]},
+      'Accessible basics (alt text, contrast)']},
     { name:'Entities & Context', icon:'🧩', checks:[
       'sameAs/Organization details present',
       'Valid schema markup (Article/FAQ/Product)',
       'Related entities covered with context',
       'Primary entity clearly defined',
-      'Organization contact/about page visible' // added to make 5
-    ]},
+      'Organization contact/about page visible']},
     { name:'Structure & Architecture', icon:'🏗️', checks:[
       'Logical H2/H3 headings & topic clusters',
       'Internal links to hub/related pages',
       'Clean, descriptive URL slug',
       'Breadcrumbs enabled (+ schema)',
-      'XML sitemap logical structure' // added to make 5
-    ]},
+      'XML sitemap logical structure']},
     { name:'Content Quality', icon:'🧠', checks:[
       'E-E-A-T signals (author, date, expertise)',
       'Unique value vs. top competitors',
       'Facts & citations up to date',
       'Helpful media (images/video) w/ captions',
-      'Up-to-date examples & screenshots' // added to make 5
-    ]},
+      'Up-to-date examples & screenshots']},
     { name:'Content & Keywords', icon:'📝', checks:[
       'Define search intent & primary topic',
       'Map target & related keywords (synonyms/PAA)',
       'H1 includes primary topic naturally',
       'Integrate FAQs / questions with answers',
-      'Readable, NLP-friendly language'
-    ]},
+      'Readable, NLP-friendly language']},
     { name:'Technical Elements', icon:'⚙️', checks:[
       'Title tag (≈50–60 chars) w/ primary keyword',
       'Meta description (≈140–160 chars) + CTA',
       'Canonical tag set correctly',
       'Indexable & listed in XML sitemap',
-      'Robots directives valid'
-    ]},
+      'Robots directives valid']},
   ];
 
-  /* Knowledge base for Improve modal */
+  /* KB for Improve modal */
   const KB = {
     'Mobile-friendly, responsive layout': {why:'Most traffic is mobile; poor UX kills engagement.', tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'], link:'https://search.google.com/test/mobile-friendly'},
     'Optimized speed (compression, lazy-load)': {why:'Speed affects abandonment and CWV.', tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'], link:'https://web.dev/fast/'},
@@ -346,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'Robots directives valid': {why:'Avoid accidental noindex/nofollow.', tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'], link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}
   };
 
-  /* Compute checklist scores using API signals */
+  /* Compute checklist score from API signals */
   function scoreChecklist(label, data, url, targetKw=''){
     const qs = data.quick_stats||{};
     const cs = data.content_structure||{};
@@ -359,43 +430,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const meta  = (cs.meta_description||'');
     const internal = Number(qs.internal_links||0);
     const external = Number(qs.external_links||0);
-    const schemaTypes = new Set(ps.schema_types||[]);
-    const robots = (ps.robots||'').toLowerCase();
+    const schemaTypes = new Set((data.page_signals?.schema_types)||[]);
+    const robots = (data.page_signals?.robots||'').toLowerCase();
     const hasFAQ = schemaTypes.has('FAQPage');
     const hasArticle = schemaTypes.has('Article') || schemaTypes.has('NewsArticle') || schemaTypes.has('BlogPosting');
 
     const urlPath = (()=>{ try { return new URL(url).pathname; } catch { return '/'; } })();
-    const slugScore = (()=>{ // rough cleanliness
-      const hasQuery = url.includes('?');
-      const segs = urlPath.split('/').filter(Boolean);
-      const words = segs.join('-').split('-').filter(Boolean);
-      if (hasQuery) return 55;
-      if (segs.length>6) return 60;
-      if (words.some(w=>w.length>24)) return 65;
-      return 85;
-    })();
+    const slugScore = (()=>{ const hasQuery = url.includes('?'); const segs = urlPath.split('/').filter(Boolean); const words = segs.join('-').split('-').filter(Boolean); if (hasQuery) return 55; if (segs.length>6) return 60; if (words.some(w=>w.length>24)) return 65; return 85; })();
 
     switch(label){
       // User Signals & Experience
       case 'Mobile-friendly, responsive layout': return ps.has_viewport ? 88 : 58;
-      case 'Optimized speed (compression, lazy-load)': return 60; // server doesn’t measure CWV; neutral baseline
-      case 'Core Web Vitals passing (LCP/INP/CLS)':     return 60; // neutral (needs field data)
+      case 'Optimized speed (compression, lazy-load)': return 60;
+      case 'Core Web Vitals passing (LCP/INP/CLS)':     return 60;
       case 'Clear CTAs and next steps':                 return meta.length>=140 && /learn|get|try|start|buy|sign|download|contact/i.test(meta) ? 80 : 60;
       case 'Accessible basics (alt text, contrast)':    return (data.images_alt_count||0) >= 3 ? 82 : ((data.images_alt_count||0) >= 1 ? 68 : 48);
 
       // Entities & Context
       case 'sameAs/Organization details present':       return ps.has_org_sameas ? 90 : 55;
       case 'Valid schema markup (Article/FAQ/Product)': return (hasArticle || hasFAQ || schemaTypes.has('Product')) ? 85 : (schemaTypes.size>0?70:50);
-      case 'Related entities covered with context':     return external>=2 ? 72 : 60; // proxy using external refs
+      case 'Related entities covered with context':     return external>=2 ? 72 : 60;
       case 'Primary entity clearly defined':            return ps.has_main_entity ? 85 : (h1>0 ? 72 : 58);
-      case 'Organization contact/about page visible':   return 60; // requires crawl of site nav; neutral
+      case 'Organization contact/about page visible':   return 60;
 
       // Structure & Architecture
       case 'Logical H2/H3 headings & topic clusters':   return (h2>=3 && h3>=2) ? 85 : (h2>=2 ? 70 : 55);
       case 'Internal links to hub/related pages':       return internal>=5 ? 85 : (internal>=2 ? 65 : 45);
       case 'Clean, descriptive URL slug':               return slugScore;
       case 'Breadcrumbs enabled (+ schema)':            return ps.has_breadcrumbs ? 85 : 55;
-      case 'XML sitemap logical structure':             return 60; // needs site-wide fetch; neutral
+      case 'XML sitemap logical structure':             return 60;
 
       // Content Quality
       case 'E-E-A-T signals (author, date, expertise)': return ps.has_org_sameas ? 75 : 65;
@@ -439,13 +502,10 @@ document.addEventListener('DOMContentLoaded', () => {
     return 60;
   }
 
-  /* Render the Ground categories using computed scores */
   function renderCategories(data, url, targetKw){
     catsEl.innerHTML='';
     let autoGood=0;
-
     CATS.forEach(cat=>{
-      // Compute each check score
       const rows = cat.checks.map(lbl=>{
         const s = scoreChecklist(lbl, data, url, targetKw);
         const fill = fillBy(s), outline = outlineBy(s);
@@ -544,11 +604,16 @@ document.addEventListener('DOMContentLoaded', () => {
     try{
       setRunning(true);
 
-      // reset visuals
+      // reset wheels/bars
       mwRing?.style.setProperty('--v',0); mwFill?.style.setProperty('--p',0); mw?.classList.remove('good','warn','bad'); mw?.classList.add('warn');
       if(mwNum)mwNum.textContent='0%';
       overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add('warn');
       overallFill.style.width='0%'; overallPct.textContent='0%';
+
+      // reset readability wheel/badges
+      readRing?.style.setProperty('--v',0); readFill?.style.setProperty('--p',0); readMw?.classList.remove('good','warn','bad'); readMw?.classList.add('warn'); readNum.textContent='0%';
+      rbFleschBar?.classList.remove('good','warn','bad'); rbFleschBar?.classList.add('warn'); rbFleschFill.style.width='0%'; rbFleschPct.textContent='0%'; rbFleschVal.textContent='—';
+      readBadge.textContent='—'; gradeBadge.textContent='Grade —'; rbGradeFill.style.width='0%'; rbGradeVal.textContent='—'; rbASL.textContent='—'; rbPassive.textContent='—%'; rbSimple.textContent='—%';
 
       const data=await callAnalyzer(url);
       if(!data||data.error) throw new Error(data?.error||'Unknown error');
@@ -576,12 +641,51 @@ document.addEventListener('DOMContentLoaded', () => {
       setChip(chipHuman,'Human-like', `${human} %`, human);
       setChip(chipAI, 'AI-like', `${ai} %`, 100-human);
 
-      /* Quick stats & structure */
+      /* Quick stats */
       statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
       statInt.textContent=data.quick_stats?.internal_links??0;
       statExt.textContent=data.quick_stats?.external_links??0;
       statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
 
+      /* Readability Insights fill */
+      const rs = clamp01(r.score||0);
+      const rBand = bandName(rs);
+      readMw?.classList.remove('good','warn','bad'); readMw?.classList.add(rBand);
+      readRing?.style.setProperty('--v',rs); readFill?.style.setProperty('--p',rs);
+      readNum.textContent = rs+'%';
+
+      // Badge by score
+      const badgeTxt = rs>=80 ? 'Very Easy To Read' : (rs>=60 ? 'Good — Needs More Improvement' : 'Needs Improvement in Content');
+      readBadge.textContent = badgeTxt;
+      readBadge.className = 'pill ' + (rs>=80?'score-pill--green':rs>=60?'score-pill--orange':'score-pill--red');
+
+      // Badge by Grade
+      const grade = (typeof r.grade==='number') ? r.grade : null;
+      gradeBadge.textContent = 'Grade ' + (grade ?? '—');
+
+      // Flesch bar
+      const fre = clamp01(r.flesch ?? 0);
+      rbFleschBar.classList.remove('good','warn','bad'); rbFleschBar.classList.add(bandName(fre));
+      rbFleschFill.style.width = fre+'%';
+      rbFleschPct.textContent = fre+'%';
+      rbFleschVal.textContent = (r.flesch ?? '—');
+
+      // Grade bar (invert: lower grade => wider)
+      if (grade !== null){
+        const gWidth = Math.max(0, Math.min(100, Math.round(((18 - Math.min(18, Math.max(1, grade))) / 17) * 100)));
+        rbGradeFill.style.width = gWidth + '%';
+        rbGradeVal.textContent = grade.toFixed ? grade.toFixed(1) : grade;
+      } else {
+        rbGradeFill.style.width = '0%';
+        rbGradeVal.textContent = '—';
+      }
+
+      // Minis
+      rbASL.textContent = (r.avg_sentence_len ?? '—');
+      rbPassive.textContent = ((r.passive_ratio ?? '—')) + (typeof r.passive_ratio==='number'?'%':'');
+      rbSimple.textContent  = ((r.simple_words_ratio ?? '—')) + (typeof r.simple_words_ratio==='number'?'%':'');
+
+      /* Structure */
       titleVal.textContent=data.content_structure?.title||'—';
       metaVal.textContent=data.content_structure?.meta_description||'—';
       const hs=data.content_structure?.headings||{};
@@ -610,7 +714,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recsEl.appendChild(d);
       });
 
-      /* Semantic Ground (scores from signals) */
+      /* Semantic Ground */
       renderCategories(data, url, '');
 
     }catch(err){
