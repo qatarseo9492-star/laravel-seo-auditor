@@ -64,7 +64,7 @@ class AnalyzerController extends Controller
             $categories   = $this->buildCategories(
                 $url, $title, $metaDescription, $headings, $links, $imagesAltCount, $schemaCount,
                 $kw, $readability, $jsonldSummary, $hasViewport, $robots, $firstParagraph,
-                $lazyImgCount, $figcaptionCount, $hasOgOrTwitter
+                $lazyImgCount, $figcaptionCount, $hasOgOrTwitter, $canonical, $mainText
             );
 
             // 8) Overall score + quick recommendations
@@ -159,11 +159,9 @@ class AnalyzerController extends Controller
 
     private function makeDom(string $html): \DOMDocument
     {
+        // Keep <script> tags so JSON-LD stays available for schema detection.
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
-        // keep scripts/styles out of text metrics
-        $html = preg_replace('#<script\b[^>]*>[\s\S]*?</script>#i', ' ', $html);
-        $html = preg_replace('#<style\b[^>]*>[\s\S]*?</style>#i', ' ', $html);
         $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
         $dom->loadHTML($html, LIBXML_NOERROR|LIBXML_NOWARNING);
         libxml_clear_errors();
@@ -228,6 +226,19 @@ class AnalyzerController extends Controller
         return $a === $b;
     }
 
+    /** Counts <img> with non-empty alt */
+    private function countImagesWithAlt(\DOMDocument $dom): int
+    {
+        $xp = new \DOMXPath($dom);
+        $nodes = $xp->query('//img');
+        $count = 0;
+        foreach ($nodes as $img) {
+            $alt = trim($img->getAttribute('alt') ?? '');
+            if ($alt !== '') $count++;
+        }
+        return $count;
+    }
+
     private function textToHtmlRatio(string $html, string $mainText): int
     {
         $lenHtml = max(1, mb_strlen($html, '8bit'));
@@ -264,7 +275,7 @@ class AnalyzerController extends Controller
     private function countLazyImages(\DOMDocument $dom): int
     {
         $xp = new \DOMXPath($dom);
-        return $xp->query('//img[translate(@loading,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="lazy"]')->length;
+        return $xp->query('//img[translate(@loading,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")=\"lazy\"]')->length;
     }
 
     private function countFigcaptions(\DOMDocument $dom): int
@@ -295,7 +306,7 @@ class AnalyzerController extends Controller
         $hasProduct      = false;
         $hasFAQ          = false;
 
-        $nodes = $xp->query('//script[@type="application/ld+json"]');
+        $nodes = $xp->query('//script[@type=\"application/ld+json\"]');
         foreach ($nodes as $node) {
             $raw = trim((string)$node->nodeValue);
             if ($raw === '') continue;
@@ -363,7 +374,7 @@ class AnalyzerController extends Controller
         $xp = new \DOMXPath($dom);
         $candidates = [
             '//article',
-            '//*[self::main or self::section or self::div][not(@role="navigation")]'
+            '//*[self::main or self::section or self::div][not(@role=\"navigation\")]'
         ];
 
         $bestTxt = '';
@@ -435,7 +446,7 @@ class AnalyzerController extends Controller
     }
 
     private function tokenizeWords(string $text): array {
-        // Unicode letters + apostrophes + Arabic/Indic digits inside words
+        // Unicode letters + apostrophes
         preg_match_all('/[\p{L}\']+/u', mb_strtolower($text, 'UTF-8'), $m);
         return $m[0] ?? [];
     }
@@ -595,7 +606,9 @@ class AnalyzerController extends Controller
         string $firstParagraph,
         int    $lazyImgCount,
         int    $figcaptionCount,
-        bool   $hasOgOrTwitter
+        bool   $hasOgOrTwitter,
+        string $canonical,
+        string $mainText
     ): array {
         $band = fn(int $s)=> $s>=80?'green':($s>=60?'orange':'red');
         $colPill = fn(int $s)=> $band($s);
@@ -630,7 +643,7 @@ class AnalyzerController extends Controller
             'Pages that guide users with clear CTAs convert better and reduce pogo-sticking.',
             ['Place one primary CTA above the fold.','Use action verbs: Get, Start, Download, Contact.'],
             'clear call to action examples', $score);
-        $uxChecks[] = $this->mkCheck('Accessible contrast & a11y basics', $score = 70, // heuristic
+        $uxChecks[] = $this->mkCheck('Accessible contrast & a11y basics', $score = 70,
             'Contrast and ARIA basics improve readability for all users.',
             ['Check contrast ≥ 4.5:1 for body text.','Add alt text and focus indicators.'],
             'web accessibility contrast basics', $score);
@@ -750,7 +763,7 @@ class AnalyzerController extends Controller
             ['Use benefit + action verb. Keep ≈155 chars.'],
             'write good meta description CTA', $score);
         $noIndex  = Str::contains($robots, 'noindex');
-        $teChecks[] = $this->mkCheck('Canonical tag set correctly', $score = $boolScore(!empty($canonical = $this->extractCanonical(new \DOMXPath($this->makeDom('<html></html>')))) || true, 95, 55),
+        $teChecks[] = $this->mkCheck('Canonical tag set correctly', $score = $boolScore(!empty($canonical), 95, 55),
             'Canonical prevents duplicate content issues.',
             ['Add `<link rel="canonical">` to preferred URL.'],
             'canonical tag best practices', $score);
@@ -897,7 +910,7 @@ class AnalyzerController extends Controller
     private function countSchemaBlocks(\DOMDocument $dom): int
     {
         $xp = new \DOMXPath($dom);
-        $jsonLd = $xp->query('//script[@type="application/ld+json"]')->length;
+        $jsonLd = $xp->query('//script[@type=\"application/ld+json\"]')->length;
         $micro  = $xp->query('//*[@itemscope]')->length;
         return $jsonLd + $micro;
     }
