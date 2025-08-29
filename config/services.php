@@ -6,19 +6,13 @@ return [
     |--------------------------------------------------------------------------
     | Third Party Services
     |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS, and others. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional place to find your various credentials.
-    |
     */
 
     'mailgun' => [
-        'domain' => env('MAILGUN_DOMAIN'),
-        'secret' => env('MAILGUN_SECRET'),
+        'domain'   => env('MAILGUN_DOMAIN'),
+        'secret'   => env('MAILGUN_SECRET'),
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
-        'scheme' => 'https',
+        'scheme'   => 'https',
     ],
 
     'postmark' => [
@@ -26,17 +20,36 @@ return [
     ],
 
     'ses' => [
-        'key' => env('AWS_ACCESS_KEY_ID'),
+        'key'    => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    // --- PageSpeed Insights (server proxy) ---
+    /*
+    |--------------------------------------------------------------------------
+    | Google PageSpeed Insights
+    |--------------------------------------------------------------------------
+    | Supports either env:
+    |   - PAGESPEED_API_KEY (preferred)
+    |   - GOOGLE_PSI_KEY   (fallback/alias)
+    |
+    | Access in code as:
+    |   config('services.pagespeed.key')  // recommended
+    |   config('services.psi.key')        // alias
+    */
     'pagespeed' => [
-        'key'       => env('PAGESPEED_API_KEY'),
+        'key'       => env('PAGESPEED_API_KEY', env('GOOGLE_PSI_KEY')),
         'endpoint'  => env('PAGESPEED_ENDPOINT', 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'),
-        'timeout'   => env('PAGESPEED_TIMEOUT', 20),
-        'cache_ttl' => env('PAGESPEED_CACHE_TTL', 60),
+        'timeout'   => (int) env('PAGESPEED_TIMEOUT', 25),
+        'cache_ttl' => (int) env('PAGESPEED_CACHE_TTL', 120),
+    ],
+
+    // Alias so older code using config('services.psi.*') still works.
+    'psi' => [
+        'key'       => env('GOOGLE_PSI_KEY', env('PAGESPEED_API_KEY')),
+        'endpoint'  => env('PAGESPEED_ENDPOINT', 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed'),
+        'timeout'   => (int) env('PAGESPEED_TIMEOUT', 25),
+        'cache_ttl' => (int) env('PAGESPEED_CACHE_TTL', 120),
     ],
 
 ];
