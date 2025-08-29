@@ -4,7 +4,7 @@
 @push('head')
 <style>
   /* Page layout adjustments (as requested): single layout border + background */
-  html,body{background:#05210c!important;color:#e5e7eb}
+  html,body{background:#03041c!important;color:#e5e7eb} /* was #05210c */
   .maxw{max-width:1150px;margin:0 auto;border:1px solid #154f2e;border-radius:18px;padding:8px}
 
   .title-wrap{display:flex;align-items:center;gap:14px;justify-content:center;margin-top:14px}
