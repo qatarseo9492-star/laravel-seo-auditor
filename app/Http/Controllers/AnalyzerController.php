@@ -61,7 +61,7 @@ class AnalyzerController extends Controller
             // 6) Readability (multilingual-aware)
             $readability = $this->computeReadabilityFromText($mainText);
 
-            // 7) Build categories (6 x 5 checks) with icons and actionable tips
+            // 7) Build categories (6 x 5 checks)
             $categories   = $this->buildCategories(
                 $url, $title, $metaDescription, $headings, $links, $imagesAltCount, $schemaCount,
                 $kw, $readability, $jsonldSummary, $hasViewport, $robots, $firstParagraph,
@@ -121,41 +121,45 @@ class AnalyzerController extends Controller
     }
 
     /**
-     * GET /semantic-analyzer/psi?url=...
-     * Server-side proxy to Google PageSpeed Insights (v5) for MOBILE & DESKTOP.
-     * Expects PAGESPEED_API_KEY in .env (config/services.php -> 'pagespeed').
-     * Returns 200 with ok=false if key is missing (so UI can show a friendly message).
+     * PSI proxy
+     * Accepts POST (JSON) or GET (?url=) and returns both mobile + desktop metrics.
+     * Reads config('services.pagespeed.*').
+     *
+     * Routes to define (one or both):
+     *   Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psi'])->name('semantic.psi');
+     *   Route::get('/semantic-analyzer/psi',  [AnalyzerController::class, 'psi']);
      */
     public function psi(Request $request)
     {
-        $url = trim((string) $request->query('url', ''));
-        if ($url === '') {
-            return response()->json(['ok' => false, 'error' => 'Missing url'], 422);
+        $url = trim((string) ($request->input('url') ?? $request->query('url', '')));
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return response()->json(['ok' => false, 'error' => 'Invalid URL'], 422);
         }
 
         $cfg      = config('services.pagespeed', []);
         $key      = $cfg['key'] ?? env('GOOGLE_PSI_KEY');
-        $endpoint = $cfg['endpoint'] ?? 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+        $endpoint = rtrim($cfg['endpoint'] ?? 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed', '/');
         $timeout  = (int)($cfg['timeout']   ?? 25);
         $ttl      = (int)($cfg['cache_ttl'] ?? 120);
 
         if (!$key) {
+            // 200 with ok=false so UI can show a friendly error
             return response()->json([
                 'ok'    => false,
                 'error' => 'PSI key missing',
-                'hint'  => 'Set PAGESPEED_API_KEY in .env then: php artisan config:clear',
+                'hint'  => 'Set PAGESPEED_API_KEY in .env and run: php artisan config:clear',
             ], 200);
         }
 
         try {
-            $mobile  = Cache::remember("psi:m:{$url}", $ttl, fn () => $this->callPsiOnce($endpoint, $key, $timeout, $url, 'MOBILE'));
-            $desktop = Cache::remember("psi:d:{$url}", $ttl, fn () => $this->callPsiOnce($endpoint, $key, $timeout, $url, 'DESKTOP'));
+            $mobile  = Cache::remember("psi:m:".md5($url), $ttl, fn () => $this->callPsiOnce($endpoint, $key, $timeout, $url, 'mobile'));
+            $desktop = Cache::remember("psi:d:".md5($url), $ttl, fn () => $this->callPsiOnce($endpoint, $key, $timeout, $url, 'desktop'));
 
             return response()->json([
                 'ok'      => true,
                 'url'     => $url,
-                'mobile'  => $mobile,
-                'desktop' => $desktop,
+                'mobile'  => $mobile,   // { score, lcp, cls, inp, ttfb }
+                'desktop' => $desktop,  // { score, lcp, cls, inp, ttfb }
             ]);
         } catch (\Throwable $e) {
             return response()->json(['ok' => false, 'error' => 'PSI request failed: '.$e->getMessage()], 200);
@@ -305,7 +309,7 @@ class AnalyzerController extends Controller
     private function textToHtmlRatio(string $html, string $mainText): int
     {
         $lenHtml = max(1, mb_strlen($html, '8bit'));
-        $lenText = max(0, mb_strlen($mainText, 'UTF-8'));
+               $lenText = max(0, mb_strlen($mainText, 'UTF-8'));
         $ratio = ($lenText / $lenHtml) * 100;
         return (int) round(min(100, max(0, $ratio)));
     }
@@ -354,8 +358,7 @@ class AnalyzerController extends Controller
     }
 
     /**
-     * Parse JSON-LD to detect types, BreadcrumbList, Organization sameAs, mainEntity,
-     * author and datePublished, and flags for Article/Product/FAQPage.
+     * Parse JSON-LD types & flags
      */
     private function scanJsonLd(\DOMXPath $xp): array
     {
@@ -380,7 +383,6 @@ class AnalyzerController extends Controller
                 foreach ($this->iterateJsonLd($json) as $obj) {
                     if (!is_array($obj)) continue;
 
-                    // @type (string or array)
                     if (isset($obj['@type'])) {
                         $t = $obj['@type'];
                         $list = is_array($t) ? $t : [$t];
@@ -502,20 +504,17 @@ class AnalyzerController extends Controller
     private function splitSentences(string $text): array {
         $text = preg_replace('/\s+/u', ' ', trim($text));
         if ($text === '') return [];
-        // More permissive sentence segmentation (supports many scripts)
         $text = preg_replace('/([\.!\?؟।]|。|！|？)\s+/u', "$1\n", $text);
         $parts = preg_split("/\n+/u", $text) ?: [];
         return array_values(array_filter(array_map('trim', $parts), fn($s) => $s !== ''));
     }
 
     private function tokenizeWords(string $text): array {
-        // Unicode letters + apostrophes
         preg_match_all('/[\p{L}\']+/u', mb_strtolower($text, 'UTF-8'), $m);
         return $m[0] ?? [];
     }
 
     private function countSyllables(string $word): int {
-        // English heuristic only; for other scripts we'll switch to LIX below.
         $w = strtolower(preg_replace('/[^a-z]/', '', $word));
         if ($w === '') return 0;
         preg_match_all('/[aeiouy]+/', $w, $m);
@@ -527,7 +526,6 @@ class AnalyzerController extends Controller
 
     private function languageLooksLatin(string $text): bool
     {
-        // If most letters are non-Latin, we consider it non-Latin
         preg_match_all('/\p{L}/u', $text, $L);
         $letters = $L[0] ?? [];
         if (!$letters) return true;
@@ -545,11 +543,9 @@ class AnalyzerController extends Controller
         $words     = $this->tokenizeWords($text);
         $wCount    = max(1, count($words));
 
-        // Lexical diversity (type/token ratio)
         $types = array_unique($words);
         $ttr   = round((count($types)/$wCount) * 100, 1);
 
-        // Simple repetition using tri-grams
         $trigrams = [];
         for ($i=0; $i < max(0, $wCount-2); $i++) {
             $tri = $words[$i].' '.$words[$i+1].' '.$words[$i+2];
@@ -559,7 +555,6 @@ class AnalyzerController extends Controller
         foreach ($trigrams as $c) if ($c > 1) $repTri += $c;
         $repPct = min(100, round(($repTri / max(1, count($trigrams))) * 100));
 
-        // Digits density (per 100 words)
         preg_match_all('/\p{N}+/u', $text, $D);
         $digits       = count($D[0] ?? []);
         $digitsPer100 = round(($digits / $wCount) * 100);
@@ -567,7 +562,6 @@ class AnalyzerController extends Controller
         $isLatin = $this->languageLooksLatin($text);
 
         if ($isLatin) {
-            // English-like: use classic metrics
             $letters = 0; $chars = 0; $syll = 0; $poly = 0; $complex = 0;
             foreach ($words as $w) {
                 $letters += preg_match_all('/[a-z]/', $w);
@@ -621,11 +615,9 @@ class AnalyzerController extends Controller
             ];
         }
 
-        // Non-Latin: use LIX-like score
         $asl  = $wCount / $sCount;
         $long = 0; foreach ($words as $w) if (mb_strlen($w,'UTF-8') >= 7) $long++;
         $lix  = $asl + ($long * 100 / $wCount);
-        // map LIX to 0–100 (lower is better)
         $score = (int) round(max(0, min(100, 100 - (($lix - 20) * 2))));
         $badge = $score >= 80 ? 'Very Easy To Read' : ($score >= 60 ? 'Good — Needs More Improvement' : 'Needs Improvement in Content');
 
@@ -633,7 +625,7 @@ class AnalyzerController extends Controller
             'language'            => 'non-latin',
             'score'               => $score,
             'badge'               => $badge,
-            'grade'               => round(max(1, min(18, 19 - $score/6))), // synthetic grade from score
+            'grade'               => round(max(1, min(18, 19 - $score/6))),
             'flesch'              => null,
             'fk_grade'            => null,
             'smog'                => null,
@@ -651,7 +643,7 @@ class AnalyzerController extends Controller
     }
 
     /* ===========================================================
-     | Categories (6 x 5 checks) with icons + actionable tips
+     | Categories (6 x 5 checks) + scoring
      * ===========================================================*/
     private function buildCategories(
         string $url,
@@ -679,7 +671,6 @@ class AnalyzerController extends Controller
         $h3Count = count($headings['H3'] ?? []);
         $contentLen = mb_strlen($firstParagraph ?: implode(' ', $headings['H1'] ?? []), 'UTF-8');
 
-        // Helpers for scoring heuristics
         $boolScore = fn(bool $ok, int $good=90, int $bad=40) => $ok ? $good : $bad;
         $ctaWords  = ['buy','shop','get started','contact','learn more','sign up','subscribe','download','try','book','start'];
         $hasCTA    = $this->containsAny($firstParagraph.' '.implode(' ', $headings['H2'] ?? []), $ctaWords);
@@ -902,7 +893,7 @@ class AnalyzerController extends Controller
     {
         preg_match_all('/\b(20[0-9]{2})\b/', $text, $m);
         $yrs = array_map('intval', $m[1] ?? []);
-               $max = $yrs ? max($yrs) : 0;
+        $max = $yrs ? max($yrs) : 0;
         $current = (int) date('Y');
         if ($max >= $current-1) return 20;
         if ($max >= $current-3) return 10;
@@ -955,7 +946,6 @@ class AnalyzerController extends Controller
             + 0.14 * ($map['Entities & Context']       ?? 0)
             + 0.14 * ($map['User Signals & Experience']?? 0);
 
-        // small boost from readability
         $score = 0.9 * $score + 0.1 * ((int)$readability['score'] ?? 0);
 
         return (int) round(max(0, min(100, $score)));
@@ -984,63 +974,57 @@ class AnalyzerController extends Controller
     /* ===========================================================
      | PageSpeed Insights (server proxy)
      * ===========================================================*/
-    private function callPsiOnce(string $endpoint, string $key, int $timeout, string $url, string $strategy = 'MOBILE'): array
+    private function callPsiOnce(string $endpoint, string $key, int $timeout, string $url, string $strategy = 'mobile'): array
     {
+        $strategy = strtolower($strategy) === 'desktop' ? 'desktop' : 'mobile'; // enforce valid values
+
         $params = [
             'url'      => $url,
             'key'      => $key,
-            'strategy' => $strategy,     // 'MOBILE' | 'DESKTOP'
-            'category' => 'performance', // we only need performance, others optional
+            'strategy' => $strategy,     // 'mobile' | 'desktop'
+            'category' => 'performance',
         ];
 
-        $res = Http::timeout($timeout)->get($endpoint, $params);
+        $res = Http::timeout($timeout)->retry(2, 250)->get($endpoint, $params);
         if (!$res->ok()) {
             return ['ok' => false, 'status' => $res->status(), 'error' => 'HTTP '.$res->status()];
         }
         $json = $res->json() ?: [];
 
-        // Performance score (0–1) => 0–100
-        $perf = null;
-        if (isset($json['lighthouseResult']['categories']['performance']['score'])) {
-            $perf = (int) round(($json['lighthouseResult']['categories']['performance']['score'] ?? 0) * 100);
-        }
+        // Extract metrics
+        $lr     = $json['lighthouseResult'] ?? [];
+        $audits = $lr['audits'] ?? [];
 
-        $audits = $json['lighthouseResult']['audits'] ?? [];
-        $field  = $json['loadingExperience']['metrics'] ?? [];
+        // Performance score 0–1 -> 0–100
+        $perfScore = isset($lr['categories']['performance']['score'])
+            ? (int) round(($lr['categories']['performance']['score'] ?? 0) * 100)
+            : null;
 
-        $lcp_ms  = $audits['largest-contentful-paint']['numericValue']
-                   ?? ($field['LARGEST_CONTENTFUL_PAINT_MS']['percentile'] ?? null);
+        // LCP seconds
+        $lcpMs = $audits['largest-contentful-paint']['numericValue'] ?? null;
+        $lcp   = is_numeric($lcpMs) ? round($lcpMs / 1000, 2) : null;
 
-        $cls_val = $audits['cumulative-layout-shift']['numericValue']
-                   ?? ($field['CUMULATIVE_LAYOUT_SHIFT_SCORE']['percentile'] ?? null);
+        // CLS unitless
+        $cls = $audits['cumulative-layout-shift']['numericValue'] ?? null;
+        if (is_numeric($cls)) $cls = round((float)$cls, 3);
 
-        $inp_ms  = ($audits['experimental-interaction-to-next-paint']['numericValue'] ?? null)
-                   ?? ($field['INTERACTION_TO_NEXT_PAINT']['percentile'] ?? null);
+        // INP ms (new id) with fallback to experimental id
+        $inpMs = $audits['interaction-to-next-paint']['numericValue']
+            ?? ($audits['experimental-interaction-to-next-paint']['numericValue'] ?? null);
+        $inp = is_numeric($inpMs) ? (int) round($inpMs) : null;
 
-        // TTFB: either server-response-time or time-to-first-byte
-        $ttfb_ms = $audits['server-response-time']['numericValue']
-                   ?? ($audits['time-to-first-byte']['numericValue'] ?? null);
-
-        // Normalize units
-        $lcp_s   = is_numeric($lcp_ms) ? round($lcp_ms/1000, 2) : null;
-        $inp_val = is_numeric($inp_ms) ? (int) round($inp_ms)   : null;
-        $ttfb    = is_numeric($ttfb_ms)? (int) round($ttfb_ms)  : null;
-
-        // CLS can come as 0–1 or percentile (0–100); normalize to 0–1 when needed
-        if (is_numeric($cls_val)) {
-            $cls_val = $cls_val > 1 ? round($cls_val/100, 3) : round($cls_val, 3);
-        } else {
-            $cls_val = null;
-        }
+        // TTFB ms (server-response-time first, then time-to-first-byte)
+        $ttfbMs = $audits['server-response-time']['numericValue']
+            ?? ($audits['time-to-first-byte']['numericValue'] ?? null);
+        $ttfb = is_numeric($ttfbMs) ? (int) round($ttfbMs) : null;
 
         return [
-            'ok'       => true,
-            'strategy' => $strategy,
-            'score'    => $perf,     // 0–100
-            'lcp_s'    => $lcp_s,    // seconds
-            'cls'      => $cls_val,  // unitless
-            'inp_ms'   => $inp_val,  // ms
-            'ttfb_ms'  => $ttfb,     // ms
+            'ok'     => true,
+            'score'  => $perfScore, // 0–100
+            'lcp'    => $lcp,       // seconds
+            'cls'    => $cls,       // unitless (0–1+)
+            'inp'    => $inp,       // ms
+            'ttfb'   => $ttfb,      // ms
         ];
     }
 }
