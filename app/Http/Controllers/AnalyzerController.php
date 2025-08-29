@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class AnalyzerController extends Controller
 {
     /**
-     * POST: /api/semantic-analyze  (or named web route if you use it)
+     * POST /semantic-analyzer/analyze  (also wired as /api/semantic-analyze)
+     * Fetch page -> parse -> compute stats -> score -> JSON.
      */
     public function semanticAnalyze(Request $request)
     {
@@ -18,48 +20,87 @@ class AnalyzerController extends Controller
             'target_keyword' => ['nullable','string','max:160'],
         ]);
 
-        $url   = (string) $data['url'];
-        $kw    = trim((string)($data['target_keyword'] ?? ''));
-        $ua    = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36';
+        $url = (string) $data['url'];
+        $kw  = trim((string)($data['target_keyword'] ?? ''));
+        $ua  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36';
+
+        // 0) Cache quick wins
+        $cacheKey = 'analyze:'.md5($url.'|'.$kw);
+        if ($cached = Cache::get($cacheKey)) {
+            return response()->json($cached);
+        }
 
         try {
-            // 1) Fetch
+            // 1) Fetch (safe)
             $resp = $this->fetchUrl($url, $ua);
             if (!$resp['ok']) {
-                return response()->json(['ok'=>false,'error'=>$resp['error'] ?? 'Fetch failed'], 422);
+                return response()->json(['error' => $resp['error'] ?? 'Fetch failed'], 422);
             }
             $html = $resp['body'] ?? '';
             $host = $resp['host'] ?? parse_url($url, PHP_URL_HOST);
+            $httpStatus = $resp['status'] ?? 200;
 
-            // 2) DOM
+            // 2) Parse HTML
             $dom  = $this->makeDom($html);
 
-            // 3) Main text (content to score)
-            $mainText = $this->extractMainText($dom);
+            // 3) Extract main text (Readability with fallback)
+            $mainText = $this->extractMainTextSmart($dom);
 
-            // 4) Structure & quick stats
-            $title           = $this->extractTitle($dom);
+            // 4) Structure + on-page bits
+            $title  = $this->extractTitle($dom);
             $metaDescription = $this->extractMeta($dom, 'description');
-            $headings        = $this->extractHeadings($dom);
-            $links           = $this->extractLinks($dom, $host);
-            $imagesAlt       = $this->countImagesWithAlt($dom);
-            $schemaCount     = $this->countSchemaBlocks($dom);
-            $ratio           = $this->textToHtmlRatio($html, $mainText);
+            $headings = $this->extractHeadings($dom);
+            $links    = $this->extractLinks($dom, $host);
+            $imagesAlt = $this->countImagesWithAlt($dom);
+            $schema = $this->scanSchema($dom);
+            $schemaCount = $schema['count'];
+            $hasFAQ = $schema['hasFAQ'];
+            $hasBreadcrumb = $schema['hasBreadcrumb'];
+            $canonical = $this->extractCanonical($dom);
+            $robotsMeta = $this->extractRobotsMeta($dom);
+            $viewport   = $this->extractViewport($dom);
+            $ratio = $this->textToHtmlRatio($html, $mainText);
 
-            // 5) Readability (real)
+            // 5) Readability (real content)
             $readability = $this->computeReadabilityFromText($mainText);
 
-            // 6) Categories (FULL list you requested)
-            $categories   = $this->buildCategories(
-                $title,$metaDescription,$headings,$links,$imagesAlt,$schemaCount,$kw,$readability,$dom,$url,$mainText
+            // 6) Categories + Recommendations
+            $categories = $this->buildCategoriesNew(
+                $title,
+                $metaDescription,
+                $headings,
+                $links,
+                $imagesAlt,
+                $schemaCount,
+                $hasFAQ,
+                $hasBreadcrumb,
+                $kw,
+                $readability,
+                $canonical,
+                $robotsMeta,
+                $viewport
             );
-            $overallScore = $this->computeOverallScore($categories, $readability);
-            $wheel        = ['label' => $this->wheelLabel($overallScore)];
-            $recommendations = $this->buildRecommendations($links, $imagesAlt, $schemaCount, $headings, $readability, $kw);
 
-            // 7) Payload
-            return response()->json([
+            $overallScore = $this->computeOverallScoreNew($categories, $readability);
+            $wheel = ['label' => $this->wheelLabel($overallScore)];
+
+            $recommendations = $this->buildRecommendationsNew(
+                $links,
+                $imagesAlt,
+                $schemaCount,
+                $headings,
+                $readability,
+                $kw,
+                $canonical,
+                $robotsMeta,
+                $viewport,
+                $hasFAQ
+            );
+
+            // 7) Response payload
+            $response = [
                 'ok'            => true,
+                'http_status'   => $httpStatus,
                 'overall_score' => $overallScore,
                 'wheel'         => $wheel,
                 'quick_stats'   => [
@@ -69,32 +110,88 @@ class AnalyzerController extends Controller
                     'external_links'     => $links['external'],
                     'text_to_html_ratio' => $ratio,
                 ],
+                'meta' => [
+                    'canonical' => $canonical,
+                    'robots'    => $robotsMeta,
+                    'viewport'  => $viewport,
+                ],
                 'content_structure' => [
                     'title'            => $title,
                     'meta_description' => $metaDescription,
                     'headings'         => $headings,
                 ],
-                'readability'     => $readability,
-                'recommendations' => $recommendations,
-                'categories'      => $categories,
-            ]);
+                'schema_count'   => $schemaCount,
+                'readability'    => $readability,
+                'recommendations'=> $recommendations,
+                'categories'     => $categories,
+            ];
+
+            Cache::put($cacheKey, $response, now()->addMinutes(15));
+            return response()->json($response);
+
         } catch (\Throwable $e) {
-            return response()->json(['ok'=>false,'error'=>'Analyzer error: '.$e->getMessage()], 500);
+            return response()->json([
+                'error' => 'Analyzer error: '.$e->getMessage()
+            ], 500);
         }
     }
 
-    /* ========================= Fetch & DOM ========================= */
+    /* ============================================================
+     | Safe fetching
+     * ============================================================*/
+
+    private function isPrivateIp(string $host): bool
+    {
+        $ips = [];
+        foreach ((array) @gethostbynamel($host) as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) $ips[] = $ip;
+        }
+        if (!$ips) return true; // resolve failed -> block
+        foreach ($ips as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP,
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+                return true; // private/reserved -> block
+            }
+        }
+        return false;
+    }
 
     private function fetchUrl(string $url, string $ua): array
     {
         try {
+            $host = parse_url($url, PHP_URL_HOST);
+            if (!$host || $this->isPrivateIp($host)) {
+                return ['ok'=>false, 'error'=>'Blocked host (private/reserved IP)'];
+            }
+
             $res = Http::withHeaders([
                     'User-Agent' => $ua,
                     'Accept'     => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                ])->timeout(20)->retry(2, 300)->get($url);
+                ])
+                ->withOptions([
+                    'allow_redirects' => ['max' => 5],
+                    'verify'          => true,
+                    'timeout'         => 20,
+                    'connect_timeout' => 10,
+                ])
+                ->retry(2, 300)
+                ->get($url);
 
-            if (!$res->ok()) return ['ok'=>false, 'error'=>"HTTP ".$res->status()];
-            return ['ok'=>true, 'body'=>(string)$res->body(), 'host'=>parse_url($url, PHP_URL_HOST)];
+            if (!$res->ok()) return ['ok'=>false, 'status'=>$res->status(), 'error'=>"HTTP ".$res->status()];
+
+            $lenHeader = $res->header('Content-Length');
+            $declaredLen = is_array($lenHeader) ? (int)($lenHeader[0] ?? 0) : (int)($lenHeader ?? 0);
+            if ($declaredLen > 3_000_000) return ['ok'=>false,'status'=>$res->status(),'error'=>'Page too large (>3MB)'];
+
+            $body = (string)$res->body();
+            if (strlen($body) > 3_000_000) $body = substr($body, 0, 3_000_000);
+
+            return [
+                'ok'     => true,
+                'body'   => $body,
+                'host'   => $host,
+                'status' => $res->status(),
+            ];
         } catch (\Throwable $e) {
             return ['ok'=>false, 'error'=>$e->getMessage()];
         }
@@ -104,6 +201,7 @@ class AnalyzerController extends Controller
     {
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
+        // Remove scripts/styles for cleaner text
         $html = preg_replace('#<script\b[^>]*>[\s\S]*?</script>#i', ' ', $html);
         $html = preg_replace('#<style\b[^>]*>[\s\S]*?</style>#i', ' ', $html);
         $html = mb_convert_encoding($html, 'HTML-ENTITIES', 'UTF-8');
@@ -112,20 +210,26 @@ class AnalyzerController extends Controller
         return $dom;
     }
 
-    /* ========================= Extractors ========================= */
+    /* ============================================================
+     | Extraction helpers
+     * ============================================================*/
 
     private function extractTitle(\DOMDocument $dom): string
     {
         $nodes = $dom->getElementsByTagName('title');
-        return ($nodes && $nodes->length) ? $this->cleanText($nodes->item(0)->textContent) : '';
+        if ($nodes && $nodes->length) {
+            return $this->cleanText($nodes->item(0)->textContent);
+        }
+        return '';
     }
 
     private function extractMeta(\DOMDocument $dom, string $name): string
     {
         $xp = new \DOMXPath($dom);
         $nodes = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='{$name}']/@content");
-        if ($nodes && $nodes->length) return $this->cleanText($nodes->item(0)->nodeValue);
-
+        if ($nodes && $nodes->length) {
+            return $this->cleanText($nodes->item(0)->nodeValue);
+        }
         if ($name === 'description') {
             $nodes = $xp->query("//meta[translate(@property,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='og:description']/@content");
             if ($nodes && $nodes->length) return $this->cleanText($nodes->item(0)->nodeValue);
@@ -133,11 +237,36 @@ class AnalyzerController extends Controller
         return '';
     }
 
+    private function extractCanonical(\DOMDocument $dom): string
+    {
+        $xp = new \DOMXPath($dom);
+        $nodes = $xp->query("//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='canonical']/@href");
+        if ($nodes && $nodes->length) return trim($nodes->item(0)->nodeValue ?? '');
+        return '';
+    }
+
+    private function extractRobotsMeta(\DOMDocument $dom): string
+    {
+        $xp = new \DOMXPath($dom);
+        $nodes = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='robots']/@content");
+        if ($nodes && $nodes->length) return trim($nodes->item(0)->nodeValue ?? '');
+        return '';
+    }
+
+    private function extractViewport(\DOMDocument $dom): string
+    {
+        $xp = new \DOMXPath($dom);
+        $nodes = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='viewport']/@content");
+        if ($nodes && $nodes->length) return trim($nodes->item(0)->nodeValue ?? '');
+        return '';
+    }
+
     private function extractHeadings(\DOMDocument $dom): array
     {
         $out = ['H1'=>[], 'H2'=>[], 'H3'=>[], 'H4'=>[], 'H5'=>[], 'H6'=>[]];
         foreach (['h1','h2','h3','h4','h5','h6'] as $h) {
-            foreach ($dom->getElementsByTagName($h) as $n) {
+            $nodes = $dom->getElementsByTagName($h);
+            foreach ($nodes as $n) {
                 $txt = $this->cleanText($n->textContent);
                 if ($txt !== '') $out[strtoupper($h)][] = $txt;
             }
@@ -180,6 +309,29 @@ class AnalyzerController extends Controller
         return $count;
     }
 
+    private function scanSchema(\DOMDocument $dom): array
+    {
+        $xp = new \DOMXPath($dom);
+        $count = 0; $hasFAQ = false; $hasBreadcrumb = false;
+        foreach ($xp->query('//script[@type="application/ld+json"]') as $s) {
+            $json = trim($s->textContent ?? '');
+            if ($json === '') continue;
+            $count++;
+            $j = @json_decode($json, true);
+            if (!$j) continue;
+            $flat = json_encode($j);
+            if (stripos($flat,'"FAQPage"') !== false) $hasFAQ = true;
+            if (stripos($flat,'"BreadcrumbList"') !== false) $hasBreadcrumb = true;
+        }
+        // microdata itemscope
+        $count += $xp->query('//*[@itemscope]')->length;
+        // breadcrumb HTML hint
+        if (!$hasBreadcrumb) {
+            $hasBreadcrumb = (bool) $xp->query("//*[contains(translate(@class,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'breadcrumb')]")->length;
+        }
+        return ['count'=>$count, 'hasFAQ'=>$hasFAQ, 'hasBreadcrumb'=>$hasBreadcrumb];
+    }
+
     private function textToHtmlRatio(string $html, string $mainText): int
     {
         $lenHtml = max(1, mb_strlen($html, '8bit'));
@@ -188,17 +340,44 @@ class AnalyzerController extends Controller
         return (int) round(min(100, max(0, $ratio)));
     }
 
-    private function extractMainText(\DOMDocument $dom): string
+    /* ============================================================
+     | Readability (with better main text)
+     * ============================================================*/
+
+    private function extractMainTextSmart(\DOMDocument $dom): string
+    {
+        // Try Readability.php
+        try {
+            if (class_exists('\\andreskrey\\Readability\\Readability')) {
+                $html = $dom->saveHTML() ?: '';
+                $config = new \andreskrey\Readability\Configuration([
+                    'summonCthulhu' => false,
+                    'fixRelativeURLs' => false,
+                ]);
+                $r = new \andreskrey\Readability\Readability($config);
+                $r->parse($html);
+                $txt = $this->cleanText($r->getContent() ?? '');
+                if (mb_strlen($txt) >= 200) return $txt;
+            }
+        } catch (\Throwable $e) {
+            // ignore, fallback below
+        }
+        // Fallback heuristic
+        return $this->extractMainTextHeuristic($dom);
+    }
+
+    private function extractMainTextHeuristic(\DOMDocument $dom): string
     {
         $xp = new \DOMXPath($dom);
         $candidates = [
             '//article',
             '//*[self::main or self::section or self::div][not(@role="navigation")]'
         ];
-
-        $bestTxt = ''; $bestScore = 0;
+        $bestTxt = '';
+        $bestScore = 0;
         foreach ($candidates as $q) {
-            $nodes = $xp->query($q); if (!$nodes) continue;
+            $nodes = $xp->query($q);
+            if (!$nodes) continue;
             foreach ($nodes as $node) {
                 $txt = $this->nodeVisibleText($node);
                 $len = mb_strlen($txt, 'UTF-8');
@@ -219,12 +398,10 @@ class AnalyzerController extends Controller
     {
         $skip = ['script','style','noscript','nav','footer','header','aside','svg'];
         if ($node->nodeType === XML_TEXT_NODE) return $node->textContent;
-
         $out = '';
         if ($node->hasChildNodes()) {
             foreach ($node->childNodes as $child) {
                 if ($child->nodeType === XML_ELEMENT_NODE) {
-                    /** @var \DOMElement $child */
                     if (in_array(strtolower($child->nodeName), $skip, true)) continue;
                     $hidden = strtolower($child->getAttribute('aria-hidden') ?? '') === 'true';
                     if ($hidden) continue;
@@ -243,22 +420,22 @@ class AnalyzerController extends Controller
         return trim($s);
     }
 
-    /* ========================= Readability ========================= */
-
     private function splitSentences(string $text): array {
         $text = preg_replace('/\s+/u', ' ', trim($text));
         if ($text === '') return [];
-        $text = preg_replace('/([.!?])\s+(?=[A-Z0-9])/u', "$1\n", $text);
+        $text = preg_replace('/([.!?])\s+(?=[\p{Lu}0-9])/u', "$1\n", $text);
         $parts = preg_split("/\n+/u", $text) ?: [];
         return array_values(array_filter(array_map('trim', $parts), fn($s) => $s !== ''));
     }
 
+    // Unicode-aware tokenization
     private function tokenizeWords(string $text): array {
-        preg_match_all('/[A-Za-z\']+/u', mb_strtolower($text, 'UTF-8'), $m);
+        preg_match_all('/[\p{L}\p{M}\']+/u', mb_strtolower($text, 'UTF-8'), $m);
         return $m[0] ?? [];
     }
 
     private function countSyllables(string $word): int {
+        // English-oriented (ok for most Latin text)
         $w = strtolower(preg_replace('/[^a-z]/', '', $word));
         if ($w === '') return 0;
         preg_match_all('/[aeiouy]+/', $w, $m);
@@ -268,30 +445,14 @@ class AnalyzerController extends Controller
         return max(1, $count);
     }
 
-    private function trigramRepetition(array $tokens): float
-    {
-        $n = count($tokens);
-        if ($n < 3) return 0.0;
-        $total = $n - 2;
-        $counts = [];
-        for ($i=0; $i<$n-2; $i++) {
-            $tri = $tokens[$i].' '.$tokens[$i+1].' '.$tokens[$i+2];
-            $counts[$tri] = ($counts[$tri] ?? 0) + 1;
-        }
-        $repeated = 0;
-        foreach ($counts as $c) if ($c > 1) $repeated += ($c - 1);
-        return $total > 0 ? $repeated / $total : 0.0;
-    }
-
-    private function computeReadabilityFromText(string $text): array
-    {
+    private function computeReadabilityFromText(string $text): array {
         $sentences = $this->splitSentences($text);
-        $sCount    = max(1, count($sentences));
-        $tokens    = $this->tokenizeWords($text);
-        $wCount    = max(1, count($tokens));
+        $sCount = max(1, count($sentences));
+        $words = $this->tokenizeWords($text);
+        $wCount = max(1, count($words));
 
         $letters = 0; $chars = 0; $syll = 0; $poly = 0; $complex = 0;
-        foreach ($tokens as $w) {
+        foreach ($words as $w) {
             $letters += preg_match_all('/[a-z]/', $w);
             $chars   += strlen($w);
             $sy = $this->countSyllables($w);
@@ -299,282 +460,345 @@ class AnalyzerController extends Controller
             if ($sy >= 3) { $poly++; $complex++; }
         }
 
-        $asl = $wCount / $sCount;
-        $asw = $syll   / $wCount;
+        $asl = $wCount / $sCount;      // avg sentence length
+        $asw = $syll   / $wCount;      // avg syllables per word
 
         $flesch = 206.835 - 1.015 * $asl - 84.6 * $asw;
-        $fk     = 0.39 * $asl + 11.8 * $asw - 15.59;
-        $smog   = 1.0430 * sqrt($poly * (30.0 / $sCount)) + 3.1291;
-        $fog    = 0.4 * ($asl + 100.0 * ($complex / $wCount));
-        $L      = ($letters / $wCount) * 100.0;
-        $S      = ($sCount  / $wCount) * 100.0;
-        $cli    = 0.0588 * $L - 0.296 * $S - 15.8;
-        $ari    = 4.71 * ($chars / $wCount) + 0.5 * $asl - 21.43;
-
-        $unique = count(array_unique($tokens));
-        $ttr    = $wCount > 0 ? $unique / $wCount : 0.0;
-        $triRep = $this->trigramRepetition($tokens);
-        $digits = preg_match_all('/\d/u', $text, $m);
-        $digitsPer100 = round(($digits / $wCount) * 100, 1);
+        $fk = 0.39 * $asl + 11.8 * $asw - 15.59;
+        $smog = 1.0430 * sqrt($poly * (30.0 / $sCount)) + 3.1291;
+        $fog = 0.4 * ($asl + 100.0 * ($complex / $wCount));
+        $L = ($letters / $wCount) * 100.0;
+        $S = ($sCount  / $wCount) * 100.0;
+        $cli = 0.0588 * $L - 0.296 * $S - 15.8;
+        $ari = 4.71 * ($chars / $wCount) + 0.5 * $asl - 21.43;
 
         preg_match_all('/\b(is|are|was|were|be|been|being)\s+[a-z]+ed\b/i', $text, $pv);
-        $passiveRatio = min(100, round((count($pv[0] ?? []) / $sCount) * 100));
+        $passiveHits  = count($pv[0] ?? []);
+        $passiveRatio = min(100, round(($passiveHits / $sCount) * 100));
 
-        $displayScore = (int) max(0, min(100, round($flesch)));
-        $avgGrade = max(1, min(18, ($fk + $smog + $fog + $cli + $ari) / 5.0));
+        $avgGrade    = max(1, min(18, ($fk + $smog + $fog + $cli + $ari) / 5.0));
+        $fre         = max(0, min(100, $flesch));
+        $gradeScore  = max(0, min(100, 100 - (($avgGrade - 1) * (100.0 / 17.0))));
+        $score       = (int) round(($fre + $gradeScore) / 2);
+
+        $simpleWordsRatio = max(0, min(100, round((($wCount - $complex) / $wCount) * 100)));
 
         return [
-            'score'               => $displayScore,
+            'score'               => $score,
             'grade'               => round($avgGrade, 1),
             'flesch'              => round($flesch, 1),
-
-            'word_count'          => $wCount,
-            'sentence_count'      => $sCount,
-            'syllable_count'      => $syll,
-
-            'avg_sentence_len'    => round($asl, 1),
-            'syllables_per_word'  => round($asw, 2),
-            'lexical_diversity'   => round($ttr, 4),
-            'repetition_trigram'  => round($triRep, 4),
-            'digits_per_100_words'=> $digitsPer100,
-
             'fk_grade'            => round($fk, 1),
             'smog'                => round($smog, 1),
             'gunning_fog'         => round($fog, 1),
             'coleman_liau'        => round($cli, 1),
             'ari'                 => round($ari, 1),
-
+            'avg_sentence_len'    => round($asl, 2),
+            'simple_words_ratio'  => $simpleWordsRatio,
             'passive_ratio'       => $passiveRatio,
-            'note'                => 'Score uses clamped Flesch (0–100) for intuitive wheel; grade is an averaged index.',
+            'note'                => 'Score blends Flesch and average grade-level into a 0–100 scale.',
         ];
     }
 
-    /* ========================= Categories (FULL) ========================= */
+    /* ============================================================
+     | Categories / scoring (expanded)
+     * ============================================================*/
 
-    private function buildCategories(
+    private function buildCategoriesNew(
         string $title,
         string $meta,
         array $headings,
         array $links,
         int $imagesAlt,
         int $schemaCount,
+        bool $hasFAQ,
+        bool $hasBreadcrumb,
         string $kw,
         array $readability,
-        \DOMDocument $dom,
-        string $url,
-        string $mainText
-    ): array
-    {
+        string $canonical,
+        string $robotsMeta,
+        string $viewport
+    ): array {
         $band = fn(int $s) => $s>=80?'green':($s>=60?'orange':'red');
 
-        $len = mb_strlen($title);
-        $titleScore = ($len>=50 && $len<=60) ? 100 : (($len>=35 && $len<=70)?70:40);
-        $metaLen = mb_strlen($meta);
-        $metaScore = ($metaLen>=140 && $metaLen<=160) ? 80 : (($metaLen>=110 && $metaLen<=180)?70:45);
+        // Helpers
+        $titleLen = strlen($title);
+        $metaLen  = strlen($meta);
+        $hasH1    = !empty($headings['H1']);
+        $h1HasKw  = $kw !== '' && $hasH1 && Str::contains(Str::lower(implode(' ', $headings['H1'])), Str::lower($kw));
+        $kwInTitle= $kw !== '' && Str::contains(Str::lower($title), Str::lower($kw));
+        $hasCanonical = $canonical !== '';
+        $isNoindex = stripos($robotsMeta, 'noindex') !== false;
 
-        $hasCanonical   = $this->hasCanonical($dom);
-        $isIndexable    = $this->isIndexable($dom);
-        $hasBreadcrumbs = $this->breadcrumbsEnabled($dom);
-        $viewportOK     = $this->hasViewportMeta($dom);
-        $faqPresent     = $this->schemaHasTypes($dom, ['FAQPage']);
-        $schemaGood     = $schemaCount>=1 || $this->schemaHasTypes($dom, ['Article','BlogPosting','Product','NewsArticle']);
-        $orgSameAs      = $this->schemaHasOrganizationSameAs($dom);
-        $slugScore      = $this->cleanUrlSlugScore($url);
-        $h23Count       = $this->countHeadings($headings, ['H2','H3']);
-        $h2h3Score      = $h23Count>=6 ? 90 : ($h23Count>=3 ? 80 : 55);
-        $internalScore  = $links['internal']>=6 ? 85 : ($links['internal']>=3 ? 70 : 45);
-        $breadcrumbsScore = $hasBreadcrumbs ? 85 : 55;
+        /* ----- Content & Keywords */
+        $ck = [];
+        $ckScore = 0; $ckMax = 0;
 
-        $ctaScore       = $this->ctaScore($mainText);
-        $speedScore     = $this->hasLazyLoading($dom) ? 70 : 60;
-        $webVitalsScore = 60; // neutral default
+        $s1 = $kw === '' ? 70 : ($kwInTitle ? 95 : 55);
+        $ck[] = ['label'=>'Primary keyword in title', 'score'=>$s1, 'color'=>$band($s1),
+                 'advice'=>'Place target keyword near the beginning of the title.',
+                 'why'=>'Titles guide user expectation and improve CTR.',
+                 'tips'=>['Include the main term early.','Keep ≈50–60 chars.','Make it benefit-oriented.'],
+                 'improve_search_url'=>$this->searchLink('title tag best practices')];
+        $ckScore += $s1; $ckMax += 100;
 
-        $h1HasKw        = $this->h1HasKeyword($headings, $kw);
-        $kwInIntro      = $this->kwInFirstPara($mainText, $kw);
-        $readScore      = (int)($readability['score'] ?? 0);
+        $s2 = $metaLen >= 140 && $metaLen <= 170 ? 90 : ($metaLen ? 65 : 40);
+        $ck[] = ['label'=>'Meta description length', 'score'=>$s2, 'color'=>$band($s2),
+                 'advice'=>'Use 140–160 chars with a soft CTA.',
+                 'why'=>'Good descriptions improve SERP click-through.',
+                 'tips'=>['Mention the benefit the user gets.','Avoid duplicating the title.'],
+                 'improve_search_url'=>$this->searchLink('meta description length CTA')];
+        $ckScore += $s2; $ckMax += 100;
 
-        $extLinksScore  = $links['external']>=3 ? 80 : ($links['external']>=1 ? 65 : 45);
-        $mediaScore     = $imagesAlt>=5 ? 80 : ($imagesAlt>=1 ? 60 : 40);
+        $s3 = $hasH1 ? ($h1HasKw ? 95 : 80) : 40;
+        $ck[] = ['label'=>'Single, descriptive H1', 'score'=>$s3, 'color'=>$band($s3),
+                 'advice'=>'Exactly one H1 summarizing the page; include the primary topic.',
+                 'why'=>'Clear hierarchy helps users and crawlers.',
+                 'tips'=>['Use one H1 only.','Keep under ~70 chars.']];
+        $ckScore += $s3; $ckMax += 100;
 
-        // Content & Keywords (5)
-        $ck = [
-            ['label'=>'Define search intent & primary topic','score'=>$kwInIntro?65:45],
-            ['label'=>'Map target & related keywords (synonyms/PAA)','score'=>$h23Count>=3?66:50],
-            ['label'=>'H1 includes primary topic naturally','score'=>$h1HasKw?90:40],
-            ['label'=>'Integrate FAQs / questions with answers','score'=>$faqPresent?85:50],
-            ['label'=>'Readable, NLP-friendly language','score'=>$readScore>=80?85:($readScore>=60?65:45)],
-        ];
-        $ckScore = (int)round(array_sum(array_column($ck,'score'))/count($ck));
+        $s4 = $hasFAQ ? 85 : 55;
+        $ck[] = ['label'=>'Integrate FAQs / questions with answers', 'score'=>$s4, 'color'=>$band($s4),
+                 'advice'=>'Answer 3–6 PAA-style questions and add FAQPage schema.',
+                 'why'=>'Captures long-tail queries and may win rich results.',
+                 'tips'=>['Answers 40–60 words.','Use clear, conversational language.']];
+        $ckScore += $s4; $ckMax += 100;
 
-        // Technical Elements (4)
-        $te = [
-            ['label'=>'Title tag (≈50–60 chars) w/ primary keyword','score'=>min($titleScore, ($h1HasKw||$kwInIntro)?$titleScore:70)],
-            ['label'=>'Meta description (≈140–160 chars) + CTA','score'=>$metaScore],
-            ['label'=>'Canonical tag set correctly','score'=>$hasCanonical?95:50],
-            ['label'=>'Indexable & listed in XML sitemap','score'=>$isIndexable?80:45],
-        ];
-        $teScore = (int)round(array_sum(array_column($te,'score'))/count($te));
+        $s5 = max(40, min(100, (int)$readability['score']));
+        $ck[] = ['label'=>'Readable, NLP-friendly language', 'score'=>$s5, 'color'=>$band($s5),
+                 'advice'=>'Aim for Grade 7–9; shorten sentences; reduce passive voice.',
+                 'why'=>'Clarity boosts engagement and retention.',
+                 'tips'=>['Use short paragraphs.','Prefer active voice.','Define jargon.']];
+        $ckScore += $s5; $ckMax += 100;
 
-        // Structure & Architecture (4)
-        $sa = [
-            ['label'=>'Logical H2/H3 headings & topic clusters','score'=>$h2h3Score],
-            ['label'=>'Internal links to hub/related pages','score'=>$internalScore],
-            ['label'=>'Clean, descriptive URL slug','score'=>$slugScore],
-            ['label'=>'Breadcrumbs enabled (+ schema)','score'=>$breadcrumbsScore],
-        ];
-        $saScore = (int)round(array_sum(array_column($sa,'score'))/count($sa));
+        $contentScore = (int)round(($ckScore / max(1,$ckMax)) * 100);
 
-        // Content Quality (4)
-        $eeatScore = $this->hasEEATSignals($dom,$mainText) ? 80 : 40;
-        $cq = [
-            ['label'=>'E-E-A-T signals (author, date, expertise)','score'=>$eeatScore],
-            ['label'=>'Unique value vs. top competitors','score'=>60],
-            ['label'=>'Facts & citations up to date','score'=>$extLinksScore],
-            ['label'=>'Helpful media (images/video) w/ captions','score'=>$mediaScore],
-        ];
-        $cqScore = (int)round(array_sum(array_column($cq,'score'))/count($cq));
+        /* ----- Technical Elements */
+        $te = []; $teScore = 0; $teMax = 0;
 
-        // User Signals & Experience (4)
-        $ux = [
-            ['label'=>'Mobile-friendly, responsive layout','score'=>$viewportOK?90:60],
-            ['label'=>'Optimized speed (compression, lazy-load)','score'=>$speedScore],
-            ['label'=>'Core Web Vitals passing (LCP/INP/CLS)','score'=>$webVitalsScore],
-            ['label'=>'Clear CTAs and next steps','score'=>$ctaScore],
-        ];
-        $uxScore = (int)round(array_sum(array_column($ux,'score'))/count($ux));
+        $t1 = ($titleLen >= 45 && $titleLen <= 64) ? 90 : ($titleLen ? 65 : 40);
+        $te[] = ['label'=>'Title tag (≈50–60 chars) w/ primary keyword', 'score'=>$t1, 'color'=>$band($t1),
+                 'advice'=>'Keep concise; include the main term naturally.',
+                 'why'=>'Prevents truncation and improves CTR.'];
+        $teScore += $t1; $teMax += 100;
 
-        // Entities & Context (4)
-        $ec = [
-            ['label'=>'Primary entity clearly defined','score'=>$h1HasKw?75:55],
-            ['label'=>'Related entities covered with context','score'=>$extLinksScore>=75?75:($h2h3Score>=80?70:55)],
-            ['label'=>'Valid schema markup (Article/FAQ/Product)','score'=>$schemaGood?80:40],
-            ['label'=>'sameAs/Organization details present','score'=>$orgSameAs?55:40],
-        ];
-        $ecScore = (int)round(array_sum(array_column($ec,'score'))/count($ec));
+        $t2 = $s2; // reuse meta length scoring
+        $te[] = ['label'=>'Meta description (≈140–160 chars) + CTA', 'score'=>$t2, 'color'=>$band($t2),
+                 'advice'=>'Write a compelling summary that invites a click.',
+                 'why'=>'Improves SERP engagement.'];
+        $teScore += $t2; $teMax += 100;
+
+        $t3 = $hasCanonical ? 90 : 45;
+        $te[] = ['label'=>'Canonical tag set correctly', 'score'=>$t3, 'color'=>$band($t3),
+                 'advice'=>'Set canonical to the preferred URL to avoid duplicates.',
+                 'why'=>'Consolidates signals across variants.'];
+        $teScore += $t3; $teMax += 100;
+
+        $t4 = !$isNoindex ? 88 : 40;
+        $te[] = ['label'=>'Indexable & listed in XML sitemap', 'score'=>$t4, 'color'=>$band($t4),
+                 'advice'=>'Ensure no noindex and include in your sitemap.',
+                 'why'=>'Improves discoverability and indexing.'];
+        $teScore += $t4; $teMax += 100;
+
+        $technicalScore = (int)round(($teScore / max(1,$teMax)) * 100);
+
+        /* ----- Structure & Architecture */
+        $sa = []; $saScore = 0; $saMax = 0;
+        $h2c = count($headings['H2'] ?? []); $h3c = count($headings['H3'] ?? []);
+
+        $sah = ($h2c >= 2) ? 85 : ($h2c >= 1 ? 65 : 45);
+        $sa[] = ['label'=>'Logical H2/H3 headings & topic clusters', 'score'=>$sah, 'color'=>$band($sah),
+                 'advice'=>'Use H2 for main sections, H3 for sub-points.',
+                 'why'=>'Improves scanability and semantic parsing.'];
+        $saScore += $sah; $saMax += 100;
+
+        $sai = $links['internal'] >= 5 ? 85 : ($links['internal'] >= 2 ? 65 : 45);
+        $sa[] = ['label'=>'Internal links to hub/related pages', 'score'=>$sai, 'color'=>$band($sai),
+                 'advice'=>'Add 3–5 contextual internal links to pillar pages.',
+                 'why'=>'Distributes authority and helps discovery.'];
+        $saScore += $sai; $saMax += 100;
+
+        $sau = 70; // slug quality can’t be judged reliably from DOM
+        $sa[] = ['label'=>'Clean, descriptive URL slug', 'score'=>$sau, 'color'=>$band($sau),
+                 'advice'=>'Short, hyphenated, meaningful words.',
+                 'why'=>'Improves CTR and understanding.'];
+        $saScore += $sau; $saMax += 100;
+
+        $sab = $hasBreadcrumb ? 85 : 55;
+        $sa[] = ['label'=>'Breadcrumbs enabled (+ schema)', 'score'=>$sab, 'color'=>$band($sab),
+                 'advice'=>'Show breadcrumbs UI and add BreadcrumbList JSON-LD.',
+                 'why'=>'Adds context for users and rich results.'];
+        $saScore += $sab; $saMax += 100;
+
+        $structureScore = (int)round(($saScore / max(1,$saMax)) * 100);
+
+        /* ----- Content Quality */
+        $cq = []; $cqScore = 0; $cqMax = 0;
+
+        $cqe = 70; // E-E-A-T detection needs site-specific logic
+        $cq[] = ['label'=>'E-E-A-T signals (author, date, expertise)', 'score'=>$cqe, 'color'=>$band($cqe),
+                 'advice'=>'Show author, credentials, and last updated date.',
+                 'why'=>'Builds credibility and trust.'];
+        $cqScore += $cqe; $cqMax += 100;
+
+        $cqu = 70; // Unique value vs competitors (heuristic)
+        $cq[] = ['label'=>'Unique value vs. top competitors', 'score'=>$cqu, 'color'=>$band($cqu),
+                 'advice'=>'Add comparisons, original data, or tools.',
+                 'why'=>'Differentiates and reduces pogo-sticking.'];
+        $cqScore += $cqu; $cqMax += 100;
+
+        $cqf = $links['external'] >= 2 ? 80 : 55;
+        $cq[] = ['label'=>'Facts & citations up to date', 'score'=>$cqf, 'color'=>$band($cqf),
+                 'advice'=>'Cite 2–3 authoritative sources and include dates.',
+                 'why'=>'Improves accuracy and trust.'];
+        $cqScore += $cqf; $cqMax += 100;
+
+        $cqm = $imagesAlt >= 1 ? ($imagesAlt >= 5 ? 90 : 75) : 45;
+        $cq[] = ['label'=>'Helpful media (images/video) w/ captions', 'score'=>$cqm, 'color'=>$band($cqm),
+                 'advice'=>'Use descriptive alt text and short captions.',
+                 'why'=>'Boosts comprehension and accessibility.'];
+        $cqScore += $cqm; $cqMax += 100;
+
+        $contentQualityScore = (int)round(($cqScore / max(1,$cqMax)) * 100);
+
+        /* ----- User Signals & Experience */
+        $ux = []; $uxScore = 0; $uxMax = 0;
+
+        $uxr = $viewport !== '' ? 85 : 55;
+        $ux[] = ['label'=>'Mobile-friendly, responsive layout', 'score'=>$uxr, 'color'=>$band($uxr),
+                 'advice'=>'Include a responsive viewport tag and test small widths.',
+                 'why'=>'Mobile-first indexing makes mobile UX critical.'];
+        $uxScore += $uxr; $uxMax += 100;
+
+        $uxp = 70; // real speed needs lab/field data
+        $ux[] = ['label'=>'Optimized speed (compression, lazy-load)', 'score'=>$uxp, 'color'=>$band($uxp),
+                 'advice'=>'Compress images, enable HTTP/2/3, lazy-load below the fold.',
+                 'why'=>'Performance strongly affects engagement.'];
+        $uxScore += $uxp; $uxMax += 100;
+
+        $uxc = 70; // CWV unknown here
+        $ux[] = ['label'=>'Core Web Vitals passing (LCP/INP/CLS)', 'score'=>$uxc, 'color'=>$band($uxc),
+                 'advice'=>'Preload hero, reduce JS long tasks, reserve space for media.',
+                 'why'=>'Good CWV correlates with better UX and rankings.'];
+        $uxScore += $uxc; $uxMax += 100;
+
+        $uxa = 78; // CTA clarity heuristic
+        $ux[] = ['label'=>'Clear CTAs and next steps', 'score'=>$uxa, 'color'=>$band($uxa),
+                 'advice'=>'Use verb-first buttons; place primary CTA above the fold.',
+                 'why'=>'Guides users and reduces pogo-sticking.'];
+        $uxScore += $uxa; $uxMax += 100;
+
+        $uxScoreFinal = (int)round(($uxScore / max(1,$uxMax)) * 100);
+
+        /* ----- Entities & Context */
+        $ec = []; $ecScore = 0; $ecMax = 0;
+
+        $e1 = 70; // Primary entity heuristics simplified
+        $ec[] = ['label'=>'Primary entity clearly defined', 'score'=>$e1, 'color'=>$band($e1),
+                 'advice'=>'Introduce what/who early and link to an entity page.',
+                 'why'=>'Helps disambiguate in knowledge graphs.'];
+        $ecScore += $e1; $ecMax += 100;
+
+        $e2 = 70;
+        $ec[] = ['label'=>'Related entities covered with context', 'score'=>$e2, 'color'=>$band($e2),
+                 'advice'=>'Add short sections for key related entities.',
+                 'why'=>'Signals breadth and relationships.'];
+        $ecScore += $e2; $ecMax += 100;
+
+        $e3 = $schemaCount >= 1 ? 85 : 50;
+        $ec[] = ['label'=>'Valid schema markup (Article/FAQ/Product)', 'score'=>$e3, 'color'=>$band($e3),
+                 'advice'=>'Add JSON-LD, validate in Rich Results Test.',
+                 'why'=>'Enables rich features and explicit semantics.'];
+        $ecScore += $e3; $ecMax += 100;
+
+        $e4 = 65;
+        $ec[] = ['label'=>'sameAs/Organization details present', 'score'=>$e4, 'color'=>$band($e4),
+                 'advice'=>'Add Organization schema with logo/url/sameAs.',
+                 'why'=>'Connects brand to official profiles.'];
+        $ecScore += $e4; $ecMax += 100;
+
+        $entitiesScore = (int)round(($ecScore / max(1,$ecMax)) * 100);
 
         return [
-            ['name'=>'Content & Keywords','icon'=>'✍️','score'=>$ckScore,'checks'=>$this->decorate($ck,$band)],
-            ['name'=>'Technical Elements','icon'=>'</>','score'=>$teScore,'checks'=>$this->decorate($te,$band)],
-            ['name'=>'Structure & Architecture','icon'=>'🧱','score'=>$saScore,'checks'=>$this->decorate($sa,$band)],
-            ['name'=>'Content Quality','icon'=>'⭐','score'=>$cqScore,'checks'=>$this->decorate($cq,$band)],
-            ['name'=>'User Signals & Experience','icon'=>'👤','score'=>$uxScore,'checks'=>$this->decorate($ux,$band)],
-            ['name'=>'Entities & Context','icon'=>'🗂️','score'=>$ecScore,'checks'=>$this->decorate($ec,$band)],
+            ['name'=>'Content & Keywords',        'score'=>$contentScore,       'checks'=>$ck],
+            ['name'=>'Technical Elements',        'score'=>$technicalScore,     'checks'=>$te],
+            ['name'=>'Structure & Architecture',  'score'=>$structureScore,     'checks'=>$sa],
+            ['name'=>'Content Quality',           'score'=>$contentQualityScore,'checks'=>$cq],
+            ['name'=>'User Signals & Experience', 'score'=>$uxScoreFinal,       'checks'=>$ux],
+            ['name'=>'Entities & Context',        'score'=>$entitiesScore,      'checks'=>$ec],
         ];
     }
 
-    private function decorate(array $checks, callable $band): array {
-        return array_map(function($c) use ($band){
-            $c['color'] = $band((int)$c['score']);
-            return $c + [
-                'advice'=>'Tap “Improve” for tips.',
-                'improve_search_url'=>$this->searchLink($c['label'].' SEO')
-            ];
-        }, $checks);
+    private function buildRecommendationsNew(
+        array $links,
+        int $imagesAlt,
+        int $schemaCount,
+        array $headings,
+        array $readability,
+        string $kw,
+        string $canonical,
+        string $robotsMeta,
+        string $viewport,
+        bool $hasFAQ
+    ): array {
+        $recs = [];
+
+        if ($schemaCount < 1) {
+            $recs[] = ['severity'=>'Info','text'=>'Add JSON-LD structured data (Article, FAQPage, Breadcrumb).'];
+        }
+        if ($imagesAlt < 1) {
+            $recs[] = ['severity'=>'Warning','text'=>'Add descriptive alt text to key images for accessibility/SEO.'];
+        }
+        if ($links['internal'] < 3) {
+            $recs[] = ['severity'=>'Warning','text'=>'Add 3–5 internal links to related hub/pillar pages.'];
+        }
+        if (($readability['score'] ?? 0) < 60) {
+            $recs[] = ['severity'=>'Critical','text'=>'Improve readability: shorter sentences, fewer passive constructions, simpler words.'];
+        }
+        if ($kw !== '' && !$this->keywordPresentInHeadings($headings, $kw)) {
+            $recs[] = ['severity'=>'Info','text'=>'Include the target keyword (or close variant) in a relevant heading.'];
+        }
+        if (!$canonical) {
+            $recs[] = ['severity'=>'Info','text'=>'Set a canonical URL to consolidate duplicate variants.'];
+        }
+        if (stripos($robotsMeta, 'noindex') !== false) {
+            $recs[] = ['severity'=>'Critical','text'=>'Robots meta includes "noindex" — remove to allow indexing.'];
+        }
+        if (!$viewport) {
+            $recs[] = ['severity'=>'Warning','text'=>'Missing responsive viewport meta; add it for mobile friendliness.'];
+        }
+        if (!$hasFAQ) {
+            $recs[] = ['severity'=>'Info','text'=>'Add 3–6 short FAQs and FAQPage schema to capture PAA queries.'];
+        }
+
+        return $recs;
     }
 
-    /* ========================= Helpers used by categories ========================= */
-
-    private function hasViewportMeta(\DOMDocument $dom): bool {
-        $xp = new \DOMXPath($dom);
-        return $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='viewport']")->length > 0;
-    }
-    private function hasCanonical(\DOMDocument $dom): bool {
-        $xp = new \DOMXPath($dom);
-        return $xp->query("//link[translate(@rel,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='canonical' and @href]")->length > 0;
-    }
-    private function isIndexable(\DOMDocument $dom): bool {
-        $xp = new \DOMXPath($dom);
-        $nodes = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='robots']/@content");
-        if ($nodes && $nodes->length) {
-            $v = strtolower($nodes->item(0)->nodeValue);
-            if (str_contains($v,'noindex')) return false;
-        }
-        return true;
-    }
-    private function breadcrumbsEnabled(\DOMDocument $dom): bool {
-        if ($this->schemaHasTypes($dom, ['BreadcrumbList'])) return true;
-        $xp = new \DOMXPath($dom);
-        return $xp->query("//*[@itemtype and contains(translate(@itemtype,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'breadcrumb')]")->length > 0;
-    }
-    private function schemaHasTypes(\DOMDocument $dom, array $types): bool {
-        $xp = new \DOMXPath($dom);
-        foreach ($xp->query("//script[@type='application/ld+json']") as $n) {
-            $json = strtolower($n->nodeValue ?? '');
-            foreach ($types as $t) if (str_contains($json, strtolower($t))) return true;
-        }
-        return false;
-    }
-    private function schemaHasOrganizationSameAs(\DOMDocument $dom): bool {
-        $xp = new \DOMXPath($dom);
-        foreach ($xp->query("//script[@type='application/ld+json']") as $n) {
-            $json = strtolower($n->nodeValue ?? '');
-            if ((str_contains($json,'"@type":"organization"') || str_contains($json,'"organization"'))
-                && str_contains($json,'"sameas"')) return true;
-        }
-        return false;
-    }
-    private function hasLazyLoading(\DOMDocument $dom): bool {
-        $xp = new \DOMXPath($dom);
-        foreach ($xp->query("//img[@loading]") as $n) {
-            if (strtolower($n->getAttribute('loading')) === 'lazy') return true;
-        }
-        return false;
-    }
-    private function cleanUrlSlugScore(string $url): int {
-        $path = trim(parse_url($url, PHP_URL_PATH) ?? '', '/');
-        if ($path === '') return 70;
-        $seg  = explode('/', $path);
-        $slug = end($seg);
-        $okHyphen = substr_count($slug,'-')>=1 && substr_count($slug,'-')<=8;
-        $tooNumeric = preg_match('/\d{4,}/', $slug);
-        return ($okHyphen && !$tooNumeric) ? 85 : 55;
-    }
-    private function countHeadings(array $headings, array $levels): int {
-        $c=0; foreach ($levels as $L) $c += count($headings[$L] ?? []);
-        return $c;
-    }
-    private function h1HasKeyword(array $headings, string $kw): bool {
-        if ($kw==='') return false;
-        $needle = Str::lower($kw);
-        foreach (($headings['H1'] ?? []) as $h) {
-            if (Str::contains(Str::lower($h), $needle)) return true;
-        }
-        return false;
-    }
-    private function kwInFirstPara(string $text, string $kw): bool {
-        if ($kw==='') return false;
-        $intro = mb_substr($text, 0, 400);
-        return Str::contains(Str::lower($intro), Str::lower($kw));
-    }
-    private function ctaScore(string $text): int {
-        $t = strtolower($text);
-        $hits = preg_match_all('/(buy now|add to cart|contact us|sign up|get started|learn more|download)/i', $t);
-        return $hits>=2 ? 85 : ($hits>=1 ? 70 : 55);
-    }
-    private function hasEEATSignals(\DOMDocument $dom, string $text): bool {
-        $xp = new \DOMXPath($dom);
-        $author = $xp->query("//meta[translate(@name,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='author']");
-        if (($author && $author->length) || preg_match('/\bby\s+[A-Z][a-z]+/u', $text)) return true;
-        if (preg_match('/last updated|reviewed|medically reviewed/i', $text)) return true;
-        return false;
-    }
-
-    /* ========================= Score & recs ========================= */
-
-    private function computeOverallScore(array $categories, array $readability): int
+    private function keywordPresentInHeadings(array $headings, string $kw): bool
     {
+        $needle = Str::lower($kw);
+        foreach ($headings as $arr) {
+            foreach ($arr as $h) {
+                if (Str::contains(Str::lower($h), $needle)) return true;
+            }
+        }
+        return false;
+    }
+
+    private function computeOverallScoreNew(array $categories, array $readability): int
+    {
+        // Weighted across 6 categories + readability nudge
         $map = [];
-        foreach ($categories as $c) $map[$c['name']] = (int)$c['score'];
+        foreach ($categories as $c) $map[$c['name']] = (int)($c['score'] ?? 0);
 
-        $content   = $map['Content & Keywords']   ?? 0;
-        $technical = $map['Technical Elements']   ?? 0;
-        $links     = $map['Structure & Architecture'] ?? 0; // using architecture as nav quality
-        $quality   = $map['Content Quality']      ?? 0;
-        $ux        = $map['User Signals & Experience'] ?? 0;
-        $entities  = $map['Entities & Context']   ?? 0;
+        $score =
+            0.22 * ($map['Content & Keywords']        ?? 0) +
+            0.18 * ($map['Technical Elements']        ?? 0) +
+            0.15 * ($map['Structure & Architecture']  ?? 0) +
+            0.18 * ($map['Content Quality']           ?? 0) +
+            0.15 * ($map['User Signals & Experience'] ?? 0) +
+            0.12 * ($map['Entities & Context']        ?? 0);
 
-        $score = 0.22*$content + 0.20*$technical + 0.15*$links + 0.18*$quality + 0.15*$ux + 0.10*$entities;
-        $score = 0.9*$score + 0.1*($readability['score'] ?? 0);
+        $score = 0.9 * $score + 0.1 * (int)($readability['score'] ?? 0);
         return (int) round(max(0, min(100, $score)));
     }
 
@@ -583,39 +807,5 @@ class AnalyzerController extends Controller
         if ($score >= 80) return 'Great Work — Well Optimized';
         if ($score >= 60) return 'Needs Optimization';
         return 'Needs Significant Optimization';
-    }
-
-    private function buildRecommendations(array $links, int $imagesAlt, int $schemaCount, array $headings, array $readability, string $kw): array
-    {
-        $recs = [];
-        if ($schemaCount < 1) $recs[] = ['severity'=>'Info','text'=>'Add JSON-LD schema (FAQPage, Article, Breadcrumb) for richer SERPs.'];
-        if ($imagesAlt < 1)  $recs[] = ['severity'=>'Warning','text'=>'Add descriptive alt text to key images.'];
-        if ($links['internal'] < 3) $recs[] = ['severity'=>'Warning','text'=>'Add 3–5 internal links to related pillar pages.'];
-        if (($readability['score'] ?? 0) < 60) $recs[] = ['severity'=>'Critical','text'=>'Improve readability: shorter sentences, simpler vocabulary, reduce passive voice.'];
-        if ($kw !== '' && !$this->keywordPresentInHeadings($headings, $kw)) {
-            $recs[] = ['severity'=>'Info','text'=>'Include the target keyword (or variant) in one or two headings where natural.'];
-        }
-        return $recs;
-    }
-
-    private function keywordPresentInHeadings(array $headings, string $kw): bool
-    {
-        $needle = Str::lower($kw);
-        foreach ($headings as $arr) foreach ($arr as $h)
-            if (Str::contains(Str::lower($h), $needle)) return true;
-        return false;
-    }
-
-    private function countSchemaBlocks(\DOMDocument $dom): int
-    {
-        $xp = new \DOMXPath($dom);
-        $jsonLd = $xp->query('//script[@type="application/ld+json"]')->length;
-        $micro  = $xp->query('//*[@itemscope]')->length;
-        return $jsonLd + $micro;
-    }
-
-    private function searchLink(string $q): string
-    {
-        return 'https://www.google.com/search?q='.rawurlencode($q);
     }
 }
