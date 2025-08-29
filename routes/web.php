@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;   // <-- added
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
 use App\Http\Controllers\ProfileController;
@@ -41,24 +41,34 @@ Route::middleware('auth')->group(function () {
     Route::post('/semantic-analyzer/analyze', [AnalyzerController::class, 'semanticAnalyze'])
         ->name('semantic.analyze');
 
-    // ===== PageSpeed Insights proxy (FIXED) =====
+    // ===== PageSpeed Insights proxy (FINAL) =====
     Route::post('/semantic-analyzer/psi', function (Request $req) {
         $url = trim((string) $req->input('url'));
-        abort_unless(filter_var($url, FILTER_VALIDATE_URL), 422, 'Invalid URL');
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return response()->json(['ok' => false, 'error' => 'Invalid URL'], 422);
+        }
 
-        // Read from services.pagespeed.* (matches your config/services.php)
+        // Read from services.pagespeed.* (matches config/services.php)
         $cfg      = config('services.pagespeed', []);
-        $key      = $cfg['key']       ?? null;  // <-- fixed
+        $key      = $cfg['key']       ?? env('PAGESPEED_API_KEY') ?? env('GOOGLE_PSI_KEY');
         $endpoint = $cfg['endpoint']  ?? 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
         $timeout  = (int)($cfg['timeout']   ?? 20);
         $ttl      = (int)($cfg['cache_ttl'] ?? 60);
 
-        abort_unless($key, 500, 'PSI key missing');
+        if (!$key) {
+            // Friendly 200 so UI can render a helpful message
+            return response()->json([
+                'ok'    => false,
+                'error' => 'PSI key missing',
+                'hint'  => 'Set PAGESPEED_API_KEY in .env and run: php artisan config:clear',
+            ], 200);
+        }
 
         $fetch = function (string $strategy) use ($endpoint, $url, $key, $timeout, $ttl) {
-            $cacheKey = "psi:" . $strategy . ":" . md5($url);
-            return Cache::remember($cacheKey, $ttl, function () use ($endpoint, $url, $key, $timeout, $strategy) {
+            $strategy = strtolower($strategy) === 'desktop' ? 'desktop' : 'mobile';
+            $cacheKey = "psi:{$strategy}:" . md5($url);
 
+            return Cache::remember($cacheKey, $ttl, function () use ($endpoint, $url, $key, $timeout, $strategy) {
                 $res = Http::timeout($timeout)
                     ->retry(2, 250)
                     ->acceptJson()
@@ -71,35 +81,43 @@ Route::middleware('auth')->group(function () {
 
                 if (!$res->ok()) {
                     return [
-                        '_error' => [
-                            'status' => $res->status(),
-                            'body'   => $res->body(),
-                        ],
+                        'ok'     => false,
+                        'status' => $res->status(),
+                        'error'  => 'HTTP ' . $res->status(),
                     ];
                 }
 
-                $j        = $res->json();
-                $lr       = $j['lighthouseResult'] ?? [];
-                $audits   = $lr['audits'] ?? [];
-                $perfRaw  = $lr['categories']['performance']['score'] ?? null;
-                $score    = is_null($perfRaw) ? null : round($perfRaw * 100);
+                $j      = $res->json() ?: [];
+                $lr     = $j['lighthouseResult'] ?? [];
+                $audits = $lr['audits'] ?? [];
 
-                $num = function (string $id) use ($audits) {
-                    return $audits[$id]['numericValue'] ?? null;
-                };
+                // Performance score 0–1 -> 0–100
+                $perfRaw = $lr['categories']['performance']['score'] ?? null;
+                $score   = is_null($perfRaw) ? null : (int) round($perfRaw * 100);
+
+                // Audits (with fallbacks)
+                $lcp_ms  = $audits['largest-contentful-paint']['numericValue'] ?? null;
+                $cls_val = $audits['cumulative-layout-shift']['numericValue'] ?? null;
+                $inp_ms  = $audits['interaction-to-next-paint']['numericValue']
+                    ?? ($audits['experimental-interaction-to-next-paint']['numericValue'] ?? null);
+                $ttfb_ms = $audits['server-response-time']['numericValue']
+                    ?? ($audits['time-to-first-byte']['numericValue'] ?? null);
 
                 return [
-                    'score'  => $score,
-                    'lcp'    => $num('largest-contentful-paint'),           // seconds
-                    'cls'    => $audits['cumulative-layout-shift']['numericValue'] ?? null,
-                    'inp'    => $num('interaction-to-next-paint'),           // ms
-                    'ttfb'   => $num('server-response-time'),                // ms
-                    'raw'    => $j,                                          // keep full JSON if UI needs more
+                    'ok'       => true,
+                    'strategy' => $strategy,
+                    'score'    => $score,                                   // 0–100
+                    'lcp'      => is_numeric($lcp_ms)  ? round($lcp_ms/1000, 2) : null, // seconds
+                    'cls'      => is_numeric($cls_val) ? round($cls_val, 3)      : null, // unitless
+                    'inp'      => is_numeric($inp_ms)  ? (int) round($inp_ms)    : null, // ms
+                    'ttfb'     => is_numeric($ttfb_ms) ? (int) round($ttfb_ms)   : null, // ms
                 ];
             });
         };
 
         return response()->json([
+            'ok'      => true,
+            'url'     => $url,
             'mobile'  => $fetch('mobile'),
             'desktop' => $fetch('desktop'),
         ]);
