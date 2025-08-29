@@ -2,9 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;   // <-- added
+use Illuminate\Http\Request;          // <-- added
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\AnalyzerController; // <-- added
+use App\Http\Controllers\AnalyzerController; // <-- existing
 
 /*
 |--------------------------------------------------------------------------
@@ -49,8 +51,47 @@ Route::middleware('auth')->group(function () {
 
     // Analyzer JSON endpoint (used by the Blade fetch() call)
     Route::post('/semantic-analyzer/analyze', [AnalyzerController::class, 'semanticAnalyze'])
-        ->name('semantic.analyze'); // <-- added (fixes Route [semantic.analyze] not defined)
-    
+        ->name('semantic.analyze'); // <-- existing
+
+    // ===== PageSpeed Insights proxy (NEW) =====
+    // Keeps PSI key server-side; frontend calls this with { url }
+    Route::post('/semantic-analyzer/psi', function (Request $req) {
+        $url = (string) $req->input('url');
+        abort_unless(filter_var($url, FILTER_VALIDATE_URL), 422, 'Invalid URL');
+
+        $key = config('services.psi.key', env('GOOGLE_PSI_KEY'));
+        abort_unless($key, 500, 'PSI key missing');
+
+        $base = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
+
+        $fetch = function (string $strategy) use ($base, $url, $key) {
+            $res = Http::retry(2, 200)
+                ->acceptJson()
+                ->get($base, [
+                    'url'       => $url,
+                    'strategy'  => $strategy,           // 'mobile' | 'desktop'
+                    'category'  => 'performance',
+                    'key'       => $key,
+                ]);
+
+            if (!$res->ok()) {
+                return [
+                    'error' => [
+                        'status' => $res->status(),
+                        'body'   => $res->body(),
+                    ]
+                ];
+            }
+            return $res->json();
+        };
+
+        return response()->json([
+            'mobile'  => $fetch('mobile'),
+            'desktop' => $fetch('desktop'),
+        ]);
+    })->name('semantic.psi');
+    // ==========================================
+
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::post('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
