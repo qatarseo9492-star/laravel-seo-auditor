@@ -3,7 +3,6 @@
 
 @push('head')
 <style>
-  /* ---- Base ------------------------------------------------- */
   html,body{background:#04021c!important;color:#e5e7eb}
   .maxw{max-width:1150px;margin:0 auto}
   .title-wrap{display:flex;align-items:center;gap:14px;justify-content:center;margin-top:14px}
@@ -13,19 +12,16 @@
   .shoail{display:inline-block;background:linear-gradient(90deg,#22d3ee,#a78bfa,#f472b6,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:400% 100%;animation:rainbowSlide 6s linear infinite,bob 3s ease-in-out infinite}
   @keyframes rainbowSlide{to{background-position:100% 50%}} @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
-  /* Legend */
   .legend{display:flex;gap:10px;justify-content:center;margin:10px 0 6px}
   .legend .badge{padding:6px 10px;border-radius:9999px;font-weight:800;border:1px solid #ffffff2a;font-size:12px}
   .legend .g{background:#063f2c;color:#a7f3d0;border-color:#10b98166}
   .legend .o{background:#3b2a05;color:#fde68a;border-color:#f59e0b66}
   .legend .r{background:#3a0b0b;color:#fecaca;border-color:#ef444466}
 
-  /* Cards */
   .card{border-radius:18px;padding:18px;background:#0a0a14;border:1px solid #ffffff1c}
   .cat-card{border-radius:16px;padding:16px;background:#111E2F;border:1px solid #ffffff1c}
   .ground-slab{border-radius:22px;padding:20px;background:#0D0E1E;border:1px solid #ffffff1c;margin-top:20px}
 
-  /* Chips / pills / buttons (compact) */
   .pill{padding:5px 10px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid #ffffff29;background:#ffffff14;color:#e5e7eb}
   .chip{padding:6px 8px;border-radius:12px;font-weight:800;display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff24;color:#eef2ff;font-size:12px}
   .chip i{font-style:normal}
@@ -41,7 +37,7 @@
 
   .analyze-wrap{border-radius:16px;background:#020114;border:1px solid #ffffff20;box-shadow:inset 0 0 0 1px #ffffff0a;padding:12px}
 
-  /* Score wheel (small) */
+  /* Wheel small */
   .mw{--v:0;--ring:#f59e0b;--p:0;width:200px;height:200px;position:relative}
   .mw-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--v)*1%),#ffffff14 0);-webkit-mask:radial-gradient(circle 76px,transparent 72px,#000 72px);mask:radial-gradient(circle 76px,transparent 72px,#000 72px)}
   .mw-fill{position:absolute;inset:18px;border-radius:50%;overflow:hidden;background:#000}
@@ -49,13 +45,11 @@
   .mw.good{--ring:#22c55e;--fill:linear-gradient(to top,#16a34a 0%,#22c55e 60%,#86efac 100%)} .mw.warn{--ring:#f59e0b;--fill:linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%)} .mw.bad{--ring:#ef4444;--fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%)}
   .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
 
-  /* Water bar */
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid #ffffff22;background:#0b0b12}
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
   .waterbox.good .fill{background:linear-gradient(90deg,#16a34a,#22c55e,#86efac)} .waterbox.warn .fill{background:linear-gradient(90deg,#f59e0b,#fbbf24,#fde68a)} .waterbox.bad .fill{background:linear-gradient(90deg,#ef4444,#f87171,#fecaca)}
   .waterbox .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:#e5e7eb;font-size:11px}
 
-  /* Progress & check rows */
   .progress{width:100%;height:10px;border-radius:9999px;background:#ffffff14;overflow:hidden;border:1px solid #ffffff1a}
   .progress>span{display:block;height:100%;border-radius:9999px;background:linear-gradient(90deg,#ef4444,#fde047,#22c55e);transition:width .5s ease}
   .check{display:flex;align-items:center;justify-content:space-between;border-radius:12px;padding:10px 12px;border:1px solid #ffffff1a;background:#0F1A29}
@@ -70,12 +64,10 @@
   .outline-orange{border-color:#f59e0bdd!important;box-shadow:0 0 0 2px #f59e0b8c inset,0 0 16px #f59e0b55}
   .outline-red{border-color:#ef4444dd!important;box-shadow:0 0 0 2px #ef44448c inset,0 0 16px #ef444455}
 
-  /* Modal */
   dialog[open]{display:block} dialog::backdrop{background:rgba(0,0,0,.6)}
   #improveModal .card{background:#0D0E1E;border:1px solid #1b2640}
   #improveModal .card .card{background:#111E2F;border-color:#ffffff1c}
 
-  /* Error box */
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#3a0b0b;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
 </style>
 @endpush
@@ -83,7 +75,6 @@
 @section('content')
 <section class="maxw px-4 pb-10">
 
-  {{-- Title --}}
   <div class="title-wrap">
     <div class="king">👑</div>
     <div style="text-align:center">
@@ -92,12 +83,8 @@
     </div>
   </div>
 
-  {{-- Legend --}}
-  <div class="legend">
-    <span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span>
-  </div>
+  <div class="legend"><span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span></div>
 
-  {{-- Wheel + chips (small) --}}
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#090916;border:1px solid #ffffff12">
       <div class="mw warn" id="mw">
@@ -121,7 +108,6 @@
     </div>
   </div>
 
-  {{-- Analyze toolbar (under wheel) --}}
   <div class="analyze-wrap" style="margin-top:12px;">
     <div class="url-row">
       <span style="opacity:.75">🌐</span>
@@ -140,16 +126,15 @@
       <button id="resetBtn"   type="button" class="btn btn-orange">↻ Reset</button>
       <button id="exportBtn"  type="button" class="btn btn-purple">⬇︎ Export</button>
     </div>
-
     <div id="errorBox"></div>
 
     <div id="statusChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
       <div class="chip" id="chipHttpWrap"><span class="t-grad">HTTP:</span>&nbsp;<span id="chipHttp">—</span></div>
       <div class="chip" id="chipTitleWrap"><span class="t-grad">Title:</span>&nbsp;<span id="chipTitle">—</span></div>
       <div class="chip" id="chipMetaWrap"><span class="t-grad">Meta desc:</span>&nbsp;<span id="chipMeta">—</span></div>
-      <div class="chip" id="chipCanonWrap"><span class="t-grad">Canonical:</span>&nbsp;<span id="chipCanon">—</span></div>
-      <div class="chip" id="chipRobotsWrap"><span class="t-grad">Robots:</span>&nbsp;<span id="chipRobots">—</span></div>
-      <div class="chip" id="chipViewportWrap"><span class="t-grad">Viewport:</span>&nbsp;<span id="chipViewport">—</span></div>
+      <div class="chip"><span class="t-grad">Canonical:</span>&nbsp;<span id="chipCanon">—</span></div>
+      <div class="chip"><span class="t-grad">Robots:</span>&nbsp;<span id="chipRobots">—</span></div>
+      <div class="chip"><span class="t-grad">Viewport:</span>&nbsp;<span id="chipViewport">—</span></div>
       <div class="chip"><span class="t-grad">H1/H2/H3:</span>&nbsp;<span id="chipH">—</span></div>
       <div class="chip"><span class="t-grad">Internal links:</span>&nbsp;<span id="chipInt">—</span></div>
       <div class="chip"><span class="t-grad">Schema:</span>&nbsp;<span id="chipSchema">—</span></div>
@@ -157,7 +142,6 @@
     </div>
   </div>
 
-  {{-- Quick Stats --}}
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Quick Stats</h3>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
@@ -167,7 +151,6 @@
     </div>
   </div>
 
-  {{-- Content Structure --}}
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Content Structure</h3>
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
@@ -184,25 +167,22 @@
     </div>
   </div>
 
-  {{-- Recommendations --}}
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Recommendations</h3>
     <div id="recs" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"></div>
   </div>
 
-  {{-- Semantic SEO Ground --}}
   <div class="ground-slab">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <div class="king">🧭</div>
       <div>
         <div class="t-grad" style="font-weight:900;font-size:18px">Semantic SEO Ground</div>
-        <div style="font-size:12px;color:#b6c2cf">Actionable checklists for structure, quality, UX & entities</div>
+        <div style="font-size:12px;color:#b6c2cf">Six categories • Five checks each • Click “Improve” for guidance</div>
       </div>
     </div>
     <div id="cats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"></div>
   </div>
 
-  {{-- Improve Modal --}}
   <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
     <div class="card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px">
@@ -256,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const chipHttp=$('#chipHttp'), chipTitle=$('#chipTitle'), chipMeta=$('#chipMeta'),
         chipCanon=$('#chipCanon'), chipRobots=$('#chipRobots'), chipViewport=$('#chipViewport'),
         chipH=$('#chipH'), chipIntChip=$('#chipInt'), chipSchema=$('#chipSchema'), chipAuto=$('#chipAuto');
-  const chipHttpWrap=$('#chipHttpWrap'), chipTitleWrap=$('#chipTitleWrap'), chipMetaWrap=$('#chipMetaWrap');
 
   const errorBox = $('#errorBox');
 
@@ -287,126 +266,245 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function clearError(){ errorBox.style.display='none'; errorBox.textContent=''; }
 
-  /* Paste/import/print/reset/export */
-  pasteBtn?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
-  importBtn?.addEventListener('click',()=>importFile.click());
-  importFile?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)})
-  printBtn?.addEventListener('click',()=>window.print());
-  resetBtn?.addEventListener('click',()=>location.reload());
-  exportBtn?.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)})
-
-  /* ---- Knowledge base for Improve modal ---- */
-  const KB = {
-    // User Signals & Experience
-    'Mobile-friendly, responsive layout': {why:'Most traffic is mobile; poor UX kills engagement.', tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'], link:'https://search.google.com/test/mobile-friendly'},
-    'Optimized speed (compression, lazy-load)': {why:'Speed affects abandonment and Core Web Vitals.', tips:['Use modern formats (WebP/AVIF).','HTTP/2 + caching/CDN.','Lazy-load below-the-fold media.'], link:'https://web.dev/fast/'},
-    'Core Web Vitals passing (LCP/INP/CLS)': {why:'Passing CWV improves experience and stability.', tips:['Preload hero image.','Minimize long JS tasks.','Reserve image/video space.'], link:'https://web.dev/vitals/'},
-    'Clear CTAs and next steps': {why:'Clarity increases conversions and task completion.', tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'], link:'https://www.nngroup.com/articles/call-to-action-buttons/'},
-
-    // Entities & Context
-    'sameAs/Organization details present': {why:'Entity grounding disambiguates your brand.', tips:['Organization JSON-LD.','Include sameAs links.','Ensure NAP consistency.'], link:'https://schema.org/Organization'},
-    'Valid schema markup (Article/FAQ/Product)': {why:'Structured data unlocks rich results.', tips:['Validate with Rich Results Test.','Only mark visible content.','Keep to supported types.'], link:'https://search.google.com/test/rich-results'},
-    'Related entities covered with context': {why:'Covering related entities builds topical depth.', tips:['Mention core related concepts.','Explain relationships.','Link to reference pages.'], link:'https://developers.google.com/knowledge-graph'},
-    'Primary entity clearly defined': {why:'A single main entity clarifies page purpose.', tips:['Define at the top.','Use consistent naming.','Add schema about it.'], link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},
-
-    // Structure & Architecture
-    'Logical H2/H3 headings & topic clusters': {why:'Hierarchy helps skimming and indexing.', tips:['Group related subtopics under H2.','Use H3 for steps/examples.','Keep sections 150–300 words.'], link:'https://moz.com/learn/seo/site-structure'},
-    'Internal links to hub/related pages': {why:'Internal links distribute authority & context.', tips:['Link to 3–5 relevant hubs.','Use descriptive anchors.','Add “Further reading”.'], link:'https://ahrefs.com/blog/internal-links/'},
-    'Clean, descriptive URL slug': {why:'Readable slugs improve CTR and clarity.', tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid dates unless needed.'], link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},
-    'Breadcrumbs enabled (+ schema)': {why:'Breadcrumbs clarify location and may show in SERP.', tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'], link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},
-
-    // Content Quality
-    'E-E-A-T signals (author, date, expertise)': {why:'Trust signals reduce bounce and build credibility.', tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'], link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},
-    'Unique value vs. top competitors': {why:'Differentiation is necessary to rank and retain.', tips:['Original data/examples.','Pros/cons & decision criteria.','Why your approach is better.'], link:'https://backlinko.com/seo-techniques'},
-    'Facts & citations up to date': {why:'Freshness + accuracy boosts trust.', tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'], link:'https://scholar.google.com/'},
-    'Helpful media (images/video) w/ captions': {why:'Media breaks walls of text and aids clarity.', tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'], link:'https://web.dev/optimize-lcp/'},
-
-    // Content & Keywords
-    'Define search intent & primary topic': {why:'Matching intent drives relevance & dwell time.', tips:['State the outcome early.','Align format to intent.','Use concrete examples.'], link:'https://ahrefs.com/blog/search-intent/'},
-    'Map target & related keywords (synonyms/PAA)': {why:'Variants improve recall and completeness.', tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'], link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},
-    'H1 includes primary topic naturally': {why:'Clear page topic helps users and algorithms.', tips:['One H1 per page.','Put topic near the start.','Be descriptive, not clickbait.'], link:'https://web.dev/learn/html/semantics/#headings'},
-    'Integrate FAQs / questions with answers': {why:'Captures long-tail & can earn rich results.', tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'], link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},
-    'Readable, NLP-friendly language': {why:'Plain, direct writing improves comprehension.', tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'], link:'https://www.plainlanguage.gov/guidelines/'},
-
-    // Technical Elements
-    'Title tag (≈50–60 chars) w/ primary keyword': {why:'Title remains the strongest on-page signal.', tips:['50–60 chars.','Primary topic first.','Avoid truncation & duplication.'], link:'https://moz.com/learn/seo/title-tag'},
-    'Meta description (≈140–160 chars) + CTA': {why:'Meta drives CTR which correlates with rankings.', tips:['140–160 chars.','Benefit + soft CTA.','Match intent.'], link:'https://moz.com/learn/seo/meta-description'},
-    'Canonical tag set correctly': {why:'Avoid duplicates and consolidate signals.', tips:['One canonical.','Point to preferred URL.','No conflicting canonicals.'], link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},
-    'Indexable & listed in XML sitemap': {why:'Indexation is prerequisite to ranking.', tips:['Not blocked by robots.','In XML sitemap.','Submit in Search Console.'], link:'https://developers.google.com/search/docs/crawling-indexing/overview'},
-  };
-
-  /* EXACT default categories you requested */
-  const DEFAULT_CATS = [
-    { name:'User Signals & Experience', checks:[
-      {label:'Mobile-friendly, responsive layout'},
-      {label:'Optimized speed (compression, lazy-load)'},
-      {label:'Core Web Vitals passing (LCP/INP/CLS)'},
-      {label:'Clear CTAs and next steps'}
+  /* Category definitions (exactly 5 per category, with unique icons) */
+  const CATS = [
+    { name:'User Signals & Experience', icon:'📱', checks:[
+      'Mobile-friendly, responsive layout',
+      'Optimized speed (compression, lazy-load)',
+      'Core Web Vitals passing (LCP/INP/CLS)',
+      'Clear CTAs and next steps',
+      'Accessible basics (alt text, contrast)' // added to make 5
     ]},
-    { name:'Entities & Context', checks:[  // (Your second block content)
-      {label:'sameAs/Organization details present'},
-      {label:'Valid schema markup (Article/FAQ/Product)'},
-      {label:'Related entities covered with context'},
-      {label:'Primary entity clearly defined'}
+    { name:'Entities & Context', icon:'🧩', checks:[
+      'sameAs/Organization details present',
+      'Valid schema markup (Article/FAQ/Product)',
+      'Related entities covered with context',
+      'Primary entity clearly defined',
+      'Organization contact/about page visible' // added to make 5
     ]},
-    { name:'Structure & Architecture', checks:[
-      {label:'Logical H2/H3 headings & topic clusters'},
-      {label:'Internal links to hub/related pages'},
-      {label:'Clean, descriptive URL slug'},
-      {label:'Breadcrumbs enabled (+ schema)'}
+    { name:'Structure & Architecture', icon:'🏗️', checks:[
+      'Logical H2/H3 headings & topic clusters',
+      'Internal links to hub/related pages',
+      'Clean, descriptive URL slug',
+      'Breadcrumbs enabled (+ schema)',
+      'XML sitemap logical structure' // added to make 5
     ]},
-    { name:'Content Quality', checks:[
-      {label:'E-E-A-T signals (author, date, expertise)'},
-      {label:'Unique value vs. top competitors'},
-      {label:'Facts & citations up to date'},
-      {label:'Helpful media (images/video) w/ captions'}
+    { name:'Content Quality', icon:'🧠', checks:[
+      'E-E-A-T signals (author, date, expertise)',
+      'Unique value vs. top competitors',
+      'Facts & citations up to date',
+      'Helpful media (images/video) w/ captions',
+      'Up-to-date examples & screenshots' // added to make 5
     ]},
-    { name:'Content & Keywords', checks:[
-      {label:'Define search intent & primary topic'},
-      {label:'Map target & related keywords (synonyms/PAA)'},
-      {label:'H1 includes primary topic naturally'},
-      {label:'Integrate FAQs / questions with answers'},
-      {label:'Readable, NLP-friendly language'}
+    { name:'Content & Keywords', icon:'📝', checks:[
+      'Define search intent & primary topic',
+      'Map target & related keywords (synonyms/PAA)',
+      'H1 includes primary topic naturally',
+      'Integrate FAQs / questions with answers',
+      'Readable, NLP-friendly language'
     ]},
-    { name:'Technical Elements', checks:[
-      {label:'Title tag (≈50–60 chars) w/ primary keyword'},
-      {label:'Meta description (≈140–160 chars) + CTA'},
-      {label:'Canonical tag set correctly'},
-      {label:'Indexable & listed in XML sitemap'}
+    { name:'Technical Elements', icon:'⚙️', checks:[
+      'Title tag (≈50–60 chars) w/ primary keyword',
+      'Meta description (≈140–160 chars) + CTA',
+      'Canonical tag set correctly',
+      'Indexable & listed in XML sitemap',
+      'Robots directives valid'
     ]},
   ];
 
-  /* Merge helper: ensure API result contains ALL default checks */
-  function ensureAllDefaults(apiCats){
-    const byName = new Map((apiCats||[]).map(c=>[c.name,c]));
-    DEFAULT_CATS.forEach(def=>{
-      if(!byName.has(def.name)){
-        // missing category entirely -> add default
-        byName.set(def.name, JSON.parse(JSON.stringify(def)));
-      }else{
-        // merge checks: add any missing labels
-        const existing = byName.get(def.name);
-        existing.checks = existing.checks || [];
-        const have = new Set(existing.checks.map(x=>x.label));
-        def.checks.forEach(ch=>{
-          if(!have.has(ch.label)){
-            existing.checks.push({label: ch.label, score: ch.score ?? undefined});
-          }
-        });
+  /* Knowledge base for Improve modal */
+  const KB = {
+    'Mobile-friendly, responsive layout': {why:'Most traffic is mobile; poor UX kills engagement.', tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'], link:'https://search.google.com/test/mobile-friendly'},
+    'Optimized speed (compression, lazy-load)': {why:'Speed affects abandonment and CWV.', tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'], link:'https://web.dev/fast/'},
+    'Core Web Vitals passing (LCP/INP/CLS)': {why:'Passing CWV improves experience & stability.', tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'], link:'https://web.dev/vitals/'},
+    'Clear CTAs and next steps': {why:'Clarity increases conversions and task completion.', tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'], link:'https://www.nngroup.com/articles/call-to-action-buttons/'},
+    'Accessible basics (alt text, contrast)': {why:'Accessibility broadens reach and reduces risk.', tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'], link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},
+    'sameAs/Organization details present': {why:'Entity grounding disambiguates your brand.', tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'], link:'https://schema.org/Organization'},
+    'Valid schema markup (Article/FAQ/Product)': {why:'Structured data unlocks rich results.', tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'], link:'https://search.google.com/test/rich-results'},
+    'Related entities covered with context': {why:'Covering related entities builds topical depth.', tips:['Mention related concepts.','Explain relationships.','Link to references.'], link:'https://developers.google.com/knowledge-graph'},
+    'Primary entity clearly defined': {why:'A single main entity clarifies page purpose.', tips:['Define at the top.','Use consistent naming.','Add schema about it.'], link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},
+    'Organization contact/about page visible': {why:'Trust & contact clarity support E-E-A-T.', tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'], link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},
+    'Logical H2/H3 headings & topic clusters': {why:'Hierarchy helps skimming and indexing.', tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'], link:'https://moz.com/learn/seo/site-structure'},
+    'Internal links to hub/related pages': {why:'Internal links distribute authority & context.', tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'], link:'https://ahrefs.com/blog/internal-links/'},
+    'Clean, descriptive URL slug': {why:'Readable slugs improve CTR & clarity.', tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'], link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},
+    'Breadcrumbs enabled (+ schema)': {why:'Breadcrumbs clarify location & show in SERP.', tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'], link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},
+    'XML sitemap logical structure': {why:'Sitemap accelerates discovery & updates.', tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'], link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},
+    'E-E-A-T signals (author, date, expertise)': {why:'Trust signals reduce bounce & build credibility.', tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'], link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},
+    'Unique value vs. top competitors': {why:'Differentiation is necessary to rank & retain.', tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'], link:'https://backlinko.com/seo-techniques'},
+    'Facts & citations up to date': {why:'Freshness + accuracy boosts trust.', tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'], link:'https://scholar.google.com/'},
+    'Helpful media (images/video) w/ captions': {why:'Media improves comprehension & dwell time.', tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'], link:'https://web.dev/optimize-lcp/'},
+    'Up-to-date examples & screenshots': {why:'Current visuals reflect product reality.', tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'], link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},
+    'Define search intent & primary topic': {why:'Matching intent drives relevance & time on page.', tips:['State outcome early.','Align format to intent.','Use concrete examples.'], link:'https://ahrefs.com/blog/search-intent/'},
+    'Map target & related keywords (synonyms/PAA)': {why:'Variants improve recall & completeness.', tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'], link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},
+    'H1 includes primary topic naturally': {why:'Clear topic helps users and algorithms.', tips:['One H1 per page.','Topic near the start.','Be descriptive.'], link:'https://web.dev/learn/html/semantics/#headings'},
+    'Integrate FAQs / questions with answers': {why:'Captures long-tail & can earn rich results.', tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'], link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},
+    'Readable, NLP-friendly language': {why:'Plain, direct writing improves comprehension.', tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'], link:'https://www.plainlanguage.gov/guidelines/'},
+    'Title tag (≈50–60 chars) w/ primary keyword': {why:'Title remains the strongest on-page signal.', tips:['50–60 chars.','Primary topic first.','Avoid duplication.'], link:'https://moz.com/learn/seo/title-tag'},
+    'Meta description (≈140–160 chars) + CTA': {why:'Meta drives CTR which correlates with rankings.', tips:['140–160 chars.','Benefit + CTA.','Match intent.'], link:'https://moz.com/learn/seo/meta-description'},
+    'Canonical tag set correctly': {why:'Avoid duplicates; consolidate signals.', tips:['One canonical.','Absolute URL.','No conflicting canonicals.'], link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},
+    'Indexable & listed in XML sitemap': {why:'Indexation is prerequisite to ranking.', tips:['No noindex.','Include in sitemap.','Submit in Search Console.'], link:'https://developers.google.com/search/docs/crawling-indexing/overview'},
+    'Robots directives valid': {why:'Avoid accidental noindex/nofollow.', tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'], link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}
+  };
+
+  /* Compute checklist scores using API signals */
+  function scoreChecklist(label, data, url, targetKw=''){
+    const qs = data.quick_stats||{};
+    const cs = data.content_structure||{};
+    const ps = data.page_signals||{};
+    const r  = data.readability||{};
+    const h1 = (cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;
+    const h2 = (cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;
+    const h3 = (cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;
+    const title = (cs.title||'');
+    const meta  = (cs.meta_description||'');
+    const internal = Number(qs.internal_links||0);
+    const external = Number(qs.external_links||0);
+    const schemaTypes = new Set(ps.schema_types||[]);
+    const robots = (ps.robots||'').toLowerCase();
+    const hasFAQ = schemaTypes.has('FAQPage');
+    const hasArticle = schemaTypes.has('Article') || schemaTypes.has('NewsArticle') || schemaTypes.has('BlogPosting');
+
+    const urlPath = (()=>{ try { return new URL(url).pathname; } catch { return '/'; } })();
+    const slugScore = (()=>{ // rough cleanliness
+      const hasQuery = url.includes('?');
+      const segs = urlPath.split('/').filter(Boolean);
+      const words = segs.join('-').split('-').filter(Boolean);
+      if (hasQuery) return 55;
+      if (segs.length>6) return 60;
+      if (words.some(w=>w.length>24)) return 65;
+      return 85;
+    })();
+
+    switch(label){
+      // User Signals & Experience
+      case 'Mobile-friendly, responsive layout': return ps.has_viewport ? 88 : 58;
+      case 'Optimized speed (compression, lazy-load)': return 60; // server doesn’t measure CWV; neutral baseline
+      case 'Core Web Vitals passing (LCP/INP/CLS)':     return 60; // neutral (needs field data)
+      case 'Clear CTAs and next steps':                 return meta.length>=140 && /learn|get|try|start|buy|sign|download|contact/i.test(meta) ? 80 : 60;
+      case 'Accessible basics (alt text, contrast)':    return (data.images_alt_count||0) >= 3 ? 82 : ((data.images_alt_count||0) >= 1 ? 68 : 48);
+
+      // Entities & Context
+      case 'sameAs/Organization details present':       return ps.has_org_sameas ? 90 : 55;
+      case 'Valid schema markup (Article/FAQ/Product)': return (hasArticle || hasFAQ || schemaTypes.has('Product')) ? 85 : (schemaTypes.size>0?70:50);
+      case 'Related entities covered with context':     return external>=2 ? 72 : 60; // proxy using external refs
+      case 'Primary entity clearly defined':            return ps.has_main_entity ? 85 : (h1>0 ? 72 : 58);
+      case 'Organization contact/about page visible':   return 60; // requires crawl of site nav; neutral
+
+      // Structure & Architecture
+      case 'Logical H2/H3 headings & topic clusters':   return (h2>=3 && h3>=2) ? 85 : (h2>=2 ? 70 : 55);
+      case 'Internal links to hub/related pages':       return internal>=5 ? 85 : (internal>=2 ? 65 : 45);
+      case 'Clean, descriptive URL slug':               return slugScore;
+      case 'Breadcrumbs enabled (+ schema)':            return ps.has_breadcrumbs ? 85 : 55;
+      case 'XML sitemap logical structure':             return 60; // needs site-wide fetch; neutral
+
+      // Content Quality
+      case 'E-E-A-T signals (author, date, expertise)': return ps.has_org_sameas ? 75 : 65;
+      case 'Unique value vs. top competitors':          return 60;
+      case 'Facts & citations up to date':              return external>=2 ? 78 : 58;
+      case 'Helpful media (images/video) w/ captions':  return (data.images_alt_count||0) >= 3 ? 82 : 58;
+      case 'Up-to-date examples & screenshots':         return 60;
+
+      // Content & Keywords
+      case 'Define search intent & primary topic':      return (title && h1>0) ? 78 : 60;
+      case 'Map target & related keywords (synonyms/PAA)': {
+        const kw = (targetKw||'').trim();
+        if (!kw) return 60;
+        const found = (title.toLowerCase().includes(kw.toLowerCase()) || (cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));
+        return found ? 80 : 62;
       }
-    });
-    return Array.from(byName.values());
+      case 'H1 includes primary topic naturally': {
+        const kw = (targetKw||'').trim();
+        if (h1===0) return 45;
+        if (!kw) return 72;
+        const found = (cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));
+        return found ? 84 : 72;
+      }
+      case 'Integrate FAQs / questions with answers':   return hasFAQ ? 85 : (/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ') + ' ' + (cs.headings?.H3||[]).join(' ')) ? 70 : 55);
+      case 'Readable, NLP-friendly language':           return clamp01(r.score||0);
+
+      // Technical Elements
+      case 'Title tag (≈50–60 chars) w/ primary keyword': {
+        const len = (title||'').length;
+        return (len>=50 && len<=60) ? 88 : (len ? 68 : 45);
+      }
+      case 'Meta description (≈140–160 chars) + CTA': {
+        const len = (meta||'').length;
+        const hasCTA = /learn|get|try|start|buy|sign|download|contact/i.test(meta||'');
+        return (len>=140 && len<=160) ? (hasCTA?90:82) : (len ? 65 : 48);
+      }
+      case 'Canonical tag set correctly':               return ps.canonical ? 85 : 55;
+      case 'Indexable & listed in XML sitemap':         return robots.includes('noindex') ? 20 : 80;
+      case 'Robots directives valid':                   return (robots && /(noindex|none)/.test(robots)) ? 45 : 75;
+    }
+    return 60;
   }
 
-  function enrichCheck(check, catName){
-    const kb = KB[check.label] || {};
-    return {
-      ...check,
-      why: check.why || kb.why || 'This factor influences relevance, UX, and eligibility for rich results.',
-      tips: (check.tips && check.tips.length ? check.tips : (kb.tips || ['Aim for ≥80 (green) and re-run the analyzer.'])),
-      improve_search_url: check.improve_search_url || kb.link || ('https://www.google.com/search?q='+encodeURIComponent(check.label+' best practices')),
-      _cat: catName
-    };
+  /* Render the Ground categories using computed scores */
+  function renderCategories(data, url, targetKw){
+    catsEl.innerHTML='';
+    let autoGood=0;
+
+    CATS.forEach(cat=>{
+      // Compute each check score
+      const rows = cat.checks.map(lbl=>{
+        const s = scoreChecklist(lbl, data, url, targetKw);
+        const fill = fillBy(s), outline = outlineBy(s);
+        const pill = s>=80 ? 'score-pill--green' : s>=60 ? 'score-pill--orange' : 'score-pill--red';
+        if (s>=80) autoGood++;
+        return {label:lbl, score:s, fill, outline, pill, bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};
+      });
+
+      const total = rows.length;
+      const passed = rows.filter(r=>r.score>=80).length;
+      const pct = Math.round((passed/Math.max(1,total))*100);
+
+      const card=document.createElement('div'); card.className='cat-card';
+      card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="king" style="width:34px;height:34px">${cat.icon}</div>
+            <div>
+              <div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div>
+              <div style="font-size:12px;color:#b6c2cf">Keep improving</div>
+            </div>
+          </div>
+          <div class="pill">${passed} / ${total}</div>
+        </div>
+        <div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div>
+        <div class="space-y-2" id="list"></div>`;
+      const list = card.querySelector('#list');
+
+      rows.forEach(row=>{
+        const dot  = row.score>=80 ? '#10b981' : row.score>=60 ? '#f59e0b' : '#ef4444';
+        const el=document.createElement('div'); el.className='check';
+        el.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span>
+            <div class="font-semibold" style="font-size:13px">${row.label}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="score-pill ${row.pill}">${row.score}</span>
+            <button class="improve-btn ${row.fill} ${row.outline}" type="button">Improve</button>
+          </div>`;
+        el.querySelector('.improve-btn').addEventListener('click',()=>{
+          const kb = KB[row.label] || {why:'This item impacts relevance and UX.', tips:['Aim for ≥80 and re-run the analyzer.'], link:'https://www.google.com'};
+          mTitle.textContent = row.label;
+          mCat.textContent   = cat.name;
+          mScore.textContent = row.score;
+          mBand.textContent  = row.bandTxt;
+          mBand.className    = 'pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');
+          mWhy.textContent   = kb.why;
+          mTips.innerHTML = '';
+          (kb.tips||[]).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; mTips.appendChild(li); });
+          mLink.href = kb.link || ('https://www.google.com/search?q='+encodeURIComponent(row.label+' best practices'));
+          if(typeof modal.showModal==='function') modal.showModal(); else modal.setAttribute('open','');
+        });
+        list.appendChild(el);
+      });
+
+      catsEl.appendChild(card);
+    });
+
+    chipAuto.textContent = autoGood;
   }
 
   /* API call with fallback */
@@ -429,8 +527,16 @@ document.addEventListener('DOMContentLoaded', () => {
     analyzeBtn.textContent = isOn ? 'Analyzing…' : '🔍 Analyze';
   }
 
-  /* Analyze click */
-  analyzeBtn?.addEventListener('click', async e=>{
+  /* Paste/import/print/reset/export */
+  $('#pasteBtn')?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
+  $('#importBtn')?.addEventListener('click',()=>importFile.click());
+  $('#importFile')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)})
+  $('#printBtn')?.addEventListener('click',()=>window.print());
+  $('#resetBtn')?.addEventListener('click',()=>location.reload());
+  $('#exportBtn')?.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)})
+
+  /* Analyze */
+  $('#analyzeBtn')?.addEventListener('click', async e=>{
     e.preventDefault();
     clearError();
     const url=(urlInput.value||'').trim();
@@ -441,14 +547,14 @@ document.addEventListener('DOMContentLoaded', () => {
       // reset visuals
       mwRing?.style.setProperty('--v',0); mwFill?.style.setProperty('--p',0); mw?.classList.remove('good','warn','bad'); mw?.classList.add('warn');
       if(mwNum)mwNum.textContent='0%';
-      if(overallFill)overallFill.style.width='0%'; if(overallPct)overallPct.textContent='0%';
-      chipOverall.classList.remove('good','warn','bad'); chipOverall.classList.add('warn');
+      overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add('warn');
+      overallFill.style.width='0%'; overallPct.textContent='0%';
 
       const data=await callAnalyzer(url);
-      if(!data || data.error) throw new Error(data?.error || 'Unknown error');
+      if(!data||data.error) throw new Error(data?.error||'Unknown error');
       window.__lastData = {...data, url};
 
-      /* Overall & chips */
+      /* Overall */
       const score = clamp01(data.overall_score||0), band=bandName(score);
       mw?.classList.remove('good','warn','bad'); mw?.classList.add(band);
       mwRing?.style.setProperty('--v',score); mwFill?.style.setProperty('--p',score);
@@ -470,19 +576,14 @@ document.addEventListener('DOMContentLoaded', () => {
       setChip(chipHuman,'Human-like', `${human} %`, human);
       setChip(chipAI, 'AI-like', `${ai} %`, 100-human);
 
-      /* Quick stats */
-      statF.textContent=r.flesch??'—';
-      statG.textContent='Grade '+(r.grade??'—');
+      /* Quick stats & structure */
+      statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
       statInt.textContent=data.quick_stats?.internal_links??0;
       statExt.textContent=data.quick_stats?.external_links??0;
       statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
 
-      /* Structure */
-      const title = data.content_structure?.title || '';
-      const meta  = data.content_structure?.meta_description || '';
-      titleVal.textContent=title||'—';
-      metaVal.textContent=meta||'—';
-
+      titleVal.textContent=data.content_structure?.title||'—';
+      metaVal.textContent=data.content_structure?.meta_description||'—';
       const hs=data.content_structure?.headings||{};
       chipH.textContent=`H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
       headingMap.innerHTML='';
@@ -493,20 +594,13 @@ document.addEventListener('DOMContentLoaded', () => {
         headingMap.appendChild(box);
       });
 
-      /* Status chips coloring */
-      function setBandChip(wrapperEl, score){
-        if(!wrapperEl) return;
-        wrapperEl.classList.remove('good','warn','bad');
-        wrapperEl.classList.add(bandName(score));
-      }
-      chipHttp.textContent='200'; setBandChip(chipHttpWrap, 90);
-      const tl = title.length; chipTitle.textContent = tl ? (tl+' chars') : '—'; setBandChip(chipTitleWrap, (tl>=50&&tl<=60)?85:(tl?65:40));
-      const ml = meta.length;  chipMeta.textContent  = ml ? (ml+' chars') : '—'; setBandChip(chipMetaWrap, (ml>=140&&ml<=160)?85:(ml?65:40));
-      try{chipCanon.textContent=new URL(url).origin}catch{chipCanon.textContent='—'}
-      chipRobots.textContent='—'; chipViewport.textContent='—';
+      /* Status chips */
+      chipHttp.textContent='200';
+      chipCanon.textContent=(data.page_signals?.canonical||'—')||'—';
+      chipRobots.textContent=(data.page_signals?.robots||'—')||'—';
+      chipViewport.textContent=data.page_signals?.has_viewport ? 'yes' : '—';
       chipIntChip.textContent=data.quick_stats?.internal_links??0;
-      chipSchema.textContent=(data.schema_count ?? (data.quick_stats?.schema_count ?? '—'));
-      chipAuto.textContent=(data.categories||[]).flatMap(c=>c.checks||[]).filter(x=>(x.score||0)>=80).length;
+      chipSchema.textContent=(data.page_signals?.schema_types||[]).length;
 
       /* Recommendations */
       recsEl.innerHTML='';
@@ -516,67 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
         recsEl.appendChild(d);
       });
 
-      /* Categories + checks: ensure every requested item exists */
-      let cats = ensureAllDefaults(data.categories||[]);
-      // Enrich + render
-      catsEl.innerHTML='';
-      cats.forEach(cat=>{
-        const ck = (cat.checks||[]).map(c=>enrichCheck(c, cat.name));
-        const total = ck.length;
-        const passed = ck.filter(x=>(x.score||0)>=80).length;
-        const pct = Math.round((passed/Math.max(1,total))*100);
-
-        const card=document.createElement('div'); card.className='cat-card';
-        card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <div style="display:flex;align-items:center;gap:8px">
-              <div class="king" style="width:34px;height:34px">★</div>
-              <div>
-                <div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div>
-                <div style="font-size:12px;color:#b6c2cf">Keep improving</div>
-              </div>
-            </div>
-            <div class="pill">${passed} / ${total}</div>
-          </div>
-          <div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div>
-          <div class="space-y-2" id="list"></div>`;
-        const list = card.querySelector('#list');
-
-        ck.forEach(ch=>{
-          const s = Number(ch.score ?? 60);
-          const fill = fillBy(s), outline = outlineBy(s);
-          const pill = s>=80 ? 'score-pill--green' : s>=60 ? 'score-pill--orange' : 'score-pill--red';
-          const dot  = s>=80 ? '#10b981' : s>=60 ? '#f59e0b' : '#ef4444';
-
-          const row=document.createElement('div'); row.className='check';
-          row.innerHTML = `
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span>
-              <div class="font-semibold" style="font-size:13px">${ch.label}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <span class="score-pill ${pill}">${isFinite(s)?s:'—'}</span>
-              <button class="improve-btn ${fill} ${outline}" type="button">Improve</button>
-            </div>`;
-          row.querySelector('.improve-btn').addEventListener('click',()=>{
-            mTitle.textContent = ch.label;
-            mCat.textContent   = ch._cat || cat.name;
-            mScore.textContent = isFinite(s)?s:'—';
-            mBand.textContent  = bandLabel(s);
-            mBand.className    = 'pill '+(s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red');
-            mWhy.textContent   = ch.why;
-            mTips.innerHTML = '';
-            (ch.tips||[]).forEach(t=>{
-              const li=document.createElement('li'); li.textContent=t; mTips.appendChild(li);
-            });
-            mLink.href = ch.improve_search_url || ('https://www.google.com/search?q='+encodeURIComponent(ch.label+' best practices'));
-            if(typeof modal.showModal==='function') modal.showModal(); else modal.setAttribute('open','');
-          });
-
-          list.appendChild(row);
-        });
-
-        catsEl.appendChild(card);
-      });
+      /* Semantic Ground (scores from signals) */
+      renderCategories(data, url, '');
 
     }catch(err){
       console.error(err);
@@ -586,8 +621,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* Close modal on backdrop click */
-  modal?.addEventListener('click',e=>{
+  /* backdrop close */
+  $('#improveModal')?.addEventListener('click',e=>{
+    const modal=e.currentTarget;
     const r=modal.getBoundingClientRect();
     const inside=(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);
     if(!inside){ if(typeof modal.close==='function')modal.close(); else modal.removeAttribute('open'); }
