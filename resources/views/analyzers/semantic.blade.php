@@ -508,11 +508,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function showError(msg, detail) {
     errorBox.style.display = 'block';
-    errorBox.textContent = msg + (detail ? "\\n\\n" + detail : '');
+    errorBox.textContent = msg + (detail ? "\n\n" + detail : '');
   }
   function clearError(){ errorBox.style.display='none'; errorBox.textContent=''; }
 
-  /* Category defs (unchanged)... (trimmed for brevity in comment — logic retained below) */
+  /* Category defs (unchanged)... */
   const CATS = [
     { name:'User Signals & Experience', icon:'📱', checks:[
       'Mobile-friendly, responsive layout',
@@ -585,7 +585,6 @@ document.addEventListener('DOMContentLoaded', () => {
     'Robots directives valid': {why:'Avoid accidental noindex/nofollow.', tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'], link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}
   };
 
-  /* Checklist scoring (same as your last working version) */
   function clamp01num(n){return Math.max(0,Math.min(100,Number(n)||0))}
   function scoreChecklist(label, data, url, targetKw=''){
     const qs = data.quick_stats||{};
@@ -741,16 +740,30 @@ document.addEventListener('DOMContentLoaded', () => {
       if(res.ok)return res.json();
     }
     const txt=await res.text();
-    throw new Error(`HTTP ${res.status}\\n${txt?.slice(0,800)}`);
+    throw new Error(`HTTP ${res.status}\n${txt?.slice(0,800)}`);
   }
 
-  /* PSI proxy call (server must exist; handles missing key gracefully) */
+  /* PSI proxy call (POST + CSRF) */
   async function callPSI(url){
-    const res = await fetch(`/semantic-analyzer/psi?url=${encodeURIComponent(url)}`);
+    const res = await fetch('/semantic-analyzer/psi', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      },
+      body: JSON.stringify({ url })
+    });
+
     const text = await res.text();
     let json = {};
-    try { json = JSON.parse(text); } catch { throw new Error(`PSI: invalid JSON\\n${text?.slice(0,400)}`); }
-    if(!res.ok || json.error){
+    try { json = JSON.parse(text); } catch { throw new Error(`PSI: invalid JSON\n${text?.slice(0,400)}`); }
+
+    if (json.ok === false) {
+      const msg = json.error || json.message || 'PSI unavailable';
+      throw new Error(msg);
+    }
+    if (!res.ok) {
       throw new Error(json.error || json.message || `PSI HTTP ${res.status}`);
     }
     return json;
@@ -960,36 +973,55 @@ document.addEventListener('DOMContentLoaded', () => {
         const psi = await callPSI(url);
         psiStatus.textContent = 'OK';
 
-        // extract numeric values (prefer field, then lab). Controller should normalize,
-        // but we fallback to common PSI structure if needed.
-        const mobile = psi.mobile || {};
+        const mobile  = psi.mobile  || {};
         const desktop = psi.desktop || {};
 
-        const mScore = clamp01(Math.round(mobile.score || mobile.performance || 0));
-        const dScore = clamp01(Math.round(desktop.score || desktop.performance || 0));
-
-        setWheel(ringMobile, fillMobile, numMobile, mwMobile, mScore, 'M');
+        // Scores (0–100)
+        const mScore = clamp01(Math.round(mobile.score  ?? mobile.performance ?? 0));
+        const dScore = clamp01(Math.round(desktop.score ?? desktop.performance ?? 0));
+        setWheel(ringMobile,  fillMobile,  numMobile,  mwMobile,  mScore, 'M');
         setWheel(ringDesktop, fillDesktop, numDesktop, mwDesktop, dScore, 'D');
 
-        const metrics = {
-          lcp_s   : Number(mobile.lcp_s ?? desktop.lcp_s ?? psi.lcp_s ?? psi.metrics?.lcp_s ?? null),
-          cls     : Number(mobile.cls   ?? desktop.cls   ?? psi.cls   ?? psi.metrics?.cls   ?? null),
-          inp_ms  : Number(mobile.inp_ms?? desktop.inp_ms?? psi.inp_ms?? psi.metrics?.inp_ms?? null),
-          ttfb_ms : Number(mobile.ttfb_ms??desktop.ttfb_ms??psi.ttfb_ms??psi.metrics?.ttfb_ms?? null),
+        // Helper to pick first usable numeric value
+        const pick = (...vals) => {
+          for (const v of vals) {
+            const n = Number(v);
+            if (v !== undefined && v !== null && !Number.isNaN(n)) return n;
+          }
+          return null;
         };
 
+        // LCP seconds: prefer *_s, else divide ms by 1000
+        const lcpSeconds = (() => {
+          const sec = pick(mobile.lcp_s, desktop.lcp_s, psi.lcp_s, psi.metrics?.lcp_s);
+          if (sec !== null) return sec;
+          const ms = pick(mobile.lcp, desktop.lcp, psi.lcp, psi.metrics?.lcp);
+          return ms !== null ? ms / 1000 : null;
+        })();
+
+        // CLS unitless
+        const clsVal = pick(mobile.cls, desktop.cls, psi.cls, psi.metrics?.cls);
+
+        // INP ms: prefer *_ms, else raw 'inp' already ms
+        const inpMs = pick(mobile.inp_ms, desktop.inp_ms, psi.inp_ms, psi.metrics?.inp_ms);
+        const inp   = (inpMs !== null) ? inpMs : pick(mobile.inp, desktop.inp, psi.inp, psi.metrics?.inp);
+
+        // TTFB ms: prefer *_ms, else raw 'ttfb' already ms
+        const ttfbMs = pick(mobile.ttfb_ms, desktop.ttfb_ms, psi.ttfb_ms, psi.metrics?.ttfb_ms);
+        const ttfb   = (ttfbMs !== null) ? ttfbMs : pick(mobile.ttfb, desktop.ttfb, psi.ttfb, psi.metrics?.ttfb);
+
         // Scores from bounds
-        const sLCP  = scoreFromBounds(metrics.lcp_s, 2.5, 6.0);
-        const sCLS  = scoreFromBounds(metrics.cls,   0.1, 0.25);
-        const sINP  = scoreFromBounds(metrics.inp_ms,200, 500);
-        const sTTFB = scoreFromBounds(metrics.ttfb_ms,800, 1800);
+        const sLCP  = scoreFromBounds(lcpSeconds, 2.5, 6.0);
+        const sCLS  = scoreFromBounds(clsVal,     0.10, 0.25);
+        const sINP  = scoreFromBounds(inp,        200,  500);
+        const sTTFB = scoreFromBounds(ttfb,       800,  1800);
 
-        setSpMeter(lcpBar, lcpVal,  metrics.lcp_s, sLCP, v=> (v!=null? v.toFixed(2)+' s' : '—'));
-        setSpMeter(clsBar, clsVal,  metrics.cls,   sCLS, v=> (v!=null? v.toFixed(3)     : '—'));
-        setSpMeter(inpBar, inpVal,  metrics.inp_ms,sINP, v=> (v!=null? Math.round(v)+' ms' : '—'));
-        setSpMeter(ttfbBar, ttfbVal,metrics.ttfb_ms,sTTFB, v=> (v!=null? Math.round(v)+' ms' : '—'));
+        setSpMeter(lcpBar, lcpVal,   lcpSeconds, sLCP,  v => (v != null ? v.toFixed(2)+' s' : '—'));
+        setSpMeter(clsBar, clsVal,   clsVal,     sCLS,  v => (v != null ? v.toFixed(3)      : '—'));
+        setSpMeter(inpBar, inpVal,   inp,        sINP,  v => (v != null ? Math.round(v)+' ms' : '—'));
+        setSpMeter(ttfbBar, ttfbVal, ttfb,       sTTFB, v => (v != null ? Math.round(v)+' ms' : '—'));
 
-        buildSpeedFixes(metrics);
+        buildSpeedFixes({ lcp_s: lcpSeconds, cls: clsVal, inp_ms: inp ?? null, ttfb_ms: ttfb ?? null });
       } catch (e) {
         psiStatus.textContent = 'Unavailable';
         psiFixes.innerHTML = `<li>⚠️ ${String(e.message||e)}. Make sure PSI key is set server-side.</li>`;
