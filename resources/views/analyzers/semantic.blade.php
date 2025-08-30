@@ -140,7 +140,7 @@
   .rb-banner.warn{background:linear-gradient(90deg,#3b2a05,#7a5d0d);border:1px solid #9a6a10;box-shadow:0 0 0 2px #9a6a1066 inset,0 0 42px #f59e0b33;color:#fde68a}
   .rb-banner.bad{ background:linear-gradient(90deg,#3a0b0b,#6f1d1d);border:1px solid #8a1a1a;box-shadow:0 0 0 2px #8a1a1a66 inset,0 0 42px #ef444433;color:#fecaca}
 
-  /* ===================== Site Speed & Core Web Vitals ===================== */
+  /* ===================== Site Speed & CWV ===================== */
   .speed-card{border-radius:20px;background:#0b0f1f;border:1px solid #173a2a;padding:16px;margin-top:16px}
   .sp-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .sp-title{display:flex;align-items:center;gap:10px}
