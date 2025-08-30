@@ -6,15 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log; // <-- Make sure this is imported
-use App\Services\OpenAIService;      // <-- Make sure this is imported
+use Illuminate\Support\Facades\Log; // <-- Required for logging
+use App\Services\OpenAIService;      // <-- Required for the new feature
 
 class AnalyzerController extends Controller
 {
     /**
      * POST /semantic-analyzer/analyze
      */
-    public function semanticAnalyze(Request $request, OpenAIService $openAIService) // <-- Inject OpenAIService
+    public function semanticAnalyze(Request $request, OpenAIService $openAIService) // <-- This is the critical change
     {
         $data = $request->validate([
             'url'            => ['required','url'],
@@ -26,15 +26,19 @@ class AnalyzerController extends Controller
         $ua  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36';
 
         try {
-            // --- This is all your original, existing logic ---
+            // 1) Fetch HTML
             $resp = $this->fetchUrl($url, $ua);
             if (!$resp['ok']) {
                 return response()->json(['error' => $resp['error'] ?? 'Fetch failed'], 422);
             }
             $html = $resp['body'] ?? '';
             $host = $resp['host'] ?? parse_url($url, PHP_URL_HOST);
+
+            // 2) Build DOM + XPath
             $dom = $this->makeDom($html);
             $xp  = new \DOMXPath($dom);
+
+            // 3) Extract main text & structure
             $mainText        = $this->extractMainText($dom);
             $title           = $this->extractTitle($dom);
             $metaDescription = $this->extractMeta($dom, 'description');
@@ -47,16 +51,26 @@ class AnalyzerController extends Controller
             $lazyImgCount    = $this->countLazyImages($dom);
             $figcaptionCount = $this->countFigcaptions($dom);
             $hasOgOrTwitter  = $this->hasOpenGraphOrTwitter($xp);
+
+            // 4) Technical meta
             $canonical   = $this->extractCanonical($xp);
             $robots      = $this->extractMetaRobots($xp);
             $hasViewport = $this->hasViewport($xp);
+
+            // 5) JSON-LD summary (entities/context)
             $jsonldSummary = $this->scanJsonLd($xp);
+
+            // 6) Readability (multilingual-aware)
             $readability = $this->computeReadabilityFromText($mainText);
+
+            // 7) Build categories (6 x 5 checks)
             $categories   = $this->buildCategories(
                 $url, $title, $metaDescription, $headings, $links, $imagesAltCount, $schemaCount,
                 $kw, $readability, $jsonldSummary, $hasViewport, $robots, $firstParagraph,
                 $lazyImgCount, $figcaptionCount, $hasOgOrTwitter, $canonical, $mainText
             );
+
+            // 8) Overall score + quick recommendations
             $overallScore = $this->computeOverallScore($categories, $readability);
             $wheel        = ['label' => $this->wheelLabel($overallScore)];
             $recs         = $this->buildRecommendations($links, $imagesAltCount, $schemaCount, $headings, $readability, $kw);
@@ -64,8 +78,10 @@ class AnalyzerController extends Controller
             $jsonResponse = [
                 'overall_score'      => $overallScore,
                 'wheel'              => $wheel,
+
                 'schema_count'       => $schemaCount,
                 'images_alt_count'   => $imagesAltCount,
+
                 'page_signals'       => [
                     'canonical'        => $canonical,
                     'robots'           => $robots,
@@ -80,6 +96,7 @@ class AnalyzerController extends Controller
                     'has_product'      => $jsonldSummary['has_product'],
                     'has_article'      => $jsonldSummary['has_article'],
                 ],
+
                 'quick_stats'        => [
                     'readability_flesch' => $readability['flesch'],
                     'readability_grade'  => $readability['grade'],
@@ -87,17 +104,17 @@ class AnalyzerController extends Controller
                     'external_links'     => $links['external'],
                     'text_to_html_ratio' => $ratio,
                 ],
+
                 'content_structure'  => [
                     'title'            => $title,
                     'meta_description' => $metaDescription,
                     'headings'         => $headings,
                 ],
+
                 'readability'        => $readability,
                 'recommendations'    => $recs,
                 'categories'         => $categories,
             ];
-            // --- End of your original logic ---
-
 
             // =================================================================
             // NEW: OpenAI Content Optimization Integration
