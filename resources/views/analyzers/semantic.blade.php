@@ -518,7 +518,7 @@
     const rbTriVal=$('#rbTriVal'), rbTriFill=$('#rbTriFill');
     const rbDigitsVal=$('#rbDigitsVal'), rbDigitsFill=$('#rbDigitsFill');
     const rbPassiveVal=$('#rbPassiveVal'), rbPassiveFill=$('#rbPassiveFill');
-    const rbSimpleVal=$('#rbSimpleVal'), rbSimpleFill=$('#rbSimpleFill']);
+    const rbSimpleVal=$('#rbSimpleVal'), rbSimpleFill=$('#rbSimpleFill');
     const rbFixes=$('#rbFixes'), rbBanner=$('#rbBanner']);
 
     /* Speed UI */
