@@ -6,15 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log; // <-- Added for logging
-use App\Services\OpenAIService;      // <-- Import the new service
+use Illuminate\Support\Facades\Log; // <-- Make sure this is imported
+use App\Services\OpenAIService;      // <-- Make sure this is imported
 
 class AnalyzerController extends Controller
 {
     /**
      * POST /semantic-analyzer/analyze
      */
-    public function semanticAnalyze(Request $request, OpenAIService $openAIService) // <-- Inject the service
+    public function semanticAnalyze(Request $request, OpenAIService $openAIService) // <-- Inject OpenAIService
     {
         $data = $request->validate([
             'url'            => ['required','url'],
@@ -26,19 +26,15 @@ class AnalyzerController extends Controller
         $ua  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36';
 
         try {
-            // 1) Fetch HTML
+            // --- This is all your original, existing logic ---
             $resp = $this->fetchUrl($url, $ua);
             if (!$resp['ok']) {
                 return response()->json(['error' => $resp['error'] ?? 'Fetch failed'], 422);
             }
             $html = $resp['body'] ?? '';
             $host = $resp['host'] ?? parse_url($url, PHP_URL_HOST);
-
-            // 2) Build DOM + XPath
             $dom = $this->makeDom($html);
             $xp  = new \DOMXPath($dom);
-
-            // 3) Extract main text & structure (Existing logic is unchanged)
             $mainText        = $this->extractMainText($dom);
             $title           = $this->extractTitle($dom);
             $metaDescription = $this->extractMeta($dom, 'description');
@@ -51,31 +47,20 @@ class AnalyzerController extends Controller
             $lazyImgCount    = $this->countLazyImages($dom);
             $figcaptionCount = $this->countFigcaptions($dom);
             $hasOgOrTwitter  = $this->hasOpenGraphOrTwitter($xp);
-
-            // 4) Technical meta (Existing logic is unchanged)
             $canonical   = $this->extractCanonical($xp);
             $robots      = $this->extractMetaRobots($xp);
             $hasViewport = $this->hasViewport($xp);
-
-            // 5) JSON-LD summary (Existing logic is unchanged)
             $jsonldSummary = $this->scanJsonLd($xp);
-
-            // 6) Readability (Existing logic is unchanged)
             $readability = $this->computeReadabilityFromText($mainText);
-
-            // 7) Build categories (Existing logic is unchanged)
             $categories   = $this->buildCategories(
                 $url, $title, $metaDescription, $headings, $links, $imagesAltCount, $schemaCount,
                 $kw, $readability, $jsonldSummary, $hasViewport, $robots, $firstParagraph,
                 $lazyImgCount, $figcaptionCount, $hasOgOrTwitter, $canonical, $mainText
             );
-
-            // 8) Overall score + quick recommendations (Existing logic is unchanged)
             $overallScore = $this->computeOverallScore($categories, $readability);
             $wheel        = ['label' => $this->wheelLabel($overallScore)];
             $recs         = $this->buildRecommendations($links, $imagesAltCount, $schemaCount, $headings, $readability, $kw);
 
-            // Prepare the base response array
             $jsonResponse = [
                 'overall_score'      => $overallScore,
                 'wheel'              => $wheel,
@@ -111,18 +96,25 @@ class AnalyzerController extends Controller
                 'recommendations'    => $recs,
                 'categories'         => $categories,
             ];
+            // --- End of your original logic ---
+
 
             // =================================================================
             // NEW: OpenAI Content Optimization Integration
             // =================================================================
             try {
+                // Call the service with the HTML content we fetched earlier
                 $optimizationData = $openAIService->getOptimizationData($html);
                 $jsonResponse['content_optimization'] = $optimizationData;
             } catch (\Throwable $e) {
-                Log::error('OpenAI Content Optimization failed: ' . $e->getMessage());
+                Log::error('OpenAI Content Optimization failed in Controller: ' . $e->getMessage());
                 $jsonResponse['content_optimization'] = null; // Ensure the key exists but is null on failure
             }
             // =================================================================
+
+
+            // ADDED FOR DEBUGGING: This will write the result to your log file.
+            Log::info('Final OpenAI Data Sent to Frontend:', (array)($jsonResponse['content_optimization'] ?? ['status' => 'Not found or failed']));
 
             return response()->json($jsonResponse);
 
@@ -190,7 +182,7 @@ class AnalyzerController extends Controller
     }
 
     /* ===========================================================
-     | Fetching & Parsing (All helper methods below are unchanged)
+     | Fetching & Parsing
      * ===========================================================*/
     private function fetchUrl(string $url, string $ua): array
     {
@@ -1041,3 +1033,4 @@ class AnalyzerController extends Controller
         ];
     }
 }
+
