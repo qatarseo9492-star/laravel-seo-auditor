@@ -3,8 +3,8 @@
 
 @push('head')
 <style>
-  /* Page layout adjustments (as requested): single layout border + background */
-  html,body{background:#03041c!important;color:#e5e7eb} /* was #05210c */
+  /* Overall page skin */
+  html,body{background:#03041c!important;color:#e5e7eb}
   .maxw{max-width:1150px;margin:0 auto;border:1px solid #154f2e;border-radius:18px;padding:8px}
 
   .title-wrap{display:flex;align-items:center;gap:14px;justify-content:center;margin-top:14px}
@@ -17,7 +17,7 @@
   .legend{display:flex;gap:10px;justify-content:center;margin:10px 0 6px}
   .legend .badge{padding:6px 10px;border-radius:9999px;font-weight:800;border:1px solid #ffffff2a;font-size:12px}
   .legend .g{background:#063f2c;color:#a7f3d0;border-color:#10b98166}
-  ..legend .o{background:#3b2a05;color:#fde68a;border-color:#f59e0b66}
+  .legend .o{background:#3b2a05;color:#fde68a;border-color:#f59e0b66}
   .legend .r{background:#3a0b0b;color:#fecaca;border-color:#ef444466}
 
   .card{border-radius:18px;padding:18px;background:#0a0a14;border:1px solid #ffffff1c}
@@ -39,12 +39,12 @@
 
   .analyze-wrap{border-radius:16px;background:#020114;border:1px solid #ffffff20;padding:12px}
 
-  /* Wheels (overall + readability + speed) */
-  .mw{--v:0;--ring:#f59e0b;--p:0;width:200px;height:200px;position:relative}
+  /* ===== Wheels (overall + readability + speed) ===== */
+  .mw{--v:0;--p:0;--ring:#f59e0b;width:200px;height:200px;position:relative}
   .mw-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--v)*1%),#ffffff14 0);-webkit-mask:radial-gradient(circle 76px,transparent 72px,#000 72px);mask:radial-gradient(circle 76px,transparent 72px,#000 72px)}
   .mw-fill{position:absolute;inset:18px;border-radius:50%;overflow:hidden;background:#000}
   .mw-fill::after{content:"";position:absolute;left:0;right:0;height:100%;top:calc(100% - var(--p)*1%);transition:top .9s ease;background:var(--fill,linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%));-webkit-mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%);mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%)}
-  .mw.good{--ring:#22c55e;--fill:linear-gradient(to top,#16a34a 0%,#22c55e 60%,#86efac 100%)} .mw.warn{--ring:#f59e0b;--fill:linear-gradient(to top,#f59e0b 0%,#fbbf24 60%,#fde68a 100%)} .mw.bad{--ring:#ef4444;--fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%)}
+  .mw.good{--ring:#22c55e;--fill:linear-gradient(to top,#16a34a 0%,#22c55e 60%,#86efac 100%)} .mw.warn{--ring:#f59e0b} .mw.bad{--ring:#ef4444;--fill:linear-gradient(to top,#ef4444 0%,#f87171 60%,#fecaca 100%)}
   .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
   .mw-sm{width:170px;height:170px}
   .mw-sm .mw-ring{-webkit-mask:radial-gradient(circle 64px,transparent 60px,#000 60px);mask:radial-gradient(circle 64px,transparent 60px,#000 60px)}
@@ -77,66 +77,75 @@
 
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#3a0b0b;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
 
-  /* ===================== Readability (new) ===================== */
+  /* ===================== Readability (unchanged logic) ===================== */
   .read-card{border-radius:20px;background:#0b0f1f;border:1px solid #17203e;padding:16px}
   .rb-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .rb-title{display:flex;align-items:center;gap:10px}
   .rb-title .ico{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#22d3ee33,#a78bfa33);border:1px solid #ffffff22}
   .rb-legend{font-size:12px;color:#aab3c2}
-
   .rb-grid{display:grid;grid-template-columns:220px 1fr;gap:12px;margin-top:10px}
   @media (max-width:920px){.rb-grid{grid-template-columns:1fr}}
-
   .rb-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
   @media (max-width:920px){.rb-tiles{grid-template-columns:1fr}}
-
   .rb-tile{background:#0f1830;border:1px solid #21325c;border-radius:14px;padding:12px}
   .rb-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b6c2cf;margin:8px 0 6px}
   .rb-val{color:#e5e7eb;font-weight:800}
   .rb-meter{height:10px;border-radius:9999px;background:#0c1226;border:1px solid #1b2b51;overflow:hidden}
   .rb-meter>span{display:block;height:100%;width:0%;transition:width .9s ease;background:linear-gradient(90deg,#ef4444,#fde047,#22c55e)}
-
   .rb-fixes{background:#0f1830;border:1px solid #21325c;border-radius:14px;padding:14px;margin-top:12px}
   .rb-fixes h4{margin:0 0 8px 0;font-weight:900}
   .rb-fixes ul{margin:0;padding-left:18px}
   .rb-fixes li{margin:6px 0}
-
   .rb-banner{margin-top:12px;border-radius:14px;padding:12px;font-weight:800}
   .rb-banner.good{background:#05240f;border:1px solid #126f3f;color:#a7f3d0}
   .rb-banner.warn{background:#3b2a05;border:1px solid #9a6a10;color:#fde68a}
   .rb-banner.bad{background:#3a0b0b;border:1px solid #8a1a1a;color:#fecaca}
 
-  /* ===================== Site Speed & CWV ===================== */
+  /* ===================== Site Speed & CWV (UPDATED) ===================== */
   .speed-card{border-radius:20px;background:#0b0f1f;border:1px solid #173a2a;padding:16px;margin-top:16px}
   .sp-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .sp-title{display:flex;align-items:center;gap:10px}
   .sp-title .ico{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#34d39933,#22d3ee33);border:1px solid #1a4c34}
   .sp-note{font-size:12px;color:#a9d3be}
 
-  .sp-grid{display:grid;grid-template-columns:260px 1fr;gap:14px;margin-top:12px}
-  @media (max-width:1024px){.sp-grid{grid-template-columns:1fr}}
+  /* Stack wheels ABOVE metric bars (requested) */
+  .sp-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
+  .sp-wheels{display:grid;grid-template-columns:repeat(2,minmax(240px,1fr));justify-content:center;gap:18px}
+  @media (max-width:680px){.sp-wheels{grid-template-columns:1fr}} /* stack on small screens */
 
-  .sp-wheels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .sp-tile{background:#0e1a22;border:1px solid #1d3641;border-radius:14px;padding:12px}
   .sp-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#a6c5cf;margin:6px 0}
   .sp-val{color:#e5e7eb;font-weight:800}
-  .sp-meter{height:10px;border-radius:9999px;background:#07151a;border:1px solid #16414e;overflow:hidden}
-  .sp-meter>span{display:block;height:100%;width:0%;transition:width .9s ease;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e)}
 
-  .sp-fixes{background:#0e1a22;border:1px solid #1d3641;border-radius:14px;padding:14px;margin-top:12px}
-  .sp-fixes h4{margin:0 0 8px 0;font-weight:900}
-  .sp-fixes ul{margin:0;padding-left:18px}
-  .sp-fixes li{margin:6px 0}
+  /* Stylish PSI-like meters */
+  .sp-meter{position:relative;height:14px;border-radius:9999px;background:linear-gradient(180deg,#09161c,#0f2530);border:1px solid #143341;box-shadow:inset 0 2px 6px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.03);overflow:hidden}
+  .sp-meter>span{position:relative;display:block;height:100%;width:0%;transition:width .9s ease;background:linear-gradient(90deg,#ef4444 0%,#f59e0b 40%,#22c55e 100%);box-shadow:0 0 12px rgba(34,197,94,.35),inset 0 0 6px rgba(0,0,0,.4)}
+  .sp-meter>span::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0)),repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 12px,transparent 12px 24px);mix-blend-mode:soft-light;pointer-events:none}
 
-  /* === NEW: Good-score visuals (≥80) for the Speed section only === */
-  .speed-badge{display:none;padding:6px 10px;border-radius:9999px;font-weight:900;border:1px solid #22c55e8a;background:linear-gradient(90deg,#16a34a,#22c55e,#86efac);color:#03140a;box-shadow:0 0 0 2px #22c55e55 inset,0 0 18px #22c55e44}
+  /* Good-score badge */
+  .speed-badge{display:none;padding:8px 12px;border-radius:9999px;font-weight:900;border:1px solid #22c55e8a;background:linear-gradient(90deg,#16a34a,#22c55e,#86efac);color:#03140a;box-shadow:0 0 0 2px #22c55e55 inset,0 0 18px #22c55e44}
   .speed-badge.show{display:inline-flex;align-items:center;gap:8px}
   .speed-badge i{filter:drop-shadow(0 2px 8px rgba(34,197,94,.6))}
 
-  /* pulse/glow when a wheel is GOOD (class already switches to .good via JS) */
-  @keyframes goodPulse {0%{box-shadow:0 0 0 0 rgba(34,197,94,.35)}70%{box-shadow:0 0 0 16px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
-  .mw.good{box-shadow:0 0 0 2px #22c55e55 inset,0 0 32px #22c55e40;animation:goodPulse 2.2s ease-out infinite}
-  .mw.good .mw-ring{filter:drop-shadow(0 0 10px rgba(34,197,94,.35))}
+  /* Bigger multicolor wheels + rainbow glow in Speed ONLY */
+  .speed-card .mw-sm{width:220px;height:220px}
+  .speed-card .mw-sm .mw-ring{-webkit-mask:radial-gradient(circle 84px,transparent 80px,#000 80px);mask:radial-gradient(circle 84px,transparent 80px,#000 80px)}
+  .speed-card .mw-sm .mw-fill{inset:16px}
+  .speed-card .mw-sm .mw-center{font-size:30px}
+
+  /* Multicolor fill when score is GOOD */
+  .speed-card .mw.good .mw-fill::after{background:linear-gradient(to top,#22d3ee 0%,#a78bfa 25%,#fb7185 50%,#f59e0b 75%,#22c55e 100%)}
+
+  /* Multicolor halo/glow masked to arc length */
+  @keyframes rainbowPulse{0%{opacity:.75;filter:blur(18px)}70%{opacity:.35;filter:blur(24px)}100%{opacity:.75;filter:blur(18px)}}
+  .speed-card .mw.good::before{
+    content:"";position:absolute;inset:-10px;border-radius:50%;
+    background:conic-gradient(from 0deg,#22d3ee,#a78bfa,#fb7185,#f59e0b,#22c55e,#22d3ee);
+    -webkit-mask:conic-gradient(#000 calc(var(--v)*1%), transparent 0);
+    pointer-events:none;z-index:0;animation:rainbowPulse 2.2s ease-in-out infinite
+  }
+  .speed-card .mw.good{box-shadow:0 0 0 2px rgba(34,197,94,.35) inset,0 0 40px rgba(34,197,94,.32)}
+  .speed-card .mw.good .mw-ring{filter:drop-shadow(0 0 14px rgba(34,197,94,.45))}
 </style>
 @endpush
 
@@ -253,7 +262,6 @@
 
       <!-- Metric tiles -->
       <div class="rb-tiles">
-        <!-- Row 1 -->
         <div class="rb-tile">
           <div class="rb-row"><div>😊 Flesch Reading Ease</div><div class="rb-val" id="rbFleschVal">—</div></div>
           <div class="rb-meter"><span id="rbFleschFill" style="width:0%"></span></div>
@@ -266,8 +274,6 @@
           <div class="rb-row"><div>🔤 Words</div><div class="rb-val" id="rbWordsVal">—</div></div>
           <div class="rb-meter"><span id="rbWordsFill" style="width:0%"></span></div>
         </div>
-
-        <!-- Row 2 -->
         <div class="rb-tile">
           <div class="rb-row"><div>🅰️ Syllables / Word</div><div class="rb-val" id="rbSyllVal">—</div></div>
           <div class="rb-meter"><span id="rbSyllFill" style="width:0%"></span></div>
@@ -280,8 +286,6 @@
           <div class="rb-row"><div>♻️ Repetition (tri-gram)</div><div class="rb-val" id="rbTriVal">—</div></div>
           <div class="rb-meter"><span id="rbTriFill" style="width:0%"></span></div>
         </div>
-
-        <!-- Row 3 -->
         <div class="rb-tile">
           <div class="rb-row"><div># Digits / 100 words</div><div class="rb-val" id="rbDigitsVal">—</div></div>
           <div class="rb-meter"><span id="rbDigitsFill" style="width:0%"></span></div>
@@ -297,20 +301,14 @@
       </div>
     </div>
 
-    <!-- Fixes -->
     <div class="rb-fixes">
       <h4>💡 Simple Fixes</h4>
-      <ul id="rbFixes">
-        <li>Run an analysis to see targeted suggestions.</li>
-      </ul>
+      <ul id="rbFixes"><li>Run an analysis to see targeted suggestions.</li></ul>
     </div>
 
-    <!-- Grade banner -->
-    <div id="rbBanner" class="rb-banner warn">
-      Readability score helps you target Grade 7–9 for most audiences.
-    </div>
+    <div id="rbBanner" class="rb-banner warn">Readability score helps you target Grade 7–9 for most audiences.</div>
   </div>
-  <!-- =================== /Readability Insights =================== -->
+  <!-- /Readability -->
 
   <!-- ===================== Site Speed & Core Web Vitals ===================== -->
   <div class="speed-card" id="speedCard">
@@ -323,14 +321,13 @@
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
-        <!-- NEW: good score badge (hidden by default; toggled by JS) -->
         <span id="speedBadge" class="speed-badge"><i>🎉</i> Excellent Speed</span>
         <span id="psiStatus" class="pill">Waiting…</span>
       </div>
     </div>
 
     <div class="sp-grid">
-      <!-- Wheels -->
+      <!-- Wheels ABOVE bars -->
       <div class="sp-wheels">
         <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#07161a;border:1px solid #12373f">
           <div class="mw mw-sm warn" id="mwMobile">
@@ -350,24 +347,19 @@
         </div>
       </div>
 
-      <!-- Metrics -->
       <div>
-        <!-- LCP -->
         <div class="sp-tile">
           <div class="sp-row"><div>🏁 LCP (s)</div><div class="sp-val" id="lcpVal">—</div></div>
           <div class="sp-meter"><span id="lcpBar" style="width:0%"></span></div>
         </div>
-        <!-- CLS -->
         <div class="sp-tile">
           <div class="sp-row"><div>📦 CLS</div><div class="sp-val" id="clsVal">—</div></div>
           <div class="sp-meter"><span id="clsBar" style="width:0%"></span></div>
         </div>
-        <!-- INP -->
         <div class="sp-tile">
           <div class="sp-row"><div>⚡ INP (ms)</div><div class="sp-val" id="inpVal">—</div></div>
           <div class="sp-meter"><span id="inpBar" style="width:0%"></span></div>
         </div>
-        <!-- TTFB -->
         <div class="sp-tile">
           <div class="sp-row"><div>⏱️ TTFB (ms)</div><div class="sp-val" id="ttfbVal">—</div></div>
           <div class="sp-meter"><span id="ttfbBar" style="width:0%"></span></div>
@@ -375,15 +367,12 @@
       </div>
     </div>
 
-    <!-- Suggestions -->
     <div class="sp-fixes">
       <h4>💡 Speed Suggestions</h4>
-      <ul id="psiFixes">
-        <li>Run Analyze to fetch PSI data.</li>
-      </ul>
+      <ul id="psiFixes"><li>Run Analyze to fetch PSI data.</li></ul>
     </div>
   </div>
-  <!-- =================== /Site Speed & CWV =================== -->
+  <!-- /Speed & CWV -->
 
   <!-- Content Structure -->
   <div class="card" style="margin-top:16px">
@@ -481,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
         mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
         mTips=$('#improveTips'), mLink=$('#improveSearch');
 
-  /* Readability UI (new) */
+  /* Readability UI */
   const readMw=$('#readMw'), readRing=$('#readRing'), readFill=$('#readFill'), readNum=$('#readNum');
   const readBadge=$('#readBadge'), gradeBadge=$('#gradeBadge'), rbLegend=$('#rbLegend');
   const rbFleschVal=$('#rbFleschVal'), rbFleschFill=$('#rbFleschFill');
@@ -503,14 +492,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const inpVal=$('#inpVal'), inpBar=$('#inpBar');
   const ttfbVal=$('#ttfbVal'), ttfbBar=$('#ttfbBar');
   const psiStatus=$('#psiStatus'), psiFixes=$('#psiFixes');
-  const speedBadge=$('#speedBadge'); // NEW
+  const speedBadge=$('#speedBadge');
 
   /* Helpers */
   const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
   const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
   const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
-  const fillBy=s=>s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');
-  const outlineBy=s=>s>=80?'outline-green':(s>=60?'outline-orange':'outline-red');
 
   function setChip(el,label,value,score){
     if(!el)return;
@@ -525,7 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function clearError(){ errorBox.style.display='none'; errorBox.textContent=''; }
 
-  /* Category defs (unchanged)... */
+  /* Categories (kept same behaviour) */
   const CATS = [
     { name:'User Signals & Experience', icon:'📱', checks:[
       'Mobile-friendly, responsive layout',
@@ -568,34 +555,34 @@ document.addEventListener('DOMContentLoaded', () => {
   const KB = {
     'Mobile-friendly, responsive layout': {why:'Most traffic is mobile; poor UX kills engagement.', tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'], link:'https://search.google.com/test/mobile-friendly'},
     'Optimized speed (compression, lazy-load)': {why:'Speed affects abandonment and CWV.', tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'], link:'https://web.dev/fast/'},
-    'Core Web Vitals passing (LCP/INP/CLS)': {why:'Passing CWV improves experience & stability.', tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'], link:'https://web.dev/vitals/'},
-    'Clear CTAs and next steps': {why:'Clarity increases conversions and task completion.', tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'], link:'https://www.nngroup.com/articles/call-to-action-buttons/'},
-    'Accessible basics (alt text, contrast)': {why:'Accessibility broadens reach and reduces risk.', tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'], link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},
-    'sameAs/Organization details present': {why:'Entity grounding disambiguates your brand.', tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'], link:'https://schema.org/Organization'},
+    'Core Web Vitals passing (LCP/INP/CLS)':     {why:'Passing CWV improves experience & stability.', tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'], link:'https://web.dev/vitals/'},
+    'Clear CTAs and next steps':                 {why:'Clarity increases conversions and task completion.', tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'], link:'https://www.nngroup.com/articles/call-to-action-buttons/'},
+    'Accessible basics (alt text, contrast)':    {why:'Accessibility broadens reach and reduces risk.', tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'], link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},
+    'sameAs/Organization details present':       {why:'Entity grounding disambiguates your brand.', tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'], link:'https://schema.org/Organization'},
     'Valid schema markup (Article/FAQ/Product)': {why:'Structured data unlocks rich results.', tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'], link:'https://search.google.com/test/rich-results'},
-    'Related entities covered with context': {why:'Covering related entities builds topical depth.', tips:['Mention related concepts.','Explain relationships.','Link to references.'], link:'https://developers.google.com/knowledge-graph'},
-    'Primary entity clearly defined': {why:'A single main entity clarifies page purpose.', tips:['Define at the top.','Use consistent naming.','Add schema about it.'], link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},
-    'Organization contact/about page visible': {why:'Trust & contact clarity support E-E-A-T.', tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'], link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},
-    'Logical H2/H3 headings & topic clusters': {why:'Hierarchy helps skimming and indexing.', tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'], link:'https://moz.com/learn/seo/site-structure'},
-    'Internal links to hub/related pages': {why:'Internal links distribute authority & context.', tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'], link:'https://ahrefs.com/blog/internal-links/'},
-    'Clean, descriptive URL slug': {why:'Readable slugs improve CTR & clarity.', tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'], link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},
-    'Breadcrumbs enabled (+ schema)': {why:'Breadcrumbs clarify location & show in SERP.', tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'], link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},
-    'XML sitemap logical structure': {why:'Sitemap accelerates discovery & updates.', tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'], link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},
+    'Related entities covered with context':     {why:'Covering related entities builds topical depth.', tips:['Mention related concepts.','Explain relationships.','Link to references.'], link:'https://developers.google.com/knowledge-graph'},
+    'Primary entity clearly defined':            {why:'A single main entity clarifies page purpose.', tips:['Define at the top.','Use consistent naming.','Add schema about it.'], link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},
+    'Organization contact/about page visible':   {why:'Trust & contact clarity support E-E-A-T.', tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'], link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},
+    'Logical H2/H3 headings & topic clusters':   {why:'Hierarchy helps skimming and indexing.', tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'], link:'https://moz.com/learn/seo/site-structure'},
+    'Internal links to hub/related pages':       {why:'Internal links distribute authority & context.', tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'], link:'https://ahrefs.com/blog/internal-links/'},
+    'Clean, descriptive URL slug':               {why:'Readable slugs improve CTR & clarity.', tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'], link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},
+    'Breadcrumbs enabled (+ schema)':            {why:'Breadcrumbs clarify location & show in SERP.', tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'], link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},
+    'XML sitemap logical structure':             {why:'Sitemap accelerates discovery & updates.', tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'], link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},
     'E-E-A-T signals (author, date, expertise)': {why:'Trust signals reduce bounce & build credibility.', tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'], link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},
-    'Unique value vs. top competitors': {why:'Differentiation is necessary to rank & retain.', tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'], link:'https://backlinko.com/seo-techniques'},
-    'Facts & citations up to date': {why:'Freshness + accuracy boosts trust.', tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'], link:'https://scholar.google.com/'},
-    'Helpful media (images/video) w/ captions': {why:'Media improves comprehension & dwell time.', tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'], link:'https://web.dev/optimize-lcp/'},
-    'Up-to-date examples & screenshots': {why:'Current visuals reflect product reality.', tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'], link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},
-    'Define search intent & primary topic': {why:'Matching intent drives relevance & time on page.', tips:['State outcome early.','Align format to intent.','Use concrete examples.'], link:'https://ahrefs.com/blog/search-intent/'},
+    'Unique value vs. top competitors':          {why:'Differentiation is necessary to rank & retain.', tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'], link:'https://backlinko.com/seo-techniques'},
+    'Facts & citations up to date':              {why:'Freshness + accuracy boosts trust.', tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'], link:'https://scholar.google.com/'},
+    'Helpful media (images/video) w/ captions':  {why:'Media improves comprehension & dwell time.', tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'], link:'https://web.dev/optimize-lcp/'},
+    'Up-to-date examples & screenshots':         {why:'Current visuals reflect product reality.', tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'], link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},
+    'Define search intent & primary topic':      {why:'Matching intent drives relevance and time on page.', tips:['State outcome early.','Align format to intent.','Use concrete examples.'], link:'https://ahrefs.com/blog/search-intent/'},
     'Map target & related keywords (synonyms/PAA)': {why:'Variants improve recall & completeness.', tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'], link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},
-    'H1 includes primary topic naturally': {why:'Clear topic helps users and algorithms.', tips:['One H1 per page.','Topic near the start.','Be descriptive.'], link:'https://web.dev/learn/html/semantics/#headings'},
-    'Integrate FAQs / questions with answers': {why:'Captures long-tail & can earn rich results.', tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'], link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},
-    'Readable, NLP-friendly language': {why:'Plain, direct writing improves comprehension.', tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'], link:'https://www.plainlanguage.gov/guidelines/'},
+    'H1 includes primary topic naturally':       {why:'Clear topic helps users and algorithms.', tips:['One H1 per page.','Topic near the start.','Be descriptive.'], link:'https://web.dev/learn/html/semantics/#headings'},
+    'Integrate FAQs / questions with answers':   {why:'Captures long-tail & can earn rich results.', tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'], link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},
+    'Readable, NLP-friendly language':           {why:'Plain, direct writing improves comprehension.', tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'], link:'https://www.plainlanguage.gov/guidelines/'},
     'Title tag (≈50–60 chars) w/ primary keyword': {why:'Title remains the strongest on-page signal.', tips:['50–60 chars.','Primary topic first.','Avoid duplication.'], link:'https://moz.com/learn/seo/title-tag'},
-    'Meta description (≈140–160 chars) + CTA': {why:'Meta drives CTR which correlates with rankings.', tips:['140–160 chars.','Benefit + CTA.','Match intent.'], link:'https://moz.com/learn/seo/meta-description'},
-    'Canonical tag set correctly': {why:'Avoid duplicates; consolidate signals.', tips:['One canonical.','Absolute URL.','No conflicting canonicals.'], link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},
-    'Indexable & listed in XML sitemap': {why:'Indexation is prerequisite to ranking.', tips:['No noindex.','Include in sitemap.','Submit in Search Console.'], link:'https://developers.google.com/search/docs/crawling-indexing/overview'},
-    'Robots directives valid': {why:'Avoid accidental noindex/nofollow.', tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'], link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}
+    'Meta description (≈140–160 chars) + CTA':   {why:'Meta drives CTR which correlates with rankings.', tips:['140–160 chars.','Benefit + CTA.','Match intent.'], link:'https://moz.com/learn/seo/meta-description'},
+    'Canonical tag set correctly':               {why:'Avoid duplicates; consolidate signals.', tips:['One canonical.','Absolute URL.','No conflicting canonicals.'], link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},
+    'Indexable & listed in XML sitemap':         {why:'Indexation is prerequisite to ranking.', tips:['No noindex.','Include in sitemap.','Submit in Search Console.'], link:'https://developers.google.com/search/docs/crawling-indexing/overview'},
+    'Robots directives valid':                   {why:'Avoid accidental noindex/nofollow.', tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'], link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}
   };
 
   function clamp01num(n){return Math.max(0,Math.min(100,Number(n)||0))}
@@ -747,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chipAuto.textContent = autoGood;
   }
 
-  /* API call with fallback */
+  /* Analyzer API (unchanged) */
   async function callAnalyzer(url){
     const headers={'Accept':'application/json','Content-Type':'application/json'};
     let res=await fetch('/api/semantic-analyze',{method:'POST',headers,body:JSON.stringify({url,target_keyword:''})});
@@ -760,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
     throw new Error(`HTTP ${res.status}\\n${txt?.slice(0,800)}`);
   }
 
-  /* PSI proxy call (POST + CSRF) */
+  /* PSI proxy (unchanged) */
   async function callPSI(url){
     const res = await fetch('/semantic-analyzer/psi', {
       method: 'POST',
@@ -793,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
     analyzeBtn.textContent = isOn ? 'Analyzing…' : '🔍 Analyze';
   }
 
-  /* Helpers for readability meters */
+  /* Readability meters */
   const pct = (v,min,max,invert=false)=>{
     if(v===null||v===undefined||isNaN(v)) return 0;
     let p=(v-min)/Math.max(1,(max-min))*100;
@@ -846,9 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(m.cls!=null && m.cls>0.1) tips.push('Reduce CLS: always set width/height on images/media; avoid layout shifts from ads and embeds.');
     if(m.inp_ms!=null && m.inp_ms>200) tips.push('Lower INP: break up long tasks, defer non-critical JS, reduce third-party scripts.');
     if(m.ttfb_ms!=null && m.ttfb_ms>800) tips.push('Reduce TTFB: enable caching/CDN, optimize server, use HTTP/2 or HTTP/3.');
-    if(!tips.length){
-      tips.push('Great job! Keep images optimized and JS lean to maintain fast performance.');
-    }
+    if(!tips.length){ tips.push('Great job! Keep images optimized and JS lean to maintain fast performance.'); }
     psiFixes.innerHTML = tips.map(t=>`<li>✅ ${t}</li>`).join('');
   }
 
@@ -875,13 +860,13 @@ document.addEventListener('DOMContentLoaded', () => {
       overallBar?.classList.remove('good','warn','bad'); overallBar?.classList.add('warn');
       overallFill.style.width='0%'; overallPct.textContent='0%';
 
-      // reset readability wheel/badges
+      // reset readability
       readRing?.style.setProperty('--v',0); readFill?.style.setProperty('--p',0); readMw?.classList.remove('good','warn','bad'); readMw?.classList.add('warn'); readNum.textContent='0%';
       [rbFleschFill,rbASLFill,rbWordsFill,rbSyllFill,rbTTRFill,rbTriFill,rbDigitsFill,rbPassiveFill,rbSimpleFill].forEach(el=>{ if(el) el.style.width='0%'; });
       [rbFleschVal,rbASLVal,rbWordsVal,rbSyllVal,rbTTRVal,rbTriVal,rbDigitsVal,rbPassiveVal,rbSimpleVal].forEach(el=>{ if(el) el.textContent='—'; });
       readBadge.textContent='—'; gradeBadge.textContent='Grade —'; rbBanner.className='rb-banner warn'; rbBanner.textContent='Readability score helps you target Grade 7–9 for most audiences.'; rbFixes.innerHTML='<li>Run an analysis to see targeted suggestions.</li>';
 
-      /* ---- PSI: initial reset ---- */
+      // reset speed
       psiStatus.textContent='Checking…';
       [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
       [fillMobile,fillDesktop].forEach(el=>el.style.setProperty('--p',0));
@@ -890,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
       [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
       [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
       psiFixes.innerHTML='<li>Fetching PageSpeed data…</li>';
-      speedBadge?.classList.remove('show'); // NEW: hide badge until we know scores
+      speedBadge?.classList.remove('show');
 
       const data=await callAnalyzer(url);
       if(!data||data.error) throw new Error(data?.error||'Unknown error');
@@ -905,12 +890,10 @@ document.addEventListener('DOMContentLoaded', () => {
       overallFill.style.width=score+'%'; overallPct.textContent=score+'%';
       setChip(chipOverall,'Overall',`${score} /100`,score);
 
-      /* Content score = avg(Content & Keywords, Content Quality) */
       const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
       const contentScore = Math.round(([cmap['Content & Keywords'], cmap['Content Quality']].filter(v=>typeof v==='number').reduce((a,b)=>a+b,0))/2 || 0);
       setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
 
-      /* Writer/Human/AI (heuristic) */
       const r=data.readability||{};
       const human = clamp01(Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3));
       const ai    = clamp01(100-human);
@@ -918,13 +901,11 @@ document.addEventListener('DOMContentLoaded', () => {
       setChip(chipHuman,'Human-like', `${human} %`, human);
       setChip(chipAI, 'AI-like', `${ai} %`, 100-human);
 
-      /* Quick stats */
       statF.textContent=r.flesch??'—'; statG.textContent='Grade '+(r.grade??'—');
       statInt.textContent=data.quick_stats?.internal_links??0;
       statExt.textContent=data.quick_stats?.external_links??0;
       statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
 
-      /* Readability Insights fill */
       const rs = clamp01(r.score||0);
       const rBand = bandName(rs);
       readMw?.classList.remove('good','warn','bad'); readMw?.classList.add(rBand);
@@ -954,7 +935,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       buildFixes(r);
 
-      /* Structure */
       titleVal.textContent=data.content_structure?.title||'—';
       metaVal.textContent=data.content_structure?.meta_description||'—';
       const hs=data.content_structure?.headings||{};
@@ -967,7 +947,6 @@ document.addEventListener('DOMContentLoaded', () => {
         headingMap.appendChild(box);
       });
 
-      /* Status chips */
       chipHttp.textContent='200';
       chipCanon.textContent=(data.page_signals?.canonical||'—')||'—';
       chipRobots.textContent=(data.page_signals?.robots||'—')||'—';
@@ -975,7 +954,6 @@ document.addEventListener('DOMContentLoaded', () => {
       chipIntChip.textContent=data.quick_stats?.internal_links??0;
       chipSchema.textContent=(data.page_signals?.schema_types||[]).length;
 
-      /* Recommendations */
       recsEl.innerHTML='';
       (data.recommendations||[]).forEach(rec=>{
         const d=document.createElement('div'); d.className='card';
@@ -983,10 +961,9 @@ document.addEventListener('DOMContentLoaded', () => {
         recsEl.appendChild(d);
       });
 
-      /* Semantic Ground */
       renderCategories(data, url, '');
 
-      /* ---- PSI fetch & render ---- */
+      // PSI
       try {
         const psi = await callPSI(url);
         psiStatus.textContent = 'OK';
@@ -994,20 +971,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const mobile  = psi.mobile  || {};
         const desktop = psi.desktop || {};
 
-        // Scores (0–100)
         const mScore = clamp01(Math.round(mobile.score  ?? mobile.performance ?? 0));
         const dScore = clamp01(Math.round(desktop.score ?? desktop.performance ?? 0));
         setWheel(ringMobile,  fillMobile,  numMobile,  mwMobile,  mScore, 'M');
         setWheel(ringDesktop, fillDesktop, numDesktop, mwDesktop, dScore, 'D');
 
-        // NEW: reveal celebratory badge if either score is "good"
-        if (mScore >= 80 || dScore >= 80) {
-          speedBadge?.classList.add('show');
-        } else {
-          speedBadge?.classList.remove('show');
-        }
+        if (mScore >= 80 || dScore >= 80) speedBadge?.classList.add('show'); else speedBadge?.classList.remove('show');
 
-        // Helper to pick first usable numeric value
         const pick = (...vals) => {
           for (const v of vals) {
             const n = Number(v);
@@ -1015,27 +985,18 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           return null;
         };
-
-        // LCP seconds: prefer *_s, else divide ms by 1000
         const lcpSeconds = (() => {
           const sec = pick(mobile.lcp_s, desktop.lcp_s, psi.lcp_s, psi.metrics?.lcp_s);
           if (sec !== null) return sec;
           const ms = pick(mobile.lcp, desktop.lcp, psi.lcp, psi.metrics?.lcp);
           return ms !== null ? ms / 1000 : null;
         })();
-
-        // CLS unitless
         const clsValNum = pick(mobile.cls, desktop.cls, psi.cls, psi.metrics?.cls);
-
-        // INP ms: prefer *_ms, else raw 'inp' already ms
         const inpMs = pick(mobile.inp_ms, desktop.inp_ms, psi.inp_ms, psi.metrics?.inp_ms);
         const inp   = (inpMs !== null) ? inpMs : pick(mobile.inp, desktop.inp, psi.inp, psi.metrics?.inp);
-
-        // TTFB ms: prefer *_ms, else raw 'ttfb' already ms
         const ttfbMs = pick(mobile.ttfb_ms, desktop.ttfb_ms, psi.ttfb_ms, psi.metrics?.ttfb_ms);
         const ttfb   = (ttfbMs !== null) ? ttfbMs : pick(mobile.ttfb, desktop.ttfb, psi.ttfb, psi.metrics?.ttfb);
 
-        // Scores from bounds
         const sLCP  = scoreFromBounds(lcpSeconds, 2.5, 6.0);
         const sCLS  = scoreFromBounds(clsValNum,   0.10, 0.25);
         const sINP  = scoreFromBounds(inp,        200,   500);
@@ -1049,7 +1010,7 @@ document.addEventListener('DOMContentLoaded', () => {
         buildSpeedFixes({ lcp_s: lcpSeconds, cls: clsValNum, inp_ms: inp ?? null, ttfb_ms: ttfb ?? null });
       } catch (e) {
         psiStatus.textContent = 'Unavailable';
-        speedBadge?.classList.remove('show'); // hide badge if PSI fails
+        speedBadge?.classList.remove('show');
         psiFixes.innerHTML = `<li>⚠️ ${String(e.message||e)}. Make sure PSI key is set server-side.</li>`;
       }
 
@@ -1061,7 +1022,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* backdrop close */
   $('#improveModal')?.addEventListener('click',e=>{
     const modal=e.currentTarget;
     const r=modal.getBoundingClientRect();
