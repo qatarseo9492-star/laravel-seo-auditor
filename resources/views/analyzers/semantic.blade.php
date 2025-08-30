@@ -584,7 +584,100 @@
     </div>
   </div>
   <!-- =================== /Site Speed & CWV =================== -->
+<!-- ===================== Content Optimization Info ===================== -->
+<div class="speed-card" id="contentOptimizationCard" style="border-color: #3e173a; margin-top: 16px;">
+    <div class="sp-head">
+        <div class="sp-title">
+            <div class="ico" style="background: linear-gradient(135deg, #a78bfa33, #f472b633); border-color: #4c1a3b;">
+                🧠
+            </div>
+            <div>
+                <div class="t-grad" style="font-weight:900;">Content Optimization Info</div>
+                <div class="sp-note" style="color: #d3a6c5;">Analysis of topics, gaps, and user intent</div>
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+            <span id="contentOverallScore" class="pill score-pill--orange">Overall Score: 75</span>
+        </div>
+    </div>
 
+    <!-- Optimization Grid -->
+    <div class="sp-grid" style="margin-top: 16px; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+
+        <!-- Left Column -->
+        <div style="display: grid; gap: 12px; align-content: start;">
+            <!-- NLP-Based Content Scoring -->
+            <div class="wheel-card" style="width: 100%; background: #16071a; border-color: #37123f;">
+                <div class="mw mw-sm warn" id="mwContent">
+                    <div class="mw-ring" id="ringContent" style="--v:75"></div>
+                    <div class="mw-fill" id="fillContent" style="--p:75"></div>
+                    <div class="mw-center" id="numContent">75%</div>
+                </div>
+                <div class="wheel-label">NLP Content Score</div>
+            </div>
+
+            <!-- Readability & User Intent Alignment -->
+            <div class="sp-tile" style="background: #1a0e22; border-color: #411d36;">
+                <h4 class="t-grad" style="margin: 0 0 8px; font-size: 14px;">✅ Readability & Intent</h4>
+                <div class="check" style="background: #291a33; border-color: #412d4a;">
+                    <span>Readability Score (Flesch)</span>
+                    <span class="score-pill score-pill--green">82</span>
+                </div>
+                <div class="check" style="background: #291a33; border-color: #412d4a; margin-top: 8px;">
+                    <span>Detected User Intent</span>
+                    <span class="score-pill score-pill--green">Informational</span>
+                </div>
+            </div>
+
+            <!-- Schema Markup Suggestions -->
+            <div class="sp-tile" style="background: #1a0e22; border-color: #411d36;">
+                <h4 class="t-grad" style="margin: 0 0 8px; font-size: 14px;">✅ Schema Markup Suggestions</h4>
+                <div class="rb-fixes"
+                    style="margin-top: 0; background: none; border: none; padding: 0; box-shadow: none;">
+                    <ul id="schemaSuggestions">
+                        <li style="background: linear-gradient(90deg, #a78bfa22, #f472b622); border-color: #832a83;">
+                            Suggesting <strong>Article</strong> schema for general content.</li>
+                        <li style="background: linear-gradient(90deg, #a78bfa22, #f472b622); border-color: #832a83;">
+                            Found 3 questions, suggest <strong>FAQPage</strong> schema.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div style="display: grid; gap: 12px; align-content: start;">
+            <!-- Topic Coverage Analysis -->
+            <div class="sp-tile" style="background: #1a0e22; border-color: #411d36;">
+                <h4 class="t-grad" style="margin: 0 0 8px; font-size: 14px;">✅ Topic Coverage Analysis</h4>
+                <p style="font-size: 12px; color: #b6c2cf; margin: 0 0 10px;">Your content covers <strong>18 of
+                        25</strong> key topics found in top results.</p>
+                <div class="progress" style="margin-bottom: 8px;"><span style="width:72%"></span></div>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <span class="chip good"><i>✅</i><span>SEO analysis</span></span>
+                    <span class="chip good"><i>✅</i><span>Laravel</span></span>
+                    <span class="chip good"><i>✅</i><span>user intent</span></span>
+                    <span class="chip good"><i>✅</i><span>content score</span></span>
+                    <span class="chip good"><i>✅</i><span>readability</span></span>
+                </div>
+            </div>
+
+            <!-- Content Gap Detection -->
+            <div class="sp-tile" style="background: #1a0e22; border-color: #411d36;">
+                <h4 class="t-grad" style="margin: 0 0 8px; font-size: 14px;">✅ Content Gap Detection</h4>
+                <p style="font-size: 12px; color: #b6c2cf; margin: 0 0 10px;">You are missing <strong>7
+                        topics</strong> that competitors are covering.</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                    <span class="chip bad"><i>🔴</i><span>semantic search</span></span>
+                    <span class="chip bad"><i>🔴</i><span>NLP models</span></span>
+                    <span class="chip warn"><i>🟧</i><span>E-E-A-T</span></span>
+                    <span class="chip bad"><i>🔴</i><span>knowledge graph</span></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<!-- =================== /Content Optimization Info =================== -->
   <!-- Content Structure -->
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Content Structure</h3>
