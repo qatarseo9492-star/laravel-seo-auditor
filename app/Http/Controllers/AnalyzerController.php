@@ -6,13 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log; // <-- Added for logging
+use App\Services\OpenAIService;      // <-- Import the new service
 
 class AnalyzerController extends Controller
 {
     /**
      * POST /semantic-analyzer/analyze
      */
-    public function semanticAnalyze(Request $request)
+    public function semanticAnalyze(Request $request, OpenAIService $openAIService) // <-- Inject the service
     {
         $data = $request->validate([
             'url'            => ['required','url'],
@@ -36,7 +38,7 @@ class AnalyzerController extends Controller
             $dom = $this->makeDom($html);
             $xp  = new \DOMXPath($dom);
 
-            // 3) Extract main text & structure
+            // 3) Extract main text & structure (Existing logic is unchanged)
             $mainText        = $this->extractMainText($dom);
             $title           = $this->extractTitle($dom);
             $metaDescription = $this->extractMeta($dom, 'description');
@@ -50,36 +52,35 @@ class AnalyzerController extends Controller
             $figcaptionCount = $this->countFigcaptions($dom);
             $hasOgOrTwitter  = $this->hasOpenGraphOrTwitter($xp);
 
-            // 4) Technical meta
+            // 4) Technical meta (Existing logic is unchanged)
             $canonical   = $this->extractCanonical($xp);
             $robots      = $this->extractMetaRobots($xp);
             $hasViewport = $this->hasViewport($xp);
 
-            // 5) JSON-LD summary (entities/context)
+            // 5) JSON-LD summary (Existing logic is unchanged)
             $jsonldSummary = $this->scanJsonLd($xp);
 
-            // 6) Readability (multilingual-aware)
+            // 6) Readability (Existing logic is unchanged)
             $readability = $this->computeReadabilityFromText($mainText);
 
-            // 7) Build categories (6 x 5 checks)
+            // 7) Build categories (Existing logic is unchanged)
             $categories   = $this->buildCategories(
                 $url, $title, $metaDescription, $headings, $links, $imagesAltCount, $schemaCount,
                 $kw, $readability, $jsonldSummary, $hasViewport, $robots, $firstParagraph,
                 $lazyImgCount, $figcaptionCount, $hasOgOrTwitter, $canonical, $mainText
             );
 
-            // 8) Overall score + quick recommendations
+            // 8) Overall score + quick recommendations (Existing logic is unchanged)
             $overallScore = $this->computeOverallScore($categories, $readability);
             $wheel        = ['label' => $this->wheelLabel($overallScore)];
             $recs         = $this->buildRecommendations($links, $imagesAltCount, $schemaCount, $headings, $readability, $kw);
 
-            return response()->json([
+            // Prepare the base response array
+            $jsonResponse = [
                 'overall_score'      => $overallScore,
                 'wheel'              => $wheel,
-
                 'schema_count'       => $schemaCount,
                 'images_alt_count'   => $imagesAltCount,
-
                 'page_signals'       => [
                     'canonical'        => $canonical,
                     'robots'           => $robots,
@@ -94,7 +95,6 @@ class AnalyzerController extends Controller
                     'has_product'      => $jsonldSummary['has_product'],
                     'has_article'      => $jsonldSummary['has_article'],
                 ],
-
                 'quick_stats'        => [
                     'readability_flesch' => $readability['flesch'],
                     'readability_grade'  => $readability['grade'],
@@ -102,17 +102,30 @@ class AnalyzerController extends Controller
                     'external_links'     => $links['external'],
                     'text_to_html_ratio' => $ratio,
                 ],
-
                 'content_structure'  => [
                     'title'            => $title,
                     'meta_description' => $metaDescription,
                     'headings'         => $headings,
                 ],
-
                 'readability'        => $readability,
                 'recommendations'    => $recs,
                 'categories'         => $categories,
-            ]);
+            ];
+
+            // =================================================================
+            // NEW: OpenAI Content Optimization Integration
+            // =================================================================
+            try {
+                $optimizationData = $openAIService->getOptimizationData($html);
+                $jsonResponse['content_optimization'] = $optimizationData;
+            } catch (\Throwable $e) {
+                Log::error('OpenAI Content Optimization failed: ' . $e->getMessage());
+                $jsonResponse['content_optimization'] = null; // Ensure the key exists but is null on failure
+            }
+            // =================================================================
+
+            return response()->json($jsonResponse);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => 'Analyzer error: '.$e->getMessage()
@@ -126,8 +139,8 @@ class AnalyzerController extends Controller
      * Reads config('services.pagespeed.*').
      *
      * Routes to define (one or both):
-     *   Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psi'])->name('semantic.psi');
-     *   Route::get('/semantic-analyzer/psi',  [AnalyzerController::class, 'psi']);
+     * Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psi'])->name('semantic.psi');
+     * Route::get('/semantic-analyzer/psi',  [AnalyzerController::class, 'psi']);
      */
     public function psi(Request $request)
     {
@@ -177,7 +190,7 @@ class AnalyzerController extends Controller
     }
 
     /* ===========================================================
-     | Fetching & Parsing
+     | Fetching & Parsing (All helper methods below are unchanged)
      * ===========================================================*/
     private function fetchUrl(string $url, string $ua): array
     {
