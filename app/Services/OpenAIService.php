@@ -54,7 +54,7 @@ class OpenAIService
     }
 
     /**
-     * Builds the detailed prompt for the OpenAI API.
+     * Builds the detailed prompt for the OpenAI API using Heredoc syntax for safety.
      *
      * @param string $textContent The text content to analyze.
      * @return string The formatted prompt.
@@ -65,61 +65,37 @@ class OpenAIService
         $cleanText = preg_replace('/\s+/', ' ', $cleanText);
         $truncatedText = mb_substr($cleanText, 0, 15000);
 
-        return "
-        Analyze the following text content from a webpage and provide a detailed content optimization report.
+        // Using Heredoc syntax (<<<PROMPT) is safer for multi-line strings in PHP.
+        return <<<PROMPT
+Analyze the following text content from a webpage and provide a detailed content optimization report.
 
-        Content to Analyze:
-        \"\"\"
-        {$truncatedText}
-        \"\"\"
+Content to Analyze:
+"""
+{$truncatedText}
+"""
 
-        Based on the content, generate a JSON object with the following exact structure:
-        {
-            \"nlp_score\": <A score from 0-100 evaluating overall content quality, depth, and relevance.>,
-            \"topic_coverage\": {
-                \"covered\": <An estimated number of key topics covered, e.g., 18>,
-                \"total\": <An estimated total number of relevant topics, e.g., 25>,
-                \"percentage\": <The percentage calculated from covered/total>
-            },
-            \"content_gaps\": {
-                \"missing_count\": <A count of missing topics, e.g., 7>,
-                \"missing_topics\": [
-                    {\"term\": \"<first missing topic>\", \"severity\": \"<bad or warn>\"},
-                    {\"term\": \"<second missing topic>\", \"severity\": \"<bad or warn>\"}
-                ]
-            },
-            \"schema_suggestions\": [\"<e.g., Article>\", \"<e.g., FAQPage>\"],
-            \"readability_intent\": {
-                \"intent\": \"<Informational, Commercial, or Transactional>\",
-                \"grade_level\": <An estimated reading grade level, e.g., 8>
-            }
-        }
-        ";
+Based on the content, generate a JSON object with the following exact structure:
+{
+    "nlp_score": <A score from 0-100 evaluating overall content quality, depth, and relevance.>,
+    "topic_coverage": {
+        "covered": <An estimated number of key topics covered, e.g., 18>,
+        "total": <An estimated total number of relevant topics, e.g., 25>,
+        "percentage": <The percentage calculated from covered/total>
+    },
+    "content_gaps": {
+        "missing_count": <A count of missing topics, e.g., 7>,
+        "missing_topics": [
+            {"term": "<first missing topic>", "severity": "<bad or warn>"},
+            {"term": "<second missing topic>", "severity": "<bad or warn>"}
+        ]
+    },
+    "schema_suggestions": ["<e.g., Article>", "<e.g., FAQPage>"],
+    "readability_intent": {
+        "intent": "<Informational, Commercial, or Transactional>",
+        "grade_level": <An estimated reading grade level, e.g., 8>
     }
 }
-```
-
-### Step 2: Final Configuration Checklist
-
-Now, just follow this final checklist to ensure everything is connected correctly.
-
-1.  **File `app/Services/OpenAIService.php`:**
-    * ✅ Ensure it contains the secure code from the block above.
-
-2.  **File `.env`:**
-    * ✅ Make sure you have added your API key to the bottom of this file.
-    * `OPENAI_API_KEY="sk-proj-YourSecretApiKeyGoesHere"`
-
-3.  **File `config/services.php`:**
-    * ✅ Confirm this file has the `openai` array entry that connects to the `.env` variable.
-    * `'openai' => ['key' => env('OPENAI_API_KEY')]`
-
-
-
-### Step 3: Clear Your Cache (Mandatory)
-
-This is the final, crucial step. To make Laravel read your new `.env` variable, you **must** run this command in your project's terminal:
-
-```bash
-php artisan config:cache
+PROMPT;
+    }
+}
 
