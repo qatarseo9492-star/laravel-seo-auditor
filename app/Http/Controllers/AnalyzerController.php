@@ -6,15 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log; // <-- Required for logging
-use App\Services\OpenAIService;      // <-- Required for the new feature
+use Illuminate\Support\Facades\Log; // <-- ADDED
+use App\Services\OpenAIService;      // <-- ADDED
 
 class AnalyzerController extends Controller
 {
     /**
      * POST /semantic-analyzer/analyze
      */
-    public function semanticAnalyze(Request $request, OpenAIService $openAIService) // <-- This is the critical change
+    public function semanticAnalyze(Request $request, OpenAIService $openAIService) // <-- ADJUSTED
     {
         $data = $request->validate([
             'url'            => ['required','url'],
@@ -26,7 +26,7 @@ class AnalyzerController extends Controller
         $ua  = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36';
 
         try {
-            // 1) Fetch HTML
+            // 1) Fetch HTML (Original code, unchanged)
             $resp = $this->fetchUrl($url, $ua);
             if (!$resp['ok']) {
                 return response()->json(['error' => $resp['error'] ?? 'Fetch failed'], 422);
@@ -34,11 +34,11 @@ class AnalyzerController extends Controller
             $html = $resp['body'] ?? '';
             $host = $resp['host'] ?? parse_url($url, PHP_URL_HOST);
 
-            // 2) Build DOM + XPath
+            // 2) Build DOM + XPath (Original code, unchanged)
             $dom = $this->makeDom($html);
             $xp  = new \DOMXPath($dom);
 
-            // 3) Extract main text & structure
+            // 3) Extract main text & structure (Original code, unchanged)
             $mainText        = $this->extractMainText($dom);
             $title           = $this->extractTitle($dom);
             $metaDescription = $this->extractMeta($dom, 'description');
@@ -52,36 +52,35 @@ class AnalyzerController extends Controller
             $figcaptionCount = $this->countFigcaptions($dom);
             $hasOgOrTwitter  = $this->hasOpenGraphOrTwitter($xp);
 
-            // 4) Technical meta
+            // 4) Technical meta (Original code, unchanged)
             $canonical   = $this->extractCanonical($xp);
             $robots      = $this->extractMetaRobots($xp);
             $hasViewport = $this->hasViewport($xp);
 
-            // 5) JSON-LD summary (entities/context)
+            // 5) JSON-LD summary (entities/context) (Original code, unchanged)
             $jsonldSummary = $this->scanJsonLd($xp);
 
-            // 6) Readability (multilingual-aware)
+            // 6) Readability (multilingual-aware) (Original code, unchanged)
             $readability = $this->computeReadabilityFromText($mainText);
 
-            // 7) Build categories (6 x 5 checks)
+            // 7) Build categories (6 x 5 checks) (Original code, unchanged)
             $categories   = $this->buildCategories(
                 $url, $title, $metaDescription, $headings, $links, $imagesAltCount, $schemaCount,
                 $kw, $readability, $jsonldSummary, $hasViewport, $robots, $firstParagraph,
                 $lazyImgCount, $figcaptionCount, $hasOgOrTwitter, $canonical, $mainText
             );
 
-            // 8) Overall score + quick recommendations
+            // 8) Overall score + quick recommendations (Original code, unchanged)
             $overallScore = $this->computeOverallScore($categories, $readability);
             $wheel        = ['label' => $this->wheelLabel($overallScore)];
             $recs         = $this->buildRecommendations($links, $imagesAltCount, $schemaCount, $headings, $readability, $kw);
 
+            // Build the original JSON Response (Original code, unchanged)
             $jsonResponse = [
                 'overall_score'      => $overallScore,
                 'wheel'              => $wheel,
-
                 'schema_count'       => $schemaCount,
                 'images_alt_count'   => $imagesAltCount,
-
                 'page_signals'       => [
                     'canonical'        => $canonical,
                     'robots'           => $robots,
@@ -96,7 +95,6 @@ class AnalyzerController extends Controller
                     'has_product'      => $jsonldSummary['has_product'],
                     'has_article'      => $jsonldSummary['has_article'],
                 ],
-
                 'quick_stats'        => [
                     'readability_flesch' => $readability['flesch'],
                     'readability_grade'  => $readability['grade'],
@@ -104,13 +102,11 @@ class AnalyzerController extends Controller
                     'external_links'     => $links['external'],
                     'text_to_html_ratio' => $ratio,
                 ],
-
                 'content_structure'  => [
                     'title'            => $title,
                     'meta_description' => $metaDescription,
                     'headings'         => $headings,
                 ],
-
                 'readability'        => $readability,
                 'recommendations'    => $recs,
                 'categories'         => $categories,
