@@ -428,7 +428,8 @@
 /* Robust init so the Analyze button always works even if scripts load after DOM ready */
 (function(){
   const init = () => {
-    const $ = s=>document.querySelector(s);
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
 
     /* ============== Element refs ============== */
     const mw=$('#mw'), mwRing=$('#mwRing'), mwFill=$('#mwFill'), mwNum=$('#mwNum');
@@ -797,15 +798,15 @@
     }
 
     /* ===== Paste/import/print/reset/export ===== */
-    $('#pasteBtn')?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
-    $('#importBtn')?.addEventListener('click',()=>importFile.click());
-    $('#importFile')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)})
-    $('#printBtn')?.addEventListener('click',()=>window.print());
-    $('#resetBtn')?.addEventListener('click',()=>location.reload());
-    $('#exportBtn')?.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)})
+    document.getElementById('pasteBtn')?.addEventListener('click',async e=>{e.preventDefault();try{const t=await navigator.clipboard.readText();if(t)urlInput.value=t.trim()}catch{}})
+    document.getElementById('importBtn')?.addEventListener('click',()=>importFile.click());
+    document.getElementById('importFile')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)})
+    document.getElementById('printBtn')?.addEventListener('click',()=>window.print());
+    document.getElementById('resetBtn')?.addEventListener('click',()=>location.reload());
+    document.getElementById('exportBtn')?.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)})
 
     /* ===== Analyze ===== */
-    $('#analyzeBtn')?.addEventListener('click', async e=>{
+    document.getElementById('analyzeBtn')?.addEventListener('click', async e=>{
       e.preventDefault();
       clearError();
       const url=(urlInput.value||'').trim();
@@ -975,7 +976,7 @@
     });
 
     /* Modal backdrop close */
-    $('#improveModal')?.addEventListener('click',e=>{
+    document.getElementById('improveModal')?.addEventListener('click',e=>{
       const modal=e.currentTarget;
       const r=modal.getBoundingClientRect();
       const inside=(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom);
