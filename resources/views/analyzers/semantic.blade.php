@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function showError(msg, detail) {
     errorBox.style.display = 'block';
-    errorBox.textContent = msg + (detail ? "\\n\\n" + detail : '');
+    errorBox.textContent = msg + (detail ? "\n\n" + detail : '');
   }
   function clearError(){ errorBox.style.display='none'; errorBox.textContent=''; }
 
@@ -717,7 +717,8 @@ document.addEventListener('DOMContentLoaded', () => {
           mCat.textContent   = cat.name;
           mScore.textContent = row.score;
           mBand.textContent  = row.bandTxt;
-          mBand.className    = 'pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');
+          mBand.className    = 'pill '+(row.score>=80?'score-pill--green':'score-pill--orange');
+          if(row.score<60) mBand.className='pill score-pill--red';
           mWhy.textContent   = kb.why;
           mTips.innerHTML = '';
           (kb.tips||[]).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; mTips.appendChild(li); });
@@ -744,7 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if(res.ok)return res.json();
     }
     const txt=await res.text();
-    throw new Error(`HTTP ${res.status}\\n${txt?.slice(0,800)}`);
+    throw new Error(`HTTP ${res.status}\n${txt?.slice(0,800)}`);
   }
 
   /* PSI proxy (unchanged) */
@@ -761,7 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const text = await res.text();
     let json = {};
-    try { json = JSON.parse(text); } catch { throw new Error(`PSI: invalid JSON\\n${text?.slice(0,400)}`); }
+    try { json = JSON.parse(text); } catch { throw new Error(`PSI: invalid JSON\n${text?.slice(0,400)}`); }
 
     if (json.ok === false) {
       const msg = json.error || json.message || 'PSI unavailable';
