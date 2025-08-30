@@ -17,7 +17,7 @@
   .legend{display:flex;gap:10px;justify-content:center;margin:10px 0 6px}
   .legend .badge{padding:6px 10px;border-radius:9999px;font-weight:800;border:1px solid #ffffff2a;font-size:12px}
   .legend .g{background:#063f2c;color:#a7f3d0;border-color:#10b98166}
-  .legend .o{background:#3b2a05;color:#fde68a;border-color:#f59e0b66}
+  ..legend .o{background:#3b2a05;color:#fde68a;border-color:#f59e0b66}
   .legend .r{background:#3a0b0b;color:#fecaca;border-color:#ef444466}
 
   .card{border-radius:18px;padding:18px;background:#0a0a14;border:1px solid #ffffff1c}
@@ -128,13 +128,15 @@
   .sp-fixes ul{margin:0;padding-left:18px}
   .sp-fixes li{margin:6px 0}
 
-  /* === NEW: celebratory badge for good scores (≥80) === */
+  /* === NEW: Good-score visuals (≥80) for the Speed section only === */
   .speed-badge{display:none;padding:6px 10px;border-radius:9999px;font-weight:900;border:1px solid #22c55e8a;background:linear-gradient(90deg,#16a34a,#22c55e,#86efac);color:#03140a;box-shadow:0 0 0 2px #22c55e55 inset,0 0 18px #22c55e44}
   .speed-badge.show{display:inline-flex;align-items:center;gap:8px}
   .speed-badge i{filter:drop-shadow(0 2px 8px rgba(34,197,94,.6))}
 
-  /* === NEW: stronger GOOD glow on wheels (no logic changes) === */
-  .mw.good{box-shadow:0 0 0 2px #22c55e55 inset,0 0 28px #22c55e33}
+  /* pulse/glow when a wheel is GOOD (class already switches to .good via JS) */
+  @keyframes goodPulse {0%{box-shadow:0 0 0 0 rgba(34,197,94,.35)}70%{box-shadow:0 0 0 16px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+  .mw.good{box-shadow:0 0 0 2px #22c55e55 inset,0 0 32px #22c55e40;animation:goodPulse 2.2s ease-out infinite}
+  .mw.good .mw-ring{filter:drop-shadow(0 0 10px rgba(34,197,94,.35))}
 </style>
 @endpush
 
@@ -251,6 +253,7 @@
 
       <!-- Metric tiles -->
       <div class="rb-tiles">
+        <!-- Row 1 -->
         <div class="rb-tile">
           <div class="rb-row"><div>😊 Flesch Reading Ease</div><div class="rb-val" id="rbFleschVal">—</div></div>
           <div class="rb-meter"><span id="rbFleschFill" style="width:0%"></span></div>
@@ -264,6 +267,7 @@
           <div class="rb-meter"><span id="rbWordsFill" style="width:0%"></span></div>
         </div>
 
+        <!-- Row 2 -->
         <div class="rb-tile">
           <div class="rb-row"><div>🅰️ Syllables / Word</div><div class="rb-val" id="rbSyllVal">—</div></div>
           <div class="rb-meter"><span id="rbSyllFill" style="width:0%"></span></div>
@@ -277,6 +281,7 @@
           <div class="rb-meter"><span id="rbTriFill" style="width:0%"></span></div>
         </div>
 
+        <!-- Row 3 -->
         <div class="rb-tile">
           <div class="rb-row"><div># Digits / 100 words</div><div class="rb-val" id="rbDigitsVal">—</div></div>
           <div class="rb-meter"><span id="rbDigitsFill" style="width:0%"></span></div>
@@ -292,6 +297,7 @@
       </div>
     </div>
 
+    <!-- Fixes -->
     <div class="rb-fixes">
       <h4>💡 Simple Fixes</h4>
       <ul id="rbFixes">
@@ -299,10 +305,12 @@
       </ul>
     </div>
 
+    <!-- Grade banner -->
     <div id="rbBanner" class="rb-banner warn">
       Readability score helps you target Grade 7–9 for most audiences.
     </div>
   </div>
+  <!-- =================== /Readability Insights =================== -->
 
   <!-- ===================== Site Speed & Core Web Vitals ===================== -->
   <div class="speed-card" id="speedCard">
@@ -314,8 +322,8 @@
           <div class="sp-note">Uses PageSpeed Insights (Mobile + Desktop)</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <!-- NEW badge: appears automatically when a score is good -->
+      <div style="display:flex;align-items:center;gap:6px">
+        <!-- NEW: good score badge (hidden by default; toggled by JS) -->
         <span id="speedBadge" class="speed-badge"><i>🎉</i> Excellent Speed</span>
         <span id="psiStatus" class="pill">Waiting…</span>
       </div>
@@ -344,18 +352,22 @@
 
       <!-- Metrics -->
       <div>
+        <!-- LCP -->
         <div class="sp-tile">
           <div class="sp-row"><div>🏁 LCP (s)</div><div class="sp-val" id="lcpVal">—</div></div>
           <div class="sp-meter"><span id="lcpBar" style="width:0%"></span></div>
         </div>
+        <!-- CLS -->
         <div class="sp-tile">
           <div class="sp-row"><div>📦 CLS</div><div class="sp-val" id="clsVal">—</div></div>
           <div class="sp-meter"><span id="clsBar" style="width:0%"></span></div>
         </div>
+        <!-- INP -->
         <div class="sp-tile">
           <div class="sp-row"><div>⚡ INP (ms)</div><div class="sp-val" id="inpVal">—</div></div>
           <div class="sp-meter"><span id="inpBar" style="width:0%"></span></div>
         </div>
+        <!-- TTFB -->
         <div class="sp-tile">
           <div class="sp-row"><div>⏱️ TTFB (ms)</div><div class="sp-val" id="ttfbVal">—</div></div>
           <div class="sp-meter"><span id="ttfbBar" style="width:0%"></span></div>
@@ -363,6 +375,7 @@
       </div>
     </div>
 
+    <!-- Suggestions -->
     <div class="sp-fixes">
       <h4>💡 Speed Suggestions</h4>
       <ul id="psiFixes">
@@ -370,6 +383,7 @@
       </ul>
     </div>
   </div>
+  <!-- =================== /Site Speed & CWV =================== -->
 
   <!-- Content Structure -->
   <div class="card" style="margin-top:16px">
@@ -489,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const inpVal=$('#inpVal'), inpBar=$('#inpBar');
   const ttfbVal=$('#ttfbVal'), ttfbBar=$('#ttfbBar');
   const psiStatus=$('#psiStatus'), psiFixes=$('#psiFixes');
-  const speedBadge=$('#speedBadge');
+  const speedBadge=$('#speedBadge'); // NEW
 
   /* Helpers */
   const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
@@ -664,6 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderCategories(data, url, targetKw){
+    const catsEl=$('#cats');
     catsEl.innerHTML='';
     let autoGood=0;
     CATS.forEach(cat=>{
@@ -709,6 +724,8 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>`;
         el.querySelector('.improve-btn').addEventListener('click',()=>{
           const kb = KB[row.label] || {why:'This item impacts relevance and UX.', tips:['Aim for ≥80 and re-run the analyzer.'], link:'https://www.google.com'};
+          const modal=$('#improveModal'), mTitle=$('#improveTitle'), mCat=$('#improveCategory');
+          const mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'), mTips=$('#improveTips'), mLink=$('#improveSearch');
           mTitle.textContent = row.label;
           mCat.textContent   = cat.name;
           mScore.textContent = row.score;
@@ -726,6 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
       catsEl.appendChild(card);
     });
 
+    const chipAuto=$('#chipAuto');
     chipAuto.textContent = autoGood;
   }
 
@@ -863,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
       [rbFleschVal,rbASLVal,rbWordsVal,rbSyllVal,rbTTRVal,rbTriVal,rbDigitsVal,rbPassiveVal,rbSimpleVal].forEach(el=>{ if(el) el.textContent='—'; });
       readBadge.textContent='—'; gradeBadge.textContent='Grade —'; rbBanner.className='rb-banner warn'; rbBanner.textContent='Readability score helps you target Grade 7–9 for most audiences.'; rbFixes.innerHTML='<li>Run an analysis to see targeted suggestions.</li>';
 
-      // reset speed
+      /* ---- PSI: initial reset ---- */
       psiStatus.textContent='Checking…';
       [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
       [fillMobile,fillDesktop].forEach(el=>el.style.setProperty('--p',0));
@@ -872,7 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
       [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
       [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
       psiFixes.innerHTML='<li>Fetching PageSpeed data…</li>';
-      speedBadge?.classList.remove('show'); // hide celebratory badge until proven good
+      speedBadge?.classList.remove('show'); // NEW: hide badge until we know scores
 
       const data=await callAnalyzer(url);
       if(!data||data.error) throw new Error(data?.error||'Unknown error');
@@ -926,7 +944,7 @@ document.addEventListener('DOMContentLoaded', () => {
       setMeter(rbTriFill,    rbTriVal,    r.repetition_trigram, ((r.repetition_trigram!=null?r.repetition_trigram+'%':'—')), [0,20], true);
       setMeter(rbDigitsFill, rbDigitsVal, r.digits_per_100w, (r.digits_per_100w??'—'), [0,20], true);
       setMeter(rbPassiveFill,rbPassiveVal,r.passive_ratio, ((r.passive_ratio!=null?r.passive_ratio+'%':'—')), [0,30], true);
-      setMeter(rbSimpleFill, r.simple_words_ratio, ((r.simple_words_ratio!=null?r.simple_words_ratio+'%':'—')), [60,100], false);
+      setMeter(rbSimpleFill, rbSimpleVal, r.simple_words_ratio, ((r.simple_words_ratio!=null?r.simple_words_ratio+'%':'—')), [60,100], false);
       if (grade!==null){
         const bandCl = grade<=7?'good':(grade<=10?'warn':'bad');
         rbBanner.className='rb-banner '+bandCl;
@@ -982,10 +1000,11 @@ document.addEventListener('DOMContentLoaded', () => {
         setWheel(ringMobile,  fillMobile,  numMobile,  mwMobile,  mScore, 'M');
         setWheel(ringDesktop, fillDesktop, numDesktop, mwDesktop, dScore, 'D');
 
-        // === NEW: show celebratory badge if either score is good (≥80) ===
-        if (speedBadge) {
-          if (mScore >= 80 || dScore >= 80) speedBadge.classList.add('show');
-          else speedBadge.classList.remove('show');
+        // NEW: reveal celebratory badge if either score is "good"
+        if (mScore >= 80 || dScore >= 80) {
+          speedBadge?.classList.add('show');
+        } else {
+          speedBadge?.classList.remove('show');
         }
 
         // Helper to pick first usable numeric value
@@ -1018,9 +1037,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Scores from bounds
         const sLCP  = scoreFromBounds(lcpSeconds, 2.5, 6.0);
-        const sCLS  = scoreFromBounds(clsValNum,     0.10, 0.25);
-        const sINP  = scoreFromBounds(inp,        200,  500);
-        const sTTFB = scoreFromBounds(ttfb,       800,  1800);
+        const sCLS  = scoreFromBounds(clsValNum,   0.10, 0.25);
+        const sINP  = scoreFromBounds(inp,        200,   500);
+        const sTTFB = scoreFromBounds(ttfb,       800,   1800);
 
         setSpMeter(lcpBar, lcpVal,   lcpSeconds, sLCP,  v => (v != null ? v.toFixed(2)+' s' : '—'));
         setSpMeter(clsBar, clsVal,   clsValNum,  sCLS,  v => (v != null ? v.toFixed(3)      : '—'));
@@ -1030,8 +1049,8 @@ document.addEventListener('DOMContentLoaded', () => {
         buildSpeedFixes({ lcp_s: lcpSeconds, cls: clsValNum, inp_ms: inp ?? null, ttfb_ms: ttfb ?? null });
       } catch (e) {
         psiStatus.textContent = 'Unavailable';
+        speedBadge?.classList.remove('show'); // hide badge if PSI fails
         psiFixes.innerHTML = `<li>⚠️ ${String(e.message||e)}. Make sure PSI key is set server-side.</li>`;
-        speedBadge?.classList.remove('show');
       }
 
     }catch(err){
