@@ -163,6 +163,156 @@
   .sp-meter.good{box-shadow:0 0 0 1px #1b5e2f inset,0 0 24px #22c55e33}
   .sp-meter.warn{box-shadow:0 0 0 1px #8a5a12 inset,0 0 24px #f59e0b33}
   .sp-meter.bad {box-shadow:0 0 0 1px #6f1616 inset,0 0 24px #ef444433}
+
+  /* ===================== Content Optimization (Futuristic) ===================== */
+  .co-card {
+    --co-bg: #0d1124;
+    --co-border: #2a3150;
+    --co-glow-1: #00f6ff;
+    --co-glow-2: #a78bfa;
+
+    border-radius: 20px;
+    background: var(--co-bg);
+    border: 1px solid var(--co-border);
+    padding: 16px;
+    margin-top: 16px;
+    background-image: radial-gradient(circle at 10% 10%, #a78bfa1a, transparent 40%),
+                      radial-gradient(circle at 90% 80%, #00f6ff1a, transparent 50%);
+  }
+
+  .co-grid {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+
+  @media (max-width: 920px) {
+    .co-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* New Futuristic Score Meter */
+  .co-meter-wrap {
+    display: grid;
+    place-items: center;
+    padding: 10px;
+  }
+
+  .co-meter {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+
+  .co-meter-bg {
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(#1a203c 0deg 270deg, #10152d 270deg 360deg);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #21294a, 0 0 0 5px #11162d, 0 0 0 6px #21294a;
+  }
+
+  .co-meter-progress {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    --v: 75; /* This will be your score */
+    background: conic-gradient(from -135deg, var(--co-glow-2) 0deg, var(--co-glow-1) 90deg, transparent 90deg);
+    -webkit-mask: conic-gradient(from -135deg, #000 0deg, #000 calc(var(--v) * 2.7deg), transparent calc(var(--v) * 2.7deg + 1deg));
+    mask: conic-gradient(from -135deg, #000 0deg, #000 calc(var(--v) * 2.7deg), transparent calc(var(--v) * 2.7deg + 1deg));
+    transform: rotate(180deg);
+    transition: --v 1s ease-in-out;
+    filter: drop-shadow(0 0 6px var(--co-glow-1));
+  }
+
+  .co-meter-inner {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #151a33, #0b0f1f);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,.3), 0 0 0 1px #21294a inset;
+  }
+
+  .co-meter-score {
+    font-size: 44px;
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 10px var(--co-glow-1);
+  }
+
+  .co-meter-label {
+    font-size: 12px;
+    color: #aab3c2;
+    margin-top: 4px;
+  }
+
+  /* Info Items Grid */
+  .co-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 500px) {
+    .co-info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .co-info-item {
+    border-radius: 14px;
+    padding: 14px;
+    background: #111830cc;
+    border: 1px solid var(--co-border);
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  }
+
+  .co-info-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .co-info-icon {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #a78bfa33, #00f6ff33);
+    border: 1px solid #ffffff22;
+  }
+
+  .co-info-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .co-info-title {
+    font-weight: 800;
+    color: #e5e7eb;
+  }
+
+  .co-info-item p {
+    font-size: 12px;
+    color: #aab3c2;
+    margin: 0 0 10px;
+  }
+
+  .co-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
 </style>
 
 <script defer>
@@ -584,100 +734,89 @@
     </div>
   </div>
   <!-- =================== /Site Speed & CWV =================== -->
-<!-- ===================== Content Optimization Info ===================== -->
-<div class="speed-card" id="contentOptimizationCard" style="border-color: #3e173a; margin-top: 16px;">
-    <div class="sp-head">
-        <div class="sp-title">
-            <div class="ico" style="background: linear-gradient(135deg, #a78bfa33, #f472b633); border-color: #4c1a3b;">
-                🧠
-            </div>
+
+  <!-- ===================== Content Optimization Info (Futuristic) ===================== -->
+  <div class="co-card" id="contentOptimizationCard">
+    <div class="co-grid">
+
+      <!-- Left Column: New Score Meter -->
+      <div class="co-meter-wrap">
+        <div class="co-meter" id="mwContent">
+          <div class="co-meter-bg"></div>
+          <div class="co-meter-progress" style="--v: 82;"></div>
+          <div class="co-meter-inner">
             <div>
-                <div class="t-grad" style="font-weight:900;">Content Optimization Info</div>
-                <div class="sp-note" style="color: #d3a6c5;">Analysis of topics, gaps, and user intent</div>
+              <div class="co-meter-score" id="numContent">82</div>
+              <div class="co-meter-label">NLP Content Score</div>
             </div>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:6px">
-            <span id="contentOverallScore" class="pill score-pill--orange">Overall Score: 75</span>
+      </div>
+
+      <!-- Right Column: Info Grid -->
+      <div class="co-info-grid">
+        <!-- Topic Coverage -->
+        <div class="co-info-item">
+          <div class="co-info-header">
+            <div class="co-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+            </div>
+            <span class="co-info-title">Topic Coverage</span>
+          </div>
+          <p>Covers <strong>18 of 25</strong> key topics found in top competitor content.</p>
+          <div class="progress" style="margin-bottom: 0;"><span style="width:72%; background: linear-gradient(90deg, var(--co-glow-2), var(--co-glow-1));"></span></div>
         </div>
+
+        <!-- Content Gaps -->
+        <div class="co-info-item">
+          <div class="co-info-header">
+            <div class="co-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            </div>
+            <span class="co-info-title">Content Gaps</span>
+          </div>
+          <p>Missing <strong>7 topics</strong> that your top competitors are covering.</p>
+          <div class="co-tags">
+            <span class="chip bad"><i>🔴</i><span>semantic search</span></span>
+            <span class="chip bad"><i>🔴</i><span>NLP models</span></span>
+            <span class="chip warn"><i>🟧</i><span>E-E-A-T</span></span>
+          </div>
+        </div>
+
+        <!-- Schema Suggestions -->
+        <div class="co-info-item">
+          <div class="co-info-header">
+            <div class="co-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+            </div>
+            <span class="co-info-title">Schema Suggestions</span>
+          </div>
+          <p>Rule-based analysis suggests the following schema types:</p>
+          <div class="co-tags">
+            <span class="chip good"><i>✅</i><span>Article</span></span>
+            <span class="chip good"><i>✅</i><span>FAQPage</span></span>
+          </div>
+        </div>
+
+        <!-- Readability & Intent -->
+        <div class="co-info-item">
+          <div class="co-info-header">
+            <div class="co-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+            </div>
+            <span class="co-info-title">Readability & Intent</span>
+          </div>
+          <p>Content is easy to read and aligns with user intent.</p>
+          <div class="co-tags">
+            <span class="chip" style="background-color: #00f6ff22; border-color: #00f6ff88; color: #cffcff;">Intent: Informational</span>
+            <span class="chip" style="background-color: #a78bfa22; border-color: #a78bfa88; color: #e9d5ff;">Grade Level: 8</span>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+  <!-- =================== /Content Optimization Info (Futuristic) =================== -->
 
-    <!-- Optimization Grid -->
-    <div class="sp-grid" style="margin-top: 16px; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-
-        <!-- Left Column -->
-        <div style="display: grid; gap: 12px; align-content: start;">
-            <!-- NLP-Based Content Scoring -->
-            <div class="wheel-card" style="width: 100%; background: #16071a; border-color: #37123f;">
-                <div class="mw mw-sm warn" id="mwContent">
-                    <div class="mw-ring" id="ringContent" style="--v:75"></div>
-                    <div class="mw-fill" id="fillContent" style="--p:75"></div>
-                    <div class="mw-center" id="numContent">75%</div>
-                </div>
-                <div class="wheel-label">NLP Content Score</div>
-            </div>
-
-            <!-- Readability & User Intent Alignment -->
-            <div class="sp-tile" style="background: #1a0e22; border-color: #411d36;">
-                <h4 class="t-grad" style="margin: 0 0 8px; font-size: 14px;">✅ Readability & Intent</h4>
-                <div class="check" style="background: #291a33; border-color: #412d4a;">
-                    <span>Readability Score (Flesch)</span>
-                    <span class="score-pill score-pill--green">82</span>
-                </div>
-                <div class="check" style="background: #291a33; border-color: #412d4a; margin-top: 8px;">
-                    <span>Detected User Intent</span>
-                    <span class="score-pill score-pill--green">Informational</span>
-                </div>
-            </div>
-
-            <!-- Schema Markup Suggestions -->
-            <div class="sp-tile" style="background: #1a0e22; border-color: #411d36;">
-                <h4 class="t-grad" style="margin: 0 0 8px; font-size: 14px;">✅ Schema Markup Suggestions</h4>
-                <div class="rb-fixes"
-                    style="margin-top: 0; background: none; border: none; padding: 0; box-shadow: none;">
-                    <ul id="schemaSuggestions">
-                        <li style="background: linear-gradient(90deg, #a78bfa22, #f472b622); border-color: #832a83;">
-                            Suggesting <strong>Article</strong> schema for general content.</li>
-                        <li style="background: linear-gradient(90deg, #a78bfa22, #f472b622); border-color: #832a83;">
-                            Found 3 questions, suggest <strong>FAQPage</strong> schema.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Column -->
-        <div style="display: grid; gap: 12px; align-content: start;">
-            <!-- Topic Coverage Analysis -->
-            <div class="sp-tile" style="background: #1a0e22; border-color: #411d36;">
-                <h4 class="t-grad" style="margin: 0 0 8px; font-size: 14px;">✅ Topic Coverage Analysis</h4>
-                <p style="font-size: 12px; color: #b6c2cf; margin: 0 0 10px;">Your content covers <strong>18 of
-                        25</strong> key topics found in top results.</p>
-                <div class="progress" style="margin-bottom: 8px;"><span style="width:72%"></span></div>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                    <span class="chip good"><i>✅</i><span>SEO analysis</span></span>
-                    <span class="chip good"><i>✅</i><span>Laravel</span></span>
-                    <span class="chip good"><i>✅</i><span>user intent</span></span>
-                    <span class="chip good"><i>✅</i><span>content score</span></span>
-                    <span class="chip good"><i>✅</i><span>readability</span></span>
-                </div>
-            </div>
-
-            <!-- Content Gap Detection -->
-            <div class="sp-tile" style="background: #1a0e22; border-color: #411d36;">
-                <h4 class="t-grad" style="margin: 0 0 8px; font-size: 14px;">✅ Content Gap Detection</h4>
-                <p style="font-size: 12px; color: #b6c2cf; margin: 0 0 10px;">You are missing <strong>7
-                        topics</strong> that competitors are covering.</p>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
-                    <span class="chip bad"><i>🔴</i><span>semantic search</span></span>
-                    <span class="chip bad"><i>🔴</i><span>NLP models</span></span>
-                    <span class="chip warn"><i>🟧</i><span>E-E-A-T</span></span>
-                    <span class="chip bad"><i>🔴</i><span>knowledge graph</span></span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-<!-- =================== /Content Optimization Info =================== -->
   <!-- Content Structure -->
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Content Structure</h3>
