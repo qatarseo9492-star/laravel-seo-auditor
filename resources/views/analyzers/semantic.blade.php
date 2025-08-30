@@ -38,11 +38,137 @@
   .url-row .paste{padding:6px 10px;border-radius:10px;border:1px solid #ffffff26;background:#ffffff10;color:#e5e7eb}
 
   .analyze-wrap{border-radius:16px;background:#020114;border:1px solid #ffffff20;padding:12px}
+
+  /* ===================== Wheels (overall + readability + speed) ===================== */
+  .mw{--v:0;--p:0;--ring:#22c55e;width:200px;height:200px;position:relative;filter:drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+  .mw-ring{position:absolute;inset:0;border-radius:50%;
+    background:
+      conic-gradient(from -90deg,
+        #ef4444 0deg,
+        #f59e0b 60deg,
+        #eab308 120deg,
+        #22c55e 180deg,
+        #10b981 240deg,
+        #22c55e 300deg,
+        #06b6d4 330deg,
+        #a78bfa 360deg);
+    -webkit-mask:
+      conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
+      radial-gradient(circle 76px,transparent 72px,#000 72px);
+    mask:
+      conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
+      radial-gradient(circle 76px,transparent 72px,#000 72px);
+    box-shadow:
+      0 0 0 6px #0d1f24 inset,
+      0 0 28px rgba(34,197,94,.25),
+      0 0 60px rgba(34,197,94,.15);
+  }
+  .mw-fill{position:absolute;inset:18px;border-radius:50%;overflow:hidden;background:#000}
+  .mw-fill::after{content:"";position:absolute;left:0;right:0;height:100%;top:calc(100% - var(--p)*1%);transition:top .9s ease;
+    background:linear-gradient(to top,#0ea5e9 0%,#22c55e 40%,#84cc16 60%,#facc15 85%,#f97316 100%);
+    -webkit-mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%);mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%)}
+  .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
+  .mw.good {filter:drop-shadow(0 0 10px rgba(34,197,94,.35)) drop-shadow(0 0 50px rgba(34,197,94,.25))}
+  .mw.warn {filter:drop-shadow(0 0 10px rgba(245,158,11,.35)) drop-shadow(0 0 50px rgba(245,158,11,.25))}
+  .mw.bad  {filter:drop-shadow(0 0 10px rgba(239,68,68,.35))  drop-shadow(0 0 50px rgba(239,68,68,.25))}
+  .mw-sm{width:170px;height:170px}
+  .mw-sm .mw-ring{-webkit-mask:
+      conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
+      radial-gradient(circle 64px,transparent 60px,#000 60px);
+    mask:
+      conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
+      radial-gradient(circle 64px,transparent 60px,#000 60px)}
+  .mw-sm .mw-fill{inset:14px}
+  .mw-sm .mw-center{font-size:28px}
+
+  .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid #ffffff22;background:#0b0b12}
+  .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
+  .waterbox.good .fill{background:linear-gradient(90deg,#16a34a,#22c55e,#86efac)}
+  .waterbox.warn .fill{background:linear-gradient(90deg,#f59e0b,#fbbf24,#fde68a)}
+  .waterbox.bad  .fill{background:linear-gradient(90deg,#ef4444,#f87171,#fecaca)}
+  .waterbox .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:#e5e7eb;font-size:11px}
+
+  .progress{width:100%;height:10px;border-radius:9999px;background:#ffffff14;overflow:hidden;border:1px solid #ffffff1a}
+  .progress>span{display:block;height:100%;border-radius:9999px;background:linear-gradient(90deg,#ef4444,#fde047,#22c55e);transition:width .5s ease}
+
+  .check{display:flex;align-items:center;justify-content:space-between;border-radius:12px;padding:10px 12px;border:1px solid #ffffff1a;background:#0F1A29}
+  .score-pill{padding:3px 7px;border-radius:10px;font-weight:800;background:#ffffff14;border:1px solid #ffffff22;color:#e5e7eb;font-size:12px}
+  .score-pill--green{background:#10b9812e;border-color:#10b98166;color:#bbf7d0}
+  .score-pill--orange{background:#f59e0b2e;border-color:#f59e0b66;color:#fde68a}
+  .score-pill--red{background:#ef44442e;border-color:#ef444466;color:#fecaca}
+
+  .improve-btn{padding:6px 9px;border-radius:10px;color:#0b1020;font-weight:800;border:1px solid transparent;transition:transform .08s ease;font-size:12px}
+  .improve-btn:active{transform:translateY(1px)}
+  .fill-green {background:linear-gradient(135deg,#16a34a,#22c55e,#86efac);color:#05240f}
+  .fill-orange{background:linear-gradient(135deg,#f59e0b,#fbbf24,#fde68a);color:#3a2400}
+  .fill-red   {background:linear-gradient(135deg,#ef4444,#f87171,#fecaca);color:#2f0606}
+  .outline-green{border-color:#22c55edd!important;box-shadow:0 0 0 2px #22c55e8c inset,0 0 16px #22c55e55}
+  .outline-orange{border-color:#f59e0bdd!important;box-shadow:0 0 0 2px #f59e0b8c inset,0 0 16px #f59e0b55}
+  .outline-red{border-color:#ef4444dd!important;box-shadow:0 0 0 2px #ef44448c inset,0 0 16px #ef444455}
+
+  dialog[open]{display:block} dialog::backdrop{background:rgba(0,0,0,.6)}
+  #improveModal .card{background:#0D0E1E;border:1px solid #1b2640}
+  #improveModal .card .card{background:#111E2F;border-color:#ffffff1c}
+
+  #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#3a0b0b;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
+
+  /* ===================== Readability ===================== */
+  .read-card{border-radius:20px;background:#0b0f1f;border:1px solid #17203e;padding:16px}
+  .rb-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .rb-title{display:flex;align-items:center;gap:10px}
+  .rb-title .ico{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#22d3ee33,#a78bfa33);border:1px solid #ffffff22}
+  .rb-legend{font-size:12px;color:#aab3c2}
+  .rb-grid{display:grid;grid-template-columns:220px 1fr;gap:12px;margin-top:10px}
+  @media (max-width:920px){.rb-grid{grid-template-columns:1fr}}
+  .rb-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  @media (max-width:920px){.rb-tiles{grid-template-columns:1fr}}
+  .rb-tile{background:#0f1830;border:1px solid #21325c;border-radius:14px;padding:12px}
+  .rb-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b6c2cf;margin:8px 0 6px}
+  .rb-val{color:#e5e7eb;font-weight:800}
+  .rb-meter{height:10px;border-radius:9999px;background:#0c1226;border:1px solid #1b2b51;overflow:hidden}
+  .rb-meter>span{display:block;height:100%;width:0%;transition:width .9s ease;background:linear-gradient(90deg,#ef4444,#fde047,#22c55e)}
+
+  /* Readability "Simple Fixes" — full colorful box */
+  .rb-fixes{background:linear-gradient(135deg,#0ea5e966,#a78bfa33), radial-gradient(120% 120% at 10% 10%,#22d3ee22,transparent 60%);border:1px solid #1f3f7a;border-radius:14px;padding:14px;margin-top:12px;box-shadow:0 0 0 1px #1c2e57 inset,0 12px 32px rgba(0,0,0,.35)}
+  .rb-fixes h4{margin:0 0 8px 0;font-weight:900}
+  .rb-fixes ul{margin:0;padding-left:0;display:grid;gap:8px}
+  .rb-fixes li{list-style:none;border:1px solid #2a3e83;background:linear-gradient(90deg,#1e40af33,#22d3ee22,#a78bfa22);padding:10px 12px;border-radius:12px;font-weight:700;color:#dbeafe;box-shadow:0 0 0 1px #1e3a8a inset}
+
+  /* Readability banner — colorful gradients */
+  .rb-banner{margin-top:12px;border-radius:14px;padding:12px;font-weight:900;box-shadow:0 0 0 1px transparent inset,0 14px 32px rgba(0,0,0,.25)}
+  .rb-banner.good{background:linear-gradient(90deg,#05240f,#0f5132);border:1px solid #126f3f;box-shadow:0 0 0 2px #126f3f66 inset,0 0 42px #22c55e33;color:#a7f3d0}
+  .rb-banner.warn{background:linear-gradient(90deg,#3b2a05,#7a5d0d);border:1px solid #9a6a10;box-shadow:0 0 0 2px #9a6a1066 inset,0 0 42px #f59e0b33;color:#fde68a}
+  .rb-banner.bad{ background:linear-gradient(90deg,#3a0b0b,#6f1d1d);border:1px solid #8a1a1a;box-shadow:0 0 0 2px #8a1a1a66 inset,0 0 42px #ef444433;color:#fecaca}
+
+  /* ===================== Site Speed & CWV ===================== */
+  .speed-card{border-radius:20px;background:#0b0f1f;border:1px solid #173a2a;padding:16px;margin-top:16px}
+  .sp-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .sp-title{display:flex;align-items:center;gap:10px}
+  .sp-title .ico{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#34d39933,#22d3ee33);border:1px solid #1a4c34}
+  .sp-note{font-size:12px;color:#a9d3be}
+
+  /* Wheels row — CENTERED and above bars */
+  .sp-wheels{display:flex;justify-content:center;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
+  .wheel-card{display:grid;place-items:center;border-radius:16px;padding:10px;background:#07161a;border:1px solid #12373f;position:relative;box-shadow:0 0 0 1px #0b2a2f inset,0 8px 28px rgba(0,0,0,.35);width:220px}
+  .wheel-label{font-size:12px;color:#a6c5cf;margin-top:6px}
+
+  /* Metric bars */
+  .sp-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:10px}
+  .sp-tile{background:#0e1a22;border:1px solid #1d3641;border-radius:14px;padding:12px}
+  .sp-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#a6c5cf;margin:6px 0}
+  .sp-val{color:#e5e7eb;font-weight:800}
+  .sp-meter{height:12px;border-radius:9999px;background:#0b1417;border:1px solid #16414e;overflow:hidden;position:relative}
+  .sp-meter>span{display:block;height:100%;width:0%;transition:width .9s ease;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e)}
+  .sp-meter::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,#ffffff0a 0 8px,#ffffff06 8px 16px);pointer-events:none}
+  .sp-meter.good{box-shadow:0 0 0 1px #1b5e2f inset,0 0 24px #22c55e33}
+  .sp-meter.warn{box-shadow:0 0 0 1px #8a5a12 inset,0 0 24px #f59e0b33}
+  .sp-meter.bad {box-shadow:0 0 0 1px #6f1616 inset,0 0 24px #ef444433}
 </style>
 @endpush
 
 @section('content')
 <section class="maxw px-4 pb-10">
+
   <!-- Title -->
   <div class="title-wrap">
     <div class="king">👑</div>
@@ -211,42 +337,6 @@
       </div>
     </div>
 
-    <!-- NEW: four mini PSI category wheels -->
-    <div class="sp-mini">
-      <div class="mini-card">
-        <div class="mw mw-xxs warn" id="mwPerf">
-          <div class="mw-ring" id="ringPerf"></div>
-          <div class="mw-fill" id="fillPerf"></div>
-          <div class="mw-center" id="numPerf">—</div>
-        </div>
-        <div class="mini-label">Performance</div>
-      </div>
-      <div class="mini-card">
-        <div class="mw mw-xxs warn" id="mwAcc">
-          <div class="mw-ring" id="ringAcc"></div>
-          <div class="mw-fill" id="fillAcc"></div>
-          <div class="mw-center" id="numAcc">—</div>
-        </div>
-        <div class="mini-label">Accessibility</div>
-      </div>
-      <div class="mini-card">
-        <div class="mw mw-xxs warn" id="mwBest">
-          <div class="mw-ring" id="ringBest"></div>
-          <div class="mw-fill" id="fillBest"></div>
-          <div class="mw-center" id="numBest">—</div>
-        </div>
-        <div class="mini-label">Best Practices</div>
-      </div>
-      <div class="mini-card">
-        <div class="mw mw-xxs warn" id="mwSEO">
-          <div class="mw-ring" id="ringSEO"></div>
-          <div class="mw-fill" id="fillSEO"></div>
-          <div class="mw-center" id="numSEO">—</div>
-        </div>
-        <div class="mini-label">SEO</div>
-      </div>
-    </div>
-
     <!-- Bars -->
     <div class="sp-grid">
       <div>
@@ -329,6 +419,7 @@
       </div>
     </div>
   </dialog>
+
 </section>
 @endsection
 
@@ -383,12 +474,6 @@
     const inpVal=$('#inpVal'), inpBar=$('#inpBar'), inpMeter=$('#inpMeter');
     const ttfbVal=$('#ttfbVal'), ttfbBar=$('#ttfbBar'), ttfbMeter=$('#ttfbMeter');
     const psiStatus=$('#psiStatus'), psiFixes=$('#psiFixes');
-
-    /* mini PSI wheels */
-    const mwPerf=$('#mwPerf'), ringPerf=$('#ringPerf'), fillPerf=$('#fillPerf'), numPerf=$('#numPerf');
-    const mwAcc=$('#mwAcc'), ringAcc=$('#ringAcc'), fillAcc=$('#fillAcc'), numAcc=$('#numAcc');
-    const mwBest=$('#mwBest'), ringBest=$('#ringBest'), fillBest=$('#fillBest'), numBest=$('#numBest');
-    const mwSEO=$('#mwSEO'), ringSEO=$('#ringSEO'), fillSEO=$('#fillSEO'), numSEO=$('#numSEO');
 
     /* ============== Helpers ============== */
     const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
@@ -449,19 +534,182 @@
     ];
 
     const KB = {
-      /* ... (unchanged; same KB object content you pasted) ... */
+      'Mobile-friendly, responsive layout': {why:'Most traffic is mobile; poor UX kills engagement.', tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'], link:'https://search.google.com/test/mobile-friendly'},
+      'Optimized speed (compression, lazy-load)': {why:'Speed affects abandonment and CWV.', tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'], link:'https://web.dev/fast/'},
+      'Core Web Vitals passing (LCP/INP/CLS)': {why:'Passing CWV improves experience & stability.', tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'], link:'https://web.dev/vitals/'},
+      'Clear CTAs and next steps': {why:'Clarity increases conversions and task completion.', tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'], link:'https://www.nngroup.com/articles/call-to-action-buttons/'},
+      'Accessible basics (alt text, contrast)': {why:'Accessibility broadens reach and reduces risk.', tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'], link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},
+      'sameAs/Organization details present': {why:'Entity grounding disambiguates your brand.', tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'], link:'https://schema.org/Organization'},
+      'Valid schema markup (Article/FAQ/Product)': {why:'Structured data unlocks rich results.', tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'], link:'https://search.google.com/test/rich-results'},
+      'Related entities covered with context': {why:'Covering related entities builds topical depth.', tips:['Mention related concepts.','Explain relationships.','Link to references.'], link:'https://developers.google.com/knowledge-graph'},
+      'Primary entity clearly defined': {why:'A single main entity clarifies page purpose.', tips:['Define at the top.','Use consistent naming.','Add schema about it.'], link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},
+      'Organization contact/about page visible': {why:'Trust & contact clarity support E-E-A-T.', tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'], link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},
+      'Logical H2/H3 headings & topic clusters': {why:'Hierarchy helps skimming and indexing.', tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'], link:'https://moz.com/learn/seo/site-structure'},
+      'Internal links to hub/related pages': {why:'Internal links distribute authority & context.', tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'], link:'https://ahrefs.com/blog/internal-links/'},
+      'Clean, descriptive URL slug': {why:'Readable slugs improve CTR & clarity.', tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'], link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},
+      'Breadcrumbs enabled (+ schema)': {why:'Breadcrumbs clarify location & show in SERP.', tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'], link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},
+      'XML sitemap logical structure': {why:'Sitemap accelerates discovery & updates.', tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'], link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},
+      'E-E-A-T signals (author, date, expertise)': {why:'Trust signals reduce bounce & build credibility.', tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'], link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},
+      'Unique value vs. top competitors': {why:'Differentiation is necessary to rank & retain.', tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'], link:'https://backlinko.com/seo-techniques'},
+      'Facts & citations up to date': {why:'Freshness + accuracy boosts trust.', tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'], link:'https://scholar.google.com/'},
+      'Helpful media (images/video) w/ captions': {why:'Media improves comprehension & dwell time.', tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'], link:'https://web.dev/optimize-lcp/'},
+      'Up-to-date examples & screenshots': {why:'Current visuals reflect product reality.', tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'], link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},
+      'Define search intent & primary topic': {why:'Matching intent drives relevance & time on page.', tips:['State outcome early.','Align format to intent.','Use concrete examples.'], link:'https://ahrefs.com/blog/search-intent/'},
+      'Map target & related keywords (synonyms/PAA)': {why:'Variants improve recall & completeness.', tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'], link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},
+      'H1 includes primary topic naturally': {why:'Clear topic helps users and algorithms.', tips:['One H1 per page.','Topic near the start.','Be descriptive.'], link:'https://web.dev/learn/html/semantics/#headings'},
+      'Integrate FAQs / questions with answers': {why:'Captures long-tail & can earn rich results.', tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'], link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},
+      'Readable, NLP-friendly language': {why:'Plain, direct writing improves comprehension.', tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'], link:'https://www.plainlanguage.gov/guidelines/'},
+      'Title tag (≈50–60 chars) w/ primary keyword': {why:'Title remains the strongest on-page signal.', tips:['50–60 chars.','Primary topic first.','Avoid duplication.'], link:'https://moz.com/learn/seo/title-tag'},
+      'Meta description (≈140–160 chars) + CTA': {why:'Meta drives CTR which correlates with rankings.', tips:['140–160 chars.','Benefit + CTA.','Match intent.'], link:'https://moz.com/learn/seo/meta-description'},
+      'Canonical tag set correctly': {why:'Avoid duplicates; consolidate signals.', tips:['One canonical.','Absolute URL.','No conflicting canonicals.'], link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},
+      'Indexable & listed in XML sitemap': {why:'Indexation is prerequisite to ranking.', tips:['No noindex.','Include in sitemap.','Submit in Search Console.'], link:'https://developers.google.com/search/docs/crawling-indexing/overview'},
+      'Robots directives valid': {why:'Avoid accidental noindex/nofollow.', tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'], link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}
     };
 
     /* ============== Scoring helpers (unchanged logic) ============== */
     function clamp01num(n){return Math.max(0,Math.min(100,Number(n)||0))}
     function scoreChecklist(label, data, url, targetKw=''){
-      /* ... (unchanged scoring switch as in your code) ... */
-      /* keep exactly what you pasted; omitted here for brevity in this comment */
+      const qs = data.quick_stats||{};
+      const cs = data.content_structure||{};
+      const ps = data.page_signals||{};
+      const r  = data.readability||{};
+      const h1 = (cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;
+      const h2 = (cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;
+      const h3 = (cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;
+      const title = (cs.title||'');
+      const meta  = (cs.meta_description||'');
+      const internal = Number(qs.internal_links||0);
+      const external = Number(qs.external_links||0);
+      const schemaTypes = new Set((data.page_signals?.schema_types)||[]);
+      const robots = (data.page_signals?.robots||'').toLowerCase();
+      const hasFAQ = schemaTypes.has('FAQPage');
+      const hasArticle = schemaTypes.has('Article') || schemaTypes.has('NewsArticle') || schemaTypes.has('BlogPosting');
+
+      const urlPath = (()=>{ try { return new URL(url).pathname; } catch { return '/'; } })();
+      const slugScore = (()=>{ const hasQuery = url.includes('?'); const segs = urlPath.split('/').filter(Boolean); const words = segs.join('-').split('-').filter(Boolean); if (hasQuery) return 55; if (segs.length>6) return 60; if (words.some(w=>w.length>24)) return 65; return 85; })();
+
+      switch(label){
+        case 'Mobile-friendly, responsive layout': return ps.has_viewport ? 88 : 58;
+        case 'Optimized speed (compression, lazy-load)': return 60;
+        case 'Core Web Vitals passing (LCP/INP/CLS)':     return 60;
+        case 'Clear CTAs and next steps':                 return meta.length>=140 && /learn|get|try|start|buy|sign|download|contact/i.test(meta) ? 80 : 60;
+        case 'Accessible basics (alt text, contrast)':    return (data.images_alt_count||0) >= 3 ? 82 : ((data.images_alt_count||0) >= 1 ? 68 : 48);
+
+        case 'sameAs/Organization details present':       return ps.has_org_sameas ? 90 : 55;
+        case 'Valid schema markup (Article/FAQ/Product)': return (hasArticle || hasFAQ || schemaTypes.has('Product')) ? 85 : (schemaTypes.size>0?70:50);
+        case 'Related entities covered with context':     return external>=2 ? 72 : 60;
+        case 'Primary entity clearly defined':            return ps.has_main_entity ? 85 : (h1>0 ? 72 : 58);
+        case 'Organization contact/about page visible':   return 60;
+
+        case 'Logical H2/H3 headings & topic clusters':   return (h2>=3 && h3>=2) ? 85 : (h2>=2 ? 70 : 55);
+        case 'Internal links to hub/related pages':       return internal>=5 ? 85 : (internal>=2 ? 65 : 45);
+        case 'Clean, descriptive URL slug':               return slugScore;
+        case 'Breadcrumbs enabled (+ schema)':            return ps.has_breadcrumbs ? 85 : 55;
+        case 'XML sitemap logical structure':             return 60;
+
+        case 'E-E-A-T signals (author, date, expertise)': return ps.has_org_sameas ? 75 : 65;
+        case 'Unique value vs. top competitors':          return 60;
+        case 'Facts & citations up to date':              return external>=2 ? 78 : 58;
+        case 'Helpful media (images/video) w/ captions':  return (data.images_alt_count||0) >= 3 ? 82 : 58;
+        case 'Up-to-date examples & screenshots':         return 60;
+
+        case 'Define search intent & primary topic':      return (title && h1>0) ? 78 : 60;
+        case 'Map target & related keywords (synonyms/PAA)': {
+          const kw = (targetKw||'').trim();
+          if (!kw) return 60;
+          const found = (title.toLowerCase().includes(kw.toLowerCase()) || (cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));
+          return found ? 80 : 62;
+        }
+        case 'H1 includes primary topic naturally': {
+          const kw = (targetKw||'').trim();
+          if (h1===0) return 45;
+          if (!kw) return 72;
+          const found = (cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));
+          return found ? 84 : 72;
+        }
+        case 'Integrate FAQs / questions with answers':   return hasFAQ ? 85 : (/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ') + ' ' + (cs.headings?.H3||[]).join(' ')) ? 70 : 55);
+        case 'Readable, NLP-friendly language':           return clamp01num(r.score||0);
+
+        case 'Title tag (≈50–60 chars) w/ primary keyword': {
+          const len = (title||'').length;
+          return (len>=50 && len<=60) ? 88 : (len ? 68 : 45);
+        }
+        case 'Meta description (≈140–160 chars) + CTA': {
+          const len = (meta||'').length;
+          const hasCTA = /learn|get|try|start|buy|sign|download|contact/i.test(meta||'');
+          return (len>=140 && len<=160) ? (hasCTA?90:82) : (len ? 65 : 48);
+        }
+        case 'Canonical tag set correctly':               return ps.canonical ? 85 : 55;
+        case 'Indexable & listed in XML sitemap':         return robots.includes('noindex') ? 20 : 80;
+        case 'Robots directives valid':                   return (robots && /(noindex|none)/.test(robots)) ? 45 : 75;
+      }
       return 60;
     }
 
     function renderCategories(data, url, targetKw){
-      /* ... (unchanged from your code) ... */
+      const catsEl = document.querySelector('#cats');
+      catsEl.innerHTML='';
+      let autoGood=0;
+      CATS.forEach(cat=>{
+        const rows = cat.checks.map(lbl=>{
+          const s = scoreChecklist(lbl, data, url, targetKw);
+          const fill = s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');
+          const pill = s>=80 ? 'score-pill--green' : s>=60 ? 'score-pill--orange' : 'score-pill--red';
+          if (s>=80) autoGood++;
+          return {label:lbl, score:s, fill, pill, bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};
+        });
+
+        const total = rows.length;
+        const passed = rows.filter(r=>r.score>=80).length;
+        const pct = Math.round((passed/Math.max(1,total))*100);
+
+        const card=document.createElement('div'); card.className='cat-card';
+        card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="king" style="width:34px;height:34px">${cat.icon}</div>
+              <div>
+                <div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div>
+                <div style="font-size:12px;color:#b6c2cf">Keep improving</div>
+              </div>
+            </div>
+            <div class="pill">${passed} / ${total}</div>
+          </div>
+          <div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div>
+          <div class="space-y-2" id="list"></div>`;
+        const list = card.querySelector('#list');
+
+        rows.forEach(row=>{
+          const dot  = row.score>=80 ? '#10b981' : row.score>=60 ? '#f59e0b' : '#ef4444';
+          const el=document.createElement('div'); el.className='check';
+          el.innerHTML = `
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span>
+              <div class="font-semibold" style="font-size:13px">${row.label}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="score-pill ${row.pill}">${row.score}</span>
+              <button class="improve-btn ${row.fill}" type="button">Improve</button>
+            </div>`;
+          el.querySelector('.improve-btn').addEventListener('click',()=>{
+            const kb = KB[row.label] || {why:'This item impacts relevance and UX.', tips:['Aim for ≥80 and re-run the analyzer.'], link:'https://www.google.com'};
+            mTitle.textContent = row.label;
+            mCat.textContent   = cat.name;
+            mScore.textContent = row.score;
+            mBand.textContent  = row.bandTxt;
+            mBand.className    = 'pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');
+            mWhy.textContent   = kb.why;
+            mTips.innerHTML = '';
+            (kb.tips||[]).forEach(t=>{ const li=document.createElement('li'); li.textContent=t; mTips.appendChild(li); });
+            mLink.href = kb.link || ('https://www.google.com/search?q='+encodeURIComponent(row.label+' best practices'));
+            if(typeof modal.showModal==='function') modal.showModal(); else modal.setAttribute('open','');
+          });
+          list.appendChild(el);
+        });
+
+        catsEl.appendChild(card);
+      });
+
+      chipAuto.textContent = autoGood;
     }
 
     /* ============== API calls (unchanged) ============== */
@@ -512,7 +760,18 @@
     }
 
     function buildFixes(r){
-      /* ... (unchanged) ... */
+      const fixes=[];
+      if(typeof r.avg_sentence_len==='number' && r.avg_sentence_len>20) fixes.push('Break long sentences into 12–16 words.');
+      if(typeof r.simple_words_ratio==='number' && r.simple_words_ratio<80) fixes.push('Prefer shorter, simpler words (use clearer synonyms).');
+      if(typeof r.passive_ratio==='number' && r.passive_ratio>15) fixes.push('Reduce passive voice; rewrite in active voice.');
+      if(typeof r.repetition_trigram==='number' && r.repetition_trigram>10) fixes.push('Trim repeated phrases; vary wording and examples.');
+      if(typeof r.digits_per_100w==='number' && r.digits_per_100w>10) fixes.push('Reduce numeric density; round or group numbers where possible.');
+      if(fixes.length<3){
+        fixes.push('Add headings and bullets to chunk information.');
+        fixes.push('Use image captions to explain visuals succinctly.');
+        fixes.push('Front-load key points; keep paragraphs 2–4 lines.');
+      }
+      rbFixes.innerHTML = fixes.slice(0,5).map(x=>`<li>✅ ${x}</li>`).join('');
     }
 
     /* ===== Speed helpers ===== */
@@ -528,12 +787,6 @@
       elRing.style.setProperty('--v',score); elFill.style.setProperty('--p',score);
       elNum.textContent = (prefix?prefix+' ':'') + score + '%';
     }
-    function setWheelNumberOnly(elRing, elFill, elNum, container, score){
-      const b=bandName(score);
-      container.classList.remove('good','warn','bad'); container.classList.add(b);
-      elRing.style.setProperty('--v',score); elFill.style.setProperty('--p',score);
-      elNum.textContent = String(score);
-    }
     function setSpMeter(barEl, valEl, raw, score, fmt, meterWrap){
       valEl.textContent = raw==null?'—':(fmt ? fmt(raw) : raw);
       barEl.style.width = clamp01(score) + '%';
@@ -541,32 +794,6 @@
         meterWrap.classList.remove('good','warn','bad');
         meterWrap.classList.add(bandName(score));
       }
-    }
-
-    /* Helpers to safely pull PSI category scores (works with nested JSON) */
-    const toNum=v=> (typeof v==='number'?v : (typeof v==='string' && v.trim() && !isNaN(+v)? +v : null));
-    function deepFindCategoryScore(root, token){
-      if(!root||typeof root!=='object') return null;
-      let out=null;
-      const walk=o=>{
-        if(!o||out!==null||typeof o!=='object') return;
-        for(const k in o){
-          const v=o[k];
-          const key=(k||'').toLowerCase();
-          if((key.includes(token)) && v && typeof v==='object' && ('score' in v)){
-            const n=toNum(v.score); if(n!=null){ out=n; return; }
-          }
-          walk(v);
-        }
-      };
-      walk(root); return out;
-    }
-    function getCategoryScore(psi, token){
-      let s = deepFindCategoryScore(psi?.desktop,'categories') ?? deepFindCategoryScore(psi?.desktop, token);
-      if(s==null) s = deepFindCategoryScore(psi?.mobile,'categories') ?? deepFindCategoryScore(psi?.mobile, token);
-      if(s==null) s = deepFindCategoryScore(psi, 'categories') ?? deepFindCategoryScore(psi, token);
-      if(s!=null && s<=1) s = s*100;
-      return s!=null ? Math.round(s) : null;
     }
 
     /* ===== Paste/import/print/reset/export ===== */
@@ -588,10 +815,9 @@
 
         // reset wheels/bars
         psiStatus.textContent='Checking…';
-        [ringMobile,ringDesktop,ringPerf,ringAcc,ringBest,ringSEO].forEach(el=>el?.style.setProperty('--v',0));
-        [fillMobile,fillDesktop,fillPerf,fillAcc,fillBest,fillSEO].forEach(el=>el?.style.setProperty('--p',0));
-        [mwMobile,mwDesktop,mwPerf,mwAcc,mwBest,mwSEO].forEach(c=>{c?.classList.remove('good','warn','bad'); c?.classList.add('warn');});
-        [numMobile,numDesktop,numPerf,numAcc,numBest,numSEO].forEach(el=>{if(el)el.textContent='—';});
+        [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
+        [fillMobile,fillDesktop].forEach(el=>el.style.setProperty('--p',0));
+        [mwMobile,mwDesktop].forEach(c=>{c.classList.remove('good','warn','bad'); c.classList.add('warn');});
         numMobile.textContent='M 0%'; numDesktop.textContent='D 0%';
         [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
         [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
@@ -601,7 +827,7 @@
         if(!data||data.error) throw new Error(data?.error||'Unknown error');
         window.__lastData = {...data, url};
 
-        /* Overall (unchanged) */
+        /* Overall */
         const score = clamp01(data.overall_score||0), band=bandName(score);
         mw?.classList.remove('good','warn','bad'); mw?.classList.add(band);
         mwRing?.style.setProperty('--v',score); mwFill?.style.setProperty('--p',score);
@@ -610,7 +836,7 @@
         overallFill.style.width=score+'%'; overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
 
-        /* Content score */
+        /* Content score = avg(Content & Keywords, Content Quality) */
         const cmap={}; (data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
         const contentScore = Math.round(([cmap['Content & Keywords'], cmap['Content Quality']].filter(v=>typeof v==='number').reduce((a,b)=>a+b,0))/2 || 0);
         setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
@@ -629,8 +855,62 @@
         statExt.textContent=data.quick_stats?.external_links??0;
         statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
 
-        /* Readability render (unchanged) */
-        /* ... same as your code ... */
+        /* Readability render */
+        const rs = clamp01(r.score||0);
+        const rBand = bandName(rs);
+        readMw?.classList.remove('good','warn','bad'); readMw?.classList.add(rBand);
+        readRing?.style.setProperty('--v',rs); readFill?.style.setProperty('--p',rs);
+        readNum.textContent = rs+'%';
+        const badgeTxt = rs>=80 ? 'Very Easy To Read' : (rs>=60 ? 'Good — Needs More Improvement' : 'Needs Improvement in Content');
+        readBadge.textContent = badgeTxt;
+        readBadge.className = 'pill ' + (rs>=80?'score-pill--green':rs>=60?'score-pill--orange':'score-pill--red');
+        const grade = (typeof r.grade==='number') ? r.grade : null;
+        gradeBadge.textContent = 'Grade ' + (grade ?? '—');
+        rbLegend.textContent = (r.language==='non-latin' ? 'Non-Latin content (LIX-based) — العربية/others supported' : 'Latin-like content — English & similar');
+        setMeter(rbFleschFill, rbFleschVal, r.flesch, (r.flesch??'—'), [0,100], false);
+        setMeter(rbASLFill,    rbASLVal,    r.avg_sentence_len, (r.avg_sentence_len??'—'), [10,30], true);
+        setMeter(rbWordsFill,  rbWordsVal,  r.word_count, (r.word_count??'—'), [0,2000], false);
+        setMeter(rbSyllFill,   rbSyllVal,   r.avg_syllables_per_word, (r.avg_syllables_per_word??'—'), [1.2,2.2], true);
+        setMeter(rbTTRFill,    rbTTRVal,    r.ttr, ((r.ttr!=null?r.ttr+'%':'—')), [0,100], false);
+        setMeter(rbTriFill,    rbTriVal,    r.repetition_trigram, ((r.repetition_trigram!=null?r.repetition_trigram+'%':'—')), [0,20], true);
+        setMeter(rbDigitsFill, rbDigitsVal, r.digits_per_100w, (r.digits_per_100w??'—'), [0,20], true);
+        setMeter(rbPassiveFill,rbPassiveVal,r.passive_ratio, ((r.passive_ratio!=null?r.passive_ratio+'%':'—')), [0,30], true);
+        setMeter(rbSimpleFill, rbSimpleVal, r.simple_words_ratio, ((r.simple_words_ratio!=null?r.simple_words_ratio+'%':'—')), [60,100], false);
+        if (grade!==null){
+          const bandCl = grade<=7?'good':(grade<=10?'warn':'bad');
+          rbBanner.className='rb-banner '+bandCl;
+          rbBanner.textContent = grade<=7 ? `Easy to read (Grade ${grade}). Clear and accessible.` :
+                                 grade<=10 ? `Good for general audiences (Grade ${grade}).` :
+                                 `Complex reading level (Grade ${grade}). Use shorter sentences and simpler vocabulary.`;
+        }
+        buildFixes(r);
+
+        /* Structure chips */
+        titleVal.textContent=data.content_structure?.title||'—';
+        metaVal.textContent=data.content_structure?.meta_description||'—';
+        const hs=data.content_structure?.headings||{};
+        chipH.textContent=`H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
+        headingMap.innerHTML='';
+        Object.entries(hs).forEach(([lvl,arr])=>{
+          if(!arr||!arr.length)return;
+          const box=document.createElement('div'); box.className='card';
+          box.innerHTML=`<div style="font-size:12px;color:#b6c2cf;margin-bottom:6px" class="uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');
+          headingMap.appendChild(box);
+        });
+
+        chipHttp.textContent='200';
+        chipCanon.textContent=(data.page_signals?.canonical||'—')||'—';
+        chipRobots.textContent=(data.page_signals?.robots||'—')||'—';
+        chipViewport.textContent=data.page_signals?.has_viewport ? 'yes' : '—';
+        chipIntChip.textContent=data.quick_stats?.internal_links??0;
+        chipSchema.textContent=(data.page_signals?.schema_types||[]).length;
+
+        recsEl.innerHTML='';
+        (data.recommendations||[]).forEach(rec=>{
+          const d=document.createElement('div'); d.className='card';
+          d.innerHTML=`<span class="pill" style="margin-right:6px">${rec.severity}</span>${rec.text}`;
+          recsEl.appendChild(d);
+        });
 
         renderCategories(data, url, '');
 
@@ -644,17 +924,6 @@
           const dScore = clamp01(Math.round(desktop.score ?? desktop.performance ?? 0));
           setWheel(ringMobile,  fillMobile,  numMobile,  mwMobile,  mScore, 'M');
           setWheel(ringDesktop, fillDesktop, numDesktop, mwDesktop, dScore, 'D');
-
-          // mini category wheels
-          const perf = getCategoryScore(psi,'performance')   ?? dScore ?? mScore;
-          const acc  = getCategoryScore(psi,'accessibility');
-          const best = getCategoryScore(psi,'best-practices') ?? getCategoryScore(psi,'best_practices');
-          const seo  = getCategoryScore(psi,'seo');
-
-          if(perf!=null) setWheelNumberOnly(ringPerf,fillPerf,numPerf,mwPerf,clamp01(perf));
-          if(acc!=null)  setWheelNumberOnly(ringAcc,fillAcc,numAcc,mwAcc,clamp01(acc));
-          if(best!=null) setWheelNumberOnly(ringBest,fillBest,numBest,mwBest,clamp01(best));
-          if(seo!=null)  setWheelNumberOnly(ringSEO,fillSEO,numSEO,mwSEO,clamp01(seo));
 
           // helper
           const pick = (...vals) => { for (const v of vals) { const n = Number(v); if (v !== undefined && v !== null && !Number.isNaN(n)) return n; } return null; };
