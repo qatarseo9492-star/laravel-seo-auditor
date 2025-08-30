@@ -366,6 +366,22 @@
     const ttfbVal=$('#ttfbVal'), ttfbBar=$('#ttfbBar'), ttfbMeter=$('#ttfbMeter');
     const psiStatus=$('#psiStatus'), psiFixes=$('#psiFixes');
 
+    /* --- NEW --- Content Optimization UI refs */
+    const coCard = $('#contentOptimizationCard');
+    if (coCard) {
+        const coMeterProgress = coCard.querySelector('.co-meter-progress');
+        const coMeterScore = coCard.querySelector('.co-meter-score');
+        const coTopicCoverageText = coCard.querySelector('#coTopicCoverageText');
+        const coTopicCoverageProgress = coCard.querySelector('#coTopicCoverageProgress');
+        const coContentGapsText = coCard.querySelector('#coContentGapsText');
+        const coContentGapsTags = coCard.querySelector('#coContentGapsTags');
+        const coSchemaTags = coCard.querySelector('#coSchemaTags');
+        const coIntentTag = coCard.querySelector('#coIntentTag');
+        const coGradeTag = coCard.querySelector('#coGradeTag');
+        window.__coElements = { coMeterProgress, coMeterScore, coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag };
+    }
+
+
     /* Helpers */
     const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
     const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
@@ -484,6 +500,50 @@
 
         recsEl.innerHTML='';
         (data.recommendations||[]).forEach(rec=>{const d=document.createElement('div');d.className='card';d.innerHTML=`<span class="pill" style="margin-right:6px">${rec.severity}</span>${rec.text}`;recsEl.appendChild(d)});
+
+        
+        // =================================================================
+        // --- NEW --- POPULATE CONTENT OPTIMIZATION
+        // =================================================================
+        if (data.content_optimization && window.__coElements) {
+            const co = data.content_optimization;
+            const { coMeterProgress, coMeterScore, coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag } = window.__coElements;
+
+            // 1. Update Score Meter
+            if (co.nlp_score != null) {
+                coMeterScore.textContent = co.nlp_score;
+                coMeterProgress.style.setProperty('--v', co.nlp_score);
+            }
+
+            // 2. Update Topic Coverage
+            if (co.topic_coverage) {
+                coTopicCoverageText.innerHTML = `Covers <strong>${co.topic_coverage.covered} of ${co.topic_coverage.total}</strong> key topics found in top competitor content.`;
+                coTopicCoverageProgress.style.width = co.topic_coverage.percentage + '%';
+            }
+
+            // 3. Update Content Gaps
+            if (co.content_gaps && co.content_gaps.missing_topics) {
+                coContentGapsText.innerHTML = `Missing <strong>${co.content_gaps.missing_count} topics</strong> that your top competitors are covering.`;
+                coContentGapsTags.innerHTML = co.content_gaps.missing_topics.map(topic => {
+                    const icon = topic.severity === 'bad' ? '🔴' : '🟧';
+                    return `<span class="chip ${topic.severity}"><i>${icon}</i><span>${topic.term}</span></span>`;
+                }).join('');
+            }
+
+            // 4. Update Schema Suggestions
+            if (co.schema_suggestions) {
+                coSchemaTags.innerHTML = co.schema_suggestions.map(schema => {
+                    return `<span class="chip good"><i>✅</i><span>${schema}</span></span>`;
+                }).join('');
+            }
+
+            // 5. Update Readability & Intent
+            if (co.readability_intent) {
+                coIntentTag.innerHTML = `Intent: ${co.readability_intent.intent}`;
+                coGradeTag.innerHTML = `Grade Level: ${co.readability_intent.grade_level}`;
+            }
+        }
+        // =================== / END OF NEW CODE ===================
 
         renderCategories(data,url,'');
 
@@ -743,10 +803,10 @@
       <div class="co-meter-wrap">
         <div class="co-meter" id="mwContent">
           <div class="co-meter-bg"></div>
-          <div class="co-meter-progress" style="--v: 82;"></div>
+          <div class="co-meter-progress" style="--v: 0;"></div>
           <div class="co-meter-inner">
             <div>
-              <div class="co-meter-score" id="numContent">82</div>
+              <div class="co-meter-score" id="numContent">0</div>
               <div class="co-meter-label">NLP Content Score</div>
             </div>
           </div>
@@ -763,23 +823,20 @@
             </div>
             <span class="co-info-title">Topic Coverage</span>
           </div>
-          <p>Covers <strong>18 of 25</strong> key topics found in top competitor content.</p>
-          <div class="progress" style="margin-bottom: 0;"><span style="width:72%; background: linear-gradient(90deg, var(--co-glow-2), var(--co-glow-1));"></span></div>
+          <p id="coTopicCoverageText">Run analysis to get data.</p>
+          <div class="progress" style="margin-bottom: 0;"><span id="coTopicCoverageProgress" style="width:0%; background: linear-gradient(90deg, var(--co-glow-2), var(--co-glow-1));"></span></div>
         </div>
 
         <!-- Content Gaps -->
         <div class="co-info-item">
           <div class="co-info-header">
             <div class="co-info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
             </div>
             <span class="co-info-title">Content Gaps</span>
           </div>
-          <p>Missing <strong>7 topics</strong> that your top competitors are covering.</p>
-          <div class="co-tags">
-            <span class="chip bad"><i>🔴</i><span>semantic search</span></span>
-            <span class="chip bad"><i>🔴</i><span>NLP models</span></span>
-            <span class="chip warn"><i>🟧</i><span>E-E-A-T</span></span>
+          <p id="coContentGapsText">Missing topics will be shown here.</p>
+          <div class="co-tags" id="coContentGapsTags">
           </div>
         </div>
 
@@ -792,30 +849,28 @@
             <span class="co-info-title">Schema Suggestions</span>
           </div>
           <p>Rule-based analysis suggests the following schema types:</p>
-          <div class="co-tags">
-            <span class="chip good"><i>✅</i><span>Article</span></span>
-            <span class="chip good"><i>✅</i><span>FAQPage</span></span>
-          </div>
+         <div class="co-tags" id="coSchemaTags">
         </div>
+      </div>
 
-        <!-- Readability & Intent -->
-        <div class="co-info-item">
-          <div class="co-info-header">
-            <div class="co-info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-            </div>
-            <span class="co-info-title">Readability & Intent</span>
+      <!-- Readability & Intent -->
+      <div class="co-info-item">
+        <div class="co-info-header">
+          <div class="co-info-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
           </div>
-          <p>Content is easy to read and aligns with user intent.</p>
-          <div class="co-tags">
-            <span class="chip" style="background-color: #00f6ff22; border-color: #00f6ff88; color: #cffcff;">Intent: Informational</span>
-            <span class="chip" style="background-color: #a78bfa22; border-color: #a78bfa88; color: #e9d5ff;">Grade Level: 8</span>
-          </div>
+          <span class="co-info-title">Readability & Intent</span>
+        </div>
+        <p>Content alignment with user search intent and reading level.</p>
+         <div class="co-tags">
+          <span id="coIntentTag" class="chip" style="background-color: #00f6ff22; border-color: #00f6ff88; color: #cffcff;">Intent: —</span>
+          <span id="coGradeTag" class="chip" style="background-color: #a78bfa22; border-color: #a78bfa88; color: #e9d5ff;">Grade Level: —</span>
         </div>
       </div>
     </div>
   </div>
-  <!-- =================== /Content Optimization Info (Futuristic) =================== -->
+</div>
+<!-- =================== /Content Optimization Info (Futuristic) =================== -->
 
   <!-- Content Structure -->
   <div class="card" style="margin-top:16px">
