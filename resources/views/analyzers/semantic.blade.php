@@ -551,8 +551,8 @@
                 coIntentTag.innerHTML = `Intent: ${co.readability_intent.intent}`;
                 coGradeTag.innerHTML = `Grade Level: ${co.readability_intent.grade_level}`;
             }
-        }
-                    // --- Badges & Tips ---
+            
+            // --- Badges & Tips ---
             const badgeText = n=> n>=80?'Excellent':(n>=60?'Need more work':'Change your Content');
             const badgeClass = n=> n>=80?'good':(n>=60?'warn':'bad');
             const setBadgeEl = (el,score)=>{ if(!el) return; el.textContent = badgeText(score); el.className = 'co-badge ' + (el.classList.contains('small')?'small ':'') + badgeClass(score); };
@@ -600,6 +600,7 @@
                 if (scCount>0) schemaTips.innerHTML += '<div class="tip">Implement relevant schema (Article, FAQPage, HowTo) to enhance SERP features.</div>';
                 else schemaTips.innerHTML += '<div class="tip">Consider adding FAQ or HowTo blocks to unlock schema opportunities.</div>';
             }
+        }
 // =================== / END OF NEW CODE ===================
 
         renderCategories(data,url,'');
@@ -670,7 +671,6 @@
 @section('content')
 <section class="maxw px-4 pb-10">
 
-  <!-- Title -->
   <div class="title-wrap">
     <div class="king">👑</div>
     <div style="text-align:center">
@@ -679,10 +679,8 @@
     </div>
   </div>
 
-  <!-- Legend -->
   <div class="legend"><span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span></div>
 
-  <!-- Wheel + chips -->
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#090916;border:1px solid #ffffff12">
       <div class="mw warn" id="mw">
@@ -706,7 +704,6 @@
     </div>
   </div>
 
-  <!-- Analyze toolbar -->
   <div class="analyze-wrap" style="margin-top:12px;">
     <div class="url-row">
       <span style="opacity:.75">🌐</span>
@@ -727,7 +724,6 @@
     </div>
     <div id="errorBox"></div>
 
-    <!-- Status chips -->
     <div id="statusChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
       <div class="chip" id="chipHttpWrap"><span class="t-grad">HTTP:</span>&nbsp;<span id="chipHttp">—</span></div>
       <div class="chip" id="chipTitleWrap"><span class="t-grad">Title:</span>&nbsp;<span id="chipTitle">—</span></div>
@@ -742,7 +738,6 @@
     </div>
   </div>
 
-  <!-- Quick Stats -->
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Quick Stats</h3>
     <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
@@ -752,16 +747,13 @@
     </div>
   </div>
 
-  <!-- 🧠 Content Optimization (Place above Readability) -->
   <div class="co-head">
     <div class="sec-title"><span class="ico">🧠</span> Content Optimization</div>
     <div class="sec-sub">Semantic coverage, gaps, schema & intent</div>
   </div>
-<!-- ===================== Content Optimization Info (Futuristic) ===================== -->
-  <div class="co-card" id="contentOptimizationCard">
+<div class="co-card" id="contentOptimizationCard">
     <div class="co-grid">
 
-      <!-- Left Column: New Score Meter -->
       <div class="co-meter-wrap">
         <div class="co-meter" id="mwContent">
           <div class="co-meter-bg"></div>
@@ -780,9 +772,7 @@
     
       </div>
 
-      <!-- Right Column: Info Grid -->
       <div class="co-info-grid">
-        <!-- Topic Coverage -->
         <div class="co-info-item">
           <div class="co-info-header">
             <div class="co-info-icon">
@@ -796,7 +786,6 @@
     
         </div>
 
-        <!-- Content Gaps -->
         <div class="co-info-item">
           <div class="co-info-header">
             <div class="co-info-icon">
@@ -811,7 +800,6 @@
         <div id="gapTips" class="co-tips"></div>
     
 
-        <!-- Schema Suggestions -->
         <div class="co-info-item">
           <div class="co-info-header">
             <div class="co-info-icon">
@@ -826,7 +814,6 @@
         <div id="schemaTips" class="co-tips"></div>
     
 
-      <!-- Readability & Intent -->
       <div class="co-info-item">
         <div class="co-info-header">
           <div class="co-info-icon">
@@ -843,8 +830,7 @@
     </div>
   </div>
 </div>
-<!-- =================== /Content Optimization Info (Futuristic) =================== --><!-- ===================== Readability Insights ===================== -->
-  <div class="read-card" id="readabilityCard" style="margin-top:16px">
+<div class="read-card" id="readabilityCard" style="margin-top:16px">
     <div class="rb-head">
       <div class="rb-title">
         <div class="ico">📚</div>
@@ -860,7 +846,6 @@
     </div>
 
     <div class="rb-grid">
-      <!-- Wheel -->
       <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#090916;border:1px solid #ffffff12">
         <div class="mw mw-sm warn" id="readMw">
           <div class="mw-ring" id="readRing" style="--v:0"></div>
@@ -869,7 +854,6 @@
         </div>
       </div>
 
-      <!-- Metric tiles -->
       <div class="rb-tiles">
         <div class="rb-tile"><div class="rb-row"><div>😊 Flesch Reading Ease</div><div class="rb-val" id="rbFleschVal">—</div></div><div class="rb-meter"><span id="rbFleschFill" style="width:0%"></span></div></div>
         <div class="rb-tile"><div class="rb-row"><div>🧾 Avg Sentence Length</div><div class="rb-val" id="rbASLVal">—</div></div><div class="rb-meter"><span id="rbASLFill" style="width:0%"></span></div></div>
@@ -890,9 +874,6 @@
 
     <div id="rbBanner" class="rb-banner warn">Readability score helps you target Grade 7–9 for most audiences.</div>
   </div>
-  <!-- =================== /Readability =================== -->
-
-  <!-- ===================== Site Speed & Core Web Vitals ===================== -->
   <div class="speed-card" id="speedCard">
     <div class="sp-head">
       <div class="sp-title">
@@ -926,7 +907,6 @@
       </div>
     </div>
 
-    <!-- Bars -->
     <div class="sp-grid">
       <div>
         <div class="sp-tile"><div class="sp-row"><div>🏁 LCP (s)</div><div class="sp-val" id="lcpVal">—</div></div><div class="sp-meter" id="lcpMeter"><span id="lcpBar" style="width:0%"></span></div></div>
@@ -941,11 +921,6 @@
       <ul id="psiFixes"><li>Run Analyze to fetch PSI data.</li></ul>
     </div>
   </div>
-  <!-- =================== /Site Speed & CWV =================== -->
-
-  
-
-  <!-- Content Structure -->
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Content Structure</h3>
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
@@ -962,13 +937,11 @@
     </div>
   </div>
 
-  <!-- Recommendations -->
   <div class="card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Recommendations</h3>
     <div id="recs" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"></div>
   </div>
 
-  <!-- Semantic SEO Ground -->
   <div class="ground-slab">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
       <div class="king">🧭</div>
@@ -980,7 +953,6 @@
     <div id="cats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"></div>
   </div>
 
-  <!-- Improve Modal -->
   <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
     <div class="card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px">
