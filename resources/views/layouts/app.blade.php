@@ -94,7 +94,10 @@
                 $u = auth()->user();
                 $cand = $u?->profile_photo_url ?? $u?->avatar_url ?? $u?->avatar ?? null;
                 if ($cand && str_starts_with($cand,'http')) { $avatarUrl = $cand; }
-                elseif ($cand) { try { $avatarUrl = \\Illuminate\\Support\\Facades\\Storage::url($cand); } catch (\\Throwable $e) { $avatarUrl = $cand; } }
+                elseif ($cand) {
+                  try { $avatarUrl = \Illuminate\Support\Facades\Storage::url($cand); }
+                  catch (\Throwable $e) { $avatarUrl = $cand; }
+                }
                 else { $avatarUrl = null; }
                 $initials = $u ? mb_strtoupper(mb_substr($u->name ?? ($u->email ?? 'U'),0,1,'UTF-8')) : 'U';
               @endphp
