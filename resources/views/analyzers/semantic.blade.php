@@ -11,7 +11,7 @@
     --card-2:#1C1C1C;
     --ink:#EAEAEA;
     --sub:#BFC7CF;
-    --outline:#2B2B2B;
+    
 
     /* Neon wheel palette */
     --blue-1:#00C6FF;
