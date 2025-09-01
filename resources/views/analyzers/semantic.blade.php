@@ -28,8 +28,8 @@
   /* =============== Base page styles (colors only changed) =============== */
   html,body{
   html,body{
-  background:#01082D !important;
-  color:#e5e7eb;
+  background:#01051a !important;
+  color:#1e0230;
   }
   .maxw{max-width:1150px;margin:0 auto;border:1px solid var(--outline);border-radius:18px;padding:8px;background:linear-gradient(0deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))}
 
