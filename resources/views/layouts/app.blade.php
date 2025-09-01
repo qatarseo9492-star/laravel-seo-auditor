@@ -9,9 +9,10 @@
   <style>
     /* ================= Theme-safe base (uses CSS variables) ================= */
     :root{
-      --app-bg: #06021f;
+      /* Defaults; seo-neon.css will hard-override background & add neon outlines */
+      --app-bg: #01082D;                /* solid deep navy to match neon sheet */
       --app-fg: #e5e7eb;
-      --nav-bg: #06021f;
+      --nav-bg: #01082D;                /* navbar color to match page bg */
       --border-weak: rgba(255,255,255,.08);
       --pill-bg: rgba(255,255,255,.06);
       --pill-br: rgba(255,255,255,.12);
@@ -61,10 +62,11 @@
          @section('body_class','page-analyzer')
        Then in that child view you can override variables, e.g.:
          body.page-analyzer { --nav-bg: rgba(6,2,31,.7); }
-       Your neon/gradient is already scoped to #seoAnalyzer in the analyzer page,
-       so nothing here will force other pages to change.
     ============================================================ */
   </style>
+
+  <!-- Load the neon multi-color outline theme (must be after inline styles) -->
+  <link rel="stylesheet" href="{{ asset('css/seo-neon.css') }}">
 
   @stack('head')
 </head>
@@ -92,7 +94,7 @@
                 $u = auth()->user();
                 $cand = $u?->profile_photo_url ?? $u?->avatar_url ?? $u?->avatar ?? null;
                 if ($cand && str_starts_with($cand,'http')) { $avatarUrl = $cand; }
-                elseif ($cand) { try { $avatarUrl = \Illuminate\Support\Facades\Storage::url($cand); } catch (\Throwable $e) { $avatarUrl = $cand; } }
+                elseif ($cand) { try { $avatarUrl = \\Illuminate\\Support\\Facades\\Storage::url($cand); } catch (\\Throwable $e) { $avatarUrl = $cand; } }
                 else { $avatarUrl = null; }
                 $initials = $u ? mb_strtoupper(mb_substr($u->name ?? ($u->email ?? 'U'),0,1,'UTF-8')) : 'U';
               @endphp
