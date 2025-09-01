@@ -1,0 +1,26 @@
+<?php use Illuminate\Database\Migrations\Migration; use Illuminate\Database\Schema\Blueprint; use Illuminate\Support\Facades\Schema; use 
+Illuminate\Support\Facades\DB; return new class extends Migration {
+    public function up(): void { if (!Schema::hasColumn('topic_analyses', 'urls_signature')) { Schema::table('topic_analyses', function (Blueprint $table) { 
+                $table->string('urls_signature')->nullable()->after('urls_list');
+            });
+            // Backfill existing rows with deterministic signatures
+            try { $rows = DB::table('topic_analyses')->select('id', 'urls_list')->get(); foreach ($rows as $row) { $arr = json_decode($row->urls_list, true); if 
+                    (!is_array($arr)) { $arr = []; }
+                    // clean -> trim -> dedupe -> sort
+                    $arr = array_values(array_unique(array_filter(array_map('trim', $arr)))); sort($arr, SORT_NATURAL | SORT_FLAG_CASE); $sig = 
+                    sha1(json_encode($arr, JSON_UNESCAPED_SLASHES)); DB::table('topic_analyses')->where('id', $row->id)->update(['urls_signature' => $sig]);
+                }
+            } catch (\Throwable $e) {
+                // If anything goes wrong, leave the column nullable and continue.
+            }
+            // Add an index for faster lookups
+            Schema::table('topic_analyses', function (Blueprint $table) { $table->index('urls_signature', 'topic_analyses_urls_signature_index');
+            });
+        }
+    }
+    public function down(): void { if (Schema::hasColumn('topic_analyses', 'urls_signature')) { Schema::table('topic_analyses', function (Blueprint $table) { 
+                $table->dropIndex('topic_analyses_urls_signature_index'); $table->dropColumn('urls_signature');
+            });
+        }
+    }
+};
