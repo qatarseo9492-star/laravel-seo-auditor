@@ -27,8 +27,8 @@
 
   /* =============== Base page styles (colors only changed) =============== */
   html,body{
-    background: radial-gradient(120% 160% at 50% -20%, var(--bg-2) 0%, var(--bg-1) 45%, var(--bg-1) 100%) !important;
-    color: var(--ink);
+  background: radial-gradient(120% 160% at 50% -20%, #101a34 0%, #050a16 45%, #050a16 100%) !important;
+  color: #eaf1ff;
   }
   .maxw{max-width:1150px;margin:0 auto;border:1px solid var(--outline);border-radius:18px;padding:8px;background:linear-gradient(0deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))}
 
