@@ -29,7 +29,6 @@
   html,body{
   html,body{
   background:#01051a !important;
-  color:#3a025e;
   }
   .maxw{max-width:1150px;margin:0 auto;border:1px solid var(--outline);border-radius:18px;padding:8px;background:linear-gradient(0deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))}
 
