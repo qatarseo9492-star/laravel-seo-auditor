@@ -7,14 +7,36 @@
   <title>@yield('title','Semantic SEO')</title>
 
   <style>
-    html,body{background:#06021f;color:#e5e7eb;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+    /* ================= Theme-safe base (uses CSS variables) ================= */
+    :root{
+      --app-bg: #06021f;
+      --app-fg: #e5e7eb;
+      --nav-bg: #06021f;
+      --border-weak: rgba(255,255,255,.08);
+      --pill-bg: rgba(255,255,255,.06);
+      --pill-br: rgba(255,255,255,.12);
+    }
+
+    html,body{
+      background: var(--app-bg);
+      color: var(--app-fg);
+      font-family: ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+    }
     a{color:inherit;text-decoration:none}
     .container{max-width:1200px;margin:0 auto;padding:0 16px}
-    .nav{position:sticky;top:0;z-index:40;background:#06021f;border-bottom:1px solid rgba(255,255,255,.08)}
+
+    /* Header / navbar respects --nav-bg so pages can override without changing others */
+    .nav{position:sticky;top:0;z-index:40;background:var(--nav-bg);border-bottom:1px solid var(--border-weak)}
     .navbar{height:60px;display:flex;align-items:center;justify-content:space-between;gap:16px}
     .brand{display:flex;align-items:center;gap:10px;font-weight:900}
-    .pill{padding:6px 12px;border-radius:9999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06)}
-    .t-grad{background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+    .pill{padding:6px 12px;border-radius:9999px;border:1px solid var(--pill-br);background:var(--pill-bg)}
+
+    .t-grad{
+      background:linear-gradient(90deg,#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e);
+      -webkit-background-clip:text;background-clip:text;color:transparent
+    }
+
     /* Avatar ring (crisp, no blur, no bleed) */
     .avatar-wrap{position:relative;display:inline-grid;place-items:center}
     .avatar-ring{
@@ -22,7 +44,7 @@
       background:conic-gradient(#67e8f9,#a78bfa,#fb7185,#f59e0b,#22c55e,#67e8f9);
       -webkit-mask:
         radial-gradient(farthest-side,#0000 calc(100% - 3.5px),#000 calc(100% - 3.5px)) content-box,
-        linear-gradient(#000 0 0);  /* outer keep */
+        linear-gradient(#000 0 0);
       -webkit-mask-composite: xor; mask-composite: exclude;
       padding:3.5px; /* ring width */
     }
@@ -31,12 +53,22 @@
       width:32px;height:32px;border-radius:9999px;display:grid;place-items:center;
       background:#1f2937;color:#e5e7eb;font-weight:900
     }
+
     @media (max-width:720px){ .hide-sm{display:none} }
+
+    /* ================= Page-level theming hooks =================
+       Usage from a child view:
+         @section('body_class','page-analyzer')
+       Then in that child view you can override variables, e.g.:
+         body.page-analyzer { --nav-bg: rgba(6,2,31,.7); }
+       Your neon/gradient is already scoped to #seoAnalyzer in the analyzer page,
+       so nothing here will force other pages to change.
+    ============================================================ */
   </style>
 
   @stack('head')
 </head>
-<body>
+<body class="@yield('body_class','')">
   <header class="nav">
     <div class="container navbar">
       <a href="{{ route('home') }}" class="brand">
