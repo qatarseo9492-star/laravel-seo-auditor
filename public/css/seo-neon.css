@@ -1,8 +1,7 @@
 
 /* =========================
-   SEO Master — Neon Outline Theme
-   Drop into public/css/seo-neon.css, then include after any inline styles:
-   <link rel="stylesheet" href="{{ asset('css/seo-neon.css') }}">
+   SEO Master — Neon Outline Theme (v2)
+   Stronger, always-visible borders using ::before ring
    ========================= */
 
 /* ---- Base palette ---- */
@@ -11,79 +10,96 @@
   --panel:#0A0F2A;        /* card surface */
   --ink:#E6EAF3;          /* text */
   --ink-dim:#AAB3C2;      /* muted text */
-  --border:rgba(255,255,255,.06);
   --outline: conic-gradient(from 0deg,#00F6FF,#7C3AED,#F472B6,#FB923C,#22C55E,#00F6FF);
-  --glow: 0 0 0 1px rgba(255,255,255,.06) inset,
-          0 6px 28px rgba(0,0,0,.45),
-          0 0 34px rgba(0,246,255,.16),
-          0 0 60px rgba(124,58,237,.14);
+  --ring-glow:
+      0 0 0 1px rgba(255,255,255,.06) inset,
+      0 6px 28px rgba(0,0,0,.45),
+      0 0 34px rgba(0,246,255,.16),
+      0 0 60px rgba(124,58,237,.14);
 }
 
-/* Solid background as requested */
+/* Solid background */
 html,body{
   background:#01082D !important;
   color:var(--ink);
 }
 
-/* Navbar + container tweaks to match background and glow */
+/* Navbar matches background */
 .nav{
   background:#01082D !important;
   border-bottom:1px solid rgba(255,255,255,.08);
   box-shadow: 0 10px 24px rgba(0,0,0,.35);
 }
 
-/* ---------- Multi‑color outline helper ---------- */
-/* Use gradient-as-border so no markup changes are needed */
-.neo-outline,
+/* ---------- Neon ring helper (robust) ---------- */
+/* Big containers: thicker 2px ring via ::before */
 .maxw,
-.card,
-.cat-card,
+.analyze-wrap,
 .co-card,
-.co-info-item,
 .read-card,
 .speed-card,
-.ground-slab,
+.ground-slab{
+  position:relative;
+  border-radius:20px !important;
+  background: var(--panel) !important;
+  border:0 !important;
+  box-shadow: var(--ring-glow) !important;
+}
+.maxw::before,
+.analyze-wrap::before,
+.co-card::before,
+.read-card::before,
+.speed-card::before,
+.ground-slab::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:inherit;
+  padding:2px;                          /* RING WIDTH (big) */
+  background: var(--outline);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);          /* outer keep */
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;      /* punch hole */
+  pointer-events:none;
+}
+
+/* Standard cards / tiles: 1px ring */
+.card,
+.cat-card,
+.co-info-item,
+.rb-tile,
+.sp-tile,
 .wheel-card,
 .url-row,
 dialog .card{
-  background:
-      linear-gradient(var(--panel), var(--panel)) padding-box,
-      var(--outline) border-box !important;
-  border:1px solid transparent !important;
-  border-radius:18px !important;
-  box-shadow: var(--glow) !important;
-}
-
-/* Stronger rounding for bigger slabs */
-.maxw{ border-radius:20px !important; }
-.ground-slab{ border-radius:22px !important; }
-
-/* Compact elements keep existing shape */
-.url-row{ border-radius:12px !important; background:
-      linear-gradient(#0B0F23, #0B0F23) padding-box,
-      var(--outline) border-box !important;}
-
-/* Inner tiles inside sections */
-.card .card,
-.cat-card .check,
-.rb-tile,
-.sp-tile{
-  background:
-      linear-gradient(#0C122B,#0C122B) padding-box,
-      var(--outline) border-box !important;
-  border:1px solid transparent !important;
+  position:relative;
+  background: #0B122B !important;
+  border:0 !important;
   border-radius:14px !important;
-  box-shadow: var(--glow) !important;
+  box-shadow: var(--ring-glow) !important;
+}
+.card::before,
+.cat-card::before,
+.co-info-item::before,
+.rb-tile::before,
+.sp-tile::before,
+.wheel-card::before,
+.url-row::before,
+dialog .card::before{
+  content:"";
+  position:absolute; inset:0;
+  border-radius:inherit;
+  padding:1px;                          /* RING WIDTH (small) */
+  background: var(--outline);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events:none;
 }
 
-/* Progress bars get a soft neon rim */
-.progress,
-.rb-meter,
-.sp-meter{
-  border:1px solid rgba(255,255,255,.12) !important;
-  box-shadow: 0 0 0 1px rgba(255,255,255,.04) inset, 0 8px 18px rgba(0,0,0,.35);
-  background:#0B132E;
-}
+/* Input row stays dark; ensure inner input legible */
+.url-row{ background:#0B0F23 !important; }
+.url-row input{ color:var(--ink); }
 
 /* ---------- Headings with colorful icons ---------- */
 .sec-title,
@@ -91,52 +107,44 @@ dialog .card{
 .rb-title,
 .ground-slab > div .t-grad,
 .card > h3.t-grad{
-  display:flex;
-  align-items:center;
-  gap:10px;
+  display:flex; align-items:center; gap:10px;
 }
 
-/* Existing icon boxes get neon backgrounds */
+/* Neon icon badge */
 .co-info-icon,
 .sp-title .ico,
 .rb-title .ico,
 .king{
-  width:36px; height:36px;
-  display:grid; place-items:center;
+  width:36px;height:36px;
+  display:grid;place-items:center;
   border-radius:10px;
-  background:
-      linear-gradient(#0F1635,#0B112B) padding-box,
-      var(--outline) border-box !important;
-  border:1px solid transparent !important;
-  box-shadow: var(--glow);
+  position:relative;
+  background:#0E1430;
+}
+.co-info-icon::before,
+.sp-title .ico::before,
+.rb-title .ico::before,
+.king::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:1.5px;
+  background: var(--outline);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events:none;
 }
 
-/* If a heading lacks an explicit .ico, synthesize one */
-.card > h3.t-grad::before{
-  content:"";
-  width:28px;height:28px;border-radius:8px;
-  display:inline-block;
-  background:
-     linear-gradient(#0F1635,#0B112B) padding-box,
-     var(--outline) border-box;
-  border:1px solid transparent;
-  box-shadow: var(--glow);
-}
-
-/* Make gradient titles pop */
 .t-grad{
   text-shadow: 0 0 16px rgba(0,246,255,.18), 0 2px 18px rgba(124,58,237,.22);
 }
 
-/* ---------- Score wheels: brighter, neon conic ring ---------- */
+/* ---------- Score wheels (neon) ---------- */
 .mw-ring{
   background:
     conic-gradient(from -90deg,
       #15F1FF 0deg,
-      #7C3AED 70deg,
-      #F472B6 140deg,
-      #FB923C 210deg,
-      #22C55E 280deg,
+      #7C3AED 75deg,
+      #F472B6 150deg,
+      #FB923C 225deg,
+      #22C55E 300deg,
       #15F1FF 360deg);
   box-shadow:
       0 0 0 6px #0A1230 inset,
@@ -150,54 +158,37 @@ dialog .card{
 .mw.warn{ filter: drop-shadow(0 0 12px rgba(245,158,11,.45)) drop-shadow(0 0 48px rgba(124,58,237,.25)); }
 .mw.bad { filter: drop-shadow(0 0 12px rgba(239,68,68,.45))  drop-shadow(0 0 48px rgba(124,58,237,.25)); }
 
-/* Small wheels keep the same effect */
-.mw-sm .mw-ring{
-  box-shadow:
-      0 0 0 6px #0A1230 inset,
-      0 0 24px rgba(21,241,255,.22),
-      0 0 48px rgba(124,58,237,.22);
-}
-
-/* ---------- Pills & chips subtle neon edge ---------- */
+/* ---------- Chips, pills, buttons (subtle neon) ---------- */
 .pill, .chip{
-  background:
-    linear-gradient(#0E1430,#0E1430) padding-box,
-    var(--outline) border-box !important;
-  border:1px solid transparent !important;
+  position:relative;
+  background:#0E1430 !important; border:0 !important;
+  border-radius:9999px !important;
   box-shadow: 0 2px 14px rgba(0,0,0,.35);
 }
+.pill::before, .chip::before{
+  content:""; position:absolute; inset:0; border-radius:inherit; padding:1px;
+  background: var(--outline);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events:none;
+}
 
-/* Buttons keep their fills but add neon outline */
+/* Buttons keep their fills but get neon rim */
 .btn{
-  border:1px solid transparent !important;
-  background:
-    linear-gradient(#E5E7EB,#E5E7EB) padding-box,
-    var(--outline) border-box !important;
-  box-shadow: 0 6px 18px rgba(0,0,0,.35);
+  position:relative; border:0 !important; box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+.btn::before{
+  content:""; position:absolute; inset:0; border-radius:12px; padding:1.5px;
+  background: var(--outline);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events:none;
 }
 .btn-green{ color:#03120A; }
 .btn-blue{ color:#031017; }
 .btn-orange{ color:#2E1700; }
 .btn-purple{ color:#17051A; }
 
-/* Input outline */
-.url-row input{
-  color:var(--ink);
-}
-
-/* Modal polish */
-#improveModal .card{
-  background:
-      linear-gradient(#0C122B,#0C122B) padding-box,
-      var(--outline) border-box !important;
-  border:1px solid transparent !important;
-  box-shadow: var(--glow);
-}
-
-/* Speed section wheels container boost */
-.sp-wheels .wheel-card{
-  background:
-      linear-gradient(#07122A,#07122A) padding-box,
-      var(--outline) border-box !important;
-  border:1px solid transparent !important;
-}
+/* Modal neon */
+#improveModal .card{ background:#0C122B !important; }
+#improveModal .card::before{ padding:1.5px; }
