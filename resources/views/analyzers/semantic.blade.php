@@ -314,7 +314,7 @@
 
     /* Speed UI */
     const mwMobile=$('#mwMobile'), ringMobile=$('#ringMobile'), numMobile=$('#numMobile');
-    const mwDesktop=$('#mwDesktop'), ringDesktop=$('#ringDesktop'), numDesktop=$('#numDesktop');
+    const mwDesktop=$('#mwDesktop'), ringDesktop=$('#ringDesktop'), numDesktop=$$('#numDesktop');
     const lcpVal=$('#lcpVal'), lcpBar=$('#lcpBar'), lcpMeter=$('#lcpMeter');
     const clsVal=$('#clsVal'), clsBar=$('#clsBar'), clsMeter=$('#clsMeter');
     const inpVal=$('#inpVal'), inpBar=$('#inpBar'), inpMeter=$('#inpMeter');
@@ -420,24 +420,30 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
         // Readability section removed, so no more updates to its UI elements
         
-        titleVal.textContent=data.content_structure?.title||'—';
-        metaVal.textContent=data.content_structure?.meta_description||'—';
-        const hs=data.content_structure?.headings||{};
-        chipH.textContent=`H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
-        headingMap.innerHTML='';
+        // --- UPDATED: Meta & Heading population logic ---
+        titleVal.textContent = data.content_structure?.title || 'Not Found';
+        metaVal.textContent = data.content_structure?.meta_description || 'Not Found';
+        
+        const hs = data.content_structure?.headings || {};
+        chipH.textContent = `H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
+        headingMap.innerHTML = ''; // Clear previous results
+        
         const allowedHeadings = ['H1', 'H2', 'H3', 'H4'];
         let hasHeadings = false;
-        Object.entries(hs).forEach(([lvl,arr])=>{
-            if(!arr || !arr.length || !allowedHeadings.includes(lvl)) return;
+        
+        Object.entries(hs).forEach(([lvl, arr]) => {
+            if (!arr || !arr.length || !allowedHeadings.includes(lvl)) return;
             hasHeadings = true;
-            const box=document.createElement('div');
-            box.className='cat-card'; // Re-using style for consistency
-            box.innerHTML=`<div style="font-size:12px;color:#b6c2cf;margin-bottom:6px" class="uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px;">`+arr.map(t=>`<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('')+`</div>`;
-            headingMap.appendChild(box)
+            const box = document.createElement('div');
+            box.className = 'cat-card'; // Re-using style for consistency
+            box.innerHTML = `<div style="font-size:12px;color:#b6c2cf;margin-bottom:6px" class="uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px;">` + arr.map(t => `<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('') + `</div>`;
+            headingMap.appendChild(box);
         });
+
         if (!hasHeadings) {
-            headingMap.innerHTML = `<p style="color:#b6c2cf;">No headings found or analysis not run yet.</p>`;
+            headingMap.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No H1-H4 headings were found on the analyzed page.</p>`;
         }
+        // --- END OF UPDATE ---
 
 
         chipHttp.textContent='200';
@@ -887,3 +893,4 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
 </section>
 @endsection
+
