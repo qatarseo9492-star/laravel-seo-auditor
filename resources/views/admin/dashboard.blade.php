@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title','Admin — Dashboard')
-
+<script src="{{ asset('js/admin-dashboard.js') }}" defer></script>
 @push('head')
 <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
 
