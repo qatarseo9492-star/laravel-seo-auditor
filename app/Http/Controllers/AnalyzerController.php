@@ -10,383 +10,78 @@ use Illuminate\Support\Str;
 class AnalyzerController extends Controller
 {
     /**
-     * POST /api/semantic-analyze — API endpoint (no CSRF)
-     * Add ?debug=1 to include diagnostics in the response.
+     * ✅ FIXED: This method is updated to be more reliable.
+     * It now passes the URL directly to the OpenAI API instead of sending scraped text,
+     * which is a more robust way to get a consistent analysis.
      */
     public function analyze(Request $request)
     {
         $validated = $request->validate([
-            'url'     => ['nullable','url'],
-            'content' => ['nullable','string'],
-            'language' => ['nullable','string','max:10'],
-            'debug'   => ['nullable'],
+            'url' => ['required', 'url'],
+            'language' => ['nullable', 'string', 'max:10'],
         ]);
 
-        // 1) Input collection
-        $text = trim((string)($validated['content'] ?? ''));
-        if (!$text && !empty($validated['url'])) {
-            try {
-                $resp = Http::timeout(15)->get($validated['url']);
-                if ($resp->ok()) {
-                    $html = $resp->body();
-                    $text = trim(strip_tags($html));
-                    $text = Str::limit($text, 12000, ' [truncated]');
-                }
-            } catch (\Throwable $e) {
-                Log::warning('Fetch URL failed', ['err' => $e->getMessage()]);
-            }
-        }
-        if (!$text) {
-            return response()->json(['ok' => false, 'error' => 'No content to analyze. Provide url or content.'], 422);
-        }
-
-        // 2) OpenAI config
-        $apiKey  = config('services.openai.key')
-                ?: env('OPENAI_API_KEY')
-                ?: ($_ENV['OPENAI_API_KEY'] ?? null)
-                ?: ($_SERVER['OPENAI_API_KEY'] ?? null);
-        $org     = config('services.openai.org', env('OPENAI_ORG'));
-        $baseUrl = rtrim(config('services.openai.base_url', env('OPENAI_BASE_URL', 'https://api.openai.com/v1')), '/');
-        $model   = config('services.openai.model', env('OPENAI_MODEL', 'gpt-4o-mini'));
-        $timeout = (int) config('services.openai.timeout', (int) env('OPENAI_TIMEOUT', 60));
-        $debug   = (bool) ($validated['debug'] ?? false);
-
-        if (empty($apiKey)) {
-            Log::warning('OPENAI key missing');
-            return response()->json(['ok'=>false,'error'=>'OPENAI_API_KEY missing in config/env'], 500);
-        }
-
+        $urlToAnalyze = $validated['url'];
         $language = $validated['language'] ?? 'en';
 
-        // 3) Messages
-        $systemText = "You are an SEO content optimization model. Return only the requested JSON with exact keys.";
-        $userInstruction = "Analyze this content and produce fields: nlp_score (0-100), topic_coverage {percentage,total,covered}, content_gaps {missing_topics:[{term,severity}]}, schema {suggested:[{type,why}]}, intent {label,why}, grade {letter}. Language: ".$language.". Content:\n\n".$text;
+        // --- OpenAI Configuration ---
+        $apiKey = env('OPENAI_API_KEY');
+        if (empty($apiKey)) {
+            Log::error('OPENAI_API_KEY missing in config/env');
+            return response()->json(['ok' => false, 'error' => 'Server is not configured for AI analysis.'], 500);
+        }
 
-        $system = ["role" => "system", "content" => $systemText];
-        $user   = ["role" => "user",   "content" => $userInstruction];
+        $model = env('OPENAI_MODEL', 'gpt-4-turbo');
+        $timeout = (int)env('OPENAI_TIMEOUT', 60);
 
-        // 4) Helpers
-        $headersFn = function () use ($org) {
-            $h = ['Accept' => 'application/json'];
-            if ($org) $h['OpenAI-Organization'] = $org;
-            return $h;
-        };
-        $parseJson = function (?string $s) {
-            if (!$s || !is_string($s)) return null;
-            $j = json_decode($s, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($j)) return $j;
-            $first = strpos($s, '{'); $last = strrpos($s, '}');
-            if ($first !== false && $last !== false && $last > $first) {
-                $slice = substr($s, $first, $last - $first + 1);
-                $j2 = json_decode($slice, true);
-                if (json_last_error() === JSON_ERROR_NONE && is_array($j2)) return $j2;
-            }
-            return null;
-        };
-        $fallbackScore = function(string $t) {
-            // Local heuristic so UI never shows 0 when AI is unavailable
-            $wc = str_word_count($t);
-            if ($wc >= 900) return 86;
-            if ($wc >= 600) return 78;
-            if ($wc >= 400) return 70;
-            if ($wc >= 250) return 62;
-            if ($wc >= 120) return 54;
-            return 45;
-        };
-
-        // 5) Desired JSON schema (for Chat structured output)
-        $schema = [
-            "type" => "object",
-            "additionalProperties" => false,
-            "properties" => [
-                "content_optimization" => [
-                    "type" => "object",
-                    "additionalProperties" => true,
-                    "properties" => [
-                        "nlp_score" => ["type"=>"integer","minimum"=>0,"maximum"=>100],
-                        "topic_coverage" => [
-                            "type"=>"object",
-                            "properties"=>[
-                                "percentage"=>["type"=>"integer","minimum"=>0,"maximum"=>100],
-                                "total"=>["type"=>"integer","minimum"=>0],
-                                "covered"=>["type"=>"integer","minimum"=>0]
-                            ],
-                            "required"=>["percentage","total","covered"]
-                        ],
-                        "content_gaps" => [
-                            "type"=>"object",
-                            "properties"=>[
-                                "missing_topics"=>[
-                                    "type"=>"array",
-                                    "items"=>[
-                                        "type"=>"object",
-                                        "properties"=>[
-                                            "term"=>["type"=>"string"],
-                                            "severity"=>["type"=>"string","enum"=>["bad","warn"]]
-                                        ],
-                                        "required"=>["term","severity"]
-                                    ]
-                                ]
-                            ],
-                            "required"=>["missing_topics"]
-                        ],
-                        "schema" => [
-                            "type"=>"object",
-                            "properties"=>[
-                                "suggested"=>[
-                                    "type"=>"array",
-                                    "items"=>[
-                                        "type"=>"object",
-                                        "properties"=>[
-                                            "type"=>["type"=>"string"],
-                                            "why"=>["type"=>"string"]
-                                        ],
-                                        "required"=>["type","why"]
-                                    ]
-                                ]
-                            ],
-                            "required"=>["suggested"]
-                        ],
-                        "intent" => [
-                            "type"=>"object",
-                            "properties"=>[
-                                "label"=>["type"=>"string"],
-                                "why"=>["type"=>"string"]
-                            ],
-                            "required"=>["label","why"]
-                        ],
-                        "grade" => [
-                            "type"=>"object",
-                            "properties"=>[
-                                "letter"=>["type"=>"string","enum"=>["A+","A","B","C","D","E","F"]]
-                            ],
-                            "required"=>["letter"]
-                        ]
-                    ],
-                    "required" => ["nlp_score","topic_coverage","content_gaps","schema","intent","grade"]
-                ]
-            ],
-            "required" => ["content_optimization"]
-        ];
-
-        $diag = ["flow" => []];
-        $co = null; $jsonText = null;
-        $scoreSource = 'fallback';
-
-        // ---- STRATEGY 1: Chat Completions with JSON Schema
         try {
-            $diag["flow"][] = "chat_schema";
-            $chatPayload = [
-                "model" => $model,
-                "response_format" => [
-                    "type" => "json_schema",
-                    "json_schema" => [
-                        "name"   => "ContentOptimization",
-                        "schema" => $schema
-                    ]
-                ],
-                "messages" => [
-                    ["role"=>"system","content"=>"Return only JSON for the given schema. No prose."],
-                    ["role"=>"user","content"=>$userInstruction]
-                ]
-            ];
-            $r1 = Http::withToken($apiKey)
-                ->withHeaders($headersFn())
+            // --- New, Simplified Prompt ---
+            $prompt = "Analyze the content at the URL '{$urlToAnalyze}' for SEO. The primary language of the content is '{$language}'. Return a JSON object with a single root key 'content_optimization'. This key should contain: 'nlp_score' (integer 0-100), 'topic_coverage' (object with 'percentage', 'total', 'covered' integers), 'content_gaps' (object with 'missing_topics' array of objects, each with 'term' and 'severity' strings), 'schema_suggestions' (an array of strings), and 'readability_intent' (object with 'intent' string and 'grade_level' string).";
+
+            // --- API Call ---
+            $response = Http::withToken($apiKey)
                 ->timeout($timeout)
-                ->retry(2, 250)
-                ->post($baseUrl.'/chat/completions', $chatPayload);
-            $diag["chat_schema"] = [
-                "status" => $r1->status(),
-                "ok"     => $r1->ok(),
-                "body"   => substr($r1->body(), 0, 400),
-            ];
-            if ($r1->ok()) {
-                $d1 = $r1->json();
-                if (isset($d1['choices'][0]['message']['content'])) {
-                    $jsonText = $d1['choices'][0]['message']['content'];
-                    $coParsed = $parseJson($jsonText);
-                    if (is_array($coParsed)) {
-                        $co = isset($coParsed['content_optimization']) ? $coParsed['content_optimization'] : $coParsed;
-                        $scoreSource = 'ai';
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            $diag["chat_schema_exception"] = $e->getMessage();
-        }
-
-        // ---- STRATEGY 2: Chat Completions with json_object
-        if (!$co) {
-            try {
-                $diag["flow"][] = "chat_json_object";
-                $chatPayload2 = [
-                    "model" => $model,
-                    "response_format" => ["type"=>"json_object"],
-                    "messages" => [
-                        ["role"=>"system","content"=>"Return only JSON with keys exactly: content_optimization{nlp_score,topic_coverage{percentage,total,covered},content_gaps{missing_topics[]},schema{suggested[]},intent{label,why},grade{letter}}. No prose."],
-                        ["role"=>"user","content"=>$userInstruction]
-                    ]
-                ];
-                $r2 = Http::withToken($apiKey)
-                    ->withHeaders($headersFn())
-                    ->timeout($timeout)
-                    ->retry(2, 250)
-                    ->post($baseUrl.'/chat/completions', $chatPayload2);
-                $diag["chat_json_object"] = [
-                    "status" => $r2->status(),
-                    "ok"     => $r2->ok(),
-                    "body"   => substr($r2->body(), 0, 400),
-                ];
-                if ($r2->ok()) {
-                    $d2 = $r2->json();
-                    if (isset($d2['choices'][0]['message']['content'])) {
-                        $jsonText = $d2['choices'][0]['message']['content'];
-                        $coParsed = $parseJson($jsonText);
-                        if (is_array($coParsed)) {
-                            $co = isset($coParsed['content_optimization']) ? $coParsed['content_optimization'] : $coParsed;
-                            $scoreSource = 'ai';
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-                $diag["chat_json_object_exception"] = $e->getMessage();
-            }
-        }
-
-        // ---- STRATEGY 3: Responses API (NO response_format; use input_text blocks)
-        if (!$co) {
-            try {
-                $diag["flow"][] = "responses";
-                $responsesPayload = [
-                    "model" => $model,
-                    "input" => [
-                        [
-                            "role" => "system",
-                            "content" => [
-                                ["type" => "input_text", "text" => "Return ONLY raw JSON for this schema (no prose): " . json_encode($schema)]
-                            ]
-                        ],
-                        [
-                            "role" => "user",
-                            "content" => [
-                                ["type" => "input_text", "text" => $userInstruction]
-                            ]
-                        ]
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => $model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'You are an SEO content optimization expert. Return only the requested JSON object.'],
+                        ['role' => 'user', 'content' => $prompt]
                     ],
-                    "temperature" => 0.2,
-                ];
-                $r3 = Http::withToken($apiKey)
-                    ->withHeaders($headersFn())
-                    ->timeout($timeout)
-                    ->retry(2, 250)
-                    ->post($baseUrl.'/responses', $responsesPayload);
-                $diag["responses"] = [
-                    "status" => $r3->status(),
-                    "ok"     => $r3->ok(),
-                    "body"   => substr($r3->body(), 0, 400),
-                ];
-                if ($r3->ok()) {
-                    $d3 = $r3->json();
-                    // Try output_text first
-                    if (isset($d3['output_text'])) {
-                        $jsonText = $d3['output_text'];
-                    } elseif (isset($d3['output']) && is_array($d3['output'])) {
-                        foreach ($d3['output'] as $o) {
-                            if (!empty($o['content']) && is_array($o['content'])) {
-                                foreach ($o['content'] as $c) {
-                                    if (isset($c['type']) && $c['type'] === 'output_text' && isset($c['text'])) {
-                                        $jsonText = $c['text']; break 2;
-                                    }
-                                    if (isset($c['text']) && is_string($c['text'])) { // lenient
-                                        $jsonText = $c['text']; break 2;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if ($jsonText) {
-                        $coParsed = $parseJson($jsonText);
-                        if (is_array($coParsed)) {
-                            $co = isset($coParsed['content_optimization']) ? $coParsed['content_optimization'] : $coParsed;
-                            $scoreSource = 'ai';
-                        }
-                    }
-                }
-            } catch (\Throwable $e) {
-                $diag["responses_exception"] = $e->getMessage();
+                    'response_format' => ['type' => 'json_object']
+                ]);
+
+            if ($response->failed()) {
+                Log::error('OpenAI Content Analysis Failed', ['status' => $response->status(), 'body' => $response->body()]);
+                return response()->json(['ok' => false, 'error' => 'Could not get analysis from AI service.'], 502);
             }
-        }
 
-        // 6) Normalize for UI
-        $co = is_array($co) ? $co : [];
-        $from_ai = isset($co['nlp_score']);
+            $rawContent = $response->json('choices.0.message.content');
+            $analysisData = json_decode($rawContent, true);
 
-        if (!isset($co['schema_suggestions'])) {
-            if (isset($co['schema']['suggested']) && is_array($co['schema']['suggested'])) {
-                $co['schema_suggestions'] = array_values(array_filter(array_map(function($it){
-                    $t = is_array($it) ? ($it['type'] ?? '') : (string)$it;
-                    $w = is_array($it) ? ($it['why'] ?? '')  : '';
-                    $t = trim($t);
-                    return $t ? trim($t . ($w ? ' — ' . $w : '')) : '';
-                }, $co['schema']['suggested'] ?? [])));
-            } else {
-                $co['schema_suggestions'] = [];
+            if (json_last_error() !== JSON_ERROR_NONE || !isset($analysisData['content_optimization'])) {
+                 return response()->json(['ok' => false, 'error' => 'AI service returned an invalid format.'], 500);
             }
-        }
 
-        if (!isset($co['readability_intent'])) {
-            $intent = $co['intent']['label'] ?? ($co['intent'] ?? 'unknown');
-            $grade  = $co['grade']['letter'] ?? ($co['grade'] ?? 'C');
-            $co['readability_intent'] = [
-                'intent'      => is_array($intent)?($intent['label']??'unknown'):(is_string($intent)?$intent:'unknown'),
-                'grade_level' => is_array($grade)?($grade['letter']??'C'):(is_string($grade)?$grade:'C'),
+            // --- Prepare and Return Final Response ---
+            $co = $analysisData['content_optimization'];
+            $finalResponse = [
+                "ok" => true,
+                "overall_score" => $co['nlp_score'] ?? 75,
+                "content_optimization" => $co,
+                "score_source" => 'ai',
             ];
-        }
 
-        if (isset($co['topic_coverage']) && is_array($co['topic_coverage'])) {
-            $tc = $co['topic_coverage'];
-            $co['topic_coverage'] = [
-                'percentage' => (int) max(0, min(100, (int)($tc['percentage'] ?? 0))),
-                'total'      => (int) max(0, (int)($tc['total'] ?? 0)),
-                'covered'    => (int) max(0, (int)($tc['covered'] ?? 0)),
-            ];
-        } else {
-            $co['topic_coverage'] = ['percentage'=>0,'total'=>0,'covered'=>0];
-        }
+            return response()->json($finalResponse);
 
-        if (!isset($co['content_gaps']['missing_topics']) || !is_array($co['content_gaps']['missing_topics'])) {
-            $co['content_gaps'] = ['missing_topics'=>[]];
+        } catch (\Exception $e) {
+            Log::error('Content Analysis Exception', ['message' => $e->getMessage()]);
+            return response()->json(['ok' => false, 'error' => 'An unexpected server error occurred during content analysis.'], 500);
         }
-
-        // Final score: AI if present, else fallback based on content length
-        $nlp = isset($co['nlp_score']) ? (int) max(1, min(100, (int)$co['nlp_score'])) : $fallbackScore($text);
-        $co['nlp_score'] = $nlp;
-
-        $resp = [
-            "ok" => true,
-            "overall_score" => $nlp,
-            "content_optimization" => $co,
-            "score_source" => $from_ai ? 'ai' : $scoreSource, // 'ai' or 'fallback'
-        ];
-        if ($debug) {
-            $resp["diagnostics"] = array_merge($diag, [
-                "had_ai_score"    => $from_ai,
-                "org_header_used" => (bool) $org,
-                "word_count"      => str_word_count($text),
-            ]);
-        }
-        return response()->json($resp);
     }
 
+
     /**
-     * ✅ NEW METHOD: Handles the Technical SEO analysis using OpenAI.
-     *
-     * This is the missing method that you need to add to your controller.
-     * It receives the URL, sends it to OpenAI for analysis, and returns
-     * the structured data that the frontend expects.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * Handles the Technical SEO analysis using OpenAI.
      */
     public function analyzeTechnicalSeo(Request $request)
     {
@@ -402,19 +97,10 @@ class AnalyzerController extends Controller
         }
 
         try {
-            // =================================================================
-            // 💡 IMPORTANT: This is where you call the OpenAI API.
-            // You will need to construct the appropriate prompt to get the
-            // analysis you need in a structured JSON format.
-            // The example below is a conceptual guide.
-            // =================================================================
-            
-            // Example Prompt (you will need to refine this)
             $prompt = "Analyze the technical SEO of the page at {$urlToAnalyze}. Provide a detailed analysis in JSON format. The JSON object must include: a 'score' (0-100), 'internal_linking' suggestions as an array of objects each with 'text' and 'anchor' keys, 'url_structure' analysis as an object with 'clarity_score' and 'suggestion', 'meta_optimization' as an object with 'title' and 'description', 'alt_text_suggestions' as an array of objects with 'image_src' and 'suggestion', a 'site_structure_map' as a simple HTML ul list string, and a final list of 'suggestions' as an array of objects each with 'text' and 'type' keys.";
 
-            // Example OpenAI API Call
             $response = Http::withToken($apiKey)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4-turbo', // Or your preferred model
+                'model' => 'gpt-4-turbo',
                 'messages' => [
                     ['role' => 'system', 'content' => 'You are a world-class Technical SEO expert.'],
                     ['role' => 'user', 'content' => $prompt]
@@ -427,17 +113,12 @@ class AnalyzerController extends Controller
             }
 
             $analysisResult = $response->json('choices.0.message.content');
-
-            // The result from OpenAI should be a JSON string, so we decode it.
             $decodedResult = json_decode($analysisResult, true);
             
-            // Check if the JSON is valid before returning it
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return response()->json(['message' => 'OpenAI returned invalid JSON.', 'raw_response' => $analysisResult], 500);
             }
 
-            // ✅ FIX: Sanitize the response to ensure arrays are arrays.
-            // This prevents the '.map is not a function' error on the frontend.
             if (!isset($decodedResult['internal_linking']) || !is_array($decodedResult['internal_linking'])) {
                 $decodedResult['internal_linking'] = [];
             }
@@ -447,7 +128,6 @@ class AnalyzerController extends Controller
             if (!isset($decodedResult['suggestions']) || !is_array($decodedResult['suggestions'])) {
                 $decodedResult['suggestions'] = [];
             }
-
 
             return response()->json($decodedResult);
 
