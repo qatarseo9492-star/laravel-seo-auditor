@@ -76,56 +76,79 @@
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
 
   /* ===================== Wheels (overall + readability + speed) ===================== */
-  /* New neon ring with multicolor palette + soft glow */
-  .mw{--v:0;--p:0;width:200px;height:200px;position:relative;filter:drop-shadow(0 12px 28px rgba(0,0,0,.45))}
-  .mw-ring{position:absolute;inset:0;border-radius:50%;
-    background:
-      conic-gradient(from -90deg,
+  /* New double-line score wheel design */
+  .mw {
+    --v: 0;
+    width: 200px;
+    height: 200px;
+    position: relative;
+    filter: drop-shadow(0 12px 28px rgba(0, 0, 0, .45));
+  }
+  .mw-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    /* This is the background track */
+    background: #1a1a1a; 
+    box-shadow: 
+        /* Outer static ring */
+        0 0 0 3px #3a3a3a,
+        /* Inner dark area, creating the track width */
+        inset 0 0 0 13px #1a1a1a;
+  }
+  .mw-ring::before {
+    content: "";
+    position: absolute;
+    inset: 3px; /* Position inside the outer ring */
+    border-radius: 50%;
+    background: conic-gradient(from -90deg,
         var(--blue-1) 0deg, var(--blue-2) 60deg,
         var(--green-1) 120deg, var(--green-2) 150deg,
         var(--yellow-1) 195deg, var(--orange-1) 225deg,
         var(--red-1) 255deg, var(--pink-1) 300deg,
         var(--purple-1) 340deg, var(--blue-1) 360deg);
-    -webkit-mask:
-      conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
-      radial-gradient(circle 76px,transparent 72px,#000 72px);
+    
+    /* Mask to create the progress ring shape */
+    -webkit-mask: 
+        conic-gradient(from -90deg, #000 calc(var(--v) * 1%), transparent 0),
+        radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 10px));
     mask:
-      conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
-      radial-gradient(circle 76px,transparent 72px,#000 72px);
-    box-shadow:
-      0 0 0 8px #111 inset,
-      0 0 24px rgba(0,198,255,.35),
-      0 0 60px rgba(138,43,226,.25);
+        conic-gradient(from -90deg, #000 calc(var(--v) * 1%), transparent 0),
+        radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 10px));
+    -webkit-mask-composite: source-in; /* Use progress mask to clip shape mask */
   }
-  
-  /* NEW: Double Wheel effect */
-  .mw-ring::before {
-    content: "";
+  .mw-center {
     position: absolute;
-    inset: 8px;
-    border-radius: 50%;
-    border: 3px solid #ffffff1a;
-    box-shadow: 0 0 12px #000 inset;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 34px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 6px 22px rgba(0, 0, 0, .45);
   }
-
-  .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
-  .mw.good {filter:drop-shadow(0 0 12px rgba(0,255,138,.45)) drop-shadow(0 0 40px rgba(0,255,198,.35))}
-  .mw.warn {filter:drop-shadow(0 0 12px rgba(255,165,0,.45)) drop-shadow(0 0 40px rgba(255,215,0,.35))}
-  .mw.bad  {filter:drop-shadow(0 0 12px rgba(255,20,147,.45))  drop-shadow(0 0 40px rgba(138,43,226,.35))}
-  
-  .mw-sm{width:170px;height:170px}
-  .mw-sm .mw-ring{-webkit-mask:
-      conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
-      radial-gradient(circle 64px,transparent 60px,#000 60px);
-    mask:
-      conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
-      radial-gradient(circle 64px,transparent 60px,#000 60px)}
-  .mw-sm .mw-center{font-size:28px}
-  /* Smaller double ring */
+  .mw.good { filter: drop-shadow(0 0 12px rgba(0, 255, 138, .45)) drop-shadow(0 0 40px rgba(0, 255, 198, .35)); }
+  .mw.warn { filter: drop-shadow(0 0 12px rgba(255, 165, 0, .45)) drop-shadow(0 0 40px rgba(255, 215, 0, .35)); }
+  .mw.bad { filter: drop-shadow(0 0 12px rgba(255, 20, 147, .45)) drop-shadow(0 0 40px rgba(138, 43, 226, .35)); }
+  .mw-sm {
+    width: 170px;
+    height: 170px;
+  }
+  .mw-sm .mw-ring {
+    box-shadow: 
+        0 0 0 2px #3a3a3a,
+        inset 0 0 0 11px #1a1a1a;
+  }
   .mw-sm .mw-ring::before {
-      inset: 6px;
-      border-width: 2px;
+    inset: 2px;
+    -webkit-mask: 
+        conic-gradient(from -90deg, #000 calc(var(--v) * 1%), transparent 0),
+        radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
+    mask:
+        conic-gradient(from -90deg, #000 calc(var(--v) * 1%), transparent 0),
+        radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
   }
+  .mw-sm .mw-center { font-size: 28px; }
 
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
@@ -314,7 +337,7 @@
 
     /* Speed UI */
     const mwMobile=$('#mwMobile'), ringMobile=$('#ringMobile'), numMobile=$('#numMobile');
-    const mwDesktop=$('#mwDesktop'), ringDesktop=$('#ringDesktop'), numDesktop=$$('#numDesktop');
+    const mwDesktop=$('#mwDesktop'), ringDesktop=$('#ringDesktop'), numDesktop=$('#numDesktop');
     const lcpVal=$('#lcpVal'), lcpBar=$('#lcpBar'), lcpMeter=$('#lcpMeter');
     const clsVal=$('#clsVal'), clsBar=$('#clsBar'), clsMeter=$('#clsMeter');
     const inpVal=$('#inpVal'), inpBar=$('#inpBar'), inpMeter=$('#inpMeter');
