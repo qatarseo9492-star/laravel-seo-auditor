@@ -39,11 +39,13 @@
       var(--green-1),var(--green-2),
       var(--yellow-1),var(--orange-1),
       var(--red-1),var(--pink-1),var(--purple-1),var(--blue-1));
-    -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900
+    -webkit-background-clip:text;background-clip:text;color:transparent;font-weight:900;
+    background-size: 400% 100%;
+    animation: rainbowSlide 8s linear infinite;
   }
   .byline{font-size:14px;color:var(--sub)}
   .shoail{display:inline-block;background:linear-gradient(90deg,var(--blue-1),var(--pink-1),var(--purple-1),var(--green-2),var(--orange-1));-webkit-background-clip:text;background-clip:text;color:transparent;background-size:400% 100%;animation:rainbowSlide 6s linear infinite,bob 3s ease-in-out infinite}
-  @keyframes rainbowSlide{to{background-position:100% 50%}} @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+  @keyframes rainbowSlide{to{background-position:400% 50%}} @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 
   .legend{display:flex;gap:10px;justify-content:center;margin:10px 0 6px}
   .legend .badge{padding:6px 10px;border-radius:9999px;font-weight:800;border:1px solid #ffffff2a;font-size:12px}
@@ -95,19 +97,22 @@
       0 0 24px rgba(0,198,255,.35),
       0 0 60px rgba(138,43,226,.25);
   }
-  .mw-fill{position:absolute;inset:18px;border-radius:50%;overflow:hidden;background:#0f0f0f}
-  .mw-fill::after{content:"";position:absolute;left:0;right:0;height:100%;top:calc(100% - var(--p)*1%);transition:top .9s ease;
-    background:linear-gradient(to top,
-      rgba(138,43,226,.9) 0%,
-      rgba(255,20,147,.9) 25%,
-      rgba(0,198,255,.9) 50%,
-      rgba(0,255,198,.9) 70%,
-      rgba(255,165,0,.9) 100%);
-    -webkit-mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%);mask:radial-gradient(105px 16px at 50% 0,#0000 98%,#000 100%)}
+  
+  /* NEW: Double Wheel effect */
+  .mw-ring::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    border: 3px solid #ffffff1a;
+    box-shadow: 0 0 12px #000 inset;
+  }
+
   .mw-center{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;font-weight:900;color:#fff;text-shadow:0 6px 22px rgba(0,0,0,.45)}
   .mw.good {filter:drop-shadow(0 0 12px rgba(0,255,138,.45)) drop-shadow(0 0 40px rgba(0,255,198,.35))}
   .mw.warn {filter:drop-shadow(0 0 12px rgba(255,165,0,.45)) drop-shadow(0 0 40px rgba(255,215,0,.35))}
   .mw.bad  {filter:drop-shadow(0 0 12px rgba(255,20,147,.45))  drop-shadow(0 0 40px rgba(138,43,226,.35))}
+  
   .mw-sm{width:170px;height:170px}
   .mw-sm .mw-ring{-webkit-mask:
       conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
@@ -115,8 +120,12 @@
     mask:
       conic-gradient(from -90deg,#000 calc(var(--v)*1%), #0000 0),
       radial-gradient(circle 64px,transparent 60px,#000 60px)}
-  .mw-sm .mw-fill{inset:14px}
   .mw-sm .mw-center{font-size:28px}
+  /* Smaller double ring */
+  .mw-sm .mw-ring::before {
+      inset: 6px;
+      border-width: 2px;
+  }
 
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
@@ -149,34 +158,6 @@
 
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
 
-  /* ===================== Readability ===================== */
-  .read-card{border-radius:20px;background:#1B1B1B;border:1px solid #2A2A2A;padding:16px}
-  .rb-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .rb-title{display:flex;align-items:center;gap:10px}
-  .rb-title .ico{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#1f2b4a,#231f4a);border:1px solid #3a3a3a;box-shadow:0 0 24px rgba(0,198,255,.15)}
-  .rb-legend{font-size:12px;color:#aab3c2}
-  .rb-grid{display:grid;grid-template-columns:220px 1fr;gap:12px;margin-top:10px}
-  @media (max-width:920px){.rb-grid{grid-template-columns:1fr}}
-  .rb-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  @media (max-width:920px){.rb-tiles{grid-template-columns:1fr}}
-  .rb-tile{background:#1E1E1E;border:1px solid #2F2F2F;border-radius:14px;padding:12px}
-  .rb-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#b6c2cf;margin:8px 0 6px}
-  .rb-val{color:var(--ink);font-weight:800}
-  .rb-meter{height:10px;border-radius:9999px;background:#151515;border:1px solid #2A2A2A;overflow:hidden}
-  .rb-meter>span{display:block;height:100%;width:0%;transition:width .9s ease;background:linear-gradient(90deg,var(--red-1),var(--yellow-1),var(--green-1))}
-
-  /* Readability "Simple Fixes" — colorful */
-  .rb-fixes{background:linear-gradient(135deg,#1f2b4a66,#231f4a33), radial-gradient(120% 120% at 10% 10%,#00c6ff22,transparent 60%);border:1px solid #2A2A2A;border-radius:14px;padding:14px;margin-top:12px;box-shadow:0 0 0 1px #222 inset,0 12px 32px rgba(0,0,0,.35)}
-  .rb-fixes h4{margin:0 0 8px 0;font-weight:900}
-  .rb-fixes ul{margin:0;padding-left:0;display:grid;gap:8px}
-  .rb-fixes li{list-style:none;border:1px solid #2a3e83;background:linear-gradient(90deg,#1e40af33,#00c6ff22,#8A2BE222);padding:10px 12px;border-radius:12px;font-weight:700;color:#dbeafe;box-shadow:0 0 0 1px #1e3a8a inset}
-
-  /* Readability banner */
-  .rb-banner{margin-top:12px;border-radius:14px;padding:12px;font-weight:900;box-shadow:0 0 0 1px transparent inset,0 14px 32px rgba(0,0,0,.25)}
-  .rb-banner.good{background:linear-gradient(90deg,#05240f,#0f5132);border:1px solid #126f3f;box-shadow:0 0 0 2px #126f3f66 inset,0 0 42px #22c55e33;color:#a7f3d0}
-  .rb-banner.warn{background:linear-gradient(90deg,#3b2a05,#7a5d0d);border:1px solid #9a6a10;box-shadow:0 0 0 2px #9a6a1066 inset,0 0 42px #f59e0b33;color:#fde68a}
-  .rb-banner.bad{ background:linear-gradient(90deg,#3a0b0b,#6f1d1d);border:1px solid #8a1a1a;box-shadow:0 0 0 2px #8a1a1a66 inset,0 0 42px #ef444433;color:#fecaca}
-
   /* ===================== Site Speed & CWV ===================== */
   .speed-card{border-radius:20px;background:#1B1B1B;border:1px solid #2A2A2A;padding:16px;margin-top:16px}
   .sp-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
@@ -190,7 +171,8 @@
   .wheel-label{font-size:12px;color:#a6c5cf;margin-top:6px}
 
   /* Bars */
-  .sp-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:10px}
+  .sp-bars-grid{display:grid;grid-template-columns:repeat(2, 1fr); gap:14px; margin-top:16px;}
+  @media (max-width: 600px) { .sp-bars-grid { grid-template-columns: 1fr; } }
   .sp-tile{background:#191919;border:1px solid var(--outline);border-radius:14px;padding:12px}
   .sp-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#a6c5cf;margin:6px 0}
   .sp-val{color:var(--ink);font-weight:800}
@@ -200,8 +182,48 @@
   .sp-meter.good{box-shadow:0 0 0 1px #1b5e2f inset,0 0 24px #22c55e33}
   .sp-meter.warn{box-shadow:0 0 0 1px #8a5a12 inset,0 0 24px #f59e0b33}
   .sp-meter.bad {box-shadow:0 0 0 1px #6f1616 inset,0 0 24px #ef444433}
+  
+  /* NEW: Redesigned Speed Suggestions Box */
+  .sp-fixes {
+      background: linear-gradient(135deg,#0f2d1f,#0d3b2a);
+      border: 1px solid #22c55e72;
+      box-shadow: 0 0 24px rgba(34,197,94,.25), 0 0 0 1px #0f2d1f inset;
+      border-radius: 14px;
+      padding: 14px;
+      margin-top: 16px;
+  }
+  .sp-fixes h4 {
+      margin: 0 0 8px 0;
+      font-weight: 900;
+      color: #baf7d9;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+  }
+  .sp-fixes ul {
+      margin:0; padding-left:0; display:grid; gap:8px;
+  }
+  .sp-fixes li {
+      list-style: none;
+      border-left: 3px solid var(--green-1);
+      padding-left: 10px;
+      color: #d1fae5;
+      font-size: 13px;
+  }
 
   /* ===================== Content Optimization (Futuristic) ===================== */
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
+  .animated-icon {
+      display: inline-block;
+      animation: spin 6s linear infinite;
+      color: var(--blue-1);
+  }
+  .animated-icon.pulse {
+      animation: pulse 3s ease-in-out infinite, spin 10s linear infinite reverse;
+      color: var(--pink-1);
+  }
+
   .co-card {
     --co-bg: #191919;
     --co-border: var(--outline);
@@ -210,7 +232,7 @@
     background: var(--co-bg);
     border: 1px solid var(--co-border);
     padding: 16px;
-    margin-top: 16px;
+    margin-top: 12px; /* Adjusted margin */
     background-image:
       radial-gradient(circle at 10% 10%, rgba(138,43,226,.12), transparent 40%),
       radial-gradient(circle at 90% 80%, rgba(0,198,255,.12), transparent 50%);
@@ -267,7 +289,7 @@
     const $ = s=>document.querySelector(s);
 
     /* ============== Element refs ============== */
-    const mw=$('#mw'), mwRing=$('#mwRing'), mwFill=$('#mwFill'), mwNum=$('#mwNum');
+    const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
     const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
     const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
 
@@ -275,7 +297,7 @@
           importBtn=$('#importBtn'), importFile=$('#importFile'), printBtn=$('#printBtn'),
           resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn');
 
-    const statF=$('#statFlesch'), statG=$('#statGrade'), statInt=$('#statInt'), statExt=$('#statExt'), statRatio=$('#statRatio');
+    // NOTE: statF, statG etc are removed as their layout is gone.
     const titleVal=$('#titleVal'), metaVal=$('#metaVal'), headingMap=$('#headingMap'), recsEl=$('#recs'), catsEl=$('#cats');
 
     const chipHttp=$('#chipHttp'), chipTitle=$('#chipTitle'), chipMeta=$('#chipMeta'),
@@ -288,23 +310,11 @@
           mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
           mTips=$('#improveTips'), mLink=$('#improveSearch');
 
-    /* Readability UI */
-    const readMw=$('#readMw'), readRing=$('#readRing'), readFill=$('#readFill'), readNum=$('#readNum');
-    const readBadge=$('#readBadge'), gradeBadge=$('#gradeBadge'), rbLegend=$('#rbLegend');
-    const rbFleschVal=$('#rbFleschVal'), rbFleschFill=$('#rbFleschFill');
-    const rbASLVal=$('#rbASLVal'), rbASLFill=$('#rbASLFill');
-    const rbWordsVal=$('#rbWordsVal'), rbWordsFill=$('#rbWordsFill');
-    const rbSyllVal=$('#rbSyllVal'), rbSyllFill=$('#rbSyllFill');
-    const rbTTRVal=$('#rbTTRVal'), rbTTRFill=$('#rbTTRFill');
-    const rbTriVal=$('#rbTriVal'), rbTriFill=$('#rbTriFill');
-    const rbDigitsVal=$('#rbDigitsVal'), rbDigitsFill=$('#rbDigitsFill');
-    const rbPassiveVal=$('#rbPassiveVal'), rbPassiveFill=$('#rbPassiveFill');
-    const rbSimpleVal=$('#rbSimpleVal'), rbSimpleFill=$('#rbSimpleFill');
-    const rbFixes=$('#rbFixes'), rbBanner=$('#rbBanner');
+    /* Readability UI is removed */
 
     /* Speed UI */
-    const mwMobile=$('#mwMobile'), ringMobile=$('#ringMobile'), fillMobile=$('#fillMobile'), numMobile=$('#numMobile');
-    const mwDesktop=$('#mwDesktop'), ringDesktop=$('#ringDesktop'), fillDesktop=$('#fillDesktop'), numDesktop=$('#numDesktop');
+    const mwMobile=$('#mwMobile'), ringMobile=$('#ringMobile'), numMobile=$('#numMobile');
+    const mwDesktop=$('#mwDesktop'), ringDesktop=$('#ringDesktop'), numDesktop=$('#numDesktop');
     const lcpVal=$('#lcpVal'), lcpBar=$('#lcpBar'), lcpMeter=$('#lcpMeter');
     const clsVal=$('#clsVal'), clsBar=$('#clsBar'), clsMeter=$('#clsMeter');
     const inpVal=$('#inpVal'), inpBar=$('#inpBar'), inpMeter=$('#inpMeter');
@@ -353,17 +363,18 @@ ${txt?.slice(0,800)}`)}
     async function callPSI(url){const res=await fetch('/semantic-analyzer/psi',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url})});const text=await res.text();let json={};try{json=JSON.parse(text)}catch{throw new Error(`PSI: invalid JSON
 ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.message||'PSI unavailable')}if(!res.ok){throw new Error(json.error||json.message||`PSI HTTP ${res.status}`)}return json}
     function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.style.opacity=isOn?.6:1;analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze'}
-
-    /* Readability meters */
-    const pct=(v,min,max,invert=false)=>{if(v===null||v===undefined||isNaN(v))return 0;let p=(v-min)/Math.max(1,(max-min))*100;p=Math.max(0,Math.min(100,p));return invert?100-p:p};
-    function setMeter(fillEl,valEl,value,display,range,invert=false){if(!fillEl||!valEl)return;valEl.textContent=(value===null||value===undefined||Number.isNaN(value))?'—':display;fillEl.style.width=pct(Number(value),range[0],range[1],invert)+'%'}
-
-    function buildFixes(r){const fixes=[];if(typeof r.avg_sentence_len==='number'&&r.avg_sentence_len>20)fixes.push('Break long sentences into 12–16 words.');if(typeof r.simple_words_ratio==='number'&&r.simple_words_ratio<80)fixes.push('Prefer shorter, simpler words (use clearer synonyms).');if(typeof r.passive_ratio==='number'&&r.passive_ratio>15)fixes.push('Reduce passive voice; rewrite in active voice.');if(typeof r.repetition_trigram==='number'&&r.repetition_trigram>10)fixes.push('Trim repeated phrases; vary wording and examples.');if(typeof r.digits_per_100w==='number'&&r.digits_per_100w>10)fixes.push('Reduce numeric density; round or group numbers where possible.');if(fixes.length<3){fixes.push('Add headings and bullets to chunk information.');fixes.push('Use image captions to explain visuals succinctly.');fixes.push('Front-load key points; keep paragraphs 2–4 lines.')}rbFixes.innerHTML=fixes.slice(0,5).map(x=>`<li>✅ ${x}</li>`).join('')}
-
+    
     /* Speed helpers */
     const band = s => s>=80?'good':(s>=60?'warn':'bad');
     const scoreFromBounds=(val,good,poor)=>{if(val==null||isNaN(val))return 0;if(val<=good)return 100;if(val>=poor)return 0;return Math.round(100*(1-((val-good)/(poor-good))))};
-    function setWheel(elRing,elFill,elNum,container,score,prefix){const b=band(score);container.classList.remove('good','warn','bad');container.classList.add(b);elRing.style.setProperty('--v',score);elFill.style.setProperty('--p',score);elNum.textContent=(prefix?prefix+' ':'')+score+'%'}
+    function setWheel(elRing, elNum, container, score, prefix){
+        const b=band(score);
+        container.classList.remove('good','warn','bad');
+        container.classList.add(b);
+        elRing.style.setProperty('--v',score);
+        // Fill element is removed, no need to set --p
+        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
+    }
     function setSpMeter(barEl,valEl,raw,score,fmt,meterWrap){valEl.textContent=raw==null?'—':(fmt?fmt(raw):raw);barEl.style.width=clamp01(score)+'%';if(meterWrap){meterWrap.classList.remove('good','warn','bad');meterWrap.classList.add(band(score));}}
 
     /* ===== Analyze ===== */
@@ -378,7 +389,6 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         // reset speed
         psiStatus.textContent='Checking…';
         [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
-        [fillMobile,fillDesktop].forEach(el=>el.style.setProperty('--p',0));
         [mwMobile,mwDesktop].forEach(c=>{c.classList.remove('good','warn','bad');c.classList.add('warn')});
         numMobile.textContent='M 0%';numDesktop.textContent='D 0%';
         [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
@@ -391,7 +401,7 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
         const score=clamp01(data.overall_score||0), bname=bandName(score);
         mw?.classList.remove('good','warn','bad');mw?.classList.add(bname);
-        mwRing?.style.setProperty('--v',score);mwFill?.style.setProperty('--p',score);
+        mwRing?.style.setProperty('--v',score);
         mwNum.textContent=score+'%';
         overallBar?.classList.remove('good','warn','bad');overallBar?.classList.add(bname);
         overallFill.style.width=score+'%';overallPct.textContent=score+'%';
@@ -408,38 +418,27 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         setChip(chipHuman,'Human-like',`${human} %`,human);
         setChip(chipAI,'AI-like',`${ai} %`,100-human);
 
-        statF.textContent=r.flesch??'—';statG.textContent='Grade '+(r.grade??'—');
-        statInt.textContent=data.quick_stats?.internal_links??0;
-        statExt.textContent=data.quick_stats?.external_links??0;
-        statRatio.textContent=(data.quick_stats?.text_to_html_ratio??0)+'%';
-
-        const rs=clamp01(r.score||0), rBand=bandName(rs);
-        readMw?.classList.remove('good','warn','bad');readMw?.classList.add(rBand);
-        readRing?.style.setProperty('--v',rs);readFill?.style.setProperty('--p',rs);
-        readNum.textContent=rs+'%';
-        readBadge.textContent=rs>=80?'Very Easy To Read':(rs>=60?'Good — Needs More Improvement':'Needs Improvement in Content');
-        readBadge.className='pill '+(rs>=80?'score-pill--green':rs>=60?'score-pill--orange':'score-pill--red');
-        const grade=(typeof r.grade==='number')?r.grade:null;
-        gradeBadge.textContent='Grade '+(grade??'—');
-        rbLegend.textContent=(r.language==='non-latin'?'Non-Latin content (LIX-based) — العربية/others supported':'Latin-like content — English & similar');
-        setMeter(rbFleschFill,rbFleschVal,r.flesch,(r.flesch??'—'),[0,100],false);
-        setMeter(rbASLFill,rbASLVal,r.avg_sentence_len,(r.avg_sentence_len??'—'),[10,30],true);
-        setMeter(rbWordsFill,rbWordsVal,r.word_count,(r.word_count??'—'),[0,2000],false);
-        setMeter(rbSyllFill,rbSyllVal,r.avg_syllables_per_word,(r.avg_syllables_per_word??'—'),[1.2,2.2],true);
-        setMeter(rbTTRFill,rbTTRVal,r.ttr,((r.ttr!=null?r.ttr+'%':'—')),[0,100],false);
-        setMeter(rbTriFill,rbTriVal,r.repetition_trigram,((r.repetition_trigram!=null?r.repetition_trigram+'%':'—')),[0,20],true);
-        setMeter(rbDigitsFill,rbDigitsVal,r.digits_per_100w,(r.digits_per_100w??'—'),[0,20],true);
-        setMeter(rbPassiveFill,rbPassiveVal,r.passive_ratio,((r.passive_ratio!=null?r.passive_ratio+'%':'—')),[0,30],true);
-        setMeter(rbSimpleFill,rbSimpleVal,r.simple_words_ratio,((r.simple_words_ratio!=null?r.simple_words_ratio+'%':'—')),[60,100],false);
-        if(grade!==null){const bandCl=grade<=7?'good':(grade<=10?'warn':'bad');rbBanner.className='rb-banner '+bandCl;rbBanner.textContent=grade<=7?`Easy to read (Grade ${grade}). Clear and accessible.`:grade<=10?`Good for general audiences (Grade ${grade}).`:`Complex reading level (Grade ${grade}). Use shorter sentences and simpler vocabulary.`}
-        buildFixes(r);
-
+        // Readability section removed, so no more updates to its UI elements
+        
         titleVal.textContent=data.content_structure?.title||'—';
         metaVal.textContent=data.content_structure?.meta_description||'—';
         const hs=data.content_structure?.headings||{};
         chipH.textContent=`H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
         headingMap.innerHTML='';
-        Object.entries(hs).forEach(([lvl,arr])=>{if(!arr||!arr.length)return;const box=document.createElement('div');box.className='card';box.innerHTML=`<div style="font-size:12px;color:#b6c2cf;margin-bottom:6px" class="uppercase">${lvl}</div>`+arr.map(t=>`<div>• ${t}</div>`).join('');headingMap.appendChild(box)});
+        const allowedHeadings = ['H1', 'H2', 'H3', 'H4'];
+        let hasHeadings = false;
+        Object.entries(hs).forEach(([lvl,arr])=>{
+            if(!arr || !arr.length || !allowedHeadings.includes(lvl)) return;
+            hasHeadings = true;
+            const box=document.createElement('div');
+            box.className='cat-card'; // Re-using style for consistency
+            box.innerHTML=`<div style="font-size:12px;color:#b6c2cf;margin-bottom:6px" class="uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px;">`+arr.map(t=>`<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('')+`</div>`;
+            headingMap.appendChild(box)
+        });
+        if (!hasHeadings) {
+            headingMap.innerHTML = `<p style="color:#b6c2cf;">No headings found or analysis not run yet.</p>`;
+        }
+
 
         chipHttp.textContent='200';
         chipCanon.textContent=(data.page_signals?.canonical||'—')||'—';
@@ -551,8 +550,8 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
           const mobile=psi.mobile||{};const desktop=psi.desktop||{};
           const mScore=clamp01(Math.round(mobile.score??mobile.performance??0));
           const dScore=clamp01(Math.round(desktop.score??desktop.performance??0));
-          setWheel(ringMobile,fillMobile,numMobile,mwMobile,mScore,'M');
-          setWheel(ringDesktop,fillDesktop,numDesktop,mwDesktop,dScore,'D');
+          setWheel(ringMobile, numMobile, mwMobile, mScore, 'M');
+          setWheel(ringDesktop, numDesktop, mwDesktop, dScore, 'D');
 
           const pick=(...vals)=>{for(const v of vals){const n=Number(v);if(v!==undefined&&v!==null&&!Number.isNaN(n))return n}return null};
           const lcpSeconds=(()=>{const sec=pick(mobile.lcp_s,desktop.lcp_s,psi.lcp_s,psi.metrics?.lcp_s);if(sec!==null)return sec;const ms=pick(mobile.lcp,desktop.lcp,psi.lcp,psi.metrics?.lcp);return ms!==null?ms/1000:null})();
@@ -624,9 +623,9 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#161616;border:1px solid var(--outline)">
+      <!-- Overall Score Wheel - Updated -->
       <div class="mw warn" id="mw">
         <div class="mw-ring" id="mwRing" style="--v:0"></div>
-        <div class="mw-fill" id="mwFill" style="--p:0"></div>
         <div class="mw-center" id="mwNum">0%</div>
       </div>
     </div>
@@ -679,19 +678,15 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
     </div>
   </div>
 
-  <div class="card" style="margin-top:16px">
-    <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Quick Stats</h3>
-    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
-      <div class="card"><div style="font-size:12px;color:#b6c2cf">Readability (Flesch)</div><div id="statFlesch" style="font-size:20px;font-weight:800">—</div><div id="statGrade" style="font-size:12px;color:#94a3b8">—</div></div>
-      <div class="card"><div style="font-size:12px;color:#b6c2cf">Links (int / ext)</div><div style="font-size:20px;font-weight:800"><span id="statInt">0</span> / <span id="statExt">0</span></div></div>
-      <div class="card"><div style="font-size:12px;color:#b6c2cf">Text/HTML Ratio</div><div id="statRatio" style="font-size:20px;font-weight:800">—</div></div>
-    </div>
+  <!-- Quick Stats Section REMOVED -->
+
+  <!-- NEW: Content Optimization Heading -->
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+    <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"></path><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"></path></svg>
+    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Optimization</h3>
+    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
   </div>
 
-  <div class="co-head">
-    <div class="sec-title"><span class="ico">🧠</span> Content Optimization</div>
-    <div class="sec-sub">Semantic coverage, gaps, schema & intent</div>
-  </div>
 <div class="co-card" id="contentOptimizationCard">
     <div class="co-grid">
 
@@ -771,51 +766,34 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
     </div>
   </div>
 </div>
-<div class="read-card" id="readabilityCard" style="margin-top:16px">
-    <div class="rb-head">
-      <div class="rb-title">
-        <div class="ico">📚</div>
-        <div>
-          <div class="t-grad" style="font-weight:900;">Readability Insights</div>
-          <div class="rb-legend" id="rbLegend">Multilingual analysis — English, العربية, Português</div>
+
+<!-- NEW Meta Info Layout (replaces old "Content Structure") -->
+<div class="card" style="margin-top:16px;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+        <svg class="animated-icon pulse" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>
+        <h3 class="t-grad" style="font-weight:900;margin:0;">Meta & Heading Structure</h3>
+    </div>
+    <div class="space-y-3">
+        <div class="cat-card">
+            <div style="font-size:12px;color:#b6c2cf">Title Tag</div>
+            <div id="titleVal" style="font-weight:600; color:var(--ink); margin-top:4px; line-height: 1.4;">—</div>
         </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span id="readBadge" class="pill">—</span>
-        <span id="gradeBadge" class="pill">Grade —</span>
-      </div>
-    </div>
-
-    <div class="rb-grid">
-      <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#161616;border:1px solid var(--outline)">
-        <div class="mw mw-sm warn" id="readMw">
-          <div class="mw-ring" id="readRing" style="--v:0"></div>
-          <div class="mw-fill" id="readFill" style="--p:0"></div>
-          <div class="mw-center" id="readNum">0%</div>
+        <div class="cat-card">
+            <div style="font-size:12px;color:#b6c2cf">Meta Description</div>
+            <div id="metaVal" style="color:var(--ink); margin-top:4px; line-height: 1.4;">—</div>
         </div>
-      </div>
-
-      <div class="rb-tiles">
-        <div class="rb-tile"><div class="rb-row"><div>😊 Flesch Reading Ease</div><div class="rb-val" id="rbFleschVal">—</div></div><div class="rb-meter"><span id="rbFleschFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🧾 Avg Sentence Length</div><div class="rb-val" id="rbASLVal">—</div></div><div class="rb-meter"><span id="rbASLFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🔤 Words</div><div class="rb-val" id="rbWordsVal">—</div></div><div class="rb-meter"><span id="rbWordsFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🅰️ Syllables / Word</div><div class="rb-val" id="rbSyllVal">—</div></div><div class="rb-meter"><span id="rbSyllFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🔀 Lexical Diversity (TTR)</div><div class="rb-val" id="rbTTRVal">—</div></div><div class="rb-meter"><span id="rbTTRFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>♻️ Repetition (tri-gram)</div><div class="rb-val" id="rbTriVal">—</div></div><div class="rb-meter"><span id="rbTriFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div># Digits / 100 words</div><div class="rb-val" id="rbDigitsVal">—</div></div><div class="rb-meter"><span id="rbDigitsFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🗣️ Passive voice</div><div class="rb-val" id="rbPassiveVal">—</div></div><div class="rb-meter"><span id="rbPassiveFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>✨ Simple words</div><div class="rb-val" id="rbSimpleVal">—</div></div><div class="rb-meter"><span id="rbSimpleFill" style="width:0%"></span></div></div>
-      </div>
+        <div class="cat-card">
+            <div style="font-size:12px;color:#b6c2cf; margin-bottom:8px;">Heading Map (H1-H4)</div>
+            <div id="headingMap" class="space-y-2">
+                <!-- JS populates this -->
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="rb-fixes">
-      <h4>💡 Simple Fixes</h4>
-      <ul id="rbFixes"><li>Run an analysis to see targeted suggestions.</li></ul>
-    </div>
+<!-- Readability Section REMOVED -->
 
-    <div id="rbBanner" class="rb-banner warn">Readability score helps you target Grade 7–9 for most audiences.</div>
-  </div>
-  <div class="speed-card" id="speedCard">
+<div class="speed-card" id="speedCard">
     <div class="sp-head">
       <div class="sp-title">
         <div class="ico">⚡</div>
@@ -829,11 +807,11 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       </div>
     </div>
 
+    <!-- Site Speed Wheels - Updated -->
     <div class="sp-wheels">
       <div class="wheel-card">
         <div class="mw mw-sm warn" id="mwMobile">
           <div class="mw-ring" id="ringMobile" style="--v:0"></div>
-          <div class="mw-fill" id="fillMobile" style="--p:0"></div>
           <div class="mw-center" id="numMobile">M 0%</div>
         </div>
         <div class="wheel-label">Mobile</div>
@@ -841,40 +819,23 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       <div class="wheel-card">
         <div class="mw mw-sm warn" id="mwDesktop">
           <div class="mw-ring" id="ringDesktop" style="--v:0"></div>
-          <div class="mw-fill" id="fillDesktop" style="--p:0"></div>
           <div class="mw-center" id="numDesktop">D 0%</div>
         </div>
         <div class="wheel-label">Desktop</div>
       </div>
     </div>
 
-    <div class="sp-grid">
-      <div>
-        <div class="sp-tile"><div class="sp-row"><div>🏁 LCP (s)</div><div class="sp-val" id="lcpVal">—</div></div><div class="sp-meter" id="lcpMeter"><span id="lcpBar" style="width:0%"></span></div></div>
-        <div class="sp-tile"><div class="sp-row"><div>📦 CLS</div><div class="sp-val" id="clsVal">—</div></div><div class="sp-meter" id="clsMeter"><span id="clsBar" style="width:0%"></span></div></div>
-        <div class="sp-tile"><div class="sp-row"><div>⚡ INP (ms)</div><div class="sp-val" id="inpVal">—</div></div><div class="sp-meter" id="inpMeter"><span id="inpBar" style="width:0%"></span></div></div>
-        <div class="sp-tile"><div class="sp-row"><div>⏱️ TTFB (ms)</div><div class="sp-val" id="ttfbVal">—</div></div><div class="sp-meter" id="ttfbMeter"><span id="ttfbBar" style="width:0%"></span></div></div>
-      </div>
+    <div class="sp-bars-grid">
+      <div class="sp-tile"><div class="sp-row"><div>🏁 LCP (s)</div><div class="sp-val" id="lcpVal">—</div></div><div class="sp-meter" id="lcpMeter"><span id="lcpBar" style="width:0%"></span></div></div>
+      <div class="sp-tile"><div class="sp-row"><div>📦 CLS</div><div class="sp-val" id="clsVal">—</div></div><div class="sp-meter" id="clsMeter"><span id="clsBar" style="width:0%"></span></div></div>
+      <div class="sp-tile"><div class="sp-row"><div>⚡ INP (ms)</div><div class="sp-val" id="inpVal">—</div></div><div class="sp-meter" id="inpMeter"><span id="inpBar" style="width:0%"></span></div></div>
+      <div class="sp-tile"><div class="sp-row"><div>⏱️ TTFB (ms)</div><div class="sp-val" id="ttfbVal">—</div></div><div class="sp-meter" id="ttfbMeter"><span id="ttfbBar" style="width:0%"></span></div></div>
     </div>
 
+    <!-- Site Speed Suggestions - Redesigned -->
     <div class="sp-fixes">
       <h4>💡 Speed Suggestions</h4>
       <ul id="psiFixes"><li>Run Analyze to fetch PSI data.</li></ul>
-    </div>
-  </div>
-  <div class="card" style="margin-top:16px">
-    <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Content Structure</h3>
-    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-      <div class="card">
-        <div style="font-size:12px;color:#b6c2cf">Title</div>
-        <div id="titleVal" style="font-weight:600">—</div>
-        <div style="font-size:12px;color:#b6c2cf;margin-top:10px">Meta Description</div>
-        <div id="metaVal" style="color:var(--ink)">—</div>
-      </div>
-      <div class="card">
-        <div style="font-size:12px;color:#b6c2cf;margin-bottom:6px">Heading Map</div>
-        <div id="headingMap" class="text-sm space-y-2"></div>
-      </div>
     </div>
   </div>
 
