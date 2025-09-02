@@ -1,41 +1,145 @@
-/* techseo-neon.css â€” Neon theme for Technical SEO section */
-:root{
-  --bg-0:#1A1A1A; --bg-1:#262626;
-  --fg-0:#EAEAEA; --fg-dim:#B6B6B6;
-  --br-weak:rgba(255,255,255,.12);
-  --panel:rgba(255,255,255,.04);
-  --panel-strong:rgba(255,255,255,.06);
-  --c-blue-0:#00C6FF; --c-blue-1:#0072FF;
-  --c-green-0:#00FF8A; --c-green-1:#00FFC6;
-  --c-gold-0:#FFD700;  --c-gold-1:#FFA500;
-  --c-pink-0:#FF1493;  --c-red-0:#FF4500;
-  --c-purple-0:#8A2BE2;
-  --glow-soft:0 0 12px rgba(0,198,255,.35), 0 0 24px rgba(138,43,226,.25);
-  --glow-strong:0 0 10px rgba(0,255,138,.55), 0 0 24px rgba(255,20,147,.45);
-}
-html,body{background:var(--bg-0);color:var(--fg-0)}
-.panel{background:linear-gradient(180deg, var(--panel), rgba(255,255,255,.02));border:1px solid var(--br-weak);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 0 0 1px rgba(0,0,0,.2), 0 6px 18px rgba(0,0,0,.25)}
-.h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
-.h .card-title{background:linear-gradient(90deg,var(--c-blue-0),var(--c-purple-0),var(--c-pink-0),var(--c-gold-0),var(--c-green-0));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.2px;text-shadow:var(--glow-soft);animation:floatGlow 4s ease-in-out infinite}
-.pill{padding:.28rem .7rem;border-radius:999px;border:1px solid transparent;color:white;font-weight:600;background:linear-gradient(90deg, rgba(255,255,255,.1), rgba(255,255,255,.06)) padding-box,linear-gradient(90deg, var(--c-blue-0), var(--c-purple-0), var(--c-pink-0), var(--c-gold-0), var(--c-green-0)) border-box;box-shadow:var(--glow-soft)}
-[data-bar]{position:relative;background:rgba(255,255,255,.06);border:1px solid var(--br-weak);border-radius:12px;overflow:hidden;height:12px}
-[data-fill]{height:100%;width:0%;background:linear-gradient(90deg, var(--c-red-0), var(--c-gold-0), var(--c-green-0), var(--c-blue-0), var(--c-purple-0));box-shadow:var(--glow-strong);transition:width .7s cubic-bezier(.2,.8,.2,1)}
-table{width:100%;border-collapse:collapse}
-thead th{font-weight:700;color:var(--fg-0)}
-td,th{border-bottom:1px dashed var(--br-weak);padding:10px 8px;vertical-align:top}
-.il-url a{color:var(--fg-0);text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.25)}
-.il-url a:hover{filter:brightness(1.15);text-shadow:0 0 8px rgba(0,198,255,.35)}
-.img-row{display:grid;grid-template-columns:1.2fr .9fr .9fr;gap:12px;padding:10px;border-bottom:1px dashed var(--br-weak);align-items:center}
-.img-row .src a{color:var(--fg-0);text-decoration:none}
-.img-row .alt.cur{color:var(--fg-dim)}
-.img-row .alt.sug{color:#fff;text-shadow:0 0 8px rgba(0,255,138,.35)}
-.tree ul{margin:0 0 0 18px;padding:0;list-style:none}
-.tree li{margin:6px 0}
-.tree .h1,.tree .h2,.tree .h3,.tree .h4,.tree .h5,.tree .h6{display:inline-block}
-.tree .h1{color:#fff}.tree .h2{color:#cde7ff}.tree .h3{color:#d7bfff}.tree .h4{color:#ffc9e5}.tree .h5{color:#ffe6a6}.tree .h6{color:#cfffec}
-.input{width:100%;padding:.65rem .85rem;border-radius:12px;color:#fff;background:rgba(255,255,255,.06);border:1px solid var(--br-weak);outline:none;transition:border-color .2s ease, box-shadow .2s ease}
-.input:focus{border-color:#00C6FF;box-shadow:0 0 0 3px rgba(0,198,255,.2)}
-.btn{cursor:pointer;border-radius:12px;border:1px solid transparent;padding:.6rem .95rem;color:#111;background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.75)) padding-box,linear-gradient(90deg, var(--c-blue-0), var(--c-purple-0), var(--c-pink-0), var(--c-gold-0), var(--c-green-0)) border-box;transition:transform .08s ease}
-.btn:hover{transform:translateY(-1px)}
-.btn[disabled], .btn[aria-busy='true']{opacity:.65;cursor:not-allowed}
-@keyframes floatGlow{0%{filter:drop-shadow(0 0 0 rgba(0,198,255,0))}50%{filter:drop-shadow(0 0 10px rgba(0,198,255,.35))}100%{filter:drop-shadow(0 0 0 rgba(0,198,255,0))}}
+/**
+ * technical-seo.client.v2.js
+ * Robust hooks:
+ *  - Click on [data-techseo-analyze] (preferred)
+ *  - Auto-listen to common CustomEvents from existing analyzer flows:
+ *      'analyze:started', 'analyze:completed', 'analyzer:completed',
+ *      'semantic:analyze-completed', 'co:analyze:completed'
+ *    and try to read detail.url
+ *  - Fallbacks for URL source:
+ *      [data-url-input], #targetUrl, #url, input[name="url"], querystring ?url=
+ */
+(() => {
+  "use strict";
+
+  const SEL = {
+    urlInput:    '[data-url-input], #targetUrl, #url, input[name="url"]',
+    runButton:   '[data-techseo-analyze], #btn-techseo',
+    scoreUrl:    '#score-url-structure',
+    scoreMeta:   '#score-meta',
+    scoreImages: '#score-images',
+    scoreInternal: '#score-internal',
+    scoreStructure: '#score-structure',
+    scoreOverall: '#score-overall-techseo',
+    urlIssuesList: '#url-issues',
+    metaTitleCurrent:    '#meta-title-current',
+    metaDescCurrent:     '#meta-desc-current',
+    metaTitleSuggested:  '#meta-title-suggested',
+    metaDescSuggested:   '#meta-desc-suggested',
+    imagesContainer: '#images-table',
+    internalLinksTableBody: '#internal-links-table',
+    structureTree: '#structure-tree',
+    loadingOverlay: '#techseo-loading-overlay'
+  };
+
+  const $  = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+  function escapeHtml(s){return (s??'').toString().replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  const clamp100 = n => Math.max(0, Math.min(100, Number(n)||0));
+
+  function setScore(el, n){
+    if(!el) return; const v = clamp100(n);
+    el.textContent = `${v}/100`; el.style.setProperty('--score', v);
+    const bar = el.closest('[data-bar]')?.querySelector('[data-fill]'); if(bar) bar.style.width = v+'%';
+  }
+  function setText(el, val, placeholder='(missing)'){ if(el) el.textContent = (val && String(val).trim()) ? val : placeholder; }
+  function setList(el, items){ if(el) el.innerHTML = (items||[]).map(t=>`<li>${escapeHtml(t)}</li>`).join(''); }
+  function setInternalLinks(el, rows){
+    if(!el) return; el.innerHTML = (rows||[]).map(r=>`<tr><td class="il-url"><a href="${escapeHtml(r.url||'')}" target="_blank" rel="noopener">${escapeHtml(r.url||'')}</a></td><td class="il-anchor">${escapeHtml(r.anchor||r.reason||'')}</td></tr>`).join('');
+  }
+  function setImages(el, items){
+    if(!el) return; el.innerHTML = (items||[]).map(it=>`<div class="img-row"><div class="src"><a href="${escapeHtml(it.src||'')}" target="_blank" rel="noopener">${escapeHtml((it.src||'').split('/').pop()||'(image)')}</a></div><div class="alt cur">${escapeHtml(it.current_alt||'(missing)')}</div><div class="alt sug">${escapeHtml(it.suggested_alt||'')}</div></div>`).join('');
+  }
+  function renderTree(nodes){ if(!nodes?.length) return ''; return `<ul>`+nodes.map(n=>`<li><span class="h${n.level}">H${n.level}: ${escapeHtml(n.text||'')}</span>${renderTree(n.children||[])}</li>`).join('')+`</ul>`; }
+  function setTree(el, data){ if(el) el.innerHTML = renderTree(data||[]); }
+  function csrf(){ return document.querySelector('meta[name="csrf-token"]')?.content || ''; }
+  function showLoading(on){ const ov = $(SEL.loadingOverlay); if(ov){ ov.style.display = on ? 'grid' : 'none'; } }
+
+  function readUrlFallback(){
+    // 1) explicit input
+    const el = $(SEL.urlInput);
+    if (el?.value?.trim()) return el.value.trim();
+    // 2) data attribute on any container
+    const c = document.querySelector('[data-current-url]'); if (c?.dataset?.currentUrl) return c.dataset.currentUrl;
+    // 3) querystring ?url=
+    const u = new URL(location.href); const qs = u.searchParams.get('url'); if (qs) return qs;
+    // 4) last payload used
+    if (window.TechSEO?.lastPayload?.url) return window.TechSEO.lastPayload.url;
+    return '';
+  }
+
+  async function apiAnalyze(url){
+    const res = await fetch('/api/techseo/analyze', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','X-CSRF-TOKEN': csrf()},
+      body: JSON.stringify({ url })
+    });
+    const data = await res.json().catch(()=>({ok:false,error:'Invalid JSON'}));
+    if(!res.ok || data.ok === false){ throw new Error((data && (data.error||data.message)) || `HTTP ${res.status}`); }
+    return data;
+  }
+
+  async function run(url){
+    const target = (url||'').trim() || readUrlFallback();
+    if(!target){ alert('Enter a URL to analyze.'); return; }
+    const btn = $(SEL.runButton);
+    try{
+      btn && (btn.disabled=true, btn.dataset.loading='1'); showLoading(true);
+      const data = await apiAnalyze(target);
+      window.TechSEO.lastPayload = data;
+
+      setScore($(SEL.scoreUrl),       data.scores?.url_structure);
+      setScore($(SEL.scoreMeta),      data.scores?.meta);
+      setScore($(SEL.scoreImages),    data.scores?.images);
+      setScore($(SEL.scoreInternal),  data.scores?.internal_links);
+      setScore($(SEL.scoreStructure), data.scores?.structure);
+      setScore($(SEL.scoreOverall),   data.scores?.overall);
+
+      setList($(SEL.urlIssuesList), data.url_structure?.issues);
+      setText($(SEL.metaTitleCurrent),   data.meta?.title);
+      setText($(SEL.metaDescCurrent),    data.meta?.description);
+      setText($(SEL.metaTitleSuggested), data.meta?.ai?.title || '', '');
+      setText($(SEL.metaDescSuggested),  data.meta?.ai?.description || '', '');
+
+      setImages($(SEL.imagesContainer), data.images?.suggestions);
+      setInternalLinks($(SEL.internalLinksTableBody), (data.internal_linking?.ai || data.internal_linking?.candidates || []));
+      setTree($(SEL.structureTree), data.structure?.tree);
+
+      document.dispatchEvent(new CustomEvent('techseo:updated', { detail: { url: target, data } }));
+      return data;
+    } catch(err){
+      console.error('[TechSEO]', err); alert(err.message || 'Technical SEO analyze failed.');
+    } finally {
+      btn && (btn.disabled=false, delete btn.dataset.loading); showLoading(false);
+    }
+  }
+
+  function wire(){
+    const btn = $(SEL.runButton);
+    const input = $(SEL.urlInput);
+    if(btn){ btn.addEventListener('click', ()=> run()); }
+    if(input){ input.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); run(); } }); }
+
+    // Listen to various completion events from your main analyzer
+    const evtNames = [
+      'analyze:completed', 'analyzer:completed', 'semantic:analyze-completed',
+      'co:analyze:completed', 'analyze:finished'
+    ];
+    evtNames.forEach(name => {
+      document.addEventListener(name, (e) => {
+        const url = e?.detail?.url || readUrlFallback();
+        if(url) run(url);
+      });
+    });
+
+    // Also listen to a generic event if your code dispatches it
+    document.addEventListener('semantic:analyze', (e) => {
+      const url = e?.detail?.url || readUrlFallback();
+      if(url) run(url);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', wire);
+  window.TechSEO = Object.freeze({ run, lastPayload:null, config:SEL });
+})();
