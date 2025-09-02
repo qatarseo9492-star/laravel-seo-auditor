@@ -31,7 +31,7 @@
   html,body{
   background:#01051a !important;
   }
-  .maxw{max-width:1150px;margin:0 auto;border:1px solid var(--outline);border-radius:18px;padding:8px;background:linear-gradient(0deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))}
+  .maxw{max-width:1150px;margin:0 auto;padding:8px;}
 
   .title-wrap{display:flex;align-items:center;gap:14px;justify-content:center;margin-top:14px}
   .king{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#1E1E1E;border:1px solid #FFFFFF1F;box-shadow:0 0 24px #000 inset}
@@ -191,69 +191,41 @@
   /* ============================================= */
   /* === 🎨 NEW STYLES for Site Speed Section 🎨 === */
   /* ============================================= */
-  .speed-card {
-    background: linear-gradient(145deg, #0c2b2a, #0c1a2e);
-    border: 1px solid var(--green-2);
-    border-radius: 20px;
-    padding: 16px;
-    margin-top: 24px;
-    box-shadow: 0 0 32px rgba(0, 255, 198, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
-  }
-  .sp-head .ico {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, rgba(0, 255, 138, 0.2), rgba(0, 198, 255, 0.2));
-    border: 1px solid var(--green-1);
-    border-radius: 12px;
-    color: var(--green-1);
-    font-size: 20px;
-    display:grid; place-items:center;
-  }
-  .sp-wheels { gap: 24px; }
-  .wheel-card {
-    background: rgba(8, 20, 20, 0.7);
-    border-color: rgba(0, 255, 138, 0.3);
-  }
-  .sp-bars-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 20px; }
-  .sp-tile {
-    background: rgba(8, 20, 20, 0.7);
-    border: 1px solid rgba(0, 255, 138, 0.3);
-    border-radius: 14px;
-    padding: 12px;
-  }
-  .sp-meter {
-    height: 14px;
-    background: rgba(0,0,0,0.4);
-    border-color: rgba(255,255,255,0.1);
-    position: relative;
-    overflow: visible;
-    border-radius: 999px;
-  }
-  .sp-meter > span {
-    background: linear-gradient(90deg, var(--red-1), var(--orange-1), var(--yellow-1) 50%, var(--green-1) 100%);
-    box-shadow: 0 0 8px var(--green-1);
-    position: relative;
-    display: block;
-    height: 100%;
-    border-radius: 999px;
-  }
-  .sp-meter > span::after {
-    content: '';
-    position: absolute;
-    right: 0; top: -3px;
-    width: 4px; height: 20px;
-    background: #fff;
-    border-radius: 2px;
-    box-shadow: 0 0 10px #fff, 0 0 20px #fff;
-  }
-  .sp-fixes {
-    background: linear-gradient(135deg, #0d3b2a, #112d3d);
-    border: 1px solid var(--green-2);
-    box-shadow: 0 0 24px rgba(0, 255, 198, 0.25);
-    border-radius:14px; padding:14px; margin-top:16px;
-  }
-  .sp-fixes h4 { color: var(--green-1); margin:0 0 8px; font-weight:900; }
-  .sp-fixes ul { margin:0; padding-left:0; display:grid; gap:8px; list-style:none;}
-  .sp-fixes li { border-left: 3px solid var(--green-1); padding-left:10px; color: #c0fdee; font-size:13px;}
+    .speed-card-new {
+        background: #0D1120;
+        border: 1px solid #2A3659;
+        border-radius: 16px;
+        padding: 16px;
+        margin-top: 24px;
+    }
+    .speed-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .speed-title { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--ink); }
+    .speed-badge { font-size: 11px; padding: 4px 8px; border-radius: 999px; font-weight: 700; }
+    .speed-badge.good { background: #10B9811A; color: #6EE7B7; border: 1px solid #10B981; }
+    .speed-badge.warn { background: #F59E0B1A; color: #FBBF24; border: 1px solid #F59E0B; }
+    .speed-badge.bad { background: #EF44441A; color: #F87171; border: 1px solid #EF4444; }
+    .speed-overview-bar { height: 6px; background: #1F2937; border-radius: 999px; margin-top: 8px; }
+    .speed-overview-bar > div { height: 100%; width: 0%; border-radius: 999px; transition: width 0.8s ease; background: linear-gradient(90deg, var(--red-1), var(--yellow-1), var(--green-1)); }
+    .speed-overview-text { font-size: 12px; color: var(--sub); margin-top: 4px; }
+
+    .speed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    @media (max-width: 600px) { .speed-grid { grid-template-columns: 1fr; } }
+    .speed-device-card { background: #111827; border-radius: 12px; padding: 12px; border: 1px solid #1F2937; }
+    .speed-device-header { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .speed-device-score {
+        width: 60px; height: 60px;
+        position: relative;
+    }
+    .speed-device-score-val { position: absolute; inset: 0; display: grid; place-items: center; font-size: 18px; font-weight: 800; }
+    .speed-device-score svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .speed-device-score circle { fill: none; stroke-width: 6; }
+    .speed-device-score .track { stroke: #374151; }
+    .speed-device-score .progress { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+    .speed-device-metrics { display: grid; gap: 8px; font-size: 12px; }
+    .speed-device-metric { display: flex; justify-content: space-between; align-items: center; }
+    .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 12px; padding: 12px; margin-top: 16px; }
+    .speed-opportunities-title { display: flex; align-items: center; gap: 8px; color: #FBBF24; font-weight: 700; margin-bottom: 8px; }
+    .speed-opportunities ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12px; color: var(--sub); }
   
   /* ===================== Content Optimization (Futuristic) ===================== */
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -494,14 +466,14 @@
 
     /* Readability UI is removed */
 
-    /* Speed UI */
-    const mwMobile=$('#mwMobile'), ringMobile=$('#ringMobile'), numMobile=$('#numMobile');
-    const mwDesktop=$('#mwDesktop'), ringDesktop=$('#ringDesktop'), numDesktop=$('#numDesktop');
-    const lcpVal=$('#lcpVal'), lcpBar=$('#lcpBar'), lcpMeter=$('#lcpMeter');
-    const clsVal=$('#clsVal'), clsBar=$('#clsBar'), clsMeter=$('#clsMeter');
-    const inpVal=$('#inpVal'), inpBar=$('#inpBar'), inpMeter=$('#inpMeter');
-    const ttfbVal=$('#ttfbVal'), ttfbBar=$('#ttfbBar'), ttfbMeter=$('#ttfbMeter');
-    const psiStatus=$('#psiStatus'), psiFixes=$('#psiFixes');
+    // NEW Speed UI refs
+    const speedOverviewBar = $('#speedOverviewBar'), speedOverviewText = $('#speedOverviewText');
+    const mobileScoreVal = $('#mobileScoreVal'), mobileScoreCircle = $('#mobileScoreCircle');
+    const desktopScoreVal = $('#desktopScoreVal'), desktopScoreCircle = $('#desktopScoreCircle');
+    const mobileLcp = $('#mobileLcp'), mobileInp = $('#mobileInp'), mobileCls = $('#mobileCls');
+    const desktopLcp = $('#desktopLcp'), desktopInp = $('#desktopInp'), desktopCls = $('#desktopCls');
+    const speedOpportunitiesList = $('#speedOpportunitiesList');
+
 
     /* --- Content Optimization UI refs --- */
     const mwContent=$('#mwContent'), ringContent=$('#ringContent'), numContent=$('#numContent');
@@ -600,7 +572,18 @@ ${detail}`:''); };
         elRing.style.setProperty('--v',score);
         elNum.textContent=(prefix?prefix+' ':'')+score+'%';
     }
-    function setSpMeter(barEl,valEl,raw,score,fmt,meterWrap){valEl.textContent=raw==null?'—':(fmt?fmt(raw):raw);barEl.style.width=clamp01(score)+'%';if(meterWrap){meterWrap.classList.remove('good','warn','bad');meterWrap.classList.add(band(score));}}
+    
+    function setSpeedCircle(circleEl, score) {
+        if (!circleEl) return;
+        const r = circleEl.r.baseVal.value;
+        const circumference = 2 * Math.PI * r;
+        const offset = circumference - (score / 100) * circumference;
+        circleEl.style.strokeDasharray = `${circumference} ${circumference}`;
+        circleEl.style.strokeDashoffset = offset;
+        const color = score >= 80 ? 'var(--green-1)' : score >= 60 ? 'var(--yellow-1)' : 'var(--red-1)';
+        circleEl.style.stroke = color;
+    }
+
 
     /* ===== Analyze ===== */
     $('#analyzeBtn')?.addEventListener('click', async e=>{
@@ -623,8 +606,7 @@ ${detail}`:''); };
             callKeywordApi(url).catch(err => { showError('Keyword analysis failed.', err.message); return null; }),
             callContentEngineApi(url).catch(err => { showError('Content Engine analysis failed.', err.message); return null; }),
             callPSI(url).catch(err => {
-                psiStatus.textContent='Unavailable';
-                psiFixes.innerHTML=`<li>⚠️ ${String(err.message||err)}. Make sure PSI key is set server-side.</li>`;
+                speedOverviewText.textContent = `⚠️ PageSpeed Insights API request failed. ${err.message}`;
                 return null;
             })
         ]);
@@ -753,39 +735,33 @@ ${detail}`:''); };
 
         // --- POPULATE PSI / SPEED ---
         if(psiData) {
-            const mobile=psiData.mobile||{};const desktop=psiData.desktop||{};
-            const mScore=clamp01(Math.round(mobile.score??mobile.performance??0));
-            const dScore=clamp01(Math.round(desktop.score??desktop.performance??0));
-            setWheel(ringMobile, numMobile, mwMobile, mScore, 'M');
-            setWheel(ringDesktop, numDesktop, mwDesktop, dScore, 'D');
+            const mobile = psiData.mobile || {};
+            const desktop = psiData.desktop || {};
+            const overallScore = Math.round(((mobile.score || 0) + (desktop.score || 0)) / 2);
 
-            const pick=(...vals)=>{for(const v of vals){const n=Number(v);if(v!==undefined&&v!==null&&!Number.isNaN(n))return n}return null};
-            const lcpSeconds=(()=>{const sec=pick(mobile.lcp_s,desktop.lcp_s,psiData.lcp_s,psiData.metrics?.lcp_s);if(sec!==null)return sec;const ms=pick(mobile.lcp,desktop.lcp,psiData.lcp,psiData.metrics?.lcp);return ms!==null?ms/1000:null})();
-            const cls=pick(mobile.cls,desktop.cls,psiData.cls,psiData.metrics?.cls);
-            const inp=pick(mobile.inp_ms,desktop.inp_ms,psiData.inp_ms,psiData.metrics?.inp_ms,mobile.inp,desktop.inp,psiData.inp);
-            const ttfb=pick(mobile.ttfb_ms,desktop.ttfb_ms,psiData.ttfb_ms,psiData.metrics?.ttfb_ms,psiData.ttfb);
+            $('#speedBadge').textContent = bandName(overallScore).charAt(0).toUpperCase() + bandName(overallScore).slice(1);
+            $('#speedBadge').className = 'speed-badge ' + bandName(overallScore);
+            speedOverviewBar.style.width = overallScore + '%';
+            speedOverviewText.textContent = `Overall performance is ${bandName(overallScore)}. Mobile: ${mobile.score}, Desktop: ${desktop.score}.`;
 
-            const sLCP=scoreFromBounds(lcpSeconds,2.5,6.0);
-            const sCLS=scoreFromBounds(cls,0.10,0.25);
-            const sINP=scoreFromBounds(inp,200,500);
-            const sTTFB=scoreFromBounds(ttfb,800,1800);
+            mobileScoreVal.textContent = mobile.score || 0;
+            setSpeedCircle(mobileScoreCircle, mobile.score || 0);
+            desktopScoreVal.textContent = desktop.score || 0;
+            setSpeedCircle(desktopScoreCircle, desktop.score || 0);
 
-            setSpMeter(lcpBar,lcpVal,lcpSeconds,sLCP,v=>v!=null?`${v.toFixed(2)} s`:'—',lcpMeter);
-            setSpMeter(clsBar,clsVal,cls,sCLS,v=>v!=null?`${v.toFixed(3)}`:'—',clsMeter);
-            setSpMeter(inpBar,inpVal,inp,sINP,v=>v!=null?`${Math.round(v)} ms`:'—',inpMeter);
-            setSpMeter(ttfbBar,ttfbVal,ttfb,sTTFB,v=>v!=null?`${Math.round(v)} ms`:'—',ttfbMeter);
+            mobileLcp.textContent = mobile.lcp_s ? `${mobile.lcp_s.toFixed(2)}s` : 'N/A';
+            mobileInp.textContent = mobile.inp_ms ? `${mobile.inp_ms}ms` : 'N/A';
+            mobileCls.textContent = mobile.cls ? mobile.cls.toFixed(3) : 'N/A';
+            desktopLcp.textContent = desktop.lcp_s ? `${desktop.lcp_s.toFixed(2)}s` : 'N/A';
+            desktopInp.textContent = desktop.inp_ms ? `${desktop.inp_ms}ms` : 'N/A';
+            desktopCls.textContent = desktop.cls ? desktop.cls.toFixed(3) : 'N/A';
 
-            const tips=[];
-            if(lcpSeconds!=null&&lcpSeconds>2.5)tips.push('Improve LCP: preload hero image, compress images (AVIF/WebP), inline critical CSS.');
-            if(cls!=null&&cls>0.1)tips.push('Reduce CLS: always set width/height on images/media; avoid layout shifts from ads and embeds.');
-            if(inp!=null&&inp>200)tips.push('Lower INP: break up long tasks, defer non-critical JS, reduce third-party scripts.');
-            if(ttfb!=null&&ttfb>800)tips.push('Reduce TTFB: enable caching/CDN, optimize server, use HTTP/2 or HTTP/3.');
-            if(!tips.length){tips.push('Great job! Keep images optimized and JS lean to maintain fast performance.')}
-            psiFixes.innerHTML=tips.map(t=>`<li>✅ ${t}</li>`).join('');
-
-            const topBand=(mScore>=80&&dScore>=80)?'good':((mScore>=60||dScore>=60)?'warn':'bad');
-            psiStatus.className='pill '+(topBand==='good'?'score-pill--green':topBand==='warn'?'score-pill--orange':'score-pill--red');
-            psiStatus.textContent=topBand==='good'?'🎉 Excellent Speed':topBand==='warn'?'OK':'Needs Work';
+            const tips = psiData.opportunities || [];
+            if(tips.length > 0) {
+                 speedOpportunitiesList.innerHTML = tips.map(tip => `<li>${tip}</li>`).join('');
+            } else {
+                 speedOpportunitiesList.innerHTML = '<li>No specific opportunities found. Great job!</li>';
+            }
         }
       }catch(err){
         console.error(err);
@@ -812,6 +788,19 @@ ${detail}`:''); };
 @endpush
 
 @section('content')
+<!-- Main Menu Bar -->
+<div style="background:#111827; padding: 10px 20px; border-bottom: 1px solid #374151; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100;">
+    <div style="font-weight:bold; color:var(--ink); display:flex; align-items:center; gap:8px;">👑 Semantic SEO</div>
+    <div>
+        <button class="btn btn-blue" style="font-size:12px; padding: 6px 12px;">Semantic Analyzer</button>
+        <button class="btn" style="background:transparent; border-color:transparent; color:var(--sub); font-size:12px; padding: 6px 12px;">AI Content Checker</button>
+        <button class="btn" style="background:transparent; border-color:transparent; color:var(--sub); font-size:12px; padding: 6px 12px;">Topic Cluster</button>
+    </div>
+    <div>
+        <button class="btn btn-green" style="font-size:12px; padding: 6px 12px;">Dashboard</button>
+    </div>
+</div>
+
 <section class="maxw px-4 pb-10">
 
   <div class="title-wrap">
@@ -883,14 +872,17 @@ ${detail}`:''); };
 
   <!-- Content Optimization -->
   <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
-    <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"></path><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"></path></svg>
+    <span class="animated-icon" style="color:var(--green-1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"></path><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"></path></svg>
+    </span>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Optimization</h3>
-    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+    <span class="animated-icon pulse" style="color:var(--pink-1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+    </span>
   </div>
 
 <div class="co-card" id="contentOptimizationCard">
     <div class="co-grid">
-      <!-- Content Optimization Score Wheel -->
       <div style="display:grid;place-items:center;padding:10px">
         <div class="mw warn" id="mwContent">
           <div class="mw-ring" id="ringContent" style="--v:0"></div>
@@ -901,7 +893,7 @@ ${detail}`:''); };
       <div class="co-info-grid">
         <div class="co-info-item">
           <div class="co-info-header">
-            <div class="co-info-icon"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 22a10 10 0 1 0-8.49-4.88"></path></svg></div>
+            <div class="co-info-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
             <span class="co-info-title">Topic Coverage</span>
           </div>
           <p id="coTopicCoverageText">Run analysis to get data.</p>
@@ -910,7 +902,7 @@ ${detail}`:''); };
 
         <div class="co-info-item">
           <div class="co-info-header">
-            <div class="co-info-icon"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7..."></path></svg></div>
+            <div class="co-info-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
             <span class="co-info-title">Content Gaps</span>
           </div>
           <div class="co-tags" id="coContentGapsTags"></div>
@@ -918,7 +910,7 @@ ${detail}`:''); };
     
         <div class="co-info-item">
           <div class="co-info-header">
-            <div class="co-info-icon"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline></svg></div>
+            <div class="co-info-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></div>
             <span class="co-info-title">Schema Suggestions</span>
           </div>
          <div class="co-tags" id="coSchemaTags"></div>
@@ -926,7 +918,7 @@ ${detail}`:''); };
     
       <div class="co-info-item">
         <div class="co-info-header">
-          <div class="co-info-icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path></svg></div>
+          <div class="co-info-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg></div>
           <span class="co-info-title">Readability & Intent</span>
         </div>
          <div class="co-tags">
@@ -940,9 +932,13 @@ ${detail}`:''); };
 
 <!-- NEW: Content Analysis Engine -->
 <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
-    <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20.94c1.5 0 2.75 1.25 2.75 2.75S13.5 26.44 12 26.44 9.25 25.19 9.25 23.69s1.25-2.75 2.75-2.75z"></path><path d="M12 2.56c1.5 0 2.75 1.25 2.75 2.75S13.5 8.06 12 8.06 9.25 6.81 9.25 5.31s1.25-2.75 2.75-2.75z"></path></svg>
+    <span class="animated-icon" style="color:var(--blue-1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20.94c1.5 0 2.75 1.25 2.75 2.75S13.5 26.44 12 26.44 9.25 25.19 9.25 23.69s1.25-2.75 2.75-2.75z"></path><path d="M12 2.56c1.5 0 2.75 1.25 2.75 2.75S13.5 8.06 12 8.06 9.25 6.81 9.25 5.31s1.25-2.75 2.75-2.75z"></path></svg>
+    </span>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
-    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.21 17.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path><path d="M19.79 6.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path></svg>
+    <span class="animated-icon pulse" style="color:var(--purple-1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.21 17.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path><path d="M19.79 6.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path></svg>
+    </span>
 </div>
 <div class="cae-card" id="contentAnalysisEngineCard">
     <div class="cae-grid">
@@ -954,19 +950,19 @@ ${detail}`:''); };
       </div>
       <div class="cae-info-grid">
         <div class="cae-info-item">
-          <div class="cae-info-header"><div class="cae-info-icon">🧩</div><span class="cae-info-title">Topic Clustering Analysis</span></div>
+          <div class="cae-info-header"><div class="cae-info-icon animated-icon" style="color:var(--blue-1);">🧩</div><span class="cae-info-title">Topic Clustering Analysis</span></div>
           <div class="cae-tags" id="caeTopicClusters"></div>
         </div>
         <div class="cae-info-item">
-          <div class="cae-info-header"><div class="cae-info-icon">🏢</div><span class="cae-info-title">Entity Recognition</span></div>
+          <div class="cae-info-header"><div class="cae-info-icon animated-icon pulse" style="color:var(--green-1);">🏢</div><span class="cae-info-title">Entity Recognition</span></div>
           <div class="cae-tags" id="caeEntities"></div>
         </div>
         <div class="cae-info-item">
-          <div class="cae-info-header"><div class="cae-info-icon">🔍</div><span class="cae-info-title">Semantic Keyword Discovery</span></div>
+          <div class="cae-info-header"><div class="cae-info-icon animated-icon" style="color:var(--yellow-1);">🔍</div><span class="cae-info-title">Semantic Keyword Discovery</span></div>
           <div class="cae-tags" id="caeKeywords"></div>
         </div>
         <div class="cae-info-item">
-          <div class="cae-info-header"><div class="cae-info-icon">🎯</div><span class="cae-info-title">Content Relevance & Intent</span></div>
+          <div class="cae-info-header"><div class="cae-info-icon animated-icon pulse" style="color:var(--pink-1);">🎯</div><span class="cae-info-title">Content Relevance & Intent</span></div>
           <div class="sp-row"><div>Relevance Score</div><div class="sp-val" id="caeRelevanceScore">—</div></div>
           <div class="cae-relevance-bar"><span id="caeRelevanceBar" style="width:0%"></span></div>
           <div id="caeIntent" style="margin-top:8px"></div>
@@ -977,7 +973,9 @@ ${detail}`:''); };
 
 <!-- Technical SEO Integration -->
 <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
-    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
+    <span class="animated-icon pulse" style="color:var(--purple-1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
+    </span>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
 </div>
 <div class="tsi-card" id="technicalSeoCard">
@@ -990,25 +988,25 @@ ${detail}`:''); };
       </div>
       <div class="tsi-info-grid">
         <div class="tsi-info-item">
-            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon">🔗</div><span class="tsi-info-title">Internal Linking Optimization</span></div>
+            <div class="tsi-info-header"><span class="animated-icon" style="color:var(--blue-1);">🔗</span><span class="tsi-info-title">Internal Linking Optimization</span></div>
             <ul id="tsiInternalLinks"></ul>
         </div>
         <div class="tsi-info-item">
-            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon">🌐</div><span class="tsi-info-title">URL Structure Analysis</span></div>
-            <p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p>
-            <p id="tsiUrlSuggestion"></p>
+            <div class="tsi-info-header"><span class="animated-icon" style="color:var(--green-1);">🌐</span><span class="tsi-info-title">URL Structure Analysis</span></div>
+            <p style="margin:0;">Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p>
+            <p id="tsiUrlSuggestion" style="margin-top:4px;"></p>
         </div>
         <div class="tsi-info-item" style="grid-column: span 2;">
-            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon pulse">📰</div><span class="tsi-info-title">Meta Tags Optimization</span></div>
+            <div class="tsi-info-header"><span class="animated-icon pulse" style="color:var(--yellow-1);">📰</span><span class="tsi-info-title">Meta Tags Optimization</span></div>
             <p><strong>Title:</strong> <span id="tsiMetaTitle">—</span></p>
             <p><strong>Description:</strong> <span id="tsiMetaDescription">—</span></p>
         </div>
         <div class="tsi-info-item">
-            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon">🖼️</div><span class="tsi-info-title">Image Alt Text Suggestions</span></div>
+            <div class="tsi-info-header"><span class="animated-icon" style="color:var(--orange-1);">🖼️</span><span class="tsi-info-title">Image Alt Text Suggestions</span></div>
             <ul id="tsiAltTexts"></ul>
         </div>
         <div class="tsi-info-item">
-            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon pulse">🗺️</div><span class="tsi-info-title">Site Structure Mapping</span></div>
+            <div class="tsi-info-header"><span class="animated-icon pulse" style="color:var(--pink-1);">🗺️</span><span class="tsi-info-title">Site Structure Mapping</span></div>
             <div class="site-map-container" id="tsiSiteMap"></div>
         </div>
       </div>
@@ -1021,29 +1019,31 @@ ${detail}`:''); };
 
 <!-- Keyword Intelligence -->
 <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
-    <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22a10 10 0 1 0-8.49-4.88"></path><path d="M12 2a10 10 0 1 0 8.49 4.88"></path></svg>
+    <span class="animated-icon" style="color:var(--yellow-1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </span>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
 </div>
 <div class="ki-card" id="keywordIntelligenceCard">
     <div class="ki-grid">
         <div class="ki-item">
-            <h4 class="ki-item-title"><span class="animated-icon pulse">🧠</span>Semantic Keyword Research</h4>
+            <h4 class="ki-item-title"><span class="animated-icon pulse" style="color:var(--yellow-1);">🧠</span>Semantic Keyword Research</h4>
             <div id="kiSemanticResearch" class="ki-tags"></div>
         </div>
         <div class="ki-item">
-            <h4 class="ki-item-title"><span class="animated-icon">🎯</span>Keyword Intent Classification</h4>
+            <h4 class="ki-item-title"><span class="animated-icon" style="color:var(--orange-1);">🎯</span>Keyword Intent Classification</h4>
             <div id="kiIntentClassification" class="ki-tags"></div>
         </div>
         <div class="ki-item">
-            <h4 class="ki-item-title"><span class="animated-icon pulse">🗺️</span>Related Terms Mapping</h4>
+            <h4 class="ki-item-title"><span class="animated-icon pulse" style="color:var(--red-1);">🗺️</span>Related Terms Mapping</h4>
             <div id="kiRelatedTerms" class="ki-tags"></div>
         </div>
         <div class="ki-item">
-            <h4 class="ki-item-title"><span class="animated-icon">📊</span>Competitor Keyword Gap Analysis</h4>
+            <h4 class="ki-item-title"><span class="animated-icon" style="color:var(--pink-1);">📊</span>Competitor Keyword Gap Analysis</h4>
             <div id="kiCompetitorGaps" class="ki-list"></div>
         </div>
-        <div class="ki-item" style="grid-column: span 2;">
-             <h4 class="ki-item-title"><span class="animated-icon pulse">🔑</span>Long-tail Semantic Suggestions</h4>
+        <div class="ki-item" style="grid-column: 1 / -1;">
+             <h4 class="ki-item-title"><span class="animated-icon pulse" style="color:var(--purple-1);">🔑</span>Long-tail Semantic Suggestions</h4>
             <div id="kiLongTail" class="ki-list"></div>
         </div>
     </div>
@@ -1052,58 +1052,83 @@ ${detail}`:''); };
 <!-- Meta Info Layout -->
 <div class="card meta-card" style="margin-top:24px;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-        <svg class="animated-icon pulse" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path></svg>
+        <span class="animated-icon pulse" style="color:var(--blue-1);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>
+        </span>
         <h3 class="t-grad">Meta & Heading Structure</h3>
     </div>
     <div class="space-y-3">
         <div class="cat-card">
             <div class="cat-card-title">Title Tag</div>
-            <div id="titleVal"></div>
+            <div id="titleVal" style="color:var(--ink); margin-top:4px;"></div>
         </div>
         <div class="cat-card">
             <div class="cat-card-title">Meta Description</div>
-            <div id="metaVal"></div>
+            <div id="metaVal" style="color:var(--ink); margin-top:4px;"></div>
         </div>
         <div class="cat-card">
             <div class="cat-card-title">Heading Map (H1-H4)</div>
-            <div id="headingMap" class="space-y-2"></div>
+            <div id="headingMap" class="space-y-2" style="margin-top:8px;"></div>
         </div>
     </div>
 </div>
 
-<!-- Site Speed -->
-<div class="speed-card" id="speedCard">
-    <div class="sp-head">
-      <div class="sp-title">
-        <div class="ico">⚡</div>
-        <div>
-          <div class="t-grad">Site Speed & Core Web Vitals</div>
-          <div class="sp-note">Uses PageSpeed Insights (Mobile + Desktop)</div>
+<!-- Site Speed & Core Web Vitals (NEW LAYOUT) -->
+<div class="speed-card-new" id="speedCard">
+    <div class="speed-header">
+        <div class="speed-title">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+            Site Speed & Core Web Vitals
         </div>
-      </div>
-      <span id="psiStatus" class="pill">Waiting…</span>
+        <span id="speedBadge" class="speed-badge">Checking...</span>
     </div>
-    <div class="sp-wheels">
-      <div class="wheel-card">
-        <div class="mw mw-sm warn" id="mwMobile"><div class="mw-ring" id="ringMobile"></div><div class="mw-center" id="numMobile">M 0%</div></div>
-        <div class="wheel-label">Mobile</div>
-      </div>
-      <div class="wheel-card">
-        <div class="mw mw-sm warn" id="mwDesktop"><div class="mw-ring" id="ringDesktop"></div><div class="mw-center" id="numDesktop">D 0%</div></div>
-        <div class="wheel-label">Desktop</div>
-      </div>
+    <div class="speed-overview-bar"><div id="speedOverviewBar"></div></div>
+    <p class="speed-overview-text" id="speedOverviewText">Overview not available yet.</p>
+    
+    <div class="speed-grid">
+        <!-- Mobile -->
+        <div class="speed-device-card">
+            <div class="speed-device-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"></path></svg>
+                Mobile
+            </div>
+            <div style="display:flex; align-items:center; gap: 16px; margin-top:12px;">
+                <div class="speed-device-score">
+                    <svg><circle class="track" cx="30" cy="30" r="26"></circle><circle id="mobileScoreCircle" class="progress" cx="30" cy="30" r="26"></circle></svg>
+                    <div id="mobileScoreVal" class="speed-device-score-val">0</div>
+                </div>
+                <div class="speed-device-metrics">
+                    <div class="speed-device-metric"><span>LCP</span><strong id="mobileLcp"></strong></div>
+                    <div class="speed-device-metric"><span>INP</span><strong id="mobileInp"></strong></div>
+                    <div class="speed-device-metric"><span>CLS</span><strong id="mobileCls"></strong></div>
+                </div>
+            </div>
+        </div>
+        <!-- Desktop -->
+        <div class="speed-device-card">
+            <div class="speed-device-header">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 18c1.1 0 1.99-.9 1.99-2L22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2H0v2h24v-2h-4zM4 6h16v10H4V6z"></path></svg>
+                Desktop
+            </div>
+             <div style="display:flex; align-items:center; gap: 16px; margin-top:12px;">
+                <div class="speed-device-score">
+                    <svg><circle class="track" cx="30" cy="30" r="26"></circle><circle id="desktopScoreCircle" class="progress" cx="30" cy="30" r="26"></circle></svg>
+                    <div id="desktopScoreVal" class="speed-device-score-val">0</div>
+                </div>
+                <div class="speed-device-metrics">
+                    <div class="speed-device-metric"><span>LCP</span><strong id="desktopLcp"></strong></div>
+                    <div class="speed-device-metric"><span>INP</span><strong id="desktopInp"></strong></div>
+                    <div class="speed-device-metric"><span>CLS</span><strong id="desktopCls"></strong></div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="sp-bars-grid">
-      <div class="sp-tile"><div class="sp-row"><div>🏁 LCP</div><div class="sp-val" id="lcpVal"></div></div><div class="sp-meter" id="lcpMeter"><span id="lcpBar"></span></div></div>
-      <div class="sp-tile"><div class="sp-row"><div>📦 CLS</div><div class="sp-val" id="clsVal"></div></div><div class="sp-meter" id="clsMeter"><span id="clsBar"></span></div></div>
-      <div class="sp-tile"><div class="sp-row"><div>⚡ INP</div><div class="sp-val" id="inpVal"></div></div><div class="sp-meter" id="inpMeter"><span id="inpBar"></span></div></div>
-      <div class="sp-tile"><div class="sp-row"><div>⏱️ TTFB</div><div class="sp-val" id="ttfbVal"></div></div><div class="sp-meter" id="ttfbMeter"><span id="ttfbBar"></span></div></div>
+    <div class="speed-opportunities">
+        <div class="speed-opportunities-title">🚀 Opportunities</div>
+        <ul id="speedOpportunitiesList"><li>Run analysis to see opportunities.</li></ul>
     </div>
-    <div class="sp-fixes">
-      <h4>💡 Speed Suggestions</h4>
-      <ul id="psiFixes"></ul>
-    </div>
-  </div>
+</div>
+
 
   <div class="ground-slab">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
@@ -1147,3 +1172,5 @@ ${detail}`:''); };
   </dialog>
 
 </section>
+@endsection
+
