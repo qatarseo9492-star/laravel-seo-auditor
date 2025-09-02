@@ -1,265 +1,41 @@
-/**
- * technical-seo.client.js
- * ---------------------------------------------------------
- * Fills the "Technical SEO" layout with real results
- * from POST /api/techseo/analyze { url }.
- *
- * Drop-in: no layout rewrite required. Adjust the selectors
- * in SEL below to match your Blade IDs/classes if needed.
- *
- * Requirements:
- * - <meta name="csrf-token" content="{{ csrf_token() }}">
- * - A URL input and a button to trigger analysis.
- *
- * Exposes window.TechSEO with two helpers:
- *   - TechSEO.run(url)     -> runs analysis and updates the UI
- *   - TechSEO.lastPayload  -> last JSON payload received
- */
-(() => {
-  "use strict";
-
-  // ========================= Config =========================
-  // Map these to your actual markup. If your IDs differ, update here.
-  const SEL = {
-    // Inputs / buttons
-    urlInput:    '[data-url-input], #targetUrl, input[name="analyze_url"]',
-    runButton:   '[data-techseo-analyze], #btn-techseo',
-
-    // Score badges or containers (text is set to "NN/100")
-    scoreUrl:    '#score-url-structure',
-    scoreMeta:   '#score-meta',
-    scoreImages: '#score-images',
-    scoreInternal: '#score-internal',
-    scoreStructure: '#score-structure',
-    scoreOverall: '#score-overall-techseo',
-
-    // URL structure
-    urlIssuesList: '#url-issues', // <ul>
-
-    // Meta containers
-    metaTitleCurrent:    '#meta-title-current',
-    metaDescCurrent:     '#meta-desc-current',
-    metaTitleSuggested:  '#meta-title-suggested',
-    metaDescSuggested:   '#meta-desc-suggested',
-
-    // Images suggestions container (free HTML)
-    imagesContainer: '#images-table',
-
-    // Internal links suggestions (expects <tbody> or container)
-    internalLinksTableBody: '#internal-links-table',
-
-    // Headings tree container
-    structureTree: '#structure-tree',
-
-    // Optional global loading overlay (add if you want)
-    loadingOverlay: '#techseo-loading-overlay'
-  };
-
-  // If your progress bars use a width-based fill, mark the score wrapper with [data-bar]
-  // and the fill element inside with [data-fill]. This script will set width: NN%.
-  // Example:
-  // <div class="meter" data-bar><div class="fill" data-fill style="width:0%"></div></div>
-
-  // ========================= Utils ==========================
-  const $  = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-
-  function escapeHtml(s) {
-    return (s ?? '').toString().replace(/[&<>"']/g, m => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    })[m]);
-  }
-
-  function clamp01(n) { n = Number(n) || 0; return Math.max(0, Math.min(1, n)); }
-  function clamp100(n) { n = Number(n) || 0; return Math.max(0, Math.min(100, n)); }
-
-  function setScore(el, n) {
-    if (!el) return;
-    const v = clamp100(n);
-    // Text badge: "NN/100"
-    try { el.textContent = `${v}/100`; } catch {}
-    // CSS var for fancy styles if you want
-    try { el.style.setProperty('--score', v); } catch {}
-
-    // Progress bar fill if present
-    const bar = el.closest('[data-bar]')?.querySelector('[data-fill]');
-    if (bar) bar.style.width = `${v}%`;
-  }
-
-  function setText(el, val, placeholder='(missing)') {
-    if (!el) return;
-    el.textContent = (val && String(val).trim().length) ? val : placeholder;
-  }
-
-  function setList(el, items) {
-    if (!el) return;
-    const list = Array.isArray(items) ? items : [];
-    el.innerHTML = list.map(t => `<li>${escapeHtml(t)}</li>`).join('');
-  }
-
-  function setInternalLinks(el, rows) {
-    if (!el) return;
-    const list = Array.isArray(rows) ? rows : [];
-    const html = list.map(r => {
-      const url = r.url || '';
-      const anchor = r.anchor || r.reason || '';
-      return `<tr>
-        <td class="il-url"><a href="${escapeHtml(url)}" target="_blank" rel="noopener">${escapeHtml(url)}</a></td>
-        <td class="il-anchor">${escapeHtml(anchor)}</td>
-      </tr>`;
-    }).join('');
-    el.innerHTML = html;
-  }
-
-  function setImages(el, items) {
-    if (!el) return;
-    const list = Array.isArray(items) ? items : [];
-    el.innerHTML = list.map(it => {
-      const srcName = (it.src || '').split('/').pop();
-      return `<div class="img-row">
-        <div class="src"><a href="${escapeHtml(it.src || '')}" target="_blank" rel="noopener">${escapeHtml(srcName || '(image)')}</a></div>
-        <div class="alt cur">${escapeHtml(it.current_alt || '(missing)')}</div>
-        <div class="alt sug">${escapeHtml(it.suggested_alt || '')}</div>
-      </div>`;
-    }).join('');
-  }
-
-  function renderTree(nodes) {
-    if (!nodes || !nodes.length) return '';
-    return `<ul>` + nodes.map(n => `
-      <li>
-        <span class="h${n.level}">H${n.level}: ${escapeHtml(n.text || '')}</span>
-        ${renderTree(n.children || [])}
-      </li>
-    `).join('') + `</ul>`;
-  }
-
-  function setTree(el, data) {
-    if (!el) return;
-    el.innerHTML = renderTree(data);
-  }
-
-  function showLoading(isOn) {
-    const ov = $(SEL.loadingOverlay);
-    if (!ov) return;
-    ov.style.display = isOn ? 'grid' : 'none';
-  }
-
-  function csrfToken() {
-    const m = document.querySelector('meta[name="csrf-token"]');
-    return m ? m.content : '';
-  }
-
-  async function apiAnalyze(url) {
-    const res = await fetch('/api/techseo/analyze', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken()
-      },
-      body: JSON.stringify({ url })
-    });
-    const data = await res.json();
-    if (!res.ok || !data || data.ok === false) {
-      const msg = (data && (data.error || data.message)) || `HTTP ${res.status}`;
-      throw new Error(`Technical SEO analyze failed: ${msg}`);
-    }
-    return data;
-  }
-
-  // Debounce helper if you want to auto-run when input changes
-  function debounce(fn, ms=400) {
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn(...args), ms);
-    };
-  }
-
-  // ========================= App ============================
-  async function run(url, opts={}) {
-    const btn = $(SEL.runButton);
-    try {
-      const target = (url || '').trim() || ($(SEL.urlInput)?.value || '').trim();
-      if (!target) throw new Error('Please enter a URL.');
-
-      btn && (btn.disabled = true);
-      btn && (btn.dataset.loading = '1');
-      showLoading(true);
-
-      const data = await apiAnalyze(target);
-      window.TechSEO.lastPayload = data;
-
-      // Scores
-      setScore($(SEL.scoreUrl),       data.scores?.url_structure);
-      setScore($(SEL.scoreMeta),      data.scores?.meta);
-      setScore($(SEL.scoreImages),    data.scores?.images);
-      setScore($(SEL.scoreInternal),  data.scores?.internal_links);
-      setScore($(SEL.scoreStructure), data.scores?.structure);
-      setScore($(SEL.scoreOverall),   data.scores?.overall);
-
-      // URL structure
-      setList($(SEL.urlIssuesList), data.url_structure?.issues);
-
-      // Meta (current + AI suggestions if present)
-      setText($(SEL.metaTitleCurrent),   data.meta?.title);
-      setText($(SEL.metaDescCurrent),    data.meta?.description);
-      setText($(SEL.metaTitleSuggested), data.meta?.ai?.title || '' , '');
-      setText($(SEL.metaDescSuggested),  data.meta?.ai?.description || '' , '');
-
-      // Images ALT suggestions
-      setImages($(SEL.imagesContainer), data.images?.suggestions);
-
-      // Internal links (AI preferred, fallback to heuristic)
-      const linkRows = data.internal_linking?.ai || data.internal_linking?.candidates || [];
-      setInternalLinks($(SEL.internalLinksTableBody), linkRows);
-
-      // Headings tree
-      setTree($(SEL.structureTree), data.structure?.tree || []);
-
-      // Optional: emit an event so other modules can respond
-      document.dispatchEvent(new CustomEvent('techseo:updated', { detail: { url: target, data } }));
-
-      return data;
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'Technical SEO analyze failed.');
-      throw err;
-    } finally {
-      const btn = $(SEL.runButton);
-      btn && (btn.disabled = false);
-      btn && delete btn.dataset.loading;
-      showLoading(false);
-    }
-  }
-
-  function wire() {
-    const btn = $(SEL.runButton);
-    const input = $(SEL.urlInput);
-
-    if (btn) {
-      btn.addEventListener('click', () => run());
-      // Keyboard shortcut: Enter in input triggers run
-      if (input) {
-        input.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            run();
-          }
-        });
-      }
-    }
-  }
-
-  // Init
-  document.addEventListener('DOMContentLoaded', () => {
-    try { wire(); } catch (e) { console.error('TechSEO wire error', e); }
-  });
-
-  // Public API
-  window.TechSEO = Object.freeze({
-    run,
-    lastPayload: null,
-    config: SEL
-  });
-})();
+/* techseo-neon.css â€” Neon theme for Technical SEO section */
+:root{
+  --bg-0:#1A1A1A; --bg-1:#262626;
+  --fg-0:#EAEAEA; --fg-dim:#B6B6B6;
+  --br-weak:rgba(255,255,255,.12);
+  --panel:rgba(255,255,255,.04);
+  --panel-strong:rgba(255,255,255,.06);
+  --c-blue-0:#00C6FF; --c-blue-1:#0072FF;
+  --c-green-0:#00FF8A; --c-green-1:#00FFC6;
+  --c-gold-0:#FFD700;  --c-gold-1:#FFA500;
+  --c-pink-0:#FF1493;  --c-red-0:#FF4500;
+  --c-purple-0:#8A2BE2;
+  --glow-soft:0 0 12px rgba(0,198,255,.35), 0 0 24px rgba(138,43,226,.25);
+  --glow-strong:0 0 10px rgba(0,255,138,.55), 0 0 24px rgba(255,20,147,.45);
+}
+html,body{background:var(--bg-0);color:var(--fg-0)}
+.panel{background:linear-gradient(180deg, var(--panel), rgba(255,255,255,.02));border:1px solid var(--br-weak);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:0 0 0 1px rgba(0,0,0,.2), 0 6px 18px rgba(0,0,0,.25)}
+.h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.h .card-title{background:linear-gradient(90deg,var(--c-blue-0),var(--c-purple-0),var(--c-pink-0),var(--c-gold-0),var(--c-green-0));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.2px;text-shadow:var(--glow-soft);animation:floatGlow 4s ease-in-out infinite}
+.pill{padding:.28rem .7rem;border-radius:999px;border:1px solid transparent;color:white;font-weight:600;background:linear-gradient(90deg, rgba(255,255,255,.1), rgba(255,255,255,.06)) padding-box,linear-gradient(90deg, var(--c-blue-0), var(--c-purple-0), var(--c-pink-0), var(--c-gold-0), var(--c-green-0)) border-box;box-shadow:var(--glow-soft)}
+[data-bar]{position:relative;background:rgba(255,255,255,.06);border:1px solid var(--br-weak);border-radius:12px;overflow:hidden;height:12px}
+[data-fill]{height:100%;width:0%;background:linear-gradient(90deg, var(--c-red-0), var(--c-gold-0), var(--c-green-0), var(--c-blue-0), var(--c-purple-0));box-shadow:var(--glow-strong);transition:width .7s cubic-bezier(.2,.8,.2,1)}
+table{width:100%;border-collapse:collapse}
+thead th{font-weight:700;color:var(--fg-0)}
+td,th{border-bottom:1px dashed var(--br-weak);padding:10px 8px;vertical-align:top}
+.il-url a{color:var(--fg-0);text-decoration:none;border-bottom:1px dashed rgba(255,255,255,.25)}
+.il-url a:hover{filter:brightness(1.15);text-shadow:0 0 8px rgba(0,198,255,.35)}
+.img-row{display:grid;grid-template-columns:1.2fr .9fr .9fr;gap:12px;padding:10px;border-bottom:1px dashed var(--br-weak);align-items:center}
+.img-row .src a{color:var(--fg-0);text-decoration:none}
+.img-row .alt.cur{color:var(--fg-dim)}
+.img-row .alt.sug{color:#fff;text-shadow:0 0 8px rgba(0,255,138,.35)}
+.tree ul{margin:0 0 0 18px;padding:0;list-style:none}
+.tree li{margin:6px 0}
+.tree .h1,.tree .h2,.tree .h3,.tree .h4,.tree .h5,.tree .h6{display:inline-block}
+.tree .h1{color:#fff}.tree .h2{color:#cde7ff}.tree .h3{color:#d7bfff}.tree .h4{color:#ffc9e5}.tree .h5{color:#ffe6a6}.tree .h6{color:#cfffec}
+.input{width:100%;padding:.65rem .85rem;border-radius:12px;color:#fff;background:rgba(255,255,255,.06);border:1px solid var(--br-weak);outline:none;transition:border-color .2s ease, box-shadow .2s ease}
+.input:focus{border-color:#00C6FF;box-shadow:0 0 0 3px rgba(0,198,255,.2)}
+.btn{cursor:pointer;border-radius:12px;border:1px solid transparent;padding:.6rem .95rem;color:#111;background:linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.75)) padding-box,linear-gradient(90deg, var(--c-blue-0), var(--c-purple-0), var(--c-pink-0), var(--c-gold-0), var(--c-green-0)) border-box;transition:transform .08s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn[disabled], .btn[aria-busy='true']{opacity:.65;cursor:not-allowed}
+@keyframes floatGlow{0%{filter:drop-shadow(0 0 0 rgba(0,198,255,0))}50%{filter:drop-shadow(0 0 10px rgba(0,198,255,.35))}100%{filter:drop-shadow(0 0 0 rgba(0,198,255,0))}}
