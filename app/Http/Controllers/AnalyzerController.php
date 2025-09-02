@@ -6,13 +6,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use DOMDocument;
+use DOMXPath;
 
 class AnalyzerController extends Controller
 {
     /**
-     * ✅ FIXED: This method is updated to be more reliable.
-     * It now passes the URL directly to the OpenAI API instead of sending scraped text,
-     * which is a more robust way to get a consistent analysis.
+     * ✅ FIXED: This method now performs both local HTML parsing and the OpenAI API call.
+     * This ensures that the "Meta & Heading Structure" and other on-page details are
+     * fetched correctly, along with the AI-driven "Content Optimization" analysis.
      */
     public function analyze(Request $request)
     {
@@ -23,8 +25,73 @@ class AnalyzerController extends Controller
 
         $urlToAnalyze = $validated['url'];
         $language = $validated['language'] ?? 'en';
+        $contentStructure = [];
+        $pageSignals = [];
+        $quickStats = [];
 
-        // --- OpenAI Configuration ---
+        // --- 1. Local HTML Fetching & Parsing ---
+        try {
+            $response = Http::timeout(15)->get($urlToAnalyze);
+            if ($response->failed()) {
+                return response()->json(['ok' => false, 'error' => 'Failed to fetch the provided URL.'], 400);
+            }
+            $html = $response->body();
+
+            // Use DOMDocument to parse the HTML
+            $dom = new DOMDocument();
+            // Suppress warnings from malformed HTML
+            libxml_use_internal_errors(true);
+            $dom->loadHTML($html);
+            libxml_clear_errors();
+            $xpath = new DOMXPath($dom);
+
+            // Extract Title
+            $titleNode = $xpath->query('//title')->item(0);
+            $contentStructure['title'] = $titleNode ? trim($titleNode->textContent) : 'Not found';
+
+            // Extract Meta Description
+            $metaDescNode = $xpath->query("//meta[@name='description']/@content")->item(0);
+            $contentStructure['meta_description'] = $metaDescNode ? trim($metaDescNode->nodeValue) : 'Not found';
+
+            // Extract Headings (H1-H4)
+            $contentStructure['headings'] = [];
+            foreach (['h1', 'h2', 'h3', 'h4'] as $tag) {
+                $headings = $xpath->query('//' . $tag);
+                $tagUpper = strtoupper($tag);
+                $contentStructure['headings'][$tagUpper] = [];
+                foreach ($headings as $heading) {
+                    $contentStructure['headings'][$tagUpper][] = trim($heading->textContent);
+                }
+            }
+
+             // Extract other page signals
+            $pageSignals['canonical'] = optional($xpath->query("//link[@rel='canonical']/@href")->item(0))->nodeValue;
+            $pageSignals['robots'] = optional($xpath->query("//meta[@name='robots']/@content")->item(0))->nodeValue;
+            $pageSignals['has_viewport'] = $xpath->query("//meta[@name='viewport']")->length > 0;
+            
+            // Extract link counts
+            $links = $dom->getElementsByTagName('a');
+            $internalLinks = 0;
+            $parsedUrl = parse_url($urlToAnalyze);
+            $host = $parsedUrl['host'] ?? '';
+
+            foreach ($links as $link) {
+                $href = $link->getAttribute('href');
+                if (Str::startsWith($href, '/') || (Str::contains($href, $host) && Str::startsWith($href, 'http'))) {
+                    $internalLinks++;
+                }
+            }
+            $quickStats['internal_links'] = $internalLinks;
+            $quickStats['schema_types'] = []; // Placeholder, requires more complex parsing
+
+
+        } catch (\Exception $e) {
+            Log::error('Local HTML Parsing Failed', ['message' => $e->getMessage()]);
+            // Don't fail the whole request, AI part can still work
+        }
+
+
+        // --- 2. OpenAI API Call for Content Optimization ---
         $apiKey = env('OPENAI_API_KEY');
         if (empty($apiKey)) {
             Log::error('OPENAI_API_KEY missing in config/env');
@@ -35,11 +102,9 @@ class AnalyzerController extends Controller
         $timeout = (int)env('OPENAI_TIMEOUT', 60);
 
         try {
-            // --- New, Simplified Prompt ---
             $prompt = "Analyze the content at the URL '{$urlToAnalyze}' for SEO. The primary language of the content is '{$language}'. Return a JSON object with a single root key 'content_optimization'. This key should contain: 'nlp_score' (integer 0-100), 'topic_coverage' (object with 'percentage', 'total', 'covered' integers), 'content_gaps' (object with 'missing_topics' array of objects, each with 'term' and 'severity' strings), 'schema_suggestions' (an array of strings), and 'readability_intent' (object with 'intent' string and 'grade_level' string).";
 
-            // --- API Call ---
-            $response = Http::withToken($apiKey)
+            $aiResponse = Http::withToken($apiKey)
                 ->timeout($timeout)
                 ->post('https://api.openai.com/v1/chat/completions', [
                     'model' => $model,
@@ -50,24 +115,27 @@ class AnalyzerController extends Controller
                     'response_format' => ['type' => 'json_object']
                 ]);
 
-            if ($response->failed()) {
-                Log::error('OpenAI Content Analysis Failed', ['status' => $response->status(), 'body' => $response->body()]);
+            if ($aiResponse->failed()) {
+                Log::error('OpenAI Content Analysis Failed', ['status' => $aiResponse->status(), 'body' => $aiResponse->body()]);
                 return response()->json(['ok' => false, 'error' => 'Could not get analysis from AI service.'], 502);
             }
 
-            $rawContent = $response->json('choices.0.message.content');
+            $rawContent = $aiResponse->json('choices.0.message.content');
             $analysisData = json_decode($rawContent, true);
 
             if (json_last_error() !== JSON_ERROR_NONE || !isset($analysisData['content_optimization'])) {
                  return response()->json(['ok' => false, 'error' => 'AI service returned an invalid format.'], 500);
             }
 
-            // --- Prepare and Return Final Response ---
+            // --- 3. Combine and Return Final Response ---
             $co = $analysisData['content_optimization'];
             $finalResponse = [
                 "ok" => true,
                 "overall_score" => $co['nlp_score'] ?? 75,
                 "content_optimization" => $co,
+                "content_structure" => $contentStructure, // ✅ ADDED BACK
+                "page_signals" => $pageSignals,           // ✅ ADDED BACK
+                "quick_stats" => $quickStats,             // ✅ ADDED BACK
                 "score_source" => 'ai',
             ];
 
