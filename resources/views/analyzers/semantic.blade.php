@@ -81,9 +81,9 @@
     /* -- Configuration variables -- */
     --v: 0; /* Score value (0-100), controlled by JS */
     --size: 200px;
-    --track-width: 10px; /* Width of the progress track */
+    --track-width: 14px; /* Width of the progress track */
     --bg-color: #1a1a1a; /* Background of the wheel's track */
-    --outer-ring-width: 3px;
+    --outer-ring-width: 4px;
     --outer-ring-color: #3a3a3a;
     
     /* -- Internal variables -- */
@@ -122,13 +122,11 @@
     
     /* 2. Masking is used to shape the gradient into a progress ring */
     -webkit-mask-image: 
-        /* The conic gradient reveals the progress based on the --v variable */
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent var(--progress-percent)),
-        /* The radial gradient cuts out the center, creating the ring shape */
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent 0%),
         radial-gradient(farthest-side, transparent var(--inner-hole-percent), #000 calc(var(--inner-hole-percent) + 1%));
     -webkit-mask-composite: source-in;
      mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent var(--progress-percent)),
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent 0%),
         radial-gradient(farthest-side, transparent var(--inner-hole-percent), #000 calc(var(--inner-hole-percent) + 1%));
      mask-composite: intersect;
   }
@@ -138,7 +136,7 @@
     inset: 0;
     display: grid;
     place-items: center;
-    font-size: calc(var(--size) * 0.17); /* Font size scales with wheel size */
+    font-size: calc(var(--size) * 0.2); /* Font size scales with wheel size */
     font-weight: 900;
     color: #fff;
     text-shadow: 0 6px 22px rgba(0, 0, 0, .45);
@@ -152,8 +150,8 @@
   /* Modifier for a smaller version of the wheel */
   .mw-sm {
     --size: 170px;
-    --track-width: 9px;
-    --outer-ring-width: 2px;
+    --track-width: 12px;
+    --outer-ring-width: 3px;
   }
 
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
@@ -270,26 +268,6 @@
   .co-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: center;}
   @media (max-width: 920px){.co-grid{grid-template-columns:1fr}}
 
-  /* Neon meter (multicolor arc) */
-  .co-meter-wrap{display:grid;place-items:center;padding:10px}
-  .co-meter{width:200px;height:200px;position:relative;display:grid;place-items:center}
-  .co-meter-bg{position:absolute;inset:0;background:conic-gradient(#141414 0deg 270deg,#0e0e0e 270deg 360deg);border-radius:50%;box-shadow:0 0 0 1px #2a2a2a,0 0 0 6px #111}
-  .co-meter-progress{
-    position:absolute;inset:0;border-radius:50%;
-    --v:75;
-    background:conic-gradient(from -135deg,
-      var(--blue-1),var(--blue-2),var(--green-1),var(--green-2),
-      var(--yellow-1),var(--orange-1),var(--red-1),var(--pink-1),var(--purple-1),var(--blue-1));
-    -webkit-mask:conic-gradient(from -135deg,#000 0deg,#000 calc(var(--v)*2.7deg),transparent calc(var(--v)*2.7deg + 1deg));
-    mask:conic-gradient(from -135deg,#000 0deg,#000 calc(var(--v)*2.7deg),transparent calc(var(--v)*2.7deg + 1deg));
-    transform:rotate(180deg);
-    transition:--v 1s ease-in-out;
-    filter:drop-shadow(0 0 6px rgba(0,198,255,.35)) drop-shadow(0 0 24px rgba(138,43,226,.25));
-  }
-  .co-meter-inner{position:relative;width:150px;height:150px;border-radius:50%;background:linear-gradient(135deg,#171717,#141414);display:grid;place-items:center;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,.35), 0 0 0 1px #222 inset}
-  .co-meter-score{font-size:44px;font-weight:900;line-height:1;color:#fff;text-shadow:0 0 16px rgba(0,198,255,.35)}
-  .co-meter-label{font-size:12px;color:#aab3c2;margin-top:4px}
-
   /* Info Items Grid */
   .co-info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   @media (max-width:500px){.co-info-grid{grid-template-columns:1fr}}
@@ -351,10 +329,9 @@
     const psiStatus=$('#psiStatus'), psiFixes=$('#psiFixes');
 
     /* --- NEW --- Content Optimization UI refs */
+    const mwContent=$('#mwContent'), ringContent=$('#ringContent'), numContent=$('#numContent');
     const coCard = $('#contentOptimizationCard');
     if (coCard) {
-        const coMeterProgress = coCard.querySelector('.co-meter-progress');
-        const coMeterScore = coCard.querySelector('.co-meter-score');
         const coTopicCoverageText = coCard.querySelector('#coTopicCoverageText');
         const coTopicCoverageProgress = coCard.querySelector('#coTopicCoverageProgress');
         const coContentGapsText = coCard.querySelector('#coContentGapsText');
@@ -362,7 +339,7 @@
         const coSchemaTags = coCard.querySelector('#coSchemaTags');
         const coIntentTag = coCard.querySelector('#coIntentTag');
         const coGradeTag = coCard.querySelector('#coGradeTag');
-        window.__coElements = { coMeterProgress, coMeterScore, coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag };
+        window.__coElements = { coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag };
     }
 
 
@@ -397,11 +374,11 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
     const band = s => s>=80?'good':(s>=60?'warn':'bad');
     const scoreFromBounds=(val,good,poor)=>{if(val==null||isNaN(val))return 0;if(val<=good)return 100;if(val>=poor)return 0;return Math.round(100*(1-((val-good)/(poor-good))))};
     function setWheel(elRing, elNum, container, score, prefix){
+        if (!elRing || !elNum || !container) return; // Guard clause
         const b=band(score);
         container.classList.remove('good','warn','bad');
         container.classList.add(b);
         elRing.style.setProperty('--v',score);
-        // Fill element is removed, no need to set --p
         elNum.textContent=(prefix?prefix+' ':'')+score+'%';
     }
     function setSpMeter(barEl,valEl,raw,score,fmt,meterWrap){valEl.textContent=raw==null?'—':(fmt?fmt(raw):raw);barEl.style.width=clamp01(score)+'%';if(meterWrap){meterWrap.classList.remove('good','warn','bad');meterWrap.classList.add(band(score));}}
@@ -428,12 +405,13 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         if(!data||data.error) throw new Error(data?.error||'Unknown error');
         window.__lastData={...data,url};
 
-        const score=clamp01(data.overall_score||0), bname=bandName(score);
-        mw?.classList.remove('good','warn','bad');mw?.classList.add(bname);
-        mwRing?.style.setProperty('--v',score);
-        mwNum.textContent=score+'%';
-        overallBar?.classList.remove('good','warn','bad');overallBar?.classList.add(bname);
-        overallFill.style.width=score+'%';overallPct.textContent=score+'%';
+        const score=clamp01(data.overall_score||0);
+        setWheel(mwRing, mwNum, mw, score, '');
+
+        overallBar?.classList.remove('good','warn','bad');
+        overallBar?.classList.add(bandName(score));
+        overallFill.style.width=score+'%';
+        overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
 
         const cmap={};(data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
@@ -446,34 +424,37 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
         setChip(chipHuman,'Human-like',`${human} %`,human);
         setChip(chipAI,'AI-like',`${ai} %`,100-human);
+        
+        // --- Meta & Heading population logic ---
+        if (data.content_structure) {
+            titleVal.textContent = data.content_structure.title || 'Not Found';
+            metaVal.textContent = data.content_structure.meta_description || 'Not Found';
+            
+            const hs = data.content_structure.headings || {};
+            chipH.textContent = `H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
+            headingMap.innerHTML = ''; 
+            
+            const allowedHeadings = ['H1', 'H2', 'H3', 'H4'];
+            let hasHeadings = false;
+            
+            Object.entries(hs).forEach(([lvl, arr]) => {
+                if (!arr || !arr.length || !allowedHeadings.includes(lvl)) return;
+                hasHeadings = true;
+                const box = document.createElement('div');
+                box.className = 'cat-card'; 
+                box.innerHTML = `<div style="font-size:12px;color:#b6c2cf;margin-bottom:6px" class="uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px;">` + arr.map(t => `<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('') + `</div>`;
+                headingMap.appendChild(box);
+            });
 
-        // Readability section removed, so no more updates to its UI elements
-        
-        // --- UPDATED: Meta & Heading population logic ---
-        titleVal.textContent = data.content_structure?.title || 'Not Found';
-        metaVal.textContent = data.content_structure?.meta_description || 'Not Found';
-        
-        const hs = data.content_structure?.headings || {};
-        chipH.textContent = `H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
-        headingMap.innerHTML = ''; // Clear previous results
-        
-        const allowedHeadings = ['H1', 'H2', 'H3', 'H4'];
-        let hasHeadings = false;
-        
-        Object.entries(hs).forEach(([lvl, arr]) => {
-            if (!arr || !arr.length || !allowedHeadings.includes(lvl)) return;
-            hasHeadings = true;
-            const box = document.createElement('div');
-            box.className = 'cat-card'; // Re-using style for consistency
-            box.innerHTML = `<div style="font-size:12px;color:#b6c2cf;margin-bottom:6px" class="uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px;">` + arr.map(t => `<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('') + `</div>`;
-            headingMap.appendChild(box);
-        });
-
-        if (!hasHeadings) {
-            headingMap.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No H1-H4 headings were found on the analyzed page.</p>`;
+            if (!hasHeadings) {
+                headingMap.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No H1-H4 headings were found on the analyzed page.</p>`;
+            }
+        } else {
+            // Display info message if content_structure is missing
+            titleVal.textContent = 'N/A';
+            metaVal.textContent = 'N/A';
+            headingMap.innerHTML = `<div style="background:#2a1f06; border:1px solid #f59e0b72; border-radius:12px; padding:12px; font-size:13px; color:#fde68a;">Data Not Available: The analyzer could not retrieve Title, Meta, or Heading information. Please check if the target URL is accessible and correctly structured.</div>`;
         }
-        // --- END OF UPDATE ---
-
 
         chipHttp.textContent='200';
         chipCanon.textContent=(data.page_signals?.canonical||'—')||'—';
@@ -487,25 +468,21 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
         
         // =================================================================
-        // --- NEW --- POPULATE CONTENT OPTIMIZATION
+        // --- POPULATE CONTENT OPTIMIZATION
         // =================================================================
         if (data.content_optimization && window.__coElements) {
             const co = data.content_optimization;
-            const { coMeterProgress, coMeterScore, coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag } = window.__coElements;
+            const { coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag } = window.__coElements;
 
-            // 1. Update Score Meter
-            if (co.nlp_score != null) {
-                coMeterScore.textContent = co.nlp_score;
-                coMeterProgress.style.setProperty('--v', co.nlp_score);
-            }
+            // Update Score Meter
+            const nlpScore = clamp01(co.nlp_score || 0);
+            setWheel(ringContent, numContent, mwContent, nlpScore, '');
 
-            // 2. Update Topic Coverage
             if (co.topic_coverage) {
                 coTopicCoverageText.innerHTML = `Covers <strong>${co.topic_coverage.covered} of ${co.topic_coverage.total}</strong> key topics found in top competitor content.`;
                 coTopicCoverageProgress.style.width = co.topic_coverage.percentage + '%';
             }
 
-            // 3. Update Content Gaps
             if (co.content_gaps && co.content_gaps.missing_topics) {
                 coContentGapsText.innerHTML = `Missing <strong>${co.content_gaps.missing_count} topics</strong> that your top competitors are covering.`;
                 coContentGapsTags.innerHTML = co.content_gaps.missing_topics.map(topic => {
@@ -514,14 +491,12 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
                 }).join('');
             }
 
-            // 4. Update Schema Suggestions
             if (co.schema_suggestions) {
                 coSchemaTags.innerHTML = co.schema_suggestions.map(schema => {
                     return `<span class="chip good"><i>✅</i><span>${schema}</span></span>`;
                 }).join('');
             }
 
-            // 5. Update Readability & Intent
             if (co.readability_intent) {
                 coIntentTag.innerHTML = `Intent: ${co.readability_intent.intent}`;
                 coGradeTag.innerHTML = `Grade Level: ${co.readability_intent.grade_level}`;
@@ -532,7 +507,6 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
             const badgeClass = n=> n>=80?'good':(n>=60?'warn':'bad');
             const setBadgeEl = (el,score)=>{ if(!el) return; el.textContent = badgeText(score); el.className = 'co-badge ' + (el.classList.contains('small')?'small ':'') + badgeClass(score); };
 
-            // NLP badge + tips
             const coNlpBadge = document.getElementById('coNlpBadge');
             if (co.nlp_score != null) setBadgeEl(coNlpBadge, co.nlp_score);
             const nlpTips = document.getElementById('nlpTips'); if(nlpTips){ nlpTips.innerHTML = ''; 
@@ -547,7 +521,6 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
                 }
             }
 
-            // Topic coverage badge + tips
             const tcPct = (co.topic_coverage && typeof co.topic_coverage.percentage==='number') ? co.topic_coverage.percentage : 0;
             setBadgeEl(document.getElementById('coTcBadge'), tcPct);
             const tcTips = document.getElementById('tcTips'); if(tcTips){ tcTips.innerHTML = '';
@@ -556,7 +529,6 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
                 else { tcTips.innerHTML += '<div class="tip">Create an outline with key entities/FAQs; flesh out missing sections.</div>'; }
             }
 
-            // Gaps badge + tips
             const missing = Array.isArray(co.content_gaps?.missing_topics) ? co.content_gaps.missing_topics.length : 0;
             const gapScore = missing===0 ? 100 : (missing<=2 ? 70 : 50);
             setBadgeEl(document.getElementById('coGapBadge'), gapScore);
@@ -567,7 +539,6 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
                 }
             }
 
-            // Schema badge + tips
             const scCount = Array.isArray(co.schema_suggestions) ? co.schema_suggestions.length : 0;
             const scScore = scCount>0 ? 75 : 55;
             setBadgeEl(document.getElementById('coSchemaBadge'), scScore);
@@ -576,7 +547,6 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
                 else schemaTips.innerHTML += '<div class="tip">Consider adding FAQ or HowTo blocks to unlock schema opportunities.</div>';
             }
         }
-// =================== / END OF NEW CODE ===================
 
         renderCategories(data,url,'');
 
@@ -724,23 +694,16 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
 <div class="co-card" id="contentOptimizationCard">
     <div class="co-grid">
-
-      <div class="co-meter-wrap">
-        <div class="co-meter" id="mwContent">
-          <div class="co-meter-bg"></div>
-          <div class="co-meter-progress" style="--v: 0;"></div>
-          <div class="co-meter-inner">
-            <div>
-              <div class="co-meter-score" id="numContent">0</div>
-              <div class="co-meter-label">NLP Content Score</div>
-            </div>
-          </div>
+      <!-- Content Optimization Score Wheel -->
+      <div style="display:grid;place-items:center;padding:10px">
+        <div class="mw warn" id="mwContent">
+          <div class="mw-ring" id="ringContent" style="--v:0"></div>
+          <div class="mw-center" id="numContent">0%</div>
         </div>
-          <div style="margin-top:10px; display:flex; gap:10px; align-items:center">
-            <span id="coNlpBadge" class="co-badge warn">Need more work</span>
-          </div>
-          <div id="nlpTips" class="co-tips"></div>
-    
+        <div style="margin-top:10px; display:flex; gap:10px; align-items:center">
+          <span id="coNlpBadge" class="co-badge warn">Need more work</span>
+        </div>
+        <div id="nlpTips" class="co-tips"></div>
       </div>
 
       <div class="co-info-grid">
