@@ -27,9 +27,13 @@ Route::middleware('throttle:seoapi')->group(function () {
     Route::post('/technical-seo-analyze', [AnalyzerController::class, 'analyzeTechnicalSeo'])
         ->name('api.technical-seo');
         
-    // NEW: Keyword Intelligence analysis
+    // Keyword Intelligence analysis
     Route::post('/keyword-analyze', [AnalyzerController::class, 'analyzeKeywords'])
         ->name('api.keyword-analyze');
+
+    // NEW: Content Analysis Engine
+    Route::post('/content-engine-analyze', [AnalyzerController::class, 'analyzeContentEngine'])
+        ->name('api.content-engine');
 
     // Optional stubs (safe to keep)
     Route::post('/ai-check', [AnalyzerController::class, 'aiCheck'])->name('api.aicheck')
