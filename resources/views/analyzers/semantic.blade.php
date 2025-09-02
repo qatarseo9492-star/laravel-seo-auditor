@@ -81,9 +81,6 @@
     --size: 200px;
     --track-width: 14px;
     --bg-color: #1a1a1a;
-    --outer-ring-width: 4px;
-    --outer-ring-color: #2a2a2a;
-    --inner-ring-color: #4a4a4a;
     --progress-percent: calc(var(--v) * 1%);
     --inner-hole-percent: calc(100% - (var(--track-width) * 2));
 
@@ -91,9 +88,10 @@
     height: var(--size);
     position: relative;
     filter: 
-      drop-shadow(0 0 6px rgba(0, 198, 255, 0.5)) 
-      drop-shadow(0 0 16px rgba(138, 43, 226, 0.4))
-      drop-shadow(0 0 28px rgba(255, 20, 147, 0.3));
+      drop-shadow(2px 2px 5px var(--blue-2))
+      drop-shadow(-2px -2px 5px var(--pink-1))
+      drop-shadow(2px -2px 5px var(--green-2))
+      drop-shadow(-2px 2px 5px var(--yellow-1));
   }
   
   .mw-ring {
@@ -101,15 +99,15 @@
     inset: 0;
     border-radius: 50%;
     background: var(--bg-color); 
-    box-shadow: 
-      inset 0 0 0 1px var(--inner-ring-color),
-      0 0 0 var(--outer-ring-width) var(--outer-ring-color);
+    box-shadow:
+      inset 0 0 0 3px #2a2a2a, /* Inner outline */
+      0 0 0 3px #4a4a4a;     /* Outer outline */
   }
 
   .mw-ring::before {
     content: "";
     position: absolute;
-    inset: var(--outer-ring-width);
+    inset: 3px;
     border-radius: 50%;
     background: conic-gradient(from -90deg,
         var(--blue-1) 0deg, var(--blue-2) 60deg,
@@ -119,11 +117,11 @@
         var(--purple-1) 340deg, var(--blue-1) 360deg);
     -webkit-mask-image: 
         conic-gradient(from -90deg, #000 var(--progress-percent), transparent 0%),
-        radial-gradient(farthest-side, transparent var(--inner-hole-percent), #000 calc(var(--inner-hole-percent) + 1%));
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
     -webkit-mask-composite: source-in;
      mask-image: 
         conic-gradient(from -90deg, #000 var(--progress-percent), transparent 0%),
-        radial-gradient(farthest-side, transparent var(--inner-hole-percent), #000 calc(var(--inner-hole-percent) + 1%));
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
      mask-composite: intersect;
   }
 
@@ -137,15 +135,10 @@
     color: #fff;
     text-shadow: 0 4px 16px rgba(0, 0, 0, .4);
   }
-  
-  .mw.good { --inner-ring-color: var(--green-2); }
-  .mw.warn { --inner-ring-color: var(--orange-1); }
-  .mw.bad { --inner-ring-color: var(--pink-1); }
-  
+    
   .mw-sm {
     --size: 170px;
     --track-width: 12px;
-    --outer-ring-width: 3px;
   }
 
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
@@ -406,9 +399,7 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
         const score=clamp01(data.overall_score||0);
         setWheel(mwRing, mwNum, mw, score, '');
-
-        overallBar?.classList.remove('good','warn','bad');
-        overallBar?.classList.add(bandName(score));
+        
         overallFill.style.width=score+'%';
         overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
