@@ -76,31 +76,43 @@
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
 
   /* ===================== Wheels (overall + readability + speed) ===================== */
-  /* New double-line score wheel design */
+  /* Refactored Score Wheel Component */
   .mw {
-    --v: 0;
-    width: 200px;
-    height: 200px;
+    /* -- Configuration variables -- */
+    --v: 0; /* Score value (0-100), controlled by JS */
+    --size: 200px;
+    --track-width: 10px; /* Width of the progress track */
+    --bg-color: #1a1a1a; /* Background of the wheel's track */
+    --outer-ring-width: 3px;
+    --outer-ring-color: #3a3a3a;
+    
+    /* -- Internal variables -- */
+    --progress-percent: calc(var(--v) * 1%);
+    --inner-hole-percent: calc(100% - (var(--track-width) * 2));
+
+    width: var(--size);
+    height: var(--size);
     position: relative;
     filter: drop-shadow(0 12px 28px rgba(0, 0, 0, .45));
   }
+  
+  /* The .mw-ring now serves as the static background and outer ring */
   .mw-ring {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    /* This is the background track */
-    background: #1a1a1a; 
-    box-shadow: 
-        /* Outer static ring */
-        0 0 0 3px #3a3a3a,
-        /* Inner dark area, creating the track width */
-        inset 0 0 0 13px #1a1a1a;
+    background: var(--bg-color); 
+    box-shadow: 0 0 0 var(--outer-ring-width) var(--outer-ring-color);
   }
+
+  /* The ::before pseudo-element is the multicolor progress indicator */
   .mw-ring::before {
     content: "";
     position: absolute;
-    inset: 3px; /* Position inside the outer ring */
+    inset: var(--outer-ring-width);
     border-radius: 50%;
+    
+    /* 1. The full multicolor gradient */
     background: conic-gradient(from -90deg,
         var(--blue-1) 0deg, var(--blue-2) 60deg,
         var(--green-1) 120deg, var(--green-2) 150deg,
@@ -108,47 +120,41 @@
         var(--red-1) 255deg, var(--pink-1) 300deg,
         var(--purple-1) 340deg, var(--blue-1) 360deg);
     
-    /* Mask to create the progress ring shape */
-    -webkit-mask: 
-        conic-gradient(from -90deg, #000 calc(var(--v) * 1%), transparent 0),
-        radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 10px));
-    mask:
-        conic-gradient(from -90deg, #000 calc(var(--v) * 1%), transparent 0),
-        radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 10px));
-    -webkit-mask-composite: source-in; /* Use progress mask to clip shape mask */
+    /* 2. Masking is used to shape the gradient into a progress ring */
+    -webkit-mask-image: 
+        /* The conic gradient reveals the progress based on the --v variable */
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent var(--progress-percent)),
+        /* The radial gradient cuts out the center, creating the ring shape */
+        radial-gradient(farthest-side, transparent var(--inner-hole-percent), #000 calc(var(--inner-hole-percent) + 1%));
+    -webkit-mask-composite: source-in;
+     mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent var(--progress-percent)),
+        radial-gradient(farthest-side, transparent var(--inner-hole-percent), #000 calc(var(--inner-hole-percent) + 1%));
+     mask-composite: intersect;
   }
+
   .mw-center {
     position: absolute;
     inset: 0;
     display: grid;
     place-items: center;
-    font-size: 34px;
+    font-size: calc(var(--size) * 0.17); /* Font size scales with wheel size */
     font-weight: 900;
     color: #fff;
     text-shadow: 0 6px 22px rgba(0, 0, 0, .45);
   }
+  
+  /* Drop shadow colors for different score bands */
   .mw.good { filter: drop-shadow(0 0 12px rgba(0, 255, 138, .45)) drop-shadow(0 0 40px rgba(0, 255, 198, .35)); }
   .mw.warn { filter: drop-shadow(0 0 12px rgba(255, 165, 0, .45)) drop-shadow(0 0 40px rgba(255, 215, 0, .35)); }
   .mw.bad { filter: drop-shadow(0 0 12px rgba(255, 20, 147, .45)) drop-shadow(0 0 40px rgba(138, 43, 226, .35)); }
+  
+  /* Modifier for a smaller version of the wheel */
   .mw-sm {
-    width: 170px;
-    height: 170px;
+    --size: 170px;
+    --track-width: 9px;
+    --outer-ring-width: 2px;
   }
-  .mw-sm .mw-ring {
-    box-shadow: 
-        0 0 0 2px #3a3a3a,
-        inset 0 0 0 11px #1a1a1a;
-  }
-  .mw-sm .mw-ring::before {
-    inset: 2px;
-    -webkit-mask: 
-        conic-gradient(from -90deg, #000 calc(var(--v) * 1%), transparent 0),
-        radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
-    mask:
-        conic-gradient(from -90deg, #000 calc(var(--v) * 1%), transparent 0),
-        radial-gradient(farthest-side, transparent calc(100% - 9px), #000 calc(100% - 9px));
-  }
-  .mw-sm .mw-center { font-size: 28px; }
 
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
   .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
@@ -686,7 +692,7 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       <div style="flex:1"></div>
       <input id="importFile" type="file" accept="application/json" style="display:none"/>
       <button id="importBtn" type="button" class="btn btn-purple">⇪ Import</button>
-      <button id="analyzeBtn" type="button" class="btn btn-green" onclick="return window.__SemAnalyze && window.__SemAnalyze(event)">🔍 Analyze</button>
+      <button id="analyzeBtn" type="button" class="btn btn-green">🔍 Analyze</button>
       <button id="printBtn"   type="button" class="btn btn-blue">🖨️ Print</button>
       <button id="resetBtn"   type="button" class="btn btn-orange">↻ Reset</button>
       <button id="exportBtn"  type="button" class="btn btn-purple">⬇︎ Export</button>
