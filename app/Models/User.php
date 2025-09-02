@@ -21,6 +21,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        // 🔹 new fields from migration
+        'role',
+        'daily_quota',
+        'monthly_quota',
+        'banned_at',
+        'last_seen_at',
+        'last_ip',
+        'last_country',
     ];
 
     /**
@@ -40,6 +48,40 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'password' => 'hashed',
+        'password'          => 'hashed',
+        'banned_at'         => 'datetime',
+        'last_seen_at'      => 'datetime',
     ];
+
+    /**
+     * 🔹 Relationship: user → analyze logs
+     */
+    public function analyzeLogs()
+    {
+        return $this->hasMany(\App\Models\AnalyzeLog::class);
+    }
+
+    /**
+     * 🔹 Relationship: user → OpenAI usage
+     */
+    public function openAiUsage()
+    {
+        return $this->hasMany(\App\Models\OpenAiUsage::class);
+    }
+
+    /**
+     * 🔹 Check if user is banned
+     */
+    public function isBanned(): bool
+    {
+        return !is_null($this->banned_at);
+    }
+
+    /**
+     * 🔹 Check if user has admin role
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
 }
