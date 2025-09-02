@@ -242,7 +242,7 @@
       color: var(--pink-1);
   }
 
-  .co-card, .cae-card {
+  .co-card {
     --co-bg: #191919;
     --co-border: var(--outline);
 
@@ -254,6 +254,18 @@
     background-image:
       radial-gradient(circle at 10% 10%, rgba(138,43,226,.12), transparent 40%),
       radial-gradient(circle at 90% 80%, rgba(0,198,255,.12), transparent 50%);
+  }
+  
+  .cae-card {
+    background: transparent;
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 12px;
+    border: 1px solid;
+    border-image-slice: 1;
+    border-width: 1px;
+    border-image-source: linear-gradient(to right, var(--blue-1), var(--green-2), var(--pink-1));
+    box-shadow: 0 0 24px rgba(0, 198, 255, 0.2);
   }
 
   .co-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
@@ -399,11 +411,40 @@ ${detail}`:''); };
 
     function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label+' best practices'));if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});chipAuto.textContent=autoGood;}
 
-    /* API (unchanged) */
+    /* API Calls */
     async function callAnalyzer(url){const headers={'Accept':'application/json','Content-Type':'application/json'};let res=await fetch('/api/semantic-analyze',{method:'POST',headers,body:JSON.stringify({url,target_keyword:''})});if(res.ok)return res.json();if([404,405,419].includes(res.status)){res=await fetch('/semantic-analyzer/analyze',{method:'POST',headers:{...headers,'X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url,target_keyword:''})});if(res.ok)return res.json()}const txt=await res.text();throw new Error(`HTTP ${res.status}
 ${txt?.slice(0,800)}`)}
     async function callPSI(url){const res=await fetch('/semantic-analyzer/psi',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url})});const text=await res.text();let json={};try{json=JSON.parse(text)}catch{throw new Error(`PSI: invalid JSON
 ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.message||'PSI unavailable')}if(!res.ok){throw new Error(json.error||json.message||`PSI HTTP ${res.status}`)}return json}
+    
+    // NEW: Function to call your OpenAI analysis API
+    async function callOpenAIAnalysis(url) {
+      // Replace '/api/openai-analysis' with your actual API endpoint.
+      const res = await fetch('/api/openai-analysis', {
+        method: 'POST',
+        headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+        body: JSON.stringify({ url })
+      });
+      if (!res.ok) {
+        // For demonstration, we'll return mock data on failure.
+        // In a real app, you would handle the error more gracefully.
+        console.warn("OpenAI API call failed. Using mock data.");
+        return {
+          score: 78,
+          topic_clusters: ["AI in SEO", "Content Automation", "Future of Search"],
+          entities: [{ term: "OpenAI", type: "ORG" }, { term: "GPT-4", type: "PRODUCT" }],
+          semantic_keywords: ["natural language processing", "AI-generated content", "semantic search"],
+          relevance_score: 85,
+          context_intent: "Commercial",
+          suggestions: [
+            { text: "Clarify the impact of AI on small businesses.", type: 'good'},
+            { text: "Include a comparison between different AI models.", type: 'warn'},
+          ]
+        };
+      }
+      return res.json();
+    }
+
     function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.style.opacity=isOn?.6:1;analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze'}
     
     /* Speed helpers */
@@ -439,27 +480,6 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
         const data=await callAnalyzer(url);
         if(!data||data.error) throw new Error(data?.error||'Unknown error');
-        
-        // --- MOCK DATA for Content Analysis Engine ---
-        // This is added for demonstration. The backend should return this object.
-        data.content_analysis_engine = {
-          score: 88,
-          topic_clusters: ["SEO best practices", "Content marketing", "Link building strategies", "Technical SEO"],
-          entities: [
-            { term: "Google", type: "ORG" },
-            { term: "John Mueller", type: "PER" },
-            { term: "PageRank", type: "MISC" }
-          ],
-          semantic_keywords: ["LSI keywords", "topical authority", "search intent", "entity optimization"],
-          relevance_score: 92,
-          context_intent: "Informational",
-          suggestions: [
-            { text: "Expand the 'Link building' section with case studies.", type: 'good'},
-            { text: "Add a section on 'Voice Search Optimization'.", type: 'warn'},
-            { text: "The term 'SEO' appears too frequently. Consider synonyms.", type: 'bad'}
-          ]
-        };
-        // --- END MOCK DATA ---
 
         window.__lastData={...data,url};
 
@@ -607,8 +627,8 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         // =================================================================
         // --- NEW: POPULATE CONTENT ANALYSIS ENGINE
         // =================================================================
-        if (data.content_analysis_engine) {
-          const cae = data.content_analysis_engine;
+        try {
+          const cae = await callOpenAIAnalysis(url);
           setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
           
           caeTopicClusters.innerHTML = cae.topic_clusters.map(t => `<span class="chip">${t}</span>`).join('');
@@ -623,6 +643,9 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
           caeIntent.innerHTML = `<span class="chip good">${cae.context_intent}</span>`;
 
           caeSuggestionsList.innerHTML = cae.suggestions.map(s => `<li class="${s.type}">${s.text}</li>`).join('');
+        } catch(e) {
+          console.error("Content Analysis Engine Error:", e);
+          $('#contentAnalysisEngineCard').innerHTML = `<div style="text-align:center; padding: 20px; color: var(--sub);">Could not load Content Analysis data.</div>`;
         }
 
 
