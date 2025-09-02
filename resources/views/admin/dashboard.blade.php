@@ -3,6 +3,19 @@
 
 @push('head')
 <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+
+{{-- tiny pulse for the gauge arc (kept local to this page) --}}
+<style>
+  .gauge #arc{
+    animation: gaugeGlow 2.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px rgba(0,198,255,.35)) drop-shadow(0 0 8px rgba(196,77,255,.2));
+  }
+  @keyframes gaugeGlow{
+    0%   { filter: drop-shadow(0 0 3px rgba(0,198,255,.28)) drop-shadow(0 0 6px rgba(196,77,255,.16)); }
+    50%  { filter: drop-shadow(0 0 7px rgba(0,198,255,.45)) drop-shadow(0 0 12px rgba(196,77,255,.28)); }
+    100% { filter: drop-shadow(0 0 3px rgba(0,198,255,.28)) drop-shadow(0 0 6px rgba(196,77,255,.16)); }
+  }
+</style>
 @endpush
 
 @section('content')
@@ -37,11 +50,13 @@
         @endphp
         <svg class="gauge" viewBox="0 0 120 120" data-score="{{ $score }}">
           <defs>
+            {{-- updated neon gradient: cyan → green → yellow → hot pink → purple --}}
             <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%"  stop-color="#00C6FF"/>
-              <stop offset="35%" stop-color="#00FF8A"/>
-              <stop offset="70%" stop-color="#FFD700"/>
-              <stop offset="100%" stop-color="#FF1493"/>
+              <stop offset="0%"   stop-color="#00C6FF"/>
+              <stop offset="30%"  stop-color="#00FF8A"/>
+              <stop offset="55%"  stop-color="#FFD700"/>
+              <stop offset="80%"  stop-color="#FF4D7E"/>
+              <stop offset="100%" stop-color="#C44DFF"/>
             </linearGradient>
           </defs>
           <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="12"/>
@@ -55,7 +70,7 @@
           <div class="chip"><span class="dot" style="background:#00C6FF"></span>Active Users: <strong>{{ $metrics['active_users'] ?? 0 }}</strong></div>
           <div class="chip"><span class="dot" style="background:#00FF8A"></span>Analyzes Today: <strong>{{ $metrics['analyze_today'] ?? 0 }}</strong></div>
           <div class="chip"><span class="dot" style="background:#FFD700"></span>Analyzes Month: <strong>{{ $metrics['analyze_month'] ?? 0 }}</strong></div>
-          <div class="chip"><span class="dot" style="background:#FF1493"></span>Users Total: <strong>{{ $metrics['users_total'] ?? 0 }}</strong></div>
+          <div class="chip"><span class="dot" style="background:#C44DFF"></span>Users Total: <strong>{{ $metrics['users_total'] ?? 0 }}</strong></div>
         </div>
       </div>
     </div>
