@@ -76,51 +76,47 @@
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
 
   /* ===================== Wheels (overall + readability + speed) ===================== */
-  /* Refactored Score Wheel Component */
   .mw {
-    /* -- Configuration variables -- */
-    --v: 0; /* Score value (0-100), controlled by JS */
+    --v: 0;
     --size: 200px;
-    --track-width: 14px; /* Width of the progress track */
-    --bg-color: #1a1a1a; /* Background of the wheel's track */
+    --track-width: 14px;
+    --bg-color: #1a1a1a;
     --outer-ring-width: 4px;
-    --outer-ring-color: #3a3a3a;
-    
-    /* -- Internal variables -- */
+    --outer-ring-color: #2a2a2a;
+    --inner-ring-color: #4a4a4a;
     --progress-percent: calc(var(--v) * 1%);
     --inner-hole-percent: calc(100% - (var(--track-width) * 2));
 
     width: var(--size);
     height: var(--size);
     position: relative;
-    filter: drop-shadow(0 12px 28px rgba(0, 0, 0, .45));
+    filter: 
+      drop-shadow(0 0 6px rgba(0, 198, 255, 0.5)) 
+      drop-shadow(0 0 16px rgba(138, 43, 226, 0.4))
+      drop-shadow(0 0 28px rgba(255, 20, 147, 0.3));
   }
   
-  /* The .mw-ring now serves as the static background and outer ring */
   .mw-ring {
     position: absolute;
     inset: 0;
     border-radius: 50%;
     background: var(--bg-color); 
-    box-shadow: 0 0 0 var(--outer-ring-width) var(--outer-ring-color);
+    box-shadow: 
+      inset 0 0 0 1px var(--inner-ring-color),
+      0 0 0 var(--outer-ring-width) var(--outer-ring-color);
   }
 
-  /* The ::before pseudo-element is the multicolor progress indicator */
   .mw-ring::before {
     content: "";
     position: absolute;
     inset: var(--outer-ring-width);
     border-radius: 50%;
-    
-    /* 1. The full multicolor gradient */
     background: conic-gradient(from -90deg,
         var(--blue-1) 0deg, var(--blue-2) 60deg,
         var(--green-1) 120deg, var(--green-2) 150deg,
         var(--yellow-1) 195deg, var(--orange-1) 225deg,
         var(--red-1) 255deg, var(--pink-1) 300deg,
         var(--purple-1) 340deg, var(--blue-1) 360deg);
-    
-    /* 2. Masking is used to shape the gradient into a progress ring */
     -webkit-mask-image: 
         conic-gradient(from -90deg, #000 var(--progress-percent), transparent 0%),
         radial-gradient(farthest-side, transparent var(--inner-hole-percent), #000 calc(var(--inner-hole-percent) + 1%));
@@ -136,18 +132,16 @@
     inset: 0;
     display: grid;
     place-items: center;
-    font-size: calc(var(--size) * 0.2); /* Font size scales with wheel size */
+    font-size: calc(var(--size) * 0.22);
     font-weight: 900;
     color: #fff;
-    text-shadow: 0 6px 22px rgba(0, 0, 0, .45);
+    text-shadow: 0 4px 16px rgba(0, 0, 0, .4);
   }
   
-  /* Drop shadow colors for different score bands */
-  .mw.good { filter: drop-shadow(0 0 12px rgba(0, 255, 138, .45)) drop-shadow(0 0 40px rgba(0, 255, 198, .35)); }
-  .mw.warn { filter: drop-shadow(0 0 12px rgba(255, 165, 0, .45)) drop-shadow(0 0 40px rgba(255, 215, 0, .35)); }
-  .mw.bad { filter: drop-shadow(0 0 12px rgba(255, 20, 147, .45)) drop-shadow(0 0 40px rgba(138, 43, 226, .35)); }
+  .mw.good { --inner-ring-color: var(--green-2); }
+  .mw.warn { --inner-ring-color: var(--orange-1); }
+  .mw.bad { --inner-ring-color: var(--pink-1); }
   
-  /* Modifier for a smaller version of the wheel */
   .mw-sm {
     --size: 170px;
     --track-width: 12px;
@@ -155,10 +149,15 @@
   }
 
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
-  .waterbox .fill{position:absolute;inset:0;width:0%;transition:width .9s ease}
-  .waterbox.good .fill{background:linear-gradient(90deg,var(--green-1),var(--green-2))}
-  .waterbox.warn .fill{background:linear-gradient(90deg,var(--yellow-1),var(--orange-1))}
-  .waterbox.bad  .fill{background:linear-gradient(90deg,var(--red-1),var(--pink-1))}
+  .waterbox .fill{
+    position:absolute;
+    inset:0;
+    width:0%;
+    transition:width .9s ease;
+    background: linear-gradient(90deg, var(--red-1), var(--orange-1), var(--yellow-1), var(--green-1), var(--blue-1), var(--purple-1));
+    background-size: 300% 100%;
+    animation: rainbowSlide 5s linear infinite;
+  }
   .waterbox .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:var(--ink);font-size:11px}
 
   .progress{width:100%;height:10px;border-radius:9999px;background:#222;overflow:hidden;border:1px solid var(--outline)}
