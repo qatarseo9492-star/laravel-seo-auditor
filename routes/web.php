@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnalyzerController;
+// 🔹 Admin dashboard controller
+use App\Http\Controllers\Admin\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,7 +31,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 /*
 | Auth-protected app
 */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added ban + touch
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
     // UI pages
@@ -41,12 +43,14 @@ Route::middleware('auth')->group(function () {
     // Previously: -> 'semanticAnalyze'
     // Now points to the new OpenAI-powered controller method (CSRF-protected)
     Route::post('/semantic-analyzer/analyze', [AnalyzerController::class, 'analyzeWeb'])
-        ->name('semantic.analyze');
+        ->name('semantic.analyze')
+        ->middleware('quota:semantic'); // 🔹 enforce daily/monthly quota for semantic
 
     // (Optional) Direct endpoint to call the API-style method from web if needed
     // Useful for testing the raw JSON without CSRF issues in certain setups
     Route::post('/semantic-analyzer/analyze-direct', [AnalyzerController::class, 'analyze'])
-        ->name('semantic.analyze.direct');
+        ->name('semantic.analyze.direct')
+        ->middleware('quota:semantic'); // 🔹 quota too
 
     // ===== PageSpeed Insights proxy (FINAL) =====
     Route::post('/semantic-analyzer/psi', function (Request $req) {
@@ -128,7 +132,7 @@ Route::middleware('auth')->group(function () {
             'mobile'  => $fetch('mobile'),
             'desktop' => $fetch('desktop'),
         ]);
-    })->name('semantic.psi');
+    })->name('semantic.psi')->middleware('quota:psi'); // 🔹 quota for PSI
     // ===========================================
 
     // Profile
@@ -145,6 +149,17 @@ Route::middleware('auth')->group(function () {
         return redirect()->route('home');
     })->name('logout');
 });
+
+/*
+| 🔹 Admin Dashboard (role-aware later)
+*/
+Route::middleware(['auth', 'ban', 'touch'])
+    ->prefix('admin')->name('admin.')
+    ->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
+        // (We’ll add ban/unban, quota update, and data JSON endpoints next)
+    });
 
 /*
 | Convenience redirects / legacy aliases
