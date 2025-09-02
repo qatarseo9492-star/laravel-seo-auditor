@@ -19,25 +19,23 @@ Route::get('/status', function () {
 })->name('api.status');
 
 Route::middleware('throttle:seoapi')->group(function () {
-    //  UPDATED: point to the new OpenAI-powered method
+    // Main content analysis
     Route::post('/semantic-analyze', [AnalyzerController::class, 'analyze'])
         ->name('api.semantic');
 
-    // ✅ NEW: Added POST route for the Technical SEO Analysis
-    // This fixes the "405 Method Not Allowed" error. This route now accepts POST
-    // requests from the analyzer to perform the OpenAI-powered technical SEO check.
-    // Note: Ensure you have a corresponding 'analyzeTechnicalSeo' method in your AnalyzerController.
-    Route::post('/technical-seo-analyze', [AnalyzerController::class, 'analyzeTechnicalSeo'])->name('api.technical-seo.analyze');
-
-    // (Optional) Canonical alias with a clearer name; safe to keep or remove
-    // Route::post('/semantic/analyze', [AnalyzerController::class, 'analyze'])
-    //       ->name('api.semantic.analyze');
+    // Technical SEO analysis
+    Route::post('/technical-seo-analyze', [AnalyzerController::class, 'analyzeTechnicalSeo'])
+        ->name('api.technical-seo');
+        
+    // NEW: Keyword Intelligence analysis
+    Route::post('/keyword-analyze', [AnalyzerController::class, 'analyzeKeywords'])
+        ->name('api.keyword-analyze');
 
     // Optional stubs (safe to keep)
     Route::post('/ai-check', [AnalyzerController::class, 'aiCheck'])->name('api.aicheck')
-        ->withoutMiddleware('throttle:seoapi'); // remove if you added the stub methods
+        ->withoutMiddleware('throttle:seoapi');
     Route::post('/topic-cluster', [AnalyzerController::class, 'topicClusterAnalyze'])->name('api.topiccluster')
-        ->withoutMiddleware('throttle:seoapi'); // remove if you added the stub methods
+        ->withoutMiddleware('throttle:seoapi');
 });
 
 // CORS preflight
