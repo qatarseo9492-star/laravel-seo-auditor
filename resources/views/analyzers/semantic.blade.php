@@ -201,7 +201,8 @@
   .sp-meter.warn{box-shadow:0 0 0 1px #8a5a12 inset,0 0 24px #f59e0b33}
   .sp-meter.bad {box-shadow:0 0 0 1px #6f1616 inset,0 0 24px #ef444433}
 
-  /* ===================== Content Optimization (Futuristic) ===================== */
+  /* ===================== <h2 class="co-heading"><span class="spark">✦</span> Content Optimization <span class="wave">🌈</span></h2>
+Content Optimization (Futuristic) ===================== */
   .co-card {
     --co-bg: #191919;
     --co-border: var(--outline);
@@ -607,30 +608,132 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
   } else { init(); }
 })();
 </script>
+
+/* === UI Refresh (non-breaking): theme + components === */
+:root{
+  --bg-0:#1A1A1A; --bg-1:#202020; --bg-2:#262626;
+  --fg:#e5e7eb; --muted:#a3a3a3;
+  --br:rgba(255,255,255,.08);
+  --glow: 0 0 12px rgba(0,198,255,.25), 0 0 24px rgba(138,43,226,.18);
+  --grad-multi: linear-gradient(90deg,#00C6FF,#0072FF,#00FF8A,#00FFC6,#FFD700,#FFA500,#FF4500,#FF1493,#8A2BE2);
+  --card-bg: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  --pill: rgba(255,255,255,.06);
+}
+
+/* Layout base */
+html,body{ background:var(--bg-0)!important; color:var(--fg); }
+.analyzer-shell{ background:var(--bg-1); border:1px solid var(--br); border-radius:18px; padding:14px; box-shadow:var(--glow); }
+.card{ background:var(--card-bg); border:1px solid var(--br); border-radius:16px; padding:16px; }
+.card + .card{ margin-top:12px; }
+.card-title{ display:flex; align-items:center; gap:10px; font-weight:700; }
+.card-title .tag{ padding:.25rem .5rem; border:1px solid var(--br); background:var(--pill); border-radius:999px; font-size:.75rem; }
+
+/* Content Optimization multicolor heading with animated icons */
+.co-heading{
+  font-size: clamp(22px, 3.5vw, 32px);
+  font-weight: 800;
+  background: var(--grad-multi);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: .3px;
+  display:flex; align-items:center; gap:10px;
+}
+.co-heading .wave{ display:inline-block; animation: floaty 2.6s ease-in-out infinite; }
+.co-heading .spark{ display:inline-block; animation: spin-slow 8s linear infinite; }
+@keyframes floaty{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-3px) } }
+@keyframes spin-slow{ from{ transform: rotate(0deg)} to{ transform: rotate(360deg)} }
+
+/* Score wheel: show outline only (no fill), keep any logic-driven values intact */
+.score-wheel, .scoreRing{ position:relative; display:grid; place-items:center; }
+.score-wheel .fill, .scoreRing .fill, .score-wheel .slice { opacity:0 !important; } /* hide any gradient fills */
+.score-wheel svg .bg, .scoreRing svg .bg{ fill:none; stroke:rgba(255,255,255,.08); }
+.score-wheel svg .fg, .scoreRing svg .fg{ fill:none; stroke:url(#multiStroke); stroke-linecap:round; filter: drop-shadow(0 0 6px rgba(0,114,255,.5)); }
+.score-wheel .value, .scoreRing .value{
+  position:absolute; font-weight:800; font-size: clamp(28px, 4vw, 40px);
+  background: var(--grad-multi); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+/* Fallback: if wheel is a div with conic-gradient, neutralize fill */
+.score-wheel{ background: none !important; }
+
+/* Site Speed & Core Web Vitals redesign */
+.speed-grid{ display:grid; grid-template-columns: repeat(12,1fr); gap:12px; }
+.speed-card{ grid-column: span 6; background: var(--card-bg); border:1px solid var(--br); border-radius:16px; padding:16px; box-shadow: var(--glow); }
+@media (max-width: 900px){ .speed-card{ grid-column: span 12; } }
+
+.speed-meter{ display:flex; align-items:center; gap:14px; }
+.speed-meter .dial{ width:100px; height:100px; border-radius:50%; border:2px dashed rgba(255,255,255,.12); position:relative;}
+.speed-meter .dial::after{
+  content:""; position:absolute; inset:6px; border-radius:50%;
+  border:6px solid transparent; border-top-color:#00C6FF; border-right-color:#8A2BE2;
+  filter: drop-shadow(0 0 8px rgba(0,198,255,.35));
+  animation: spin-slow 12s linear infinite;
+}
+.speed-meter .score{ font-size:28px; font-weight:800; background:var(--grad-multi); -webkit-background-clip:text; color:transparent; }
+
+.speed-suggestions{ display:grid; gap:10px; margin-top:10px; }
+.suggestion{
+  display:flex; gap:10px; align-items:flex-start; padding:10px 12px;
+  background: radial-gradient(120% 120% at 10% 0%, rgba(0,114,255,.18), rgba(255,255,255,.03));
+  border:1px solid rgba(0,114,255,.25); border-radius:12px;
+  box-shadow: 0 0 8px rgba(0,114,255,.15);
+}
+.suggestion.bad{ border-color: rgba(255,69,0,.35); background: radial-gradient(120% 120% at 10% 0%, rgba(255,69,0,.18), rgba(255,255,255,.03)); }
+.suggestion.ok{ border-color: rgba(255,215,0,.35); background: radial-gradient(120% 120% at 10% 0%, rgba(255,215,0,.18), rgba(255,255,255,.03)); }
+.suggestion.good{ border-color: rgba(0,255,138,.35); background: radial-gradient(120% 120% at 10% 0%, rgba(0,255,138,.18), rgba(255,255,255,.03)); }
+
+/* Meta Description Info (titles + H1..H4), colorful with icons */
+.meta-info-grid{ display:grid; grid-template-columns: repeat(12,1fr); gap:12px; }
+.meta-card{ grid-column: span 12; background: var(--card-bg); border:1px solid var(--br); border-radius:16px; padding:16px; }
+.meta-kv{ display:grid; grid-template-columns: 180px 1fr; gap:10px; align-items:center; padding:8px 0; border-bottom:1px dashed rgba(255,255,255,.08); }
+.meta-kv:last-child{ border-bottom:none; }
+
+.meta-key{ font-weight:700; color:#cbd5e1; }
+.meta-val{ color:#e5e7eb; }
+.meta-key .ico{ margin-right:6px; display:inline-block; filter: drop-shadow(0 0 5px rgba(0,198,255,.4)); }
+.hlist{ display:flex; flex-wrap:wrap; gap:8px; }
+.hbadge{
+  padding:.35rem .55rem; border-radius:999px; border:1px solid var(--br);
+  background:var(--pill);
+  box-shadow:var(--glow);
+}
+</style>
+
+<!-- Gradient stroke definition for score wheel SVGs -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="multiStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+    <stop offset="0%" stop-color="#00C6FF"/><stop offset="20%" stop-color="#0072FF"/>
+    <stop offset="40%" stop-color="#00FF8A"/><stop offset="50%" stop-color="#00FFC6"/>
+    <stop offset="65%" stop-color="#FFD700"/><stop offset="78%" stop-color="#FFA500"/>
+    <stop offset="88%" stop-color="#FF4500"/><stop offset="95%" stop-color="#FF1493"/>
+    <stop offset="100%" stop-color="#8A2BE2"/>
+  </linearGradient>
+</defs></svg>
 @endpush
 
 @section('content')
 <section class="maxw px-4 pb-10">
+<div class="speed-grid speed-card">
 
-  <div class="title-wrap">
-    <div class="king">👑</div>
+  <div class="title-wrap speed-card">
+    <div class="king speed-card">👑</div>
     <div style="text-align:center">
-      <div class="t-grad" style="font-size:26px;line-height:1.1;">Semantic SEO Master Analyzer</div>
-      <div class="byline">By <span class="shoail">Shoail Kahoker</span></div>
+      <div class="t-grad speed-card" style="font-size:26px;line-height:1.1;">Semantic SEO Master Analyzer</div>
+      <div class="byline speed-card">By <span class="shoail">Shoail Kahoker</span></div>
     </div>
   </div>
 
-  <div class="legend"><span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span></div>
+  <div class="legend speed-card"><span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span></div>
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#161616;border:1px solid var(--outline)">
-      <div class="mw warn" id="mw">
-        <div class="mw-ring" id="mwRing" style="--v:0"></div>
-        <div class="mw-fill" id="mwFill" style="--p:0"></div>
-        <div class="mw-center" id="mwNum">0%</div>
+      <div class="mw warn speed-card" id="mw">
+        <div class="mw-ring speed-card" id="mwRing" style="--v:0"></div>
+        <div class="mw-fill speed-card" id="mwFill" style="--p:0"></div>
+        <div class="mw-center speed-card" id="mwNum">0%</div>
       </div>
     </div>
-    <div class="space-y-2">
+    <div class="space-y-2 speed-card">
       <div style="display:flex;flex-wrap:wrap;gap:6px">
         <span id="chipOverall" class="chip warn"><i>🟧</i><span>Overall: 0 /100</span></span>
         <span id="chipContent" class="chip warn"><i>🟧</i><span>Content: —</span></span>
@@ -638,15 +741,15 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         <span id="chipHuman"   class="chip"><i>🟧</i><span>Human-like: — %</span></span>
         <span id="chipAI"      class="chip"><i>🟧</i><span>AI-like: — %</span></span>
       </div>
-      <div id="overallBar" class="waterbox warn">
-        <div class="fill" id="overallFill" style="width:0%"></div>
-        <div class="label"><span id="overallPct">0%</span></div>
+      <div id="overallBar" class="waterbox warn speed-card">
+        <div class="fill speed-card" id="overallFill" style="width:0%"></div>
+        <div class="label speed-card"><span id="overallPct">0%</span></div>
       </div>
     </div>
   </div>
 
-  <div class="analyze-wrap" style="margin-top:12px;">
-    <div class="url-row">
+  <div class="analyze-wrap speed-card" style="margin-top:12px;">
+    <div class="url-row speed-card">
       <span style="opacity:.75">🌐</span>
       <input id="urlInput" name="url" type="url" placeholder="https://example.com/page" />
       <button id="pasteBtn" type="button" class="paste">Paste</button>
@@ -666,162 +769,33 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
     <div id="errorBox"></div>
 
     <div id="statusChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
-      <div class="chip" id="chipHttpWrap"><span class="t-grad">HTTP:</span>&nbsp;<span id="chipHttp">—</span></div>
-      <div class="chip" id="chipTitleWrap"><span class="t-grad">Title:</span>&nbsp;<span id="chipTitle">—</span></div>
-      <div class="chip" id="chipMetaWrap"><span class="t-grad">Meta desc:</span>&nbsp;<span id="chipMeta">—</span></div>
-      <div class="chip"><span class="t-grad">Canonical:</span>&nbsp;<span id="chipCanon">—</span></div>
-      <div class="chip"><span class="t-grad">Robots:</span>&nbsp;<span id="chipRobots">—</span></div>
-      <div class="chip"><span class="t-grad">Viewport:</span>&nbsp;<span id="chipViewport">—</span></div>
-      <div class="chip"><span class="t-grad">H1/H2/H3:</span>&nbsp;<span id="chipH">—</span></div>
-      <div class="chip"><span class="t-grad">Internal links:</span>&nbsp;<span id="chipInt">—</span></div>
-      <div class="chip"><span class="t-grad">Schema:</span>&nbsp;<span id="chipSchema">—</span></div>
-      <div class="chip"><span class="t-grad">Auto-checked:</span>&nbsp;<span id="chipAuto">0</span></div>
+      <div class="chip speed-card" id="chipHttpWrap"><span class="t-grad">HTTP:</span>&nbsp;<span id="chipHttp">—</span></div>
+      <div class="chip speed-card" id="chipTitleWrap"><span class="t-grad">Title:</span>&nbsp;<span id="chipTitle">—</span></div>
+      <div class="chip speed-card" id="chipMetaWrap"><span class="t-grad">Meta desc:</span>&nbsp;<span id="chipMeta">—</span></div>
+      <div class="chip speed-card"><span class="t-grad">Canonical:</span>&nbsp;<span id="chipCanon">—</span></div>
+      <div class="chip speed-card"><span class="t-grad">Robots:</span>&nbsp;<span id="chipRobots">—</span></div>
+      <div class="chip speed-card"><span class="t-grad">Viewport:</span>&nbsp;<span id="chipViewport">—</span></div>
+      <div class="chip speed-card"><span class="t-grad">H1/H2/H3:</span>&nbsp;<span id="chipH">—</span></div>
+      <div class="chip speed-card"><span class="t-grad">Internal links:</span>&nbsp;<span id="chipInt">—</span></div>
+      <div class="chip speed-card"><span class="t-grad">Schema:</span>&nbsp;<span id="chipSchema">—</span></div>
+      <div class="chip speed-card"><span class="t-grad">Auto-checked:</span>&nbsp;<span id="chipAuto">0</span></div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:16px">
-    <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Quick Stats</h3>
-    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
-      <div class="card"><div style="font-size:12px;color:#b6c2cf">Readability (Flesch)</div><div id="statFlesch" style="font-size:20px;font-weight:800">—</div><div id="statGrade" style="font-size:12px;color:#94a3b8">—</div></div>
-      <div class="card"><div style="font-size:12px;color:#b6c2cf">Links (int / ext)</div><div style="font-size:20px;font-weight:800"><span id="statInt">0</span> / <span id="statExt">0</span></div></div>
-      <div class="card"><div style="font-size:12px;color:#b6c2cf">Text/HTML Ratio</div><div id="statRatio" style="font-size:20px;font-weight:800">—</div></div>
-    </div>
-  </div>
-
-  <div class="co-head">
-    <div class="sec-title"><span class="ico">🧠</span> Content Optimization</div>
-    <div class="sec-sub">Semantic coverage, gaps, schema & intent</div>
-  </div>
-<div class="co-card" id="contentOptimizationCard">
-    <div class="co-grid">
-
-      <div class="co-meter-wrap">
-        <div class="co-meter" id="mwContent">
-          <div class="co-meter-bg"></div>
-          <div class="co-meter-progress" style="--v: 0;"></div>
-          <div class="co-meter-inner">
-            <div>
-              <div class="co-meter-score" id="numContent">0</div>
-              <div class="co-meter-label">NLP Content Score</div>
-            </div>
-          </div>
-        </div>
-          <div style="margin-top:10px; display:flex; gap:10px; align-items:center">
-            <span id="coNlpBadge" class="co-badge warn">Need more work</span>
-          </div>
-          <div id="nlpTips" class="co-tips"></div>
-    
-      </div>
-
-      <div class="co-info-grid">
-        <div class="co-info-item">
-          <div class="co-info-header">
-            <div class="co-info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
-            </div>
-            <span class="co-info-title">Topic Coverage</span> <span id="coTcBadge" class="co-badge small warn">Need more work</span>
-          </div>
-          <p id="coTopicCoverageText">Run analysis to get data.</p>
-          <div class="progress" style="margin-bottom: 0;"><span id="coTopicCoverageProgress" style="width:0%; background: linear-gradient(90deg, var(--purple-1), var(--blue-1), var(--green-2));"></span></div>
-          <div id="tcTips" class="co-tips"></div>
-    
-        </div>
-
-        <div class="co-info-item">
-          <div class="co-info-header">
-            <div class="co-info-icon">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            </div>
-            <span class="co-info-title">Content Gaps</span> <span id="coGapBadge" class="co-badge small warn">Need more work</span>
-          </div>
-          <p id="coContentGapsText">Missing topics will be shown here.</p>
-          <div class="co-tags" id="coContentGapsTags">
-          </div>
-        </div>
-        <div id="gapTips" class="co-tips"></div>
-    
-
-        <div class="co-info-item">
-          <div class="co-info-header">
-            <div class="co-info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-            </div>
-            <span class="co-info-title">Schema Suggestions</span> <span id="coSchemaBadge" class="co-badge small warn">Need more work</span>
-          </div>
-          <p>Rule-based analysis suggests the following schema types:</p>
-         <div class="co-tags" id="coSchemaTags">
-        </div>
-      </div>
-        <div id="schemaTips" class="co-tips"></div>
-    
-
-      <div class="co-info-item">
-        <div class="co-info-header">
-          <div class="co-info-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-          </div>
-          <span class="co-info-title">Readability & Intent</span>
-        </div>
-        <p>Content alignment with user search intent and reading level.</p>
-         <div class="co-tags">
-          <span id="coIntentTag" class="chip" style="background-color: #122833; border-color: #00c6ff88; color: #cffcff;">Intent: —</span>
-          <span id="coGradeTag" class="chip" style="background-color: #231a33; border-color: #8a2be288; color: #e9d5ff;">Grade Level: —</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="read-card" id="readabilityCard" style="margin-top:16px">
-    <div class="rb-head">
-      <div class="rb-title">
-        <div class="ico">📚</div>
-        <div>
-          <div class="t-grad" style="font-weight:900;">Readability Insights</div>
-          <div class="rb-legend" id="rbLegend">Multilingual analysis — English, العربية, Português</div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span id="readBadge" class="pill">—</span>
-        <span id="gradeBadge" class="pill">Grade —</span>
-      </div>
-    </div>
-
-    <div class="rb-grid">
-      <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#161616;border:1px solid var(--outline)">
-        <div class="mw mw-sm warn" id="readMw">
-          <div class="mw-ring" id="readRing" style="--v:0"></div>
-          <div class="mw-fill" id="readFill" style="--p:0"></div>
-          <div class="mw-center" id="readNum">0%</div>
-        </div>
-      </div>
-
-      <div class="rb-tiles">
-        <div class="rb-tile"><div class="rb-row"><div>😊 Flesch Reading Ease</div><div class="rb-val" id="rbFleschVal">—</div></div><div class="rb-meter"><span id="rbFleschFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🧾 Avg Sentence Length</div><div class="rb-val" id="rbASLVal">—</div></div><div class="rb-meter"><span id="rbASLFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🔤 Words</div><div class="rb-val" id="rbWordsVal">—</div></div><div class="rb-meter"><span id="rbWordsFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🅰️ Syllables / Word</div><div class="rb-val" id="rbSyllVal">—</div></div><div class="rb-meter"><span id="rbSyllFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🔀 Lexical Diversity (TTR)</div><div class="rb-val" id="rbTTRVal">—</div></div><div class="rb-meter"><span id="rbTTRFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>♻️ Repetition (tri-gram)</div><div class="rb-val" id="rbTriVal">—</div></div><div class="rb-meter"><span id="rbTriFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div># Digits / 100 words</div><div class="rb-val" id="rbDigitsVal">—</div></div><div class="rb-meter"><span id="rbDigitsFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>🗣️ Passive voice</div><div class="rb-val" id="rbPassiveVal">—</div></div><div class="rb-meter"><span id="rbPassiveFill" style="width:0%"></span></div></div>
-        <div class="rb-tile"><div class="rb-row"><div>✨ Simple words</div><div class="rb-val" id="rbSimpleVal">—</div></div><div class="rb-meter"><span id="rbSimpleFill" style="width:0%"></span></div></div>
-      </div>
-    </div>
-
-    <div class="rb-fixes">
-      <h4>💡 Simple Fixes</h4>
+  <div class="card speed-card" style="margin-top:16px">
+    <h4>💡 Simple Fixes</h4>
       <ul id="rbFixes"><li>Run an analysis to see targeted suggestions.</li></ul>
     </div>
 
-    <div id="rbBanner" class="rb-banner warn">Readability score helps you target Grade 7–9 for most audiences.</div>
+    <div id="rbBanner" class="rb-banner warn speed-card">Readability score helps you target Grade 7–9 for most audiences.</div>
   </div>
   <div class="speed-card" id="speedCard">
-    <div class="sp-head">
-      <div class="sp-title">
-        <div class="ico">⚡</div>
+    <div class="sp-head speed-card">
+      <div class="sp-title speed-card">
+        <div class="ico speed-card">⚡</div>
         <div>
-          <div class="t-grad" style="font-weight:900;">Site Speed & Core Web Vitals</div>
-          <div class="sp-note">Uses PageSpeed Insights (Mobile + Desktop)</div>
+          <div class="t-grad speed-card" style="font-weight:900;">Site Speed & Core Web Vitals</div>
+          <div class="sp-note speed-card">Uses PageSpeed Insights (Mobile + Desktop)</div>
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:6px">
@@ -829,65 +803,65 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       </div>
     </div>
 
-    <div class="sp-wheels">
-      <div class="wheel-card">
-        <div class="mw mw-sm warn" id="mwMobile">
-          <div class="mw-ring" id="ringMobile" style="--v:0"></div>
-          <div class="mw-fill" id="fillMobile" style="--p:0"></div>
-          <div class="mw-center" id="numMobile">M 0%</div>
+    <div class="sp-wheels speed-card">
+      <div class="wheel-card speed-card">
+        <div class="mw mw-sm warn speed-card" id="mwMobile">
+          <div class="mw-ring speed-card" id="ringMobile" style="--v:0"></div>
+          <div class="mw-fill speed-card" id="fillMobile" style="--p:0"></div>
+          <div class="mw-center speed-card" id="numMobile">M 0%</div>
         </div>
-        <div class="wheel-label">Mobile</div>
+        <div class="wheel-label speed-card">Mobile</div>
       </div>
-      <div class="wheel-card">
-        <div class="mw mw-sm warn" id="mwDesktop">
-          <div class="mw-ring" id="ringDesktop" style="--v:0"></div>
-          <div class="mw-fill" id="fillDesktop" style="--p:0"></div>
-          <div class="mw-center" id="numDesktop">D 0%</div>
+      <div class="wheel-card speed-card">
+        <div class="mw mw-sm warn speed-card" id="mwDesktop">
+          <div class="mw-ring speed-card" id="ringDesktop" style="--v:0"></div>
+          <div class="mw-fill speed-card" id="fillDesktop" style="--p:0"></div>
+          <div class="mw-center speed-card" id="numDesktop">D 0%</div>
         </div>
-        <div class="wheel-label">Desktop</div>
+        <div class="wheel-label speed-card">Desktop</div>
       </div>
     </div>
 
-    <div class="sp-grid">
+    <div class="sp-grid speed-card">
       <div>
-        <div class="sp-tile"><div class="sp-row"><div>🏁 LCP (s)</div><div class="sp-val" id="lcpVal">—</div></div><div class="sp-meter" id="lcpMeter"><span id="lcpBar" style="width:0%"></span></div></div>
-        <div class="sp-tile"><div class="sp-row"><div>📦 CLS</div><div class="sp-val" id="clsVal">—</div></div><div class="sp-meter" id="clsMeter"><span id="clsBar" style="width:0%"></span></div></div>
-        <div class="sp-tile"><div class="sp-row"><div>⚡ INP (ms)</div><div class="sp-val" id="inpVal">—</div></div><div class="sp-meter" id="inpMeter"><span id="inpBar" style="width:0%"></span></div></div>
-        <div class="sp-tile"><div class="sp-row"><div>⏱️ TTFB (ms)</div><div class="sp-val" id="ttfbVal">—</div></div><div class="sp-meter" id="ttfbMeter"><span id="ttfbBar" style="width:0%"></span></div></div>
+        <div class="sp-tile speed-card"><div class="sp-row speed-card"><div>🏁 LCP (s)</div><div class="sp-val speed-card" id="lcpVal">—</div></div><div class="sp-meter speed-card" id="lcpMeter"><span id="lcpBar" style="width:0%"></span></div></div>
+        <div class="sp-tile speed-card"><div class="sp-row speed-card"><div>📦 CLS</div><div class="sp-val speed-card" id="clsVal">—</div></div><div class="sp-meter speed-card" id="clsMeter"><span id="clsBar" style="width:0%"></span></div></div>
+        <div class="sp-tile speed-card"><div class="sp-row speed-card"><div>⚡ INP (ms)</div><div class="sp-val speed-card" id="inpVal">—</div></div><div class="sp-meter speed-card" id="inpMeter"><span id="inpBar" style="width:0%"></span></div></div>
+        <div class="sp-tile speed-card"><div class="sp-row speed-card"><div>⏱️ TTFB (ms)</div><div class="sp-val speed-card" id="ttfbVal">—</div></div><div class="sp-meter speed-card" id="ttfbMeter"><span id="ttfbBar" style="width:0%"></span></div></div>
       </div>
     </div>
 
-    <div class="sp-fixes">
+    <div class="sp-fixes speed-card">
       <h4>💡 Speed Suggestions</h4>
       <ul id="psiFixes"><li>Run Analyze to fetch PSI data.</li></ul>
     </div>
   </div>
-  <div class="card" style="margin-top:16px">
+  <div class="card speed-card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Content Structure</h3>
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-      <div class="card">
+      <div class="card speed-card">
         <div style="font-size:12px;color:#b6c2cf">Title</div>
         <div id="titleVal" style="font-weight:600">—</div>
         <div style="font-size:12px;color:#b6c2cf;margin-top:10px">Meta Description</div>
         <div id="metaVal" style="color:var(--ink)">—</div>
       </div>
-      <div class="card">
+      <div class="card speed-card">
         <div style="font-size:12px;color:#b6c2cf;margin-bottom:6px">Heading Map</div>
-        <div id="headingMap" class="text-sm space-y-2"></div>
+        <div id="headingMap" class="text-sm space-y-2 speed-card"></div>
       </div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:16px">
+  <div class="card speed-card" style="margin-top:16px">
     <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Recommendations</h3>
     <div id="recs" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"></div>
   </div>
 
-  <div class="ground-slab">
+  <div class="ground-slab speed-card">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      <div class="king">🧭</div>
+      <div class="king speed-card">🧭</div>
       <div>
-        <div class="t-grad" style="font-weight:900;font-size:18px">Semantic SEO Ground</div>
+        <div class="t-grad speed-card" style="font-weight:900;font-size:18px">Semantic SEO Ground</div>
         <div style="font-size:12px;color:#b6c2cf">Six categories • Five checks each • Click “Improve” for guidance</div>
       </div>
     </div>
@@ -895,14 +869,14 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
   </div>
 
   <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
-    <div class="card">
+    <div class="card speed-card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px">
         <h4 id="improveTitle" class="t-grad" style="font-weight:900;margin:0">Improve</h4>
         <form method="dialog"><button class="pill">Close</button></form>
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px">
-        <div class="card"><div style="font-size:12px;color:#94a3b8">Category</div><div id="improveCategory" style="font-weight:700">—</div></div>
-        <div class="card">
+        <div class="card speed-card"><div style="font-size:12px;color:#94a3b8">Category</div><div id="improveCategory" style="font-weight:700">—</div></div>
+        <div class="card speed-card">
           <div style="font-size:12px;color:#94a3b8">Score</div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
             <span id="improveScore" class="score-pill">—</span>
@@ -924,5 +898,61 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
     </div>
   </dialog>
 
+</div>
 </section>
 @endsection
+
+
+<section id="metaInfo" class="card meta-card" aria-label="Meta Description Info">
+  <div class="card-title">
+    <span class="spark">✨</span>
+    <div style="font-weight:800;background:var(--grad-multi);-webkit-background-clip:text;background-clip:text;color:transparent;">
+      Meta Description & Headings
+    </div>
+    <span class="wave">🧭</span>
+    <span class="tag">auto-fetched</span>
+  </div>
+  <div class="meta-kv">
+    <div class="meta-key"><span class="ico">🏷️</span>Title</div>
+    <div class="meta-val" id="pageTitleText"><span data-bind="title"></span></div>
+  </div>
+  <div class="meta-kv">
+    <div class="meta-key"><span class="ico">📝</span>Description</div>
+    <div class="meta-val" id="metaDescriptionText"><span data-bind="metaDescription"></span></div>
+  </div>
+  <div class="meta-kv">
+    <div class="meta-key"><span class="ico">🔠</span>H1</div>
+    <div class="meta-val hlist" id="h1List"></div>
+  </div>
+  <div class="meta-kv">
+    <div class="meta-key"><span class="ico">🔡</span>H2</div>
+    <div class="meta-val hlist" id="h2List"></div>
+  </div>
+  <div class="meta-kv">
+    <div class="meta-key"><span class="ico">🔤</span>H3</div>
+    <div class="meta-val hlist" id="h3List"></div>
+  </div>
+  <div class="meta-kv">
+    <div class="meta-key"><span class="ico">🅰️</span>H4</div>
+    <div class="meta-val hlist" id="h4List"></div>
+  </div>
+</section>
+<script>
+(function(){
+  function badge(txt){ const s=document.createElement('span'); s.className='hbadge'; s.textContent=txt; return s; }
+  function updateMeta(data){
+    if(!data) return;
+    if(data.title && document.getElementById('pageTitleText')) document.getElementById('pageTitleText').textContent = data.title;
+    if(data.metaDescription && document.getElementById('metaDescriptionText')) document.getElementById('metaDescriptionText').textContent = data.metaDescription;
+    ['h1','h2','h3','h4'].forEach(level=>{
+      const key = level+'List', arr = data[level] || data[level.toUpperCase()] || [];
+      const node = document.getElementById(key);
+      if(node){ node.innerHTML=''; (arr||[]).forEach(t=> node.appendChild(badge(t))); }
+    });
+  }
+  window.addEventListener('Analyzer:MetaReady', e => updateMeta(e.detail));
+  document.addEventListener('DOMContentLoaded', function(){
+    const preload = window.__pageMeta__ || null; if(preload) updateMeta(preload);
+  });
+})();
+</script>
