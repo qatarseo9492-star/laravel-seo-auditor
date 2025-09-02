@@ -206,6 +206,7 @@
     border-radius: 12px;
     color: var(--green-1);
     font-size: 20px;
+    display:grid; place-items:center;
   }
   .sp-wheels { gap: 24px; }
   .wheel-card {
@@ -225,11 +226,15 @@
     border-color: rgba(255,255,255,0.1);
     position: relative;
     overflow: visible;
+    border-radius: 999px;
   }
   .sp-meter > span {
     background: linear-gradient(90deg, var(--red-1), var(--orange-1), var(--yellow-1) 50%, var(--green-1) 100%);
     box-shadow: 0 0 8px var(--green-1);
     position: relative;
+    display: block;
+    height: 100%;
+    border-radius: 999px;
   }
   .sp-meter > span::after {
     content: '';
@@ -244,21 +249,23 @@
     background: linear-gradient(135deg, #0d3b2a, #112d3d);
     border: 1px solid var(--green-2);
     box-shadow: 0 0 24px rgba(0, 255, 198, 0.25);
+    border-radius:14px; padding:14px; margin-top:16px;
   }
-  .sp-fixes h4 { color: var(--green-1); }
-  .sp-fixes li { border-left-color: var(--green-1); color: #c0fdee; }
+  .sp-fixes h4 { color: var(--green-1); margin:0 0 8px; font-weight:900; }
+  .sp-fixes ul { margin:0; padding-left:0; display:grid; gap:8px; list-style:none;}
+  .sp-fixes li { border-left: 3px solid var(--green-1); padding-left:10px; color: #c0fdee; font-size:13px;}
   
   /* ===================== Content Optimization (Futuristic) ===================== */
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
   .animated-icon {
-      display: inline-block;
-      animation: spin 6s linear infinite;
-      color: var(--blue-1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 8s linear infinite;
   }
   .animated-icon.pulse {
-      animation: pulse 3s ease-in-out infinite, spin 10s linear infinite reverse;
-      color: var(--pink-1);
+      animation: pulse 3s ease-in-out infinite, spin 12s linear infinite reverse;
   }
 
   .co-card {
@@ -269,7 +276,7 @@
     background: var(--co-bg);
     border: 1px solid var(--co-border);
     padding: 16px;
-    margin-top: 12px; /* Adjusted margin */
+    margin-top: 12px;
     background-image:
       radial-gradient(circle at 10% 10%, rgba(138,43,226,.12), transparent 40%),
       radial-gradient(circle at 90% 80%, rgba(0,198,255,.12), transparent 50%);
@@ -337,7 +344,6 @@
     transform: translateY(-3px);
     border-color: rgba(0, 198, 255, 0.5);
   }
-  .tsi-info-header .animated-icon { color: var(--blue-1); }
   .tsi-info-title {
     background: linear-gradient(90deg, var(--blue-1), var(--pink-1));
     -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -345,17 +351,22 @@
   }
   .tsi-suggestions {
     border: 1px solid transparent;
+    border-radius: 14px;
+    padding:14px; margin-top:16px;
     background-image: 
         linear-gradient(to right, #1a0f2b, #1a0f2b), 
         linear-gradient(90deg, var(--pink-1), var(--purple-1));
     box-shadow: 0 0 24px rgba(255, 20, 147, 0.3);
   }
   .tsi-suggestions h4 {
+    margin:0 0 10px; font-weight:900;
+    display:flex; align-items:center; gap:8px;
     background: linear-gradient(90deg, var(--pink-1), var(--yellow-1));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .tsi-suggestions li { color: #e2d8ff; }
-  .tsi-suggestions li::before { content: '💡'; position: absolute; left: -10px; }
+  .tsi-suggestions ul { margin:0; padding-left:0; list-style:none; display:grid; gap:8px;}
+  .tsi-suggestions li { color: #e2d8ff; font-size:13px; padding-left:10px; position:relative; }
+  .tsi-suggestions li::before { content: '💡'; position: absolute; left: -10px; top:0; }
   
   
   /* =============================================== */
@@ -1136,4 +1147,3 @@ ${detail}`:''); };
   </dialog>
 
 </section>
-@endsection
