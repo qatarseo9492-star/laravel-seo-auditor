@@ -1,6 +1,7 @@
 @extends('layouts.app')
 @section('title','Semantic SEO Master — Analyzer')
  <meta name="csrf-token" content="{{ csrf_token() }}">
+ <script src="{{ asset('js/technical-seo.client.js') }}" defer></script>
  <link rel="stylesheet" href="{{ asset('css/techseo-neon.css') }}">
 @push('head')
 <style>
