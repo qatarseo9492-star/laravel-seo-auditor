@@ -221,7 +221,7 @@
     .speed-device-score circle { fill: none; stroke-width: 6; }
     .speed-device-score .track { stroke: #374151; }
     .speed-device-score .progress { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
-    .speed-device-metrics { display: grid; gap: 8px; font-size: 12px; }
+    .speed-device-metrics { display: grid; gap: 8px; font-size: 12px; flex-grow:1; }
     .speed-device-metric { display: flex; justify-content: space-between; align-items: center; }
     .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 12px; padding: 12px; margin-top: 16px; }
     .speed-opportunities-title { display: flex; align-items: center; gap: 8px; color: #FBBF24; font-weight: 700; margin-bottom: 8px; }
@@ -669,7 +669,7 @@ ${detail}`:''); };
         // --- POPULATE CONTENT OPTIMIZATION ---
         if (data.content_optimization && window.__coElements) {
             const co = data.content_optimization;
-            const { coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag } = window.__coElements;
+            const { coTopicCoverageText, coTopicCoverageProgress, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag } = window.__coElements;
 
             setWheel(ringContent, numContent, mwContent, clamp01(co.nlp_score || 0), '');
 
@@ -677,12 +677,12 @@ ${detail}`:''); };
                 coTopicCoverageText.innerHTML = `Covers <strong>${co.topic_coverage.covered} of ${co.topic_coverage.total}</strong> key topics.`;
                 coTopicCoverageProgress.style.width = co.topic_coverage.percentage + '%';
             }
-            if (co.content_gaps?.missing_topics) {
-                coContentGapsTags.innerHTML = co.content_gaps.missing_topics.map(topic => `<span class="chip ${topic.severity}"><i>${topic.severity==='bad'?'🔴':'🟧'}</i><span>${topic.term}</span></span>`).join('');
-            }
-             if (co.schema_suggestions) {
-                coSchemaTags.innerHTML = co.schema_suggestions.map(schema => `<span class="chip good"><i>✅</i><span>${schema}</span></span>`).join('');
-            }
+            const contentGapsData = Array.isArray(co.content_gaps?.missing_topics) ? co.content_gaps.missing_topics : [];
+            coContentGapsTags.innerHTML = contentGapsData.map(topic => `<span class="chip ${topic.severity}"><i>${topic.severity==='bad'?'🔴':'🟧'}</i><span>${topic.term}</span></span>`).join('');
+            
+            const schemaSuggestionsData = Array.isArray(co.schema_suggestions) ? co.schema_suggestions : [];
+            coSchemaTags.innerHTML = schemaSuggestionsData.map(schema => `<span class="chip good"><i>✅</i><span>${schema}</span></span>`).join('');
+
             if (co.readability_intent) {
                 coIntentTag.innerHTML = `Intent: ${co.readability_intent.intent}`;
                 coGradeTag.innerHTML = `Grade Level: ${co.readability_intent.grade_level}`;
@@ -693,38 +693,63 @@ ${detail}`:''); };
         if (tsiData) {
             const tsi = tsiData;
             setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
-            tsiInternalLinks.innerHTML = (tsi.internal_linking || []).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
+            const internalLinkingData = Array.isArray(tsi.internal_linking) ? tsi.internal_linking : [];
+            tsiInternalLinks.innerHTML = internalLinkingData.map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
+            
             tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
             tsiMetaTitle.textContent = tsi.meta_optimization?.title || 'N/A';
             tsiMetaDescription.textContent = tsi.meta_optimization?.description || 'N/A';
-            tsiAltTexts.innerHTML = (tsi.alt_text_suggestions || []).map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('') || '<li>No suggestions.</li>';
+
+            const altTextData = Array.isArray(tsi.alt_text_suggestions) ? tsi.alt_text_suggestions : [];
+            tsiAltTexts.innerHTML = altTextData.map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('') || '<li>No suggestions.</li>';
+            
             tsiSiteMap.innerHTML = tsi.site_structure_map || 'N/A';
-            tsiSuggestionsList.innerHTML = (tsi.suggestions || []).map(s => `<li class="${s.type}">${s.text}</li>`).join('') || '<li>No suggestions.</li>';
+
+            const suggestionsData = Array.isArray(tsi.suggestions) ? tsi.suggestions : [];
+            tsiSuggestionsList.innerHTML = suggestionsData.map(s => `<li class="${s.type}">${s.text}</li>`).join('') || '<li>No suggestions.</li>';
         }
         
         // --- POPULATE KEYWORD INTELLIGENCE ---
         if(kiData) {
             const ki = kiData;
-            kiSemanticResearch.innerHTML = (ki.semantic_research || []).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
-            kiIntentClassification.innerHTML = (ki.intent_classification || []).map(k => {
+            const semanticResearchData = Array.isArray(ki.semantic_research) ? ki.semantic_research : [];
+            kiSemanticResearch.innerHTML = semanticResearchData.map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
+
+            const intentClassificationData = Array.isArray(ki.intent_classification) ? ki.intent_classification : [];
+            kiIntentClassification.innerHTML = intentClassificationData.map(k => {
                 let intentClass = 'intent-info';
-                if (k.intent.toLowerCase().includes('trans')) intentClass = 'intent-trans';
-                if (k.intent.toLowerCase().includes('nav')) intentClass = 'intent-nav';
-                return `<span class="chip ${intentClass}">${k.keyword} <i>(${k.intent})</i></span>`;
+                if (k && k.intent && typeof k.intent === 'string') {
+                    if (k.intent.toLowerCase().includes('trans')) intentClass = 'intent-trans';
+                    if (k.intent.toLowerCase().includes('nav')) intentClass = 'intent-nav';
+                }
+                return `<span class="chip ${intentClass}">${k.keyword || ''} <i>(${k.intent || 'N/A'})</i></span>`;
             }).join('') || '<span class="chip">No data</span>';
-            kiRelatedTerms.innerHTML = (ki.related_terms || []).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
-            kiCompetitorGaps.innerHTML = (ki.competitor_gaps || []).map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No gaps found.</div>';
-            kiLongTail.innerHTML = (ki.long_tail_suggestions || []).map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No suggestions.</div>';
+
+            const relatedTermsData = Array.isArray(ki.related_terms) ? ki.related_terms : [];
+            kiRelatedTerms.innerHTML = relatedTermsData.map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
+
+            const competitorGapsData = Array.isArray(ki.competitor_gaps) ? ki.competitor_gaps : [];
+            kiCompetitorGaps.innerHTML = competitorGapsData.map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No gaps found.</div>';
+
+            const longTailData = Array.isArray(ki.long_tail_suggestions) ? ki.long_tail_suggestions : [];
+            kiLongTail.innerHTML = longTailData.map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No suggestions.</div>';
         }
         
         // --- POPULATE CONTENT ANALYSIS ENGINE ---
         if(caeData) {
             const cae = caeData;
             setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
-            caeTopicClusters.innerHTML = (cae.topic_clusters || []).map(t => `<span class="chip">${t}</span>`).join('');
-            caeEntities.innerHTML = (cae.entities || []).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
-            caeKeywords.innerHTML = (cae.semantic_keywords || []).map(k => `<span class="chip">${k}</span>`).join('');
+
+            const topicClustersData = Array.isArray(cae.topic_clusters) ? cae.topic_clusters : [];
+            caeTopicClusters.innerHTML = topicClustersData.map(t => `<span class="chip">${t}</span>`).join('');
+            
+            const entitiesData = Array.isArray(cae.entities) ? cae.entities : [];
+            caeEntities.innerHTML = entitiesData.map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
+            
+            const keywordsData = Array.isArray(cae.semantic_keywords) ? cae.semantic_keywords : [];
+            caeKeywords.innerHTML = keywordsData.map(k => `<span class="chip">${k}</span>`).join('');
+            
             const relScore = clamp01(cae.relevance_score || 0);
             caeRelevanceScore.textContent = `${relScore}%`;
             caeRelevanceBar.style.width = `${relScore}%`;
@@ -756,7 +781,7 @@ ${detail}`:''); };
             desktopInp.textContent = desktop.inp_ms ? `${desktop.inp_ms}ms` : 'N/A';
             desktopCls.textContent = desktop.cls ? desktop.cls.toFixed(3) : 'N/A';
 
-            const tips = psiData.opportunities || [];
+            const tips = Array.isArray(psiData.opportunities) ? psiData.opportunities : [];
             if(tips.length > 0) {
                  speedOpportunitiesList.innerHTML = tips.map(tip => `<li>${tip}</li>`).join('');
             } else {
@@ -788,18 +813,6 @@ ${detail}`:''); };
 @endpush
 
 @section('content')
-<!-- Main Menu Bar -->
-<div style="background:#111827; padding: 10px 20px; border-bottom: 1px solid #374151; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100;">
-    <div style="font-weight:bold; color:var(--ink); display:flex; align-items:center; gap:8px;">👑 Semantic SEO</div>
-    <div>
-        <button class="btn btn-blue" style="font-size:12px; padding: 6px 12px;">Semantic Analyzer</button>
-        <button class="btn" style="background:transparent; border-color:transparent; color:var(--sub); font-size:12px; padding: 6px 12px;">AI Content Checker</button>
-        <button class="btn" style="background:transparent; border-color:transparent; color:var(--sub); font-size:12px; padding: 6px 12px;">Topic Cluster</button>
-    </div>
-    <div>
-        <button class="btn btn-green" style="font-size:12px; padding: 6px 12px;">Dashboard</button>
-    </div>
-</div>
 
 <section class="maxw px-4 pb-10">
 
@@ -1173,4 +1186,3 @@ ${detail}`:''); };
 
 </section>
 @endsection
-
