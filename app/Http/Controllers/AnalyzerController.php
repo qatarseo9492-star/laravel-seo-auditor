@@ -16,10 +16,10 @@ class AnalyzerController extends Controller
     public function analyze(Request $request)
     {
         $validated = $request->validate([
-            'url'      => ['nullable','url'],
-            'content'  => ['nullable','string'],
+            'url'     => ['nullable','url'],
+            'content' => ['nullable','string'],
             'language' => ['nullable','string','max:10'],
-            'debug'    => ['nullable'],
+            'debug'   => ['nullable'],
         ]);
 
         // 1) Input collection
@@ -370,12 +370,78 @@ class AnalyzerController extends Controller
         ];
         if ($debug) {
             $resp["diagnostics"] = array_merge($diag, [
-                "had_ai_score"     => $from_ai,
-                "org_header_used"  => (bool) $org,
-                "word_count"       => str_word_count($text),
+                "had_ai_score"    => $from_ai,
+                "org_header_used" => (bool) $org,
+                "word_count"      => str_word_count($text),
             ]);
         }
         return response()->json($resp);
+    }
+
+    /**
+     * ✅ NEW METHOD: Handles the Technical SEO analysis using OpenAI.
+     *
+     * This is the missing method that you need to add to your controller.
+     * It receives the URL, sends it to OpenAI for analysis, and returns
+     * the structured data that the frontend expects.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function analyzeTechnicalSeo(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|url'
+        ]);
+
+        $urlToAnalyze = $request->input('url');
+        $apiKey = env('OPENAI_API_KEY');
+
+        if (!$apiKey) {
+            return response()->json(['message' => 'OpenAI API key is not configured.'], 500);
+        }
+
+        try {
+            // =================================================================
+            // 💡 IMPORTANT: This is where you call the OpenAI API.
+            // You will need to construct the appropriate prompt to get the
+            // analysis you need in a structured JSON format.
+            // The example below is a conceptual guide.
+            // =================================================================
+            
+            // Example Prompt (you will need to refine this)
+            $prompt = "Analyze the technical SEO of the page at {$urlToAnalyze}. Provide a detailed analysis in JSON format. The JSON object must include: a 'score' (0-100), 'internal_linking' suggestions, 'url_structure' analysis, 'meta_optimization' suggestions (title and description), 'alt_text_suggestions' for images, a 'site_structure_map' as a simple HTML ul list, and a final list of 'suggestions'.";
+
+            // Example OpenAI API Call
+            $response = Http::withToken($apiKey)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => 'gpt-4-turbo', // Or your preferred model
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are a world-class Technical SEO expert.'],
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'response_format' => ['type' => 'json_object']
+            ]);
+
+            if ($response->failed()) {
+                 return response()->json(['message' => 'Failed to get a response from OpenAI.', 'details' => $response->body()], 502);
+            }
+
+            $analysisResult = $response->json('choices.0.message.content');
+
+            // The result from OpenAI should be a JSON string, so we decode it.
+            $decodedResult = json_decode($analysisResult, true);
+            
+            // Check if the JSON is valid before returning it
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['message' => 'OpenAI returned invalid JSON.', 'raw_response' => $analysisResult], 500);
+            }
+
+            return response()->json($decodedResult);
+
+        } catch (\Exception $e) {
+            Log::error('Technical SEO Analysis Failed: ' . $e->getMessage());
+            return response()->json(['message' => 'An unexpected error occurred during the analysis.'], 500);
+        }
     }
 
     /** CSRF-protected proxy for the Blade */
@@ -390,3 +456,4 @@ class AnalyzerController extends Controller
     public function aiCheck(Request $request) { return response()->json(['ok'=>true,'note'=>'aiCheck stub']); }
     public function topicClusterAnalyze(Request $request) { return response()->json(['ok'=>true,'note'=>'topicClusterAnalyze stub']); }
 }
+
