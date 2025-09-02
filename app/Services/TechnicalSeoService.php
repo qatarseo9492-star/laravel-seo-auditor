@@ -250,4 +250,247 @@ class TechnicalSeoService
 
         return [
             'title' => $title,
-            'description' =
+            'description' => $desc,
+            'score' => $score,
+            'suggestions' => $suggestions,
+            'ai' => $ai // ['title' => ..., 'description' => ...] or null
+        ];
+    }
+
+    private function extractReadableText(\DOMDocument $doc, int $limit=4000): string
+    {
+        $text = preg_replace('/\s+/', ' ', $doc->textContent ?? '');
+        return mb_substr(trim($text), 0, $limit);
+    }
+
+    private function altTextSuggest(array $images, DOMXPath $xp, string $pageUrl): array
+    {
+        $items = [];
+        $missing = 0;
+        foreach (array_slice($images, 0, self::MAX_ALT_SUGGEST) as $img) {
+            $has = !!($img['alt'] ?? '');
+            if (!$has) $missing++;
+            $items[] = [
+                'src' => $img['src'],
+                'current_alt' => $img['alt'],
+                'suggested_alt' => $has ? null : $this->openaiAltFromContext($img['src'], $xp, $pageUrl)
+            ];
+        }
+
+        // simple scoring: fewer missing alts => higher score
+        $score = $this->clamp(100 - intval(($missing / max(1, count($images))) * 100), 0, 100);
+        return ['score' => $score, 'items' => $items];
+    }
+
+    private function collectSitePages(string $origin): array
+    {
+        // Prefer /sitemap.xml, fallback: shallow crawl of homepage links
+        $pages = [];
+        $internalLinks = [];
+
+        // sitemap
+        try {
+            $sm = Http::timeout(12)->get($origin . '/sitemap.xml');
+            if ($sm->ok()) {
+                if (preg_match_all('#<loc>(.*?)</loc>#', $sm->body(), $m)) {
+                    foreach ($m[1] as $loc) {
+                        if (Str::startsWith($loc, $origin)) $pages[] = $loc;
+                        if (count($pages) >= self::MAX_CRAWL_PAGES) break;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {}
+
+        if (empty($pages)) {
+            // fallback to homepage crawl
+            $home = $this->fetch($origin);
+            if ($home) {
+                $doc = $this->dom($home);
+                $xp  = new \DOMXPath($doc);
+                $a = $xp->query('//a[@href]');
+                foreach ($a as $node) {
+                    $href = $node->getAttribute('href');
+                    $abs = $this->absUrl($origin, $href);
+                    if (Str::startsWith($abs, $origin)) $pages[] = $abs;
+                    if (count($pages) >= self::MAX_CRAWL_PAGES) break;
+                }
+            }
+        }
+
+        $pages = array_values(array_unique($pages));
+        return [$pages, $internalLinks];
+    }
+
+    private function internalLinking(string $pageUrl, ?string $title, ?string $h1, array $sitePages): array
+    {
+        // Heuristic: topic slug words intersection
+        $thisSlug = Str::slug($h1 ?: $title ?: $pageUrl);
+        $thisTokens = array_filter(explode('-', $thisSlug));
+
+        $candidates = [];
+        foreach ($sitePages as $p) {
+            if ($p === $pageUrl) continue;
+            $slug = Str::slug(parse_url($p, PHP_URL_PATH) ?? $p);
+            $tokens = array_filter(explode('-', $slug));
+            $overlap = count(array_intersect($thisTokens, $tokens));
+            if ($overlap > 0) {
+                $candidates[] = [
+                    'url' => $p,
+                    'reason' => 'Slug/topic overlap',
+                    'overlap' => $overlap
+                ];
+            }
+        }
+
+        // basic score: at least 3 good candidates => 100
+        $score = $this->clamp(intval(min(100, count($candidates) * 20)), 0, 100);
+
+        // Optional AI to refine top-10
+        $ai = $this->openaiInternalLinks($pageUrl, $candidates);
+
+        return [
+            'score' => $score,
+            'candidates' => array_slice($candidates, 0, 10),
+            'ai' => $ai // optional enriched suggestions
+        ];
+    }
+
+    private function structureScore(array $tree): int
+    {
+        // Simple: has H1, uses H2s, minimal jumps
+        $hasH1 = !empty($tree) && $tree[0]['level'] === 1;
+        $hasH2 = $this->findLevel($tree, 2);
+        $deep  = $this->maxDepth($tree);
+        $okDepth = $deep <= 4;
+
+        return $this->clamp(
+            ($hasH1 ? 40 : 0) + ($hasH2 ? 30 : 0) + ($okDepth ? 30 : 0),
+            0, 100
+        );
+    }
+
+    private function findLevel(array $nodes, int $level): bool
+    {
+        foreach ($nodes as $n) {
+            if ($n['level'] === $level) return true;
+            if (!empty($n['children']) && $this->findLevel($n['children'], $level)) return true;
+        }
+        return false;
+    }
+
+    private function maxDepth(array $nodes, int $depth=0): int
+    {
+        $max = $depth;
+        foreach ($nodes as $n) {
+            $max = max($max, $this->maxDepth($n['children'] ?? [], $depth + 1));
+        }
+        return $max;
+    }
+
+    private function overall(array $scores): int
+    {
+        $scores = array_values(array_filter($scores, fn($s) => is_numeric($s)));
+        return $this->clamp(intval(array_sum($scores) / max(1, count($scores))), 0, 100);
+    }
+
+    private function clamp(int $n, int $min, int $max): int
+    {
+        return max($min, min($max, $n));
+    }
+
+    // ----------------------- OpenAI helpers ----------------------
+
+    private function openaiMeta(?string $pageText, string $url): ?array
+    {
+        $key = config('services.openai.key');
+        if (!$key || !$pageText) return null;
+
+        $prompt = "You are an SEO assistant. Write:\n".
+                  "1) A title ≤60 chars\n2) A meta description ≤160 chars\n".
+                  "Keep it natural, include a primary keyword from the text.\nURL: {$url}\n---\nContent:\n{$pageText}";
+
+        try {
+            $res = $this->chat($key, $prompt);
+            // Expect "Title: ...\nDescription: ..."
+            if (preg_match('/Title\s*:\s*(.+)\n/i', $res, $m1) &&
+                preg_match('/Description\s*:\s*(.+)$/i', $res, $m2)) {
+                return ['title' => trim($m1[1]), 'description' => trim($m2[1])];
+            }
+            // fallback: split lines
+            $lines = array_values(array_filter(array_map('trim', explode("\n", $res))));
+            return [
+                'title' => $lines[0] ?? null,
+                'description' => $lines[1] ?? null
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function openaiAltFromContext(string $imgSrc, DOMXPath $xp, string $pageUrl): ?string
+    {
+        $key = config('services.openai.key');
+        if (!$key) return null;
+
+        // Collect nearby text: first figure/parent/preceding/following text nodes (lightweight heuristic)
+        $context = $this->contextTextForImage($xp, $imgSrc);
+        $prompt = "Write a concise, descriptive ALT text (≤12 words) for an image.\n".
+                  "Make it helpful for users and accessible. No quotes.\n".
+                  "Image URL: {$imgSrc}\nContext: {$context}";
+
+        try {
+            $res = $this->chat($key, $prompt);
+            return trim($res);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    private function contextTextForImage(DOMXPath $xp, string $src): string
+    {
+        // best-effort: return page heading + first paragraph text snippet
+        $h1 = $this->text($xp, '//h1');
+        $p  = $this->text($xp, '//p');
+        return trim(mb_substr($h1 . ' ' . $p, 0, 240));
+    }
+
+    private function openaiInternalLinks(string $pageUrl, array $candidates): ?array
+    {
+        $key = config('services.openai.key');
+        if (!$key || empty($candidates)) return null;
+
+        $list = implode("\n", array_map(fn($c) => "- {$c['url']}", array_slice($candidates, 0, 10)));
+        $prompt = "You are an SEO specialist. For the page {$pageUrl}, given possible internal link targets below,\n".
+                  "pick the 5 best and for each provide: anchor text (2–4 words) and why it helps topical relevance.\n".
+                  "Return JSON array with objects: {url, anchor, reason}.\nTargets:\n{$list}";
+
+        try {
+            $json = $this->chat($key, $prompt, expectJson: true);
+            $data = json_decode($json, true);
+            if (is_array($data)) return array_slice($data, 0, 5);
+        } catch (\Throwable $e) {}
+        return null;
+    }
+
+    private function chat(string $key, string $prompt, bool $expectJson=false): string
+    {
+        // orhanerday/open-ai client style; keep it simple via HTTP for portability
+        $payload = [
+            'model' => self::OPENAI_MODEL,
+            'messages' => [
+                ['role' => 'system', 'content' => $expectJson ? 'Return ONLY strict JSON.' : 'Be concise.'],
+                ['role' => 'user', 'content' => $prompt],
+            ],
+            'temperature' => 0.2,
+        ];
+
+        $res = Http::withToken($key)
+            ->timeout(30)
+            ->post('https://api.openai.com/v1/chat/completions', $payload);
+
+        if (!$res->ok()) {
+            throw new \RuntimeException('OpenAI error: ' . $res->status());
+        }
+        return $res->json('choices.0.message.content') ?? '';
+    }
+}
