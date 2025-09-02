@@ -82,16 +82,11 @@
     --track-width: 14px;
     --bg-color: #1a1a1a;
     --progress-percent: calc(var(--v) * 1%);
-    --inner-hole-percent: calc(100% - (var(--track-width) * 2));
 
     width: var(--size);
     height: var(--size);
     position: relative;
-    filter: 
-      drop-shadow(2px 2px 5px var(--blue-2))
-      drop-shadow(-2px -2px 5px var(--pink-1))
-      drop-shadow(2px -2px 5px var(--green-2))
-      drop-shadow(-2px 2px 5px var(--yellow-1));
+    transition: filter .4s ease;
   }
   
   .mw-ring {
@@ -136,6 +131,10 @@
     text-shadow: 0 4px 16px rgba(0, 0, 0, .4);
   }
     
+  .mw.good { filter: drop-shadow(0 0 10px var(--green-1)); }
+  .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)); }
+  .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)); }
+
   .mw-sm {
     --size: 170px;
     --track-width: 12px;
