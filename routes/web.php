@@ -9,8 +9,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AnalyzerController;
-// 🔹 Admin dashboard controller
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,7 +31,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 /*
 | Auth-protected app
 */
-Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added ban + touch
+Route::middleware(['auth', 'ban', 'touch'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
     // UI pages
@@ -39,27 +39,22 @@ Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added b
     Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
     Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
 
-    // ===== Analyzer JSON endpoint (UPDATED) =====
-    // Previously: -> 'semanticAnalyze'
-    // Now points to the new OpenAI-powered controller method (CSRF-protected)
+    // ===== Analyzer JSON endpoints =====
     Route::post('/semantic-analyzer/analyze', [AnalyzerController::class, 'analyzeWeb'])
         ->name('semantic.analyze')
-        ->middleware('quota:semantic'); // 🔹 enforce daily/monthly quota for semantic
+        ->middleware('quota:semantic');
 
-    // (Optional) Direct endpoint to call the API-style method from web if needed
-    // Useful for testing the raw JSON without CSRF issues in certain setups
     Route::post('/semantic-analyzer/analyze-direct', [AnalyzerController::class, 'analyze'])
         ->name('semantic.analyze.direct')
-        ->middleware('quota:semantic'); // 🔹 quota too
+        ->middleware('quota:semantic');
 
-    // ===== PageSpeed Insights proxy (FINAL) =====
+    // ===== PageSpeed Insights proxy =====
     Route::post('/semantic-analyzer/psi', function (Request $req) {
         $url = trim((string) $req->input('url'));
         if (!filter_var($url, FILTER_VALIDATE_URL)) {
             return response()->json(['ok' => false, 'error' => 'Invalid URL'], 422);
         }
 
-        // Read from services.pagespeed.* (matches config/services.php)
         $cfg      = config('services.pagespeed', []);
         $key      = $cfg['key']       ?? env('PAGESPEED_API_KEY') ?? env('GOOGLE_PSI_KEY');
         $endpoint = $cfg['endpoint']  ?? 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
@@ -67,7 +62,6 @@ Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added b
         $ttl      = (int)($cfg['cache_ttl'] ?? 60);
 
         if (!$key) {
-            // Friendly 200 so UI can render a helpful message
             return response()->json([
                 'ok'    => false,
                 'error' => 'PSI key missing',
@@ -85,7 +79,7 @@ Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added b
                     ->acceptJson()
                     ->get($endpoint, [
                         'url'      => $url,
-                        'strategy' => $strategy,     // 'mobile' | 'desktop'
+                        'strategy' => $strategy,
                         'category' => 'performance',
                         'key'      => $key,
                     ]);
@@ -102,11 +96,9 @@ Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added b
                 $lr     = $j['lighthouseResult'] ?? [];
                 $audits = $lr['audits'] ?? [];
 
-                // Performance score 0–1 -> 0–100
                 $perfRaw = $lr['categories']['performance']['score'] ?? null;
                 $score   = is_null($perfRaw) ? null : (int) round($perfRaw * 100);
 
-                // Audits (with fallbacks)
                 $lcp_ms  = $audits['largest-contentful-paint']['numericValue'] ?? null;
                 $cls_val = $audits['cumulative-layout-shift']['numericValue'] ?? null;
                 $inp_ms  = $audits['interaction-to-next-paint']['numericValue']
@@ -117,11 +109,11 @@ Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added b
                 return [
                     'ok'       => true,
                     'strategy' => $strategy,
-                    'score'    => $score,                                   // 0–100
-                    'lcp'      => is_numeric($lcp_ms)  ? round($lcp_ms/1000, 2) : null, // seconds
-                    'cls'      => is_numeric($cls_val) ? round($cls_val, 3)      : null, // unitless
-                    'inp'      => is_numeric($inp_ms)  ? (int) round($inp_ms)    : null, // ms
-                    'ttfb'     => is_numeric($ttfb_ms) ? (int) round($ttfb_ms)   : null, // ms
+                    'score'    => $score,
+                    'lcp'      => is_numeric($lcp_ms)  ? round($lcp_ms/1000, 2) : null,
+                    'cls'      => is_numeric($cls_val) ? round($cls_val, 3)      : null,
+                    'inp'      => is_numeric($inp_ms)  ? (int) round($inp_ms)    : null,
+                    'ttfb'     => is_numeric($ttfb_ms) ? (int) round($ttfb_ms)   : null,
                 ];
             });
         };
@@ -132,8 +124,7 @@ Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added b
             'mobile'  => $fetch('mobile'),
             'desktop' => $fetch('desktop'),
         ]);
-    })->name('semantic.psi')->middleware('quota:psi'); // 🔹 quota for PSI
-    // ===========================================
+    })->name('semantic.psi')->middleware('quota:psi');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -151,14 +142,17 @@ Route::middleware(['auth', 'ban', 'touch'])->group(function () { // 🔹 added b
 });
 
 /*
-| 🔹 Admin Dashboard (role-aware later)
+| Admin Dashboard + User Management
 */
 Route::middleware(['auth', 'ban', 'touch'])
     ->prefix('admin')->name('admin.')
     ->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])
-            ->name('dashboard');
-        // (We’ll add ban/unban, quota update, and data JSON endpoints next)
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // User management
+        Route::post('/users/{user}/ban',   [UserAdminController::class, 'ban'])->name('users.ban');
+        Route::post('/users/{user}/unban', [UserAdminController::class, 'unban'])->name('users.unban');
+        Route::post('/users/{user}/quota', [UserAdminController::class, 'updateQuota'])->name('users.quota');
     });
 
 /*
