@@ -410,7 +410,7 @@ class AnalyzerController extends Controller
             // =================================================================
             
             // Example Prompt (you will need to refine this)
-            $prompt = "Analyze the technical SEO of the page at {$urlToAnalyze}. Provide a detailed analysis in JSON format. The JSON object must include: a 'score' (0-100), 'internal_linking' suggestions, 'url_structure' analysis, 'meta_optimization' suggestions (title and description), 'alt_text_suggestions' for images, a 'site_structure_map' as a simple HTML ul list, and a final list of 'suggestions'.";
+            $prompt = "Analyze the technical SEO of the page at {$urlToAnalyze}. Provide a detailed analysis in JSON format. The JSON object must include: a 'score' (0-100), 'internal_linking' suggestions as an array of objects each with 'text' and 'anchor' keys, 'url_structure' analysis as an object with 'clarity_score' and 'suggestion', 'meta_optimization' as an object with 'title' and 'description', 'alt_text_suggestions' as an array of objects with 'image_src' and 'suggestion', a 'site_structure_map' as a simple HTML ul list string, and a final list of 'suggestions' as an array of objects each with 'text' and 'type' keys.";
 
             // Example OpenAI API Call
             $response = Http::withToken($apiKey)->post('https://api.openai.com/v1/chat/completions', [
@@ -435,6 +435,19 @@ class AnalyzerController extends Controller
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return response()->json(['message' => 'OpenAI returned invalid JSON.', 'raw_response' => $analysisResult], 500);
             }
+
+            // ✅ FIX: Sanitize the response to ensure arrays are arrays.
+            // This prevents the '.map is not a function' error on the frontend.
+            if (!isset($decodedResult['internal_linking']) || !is_array($decodedResult['internal_linking'])) {
+                $decodedResult['internal_linking'] = [];
+            }
+            if (!isset($decodedResult['alt_text_suggestions']) || !is_array($decodedResult['alt_text_suggestions'])) {
+                $decodedResult['alt_text_suggestions'] = [];
+            }
+            if (!isset($decodedResult['suggestions']) || !is_array($decodedResult['suggestions'])) {
+                $decodedResult['suggestions'] = [];
+            }
+
 
             return response()->json($decodedResult);
 
