@@ -256,7 +256,7 @@
       radial-gradient(circle at 90% 80%, rgba(0,198,255,.12), transparent 50%);
   }
   
-  .cae-card {
+  .cae-card, .tsi-card {
     background: transparent;
     border-radius: 20px;
     padding: 16px;
@@ -268,19 +268,27 @@
     box-shadow: 0 0 24px rgba(0, 198, 255, 0.2);
   }
 
-  .co-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
-  @media (max-width: 920px){.co-grid, .cae-grid{grid-template-columns:1fr}}
+  .co-grid, .cae-grid, .tsi-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
+  @media (max-width: 920px){.co-grid, .cae-grid, .tsi-grid{grid-template-columns:1fr}}
 
   /* Info Items Grid */
-  .co-info-grid, .cae-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  @media (max-width:500px){.co-info-grid, .cae-info-grid{grid-template-columns:1fr}}
-  .co-info-item, .cae-info-item {border-radius:14px;padding:14px;background:#1E1E1E;border:1px solid var(--outline);box-shadow:0 8px 24px rgba(0,0,0,.3)}
-  .co-info-header, .cae-info-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .co-info-icon, .cae-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
-  .co-info-icon svg, .cae-info-icon svg{width:18px;height:18px}
-  .co-info-title, .cae-info-title{font-weight:800;color:var(--ink)}
-  .co-info-item p, .cae-info-item p{font-size:12px;color:#aab3c2;margin:0 0 10px}
-  .co-tags, .cae-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .co-info-grid, .cae-info-grid, .tsi-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media (max-width:500px){.co-info-grid, .cae-info-grid, .tsi-info-grid{grid-template-columns:1fr}}
+  .co-info-item, .cae-info-item, .tsi-info-item {border-radius:14px;padding:14px;background:#1E1E1E;border:1px solid var(--outline);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .co-info-header, .cae-info-header, .tsi-info-header {display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .co-info-icon, .cae-info-icon, .tsi-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
+  .co-info-icon svg, .cae-info-icon svg, .tsi-info-icon svg {width:18px;height:18px}
+  .co-info-title, .cae-info-title, .tsi-info-title {font-weight:800;color:var(--ink)}
+  .co-info-item p, .cae-info-item p, .tsi-info-item p {font-size:12px;color:#aab3c2;margin:0 0 10px}
+  .co-tags, .cae-tags, .tsi-tags {display:flex;flex-wrap:wrap;gap:6px}
+  
+  .tsi-info-item ul { list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  .tsi-info-item li { font-size: 13px; line-height: 1.5; }
+  .tsi-info-item code { background: #111; padding: 2px 6px; border-radius: 6px; font-size: 12px; color: var(--pink-1); }
+
+  .site-map-container { background: #111; border-radius: 12px; padding: 12px; font-size: 12px; line-height: 1.6; max-height: 200px; overflow-y: auto;}
+  .site-map-container ul { padding-left: 16px; margin: 0; }
+  .site-map-container li { list-style-type: '— '; }
 
   /* === Badges & Tips for Content Optimization === */
   .co-badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 10px;font-weight:700;font-size:12px;letter-spacing:.2px;border:1px solid var(--outline);background:#1a1a1a;color:#dbe7ff}
@@ -291,8 +299,8 @@
   .co-tips{display:flex;flex-direction:column;gap:8px;margin-top:8px}
   .co-tips .tip{border-left:3px solid #2a3b66;padding-left:10px;color:#cdd6ef;font-size:12px}
 
-  /* NEW: Content Analysis Engine Styles */
-  .cae-suggestions {
+  /* NEW: Content Analysis Engine & Tech SEO Suggestion Box Styles */
+  .cae-suggestions, .tsi-suggestions {
     border-radius: 14px;
     padding: 14px;
     margin-top: 16px;
@@ -303,27 +311,27 @@
         linear-gradient(to right, #1E1E1E, #1E1E1E), 
         linear-gradient(90deg, var(--green-1), var(--orange-1), var(--pink-1));
   }
-  .cae-suggestions h4 {
+  .cae-suggestions h4, .tsi-suggestions h4 {
     margin: 0 0 10px 0;
     font-weight: 900;
     color: var(--ink);
   }
-  .cae-suggestions ul {
+  .cae-suggestions ul, .tsi-suggestions ul {
     margin:0; padding-left:0; display:grid; gap:8px; list-style:none;
   }
-  .cae-suggestions li {
+  .cae-suggestions li, .tsi-suggestions li {
     padding-left: 10px;
     font-size: 13px;
     position: relative;
   }
-  .cae-suggestions li::before {
+  .cae-suggestions li::before, .tsi-suggestions li::before {
     content: '💡';
     position: absolute;
     left: -10px;
   }
-  .cae-suggestions li.good { color: #baf7d9; }
-  .cae-suggestions li.warn { color: #fde68a; }
-  .cae-suggestions li.bad { color: #fecaca; }
+  .cae-suggestions li.good, .tsi-suggestions li.good { color: #baf7d9; }
+  .cae-suggestions li.warn, .tsi-suggestions li.warn { color: #fde68a; }
+  .cae-suggestions li.bad, .tsi-suggestions li.bad { color: #fecaca; }
 
 </style>
 
@@ -380,7 +388,7 @@
         window.__coElements = { coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag };
     }
 
-    /* --- NEW: Content Analysis Engine UI refs --- */
+    /* --- Content Analysis Engine UI refs --- */
     const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
     const caeTopicClusters = $('#caeTopicClusters');
     const caeEntities = $('#caeEntities');
@@ -389,6 +397,17 @@
     const caeRelevanceBar = $('#caeRelevanceBar');
     const caeIntent = $('#caeIntent');
     const caeSuggestionsList = $('#caeSuggestionsList');
+    
+    /* --- Technical SEO Integration UI refs --- */
+    const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI');
+    const tsiInternalLinks = $('#tsiInternalLinks');
+    const tsiUrlClarityScore = $('#tsiUrlClarityScore');
+    const tsiUrlSuggestion = $('#tsiUrlSuggestion');
+    const tsiMetaTitle = $('#tsiMetaTitle');
+    const tsiMetaDescription = $('#tsiMetaDescription');
+    const tsiAltTexts = $('#tsiAltTexts');
+    const tsiSiteMap = $('#tsiSiteMap');
+    const tsiSuggestionsList = $('#tsiSuggestionsList');
 
 
     /* Helpers */
@@ -480,6 +499,34 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
         const data=await callAnalyzer(url);
         if(!data||data.error) throw new Error(data?.error||'Unknown error');
+        
+        // --- MOCK DATA for Content Analysis & Tech SEO ---
+        data.content_analysis_engine = {
+          score: 88,
+          topic_clusters: ["SEO best practices", "Content marketing", "Link building strategies", "Technical SEO"],
+          entities: [ { term: "Google", type: "ORG" }, { term: "John Mueller", type: "PER" }, { term: "PageRank", type: "MISC" } ],
+          semantic_keywords: ["LSI keywords", "topical authority", "search intent", "entity optimization"],
+          relevance_score: 92,
+          context_intent: "Informational",
+          suggestions: [
+            { text: "Expand the 'Link building' section with case studies.", type: 'good'},
+            { text: "Add a section on 'Voice Search Optimization'.", type: 'warn'},
+            { text: "The term 'SEO' appears too frequently. Consider synonyms.", type: 'bad'}
+          ]
+        };
+        data.technical_seo_integration = {
+            score: 82,
+            internal_linking: [ { text: "Link from 'Content Marketing' to 'SEO best practices'", anchor: "learn more about SEO" }, { text: "Add link to 'Homepage' from a key paragraph", anchor: "our main page" } ],
+            url_structure: { clarity_score: 90, suggestion: "URL is clean and descriptive. No changes needed." },
+            meta_optimization: { title: "AI-Generated Title: Mastering Semantic SEO in 2025", description: "Unlock top rankings with our guide to semantic SEO. Learn about entities, topic clusters, and AI-driven strategies." },
+            alt_text_suggestions: [ { image_src: "image1.jpg", suggestion: "A chart showing SEO growth over time" }, { image_src: "logo.png", suggestion: "Company Logo" } ],
+            site_structure_map: "<ul><li>Homepage<ul><li>About Us</li><li>Services<ul><li>SEO</li><li>Content Marketing</li></ul></li><li>Blog</li></ul></li></ul>",
+            suggestions: [
+                { text: "Implement suggested internal links to improve topic authority.", type: 'good'},
+                { text: "Review AI-generated meta tags before publishing.", type: 'warn'}
+            ]
+        };
+        // --- END MOCK DATA ---
 
         window.__lastData={...data,url};
 
@@ -625,10 +672,10 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         }
         
         // =================================================================
-        // --- NEW: POPULATE CONTENT ANALYSIS ENGINE
+        // --- POPULATE CONTENT ANALYSIS ENGINE
         // =================================================================
-        try {
-          const cae = await callOpenAIAnalysis(url);
+        if (data.content_analysis_engine) {
+          const cae = data.content_analysis_engine;
           setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
           
           caeTopicClusters.innerHTML = cae.topic_clusters.map(t => `<span class="chip">${t}</span>`).join('');
@@ -643,9 +690,23 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
           caeIntent.innerHTML = `<span class="chip good">${cae.context_intent}</span>`;
 
           caeSuggestionsList.innerHTML = cae.suggestions.map(s => `<li class="${s.type}">${s.text}</li>`).join('');
-        } catch(e) {
-          console.error("Content Analysis Engine Error:", e);
-          $('#contentAnalysisEngineCard').innerHTML = `<div style="text-align:center; padding: 20px; color: var(--sub);">Could not load Content Analysis data.</div>`;
+        }
+        
+        // =================================================================
+        // --- POPULATE TECHNICAL SEO INTEGRATION
+        // =================================================================
+        if (data.technical_seo_integration) {
+            const tsi = data.technical_seo_integration;
+            setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
+
+            tsiInternalLinks.innerHTML = tsi.internal_linking.map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('');
+            tsiUrlClarityScore.textContent = `${tsi.url_structure.clarity_score}/100`;
+            tsiUrlSuggestion.textContent = tsi.url_structure.suggestion;
+            tsiMetaTitle.textContent = tsi.meta_optimization.title;
+            tsiMetaDescription.textContent = tsi.meta_optimization.description;
+            tsiAltTexts.innerHTML = tsi.alt_text_suggestions.map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('');
+            tsiSiteMap.innerHTML = tsi.site_structure_map;
+            tsiSuggestionsList.innerHTML = tsi.suggestions.map(s => `<li class="${s.type}">${s.text}</li>`).join('');
         }
 
 
@@ -906,6 +967,49 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
     </div>
 </div>
 
+<!-- NEW: Technical SEO Integration -->
+<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+    <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
+    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
+</div>
+<div class="tsi-card" id="technicalSeoCard">
+    <div class="tsi-grid">
+      <div style="display:grid;place-items:center;padding:10px">
+        <div class="mw" id="mwTSI">
+          <div class="mw-ring" id="ringTSI" style="--v:0"></div>
+          <div class="mw-center" id="numTSI">0%</div>
+        </div>
+      </div>
+      <div class="tsi-info-grid">
+        <div class="tsi-info-item">
+            <div class="tsi-info-header"><div class="tsi-info-icon">🔗</div><span class="tsi-info-title">Internal Linking Optimization</span></div>
+            <ul id="tsiInternalLinks"><li>Run analysis...</li></ul>
+        </div>
+        <div class="tsi-info-item">
+            <div class="tsi-info-header"><div class="tsi-info-icon">🌐</div><span class="tsi-info-title">URL Structure Analysis</span></div>
+            <p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p>
+            <p id="tsiUrlSuggestion">Run analysis...</p>
+        </div>
+        <div class="tsi-info-item" style="grid-column: span 2;">
+            <div class="tsi-info-header"><div class="tsi-info-icon">📰</div><span class="tsi-info-title">Meta Tags Optimization</span></div>
+            <p><strong>Title:</strong> <span id="tsiMetaTitle">—</span></p>
+            <p><strong>Description:</strong> <span id="tsiMetaDescription">—</span></p>
+        </div>
+        <div class="tsi-info-item">
+            <div class="tsi-info-header"><div class="tsi-info-icon">🖼️</div><span class="tsi-info-title">Image Alt Text Suggestions</span></div>
+            <ul id="tsiAltTexts"><li>Run analysis...</li></ul>
+        </div>
+        <div class="tsi-info-item">
+            <div class="tsi-info-header"><div class="tsi-info-icon">🗺️</div><span class="tsi-info-title">Site Structure Mapping</span></div>
+            <div class="site-map-container" id="tsiSiteMap">Run analysis...</div>
+        </div>
+      </div>
+    </div>
+    <div class="tsi-suggestions">
+        <h4>💡 Technical SEO Suggestions</h4>
+        <ul id="tsiSuggestionsList"><li>Run analysis to see suggestions.</li></ul>
+    </div>
+</div>
 
 <!-- Meta Info Layout -->
 <div class="card" style="margin-top:16px;">
