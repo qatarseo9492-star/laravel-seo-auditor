@@ -188,59 +188,66 @@
 
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
 
-  /* ===================== Site Speed & CWV ===================== */
-  .speed-card{border-radius:20px;background:#1B1B1B;border:1px solid #2A2A2A;padding:16px;margin-top:16px}
-  .sp-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
-  .sp-title{display:flex;align-items:center;gap:10px}
-  .sp-title .ico{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#173a2a,#193a4a);border:1px solid #27423a}
-  .sp-note{font-size:12px;color:#a9d3be}
-
-  /* Wheels row CENTERED (above bars) */
-  .sp-wheels{display:flex;justify-content:center;align-items:center;gap:18px;margin-top:12px;flex-wrap:wrap}
-  .wheel-card{display:grid;place-items:center;border-radius:16px;padding:10px;background:#161616;border:1px solid var(--outline);position:relative;box-shadow:0 0 0 1px #0b0b0b inset,0 8px 28px rgba(0,0,0,.35);width:220px}
-  .wheel-label{font-size:12px;color:#a6c5cf;margin-top:6px}
-
-  /* Bars */
-  .sp-bars-grid{display:grid;grid-template-columns:repeat(2, 1fr); gap:14px; margin-top:16px;}
-  @media (max-width: 600px) { .sp-bars-grid { grid-template-columns: 1fr; } }
-  .sp-tile{background:#191919;border:1px solid var(--outline);border-radius:14px;padding:12px}
-  .sp-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#a6c5cf;margin:6px 0}
-  .sp-val{color:var(--ink);font-weight:800}
-  .sp-meter{height:12px;border-radius:9999px;background:#151515;border:1px solid var(--outline);overflow:hidden;position:relative}
-  .sp-meter>span{display:block;height:100%;width:0%;transition:width .9s ease;background:linear-gradient(90deg,var(--red-1),var(--orange-1),var(--green-1))}
-  .sp-meter::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(45deg,#ffffff0a 0 8px,#ffffff06 8px 16px);pointer-events:none}
-  .sp-meter.good{box-shadow:0 0 0 1px #1b5e2f inset,0 0 24px #22c55e33}
-  .sp-meter.warn{box-shadow:0 0 0 1px #8a5a12 inset,0 0 24px #f59e0b33}
-  .sp-meter.bad {box-shadow:0 0 0 1px #6f1616 inset,0 0 24px #ef444433}
-  
-  /* NEW: Redesigned Speed Suggestions Box */
+  /* ============================================= */
+  /* === 🎨 NEW STYLES for Site Speed Section 🎨 === */
+  /* ============================================= */
+  .speed-card {
+    background: linear-gradient(145deg, #0c2b2a, #0c1a2e);
+    border: 1px solid var(--green-2);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 0 32px rgba(0, 255, 198, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+  }
+  .sp-head .ico {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, rgba(0, 255, 138, 0.2), rgba(0, 198, 255, 0.2));
+    border: 1px solid var(--green-1);
+    border-radius: 12px;
+    color: var(--green-1);
+    font-size: 20px;
+  }
+  .sp-wheels { gap: 24px; }
+  .wheel-card {
+    background: rgba(8, 20, 20, 0.7);
+    border-color: rgba(0, 255, 138, 0.3);
+  }
+  .sp-bars-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 20px; }
+  .sp-tile {
+    background: rgba(8, 20, 20, 0.7);
+    border: 1px solid rgba(0, 255, 138, 0.3);
+    border-radius: 14px;
+    padding: 12px;
+  }
+  .sp-meter {
+    height: 14px;
+    background: rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.1);
+    position: relative;
+    overflow: visible;
+  }
+  .sp-meter > span {
+    background: linear-gradient(90deg, var(--red-1), var(--orange-1), var(--yellow-1) 50%, var(--green-1) 100%);
+    box-shadow: 0 0 8px var(--green-1);
+    position: relative;
+  }
+  .sp-meter > span::after {
+    content: '';
+    position: absolute;
+    right: 0; top: -3px;
+    width: 4px; height: 20px;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 0 10px #fff, 0 0 20px #fff;
+  }
   .sp-fixes {
-      background: linear-gradient(135deg,#0f2d1f,#0d3b2a);
-      border: 1px solid #22c55e72;
-      box-shadow: 0 0 24px rgba(34,197,94,.25), 0 0 0 1px #0f2d1f inset;
-      border-radius: 14px;
-      padding: 14px;
-      margin-top: 16px;
+    background: linear-gradient(135deg, #0d3b2a, #112d3d);
+    border: 1px solid var(--green-2);
+    box-shadow: 0 0 24px rgba(0, 255, 198, 0.25);
   }
-  .sp-fixes h4 {
-      margin: 0 0 8px 0;
-      font-weight: 900;
-      color: #baf7d9;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-  }
-  .sp-fixes ul {
-      margin:0; padding-left:0; display:grid; gap:8px;
-  }
-  .sp-fixes li {
-      list-style: none;
-      border-left: 3px solid var(--green-1);
-      padding-left: 10px;
-      color: #d1fae5;
-      font-size: 13px;
-  }
-
+  .sp-fixes h4 { color: var(--green-1); }
+  .sp-fixes li { border-left-color: var(--green-1); color: #c0fdee; }
+  
   /* ===================== Content Optimization (Futuristic) ===================== */
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
@@ -268,17 +275,25 @@
       radial-gradient(circle at 90% 80%, rgba(0,198,255,.12), transparent 50%);
   }
   
-  .co-grid, .tsi-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
-  @media (max-width: 920px){.co-grid, .tsi-grid{grid-template-columns:1fr}}
+  .co-grid, .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
+  @media (max-width: 920px){.co-grid, .tsi-grid, .cae-grid {grid-template-columns:1fr}}
 
   /* Info Items Grid */
-  .co-info-grid, .tsi-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  @media (max-width:500px){.co-info-grid, .tsi-info-grid{grid-template-columns:1fr}}
-  .co-info-icon, .tsi-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
-  .co-info-icon svg, .tsi-info-icon svg {width:18px;height:18px}
-  .co-info-header, .tsi-info-header {display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .co-info-item p, .tsi-info-item p {font-size:12px;color:#aab3c2;margin:0 0 10px}
-  .co-tags, .tsi-tags {display:flex;flex-wrap:wrap;gap:6px}
+  .co-info-grid, .tsi-info-grid, .cae-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media (max-width:500px){.co-info-grid, .tsi-info-grid, .cae-info-grid {grid-template-columns:1fr}}
+  .co-info-item, .tsi-info-item, .cae-info-item {
+    border-radius:14px;
+    padding:14px;
+    background:#1E1E1E;
+    border:1px solid var(--outline);
+    box-shadow:0 8px 24px rgba(0,0,0,.3);
+  }
+  .co-info-icon, .tsi-info-icon, .cae-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
+  .co-info-icon svg, .tsi-info-icon svg, .cae-info-icon svg {width:18px;height:18px}
+  .co-info-header, .tsi-info-header, .cae-info-header {display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .co-info-title, .tsi-info-title, .cae-info-title {font-weight:800;color:var(--ink)}
+  .co-info-item p, .tsi-info-item p, .cae-info-item p {font-size:12px;color:#aab3c2;margin:0 0 10px}
+  .co-tags, .tsi-tags, .cae-tags {display:flex;flex-wrap:wrap;gap:6px}
   
   .tsi-info-item ul { list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
   .tsi-info-item li { font-size: 13px; line-height: 1.5; }
@@ -298,150 +313,141 @@
   .co-tips .tip{border-left:3px solid #2a3b66;padding-left:10px;color:#cdd6ef;font-size:12px}
 
 
-  /* ================================================== */
-  /* === 🎨 NEW STYLES for Tech SEO Integration 🎨 === */
-  /* ================================================== */
-
+  /* ========================================================== */
+  /* === 🎨 NEW STYLES for Technical SEO Integration 🎨 === */
+  /* ========================================================== */
   .tsi-card {
     background: linear-gradient(145deg, #0d0f2b, #1f0c2e);
     border: 1px solid var(--purple-1);
     border-radius: 20px;
     padding: 16px;
-    margin-top: 12px;
+    margin-top: 24px;
     box-shadow: 0 0 32px rgba(138, 43, 226, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5);
     background-image: 
       radial-gradient(circle at 100% 0%, rgba(0,198,255,.15), transparent 30%),
       radial-gradient(circle at 0% 100%, rgba(138,43,226,.15), transparent 30%);
   }
-  
   .tsi-info-item {
-    border-radius:14px;
-    padding:14px;
     background: rgba(8, 5, 20, 0.7);
     border: 1px solid rgba(138, 43, 226, 0.3);
-    box-shadow:0 8px 24px rgba(0,0,0,.3);
     backdrop-filter: blur(4px);
     transition: transform 0.2s ease, border-color 0.2s ease;
   }
-  
   .tsi-info-item:hover {
     transform: translateY(-3px);
     border-color: rgba(0, 198, 255, 0.5);
   }
-
+  .tsi-info-header .animated-icon { color: var(--blue-1); }
   .tsi-info-title {
-    font-weight: 800;
-    font-size: 15px;
     background: linear-gradient(90deg, var(--blue-1), var(--pink-1));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    font-size: 15px;
   }
-
   .tsi-suggestions {
-    border-radius: 14px;
-    padding: 14px;
-    margin-top: 16px;
     border: 1px solid transparent;
-    background-clip: padding-box, border-box;
-    background-origin: padding-box, border-box;
     background-image: 
         linear-gradient(to right, #1a0f2b, #1a0f2b), 
         linear-gradient(90deg, var(--pink-1), var(--purple-1));
     box-shadow: 0 0 24px rgba(255, 20, 147, 0.3);
   }
-
   .tsi-suggestions h4 {
-    margin: 0 0 10px 0;
-    font-weight: 900;
     background: linear-gradient(90deg, var(--pink-1), var(--yellow-1));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  
-  .tsi-suggestions ul {
-    margin:0; padding-left:0; display:grid; gap:8px; list-style:none;
-  }
-  
-  .tsi-suggestions li {
-    padding-left: 10px;
-    font-size: 13px;
-    position: relative;
-    color: #e2d8ff;
-  }
-  
-  .tsi-suggestions li::before {
-    content: '💡';
-    position: absolute;
-    left: -10px;
-  }
-  .tsi-suggestions li.good { color: #baf7d9; }
-  .tsi-suggestions li.warn { color: #fde68a; }
-  .tsi-suggestions li.bad { color: #fecaca; }
+  .tsi-suggestions li { color: #e2d8ff; }
+  .tsi-suggestions li::before { content: '💡'; position: absolute; left: -10px; }
   
   
   /* =============================================== */
-  /* === 🧠 NEW STYLES for Keyword Intelligence 🧠 === */
+  /* === 🎨 NEW STYLES for Keyword Intelligence 🎨 === */
   /* =============================================== */
   .ki-card {
-    background: linear-gradient(145deg, #0c2b2a, #0c1a2e);
-    border: 1px solid var(--green-2);
+    background: linear-gradient(145deg, #2b210c, #2e0c1f);
+    border: 1px solid var(--orange-1);
     border-radius: 20px;
     padding: 16px;
     margin-top: 24px;
-    box-shadow: 0 0 32px rgba(0, 255, 198, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 32px rgba(255, 165, 0, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
   }
-  
   .ki-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 16px;
   }
-  
   .ki-item {
-    background: rgba(5, 25, 25, 0.7);
-    border: 1px solid rgba(0, 255, 198, 0.3);
+    background: rgba(25, 15, 5, 0.7);
+    border: 1px solid rgba(255, 165, 0, 0.3);
     border-radius: 14px;
     padding: 14px;
     backdrop-filter: blur(4px);
   }
-  
   .ki-item-title {
-    font-weight: 800;
-    font-size: 15px;
-    background: linear-gradient(90deg, var(--green-1), var(--blue-1));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin-bottom: 12px;
-    display:flex;
-    align-items:center;
-    gap: 8px;
+    font-weight: 800; font-size: 15px;
+    background: linear-gradient(90deg, var(--yellow-1), var(--pink-1));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 12px; display:flex; align-items:center; gap: 8px;
   }
-  
-  .ki-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
+  .ki-tags { display: flex; flex-wrap: wrap; gap: 8px; }
   .ki-tags .chip {
-    background: #0d3b2a;
-    border-color: #22c55e72;
-    color: #d1fae5;
+    background: #2f2508; border-color: #f59e0b72; color: #fde68a;
+  }
+  .ki-tags .chip.intent-info { background: #112d3d; border-color: #00c6ff72; color: #cffcff;}
+  .ki-tags .chip.intent-trans { background: #2f1d08; border-color: #ff8c0072; color: #ffefd5;}
+  .ki-tags .chip.intent-nav { background: #231a33; border-color: #8a2be272; color: #e9d5ff;}
+  .ki-list { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #ffedd5;}
+
+  /* ======================================================= */
+  /* === 🚀 NEW STYLES for Content Analysis Engine 🚀 === */
+  /* ======================================================= */
+  .cae-card {
+    background: linear-gradient(145deg, #0d0f2b, #1f0c2e);
+    border: 1px solid var(--blue-1);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 0 32px rgba(0, 198, 255, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5);
+  }
+  .cae-info-item {
+    background: rgba(5, 15, 25, 0.7);
+    border: 1px solid rgba(0, 198, 255, 0.3);
+    backdrop-filter: blur(4px);
+  }
+  .cae-info-title {
+    background: linear-gradient(90deg, var(--blue-1), var(--green-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .cae-relevance-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+  }
+  .cae-relevance-bar > span {
+      display:block; height:100%; width:0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue-1), var(--green-1));
+      box-shadow: 0 0 8px var(--green-1);
+      transition: width 0.9s ease;
   }
   
-  .ki-tags .chip.intent-info { background: #112d3d; border-color: #00c6ff72; color: #cffcff;}
-  .ki-tags .chip.intent-trans { background: #2f2508; border-color: #f59e0b72; color: #fde68a;}
-  .ki-tags .chip.intent-nav { background: #231a33; border-color: #8a2be272; color: #e9d5ff;}
-
-  .ki-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 13px;
-    color: #c0fdee;
+  /* =================================================== */
+  /* === 🎨 NEW STYLES for Meta & Heading Section 🎨 === */
+  /* =================================================== */
+  .meta-card {
+      background: #10122e;
+      border: 1px solid #2a2f5a;
+  }
+  .meta-card .cat-card {
+      background: #14173a;
+      border-color: #2a2f5a;
+  }
+  .meta-card .t-grad {
+      font-size: 20px;
+  }
+  .meta-card .cat-card-title {
+      background: linear-gradient(90deg, var(--green-1), var(--blue-1));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      font-weight: 800;
   }
 
 
@@ -511,12 +517,21 @@
     const tsiSiteMap = $('#tsiSiteMap');
     const tsiSuggestionsList = $('#tsiSuggestionsList');
     
-    /* --- NEW: Keyword Intelligence UI refs --- */
+    /* --- Keyword Intelligence UI refs --- */
     const kiSemanticResearch = $('#kiSemanticResearch');
     const kiIntentClassification = $('#kiIntentClassification');
     const kiRelatedTerms = $('#kiRelatedTerms');
     const kiCompetitorGaps = $('#kiCompetitorGaps');
     const kiLongTail = $('#kiLongTail');
+
+    /* --- NEW: Content Analysis Engine UI refs --- */
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
+    const caeTopicClusters = $('#caeTopicClusters');
+    const caeEntities = $('#caeEntities');
+    const caeKeywords = $('#caeKeywords');
+    const caeRelevanceScore = $('#caeRelevanceScore');
+    const caeRelevanceBar = $('#caeRelevanceBar');
+    const caeIntent = $('#caeIntent');
 
 
     /* Helpers */
@@ -540,38 +555,25 @@ ${detail}`:''); };
     function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label+' best practices'));if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});chipAuto.textContent=autoGood;}
 
     /* API Calls */
-    async function callAnalyzer(url){const headers={'Accept':'application/json','Content-Type':'application/json'};let res=await fetch('/api/semantic-analyze',{method:'POST',headers,body:JSON.stringify({url,target_keyword:''})});if(res.ok)return res.json();if([404,405,419].includes(res.status)){res=await fetch('/semantic-analyzer/analyze',{method:'POST',headers:{...headers,'X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url,target_keyword:''})});if(res.ok)return res.json()}const txt=await res.text();throw new Error(`HTTP ${res.status}
-${txt?.slice(0,800)}`)}
-    async function callPSI(url){const res=await fetch('/semantic-analyzer/psi',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url})});const text=await res.text();let json={};try{json=JSON.parse(text)}catch{throw new Error(`PSI: invalid JSON
-${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.message||'PSI unavailable')}if(!res.ok){throw new Error(json.error||json.message||`PSI HTTP ${res.status}`)}return json}
-    
-    // Tech SEO analysis API
-    async function callTechnicalSeoApi(url) {
-      const res = await fetch('/api/technical-seo-analyze', {
-        method: 'POST',
-        headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
-        body: JSON.stringify({ url })
-      });
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`Technical SEO API Error (${res.status}): ${errorText.slice(0, 800)}`);
-      }
-      return res.json();
-    }
-    
-    // NEW: Keyword Intelligence API
-    async function callKeywordApi(url) {
-        const res = await fetch('/api/keyword-analyze', {
+    async function callApi(endpoint, url) {
+        const res = await fetch(endpoint, {
             method: 'POST',
             headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
             body: JSON.stringify({ url })
         });
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(`Keyword API Error (${res.status}): ${errorText.slice(0, 800)}`);
+            throw new Error(`API Error at ${endpoint} (${res.status}): ${errorText.slice(0, 800)}`);
         }
         return res.json();
     }
+    
+    // Specific API call wrappers
+    const callAnalyzer = (url) => callApi('/api/semantic-analyze', url);
+    const callTechnicalSeoApi = (url) => callApi('/api/technical-seo-analyze', url);
+    const callKeywordApi = (url) => callApi('/api/keyword-analyze', url);
+    const callContentEngineApi = (url) => callApi('/api/content-engine-analyze', url);
+    const callPSI = (url) => callApi('/semantic-analyzer/psi', url);
 
 
     function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.style.opacity=isOn?.6:1;analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze'}
@@ -597,36 +599,26 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       if(!url){showError('Please enter a URL.');return;}
       try{
         setRunning(true);
-
-        // reset speed
-        psiStatus.textContent='Checking…';
-        [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
-        [mwMobile,mwDesktop].forEach(c=>{c.classList.remove('good','warn','bad');c.classList.add('warn')});
-        numMobile.textContent='M 0%';numDesktop.textContent='D 0%';
-        [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
-        [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
-        psiFixes.innerHTML='<li>Fetching PageSpeed data…</li>';
         
-        // --- Reset Keyword Intelligence UI ---
-        [kiSemanticResearch, kiIntentClassification, kiRelatedTerms, kiCompetitorGaps, kiLongTail].forEach(el => {
+        // --- Reset UIs before fetching ---
+        [kiSemanticResearch, kiIntentClassification, kiRelatedTerms, kiCompetitorGaps, kiLongTail, caeTopicClusters, caeEntities, caeKeywords, caeIntent].forEach(el => {
             if(el) el.innerHTML = '<span class="chip">Analyzing...</span>';
         });
 
-        const [data, tsiData, kiData] = await Promise.all([
-          callAnalyzer(url),
-          callTechnicalSeoApi(url).catch(err => {
-            console.error(err);
-            showError('Technical SEO analysis failed.', err.message);
-            return null;
-          }),
-          callKeywordApi(url).catch(err => {
-              console.error(err);
-              showError('Keyword Intelligence analysis failed.', err.message);
-              return null;
-          })
+        // --- Fire all API calls in parallel ---
+        const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
+            callAnalyzer(url).catch(err => { showError('Content analysis failed.', err.message); return null; }),
+            callTechnicalSeoApi(url).catch(err => { showError('Tech SEO analysis failed.', err.message); return null; }),
+            callKeywordApi(url).catch(err => { showError('Keyword analysis failed.', err.message); return null; }),
+            callContentEngineApi(url).catch(err => { showError('Content Engine analysis failed.', err.message); return null; }),
+            callPSI(url).catch(err => {
+                psiStatus.textContent='Unavailable';
+                psiFixes.innerHTML=`<li>⚠️ ${String(err.message||err)}. Make sure PSI key is set server-side.</li>`;
+                return null;
+            })
         ]);
 
-        if(!data||data.error) throw new Error(data?.error||'Unknown error');
+        if(!data||data.error) throw new Error(data?.error||'Local data parsing failed');
 
         window.__lastData={...data,url};
 
@@ -665,121 +657,50 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
                 hasHeadings = true;
                 const box = document.createElement('div');
                 box.className = 'cat-card'; 
-                box.innerHTML = `<div style="font-size:12px;color:#b6c2cf;margin-bottom:6px" class="uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px;">` + arr.map(t => `<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('') + `</div>`;
+                box.innerHTML = `<div class="cat-card-title uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px; margin-top: 8px;">` + arr.map(t => `<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('') + `</div>`;
                 headingMap.appendChild(box);
             });
 
             if (!hasHeadings) {
                 headingMap.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No H1-H4 headings were found on the analyzed page.</p>`;
             }
-        } else {
-            // Display info message if content_structure is missing
-            titleVal.textContent = 'N/A';
-            metaVal.textContent = 'N/A';
-            headingMap.innerHTML = `<div style="background:#2a1f06; border:1px solid #f59e0b72; border-radius:12px; padding:12px; font-size:13px; color:#fde68a;">Data Not Available: The analyzer could not retrieve Title, Meta, or Heading information. Please check if the target URL is accessible and correctly structured.</div>`;
         }
-
+        
         chipHttp.textContent='200';
         chipCanon.textContent=(data.page_signals?.canonical||'—')||'—';
         chipRobots.textContent=(data.page_signals?.robots||'—')||'—';
         chipViewport.textContent=data.page_signals?.has_viewport?'yes':'—';
         chipIntChip.textContent=data.quick_stats?.internal_links??0;
         chipSchema.textContent=(data.page_signals?.schema_types||[]).length;
-
-        recsEl.innerHTML='';
-        (data.recommendations||[]).forEach(rec=>{const d=document.createElement('div');d.className='card';d.innerHTML=`<span class="pill" style="margin-right:6px">${rec.severity}</span>${rec.text}`;recsEl.appendChild(d)});
-
         
-        // =================================================================
-        // --- POPULATE CONTENT OPTIMIZATION
-        // =================================================================
+        // --- POPULATE CONTENT OPTIMIZATION ---
         if (data.content_optimization && window.__coElements) {
             const co = data.content_optimization;
             const { coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag } = window.__coElements;
 
-            // Update Score Meter
-            const nlpScore = clamp01(co.nlp_score || 0);
-            setWheel(ringContent, numContent, mwContent, nlpScore, '');
+            setWheel(ringContent, numContent, mwContent, clamp01(co.nlp_score || 0), '');
 
             if (co.topic_coverage) {
-                coTopicCoverageText.innerHTML = `Covers <strong>${co.topic_coverage.covered} of ${co.topic_coverage.total}</strong> key topics found in top competitor content.`;
+                coTopicCoverageText.innerHTML = `Covers <strong>${co.topic_coverage.covered} of ${co.topic_coverage.total}</strong> key topics.`;
                 coTopicCoverageProgress.style.width = co.topic_coverage.percentage + '%';
             }
-
-            if (co.content_gaps && co.content_gaps.missing_topics) {
-                coContentGapsText.innerHTML = `Missing <strong>${co.content_gaps.missing_topics.length} topics</strong> that your top competitors are covering.`;
-                coContentGapsTags.innerHTML = co.content_gaps.missing_topics.map(topic => {
-                    const icon = topic.severity === 'bad' ? '🔴' : '🟧';
-                    return `<span class="chip ${topic.severity}"><i>${icon}</i><span>${topic.term}</span></span>`;
-                }).join('');
+            if (co.content_gaps?.missing_topics) {
+                coContentGapsTags.innerHTML = co.content_gaps.missing_topics.map(topic => `<span class="chip ${topic.severity}"><i>${topic.severity==='bad'?'🔴':'🟧'}</i><span>${topic.term}</span></span>`).join('');
             }
-
-            if (co.schema_suggestions) {
-                coSchemaTags.innerHTML = co.schema_suggestions.map(schema => {
-                    return `<span class="chip good"><i>✅</i><span>${schema}</span></span>`;
-                }).join('');
+             if (co.schema_suggestions) {
+                coSchemaTags.innerHTML = co.schema_suggestions.map(schema => `<span class="chip good"><i>✅</i><span>${schema}</span></span>`).join('');
             }
-
             if (co.readability_intent) {
                 coIntentTag.innerHTML = `Intent: ${co.readability_intent.intent}`;
                 coGradeTag.innerHTML = `Grade Level: ${co.readability_intent.grade_level}`;
             }
-            
-            // --- Badges & Tips ---
-            const badgeText = n=> n>=80?'Excellent':(n>=60?'Need more work':'Change your Content');
-            const badgeClass = n=> n>=80?'good':(n>=60?'warn':'bad');
-            const setBadgeEl = (el,score)=>{ if(!el) return; el.textContent = badgeText(score); el.className = 'co-badge ' + (el.classList.contains('small')?'small ':'') + badgeClass(score); };
-
-            const coNlpBadge = document.getElementById('coNlpBadge');
-            if (co.nlp_score != null) setBadgeEl(coNlpBadge, co.nlp_score);
-            const nlpTips = document.getElementById('nlpTips'); if(nlpTips){ nlpTips.innerHTML = ''; 
-                if (co.nlp_score >= 80) {
-                    nlpTips.innerHTML += '<div class="tip">Strong semantic coverage. Add a concise TL;DR for skimmers.</div>';
-                } else if (co.nlp_score >= 60) {
-                    nlpTips.innerHTML += '<div class="tip">Expand sections with examples, data points, or steps.</div>';
-                    nlpTips.innerHTML += '<div class="tip">Ensure each H2 targets a distinct search sub-intent.</div>';
-                } else {
-                    nlpTips.innerHTML += '<div class="tip">Re-outline with clear H2/H3s around user intents.</div>';
-                    nlpTips.innerHTML += '<div class="tip">Add definitions, comparisons, and checklists.</div>';
-                }
-            }
-
-            const tcPct = (co.topic_coverage && typeof co.topic_coverage.percentage==='number') ? co.topic_coverage.percentage : 0;
-            setBadgeEl(document.getElementById('coTcBadge'), tcPct);
-            const tcTips = document.getElementById('tcTips'); if(tcTips){ tcTips.innerHTML = '';
-                if (tcPct >= 80) tcTips.innerHTML += '<div class="tip">Coverage looks solid. Add internal links to deep pages.</div>';
-                else if (tcPct >= 60) tcTips.innerHTML += '<div class="tip">Add sections for uncovered subtopics with examples.</div>';
-                else { tcTips.innerHTML += '<div class="tip">Create an outline with key entities/FAQs; flesh out missing sections.</div>'; }
-            }
-
-            const missing = Array.isArray(co.content_gaps?.missing_topics) ? co.content_gaps.missing_topics.length : 0;
-            const gapScore = missing===0 ? 100 : (missing<=2 ? 70 : 50);
-            setBadgeEl(document.getElementById('coGapBadge'), gapScore);
-            const gapTips = document.getElementById('gapTips'); if(gapTips){ gapTips.innerHTML = '';
-                if (missing===0) gapTips.innerHTML += '<div class="tip">No major gaps detected. Add FAQs to capture long-tail queries.</div>';
-                else {
-                    gapTips.innerHTML += '<div class="tip">Add a subsection for each gap with 2–3 sentences and an internal link.</div>';
-                }
-            }
-
-            const scCount = Array.isArray(co.schema_suggestions) ? co.schema_suggestions.length : 0;
-            const scScore = scCount>0 ? 75 : 55;
-            setBadgeEl(document.getElementById('coSchemaBadge'), scScore);
-            const schemaTips = document.getElementById('schemaTips'); if(schemaTips){schemaTips.innerHTML = '';
-                if (scCount>0) schemaTips.innerHTML += '<div class="tip">Implement relevant schema (Article, FAQPage, HowTo) to enhance SERP features.</div>';
-                else schemaTips.innerHTML += '<div class="tip">Consider adding FAQ or HowTo blocks to unlock schema opportunities.</div>';
-            }
         }
         
-        
-        // =================================================================
-        // --- POPULATE TECHNICAL SEO INTEGRATION
-        // =================================================================
+        // --- POPULATE TECHNICAL SEO INTEGRATION ---
         if (tsiData) {
             const tsi = tsiData;
             setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
-
-            tsiInternalLinks.innerHTML = (tsi.internal_linking || []).map(l => `<li>${l.text} with anchor: code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
+            tsiInternalLinks.innerHTML = (tsi.internal_linking || []).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
             tsiMetaTitle.textContent = tsi.meta_optimization?.title || 'N/A';
@@ -789,68 +710,71 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
             tsiSuggestionsList.innerHTML = (tsi.suggestions || []).map(s => `<li class="${s.type}">${s.text}</li>`).join('') || '<li>No suggestions.</li>';
         }
         
-        // =================================================================
-        // --- NEW: POPULATE KEYWORD INTELLIGENCE
-        // =================================================================
+        // --- POPULATE KEYWORD INTELLIGENCE ---
         if(kiData) {
             const ki = kiData;
-            
             kiSemanticResearch.innerHTML = (ki.semantic_research || []).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
-            
             kiIntentClassification.innerHTML = (ki.intent_classification || []).map(k => {
                 let intentClass = 'intent-info';
                 if (k.intent.toLowerCase().includes('trans')) intentClass = 'intent-trans';
                 if (k.intent.toLowerCase().includes('nav')) intentClass = 'intent-nav';
                 return `<span class="chip ${intentClass}">${k.keyword} <i>(${k.intent})</i></span>`;
             }).join('') || '<span class="chip">No data</span>';
-            
             kiRelatedTerms.innerHTML = (ki.related_terms || []).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
             kiCompetitorGaps.innerHTML = (ki.competitor_gaps || []).map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No gaps found.</div>';
             kiLongTail.innerHTML = (ki.long_tail_suggestions || []).map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No suggestions.</div>';
-
         }
-
+        
+        // --- POPULATE CONTENT ANALYSIS ENGINE ---
+        if(caeData) {
+            const cae = caeData;
+            setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
+            caeTopicClusters.innerHTML = (cae.topic_clusters || []).map(t => `<span class="chip">${t}</span>`).join('');
+            caeEntities.innerHTML = (cae.entities || []).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
+            caeKeywords.innerHTML = (cae.semantic_keywords || []).map(k => `<span class="chip">${k}</span>`).join('');
+            const relScore = clamp01(cae.relevance_score || 0);
+            caeRelevanceScore.textContent = `${relScore}%`;
+            caeRelevanceBar.style.width = `${relScore}%`;
+            caeIntent.innerHTML = `<span class="chip good">${cae.context_intent || 'N/A'}</span>`;
+        }
 
         renderCategories(data,url,'');
 
-        try{
-          const psi=await callPSI(url);
-          const mobile=psi.mobile||{};const desktop=psi.desktop||{};
-          const mScore=clamp01(Math.round(mobile.score??mobile.performance??0));
-          const dScore=clamp01(Math.round(desktop.score??desktop.performance??0));
-          setWheel(ringMobile, numMobile, mwMobile, mScore, 'M');
-          setWheel(ringDesktop, numDesktop, mwDesktop, dScore, 'D');
+        // --- POPULATE PSI / SPEED ---
+        if(psiData) {
+            const mobile=psiData.mobile||{};const desktop=psiData.desktop||{};
+            const mScore=clamp01(Math.round(mobile.score??mobile.performance??0));
+            const dScore=clamp01(Math.round(desktop.score??desktop.performance??0));
+            setWheel(ringMobile, numMobile, mwMobile, mScore, 'M');
+            setWheel(ringDesktop, numDesktop, mwDesktop, dScore, 'D');
 
-          const pick=(...vals)=>{for(const v of vals){const n=Number(v);if(v!==undefined&&v!==null&&!Number.isNaN(n))return n}return null};
-          const lcpSeconds=(()=>{const sec=pick(mobile.lcp_s,desktop.lcp_s,psi.lcp_s,psi.metrics?.lcp_s);if(sec!==null)return sec;const ms=pick(mobile.lcp,desktop.lcp,psi.lcp,psi.metrics?.lcp);return ms!==null?ms/1000:null})();
-          const cls=pick(mobile.cls,desktop.cls,psi.cls,psi.metrics?.cls);
-          const inp=pick(mobile.inp_ms,desktop.inp_ms,psi.inp_ms,psi.metrics?.inp_ms,mobile.inp,desktop.inp,psi.inp);
-          const ttfb=pick(mobile.ttfb_ms,desktop.ttfb_ms,psi.ttfb_ms,psi.metrics?.ttfb_ms,psi.ttfb);
+            const pick=(...vals)=>{for(const v of vals){const n=Number(v);if(v!==undefined&&v!==null&&!Number.isNaN(n))return n}return null};
+            const lcpSeconds=(()=>{const sec=pick(mobile.lcp_s,desktop.lcp_s,psiData.lcp_s,psiData.metrics?.lcp_s);if(sec!==null)return sec;const ms=pick(mobile.lcp,desktop.lcp,psiData.lcp,psiData.metrics?.lcp);return ms!==null?ms/1000:null})();
+            const cls=pick(mobile.cls,desktop.cls,psiData.cls,psiData.metrics?.cls);
+            const inp=pick(mobile.inp_ms,desktop.inp_ms,psiData.inp_ms,psiData.metrics?.inp_ms,mobile.inp,desktop.inp,psiData.inp);
+            const ttfb=pick(mobile.ttfb_ms,desktop.ttfb_ms,psiData.ttfb_ms,psiData.metrics?.ttfb_ms,psiData.ttfb);
 
-          const sLCP=scoreFromBounds(lcpSeconds,2.5,6.0);
-          const sCLS=scoreFromBounds(cls,0.10,0.25);
-          const sINP=scoreFromBounds(inp,200,500);
-          const sTTFB=scoreFromBounds(ttfb,800,1800);
+            const sLCP=scoreFromBounds(lcpSeconds,2.5,6.0);
+            const sCLS=scoreFromBounds(cls,0.10,0.25);
+            const sINP=scoreFromBounds(inp,200,500);
+            const sTTFB=scoreFromBounds(ttfb,800,1800);
 
-          setSpMeter(lcpBar,lcpVal,lcpSeconds,sLCP,v=>v!=null?`${v.toFixed(2)} s`:'—',lcpMeter);
-          setSpMeter(clsBar,clsVal,cls,sCLS,v=>v!=null?`${v.toFixed(3)}`:'—',clsMeter);
-          setSpMeter(inpBar,inpVal,inp,sINP,v=>v!=null?`${Math.round(v)} ms`:'—',inpMeter);
-          setSpMeter(ttfbBar,ttfbVal,ttfb,sTTFB,v=>v!=null?`${Math.round(v)} ms`:'—',ttfbMeter);
+            setSpMeter(lcpBar,lcpVal,lcpSeconds,sLCP,v=>v!=null?`${v.toFixed(2)} s`:'—',lcpMeter);
+            setSpMeter(clsBar,clsVal,cls,sCLS,v=>v!=null?`${v.toFixed(3)}`:'—',clsMeter);
+            setSpMeter(inpBar,inpVal,inp,sINP,v=>v!=null?`${Math.round(v)} ms`:'—',inpMeter);
+            setSpMeter(ttfbBar,ttfbVal,ttfb,sTTFB,v=>v!=null?`${Math.round(v)} ms`:'—',ttfbMeter);
 
-          const tips=[];
-          if(lcpSeconds!=null&&lcpSeconds>2.5)tips.push('Improve LCP: preload hero image, compress images (AVIF/WebP), inline critical CSS.');
-          if(cls!=null&&cls>0.1)tips.push('Reduce CLS: always set width/height on images/media; avoid layout shifts from ads and embeds.');
-          if(inp!=null&&inp>200)tips.push('Lower INP: break up long tasks, defer non-critical JS, reduce third-party scripts.');
-          if(ttfb!=null&&ttfb>800)tips.push('Reduce TTFB: enable caching/CDN, optimize server, use HTTP/2 or HTTP/3.');
-          if(!tips.length){tips.push('Great job! Keep images optimized and JS lean to maintain fast performance.')}
-          psiFixes.innerHTML=tips.map(t=>`<li>✅ ${t}</li>`).join('');
+            const tips=[];
+            if(lcpSeconds!=null&&lcpSeconds>2.5)tips.push('Improve LCP: preload hero image, compress images (AVIF/WebP), inline critical CSS.');
+            if(cls!=null&&cls>0.1)tips.push('Reduce CLS: always set width/height on images/media; avoid layout shifts from ads and embeds.');
+            if(inp!=null&&inp>200)tips.push('Lower INP: break up long tasks, defer non-critical JS, reduce third-party scripts.');
+            if(ttfb!=null&&ttfb>800)tips.push('Reduce TTFB: enable caching/CDN, optimize server, use HTTP/2 or HTTP/3.');
+            if(!tips.length){tips.push('Great job! Keep images optimized and JS lean to maintain fast performance.')}
+            psiFixes.innerHTML=tips.map(t=>`<li>✅ ${t}</li>`).join('');
 
-          const topBand=(mScore>=80&&dScore>=80)?'good':((mScore>=60||dScore>=60)?'warn':'bad');
-          psiStatus.className='pill '+(topBand==='good'?'score-pill--green':topBand==='warn'?'score-pill--orange':'score-pill--red');
-          psiStatus.textContent=topBand==='good'?'🎉 Excellent Speed':topBand==='warn'?'OK':'Needs Work';
-        }catch(e){
-          psiStatus.textContent='Unavailable';
-          psiFixes.innerHTML=`<li>⚠️ ${String(e.message||e)}. Make sure PSI key is set server-side.</li>`;
+            const topBand=(mScore>=80&&dScore>=80)?'good':((mScore>=60||dScore>=60)?'warn':'bad');
+            psiStatus.className='pill '+(topBand==='good'?'score-pill--green':topBand==='warn'?'score-pill--orange':'score-pill--red');
+            psiStatus.textContent=topBand==='good'?'🎉 Excellent Speed':topBand==='warn'?'OK':'Needs Work';
         }
       }catch(err){
         console.error(err);
@@ -946,9 +870,7 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
     </div>
   </div>
 
-  <!-- Quick Stats Section REMOVED -->
-
-  <!-- NEW: Content Optimization Heading -->
+  <!-- Content Optimization -->
   <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
     <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"></path><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"></path></svg>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Optimization</h3>
@@ -963,74 +885,88 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
           <div class="mw-ring" id="ringContent" style="--v:0"></div>
           <div class="mw-center" id="numContent">0%</div>
         </div>
-        <div style="margin-top:10px; display:flex; gap:10px; align-items:center">
-          <span id="coNlpBadge" class="co-badge warn">Need more work</span>
-        </div>
-        <div id="nlpTips" class="co-tips"></div>
       </div>
 
       <div class="co-info-grid">
         <div class="co-info-item">
           <div class="co-info-header">
-            <div class="co-info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
-            </div>
-            <span class="co-info-title">Topic Coverage</span> <span id="coTcBadge" class="co-badge small warn">Need more work</span>
+            <div class="co-info-icon"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 22a10 10 0 1 0-8.49-4.88"></path></svg></div>
+            <span class="co-info-title">Topic Coverage</span>
           </div>
           <p id="coTopicCoverageText">Run analysis to get data.</p>
-          <div class="progress" style="margin-bottom: 0;"><span id="coTopicCoverageProgress" style="width:0%; background: linear-gradient(90deg, var(--purple-1), var(--blue-1), var(--green-2));"></span></div>
-          <div id="tcTips" class="co-tips"></div>
-    
+          <div class="progress"><span id="coTopicCoverageProgress" style="width:0%;"></span></div>
         </div>
 
         <div class="co-info-item">
           <div class="co-info-header">
-            <div class="co-info-icon">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-            </div>
-            <span class="co-info-title">Content Gaps</span> <span id="coGapBadge" class="co-badge small warn">Need more work</span>
+            <div class="co-info-icon"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7..."></path></svg></div>
+            <span class="co-info-title">Content Gaps</span>
           </div>
-          <p id="coContentGapsText">Missing topics will be shown here.</p>
-          <div class="co-tags" id="coContentGapsTags">
-          </div>
+          <div class="co-tags" id="coContentGapsTags"></div>
         </div>
-        <div id="gapTips" class="co-tips"></div>
     
-
         <div class="co-info-item">
           <div class="co-info-header">
-            <div class="co-info-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-            </div>
-            <span class="co-info-title">Schema Suggestions</span> <span id="coSchemaBadge" class="co-badge small warn">Need more work</span>
+            <div class="co-info-icon"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline></svg></div>
+            <span class="co-info-title">Schema Suggestions</span>
           </div>
-          <p>Rule-based analysis suggests the following schema types:</p>
-         <div class="co-tags" id="coSchemaTags">
-        </div>
+         <div class="co-tags" id="coSchemaTags"></div>
       </div>
-        <div id="schemaTips" class="co-tips"></div>
     
-
       <div class="co-info-item">
         <div class="co-info-header">
-          <div class="co-info-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-          </div>
+          <div class="co-info-icon"><svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path></svg></div>
           <span class="co-info-title">Readability & Intent</span>
         </div>
-        <p>Content alignment with user search intent and reading level.</p>
          <div class="co-tags">
-          <span id="coIntentTag" class="chip" style="background-color: #122833; border-color: #00c6ff88; color: #cffcff;">Intent: —</span>
-          <span id="coGradeTag" class="chip" style="background-color: #231a33; border-color: #8a2be288; color: #e9d5ff;">Grade Level: —</span>
+          <span id="coIntentTag" class="chip">Intent: —</span>
+          <span id="coGradeTag" class="chip">Grade Level: —</span>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- NEW: Content Analysis Engine -->
+<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+    <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20.94c1.5 0 2.75 1.25 2.75 2.75S13.5 26.44 12 26.44 9.25 25.19 9.25 23.69s1.25-2.75 2.75-2.75z"></path><path d="M12 2.56c1.5 0 2.75 1.25 2.75 2.75S13.5 8.06 12 8.06 9.25 6.81 9.25 5.31s1.25-2.75 2.75-2.75z"></path></svg>
+    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
+    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.21 17.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path><path d="M19.79 6.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path></svg>
+</div>
+<div class="cae-card" id="contentAnalysisEngineCard">
+    <div class="cae-grid">
+      <div style="display:grid;place-items:center;padding:10px">
+        <div class="mw" id="mwCAE">
+          <div class="mw-ring" id="ringCAE" style="--v:0"></div>
+          <div class="mw-center" id="numCAE">0%</div>
+        </div>
+      </div>
+      <div class="cae-info-grid">
+        <div class="cae-info-item">
+          <div class="cae-info-header"><div class="cae-info-icon">🧩</div><span class="cae-info-title">Topic Clustering Analysis</span></div>
+          <div class="cae-tags" id="caeTopicClusters"></div>
+        </div>
+        <div class="cae-info-item">
+          <div class="cae-info-header"><div class="cae-info-icon">🏢</div><span class="cae-info-title">Entity Recognition</span></div>
+          <div class="cae-tags" id="caeEntities"></div>
+        </div>
+        <div class="cae-info-item">
+          <div class="cae-info-header"><div class="cae-info-icon">🔍</div><span class="cae-info-title">Semantic Keyword Discovery</span></div>
+          <div class="cae-tags" id="caeKeywords"></div>
+        </div>
+        <div class="cae-info-item">
+          <div class="cae-info-header"><div class="cae-info-icon">🎯</div><span class="cae-info-title">Content Relevance & Intent</span></div>
+          <div class="sp-row"><div>Relevance Score</div><div class="sp-val" id="caeRelevanceScore">—</div></div>
+          <div class="cae-relevance-bar"><span id="caeRelevanceBar" style="width:0%"></span></div>
+          <div id="caeIntent" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+</div>
+
 <!-- Technical SEO Integration -->
 <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
-    <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
+    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
 </div>
 <div class="tsi-card" id="technicalSeoCard">
@@ -1043,156 +979,119 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       </div>
       <div class="tsi-info-grid">
         <div class="tsi-info-item">
-            <div class="tsi-info-header"><div class="tsi-info-icon">🔗</div><span class="tsi-info-title">Internal Linking Optimization</span></div>
-            <ul id="tsiInternalLinks"><li>Run analysis...</li></ul>
+            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon">🔗</div><span class="tsi-info-title">Internal Linking Optimization</span></div>
+            <ul id="tsiInternalLinks"></ul>
         </div>
         <div class="tsi-info-item">
-            <div class="tsi-info-header"><div class="tsi-info-icon">🌐</div><span class="tsi-info-title">URL Structure Analysis</span></div>
+            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon">🌐</div><span class="tsi-info-title">URL Structure Analysis</span></div>
             <p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p>
-            <p id="tsiUrlSuggestion">Run analysis...</p>
+            <p id="tsiUrlSuggestion"></p>
         </div>
         <div class="tsi-info-item" style="grid-column: span 2;">
-            <div class="tsi-info-header"><div class="tsi-info-icon">📰</div><span class="tsi-info-title">Meta Tags Optimization</span></div>
+            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon pulse">📰</div><span class="tsi-info-title">Meta Tags Optimization</span></div>
             <p><strong>Title:</strong> <span id="tsiMetaTitle">—</span></p>
             <p><strong>Description:</strong> <span id="tsiMetaDescription">—</span></p>
         </div>
         <div class="tsi-info-item">
-            <div class="tsi-info-header"><div class="tsi-info-icon">🖼️</div><span class="tsi-info-title">Image Alt Text Suggestions</span></div>
-            <ul id="tsiAltTexts"><li>Run analysis...</li></ul>
+            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon">🖼️</div><span class="tsi-info-title">Image Alt Text Suggestions</span></div>
+            <ul id="tsiAltTexts"></ul>
         </div>
         <div class="tsi-info-item">
-            <div class="tsi-info-header"><div class="tsi-info-icon">🗺️</div><span class="tsi-info-title">Site Structure Mapping</span></div>
-            <div class="site-map-container" id="tsiSiteMap">Run analysis...</div>
+            <div class="tsi-info-header"><div class="tsi-info-icon animated-icon pulse">🗺️</div><span class="tsi-info-title">Site Structure Mapping</span></div>
+            <div class="site-map-container" id="tsiSiteMap"></div>
         </div>
       </div>
     </div>
     <div class="tsi-suggestions">
-        <h4>💡 Technical SEO Suggestions</h4>
-        <ul id="tsiSuggestionsList"><li>Run analysis to see suggestions.</li></ul>
+        <h4><span class="animated-icon">💡</span> Technical SEO Suggestions</h4>
+        <ul id="tsiSuggestionsList"></ul>
     </div>
 </div>
 
-<!-- NEW: Keyword Intelligence -->
+<!-- Keyword Intelligence -->
 <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
-    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0-8.49-4.88"></path><path d="M12 2a10 10 0 1 0 8.49 4.88"></path><path d="M2 12h20"></path><path d="M12 2a10 10 0 1 0 0 20"></path><path d="M12 2a10 10 0 1 1 0 20"></path></svg>
+    <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22a10 10 0 1 0-8.49-4.88"></path><path d="M12 2a10 10 0 1 0 8.49 4.88"></path></svg>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
 </div>
 <div class="ki-card" id="keywordIntelligenceCard">
     <div class="ki-grid">
         <div class="ki-item">
-            <h4 class="ki-item-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 19-6-6 6-6"></path><path d="m7 13 11.5 6"></path><path d="m7 13-5-5"></path></svg>
-                Semantic Keyword Research
-            </h4>
+            <h4 class="ki-item-title"><span class="animated-icon pulse">🧠</span>Semantic Keyword Research</h4>
             <div id="kiSemanticResearch" class="ki-tags"></div>
         </div>
         <div class="ki-item">
-            <h4 class="ki-item-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
-                Keyword Intent Classification
-            </h4>
+            <h4 class="ki-item-title"><span class="animated-icon">🎯</span>Keyword Intent Classification</h4>
             <div id="kiIntentClassification" class="ki-tags"></div>
         </div>
         <div class="ki-item">
-            <h4 class="ki-item-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
-                Related Terms Mapping
-            </h4>
+            <h4 class="ki-item-title"><span class="animated-icon pulse">🗺️</span>Related Terms Mapping</h4>
             <div id="kiRelatedTerms" class="ki-tags"></div>
         </div>
         <div class="ki-item">
-            <h4 class="ki-item-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>
-                Competitor Keyword Gap Analysis
-            </h4>
+            <h4 class="ki-item-title"><span class="animated-icon">📊</span>Competitor Keyword Gap Analysis</h4>
             <div id="kiCompetitorGaps" class="ki-list"></div>
         </div>
         <div class="ki-item" style="grid-column: span 2;">
-             <h4 class="ki-item-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                Long-tail Semantic Suggestions
-            </h4>
+             <h4 class="ki-item-title"><span class="animated-icon pulse">🔑</span>Long-tail Semantic Suggestions</h4>
             <div id="kiLongTail" class="ki-list"></div>
         </div>
     </div>
 </div>
 
-
 <!-- Meta Info Layout -->
-<div class="card" style="margin-top:16px;">
+<div class="card meta-card" style="margin-top:24px;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-        <svg class="animated-icon pulse" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>
-        <h3 class="t-grad" style="font-weight:900;margin:0;">Meta & Heading Structure</h3>
+        <svg class="animated-icon pulse" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path></svg>
+        <h3 class="t-grad">Meta & Heading Structure</h3>
     </div>
     <div class="space-y-3">
         <div class="cat-card">
-            <div style="font-size:12px;color:#b6c2cf">Title Tag</div>
-            <div id="titleVal" style="font-weight:600; color:var(--ink); margin-top:4px; line-height: 1.4;">—</div>
+            <div class="cat-card-title">Title Tag</div>
+            <div id="titleVal"></div>
         </div>
         <div class="cat-card">
-            <div style="font-size:12px;color:#b6c2cf">Meta Description</div>
-            <div id="metaVal" style="color:var(--ink); margin-top:4px; line-height: 1.4;">—</div>
+            <div class="cat-card-title">Meta Description</div>
+            <div id="metaVal"></div>
         </div>
         <div class="cat-card">
-            <div style="font-size:12px;color:#b6c2cf; margin-bottom:8px;">Heading Map (H1-H4)</div>
-            <div id="headingMap" class="space-y-2">
-                <!-- JS populates this -->
-            </div>
+            <div class="cat-card-title">Heading Map (H1-H4)</div>
+            <div id="headingMap" class="space-y-2"></div>
         </div>
     </div>
 </div>
 
-<!-- Readability Section REMOVED -->
-
+<!-- Site Speed -->
 <div class="speed-card" id="speedCard">
     <div class="sp-head">
       <div class="sp-title">
         <div class="ico">⚡</div>
         <div>
-          <div class="t-grad" style="font-weight:900;">Site Speed & Core Web Vitals</div>
+          <div class="t-grad">Site Speed & Core Web Vitals</div>
           <div class="sp-note">Uses PageSpeed Insights (Mobile + Desktop)</div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <span id="psiStatus" class="pill">Waiting…</span>
-      </div>
+      <span id="psiStatus" class="pill">Waiting…</span>
     </div>
-
-    <!-- Site Speed Wheels - Updated -->
     <div class="sp-wheels">
       <div class="wheel-card">
-        <div class="mw mw-sm warn" id="mwMobile">
-          <div class="mw-ring" id="ringMobile" style="--v:0"></div>
-          <div class="mw-center" id="numMobile">M 0%</div>
-        </div>
+        <div class="mw mw-sm warn" id="mwMobile"><div class="mw-ring" id="ringMobile"></div><div class="mw-center" id="numMobile">M 0%</div></div>
         <div class="wheel-label">Mobile</div>
       </div>
       <div class="wheel-card">
-        <div class="mw mw-sm warn" id="mwDesktop">
-          <div class="mw-ring" id="ringDesktop" style="--v:0"></div>
-          <div class="mw-center" id="numDesktop">D 0%</div>
-        </div>
+        <div class="mw mw-sm warn" id="mwDesktop"><div class="mw-ring" id="ringDesktop"></div><div class="mw-center" id="numDesktop">D 0%</div></div>
         <div class="wheel-label">Desktop</div>
       </div>
     </div>
-
     <div class="sp-bars-grid">
-      <div class="sp-tile"><div class="sp-row"><div>🏁 LCP (s)</div><div class="sp-val" id="lcpVal">—</div></div><div class="sp-meter" id="lcpMeter"><span id="lcpBar" style="width:0%"></span></div></div>
-      <div class="sp-tile"><div class="sp-row"><div>📦 CLS</div><div class="sp-val" id="clsVal">—</div></div><div class="sp-meter" id="clsMeter"><span id="clsBar" style="width:0%"></span></div></div>
-      <div class="sp-tile"><div class="sp-row"><div>⚡ INP (ms)</div><div class="sp-val" id="inpVal">—</div></div><div class="sp-meter" id="inpMeter"><span id="inpBar" style="width:0%"></span></div></div>
-      <div class="sp-tile"><div class="sp-row"><div>⏱️ TTFB (ms)</div><div class="sp-val" id="ttfbVal">—</div></div><div class="sp-meter" id="ttfbMeter"><span id="ttfbBar" style="width:0%"></span></div></div>
+      <div class="sp-tile"><div class="sp-row"><div>🏁 LCP</div><div class="sp-val" id="lcpVal"></div></div><div class="sp-meter" id="lcpMeter"><span id="lcpBar"></span></div></div>
+      <div class="sp-tile"><div class="sp-row"><div>📦 CLS</div><div class="sp-val" id="clsVal"></div></div><div class="sp-meter" id="clsMeter"><span id="clsBar"></span></div></div>
+      <div class="sp-tile"><div class="sp-row"><div>⚡ INP</div><div class="sp-val" id="inpVal"></div></div><div class="sp-meter" id="inpMeter"><span id="inpBar"></span></div></div>
+      <div class="sp-tile"><div class="sp-row"><div>⏱️ TTFB</div><div class="sp-val" id="ttfbVal"></div></div><div class="sp-meter" id="ttfbMeter"><span id="ttfbBar"></span></div></div>
     </div>
-
-    <!-- Site Speed Suggestions - Redesigned -->
     <div class="sp-fixes">
       <h4>💡 Speed Suggestions</h4>
-      <ul id="psiFixes"><li>Run Analyze to fetch PSI data.</li></ul>
+      <ul id="psiFixes"></ul>
     </div>
-  </div>
-
-  <div class="card" style="margin-top:16px">
-    <h3 class="t-grad" style="font-weight:900;margin:0 0 8px">Recommendations</h3>
-    <div id="recs" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"></div>
   </div>
 
   <div class="ground-slab">
@@ -1238,4 +1137,3 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
 </section>
 @endsection
-
