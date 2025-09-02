@@ -76,13 +76,14 @@
   .url-row .paste{padding:6px 10px;border-radius:10px;border:1px solid #ffffff26;background:#232323;color:var(--ink)}
 
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
-
-  /* ===================== Wheels (overall + readability + speed) ===================== */
+  
+  /* ======================================= */
+  /* === 🎨 NEW NEON-TECH SCORE WHEELS 🎨 === */
+  /* ======================================= */
   .mw {
     --v: 0;
     --size: 200px;
     --track-width: 14px;
-    --bg-color: #1a1a1a;
     --progress-percent: calc(var(--v) * 1%);
 
     width: var(--size);
@@ -95,31 +96,40 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: var(--bg-color); 
+    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
     box-shadow:
-      inset 0 0 0 3px #2a2a2a, /* Inner outline */
-      0 0 0 3px #4a4a4a;     /* Outer outline */
+      inset 0 0 4px 1px rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,255,255,0.05);
   }
 
   .mw-ring::before {
     content: "";
     position: absolute;
-    inset: 3px;
+    inset: 0px;
     border-radius: 50%;
     background: conic-gradient(from -90deg,
-        var(--blue-1) 0deg, var(--blue-2) 60deg,
-        var(--green-1) 120deg, var(--green-2) 150deg,
-        var(--yellow-1) 195deg, var(--orange-1) 225deg,
-        var(--red-1) 255deg, var(--pink-1) 300deg,
-        var(--purple-1) 340deg, var(--blue-1) 360deg);
+        var(--blue-1) 0%, var(--green-1) 25%,
+        var(--yellow-1) 50%, var(--red-1) 75%,
+        var(--purple-1) 90%, var(--blue-1) 100%);
     -webkit-mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent 0%),
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
         radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
     -webkit-mask-composite: source-in;
      mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent 0%),
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
         radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
      mask-composite: intersect;
+     animation: rainbowSlide 4s linear infinite;
+     background-size: 200% 100%;
+  }
+  
+  .mw-ring::after {
+    content: '';
+    position: absolute;
+    inset: calc(var(--track-width) - 4px);
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 70%);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
   }
 
   .mw-center {
@@ -127,21 +137,21 @@
     inset: 0;
     display: grid;
     place-items: center;
-    font-size: calc(var(--size) * 0.22);
+    font-size: calc(var(--size) * 0.24);
     font-weight: 900;
     color: #fff;
-    text-shadow: 0 4px 16px rgba(0, 0, 0, .4);
+    text-shadow: 0 0 12px rgba(255,255,255,0.3);
   }
-    
-  .mw.good { filter: drop-shadow(0 0 10px var(--green-1)); }
-  .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)); }
-  .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)); }
+  
+  .mw.good { filter: drop-shadow(0 0 10px var(--green-1)) drop-shadow(0 0 20px var(--green-1)); }
+  .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)) drop-shadow(0 0 20px var(--orange-1)); }
+  .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)) drop-shadow(0 0 20px var(--red-1)); }
 
   .mw-sm {
     --size: 170px;
     --track-width: 12px;
   }
-
+  
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
   .waterbox .fill{
     position:absolute;
@@ -369,6 +379,71 @@
   .tsi-suggestions li.good { color: #baf7d9; }
   .tsi-suggestions li.warn { color: #fde68a; }
   .tsi-suggestions li.bad { color: #fecaca; }
+  
+  
+  /* =============================================== */
+  /* === 🧠 NEW STYLES for Keyword Intelligence 🧠 === */
+  /* =============================================== */
+  .ki-card {
+    background: linear-gradient(145deg, #0c2b2a, #0c1a2e);
+    border: 1px solid var(--green-2);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 0 32px rgba(0, 255, 198, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+  }
+  
+  .ki-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  
+  .ki-item {
+    background: rgba(5, 25, 25, 0.7);
+    border: 1px solid rgba(0, 255, 198, 0.3);
+    border-radius: 14px;
+    padding: 14px;
+    backdrop-filter: blur(4px);
+  }
+  
+  .ki-item-title {
+    font-weight: 800;
+    font-size: 15px;
+    background: linear-gradient(90deg, var(--green-1), var(--blue-1));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 12px;
+    display:flex;
+    align-items:center;
+    gap: 8px;
+  }
+  
+  .ki-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ki-tags .chip {
+    background: #0d3b2a;
+    border-color: #22c55e72;
+    color: #d1fae5;
+  }
+  
+  .ki-tags .chip.intent-info { background: #112d3d; border-color: #00c6ff72; color: #cffcff;}
+  .ki-tags .chip.intent-trans { background: #2f2508; border-color: #f59e0b72; color: #fde68a;}
+  .ki-tags .chip.intent-nav { background: #231a33; border-color: #8a2be272; color: #e9d5ff;}
+
+  .ki-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: #c0fdee;
+  }
+
 
 </style>
 
@@ -435,6 +510,13 @@
     const tsiAltTexts = $('#tsiAltTexts');
     const tsiSiteMap = $('#tsiSiteMap');
     const tsiSuggestionsList = $('#tsiSuggestionsList');
+    
+    /* --- NEW: Keyword Intelligence UI refs --- */
+    const kiSemanticResearch = $('#kiSemanticResearch');
+    const kiIntentClassification = $('#kiIntentClassification');
+    const kiRelatedTerms = $('#kiRelatedTerms');
+    const kiCompetitorGaps = $('#kiCompetitorGaps');
+    const kiLongTail = $('#kiLongTail');
 
 
     /* Helpers */
@@ -463,7 +545,7 @@ ${txt?.slice(0,800)}`)}
     async function callPSI(url){const res=await fetch('/semantic-analyzer/psi',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url})});const text=await res.text();let json={};try{json=JSON.parse(text)}catch{throw new Error(`PSI: invalid JSON
 ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.message||'PSI unavailable')}if(!res.ok){throw new Error(json.error||json.message||`PSI HTTP ${res.status}`)}return json}
     
-    // NEW: Function to call your Tech SEO analysis API
+    // Tech SEO analysis API
     async function callTechnicalSeoApi(url) {
       const res = await fetch('/api/technical-seo-analyze', {
         method: 'POST',
@@ -475,6 +557,20 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         throw new Error(`Technical SEO API Error (${res.status}): ${errorText.slice(0, 800)}`);
       }
       return res.json();
+    }
+    
+    // NEW: Keyword Intelligence API
+    async function callKeywordApi(url) {
+        const res = await fetch('/api/keyword-analyze', {
+            method: 'POST',
+            headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+            body: JSON.stringify({ url })
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`Keyword API Error (${res.status}): ${errorText.slice(0, 800)}`);
+        }
+        return res.json();
     }
 
 
@@ -510,13 +606,23 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
         [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
         psiFixes.innerHTML='<li>Fetching PageSpeed data…</li>';
+        
+        // --- Reset Keyword Intelligence UI ---
+        [kiSemanticResearch, kiIntentClassification, kiRelatedTerms, kiCompetitorGaps, kiLongTail].forEach(el => {
+            if(el) el.innerHTML = '<span class="chip">Analyzing...</span>';
+        });
 
-        const [data, tsiData] = await Promise.all([
+        const [data, tsiData, kiData] = await Promise.all([
           callAnalyzer(url),
           callTechnicalSeoApi(url).catch(err => {
             console.error(err);
             showError('Technical SEO analysis failed.', err.message);
-            return null; // Don't block the UI if this specific API fails
+            return null;
+          }),
+          callKeywordApi(url).catch(err => {
+              console.error(err);
+              showError('Keyword Intelligence analysis failed.', err.message);
+              return null;
           })
         ]);
 
@@ -673,7 +779,7 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
             const tsi = tsiData;
             setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
 
-            tsiInternalLinks.innerHTML = (tsi.internal_linking || []).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
+            tsiInternalLinks.innerHTML = (tsi.internal_linking || []).map(l => `<li>${l.text} with anchor: code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
             tsiMetaTitle.textContent = tsi.meta_optimization?.title || 'N/A';
@@ -681,6 +787,27 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
             tsiAltTexts.innerHTML = (tsi.alt_text_suggestions || []).map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('') || '<li>No suggestions.</li>';
             tsiSiteMap.innerHTML = tsi.site_structure_map || 'N/A';
             tsiSuggestionsList.innerHTML = (tsi.suggestions || []).map(s => `<li class="${s.type}">${s.text}</li>`).join('') || '<li>No suggestions.</li>';
+        }
+        
+        // =================================================================
+        // --- NEW: POPULATE KEYWORD INTELLIGENCE
+        // =================================================================
+        if(kiData) {
+            const ki = kiData;
+            
+            kiSemanticResearch.innerHTML = (ki.semantic_research || []).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
+            
+            kiIntentClassification.innerHTML = (ki.intent_classification || []).map(k => {
+                let intentClass = 'intent-info';
+                if (k.intent.toLowerCase().includes('trans')) intentClass = 'intent-trans';
+                if (k.intent.toLowerCase().includes('nav')) intentClass = 'intent-nav';
+                return `<span class="chip ${intentClass}">${k.keyword} <i>(${k.intent})</i></span>`;
+            }).join('') || '<span class="chip">No data</span>';
+            
+            kiRelatedTerms.innerHTML = (ki.related_terms || []).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
+            kiCompetitorGaps.innerHTML = (ki.competitor_gaps || []).map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No gaps found.</div>';
+            kiLongTail.innerHTML = (ki.long_tail_suggestions || []).map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No suggestions.</div>';
+
         }
 
 
@@ -763,7 +890,7 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
   <div class="legend"><span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span></div>
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
-    <div style="display:grid;place-items:center;border-radius:16px;padding:8px;background:#161616;border:1px solid var(--outline)">
+    <div style="display:grid;place-items:center;border-radius:16px;padding:8px;">
       <!-- Overall Score Wheel - Updated -->
       <div class="mw warn" id="mw">
         <div class="mw-ring" id="mwRing" style="--v:0"></div>
@@ -901,7 +1028,7 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
   </div>
 </div>
 
-<!-- NEW: Technical SEO Integration -->
+<!-- Technical SEO Integration -->
 <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
     <svg class="animated-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
@@ -944,6 +1071,52 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         <ul id="tsiSuggestionsList"><li>Run analysis to see suggestions.</li></ul>
     </div>
 </div>
+
+<!-- NEW: Keyword Intelligence -->
+<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a10 10 0 1 0-8.49-4.88"></path><path d="M12 2a10 10 0 1 0 8.49 4.88"></path><path d="M2 12h20"></path><path d="M12 2a10 10 0 1 0 0 20"></path><path d="M12 2a10 10 0 1 1 0 20"></path></svg>
+    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
+</div>
+<div class="ki-card" id="keywordIntelligenceCard">
+    <div class="ki-grid">
+        <div class="ki-item">
+            <h4 class="ki-item-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m13 19-6-6 6-6"></path><path d="m7 13 11.5 6"></path><path d="m7 13-5-5"></path></svg>
+                Semantic Keyword Research
+            </h4>
+            <div id="kiSemanticResearch" class="ki-tags"></div>
+        </div>
+        <div class="ki-item">
+            <h4 class="ki-item-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                Keyword Intent Classification
+            </h4>
+            <div id="kiIntentClassification" class="ki-tags"></div>
+        </div>
+        <div class="ki-item">
+            <h4 class="ki-item-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="m19 12-7 7-7-7"></path></svg>
+                Related Terms Mapping
+            </h4>
+            <div id="kiRelatedTerms" class="ki-tags"></div>
+        </div>
+        <div class="ki-item">
+            <h4 class="ki-item-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>
+                Competitor Keyword Gap Analysis
+            </h4>
+            <div id="kiCompetitorGaps" class="ki-list"></div>
+        </div>
+        <div class="ki-item" style="grid-column: span 2;">
+             <h4 class="ki-item-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Long-tail Semantic Suggestions
+            </h4>
+            <div id="kiLongTail" class="ki-list"></div>
+        </div>
+    </div>
+</div>
+
 
 <!-- Meta Info Layout -->
 <div class="card" style="margin-top:16px;">
