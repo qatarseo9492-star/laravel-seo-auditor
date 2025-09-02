@@ -427,6 +427,28 @@ ${detail}`:''); };
 ${txt?.slice(0,800)}`)}
     async function callPSI(url){const res=await fetch('/semantic-analyzer/psi',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url})});const text=await res.text();let json={};try{json=JSON.parse(text)}catch{throw new Error(`PSI: invalid JSON
 ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.message||'PSI unavailable')}if(!res.ok){throw new Error(json.error||json.message||`PSI HTTP ${res.status}`)}return json}
+
+    // NEW: Function to call the backend for Technical SEO Analysis
+    async function callTechSeoAnalysis(url) {
+        // This function calls your backend. The backend is responsible for using the 
+        // OpenAI API key from your .env file to perform the analysis.
+        const res = await fetch('/api/technical-seo-analyze', { 
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ url })
+        });
+
+        if (!res.ok) {
+            const errorBody = await res.text();
+            throw new Error(`Technical SEO API Error (${res.status}): ${errorBody}`);
+        }
+
+        return res.json();
+    }
     
     function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.style.opacity=isOn?.6:1;analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze'}
     
@@ -449,36 +471,49 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       clearError();
       const url=(urlInput.value||'').trim();
       if(!url){showError('Please enter a URL.');return;}
-      try{
-        setRunning(true);
+      
+      setRunning(true);
 
-        // reset speed
-        psiStatus.textContent='Checking…';
-        [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
-        [mwMobile,mwDesktop].forEach(c=>{c.classList.remove('good','warn','bad');c.classList.add('warn')});
-        numMobile.textContent='M 0%';numDesktop.textContent='D 0%';
-        [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
-        [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
-        psiFixes.innerHTML='<li>Fetching PageSpeed data…</li>';
+      // Reset speed UI
+      psiStatus.textContent='Checking…';
+      [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
+      [mwMobile,mwDesktop].forEach(c=>{c.classList.remove('good','warn','bad');c.classList.add('warn')});
+      numMobile.textContent='M 0%';numDesktop.textContent='D 0%';
+      [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
+      [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
+      psiFixes.innerHTML='<li>Fetching PageSpeed data…</li>';
 
-        const data=await callAnalyzer(url);
+      // Reset Technical SEO UI to a loading state
+      setWheel(ringTSI, numTSI, mwTSI, 0, '');
+      mwTSI.classList.remove('good', 'warn', 'bad');
+      tsiInternalLinks.innerHTML = '<li>Analyzing internal links...</li>';
+      tsiUrlClarityScore.textContent = '—';
+      tsiUrlSuggestion.textContent = 'Analyzing URL structure...';
+      tsiMetaTitle.textContent = 'Generating meta title...';
+      tsiMetaDescription.textContent = 'Generating meta description...';
+      tsiAltTexts.innerHTML = '<li>Analyzing image alt texts...</li>';
+      tsiSiteMap.innerHTML = 'Mapping site structure...';
+      tsiSuggestionsList.innerHTML = '<li>Generating suggestions...</li>';
+
+      try {
+        const data = await callAnalyzer(url);
         if(!data||data.error) throw new Error(data?.error||'Unknown error');
         
-        // --- MOCK DATA for Tech SEO ---
-        data.technical_seo_integration = {
-            score: 82,
-            internal_linking: [ { text: "Link from 'Content Marketing' to 'SEO best practices'", anchor: "learn more about SEO" }, { text: "Add link to 'Homepage' from a key paragraph", anchor: "our main page" } ],
-            url_structure: { clarity_score: 90, suggestion: "URL is clean and descriptive. No changes needed." },
-            meta_optimization: { title: "AI-Generated Title: Mastering Semantic SEO in 2025", description: "Unlock top rankings with our guide to semantic SEO. Learn about entities, topic clusters, and AI-driven strategies." },
-            alt_text_suggestions: [ { image_src: "image1.jpg", suggestion: "A chart showing SEO growth over time" }, { image_src: "logo.png", suggestion: "Company Logo" } ],
-            site_structure_map: "<ul><li>Homepage<ul><li>About Us</li><li>Services<ul><li>SEO</li><li>Content Marketing</li></ul></li><li>Blog</li></ul></li></ul>",
-            suggestions: [
-                { text: "Implement suggested internal links to improve topic authority.", type: 'good'},
-                { text: "Review AI-generated meta tags before publishing.", type: 'warn'}
-            ]
-        };
-        // --- END MOCK DATA ---
-
+        // NEW: Call the backend for live Technical SEO data
+        try {
+            const techSeoData = await callTechSeoAnalysis(url);
+            data.technical_seo_integration = techSeoData; // Attach real data to the main data object
+        } catch (e) {
+            console.error('Technical SEO Analysis failed:', e);
+            const tsiCard = document.getElementById('technicalSeoCard');
+            if (tsiCard) {
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'color:#fecaca; background:#331111; border:1px solid #ef444466; padding:12px; border-radius:12px; margin-top:16px;';
+                errorDiv.textContent = `⚠️ Technical SEO analysis failed: ${e.message}. Please check the server logs.`;
+                tsiSuggestionsList.parentElement.appendChild(errorDiv);
+            }
+        }
+       
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
@@ -623,20 +658,20 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         }
         
         // =================================================================
-        // --- POPULATE TECHNICAL SEO INTEGRATION
+        // --- POPULATE TECHNICAL SEO INTEGRATION (NOW WITH LIVE DATA)
         // =================================================================
         if (data.technical_seo_integration) {
             const tsi = data.technical_seo_integration;
             setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
 
-            tsiInternalLinks.innerHTML = tsi.internal_linking.map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('');
+            tsiInternalLinks.innerHTML = tsi.internal_linking.map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No internal linking suggestions.</li>';
             tsiUrlClarityScore.textContent = `${tsi.url_structure.clarity_score}/100`;
             tsiUrlSuggestion.textContent = tsi.url_structure.suggestion;
             tsiMetaTitle.textContent = tsi.meta_optimization.title;
             tsiMetaDescription.textContent = tsi.meta_optimization.description;
-            tsiAltTexts.innerHTML = tsi.alt_text_suggestions.map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('');
-            tsiSiteMap.innerHTML = tsi.site_structure_map;
-            tsiSuggestionsList.innerHTML = tsi.suggestions.map(s => `<li class="${s.type}">${s.text}</li>`).join('');
+            tsiAltTexts.innerHTML = tsi.alt_text_suggestions.map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('') || '<li>No alt text suggestions.</li>';
+            tsiSiteMap.innerHTML = tsi.site_structure_map || 'Could not generate site map.';
+            tsiSuggestionsList.innerHTML = tsi.suggestions.map(s => `<li class="${s.type}">${s.text}</li>`).join('') || '<li>No technical SEO suggestions.</li>';
         }
 
 
@@ -1021,3 +1056,4 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
 
 </section>
 @endsection
+
