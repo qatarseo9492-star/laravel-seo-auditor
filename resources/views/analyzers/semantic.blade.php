@@ -258,7 +258,7 @@
       radial-gradient(circle at 90% 80%, rgba(0,198,255,.12), transparent 50%);
   }
   
-  .cae-card, .tsi-card {
+  .tsi-card {
     background: transparent;
     border-radius: 20px;
     padding: 16px;
@@ -270,19 +270,19 @@
     box-shadow: 0 0 24px rgba(0, 198, 255, 0.2);
   }
 
-  .co-grid, .cae-grid, .tsi-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
-  @media (max-width: 920px){.co-grid, .cae-grid, .tsi-grid{grid-template-columns:1fr}}
+  .co-grid, .tsi-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
+  @media (max-width: 920px){.co-grid, .tsi-grid{grid-template-columns:1fr}}
 
   /* Info Items Grid */
-  .co-info-grid, .cae-info-grid, .tsi-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  @media (max-width:500px){.co-info-grid, .cae-info-grid, .tsi-info-grid{grid-template-columns:1fr}}
-  .co-info-item, .cae-info-item, .tsi-info-item {border-radius:14px;padding:14px;background:#1E1E1E;border:1px solid var(--outline);box-shadow:0 8px 24px rgba(0,0,0,.3)}
-  .co-info-header, .cae-info-header, .tsi-info-header {display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .co-info-icon, .cae-info-icon, .tsi-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
-  .co-info-icon svg, .cae-info-icon svg, .tsi-info-icon svg {width:18px;height:18px}
-  .co-info-title, .cae-info-title, .tsi-info-title {font-weight:800;color:var(--ink)}
-  .co-info-item p, .cae-info-item p, .tsi-info-item p {font-size:12px;color:#aab3c2;margin:0 0 10px}
-  .co-tags, .cae-tags, .tsi-tags {display:flex;flex-wrap:wrap;gap:6px}
+  .co-info-grid, .tsi-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media (max-width:500px){.co-info-grid, .tsi-info-grid{grid-template-columns:1fr}}
+  .co-info-item, .tsi-info-item {border-radius:14px;padding:14px;background:#1E1E1E;border:1px solid var(--outline);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+  .co-info-header, .tsi-info-header {display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .co-info-icon, .tsi-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
+  .co-info-icon svg, .tsi-info-icon svg {width:18px;height:18px}
+  .co-info-title, .tsi-info-title {font-weight:800;color:var(--ink)}
+  .co-info-item p, .tsi-info-item p {font-size:12px;color:#aab3c2;margin:0 0 10px}
+  .co-tags, .tsi-tags {display:flex;flex-wrap:wrap;gap:6px}
   
   .tsi-info-item ul { list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
   .tsi-info-item li { font-size: 13px; line-height: 1.5; }
@@ -302,7 +302,7 @@
   .co-tips .tip{border-left:3px solid #2a3b66;padding-left:10px;color:#cdd6ef;font-size:12px}
 
   /* NEW: Content Analysis Engine & Tech SEO Suggestion Box Styles */
-  .cae-suggestions, .tsi-suggestions {
+  .tsi-suggestions {
     border-radius: 14px;
     padding: 14px;
     margin-top: 16px;
@@ -313,27 +313,27 @@
         linear-gradient(to right, #1E1E1E, #1E1E1E), 
         linear-gradient(90deg, var(--green-1), var(--orange-1), var(--pink-1));
   }
-  .cae-suggestions h4, .tsi-suggestions h4 {
+  .tsi-suggestions h4 {
     margin: 0 0 10px 0;
     font-weight: 900;
     color: var(--ink);
   }
-  .cae-suggestions ul, .tsi-suggestions ul {
+  .tsi-suggestions ul {
     margin:0; padding-left:0; display:grid; gap:8px; list-style:none;
   }
-  .cae-suggestions li, .tsi-suggestions li {
+  .tsi-suggestions li {
     padding-left: 10px;
     font-size: 13px;
     position: relative;
   }
-  .cae-suggestions li::before, .tsi-suggestions li::before {
+  .tsi-suggestions li::before {
     content: '💡';
     position: absolute;
     left: -10px;
   }
-  .cae-suggestions li.good, .tsi-suggestions li.good { color: #baf7d9; }
-  .cae-suggestions li.warn, .tsi-suggestions li.warn { color: #fde68a; }
-  .cae-suggestions li.bad, .tsi-suggestions li.bad { color: #fecaca; }
+  .tsi-suggestions li.good { color: #baf7d9; }
+  .tsi-suggestions li.warn { color: #fde68a; }
+  .tsi-suggestions li.bad { color: #fecaca; }
 
 </style>
 
@@ -389,16 +389,6 @@
         const coGradeTag = coCard.querySelector('#coGradeTag');
         window.__coElements = { coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag };
     }
-
-    /* --- Content Analysis Engine UI refs --- */
-    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
-    const caeTopicClusters = $('#caeTopicClusters');
-    const caeEntities = $('#caeEntities');
-    const caeKeywords = $('#caeKeywords');
-    const caeRelevanceScore = $('#caeRelevanceScore');
-    const caeRelevanceBar = $('#caeRelevanceBar');
-    const caeIntent = $('#caeIntent');
-    const caeSuggestionsList = $('#caeSuggestionsList');
     
     /* --- Technical SEO Integration UI refs --- */
     const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI');
@@ -437,35 +427,29 @@ ${detail}`:''); };
 ${txt?.slice(0,800)}`)}
     async function callPSI(url){const res=await fetch('/semantic-analyzer/psi',{method:'POST',headers:{'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},body:JSON.stringify({url})});const text=await res.text();let json={};try{json=JSON.parse(text)}catch{throw new Error(`PSI: invalid JSON
 ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.message||'PSI unavailable')}if(!res.ok){throw new Error(json.error||json.message||`PSI HTTP ${res.status}`)}return json}
-    
-    // NEW: Function to call your OpenAI analysis API
-    async function callOpenAIAnalysis(url) {
-      // Replace '/api/openai-analysis' with your actual API endpoint.
-      const res = await fetch('/api/openai-analysis', {
-        method: 'POST',
-        headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
-        body: JSON.stringify({ url })
-      });
-      if (!res.ok) {
-        // For demonstration, we'll return mock data on failure.
-        // In a real app, you would handle the error more gracefully.
-        console.warn("OpenAI API call failed. Using mock data.");
-        return {
-          score: 78,
-          topic_clusters: ["AI in SEO", "Content Automation", "Future of Search"],
-          entities: [{ term: "OpenAI", type: "ORG" }, { term: "GPT-4", type: "PRODUCT" }],
-          semantic_keywords: ["natural language processing", "AI-generated content", "semantic search"],
-          relevance_score: 85,
-          context_intent: "Commercial",
-          suggestions: [
-            { text: "Clarify the impact of AI on small businesses.", type: 'good'},
-            { text: "Include a comparison between different AI models.", type: 'warn'},
-          ]
-        };
-      }
-      return res.json();
-    }
 
+    // NEW: Function to call the backend for Technical SEO Analysis
+    async function callTechSeoAnalysis(url) {
+        // This function calls your backend. The backend is responsible for using the 
+        // OpenAI API key from your .env file to perform the analysis.
+        const res = await fetch('/api/technical-seo-analyze', { 
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ url })
+        });
+
+        if (!res.ok) {
+            const errorBody = await res.text();
+            throw new Error(`Technical SEO API Error (${res.status}): ${errorBody}`);
+        }
+
+        return res.json();
+    }
+    
     function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.style.opacity=isOn?.6:1;analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze'}
     
     /* Speed helpers */
@@ -487,49 +471,49 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       clearError();
       const url=(urlInput.value||'').trim();
       if(!url){showError('Please enter a URL.');return;}
-      try{
-        setRunning(true);
+      
+      setRunning(true);
 
-        // reset speed
-        psiStatus.textContent='Checking…';
-        [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
-        [mwMobile,mwDesktop].forEach(c=>{c.classList.remove('good','warn','bad');c.classList.add('warn')});
-        numMobile.textContent='M 0%';numDesktop.textContent='D 0%';
-        [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
-        [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
-        psiFixes.innerHTML='<li>Fetching PageSpeed data…</li>';
+      // Reset speed UI
+      psiStatus.textContent='Checking…';
+      [ringMobile,ringDesktop].forEach(el=>el.style.setProperty('--v',0));
+      [mwMobile,mwDesktop].forEach(c=>{c.classList.remove('good','warn','bad');c.classList.add('warn')});
+      numMobile.textContent='M 0%';numDesktop.textContent='D 0%';
+      [lcpBar,clsBar,inpBar,ttfbBar].forEach(el=>el.style.width='0%');
+      [lcpVal,clsVal,inpVal,ttfbVal].forEach(el=>el.textContent='—');
+      psiFixes.innerHTML='<li>Fetching PageSpeed data…</li>';
 
-        const data=await callAnalyzer(url);
+      // Reset Technical SEO UI to a loading state
+      setWheel(ringTSI, numTSI, mwTSI, 0, '');
+      mwTSI.classList.remove('good', 'warn', 'bad');
+      tsiInternalLinks.innerHTML = '<li>Analyzing internal links...</li>';
+      tsiUrlClarityScore.textContent = '—';
+      tsiUrlSuggestion.textContent = 'Analyzing URL structure...';
+      tsiMetaTitle.textContent = 'Generating meta title...';
+      tsiMetaDescription.textContent = 'Generating meta description...';
+      tsiAltTexts.innerHTML = '<li>Analyzing image alt texts...</li>';
+      tsiSiteMap.innerHTML = 'Mapping site structure...';
+      tsiSuggestionsList.innerHTML = '<li>Generating suggestions...</li>';
+
+      try {
+        const data = await callAnalyzer(url);
         if(!data||data.error) throw new Error(data?.error||'Unknown error');
         
-        // --- MOCK DATA for Content Analysis & Tech SEO ---
-        data.content_analysis_engine = {
-          score: 88,
-          topic_clusters: ["SEO best practices", "Content marketing", "Link building strategies", "Technical SEO"],
-          entities: [ { term: "Google", type: "ORG" }, { term: "John Mueller", type: "PER" }, { term: "PageRank", type: "MISC" } ],
-          semantic_keywords: ["LSI keywords", "topical authority", "search intent", "entity optimization"],
-          relevance_score: 92,
-          context_intent: "Informational",
-          suggestions: [
-            { text: "Expand the 'Link building' section with case studies.", type: 'good'},
-            { text: "Add a section on 'Voice Search Optimization'.", type: 'warn'},
-            { text: "The term 'SEO' appears too frequently. Consider synonyms.", type: 'bad'}
-          ]
-        };
-        data.technical_seo_integration = {
-            score: 82,
-            internal_linking: [ { text: "Link from 'Content Marketing' to 'SEO best practices'", anchor: "learn more about SEO" }, { text: "Add link to 'Homepage' from a key paragraph", anchor: "our main page" } ],
-            url_structure: { clarity_score: 90, suggestion: "URL is clean and descriptive. No changes needed." },
-            meta_optimization: { title: "AI-Generated Title: Mastering Semantic SEO in 2025", description: "Unlock top rankings with our guide to semantic SEO. Learn about entities, topic clusters, and AI-driven strategies." },
-            alt_text_suggestions: [ { image_src: "image1.jpg", suggestion: "A chart showing SEO growth over time" }, { image_src: "logo.png", suggestion: "Company Logo" } ],
-            site_structure_map: "<ul><li>Homepage<ul><li>About Us</li><li>Services<ul><li>SEO</li><li>Content Marketing</li></ul></li><li>Blog</li></ul></li></ul>",
-            suggestions: [
-                { text: "Implement suggested internal links to improve topic authority.", type: 'good'},
-                { text: "Review AI-generated meta tags before publishing.", type: 'warn'}
-            ]
-        };
-        // --- END MOCK DATA ---
-
+        // NEW: Call the backend for live Technical SEO data
+        try {
+            const techSeoData = await callTechSeoAnalysis(url);
+            data.technical_seo_integration = techSeoData; // Attach real data to the main data object
+        } catch (e) {
+            console.error('Technical SEO Analysis failed:', e);
+            const tsiCard = document.getElementById('technicalSeoCard');
+            if (tsiCard) {
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'color:#fecaca; background:#331111; border:1px solid #ef444466; padding:12px; border-radius:12px; margin-top:16px;';
+                errorDiv.textContent = `⚠️ Technical SEO analysis failed: ${e.message}. Please check the server logs.`;
+                tsiSuggestionsList.parentElement.appendChild(errorDiv);
+            }
+        }
+       
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
@@ -674,41 +658,20 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
         }
         
         // =================================================================
-        // --- POPULATE CONTENT ANALYSIS ENGINE
-        // =================================================================
-        if (data.content_analysis_engine) {
-          const cae = data.content_analysis_engine;
-          setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
-          
-          caeTopicClusters.innerHTML = cae.topic_clusters.map(t => `<span class="chip">${t}</span>`).join('');
-          caeEntities.innerHTML = cae.entities.map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
-          caeKeywords.innerHTML = cae.semantic_keywords.map(k => `<span class="chip">${k}</span>`).join('');
-
-          const relScore = clamp01(cae.relevance_score || 0);
-          caeRelevanceScore.textContent = `${relScore}%`;
-          caeRelevanceBar.style.width = `${relScore}%`;
-          caeRelevanceBar.parentElement.className = 'sp-meter ' + bandName(relScore);
-          
-          caeIntent.innerHTML = `<span class="chip good">${cae.context_intent}</span>`;
-
-          caeSuggestionsList.innerHTML = cae.suggestions.map(s => `<li class="${s.type}">${s.text}</li>`).join('');
-        }
-        
-        // =================================================================
-        // --- POPULATE TECHNICAL SEO INTEGRATION
+        // --- POPULATE TECHNICAL SEO INTEGRATION (NOW WITH LIVE DATA)
         // =================================================================
         if (data.technical_seo_integration) {
             const tsi = data.technical_seo_integration;
             setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
 
-            tsiInternalLinks.innerHTML = tsi.internal_linking.map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('');
+            tsiInternalLinks.innerHTML = tsi.internal_linking.map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No internal linking suggestions.</li>';
             tsiUrlClarityScore.textContent = `${tsi.url_structure.clarity_score}/100`;
             tsiUrlSuggestion.textContent = tsi.url_structure.suggestion;
             tsiMetaTitle.textContent = tsi.meta_optimization.title;
             tsiMetaDescription.textContent = tsi.meta_optimization.description;
-            tsiAltTexts.innerHTML = tsi.alt_text_suggestions.map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('');
-            tsiSiteMap.innerHTML = tsi.site_structure_map;
-            tsiSuggestionsList.innerHTML = tsi.suggestions.map(s => `<li class="${s.type}">${s.text}</li>`).join('');
+            tsiAltTexts.innerHTML = tsi.alt_text_suggestions.map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('') || '<li>No alt text suggestions.</li>';
+            tsiSiteMap.innerHTML = tsi.site_structure_map || 'Could not generate site map.';
+            tsiSuggestionsList.innerHTML = tsi.suggestions.map(s => `<li class="${s.type}">${s.text}</li>`).join('') || '<li>No technical SEO suggestions.</li>';
         }
 
 
@@ -927,46 +890,6 @@ ${text?.slice(0,400)}`)}if(json.ok===false){throw new Error(json.error||json.mes
       </div>
     </div>
   </div>
-</div>
-
-<!-- NEW: Content Analysis Engine -->
-<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
-    <svg class="animated-icon pulse" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.25 2.75 2.75S13.5 26.44 12 26.44 9.25 25.19 9.25 23.69s1.25-2.75 2.75-2.75z"></path><path d="M12 2.56c1.5 0 2.75 1.25 2.75 2.75S13.5 8.06 12 8.06 9.25 6.81 9.25 5.31s1.25-2.75 2.75-2.75z"></path><path d="M4.21 17.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path><path d="M19.79 6.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path></svg>
-    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
-</div>
-<div class="cae-card" id="contentAnalysisEngineCard">
-    <div class="cae-grid">
-      <div style="display:grid;place-items:center;padding:10px">
-        <div class="mw" id="mwCAE">
-          <div class="mw-ring" id="ringCAE" style="--v:0"></div>
-          <div class="mw-center" id="numCAE">0%</div>
-        </div>
-      </div>
-      <div class="cae-info-grid">
-        <div class="cae-info-item">
-          <div class="cae-info-header"><div class="cae-info-icon">🧩</div><span class="cae-info-title">Topic Clustering Analysis</span></div>
-          <div class="cae-tags" id="caeTopicClusters"><span class="chip">Run analysis...</span></div>
-        </div>
-        <div class="cae-info-item">
-          <div class="cae-info-header"><div class="cae-info-icon">🏢</div><span class="cae-info-title">Entity Recognition</span></div>
-          <div class="cae-tags" id="caeEntities"><span class="chip">Run analysis...</span></div>
-        </div>
-        <div class="cae-info-item">
-          <div class="cae-info-header"><div class="cae-info-icon">🔍</div><span class="cae-info-title">Semantic Keyword Discovery</span></div>
-          <div class="cae-tags" id="caeKeywords"><span class="chip">Run analysis...</span></div>
-        </div>
-        <div class="cae-info-item">
-          <div class="cae-info-header"><div class="cae-info-icon">🎯</div><span class="cae-info-title">Content Relevance & Intent</span></div>
-          <div class="sp-row"><div>Relevance Score</div><div class="sp-val" id="caeRelevanceScore">—</div></div>
-          <div class="sp-meter"><span id="caeRelevanceBar" style="width:0%"></span></div>
-          <div id="caeIntent" style="margin-top:8px"></div>
-        </div>
-      </div>
-    </div>
-    <div class="cae-suggestions">
-        <h4>💡 Suggestions</h4>
-        <ul id="caeSuggestionsList"><li>Run analysis to see suggestions.</li></ul>
-    </div>
 </div>
 
 <!-- NEW: Technical SEO Integration -->
