@@ -2,28 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OpenAiUsage extends Model
 {
-    use HasFactory;
+    protected $table = 'openai_usage';
 
     protected $fillable = [
-        'user_id',
-        'model',
-        'prompt_tokens',
-        'completion_tokens',
-        'total_tokens',
-        'cost_usd',
-        'meta',
+        'user_id','model','prompt_tokens','completion_tokens','total_tokens','cost_usd','meta',
     ];
 
     protected $casts = [
         'meta' => 'array',
+        'cost_usd' => 'decimal:4',
     ];
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
