@@ -12,9 +12,7 @@ use DOMXPath;
 class AnalyzerController extends Controller
 {
     /**
-     * ✅ FIXED: This method now performs both local HTML parsing and the OpenAI API call.
-     * This ensures that the "Meta & Heading Structure" and other on-page details are
-     * fetched correctly, along with the AI-driven "Content Optimization" analysis.
+     * Handles Content Optimization and local on-page parsing.
      */
     public function analyze(Request $request)
     {
@@ -37,23 +35,13 @@ class AnalyzerController extends Controller
             }
             $html = $response->body();
 
-            // Use DOMDocument to parse the HTML
             $dom = new DOMDocument();
-            // Suppress warnings from malformed HTML
-            libxml_use_internal_errors(true);
-            $dom->loadHTML($html);
-            libxml_clear_errors();
+            @$dom->loadHTML($html); // Suppress warnings from malformed HTML
             $xpath = new DOMXPath($dom);
 
-            // Extract Title
-            $titleNode = $xpath->query('//title')->item(0);
-            $contentStructure['title'] = $titleNode ? trim($titleNode->textContent) : 'Not found';
-
-            // Extract Meta Description
-            $metaDescNode = $xpath->query("//meta[@name='description']/@content")->item(0);
-            $contentStructure['meta_description'] = $metaDescNode ? trim($metaDescNode->nodeValue) : 'Not found';
-
-            // Extract Headings (H1-H4)
+            // Extract Title, Meta Description, Headings
+            $contentStructure['title'] = optional($xpath->query('//title')->item(0))->textContent;
+            $contentStructure['meta_description'] = optional($xpath->query("//meta[@name='description']/@content")->item(0))->nodeValue;
             $contentStructure['headings'] = [];
             foreach (['h1', 'h2', 'h3', 'h4'] as $tag) {
                 $headings = $xpath->query('//' . $tag);
@@ -64,17 +52,15 @@ class AnalyzerController extends Controller
                 }
             }
 
-             // Extract other page signals
+            // Extract other page signals
             $pageSignals['canonical'] = optional($xpath->query("//link[@rel='canonical']/@href")->item(0))->nodeValue;
             $pageSignals['robots'] = optional($xpath->query("//meta[@name='robots']/@content")->item(0))->nodeValue;
             $pageSignals['has_viewport'] = $xpath->query("//meta[@name='viewport']")->length > 0;
-            
+
             // Extract link counts
             $links = $dom->getElementsByTagName('a');
             $internalLinks = 0;
-            $parsedUrl = parse_url($urlToAnalyze);
-            $host = $parsedUrl['host'] ?? '';
-
+            $host = parse_url($urlToAnalyze, PHP_URL_HOST) ?? '';
             foreach ($links as $link) {
                 $href = $link->getAttribute('href');
                 if (Str::startsWith($href, '/') || (Str::contains($href, $host) && Str::startsWith($href, 'http'))) {
@@ -82,81 +68,59 @@ class AnalyzerController extends Controller
                 }
             }
             $quickStats['internal_links'] = $internalLinks;
-            $quickStats['schema_types'] = []; // Placeholder, requires more complex parsing
-
+            $quickStats['schema_types'] = []; // Placeholder
 
         } catch (\Exception $e) {
             Log::error('Local HTML Parsing Failed', ['message' => $e->getMessage()]);
-            // Don't fail the whole request, AI part can still work
         }
-
 
         // --- 2. OpenAI API Call for Content Optimization ---
         $apiKey = env('OPENAI_API_KEY');
         if (empty($apiKey)) {
-            Log::error('OPENAI_API_KEY missing in config/env');
             return response()->json(['ok' => false, 'error' => 'Server is not configured for AI analysis.'], 500);
         }
 
-        $model = env('OPENAI_MODEL', 'gpt-4-turbo');
-        $timeout = (int)env('OPENAI_TIMEOUT', 60);
-
         try {
-            $prompt = "Analyze the content at the URL '{$urlToAnalyze}' for SEO. The primary language of the content is '{$language}'. Return a JSON object with a single root key 'content_optimization'. This key should contain: 'nlp_score' (integer 0-100), 'topic_coverage' (object with 'percentage', 'total', 'covered' integers), 'content_gaps' (object with 'missing_topics' array of objects, each with 'term' and 'severity' strings), 'schema_suggestions' (an array of strings), and 'readability_intent' (object with 'intent' string and 'grade_level' string).";
-
-            $aiResponse = Http::withToken($apiKey)
-                ->timeout($timeout)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => $model,
-                    'messages' => [
-                        ['role' => 'system', 'content' => 'You are an SEO content optimization expert. Return only the requested JSON object.'],
-                        ['role' => 'user', 'content' => $prompt]
-                    ],
-                    'response_format' => ['type' => 'json_object']
-                ]);
+            $prompt = "Analyze the content at '{$urlToAnalyze}' for SEO in {$language}. Return JSON with a root key 'content_optimization' containing: 'nlp_score' (0-100), 'topic_coverage' {'percentage', 'total', 'covered'}, 'content_gaps' {'missing_topics':[{'term', 'severity'}]}, 'schema_suggestions' (array of strings), and 'readability_intent' {'intent', 'grade_level'}.";
+            $aiResponse = Http::withToken($apiKey)->timeout(60)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are an SEO expert. Return only the requested JSON.'],
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'response_format' => ['type' => 'json_object']
+            ]);
 
             if ($aiResponse->failed()) {
-                Log::error('OpenAI Content Analysis Failed', ['status' => $aiResponse->status(), 'body' => $aiResponse->body()]);
-                return response()->json(['ok' => false, 'error' => 'Could not get analysis from AI service.'], 502);
+                return response()->json(['ok' => false, 'error' => 'Could not get AI analysis.'], 502);
             }
 
-            $rawContent = $aiResponse->json('choices.0.message.content');
-            $analysisData = json_decode($rawContent, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE || !isset($analysisData['content_optimization'])) {
-                 return response()->json(['ok' => false, 'error' => 'AI service returned an invalid format.'], 500);
-            }
+            $analysisData = json_decode($aiResponse->json('choices.0.message.content'), true);
 
             // --- 3. Combine and Return Final Response ---
-            $co = $analysisData['content_optimization'];
-            $finalResponse = [
+            $co = $analysisData['content_optimization'] ?? [];
+            return response()->json([
                 "ok" => true,
                 "overall_score" => $co['nlp_score'] ?? 75,
                 "content_optimization" => $co,
-                "content_structure" => $contentStructure, // ✅ ADDED BACK
-                "page_signals" => $pageSignals,           // ✅ ADDED BACK
-                "quick_stats" => $quickStats,             // ✅ ADDED BACK
+                "content_structure" => $contentStructure,
+                "page_signals" => $pageSignals,
+                "quick_stats" => $quickStats,
                 "score_source" => 'ai',
-            ];
-
-            return response()->json($finalResponse);
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Content Analysis Exception', ['message' => $e->getMessage()]);
-            return response()->json(['ok' => false, 'error' => 'An unexpected server error occurred during content analysis.'], 500);
+            return response()->json(['ok' => false, 'error' => 'Server error during content analysis.'], 500);
         }
     }
-
 
     /**
      * Handles the Technical SEO analysis using OpenAI.
      */
     public function analyzeTechnicalSeo(Request $request)
     {
-        $request->validate([
-            'url' => 'required|url'
-        ]);
-
+        $request->validate(['url' => 'required|url']);
         $urlToAnalyze = $request->input('url');
         $apiKey = env('OPENAI_API_KEY');
 
@@ -165,43 +129,76 @@ class AnalyzerController extends Controller
         }
 
         try {
-            $prompt = "Analyze the technical SEO of the page at {$urlToAnalyze}. Provide a detailed analysis in JSON format. The JSON object must include: a 'score' (0-100), 'internal_linking' suggestions as an array of objects each with 'text' and 'anchor' keys, 'url_structure' analysis as an object with 'clarity_score' and 'suggestion', 'meta_optimization' as an object with 'title' and 'description', 'alt_text_suggestions' as an array of objects with 'image_src' and 'suggestion', a 'site_structure_map' as a simple HTML ul list string, and a final list of 'suggestions' as an array of objects each with 'text' and 'type' keys.";
-
-            $response = Http::withToken($apiKey)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => 'gpt-4-turbo',
+            $prompt = "Analyze technical SEO of {$urlToAnalyze}. Return JSON with: 'score' (0-100), 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map' (HTML ul string), and 'suggestions':[{'text','type'}].";
+            $response = Http::withToken($apiKey)->timeout(60)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
                 'messages' => [
-                    ['role' => 'system', 'content' => 'You are a world-class Technical SEO expert.'],
+                    ['role' => 'system', 'content' => 'You are a Technical SEO expert. Respond only with JSON.'],
                     ['role' => 'user', 'content' => $prompt]
                 ],
                 'response_format' => ['type' => 'json_object']
             ]);
 
             if ($response->failed()) {
-                 return response()->json(['message' => 'Failed to get a response from OpenAI.', 'details' => $response->body()], 502);
+                return response()->json(['message' => 'Failed to get a response from OpenAI.'], 502);
             }
 
-            $analysisResult = $response->json('choices.0.message.content');
-            $decodedResult = json_decode($analysisResult, true);
+            $decodedResult = json_decode($response->json('choices.0.message.content'), true);
             
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                return response()->json(['message' => 'OpenAI returned invalid JSON.', 'raw_response' => $analysisResult], 500);
-            }
-
-            if (!isset($decodedResult['internal_linking']) || !is_array($decodedResult['internal_linking'])) {
-                $decodedResult['internal_linking'] = [];
-            }
-            if (!isset($decodedResult['alt_text_suggestions']) || !is_array($decodedResult['alt_text_suggestions'])) {
-                $decodedResult['alt_text_suggestions'] = [];
-            }
-            if (!isset($decodedResult['suggestions']) || !is_array($decodedResult['suggestions'])) {
-                $decodedResult['suggestions'] = [];
-            }
+            // Sanitize arrays to prevent frontend errors
+            $decodedResult['internal_linking'] = $decodedResult['internal_linking'] ?? [];
+            $decodedResult['alt_text_suggestions'] = $decodedResult['alt_text_suggestions'] ?? [];
+            $decodedResult['suggestions'] = $decodedResult['suggestions'] ?? [];
 
             return response()->json($decodedResult);
 
         } catch (\Exception $e) {
             Log::error('Technical SEO Analysis Failed: ' . $e->getMessage());
-            return response()->json(['message' => 'An unexpected error occurred during the analysis.'], 500);
+            return response()->json(['message' => 'An unexpected error occurred during analysis.'], 500);
+        }
+    }
+
+    /**
+     * NEW: Handles Keyword Intelligence analysis using OpenAI.
+     */
+    public function analyzeKeywords(Request $request)
+    {
+        $request->validate(['url' => 'required|url']);
+        $urlToAnalyze = $request->input('url');
+        $apiKey = env('OPENAI_API_KEY');
+
+        if (!$apiKey) {
+            return response()->json(['message' => 'OpenAI API key is not configured.'], 500);
+        }
+
+        try {
+            $prompt = "Perform a keyword intelligence analysis for {$urlToAnalyze}. Return JSON with: 'semantic_research' (array of 5-7 variations), 'intent_classification' (array of {'keyword','intent'}), 'related_terms' (array of 5-7 terms), 'competitor_gaps' (array of 3-5 opportunities), and 'long_tail_suggestions' (array of 3-5 recommendations).";
+            $response = Http::withToken($apiKey)->timeout(60)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are a Keyword Research specialist. Respond only with JSON.'],
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'response_format' => ['type' => 'json_object']
+            ]);
+
+            if ($response->failed()) {
+                return response()->json(['message' => 'Failed to get keyword analysis from OpenAI.'], 502);
+            }
+
+            $result = json_decode($response->json('choices.0.message.content'), true);
+
+            // Sanitize arrays to ensure they exist
+            $keys = ['semantic_research', 'intent_classification', 'related_terms', 'competitor_gaps', 'long_tail_suggestions'];
+            foreach ($keys as $key) {
+                $result[$key] = $result[$key] ?? [];
+            }
+
+            return response()->json($result);
+
+        } catch (\Exception $e) {
+            Log::error('Keyword Analysis Failed: ' . $e->getMessage());
+            return response()->json(['message' => 'An unexpected error occurred during keyword analysis.'], 500);
         }
     }
 
@@ -212,9 +209,9 @@ class AnalyzerController extends Controller
     public function semanticAnalyze(Request $request) { return $this->analyze($request); }
 
     /** PSI placeholder */
-    public function psi(Request $request) { return response()->json(['ok'=>true,'note'=>'PSI proxy not implemented here.']); }
+    public function psi(Request $request) { return response()->json(['ok' => true, 'note' => 'PSI proxy not implemented here.']); }
 
-    public function aiCheck(Request $request) { return response()->json(['ok'=>true,'note'=>'aiCheck stub']); }
-    public function topicClusterAnalyze(Request $request) { return response()->json(['ok'=>true,'note'=>'topicClusterAnalyze stub']); }
+    public function aiCheck(Request $request) { return response()->json(['ok' => true, 'note' => 'aiCheck stub']); }
+    public function topicClusterAnalyze(Request $request) { return response()->json(['ok' => true, 'note' => 'topicClusterAnalyze stub']); }
 }
 
