@@ -522,25 +522,10 @@
     const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
     const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
     function setChip(el,label,value,score){ if(!el)return; el.classList.remove('good','warn','bad'); const b=bandName(score); el.classList.add(b); el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`; };
-    const showError=(msg,detail)=>{ errorBox.style.display='block'; errorBox.textContent=msg+(detail?`: ${detail}`:''); };
+    const showError=(msg,detail)=>{ errorBox.style.display='block'; errorBox.textContent=msg+(detail?`
+
+${detail}`:''); };
     const clearError=()=>{ errorBox.style.display='none'; errorBox.textContent=''; };
-    
-    const handleApiError = (toolName, error) => {
-        let message = error.message || 'An unknown error occurred.';
-        // Try to find and parse a JSON object within the error string
-        const jsonStringMatch = message.match(/(\{.*\})/);
-        if (jsonStringMatch && jsonStringMatch[1]) {
-            try {
-                const errorJson = JSON.parse(jsonStringMatch[1]);
-                // Use the 'error' or 'message' key from the parsed JSON
-                message = errorJson.error || errorJson.message || jsonStringMatch[1];
-            } catch (e) {
-                // Not valid JSON, just use the original message
-            }
-        }
-        showError(`${toolName} analysis failed`, message);
-        return null; // Allow Promise.all to resolve
-    };
 
     /* ===== Category/KB/scoring (unchanged logic) ===== */
     const CATS=[{name:'User Signals & Experience',icon:'📱',checks:['Mobile-friendly, responsive layout','Optimized speed (compression, lazy-load)','Core Web Vitals passing (LCP/INP/CLS)','Clear CTAs and next steps','Accessible basics (alt text, contrast)']},{name:'Entities & Context',icon:'🧩',checks:['sameAs/Organization details present','Valid schema markup (Article/FAQ/Product)','Related entities covered with context','Primary entity clearly defined','Organization contact/about page visible']},{name:'Structure & Architecture',icon:'🏗️',checks:['Logical H2/H3 headings & topic clusters','Internal links to hub/related pages','Clean, descriptive URL slug','Breadcrumbs enabled (+ schema)','XML sitemap logical structure']},{name:'Content Quality',icon:'🧠',checks:['E-E-A-T signals (author, date, expertise)','Unique value vs. top competitors','Facts & citations up to date','Helpful media (images/video) w/ captions','Up-to-date examples & screenshots']},{name:'Content & Keywords',icon:'📝',checks:['Define search intent & primary topic','Map target & related keywords (synonyms/PAA)','H1 includes primary topic naturally','Integrate FAQs / questions with answers','Readable, NLP-friendly language']},{name:'Technical Elements',icon:'⚙️',checks:['Title tag (≈50–60 chars) w/ primary keyword','Meta description (≈140–160 chars) + CTA','Canonical tag set correctly','Indexable & listed in XML sitemap','Robots directives valid']}];
@@ -554,127 +539,26 @@
 
     /* API Calls */
     async function callApi(endpoint, url) {
-        const res = await fetch(endpoint, {
-            method: 'POST',
-            headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
-            body: JSON.stringify({ url })
-        });
-        if (!res.ok) {
-            const errorText = await res.text();
-            throw new Error(`API Error at ${endpoint} (${res.status}): ${errorText.slice(0, 800)}`);
-        }
-        return res.json();
-    }
-    
-    // Specific API call wrappers
-    const callAnalyzer = (url) => callApi('/api/semantic-analyze', url);
-    const callTechnicalSeoApi = (url) => callApi('/api/technical-seo-analyze', url);
-    const callKeywordApi = (url) => callApi('/api/keyword-analyze', url);
-    const callContentEngineApi = (url) => callApi('/api/content-engine-analyze', url);
-    const callPSI = (url) => callApi('/semantic-analyzer/psi', url);
-
-
-    function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.style.opacity=isOn?.6:1;analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze'}
-    
-    /* Speed helpers */
-    const band = s => s>=80?'good':(s>=60?'warn':'bad');
-    const scoreFromBounds=(val,good,poor)=>{if(val==null||isNaN(val))return 0;if(val<=good)return 100;if(val>=poor)return 0;return Math.round(100*(1-((val-good)/(poor-good))))};
-    function setWheel(elRing, elNum, container, score, prefix){
-        if (!elRing || !elNum || !container) return; // Guard clause
-        const b=band(score);
-        container.classList.remove('good','warn','bad');
-        container.classList.add(b);
-        elRing.style.setProperty('--v',score);
-        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
-    }
-    
-    function setSpeedCircle(circleEl, score) {
-        if (!circleEl) return;
-        const r = circleEl.r.baseVal.value;
-        const circumference = 2 * Math.PI * r;
-        const offset = circumference - (score / 100) * circumference;
-        circleEl.style.strokeDasharray = `${circumference} ${circumference}`;
-        circleEl.style.strokeDashoffset = offset;
-        const color = score >= 80 ? 'var(--green-1)' : score >= 60 ? 'var(--yellow-1)' : 'var(--red-1)';
-        circleEl.style.stroke = color;
-    }
-
-
-    /* ===== Analyze ===== */
-    $('#analyzeBtn')?.addEventListener('click', async e=>{
-      e.preventDefault();
-      clearError();
-      const url=(urlInput.value||'').trim();
-      if(!url){showError('Please enter a URL.');return;}
-      try{
-        setRunning(true);
-        
-        // --- Reset UIs before fetching ---
-        [kiSemanticResearch, kiIntentClassification, kiRelatedTerms, kiCompetitorGaps, kiLongTail, caeTopicClusters, caeEntities, caeKeywords, caeIntent].forEach(el => {
-            if(el) el.innerHTML = '<span class="chip">Analyzing...</span>';
-        });
-
-        // --- Fire all API calls in parallel ---
-        const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
-            callAnalyzer(url), // Critical path: if this fails, the whole thing stops.
-            callTechnicalSeoApi(url).catch(err => handleApiError('Technical SEO', err)),
-            callKeywordApi(url).catch(err => handleApiError('Keyword Intelligence', err)),
-            callContentEngineApi(url).catch(err => handleApiError('Content Engine', err)),
-            callPSI(url).catch(err => {
-                handleApiError('PageSpeed Insights', err); // Use the handler for consistency
-                speedOverviewText.textContent = `⚠️ PageSpeed Insights analysis failed.`; // Keep UI update separate
-                return null;
-            })
-        ]);
-
-        // This check is for the critical 'callAnalyzer' response.
-        if(!data || data.error) throw new Error(data?.error || 'Local data parsing failed');
-
-        window.__lastData={...data,url};
-
-        const score=clamp01(data.overall_score||0);
-        setWheel(mwRing, mwNum, mw, score, '');
-        
-        overallFill.style.width=score+'%';
-        overallPct.textContent=score+'%';
-        setChip(chipOverall,'Overall',`${score} /100`,score);
-
-        const cmap={};(data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
-        const contentScore=Math.round(([cmap['Content & Keywords'],cmap['Content Quality']].filter(v=>typeof v==='number').reduce((a,b)=>a+b,0))/2||0);
-        setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
-
-        const r=data.readability||{};
-        const human=clamp01(Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3));
-        const ai=clamp01(100-human);
-        setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
-        setChip(chipHuman,'Human-like',`${human} %`,human);
-        setChip(chipAI,'AI-like',`${ai} %`,100-human);
-        
-        // --- Meta & Heading population logic ---
-        if (data.content_structure) {
-            titleVal.textContent = data.content_structure.title || 'Not Found';
-            metaVal.textContent = data.content_structure.meta_description || 'Not Found';
-            
-            const hs = data.content_structure.headings || {};
-            chipH.textContent = `H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
-            headingMap.innerHTML = ''; 
-            
-            const allowedHeadings = ['H1', 'H2', 'H3', 'H4'];
-            let hasHeadings = false;
-            
-            Object.entries(hs).forEach(([lvl, arr]) => {
-                if (!arr || !arr.length || !allowedHeadings.includes(lvl)) return;
-                hasHeadings = true;
-                const box = document.createElement('div');
-                box.className = 'cat-card'; 
-                box.innerHTML = `<div class="cat-card-title uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px; margin-top: 8px;">` + arr.map(t => `<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('') + `</div>`;
-                headingMap.appendChild(box);
-            });
-
-            if (!hasHeadings) {
-                headingMap.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No H1-H4 headings were found on the analyzed page.</p>`;
+    const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+        body: JSON.stringify({ url })
+    });
+    if (!res.ok) {
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('application/json')) {
+            const j = await res.json().catch(() => null);
+            if (j && (j.error || j.detail || j.hint)) {
+                const parts = [j.error, j.hint, j.detail].filter(Boolean);
+                throw new Error(parts.join('
+'));
             }
         }
+        const errorText = await res.text();
+        throw new Error(`API Error at ${endpoint} (${res.status}): ${String(errorText).slice(0, 800)}`);
+    }
+    return res.json();
+}
         
         chipHttp.textContent='200';
         chipCanon.textContent=(data.page_signals?.canonical||'—')||'—';
@@ -807,23 +691,7 @@
         }
       }catch(err){
         console.error(err);
-        // This top-level catch will now primarily handle the `callAnalyzer` failure.
-        // We'll add the same error parsing here for a cleaner message.
-        let message = err.message || 'An unknown error occurred.';
-        const jsonStringMatch = message.match(/(\{.*\})/);
-        if (jsonStringMatch && jsonStringMatch[1]) {
-            try {
-                const errorJson = JSON.parse(jsonStringMatch[1]);
-                message = errorJson.error || errorJson.message || jsonStringMatch[1];
-            } catch (e) {
-                // Not valid JSON, just use the original message but try to clean it
-                 const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
-                if(apiErrorMatch && apiErrorMatch[1]) {
-                    message = apiErrorMatch[1];
-                }
-            }
-        }
-        showError('A critical error occurred during analysis', message);
+        showError('Analyze failed.',String(err.message||err));
       }finally{
         setRunning(false);
       }
@@ -1219,4 +1087,3 @@
 
 </section>
 @endsection
-
