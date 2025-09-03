@@ -95,7 +95,7 @@ class AnalyzerController extends Controller
     }
 
     /**
-     * A single, robust handler for all OpenAI requests with improved error handling.
+     * ✅ UPDATED: A single, robust handler for all OpenAI requests with improved response validation.
      */
     private function handleAiRequest(Request $request, string $toolName, string $promptTemplate, array $expectedKeys): JsonResponse
     {
@@ -114,7 +114,7 @@ class AnalyzerController extends Controller
             $prompt = str_replace('{{URL}}', $url, $promptTemplate);
 
             $response = Http::withToken($apiKey)->timeout(90)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
+                'model' => env('OPENAI_MODEL', 'gpt-4o-mini'), // Switched to a more cost-effective model for reliability
                 'messages' => [['role' => 'system', 'content' => 'You are a world-class SEO expert. Respond only with the requested JSON object.'], ['role' => 'user', 'content' => $prompt]],
                 'response_format' => ['type' => 'json_object']
             ]);
@@ -136,8 +136,12 @@ class AnalyzerController extends Controller
                 return response()->json(['message' => "The AI service returned invalid JSON for the {$toolName} analysis."], 500);
             }
 
+            // ✅ THE FIX: Stricter validation of the AI's response structure.
             foreach ($expectedKeys as $key) {
-                if (!isset($result[$key])) $result[$key] = []; // Ensure root keys exist
+                if (!isset($result[$key])) {
+                    Log::error("Missing expected key '{$key}' from AI for {$toolName}", ['result' => $result]);
+                    return response()->json(['message' => "The AI response was missing the expected '{$key}' data structure."], 500);
+                }
             }
 
             AnalysisCache::create(['url' => $url, 'type' => $toolName, 'results' => $result]);
@@ -152,23 +156,23 @@ class AnalyzerController extends Controller
 
     // All AI endpoints use the central handler
     public function analyzeContentOptimization(Request $request) {
-        $prompt = "Analyze content at '{{URL}}' for SEO. Return JSON with 'content_optimization' containing: 'nlp_score' (0-100), 'topic_coverage' {'percentage', 'total', 'covered'}, 'content_gaps' {'missing_topics':[{'term', 'severity'}]}, 'schema_suggestions' (array of strings), and 'readability_intent' {'intent', 'grade_level'}.";
+        $prompt = "Analyze content at '{{URL}}' for SEO. Return JSON with a root key 'content_optimization' containing: 'nlp_score' (integer 0-100), 'topic_coverage' (object with 'percentage', 'total', 'covered' integers), 'content_gaps' (object with 'missing_topics' array of objects), 'schema_suggestions' (array of strings), and 'readability_intent' (object with 'intent' and 'grade_level' strings).";
         return $this->handleAiRequest($request, 'content_optimization', $prompt, ['content_optimization']);
     }
 
     public function analyzeTechnicalSeo(Request $request) {
-        $prompt = "Analyze technical SEO of {{URL}}. Return JSON with: 'score' (0-100), 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map' (HTML ul string), and 'suggestions':[{'text','type'}].";
-        return $this->handleAiRequest($request, 'technical_seo', $prompt, ['internal_linking', 'alt_text_suggestions', 'suggestions']);
+        $prompt = "Analyze technical SEO of {{URL}}. Return JSON with: 'score' (integer 0-100), 'internal_linking' (array of objects), 'url_structure' (object with 'clarity_score' and 'suggestion'), 'meta_optimization' (object with 'title' and 'description'), 'alt_text_suggestions' (array of objects), 'site_structure_map' (string), and 'suggestions' (array of objects).";
+        return $this->handleAiRequest($request, 'technical_seo', $prompt, ['score', 'internal_linking']);
     }
 
     public function analyzeKeywords(Request $request) {
-        $prompt = "Perform a keyword intelligence analysis for {{URL}}. Return JSON with: 'semantic_research' (5-7 variations), 'intent_classification' ({'keyword','intent'}), 'related_terms' (5-7 terms), 'competitor_gaps' (3-5 opportunities), and 'long_tail_suggestions' (3-5 recommendations).";
-        return $this->handleAiRequest($request, 'keyword_intelligence', $prompt, ['semantic_research', 'intent_classification', 'related_terms', 'competitor_gaps', 'long_tail_suggestions']);
+        $prompt = "Perform a keyword intelligence analysis for {{URL}}. Return JSON with: 'semantic_research' (array), 'intent_classification' (array), 'related_terms' (array), 'competitor_gaps' (array), and 'long_tail_suggestions' (array).";
+        return $this->handleAiRequest($request, 'keyword_intelligence', $prompt, ['semantic_research', 'intent_classification']);
     }
 
     public function analyzeContentEngine(Request $request) {
-        $prompt = "As a Content Analysis Engine, analyze {{URL}}. Return JSON with 'score' (0-100), 'topic_clusters', 'entities':[{'term', 'type'}], 'semantic_keywords', 'relevance_score' (0-100), and 'context_intent'.";
-        return $this->handleAiRequest($request, 'content_engine', $prompt, ['topic_clusters', 'entities', 'semantic_keywords']);
+        $prompt = "As a Content Analysis Engine, analyze {{URL}}. Return JSON with 'score' (integer 0-100), 'topic_clusters' (array), 'entities' (array), 'semantic_keywords' (array), 'relevance_score' (integer 0-100), and 'context_intent' (string).";
+        return $this->handleAiRequest($request, 'content_engine', $prompt, ['score', 'topic_clusters']);
     }
 
     public function psiProxy(Request $request): JsonResponse
