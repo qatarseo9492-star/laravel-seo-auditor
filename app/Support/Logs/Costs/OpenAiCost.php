@@ -4,45 +4,27 @@ namespace App\Support\Costs;
 
 class OpenAiCost
 {
-    /**
-     * Estimate USD cost given model + token counts.
-     *
-     * @param string $model           e.g. "gpt-4o-mini"
-     * @param int|null $promptTokens  number of input tokens
-     * @param int|null $completionTokens number of output tokens
-     * @return float|null
-     */
-    public static function estimate(string $model, ?int $promptTokens, ?int $completionTokens): ?float
+    // Pricing per 1 Million tokens (as of late 2024/early 2025 estimates)
+    // Input = prompt tokens, Output = completion tokens
+    protected const MODEL_PRICING = [
+        'gpt-4o' => ['input' => 5.00, 'output' => 15.00],
+        'gpt-4o-mini' => ['input' => 0.15, 'output' => 0.60],
+        'gpt-4-turbo' => ['input' => 10.00, 'output' => 30.00],
+        'gpt-3.5-turbo' => ['input' => 0.50, 'output' => 1.50],
+    ];
+
+    public function calculate(string $model, int $promptTokens, int $completionTokens): float
     {
-        if ($promptTokens === null && $completionTokens === null) {
-            return null;
+        if (!isset(self::MODEL_PRICING[$model])) {
+            // Fallback to a common model if the provided one is not in the list
+            $model = 'gpt-4o-mini';
         }
 
-        $m = strtolower(trim($model));
+        $pricing = self::MODEL_PRICING[$model];
 
-        // Pricing (USD per 1K tokens) as of Sept 2025
-        $price = [
-            'gpt-4o'        => ['in' => 0.0025,  'out' => 0.0100],
-            'gpt-4o-mini'   => ['in' => 0.00015, 'out' => 0.00060],
-            'gpt-4-turbo'   => ['in' => 0.0100,  'out' => 0.0300],
-            'gpt-3.5-turbo' => ['in' => 0.0005,  'out' => 0.0015],
-            // fallback
-            'default'       => ['in' => 0.0010,  'out' => 0.0030],
-        ];
+        $inputCost = ($promptTokens / 1_000_000) * $pricing['input'];
+        $outputCost = ($completionTokens / 1_000_000) * $pricing['output'];
 
-        $tier = $price['default'];
-        foreach ($price as $key => $val) {
-            if ($key !== 'default' && str_contains($m, $key)) {
-                $tier = $val;
-                break;
-            }
-        }
-
-        $pt = max(0, (int)($promptTokens ?? 0));
-        $ct = max(0, (int)($completionTokens ?? 0));
-
-        $cost = ($pt / 1000.0) * $tier['in'] + ($ct / 1000.0) * $tier['out'];
-
-        return round($cost, 6);
+        return $inputCost + $outputCost;
     }
 }
