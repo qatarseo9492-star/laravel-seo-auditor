@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate-Support-Facades-Route;
-use App-Http-Controllers-AuthController;
-use App-Http-Controllers-ProfileController;
-use App-Http-Controllers-AnalyzerController;
-use App-Http-Controllers-Admin-DashboardController;
-use App-Http-Controllers-Admin-UserAdminController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AnalyzerController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserAdminController;
 
 /*
 |--------------------------------------------------------------------------
