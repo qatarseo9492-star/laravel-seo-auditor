@@ -1209,6 +1209,6 @@ ${detail}`:''); };
       </div>
     </div>
   </dialog>
-
+<script src="{{ asset('js/analyze_button_fix.js') }}"></script>
 </section>
 @endsection
