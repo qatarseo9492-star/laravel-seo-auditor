@@ -10,31 +10,27 @@ use Illuminate\Support\Str;
 use DOMDocument;
 use DOMXPath;
 use App\Models\User;
-use App\Models\Search;
 use App\Models\UserLimit;
 use App\Models\AnalysisCache;
-use App\Models\AnalyzeLog;
-use App\Models\OpenAiUsage;
 use App\Support\Logs\UsageLogger;
-use App\Support\Costs\OpenAiCost;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 
 class AnalyzerController extends Controller
 {
     /**
-     * Checks user limits and logs the search action for a specific tool.
+     * Centralized function to check limits and log any analysis tool usage.
      */
-    private function checkAndLogSearch(string $url, string $tool, Request $request): bool|JsonResponse
+    private function checkAndLog(Request $request, string $tool): bool|JsonResponse
     {
-        $user = Auth::user();
-        if (!$user) return true;
+        if (!Auth::check()) return true;
 
+        $user = Auth::user();
         $limit = UserLimit::firstOrCreate(['user_id' => $user->id]);
-        
+
         if (!$limit->updated_at->isToday()) $limit->searches_today = 0;
         if (!$limit->updated_at->isSameMonth(now())) $limit->searches_this_month = 0;
-        
+
         if ($limit->searches_today >= $limit->daily_limit || $limit->searches_this_month >= $limit->monthly_limit) {
             return response()->json(['error' => 'You have reached your usage quota.'], 429);
         }
@@ -49,52 +45,18 @@ class AnalyzerController extends Controller
     }
 
     /**
-     * Central AI analysis logic with caching.
-     */
-    private function performAiAnalysis(string $urlToAnalyze, string $prompt, string $cacheType, array $expectedKeys): JsonResponse
-    {
-        // ... This function remains unchanged ...
-        $cached = AnalysisCache::where('url', $urlToAnalyze)->where('type', $cacheType)->where('created_at', '>=', now()->subDay())->latest()->first();
-        if ($cached) return response()->json($cached->results);
-
-        $apiKey = env('OPENAI_API_KEY');
-        if (!$apiKey) return response()->json(['message' => 'OpenAI API key is not configured.'], 500);
-
-        try {
-            $response = Http::withToken($apiKey)->timeout(90)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
-                'messages' => [['role' => 'system', 'content' => 'You are a world-class SEO expert. Respond only with the requested JSON object.'], ['role' => 'user', 'content' => $prompt]],
-                'response_format' => ['type' => 'json_object']
-            ]);
-
-            if ($response->failed()) return response()->json(['message' => "Failed to get a response from the AI service for {$cacheType} analysis."], 502);
-
-            $result = json_decode($response->json('choices.0.message.content'), true);
-            foreach ($expectedKeys as $key) {
-                if (!isset($result[$key]) || !is_array($result[$key])) $result[$key] = [];
-            }
-
-            AnalysisCache::create(['url' => $urlToAnalyze, 'type' => $cacheType, 'results' => $result]);
-            return response()->json($result);
-        } catch (\Exception $e) {
-            Log::error("AI Analysis Exception for type: {$cacheType}", ['message' => $e->getMessage()]);
-            return response()->json(['message' => "An unexpected error occurred during the {$cacheType} analysis.", 'detail' => $e->getMessage()], 500);
-        }
-    }
-
-    /**
      * Handles only the local HTML parsing.
      */
     public function analyze(Request $request): JsonResponse
     {
-        // This function is now much simpler and only does local parsing.
-        // The limit check is now handled by the specific AI analysis endpoints.
         try {
             $validated = $request->validate(['url' => ['required', 'url']]);
             $urlToAnalyze = $validated['url'];
-            
-            $contentStructure = []; $pageSignals = []; $quickStats = [];
 
+            // Note: The main 'analyze' does not count against AI quota, just logs as a general search.
+            if (($limitCheck = $this->checkAndLog($request, 'local_parse')) !== true) return $limitCheck;
+
+            $contentStructure = []; $pageSignals = []; $quickStats = [];
             $response = Http::timeout(15)->get($urlToAnalyze);
             if ($response->failed()) return response()->json(['ok' => false, 'error' => "Failed to fetch URL. Status: {$response->status()}"], 400);
 
@@ -135,43 +97,106 @@ class AnalyzerController extends Controller
         }
     }
 
-    // ✅ UPDATED: All AI Endpoints now perform the limit check.
+    /**
+     * ✅ NEW: A single, robust handler for all OpenAI requests.
+     */
+    private function handleAiRequest(Request $request, string $toolName, string $promptTemplate, array $expectedKeys): JsonResponse
+    {
+        try {
+            $validated = $request->validate(['url' => 'required|url']);
+            $url = $validated['url'];
+
+            if (($limitCheck = $this->checkAndLog($request, $toolName)) !== true) return $limitCheck;
+
+            $cached = AnalysisCache::where('url', $url)->where('type', $toolName)->where('created_at', '>=', now()->subDay())->latest()->first();
+            if ($cached) return response()->json($cached->results);
+
+            $apiKey = env('OPENAI_API_KEY');
+            if (!$apiKey) return response()->json(['message' => 'AI API key not configured.'], 500);
+
+            $prompt = str_replace('{{URL}}', $url, $promptTemplate);
+
+            $response = Http::withToken($apiKey)->timeout(90)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
+                'messages' => [['role' => 'system', 'content' => 'You are a world-class SEO expert. Respond only with the requested JSON object.'], ['role' => 'user', 'content' => $prompt]],
+                'response_format' => ['type' => 'json_object']
+            ]);
+
+            if ($response->failed()) {
+                return response()->json(['message' => "AI service returned an error for {$toolName} analysis."], 502);
+            }
+
+            $result = json_decode($response->json('choices.0.message.content'), true);
+
+            foreach ($expectedKeys as $key) {
+                if (!isset($result[$key]) || !is_array($result[$key])) $result[$key] = [];
+            }
+
+            AnalysisCache::create(['url' => $url, 'type' => $toolName, 'results' => $result]);
+            
+            return response()->json($result);
+
+        } catch (\Exception $e) {
+            Log::error("AI Analysis Exception for {$toolName}", ['message' => $e->getMessage()]);
+            return response()->json(['message' => "An unexpected server error occurred during the {$toolName} analysis.", 'detail' => $e->getMessage()], 500);
+        }
+    }
+
+    // All AI endpoints now use the central handler
     public function analyzeContentOptimization(Request $request) {
-        $validated = $request->validate(['url' => 'required|url']);
-        $url = $validated['url'];
-        if (($limitCheck = $this->checkAndLogSearch($url, 'content_optimization', $request)) !== true) return $limitCheck;
-        $prompt = "Analyze content at '{$url}' for SEO. Return JSON with 'content_optimization' containing: 'nlp_score' (0-100), 'topic_coverage' {'percentage', 'total', 'covered'}, 'content_gaps' {'missing_topics':[{'term', 'severity'}]}, 'schema_suggestions' (array of strings), and 'readability_intent' {'intent', 'grade_level'}.";
-        return $this->performAiAnalysis($url, $prompt, 'content_optimization', ['content_optimization']);
+        $prompt = "Analyze content at '{{URL}}' for SEO. Return JSON with 'content_optimization' containing: 'nlp_score' (0-100), 'topic_coverage' {'percentage', 'total', 'covered'}, 'content_gaps' {'missing_topics':[{'term', 'severity'}]}, 'schema_suggestions' (array of strings), and 'readability_intent' {'intent', 'grade_level'}.";
+        return $this->handleAiRequest($request, 'content_optimization', $prompt, ['content_optimization']);
     }
 
     public function analyzeTechnicalSeo(Request $request) {
-        $validated = $request->validate(['url' => 'required|url']);
-        $url = $validated['url'];
-        if (($limitCheck = $this->checkAndLogSearch($url, 'technical_seo', $request)) !== true) return $limitCheck;
-        $prompt = "Analyze technical SEO of {$url}. Return JSON with: 'score' (0-100), 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map' (HTML ul string), and 'suggestions':[{'text','type'}].";
-        return $this->performAiAnalysis($url, $prompt, 'technical_seo', ['internal_linking', 'alt_text_suggestions', 'suggestions']);
+        $prompt = "Analyze technical SEO of {{URL}}. Return JSON with: 'score' (0-100), 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map' (HTML ul string), and 'suggestions':[{'text','type'}].";
+        return $this->handleAiRequest($request, 'technical_seo', $prompt, ['internal_linking', 'alt_text_suggestions', 'suggestions']);
     }
 
     public function analyzeKeywords(Request $request) {
-        $validated = $request->validate(['url' => 'required|url']);
-        $url = $validated['url'];
-        if (($limitCheck = $this->checkAndLogSearch($url, 'keyword_intelligence', $request)) !== true) return $limitCheck;
-        $prompt = "Perform a keyword intelligence analysis for {$url}. Return JSON with: 'semantic_research' (5-7 variations), 'intent_classification' ({'keyword','intent'}), 'related_terms' (5-7 terms), 'competitor_gaps' (3-5 opportunities), and 'long_tail_suggestions' (3-5 recommendations).";
-        return $this->performAiAnalysis($url, $prompt, 'keyword_intelligence', ['semantic_research', 'intent_classification', 'related_terms', 'competitor_gaps', 'long_tail_suggestions']);
+        $prompt = "Perform a keyword intelligence analysis for {{URL}}. Return JSON with: 'semantic_research' (5-7 variations), 'intent_classification' ({'keyword','intent'}), 'related_terms' (5-7 terms), 'competitor_gaps' (3-5 opportunities), and 'long_tail_suggestions' (3-5 recommendations).";
+        return $this->handleAiRequest($request, 'keyword_intelligence', $prompt, ['semantic_research', 'intent_classification', 'related_terms', 'competitor_gaps', 'long_tail_suggestions']);
     }
 
     public function analyzeContentEngine(Request $request) {
-        $validated = $request->validate(['url' => 'required|url']);
-        $url = $validated['url'];
-        if (($limitCheck = $this->checkAndLogSearch($url, 'content_engine', $request)) !== true) return $limitCheck;
-        $prompt = "As a Content Analysis Engine, analyze {$url}. Return JSON with 'score' (0-100), 'topic_clusters', 'entities':[{'term', 'type'}], 'semantic_keywords', 'relevance_score' (0-100), and 'context_intent'.";
-        return $this->performAiAnalysis($url, $prompt, 'content_engine', ['topic_clusters', 'entities', 'semantic_keywords']);
+        $prompt = "As a Content Analysis Engine, analyze {{URL}}. Return JSON with 'score' (0-100), 'topic_clusters', 'entities':[{'term', 'type'}], 'semantic_keywords', 'relevance_score' (0-100), and 'context_intent'.";
+        return $this->handleAiRequest($request, 'content_engine', $prompt, ['topic_clusters', 'entities', 'semantic_keywords']);
     }
 
-    public function psiProxy(Request $request) { /* ... unchanged ... */ }
-    public function analyzeWeb(Request $request) { return $this->analyze($request); }
-    public function semanticAnalyze(Request $request) { return $this->analyze($request); }
-    public function psi(Request $request) { return response()->json(['ok' => true, 'note' => 'PSI proxy not implemented here.']); }
-    public function aiCheck(Request $request) { return response()->json(['ok' => true, 'note' => 'aiCheck stub']); }
-    public function topicClusterAnalyze(Request $request) { return response()->json(['ok' => true, 'note' => 'topicClusterAnalyze stub']); }
+    /**
+     * ✅ UPDATED: PSI Proxy now also uses the central checkAndLog function.
+     */
+    public function psiProxy(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate(['url' => 'required|url']);
+            $url = $validated['url'];
+
+            if (($limitCheck = $this->checkAndLog($request, 'psi')) !== true) return $limitCheck;
+
+            $cfg = config('services.pagespeed', []);
+            $key = $cfg['key'] ?? env('PAGESPEED_API_KEY');
+            if (!$key) return response()->json(['ok' => false, 'error' => 'PageSpeed API key is not configured.'], 500);
+
+            $fetch = function (string $strategy) use ($url, $key) {
+                $cacheKey = "psi:{$strategy}:" . md5($url);
+                return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($url, $key, $strategy) {
+                    $res = Http::timeout(40)->get('https://www.googleapis.com/pagespeedonline/v5/runPagespeed', ['url' => $url, 'strategy' => $strategy, 'category' => 'performance', 'key' => $key]);
+                    if (!$res->ok()) return ['ok' => false, 'score' => 0];
+                    $j = $res->json() ?: []; $lr = $j['lighthouseResult'] ?? []; $audits = $lr['audits'] ?? []; $perfRaw = $lr['categories']['performance']['score'] ?? null;
+                    return [
+                        'ok' => true, 'score' => is_null($perfRaw) ? 0 : (int) round($perfRaw * 100),
+                        'lcp_s' => round(($audits['largest-contentful-paint']['numericValue'] ?? 0) / 1000, 2),
+                        'cls' => round($audits['cumulative-layout-shift']['numericValue'] ?? 0, 3),
+                        'inp_ms' => (int) round($audits['interaction-to-next-paint']['numericValue'] ?? 0),
+                    ];
+                });
+            };
+
+            return response()->json(['ok' => true, 'url' => $url, 'mobile' => $fetch('mobile'), 'desktop' => $fetch('desktop')]);
+        } catch (\Exception $e) {
+            Log::error('PSI Proxy Failed', ['message' => $e->getMessage()]);
+            return response()->json(['ok' => false, 'error' => 'An unexpected error occurred during the PageSpeed analysis.', 'detail' => $e->getMessage()], 500);
+        }
+    }
 }
