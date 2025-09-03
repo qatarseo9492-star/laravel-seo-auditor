@@ -9,15 +9,15 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use DOMDocument;
 use DOMXPath;
-use App\Models\Search;
-use App\Models\UserLimit;
-use App\Models\AnalysisCache;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Search;
+use App\Models\UserLimit; // ✅ THE FIX IS HERE
+use App\Models\AnalysisCache;
 use App\Models\AnalyzeLog;
 use App\Models\OpenAiUsage;
-use App\Support\Costs\OpenAiCost;
 use App\Support\Logs\UsageLogger;
+use App\Support\Costs\OpenAiCost;
+use Illuminate\Support\Facades\Auth;
 
 class AnalyzerController extends Controller
 {
