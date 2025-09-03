@@ -26,7 +26,7 @@
   </script>
 
   <!-- Alpine for the profile dropdown -->
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
   <style>
     /* Colorful background (rich gradients) */
@@ -64,9 +64,9 @@
 
         <!-- Use smart alias routes that auto-redirect guests to login -->
         <nav class="hidden md:flex items-center gap-6 text-sm">
-          <a href="{{ route('semantic') }}" class="hover:text-white">Semantic Analyzer</a>
-          <a href="{{ route('aiChecker') }}" class="hover:text-white">AI Content Checker</a>
-          <a href="{{ route('topicCluster') }}" class="hover:text-white">Topic Cluster</a>
+          <a href="{{ route('semantic.analyzer') }}" class="hover:text-white">Semantic Analyzer</a>
+          <a href="{{ route('ai.checker') }}" class="hover:text-white">AI Content Checker</a>
+          <a href="{{ route('topic.cluster') }}" class="hover:text-white">Topic Cluster</a>
           <a href="#about" class="hover:text-white">About</a>
           <a href="#features" class="hover:text-white">Features</a>
         </nav>
@@ -132,7 +132,7 @@
               <a href="{{ route('login') }}" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Sign in to use tools</a>
             @else
               <a href="{{ route('dashboard') }}" class="px-4 py-2 rounded-lg bg-white text-slate-900 font-semibold shadow-soft hover:opacity-90">Open Dashboard</a>
-              <a href="{{ route('semantic') }}" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Semantic Analyzer</a>
+              <a href="{{ route('semantic.analyzer') }}" class="px-4 py-2 rounded-lg glass hover:bg-white/5">Semantic Analyzer</a>
             @endguest
           </div>
         </div>
@@ -266,3 +266,4 @@
   </script>
 </body>
 </html>
+
