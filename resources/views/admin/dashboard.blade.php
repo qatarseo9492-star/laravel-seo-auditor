@@ -4,7 +4,6 @@
 @push('head')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-dt@2.1.7/css/dataTables.dataTables.min.css">
 <style>
-  /* ==================== Neon SEO Admin (Focused) ==================== */
   :root{
     --bg:#070d1b; --bg-2:#0c1327; --bg-3:#0f1730; --fg:#e6e9f0; --muted:#9aa6b2; --bdr:rgba(255,255,255,.10);
     --blue-1:#00c6ff; --blue-2:#0072ff; --green-1:#00ff8a; --green-2:#00ffc6; --amber-1:#ffd700; --amber-2:#ffa500; --mag-1:#ff1493; --mag-2:#8a2be2;
@@ -12,8 +11,8 @@
   }
   body{ background: radial-gradient(1200px 600px at 70% -200px, rgba(0,114,255,.18), transparent 60%), var(--bg); }
   :is(a,button,input,select,textarea):focus-visible{ outline:2px solid var(--blue-1); outline-offset:2px; }
+  .wrap{ max-width: 1320px; margin:18px auto 80px; padding:0 14px; color:var(--fg); }
 
-  .admin-wrap{ max-width:1280px; margin:18px auto 80px; padding:0 14px; color:var(--fg); }
   .hdr{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
   .title{ font-weight:900; letter-spacing:.3px; font-size:clamp(20px,2.2vw,28px); display:flex; gap:10px; align-items:center;}
   .badge{ background:linear-gradient(135deg,var(--blue-1),var(--mag-2)); color:#071228; padding:4px 10px; border-radius:999px; font-size:11px; box-shadow:0 8px 18px rgba(0,114,255,.30); }
@@ -22,7 +21,8 @@
   /* KPI */
   .kpis{ display:grid; grid-template-columns: repeat(4, minmax(220px,1fr)); gap:14px; margin: 14px 0 18px; }
   .kpi{ position:relative; background: var(--bg-3); border:1px solid var(--bdr); border-radius: 18px; padding:16px; box-shadow: var(--shadow); overflow:hidden; }
-  .kpi:before{ content:""; position:absolute; inset:-1px; border-radius: 18px; padding:1px; background: linear-gradient(135deg, var(--blue-1), var(--mag-2)); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .kpi:before{ content:""; position:absolute; inset:-1px; border-radius: 18px; padding:1px; background: linear-gradient(135deg, var(--blue-1), var(--mag-2));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
   .kpi[data-accent="green"]:before{ background:linear-gradient(135deg,var(--green-1),var(--green-2)); }
   .kpi[data-accent="amber"]:before{ background:linear-gradient(135deg,var(--amber-1),var(--amber-2)); }
   .kpi[data-accent="purple"]:before{ background:linear-gradient(135deg,var(--mag-1),var(--mag-2)); }
@@ -46,50 +46,48 @@
   .btn{ background: linear-gradient(135deg,var(--blue-1),var(--blue-2)); color:#061024; border:0; border-radius: 12px; padding:8px 12px; font-weight:800; cursor:pointer; box-shadow: 0 10px 20px rgba(0,114,255,.32), inset 0 0 0 1px rgba(255,255,255,.12); }
   .btn.ghost{ color: var(--fg); background: transparent; border:1px solid var(--bdr); box-shadow:none; }
   .btn.danger{ background: linear-gradient(135deg,#ff6b6b,#ff3355); color:#1a0910; }
+  .btn.slim{ padding:6px 10px; border-radius:10px; font-weight:700; }
 
-  @media (max-width: 1100px){ .kpis{ grid-template-columns: repeat(2,1fr);} .grid{ grid-template-columns: 1fr; } }
+  /* Drawer (user history) */
+  .drawer{ position:fixed; top:0; right:-560px; width:560px; height:100vh; background:var(--bg-2); border-left:1px solid var(--bdr); box-shadow: -20px 0 40px rgba(0,0,0,.4);
+    transition:right .26s ease; z-index: 50; display:flex; flex-direction:column; }
+  .drawer.open{ right:0; }
+  .drawer-h{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--bdr); }
+  .drawer-b{ padding:12px 14px; overflow:auto; flex:1; }
+
+  @media (max-width: 1100px){ .kpis{ grid-template-columns: repeat(2,1fr);} .grid{ grid-template-columns: 1fr; } .drawer{ width:100%; } }
 </style>
 @endpush
 
 @section('content')
-<div class="admin-wrap">
+<div class="wrap">
   <div class="hdr">
     <div class="title">Admin Dashboard <span class="badge">SEO Essentials</span></div>
-    <div class="pill">Focused for Semantic Analyzer</div>
+    <div class="pill">Only admins see global history & usage</div>
   </div>
 
-  {{-- ===== KPI CARDS ===== --}}
+  {{-- KPIs --}}
   <section class="kpis">
-    <div class="kpi" data-accent="blue">
-      <div class="kpi-title">Searches Today</div>
-      <div class="kpi-val">{{ $stats['searchesToday'] ?? ($searchesToday ?? 0) }}</div>
+    <div class="kpi" data-accent="blue"><div class="kpi-title">Searches Today</div><div class="kpi-val">{{ $stats['searchesToday'] ?? ($searchesToday ?? 0) }}</div></div>
+    <div class="kpi" data-accent="green"><div class="kpi-title">Total Users</div><div class="kpi-val">{{ $stats['totalUsers'] ?? ($totalUsers ?? 0) }}</div></div>
+    <div class="kpi" data-accent="amber"><div class="kpi-title">OpenAI Cost Today</div><div class="kpi-val">${{ number_format($stats['costToday'] ?? ($openAiCostToday ?? 0), 4) }}</div></div>
+    <div class="kpi" data-accent="purple"><div class="kpi-title">Active Users (live)</div><div class="kpi-val" id="activeLive">{{ $stats['active5m'] ?? ($activeUsers ?? 0) }}</div></div>
+  </section>
+
+  {{-- Usage & System --}}
+  <section class="grid">
+    <div class="panel">
+      <div class="panel-h"><h3>OpenAI Usage — Cost (30 days)</h3><span class="pill">USD</span></div>
+      <div class="panel-b"><canvas id="openaiChart" height="120"></canvas></div>
     </div>
-    <div class="kpi" data-accent="green">
-      <div class="kpi-title">Total Users</div>
-      <div class="kpi-val">{{ $stats['totalUsers'] ?? ($totalUsers ?? 0) }}</div>
-    </div>
-    <div class="kpi" data-accent="amber">
-      <div class="kpi-title">OpenAI Cost Today</div>
-      <div class="kpi-val">${{ number_format($stats['costToday'] ?? ($openAiCostToday ?? 0), 4) }}</div>
-    </div>
-    <div class="kpi" data-accent="purple">
-      <div class="kpi-title">Active Users (5 min)</div>
-      <div class="kpi-val">{{ $stats['active5m'] ?? ($activeUsers ?? 0) }}</div>
+    <div class="panel">
+      <div class="panel-h"><h3>PSI Usage — Requests (30 days)</h3><span class="pill">Count / avg ms</span></div>
+      <div class="panel-b"><canvas id="psiChart" height="120"></canvas></div>
     </div>
   </section>
 
-  {{-- ===== CHART + SYSTEM ===== --}}
-  <section class="grid">
-    <div class="panel">
-      <div class="panel-h">
-        <h3>Usage & Cost (Last 30 days)</h3>
-        <span class="pill">Chart.js</span>
-      </div>
-      <div class="panel-b">
-        <canvas id="usageChart" height="120"></canvas>
-      </div>
-    </div>
-
+  {{-- System & Presence --}}
+  <section class="grid" style="margin-top:14px">
     <div class="panel">
       <div class="panel-h"><h3>System Status</h3></div>
       <div class="panel-b">
@@ -106,12 +104,38 @@
         </ul>
       </div>
     </div>
+
+    <div class="panel">
+      <div class="panel-h"><h3>Active Users (Last Seen / Login / Logout)</h3><button class="btn slim ghost" id="refreshPresence">Refresh</button></div>
+      <div class="panel-b" style="overflow:auto">
+        <table class="table" id="presenceTbl">
+          <thead><tr><th>User</th><th>Last Seen</th><th>Last Login</th><th>Last Logout</th><th>Status</th></tr></thead>
+          <tbody>
+            @foreach(($presence['online'] ?? []) as $p)
+              <tr>
+                <td>{{ $p['email'] ?? '—' }}</td>
+                <td>{{ $p['last_seen_at'] ?? '—' }}</td>
+                <td>{{ $p['last_login_at'] ?? '—' }}</td>
+                <td>{{ $p['last_logout_at'] ?? '—' }}</td>
+                <td><span class="pill">{{ $p['status'] ?? '—' }}</span></td>
+              </tr>
+            @endforeach
+            @if(empty($presence['online']))<tr><td colspan="5" style="color:var(--muted)">No recent activity.</td></tr>@endif
+          </tbody>
+        </table>
+      </div>
+    </div>
   </section>
 
-  {{-- ===== USERS ===== --}}
+  {{-- Users --}}
   <section style="margin-top:16px">
     <div class="panel">
-      <div class="panel-h"><h3>User Management</h3></div>
+      <div class="panel-h">
+        <h3>Users</h3>
+        <div>
+          <button class="btn slim ghost" id="openPwdModal">Change Password</button>
+        </div>
+      </div>
       <div class="panel-b" style="overflow:auto">
         <table class="table">
           <thead>
@@ -128,6 +152,7 @@
               <td>
                 <div style="font-weight:700">{{ $u->name }}</div>
                 <div style="color:var(--muted)">{{ $u->email }}</div>
+                <button class="btn slim ghost" data-user-id="{{ $u->id }}" data-user-email="{{ $u->email }}" onclick="openUserDrawer(this)">View History</button>
               </td>
               <td>
                 <span class="pill">{{ ($u->banned ?? false) ? 'Banned' : 'Active' }}</span>
@@ -139,10 +164,8 @@
                       method="POST">
                   @csrf
                   @method('PATCH')
-                  <input class="in" type="number" name="daily"
-                         value="{{ optional($u->limit)->daily ?? 50 }}" min="0">
-                  <input class="in" type="number" name="monthly"
-                         value="{{ optional($u->limit)->monthly ?? 300 }}" min="0">
+                  <input class="in" type="number" name="daily" value="{{ optional($u->limit)->daily ?? 50 }}" min="0">
+                  <input class="in" type="number" name="monthly" value="{{ optional($u->limit)->monthly ?? 300 }}" min="0">
                   <button class="btn" type="submit">Save</button>
                 </form>
               </td>
@@ -153,9 +176,7 @@
                       onsubmit="return confirm('Ban/unban this user?')">
                   @csrf
                   @method('PATCH')
-                  <button class="btn danger" type="submit">
-                    {{ ($u->banned ?? false) ? 'Unban' : 'Ban' }}
-                  </button>
+                  <button class="btn danger" type="submit">{{ ($u->banned ?? false) ? 'Unban' : 'Ban' }}</button>
                 </form>
               </td>
             </tr>
@@ -165,7 +186,6 @@
           </tbody>
         </table>
 
-        {{-- Pagination (your controller uses ->paginate(10)) --}}
         @if(method_exists(($users ?? null),'links'))
           <div style="margin-top:10px">{{ $users->links() }}</div>
         @endif
@@ -173,25 +193,41 @@
     </div>
   </section>
 
-  {{-- ===== HISTORY ===== --}}
+  {{-- Global History --}}
   <section style="margin-top:16px">
     <div class="panel">
       <div class="panel-h">
-        <h3>Search History</h3>
-        <button class="btn ghost" onclick="window.exportCSV?.()">Export CSV</button>
+        <h3>Global Search History</h3>
+        <div>
+          <input id="histFilter" placeholder="Filter (email/domain/url)" class="in" style="width:260px">
+          <button class="btn slim ghost" onclick="window.exportCSV?.()">Export CSV</button>
+        </div>
       </div>
       <div class="panel-b" style="overflow:auto">
         <table id="historyTable" class="display" style="width:100%">
           <thead>
-            <tr><th>When</th><th>User</th><th>Query / URL</th><th>Tool</th><th>Tokens</th><th>Cost</th></tr>
+            <tr><th>When</th><th>User</th><th>Domain</th><th>URL / Query</th><th>Tool</th><th>Tokens</th><th>Cost</th></tr>
           </thead>
           <tbody>
+          @php
+            function _domain($u) {
+              if(!$u) return '';
+              $p = parse_url($u);
+              return isset($p['host']) ? $p['host'] : '';
+            }
+          @endphp
           @forelse(($history ?? []) as $h)
+            @php
+              $disp = $h->display ?? ($h->query ?? ($h->keyword ?? ($h->search_term ?? ($h->url ?? ''))));
+              $url  = $h->url ?? (filter_var($disp, FILTER_VALIDATE_URL) ? $disp : null);
+              $dom  = _domain($url);
+            @endphp
             <tr>
               <td>{{ optional($h->created_at)->format('Y-m-d H:i') }}</td>
-              <td>{{ optional($h->user)->email ?? '—' }}</td>
+              <td data-email="{{ optional($h->user)->email ?? '' }}">{{ optional($h->user)->email ?? '—' }}</td>
+              <td>{{ $dom }}</td>
               <td style="max-width:460px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
-                {{ $h->display ?? ($h->query ?? ($h->keyword ?? ($h->search_term ?? ($h->url ?? '')))) }}
+                {{ $disp }}
               </td>
               <td>{{ $h->tool ?? 'Analyzer' }}</td>
               <td>{{ $h->tokens ?? '—' }}</td>
@@ -202,6 +238,7 @@
               <tr>
                 <td>{{ now()->subMinutes($i*9)->format('Y-m-d H:i') }}</td>
                 <td>demo@site.com</td>
+                <td>example.com</td>
                 <td>https://example.com/page-{{ $i }}</td>
                 <td>Analyzer</td>
                 <td>{{ rand(400,1500) }}</td>
@@ -215,68 +252,171 @@
     </div>
   </section>
 
-  {{-- ===== TOP QUERIES/PAGES ===== --}}
-  <section style="margin-top:16px">
-    <div class="panel">
-      <div class="panel-h"><h3>Top Queries / Pages</h3></div>
-      <div class="panel-b">
-        <ul style="margin:0; padding:0; list-style:none; display:grid; grid-template-columns: repeat(2,1fr); gap:8px">
-          @forelse(($topItems ?? []) as $it)
-            <li class="kpi" style="padding:10px" data-accent="blue">
-              <div style="display:flex; justify-content:space-between; align-items:center">
-                <span style="font-weight:700; max-width:76%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ $it['name'] }}</span>
-                <span class="pill">{{ $it['count'] }}</span>
-              </div>
-            </li>
-          @empty
-            @for($i=1;$i<=6;$i++)
-              <li class="kpi" style="padding:10px" data-accent="blue">
-                <div style="display:flex; justify-content:space-between; align-items:center">
-                  <span style="font-weight:700">Placeholder item {{ $i }}</span>
-                  <span class="pill">{{ rand(10,120) }}</span>
-                </div>
-              </li>
-            @endfor
-          @endforelse
-        </ul>
-      </div>
-    </div>
-  </section>
 </div>
+
+{{-- ===== User Drawer (per-user history) ===== --}}
+<aside class="drawer" id="userDrawer" aria-hidden="true">
+  <div class="drawer-h">
+    <strong id="drawerTitle">User History</strong>
+    <button class="btn slim ghost" onclick="closeUserDrawer()">Close</button>
+  </div>
+  <div class="drawer-b">
+    <table class="table" id="userHistTbl">
+      <thead><tr><th>When</th><th>URL / Query</th><th>Tool</th><th>Tokens</th><th>Cost</th></tr></thead>
+      <tbody><tr><td colspan="5" style="color:var(--muted)">Loading…</td></tr></tbody>
+    </table>
+  </div>
+</aside>
+
+{{-- ===== Password Modal ===== --}}
+<dialog id="pwdModal" style="border:none; border-radius:14px; padding:0; width:min(520px, 96vw); background:var(--bg-2); color:var(--fg);">
+  <form method="dialog" style="padding:14px; border-bottom:1px solid var(--bdr)">
+    <strong>Change User Password</strong>
+    <button class="btn slim ghost" value="cancel" style="float:right">Close</button>
+  </form>
+  <form id="pwdForm" method="POST" style="padding:14px" onsubmit="return submitPwdChange(event)">
+    @csrf
+    @method('PATCH')
+    <input type="hidden" name="user_id" id="pwdUserId">
+    <label>Email
+      <input class="in" id="pwdEmail" style="width:100%" disabled>
+    </label>
+    <label style="display:block; margin-top:10px">New Password
+      <input class="in" type="password" name="new_password" id="pwdNew" style="width:100%" minlength="8" required>
+    </label>
+    <div style="display:flex; gap:10px; margin-top:12px">
+      <button class="btn" type="submit">Update Password</button>
+      <button class="btn ghost" type="button" onclick="document.getElementById('pwdModal').close()">Cancel</button>
+    </div>
+  </form>
+</dialog>
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/datatables.net@2.1.7/js/dataTables.min.js"></script>
 <script>
-  // Chart (Usage & Cost) — demo data; replace with real series if you pass them
-  const ctx = document.getElementById('usageChart');
-  if(ctx){
-    new Chart(ctx, {
-      type:'line',
-      data:{
-        labels:[...Array(30).keys()].map(i=>i+1),
-        datasets:[
-          { label:'Searches', data:[...Array(30)].map(()=> Math.floor(50+Math.random()*60)), tension:.35, fill:true },
-          { label:'Cost', data:[...Array(30)].map(()=> (Math.random()*2).toFixed(2)), yAxisID:'y1' }
-        ]
-      },
-      options:{
-        scales:{ y:{ beginAtZero:true }, y1:{ beginAtZero:true, position:'right' } },
-        plugins:{ legend:{ labels:{ color:'#e6e9f0' } } }
-      }
-    });
-  }
+  // ------ Data passed from controller (safe fallbacks) ------
+  const openAiDaily = @json($openAiDaily ?? ['labels'=>[], 'costs'=>[]]);
+  const psiDaily    = @json($psiDaily ?? ['labels'=>[], 'counts'=>[], 'avg_ms'=>[]]);
 
-  // DataTable (Search History)
-  if (window.DataTable){ new DataTable('#historyTable', { pageLength: 8, lengthChange: false, order:[[0,'desc']] }); }
+  // ------ Charts ------
+  (function(){
+    const oc = document.getElementById('openaiChart');
+    if (oc && openAiDaily.labels.length){
+      new Chart(oc, {
+        type:'line',
+        data:{ labels: openAiDaily.labels, datasets:[ { label:'Cost', data: openAiDaily.costs, tension:.35, fill:true } ] },
+        options:{ scales:{ y:{ beginAtZero:true }}, plugins:{ legend:{ labels:{ color:'#e6e9f0' } } } }
+      });
+    }
+    const pc = document.getElementById('psiChart');
+    if (pc && psiDaily.labels.length){
+      const ds = [{ label:'Requests', data: psiDaily.counts, tension:.35, fill:true }];
+      if ((psiDaily.avg_ms||[]).length){ ds.push({ label:'Avg ms', data: psiDaily.avg_ms, yAxisID:'y1' }); }
+      new Chart(pc, {
+        type:'line',
+        data:{ labels: psiDaily.labels, datasets: ds },
+        options:{ scales:{ y:{ beginAtZero:true }, y1:{ beginAtZero:true, position:'right' }}, plugins:{ legend:{ labels:{ color:'#e6e9f0' } } } }
+      });
+    }
+  })();
 
-  // Export CSV utility (client-side)
+  // ------ DataTable (Global History) ------
+  let histDT;
+  (function(){
+    if (!window.DataTable) return;
+    histDT = new DataTable('#historyTable', { pageLength: 12, lengthChange: false, order:[[0,'desc']] });
+    const input = document.getElementById('histFilter');
+    if (input) input.addEventListener('input', ()=> histDT.search(input.value).draw());
+  })();
+
+  // Export CSV
   window.exportCSV = () => {
     const rows = [...document.querySelectorAll('#historyTable tbody tr')].map(tr=> [...tr.children].map(td=> '"'+td.innerText.replace(/"/g,'\\"')+'"').join(','));
-    const csv = ['When,User,Query/URL,Tool,Tokens,Cost', ...rows].join('\n');
+    const csv = ['When,User,Domain,URL/Query,Tool,Tokens,Cost', ...rows].join('\n');
     const blob = new Blob([csv], {type:'text/csv'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'search-history.csv'; a.click(); URL.revokeObjectURL(a.href);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'global-history.csv'; a.click(); URL.revokeObjectURL(a.href);
   };
+
+  // ------ Live Presence (auto-refresh every 30s via the SAME route) ------
+  async function refreshPresence(){
+    try{
+      const res = await fetch(`{{ route('admin.dashboard') }}?partial=presence`, { headers:{'X-Requested-With':'fetch'} });
+      if(!res.ok) return;
+      const data = await res.json();
+      document.getElementById('activeLive').textContent = data.activeCount ?? 0;
+
+      const tbody = document.querySelector('#presenceTbl tbody');
+      tbody.innerHTML = '';
+      (data.online||[]).forEach(p=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${p.email||'—'}</td><td>${p.last_seen_at||'—'}</td><td>${p.last_login_at||'—'}</td><td>${p.last_logout_at||'—'}</td><td><span class="pill">${p.status||'—'}</span></td>`;
+        tbody.appendChild(tr);
+      });
+      if(!(data.online||[]).length){
+        const tr = document.createElement('tr'); tr.innerHTML = `<td colspan="5" style="color:var(--muted)">No recent activity.</td>`; tbody.appendChild(tr);
+      }
+    }catch(e){}
+  }
+  document.getElementById('refreshPresence')?.addEventListener('click', refreshPresence);
+  setInterval(refreshPresence, 30000);
+
+  // ------ Per-user drawer ------
+  window.openUserDrawer = async (btn)=>{
+    const id = btn.getAttribute('data-user-id');
+    const email = btn.getAttribute('data-user-email');
+    document.getElementById('drawerTitle').textContent = `History — ${email}`;
+    const dr = document.getElementById('userDrawer'); dr.classList.add('open');
+
+    const tbody = document.querySelector('#userHistTbl tbody');
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted)">Loading…</td></tr>`;
+    try{
+      const res = await fetch(`{{ route('admin.dashboard') }}?partial=userHistory&user_id=${encodeURIComponent(id)}`, { headers:{'X-Requested-With':'fetch'} });
+      const data = await res.json();
+      tbody.innerHTML = '';
+      (data.items||[]).forEach(h=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${h.when||''}</td><td style="max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.display||''}</td><td>${h.tool||''}</td><td>${h.tokens??'—'}</td><td>${h.cost??'0.0000'}</td>`;
+        tbody.appendChild(tr);
+      });
+      if(!(data.items||[]).length){
+        tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted)">No history.</td></tr>`;
+      }
+    }catch(e){
+      tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted)">Failed to load.</td></tr>`;
+    }
+  };
+  window.closeUserDrawer = ()=> document.getElementById('userDrawer').classList.remove('open');
+
+  // ------ Password Change (admin) ------
+  const pwdModal = document.getElementById('pwdModal');
+  document.getElementById('openPwdModal')?.addEventListener('click', ()=>{
+    const row = document.querySelector('table.table tbody tr'); // pick first user row to preload form; you can add a per-user button if preferred
+    if(row){
+      const email = row.querySelector('td:nth-child(1) div[style*="color"]').textContent.trim();
+      const id = row.querySelector('[data-user-id]')?.getAttribute('data-user-id');
+      document.getElementById('pwdEmail').value = email||'';
+      document.getElementById('pwdUserId').value = id||'';
+    }
+    pwdModal.showModal();
+  });
+
+  async function submitPwdChange(e){
+    e.preventDefault();
+    const id = document.getElementById('pwdUserId').value;
+    const pass = document.getElementById('pwdNew').value;
+    if(!id || !pass) return;
+    // POST to existing ban route with a special field new_password (Controller checks & updates)
+    const res = await fetch(`{{ url('/admin/users') }}/${encodeURIComponent(id)}/ban`, {
+      method:'POST',
+      headers:{'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept':'application/json'},
+      body: new URLSearchParams({ _method:'PATCH', new_password: pass })
+    });
+    pwdModal.close();
+    alert(res.ok ? 'Password updated.' : 'Request sent. Verify controller handles new_password.');
+    return false;
+  }
+  window.submitPwdChange = submitPwdChange;
 </script>
 @endpush
