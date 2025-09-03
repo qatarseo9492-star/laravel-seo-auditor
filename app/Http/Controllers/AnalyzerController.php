@@ -11,7 +11,7 @@ use DOMDocument;
 use DOMXPath;
 use App\Models\User;
 use App\Models\Search;
-use App\Models\UserLimit; // ✅ THE FIX IS HERE
+use App\Models\UserLimit;
 use App\Models\AnalysisCache;
 use App\Models\AnalyzeLog;
 use App\Models\OpenAiUsage;
@@ -21,15 +21,21 @@ use Illuminate\Support\Facades\Auth;
 
 class AnalyzerController extends Controller
 {
+    /**
+     * Checks user limits and logs the search action.
+     */
     private function checkAndLogSearch(string $url, Request $request)
     {
         $user = Auth::user();
-        if (!$user) return true;
+        if (!$user) return true; // Don't block non-logged-in users if that's the desired behavior
 
         $limit = UserLimit::firstOrCreate(['user_id' => $user->id]);
+        
+        // Reset daily counter if the last update was not today
         if (!$limit->updated_at->isToday()) {
             $limit->searches_today = 0;
         }
+        // Reset monthly counter if the last update was not this month
         if (!$limit->updated_at->isSameMonth(now())) {
             $limit->searches_this_month = 0;
         }
@@ -38,16 +44,20 @@ class AnalyzerController extends Controller
             return response()->json(['error' => 'You have reached your usage quota.'], 429);
         }
 
-        // Use the UsageLogger to log the analysis
+        // Log the analysis attempt
         (new UsageLogger())->logAnalysis($request, 'analyzer', true);
 
+        // Increment counters and update the timestamp
         $limit->increment('searches_today');
         $limit->increment('searches_this_month');
-        $limit->touch(); // Updates updated_at timestamp
+        $limit->touch();
 
         return true;
     }
 
+    /**
+     * Central AI analysis logic with caching.
+     */
     private function performAiAnalysis(string $urlToAnalyze, string $prompt, string $cacheType, array $expectedKeys)
     {
         $cached = AnalysisCache::where('url', $urlToAnalyze)
@@ -98,6 +108,9 @@ class AnalyzerController extends Controller
         }
     }
 
+    /**
+     * Handles the initial local HTML parsing.
+     */
     public function analyze(Request $request)
     {
         $validated = $request->validate(['url' => ['required', 'url']]);
@@ -143,7 +156,6 @@ class AnalyzerController extends Controller
             $quickStats['schema_types'] = [];
         } catch (\Exception $e) {
             Log::error('Local HTML Parsing Failed', ['message' => $e->getMessage()]);
-            // ✅ THE FIX: Return a specific error message to the frontend.
             return response()->json(['ok' => false, 'error' => "Could not parse the URL's HTML. It may be malformed or protected."], 500);
         }
 
@@ -155,6 +167,9 @@ class AnalyzerController extends Controller
         ]);
     }
 
+    /**
+     * Handles the PageSpeed Insights API proxy with caching.
+     */
     public function psiProxy(Request $request)
     {
         $validated = $request->validate(['url' => 'required|url']);
