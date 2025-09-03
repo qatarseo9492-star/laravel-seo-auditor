@@ -1,6 +1,8 @@
 @extends('layouts.app')
 @section('title','Semantic SEO Master — Analyzer')
  <meta name="csrf-token" content="{{ csrf_token() }}">
+ <script src="{{ asset('js/technical-seo.client.js') }}" defer></script>
+ <link rel="stylesheet" href="{{ asset('css/techseo-neon.css') }}">
 @push('head')
 <style>
   /* ===================== Neon + Multicolor Theme Palette ===================== */
@@ -53,7 +55,7 @@
   .legend .o{background:#2f2508;color:#fde68a;border-color:#f59e0b66}
   .legend .r{background:#331111;color:#fecaca;border-color:#ef444466}
 
-  .card{border-radius:18px;padding:18px;background:var(--card);border:1px solid #000000;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .card{border-radius:18px;padding:18px;background:var(--card);border:1px solid var(--outline);box-shadow:0 10px 30px rgba(0,0,0,.35)}
   .cat-card{border-radius:16px;padding:16px;background:var(--card-2);border:1px solid var(--outline)}
   .ground-slab{border-radius:22px;padding:20px;background:#1B1B1B;border:1px solid var(--outline);margin-top:20px;box-shadow:0 10px 40px rgba(0,0,0,.4)}
 
@@ -435,154 +437,377 @@
 </style>
 
 <script defer>
+/* Robust init so the Analyze button always works even if scripts load after DOM ready */
 (function(){
-  // ✅ REWRITTEN FOR ULTIMATE ROBUSTNESS
-  const $ = s => document.querySelector(s);
-  
-  // --- Global State & Element Refs ---
-  const el = {
-    errorBox: $('#errorBox'),
-    analyzeBtn: $('#analyzeBtn'),
-    urlInput: $('#urlInput'),
-    // Main Score
-    mw: $('#mw'), mwRing: $('#mwRing'), mwNum: $('#mwNum'),
-    chipOverall: $('#chipOverall'),
-    // Content Optimization Score
-    mwContent: $('#mwContent'), ringContent: $('#ringContent'), numContent: $('#numContent'),
-    coTopicCoverageText: $('#coTopicCoverageText'),
-    coTopicCoverageProgress: $('#coTopicCoverageProgress'),
-    coContentGapsTags: $('#coContentGapsTags'),
-    coSchemaTags: $('#coSchemaTags'),
-    coIntentTag: $('#coIntentTag'),
-    coGradeTag: $('#coGradeTag'),
-    // ... (add other element refs as needed)
-  };
+  const init = () => {
+    const $ = s=>document.querySelector(s);
 
-  // --- Helper Functions ---
-  const clamp01 = n => Math.max(0, Math.min(100, Number(n) || 0));
-  const bandName = s => s >= 80 ? 'good' : (s >= 60 ? 'warn' : 'bad');
-  const setWheel = (ring, num, container, score) => {
-    if (!ring || !num || !container) return;
-    score = clamp01(score);
-    container.classList.remove('good', 'warn', 'bad');
-    container.classList.add(bandName(score));
-    ring.style.setProperty('--v', score);
-    num.textContent = score + '%';
-  };
-  const setChip = (chipEl, label, value, score) => {
-    if (!chipEl) return;
-    chipEl.classList.remove('good', 'warn', 'bad');
-    chipEl.classList.add(bandName(score));
-    chipEl.innerHTML = `<i>${score >= 80 ? '✅' : (score >= 60 ? '🟧' : '🔴')}</i><span>${label}: ${value}</span>`;
-  };
-  const showError = (msg, detail) => {
-      let finalMessage = msg;
-      if (detail && detail !== msg) finalMessage += `
+    /* ============== Element refs ============== */
+    const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
+    const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
+    const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
 
-${detail}`;
-      el.errorBox.style.display = 'block';
-      el.errorBox.textContent = finalMessage;
-  };
-  const clearError = () => { el.errorBox.style.display = 'none'; el.errorBox.textContent = ''; };
-  const setRunning = (isOn) => {
-      el.analyzeBtn.disabled = isOn;
-      el.analyzeBtn.style.opacity = isOn ? 0.6 : 1;
-      el.analyzeBtn.textContent = isOn ? 'Analyzing…' : '🔍 Analyze';
-  };
+    const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn'),
+          importBtn=$('#importBtn'), importFile=$('#importFile'), printBtn=$('#printBtn'),
+          resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn');
 
-  // --- API Call Function ---
-  async function callApi(endpoint, url) {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    try {
+    // NOTE: statF, statG etc are removed as their layout is gone.
+    const titleVal=$('#titleVal'), metaVal=$('#metaVal'), headingMap=$('#headingMap'), recsEl=$('#recs'), catsEl=$('#cats');
+
+    const chipHttp=$('#chipHttp'), chipTitle=$('#chipTitle'), chipMeta=$('#chipMeta'),
+          chipCanon=$('#chipCanon'), chipRobots=$('#chipRobots'), chipViewport=$('#chipViewport'),
+          chipH=$('#chipH'), chipIntChip=$('#chipInt'), chipSchema=$('#chipSchema'), chipAuto=$('#chipAuto');
+
+    const errorBox = $('#errorBox');
+
+    const modal=$('#improveModal'), mTitle=$('#improveTitle'), mCat=$('#improveCategory'),
+          mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
+          mTips=$('#improveTips'), mLink=$('#improveSearch');
+
+    /* Readability UI is removed */
+
+    // NEW Speed UI refs
+    const speedOverviewBar = $('#speedOverviewBar'), speedOverviewText = $('#speedOverviewText');
+    const mobileScoreVal = $('#mobileScoreVal'), mobileScoreCircle = $('#mobileScoreCircle');
+    const desktopScoreVal = $('#desktopScoreVal'), desktopScoreCircle = $('#desktopScoreCircle');
+    const mobileLcp = $('#mobileLcp'), mobileInp = $('#mobileInp'), mobileCls = $('#mobileCls');
+    const desktopLcp = $('#desktopLcp'), desktopInp = $('#desktopInp'), desktopCls = $('#desktopCls');
+    const speedOpportunitiesList = $('#speedOpportunitiesList');
+
+
+    /* --- Content Optimization UI refs --- */
+    const mwContent=$('#mwContent'), ringContent=$('#ringContent'), numContent=$('#numContent');
+    const coCard = $('#contentOptimizationCard');
+    if (coCard) {
+        const coTopicCoverageText = coCard.querySelector('#coTopicCoverageText');
+        const coTopicCoverageProgress = coCard.querySelector('#coTopicCoverageProgress');
+        const coContentGapsText = coCard.querySelector('#coContentGapsText');
+        const coContentGapsTags = coCard.querySelector('#coContentGapsTags');
+        const coSchemaTags = coCard.querySelector('#coSchemaTags');
+        const coIntentTag = coCard.querySelector('#coIntentTag');
+        const coGradeTag = coCard.querySelector('#coGradeTag');
+        window.__coElements = { coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag };
+    }
+    
+    /* --- Technical SEO Integration UI refs --- */
+    const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI');
+    const tsiInternalLinks = $('#tsiInternalLinks');
+    const tsiUrlClarityScore = $('#tsiUrlClarityScore');
+    const tsiUrlSuggestion = $('#tsiUrlSuggestion');
+    const tsiMetaTitle = $('#tsiMetaTitle');
+    const tsiMetaDescription = $('#tsiMetaDescription');
+    const tsiAltTexts = $('#tsiAltTexts');
+    const tsiSiteMap = $('#tsiSiteMap');
+    const tsiSuggestionsList = $('#tsiSuggestionsList');
+    
+    /* --- Keyword Intelligence UI refs --- */
+    const kiSemanticResearch = $('#kiSemanticResearch');
+    const kiIntentClassification = $('#kiIntentClassification');
+    const kiRelatedTerms = $('#kiRelatedTerms');
+    const kiCompetitorGaps = $('#kiCompetitorGaps');
+    const kiLongTail = $('#kiLongTail');
+
+    /* --- NEW: Content Analysis Engine UI refs --- */
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
+    const caeTopicClusters = $('#caeTopicClusters');
+    const caeEntities = $('#caeEntities');
+    const caeKeywords = $('#caeKeywords');
+    const caeRelevanceScore = $('#caeRelevanceScore');
+    const caeRelevanceBar = $('#caeRelevanceBar');
+    const caeIntent = $('#caeIntent');
+
+
+    /* Helpers */
+    const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
+    const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
+    const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
+    function setChip(el,label,value,score){ if(!el)return; el.classList.remove('good','warn','bad'); const b=bandName(score); el.classList.add(b); el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`; };
+    const showError=(msg,detail)=>{ errorBox.style.display='block'; errorBox.textContent=msg+(detail?`
+
+${detail}`:''); };
+    const clearError=()=>{ errorBox.style.display='none'; errorBox.textContent=''; };
+
+    /* ===== Category/KB/scoring (unchanged logic) ===== */
+    const CATS=[{name:'User Signals & Experience',icon:'📱',checks:['Mobile-friendly, responsive layout','Optimized speed (compression, lazy-load)','Core Web Vitals passing (LCP/INP/CLS)','Clear CTAs and next steps','Accessible basics (alt text, contrast)']},{name:'Entities & Context',icon:'🧩',checks:['sameAs/Organization details present','Valid schema markup (Article/FAQ/Product)','Related entities covered with context','Primary entity clearly defined','Organization contact/about page visible']},{name:'Structure & Architecture',icon:'🏗️',checks:['Logical H2/H3 headings & topic clusters','Internal links to hub/related pages','Clean, descriptive URL slug','Breadcrumbs enabled (+ schema)','XML sitemap logical structure']},{name:'Content Quality',icon:'🧠',checks:['E-E-A-T signals (author, date, expertise)','Unique value vs. top competitors','Facts & citations up to date','Helpful media (images/video) w/ captions','Up-to-date examples & screenshots']},{name:'Content & Keywords',icon:'📝',checks:['Define search intent & primary topic','Map target & related keywords (synonyms/PAA)','H1 includes primary topic naturally','Integrate FAQs / questions with answers','Readable, NLP-friendly language']},{name:'Technical Elements',icon:'⚙️',checks:['Title tag (≈50–60 chars) w/ primary keyword','Meta description (≈140–160 chars) + CTA','Canonical tag set correctly','Indexable & listed in XML sitemap','Robots directives valid']}];
+
+    const KB={'Mobile-friendly, responsive layout':{why:'Most traffic is mobile; poor UX kills engagement.',tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'],link:'https://search.google.com/test/mobile-friendly'},'Optimized speed (compression, lazy-load)':{why:'Speed affects abandonment and CWV.',tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'],link:'https://web.dev/fast/'},'Core Web Vitals passing (LCP/INP/CLS)':{why:'Passing CWV improves experience & stability.',tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'],link:'https://web.dev/vitals/'},'Clear CTAs and next steps':{why:'Clarity increases conversions and task completion.',tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'],link:'https://www.nngroup.com/articles/call-to-action-buttons/'},'Accessible basics (alt text, contrast)':{why:'Accessibility broadens reach and reduces risk.',tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'],link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},'sameAs/Organization details present':{why:'Entity grounding disambiguates your brand.',tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'],link:'https://schema.org/Organization'},'Valid schema markup (Article/FAQ/Product)':{why:'Structured data unlocks rich results.',tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'],link:'https://search.google.com/test/rich-results'},'Related entities covered with context':{why:'Covering related entities builds topical depth.',tips:['Mention related concepts.','Explain relationships.','Link to references.'],link:'https://developers.google.com/knowledge-graph'},'Primary entity clearly defined':{why:'A single main entity clarifies page purpose.',tips:['Define at the top.','Use consistent naming.','Add schema about it.'],link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},'Organization contact/about page visible':{why:'Trust & contact clarity support E-E-A-T.',tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'],link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},'Logical H2/H3 headings & topic clusters':{why:'Hierarchy helps skimming and indexing.',tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'],link:'https://moz.com/learn/seo/site-structure'},'Internal links to hub/related pages':{why:'Internal links distribute authority & context.',tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'],link:'https://ahrefs.com/blog/internal-links/'},'Clean, descriptive URL slug':{why:'Readable slugs improve CTR & clarity.',tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'],link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},'Breadcrumbs enabled (+ schema)':{why:'Breadcrumbs clarify location & show in SERP.',tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'],link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},'XML sitemap logical structure':{why:'Sitemap accelerates discovery & updates.',tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'],link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},'E-E-A-T signals (author, date, expertise)':{why:'Trust signals reduce bounce & build credibility.',tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'],link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},'Unique value vs. top competitors':{why:'Differentiation is necessary to rank & retain.',tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'],link:'https://backlinko.com/seo-techniques'},'Facts & citations up to date':{why:'Freshness + accuracy boosts trust.',tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'],link:'https://scholar.google.com/'},'Helpful media (images/video) w/ captions':{why:'Media improves comprehension & dwell time.',tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'],link:'https://web.dev/optimize-lcp/'},'Up-to-date examples & screenshots':{why:'Current visuals reflect product reality.',tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'],link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},'Define search intent & primary topic':{why:'Matching intent drives relevance & time on page.',tips:['State outcome early.','Align format to intent.','Use concrete examples.'],link:'https://ahrefs.com/blog/search-intent/'},'Map target & related keywords (synonyms/PAA)':{why:'Variants improve recall & completeness.',tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'],link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},'H1 includes primary topic naturally':{why:'Clear topic helps users and algorithms.',tips:['One H1 per page.','Topic near the start.','Be descriptive.'],link:'https://web.dev/learn/html/semantics/#headings'},'Integrate FAQs / questions with answers':{why:'Captures long-tail & can earn rich results.',tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'],link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},'Readable, NLP-friendly language':{why:'Plain, direct writing improves comprehension.',tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'],link:'https://www.plainlanguage.gov/guidelines/'},'Title tag (≈50–60 chars) w/ primary keyword':{why:'Title remains the strongest on-page signal.',tips:['50–60 chars.','Primary topic first.','Avoid duplication.'],link:'https://moz.com/learn/seo/title-tag'},'Meta description (≈140–160 chars) + CTA':{why:'Meta drives CTR which correlates with rankings.',tips:['140–160 chars.','Benefit + CTA.','Match intent.'],link:'https://moz.com/learn/seo/meta-description'},'Canonical tag set correctly':{why:'Avoid duplicates; consolidate signals.',tips:['One canonical.','Absolute URL.','No conflicting canonicals.'],link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},'Indexable & listed in XML sitemap':{why:'Indexation is prerequisite to ranking.',tips:['No noindex.','Include in sitemap.','Submit in Search Console.'],link:'https://developers.google.com/search/docs/crawling-indexing/overview'},'Robots directives valid':{why:'Avoid accidental noindex/nofollow.',tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'],link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}};
+
+    function clamp01num(n){return Math.max(0,Math.min(100,Number(n)||0))}
+    function scoreChecklist(label,data,url,targetKw=''){const qs=data.quick_stats||{};const cs=data.content_structure||{};const ps=data.page_signals||{};const r=data.readability||{};const h1=(cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;const h2=(cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;const h3=(cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;const title=(cs.title||'');const meta=(cs.meta_description||'');const internal=Number(qs.internal_links||0);const external=Number(qs.external_links||0);const schemaTypes=new Set((data.page_signals?.schema_types)||[]);const robots=(data.page_signals?.robots||'').toLowerCase();const hasFAQ=schemaTypes.has('FAQPage');const hasArticle=schemaTypes.has('Article')||schemaTypes.has('NewsArticle')||schemaTypes.has('BlogPosting');const urlPath=(()=>{try{return new URL(url).pathname;}catch{return '/';}})();const slugScore=(()=>{const hasQuery=url.includes('?');const segs=urlPath.split('/').filter(Boolean);const words=segs.join('-').split('-').filter(Boolean);if(hasQuery)return 55;if(segs.length>6)return 60;if(words.some(w=>w.length>24))return 65;return 85;})();switch(label){case'Mobile-friendly, responsive layout':return ps.has_viewport?88:58;case'Optimized speed (compression, lazy-load)':return 60;case'Core Web Vitals passing (LCP/INP/CLS)':return 60;case'Clear CTAs and next steps':return meta.length>=140&&/learn|get|try|start|buy|sign|download|contact/i.test(meta)?80:60;case'Accessible basics (alt text, contrast)':return (data.images_alt_count||0)>=3?82:((data.images_alt_count||0)>=1?68:48);case'sameAs/Organization details present':return ps.has_org_sameas?90:55;case'Valid schema markup (Article/FAQ/Product)':return (hasArticle||hasFAQ||schemaTypes.has('Product'))?85:(schemaTypes.size>0?70:50);case'Related entities covered with context':return external>=2?72:60;case'Primary entity clearly defined':return ps.has_main_entity?85:(h1>0?72:58);case'Organization contact/about page visible':return 60;case'Logical H2/H3 headings & topic clusters':return (h2>=3&&h3>=2)?85:(h2>=2?70:55);case'Internal links to hub/related pages':return internal>=5?85:(internal>=2?65:45);case'Clean, descriptive URL slug':return slugScore;case'Breadcrumbs enabled (+ schema)':return ps.has_breadcrumbs?85:55;case'XML sitemap logical structure':return 60;case'E-E-A-T signals (author, date, expertise)':return ps.has_org_sameas?75:65;case'Unique value vs. top competitors':return 60;case'Facts & citations up to date':return external>=2?78:58;case'Helpful media (images/video) w/ captions':return (data.images_alt_count||0)>=3?82:58;case'Up-to-date examples & screenshots':return 60;case'Define search intent & primary topic':return (title&&h1>0)?78:60;case'Map target & related keywords (synonyms/PAA)':{const kw=(targetKw||'').trim();if(!kw)return 60;const found=(title.toLowerCase().includes(kw.toLowerCase())||(cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));return found?80:62}case'H1 includes primary topic naturally':{const kw=(targetKw||'').trim();if(h1===0)return 45;if(!kw)return 72;const found=(cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));return found?84:72}case'Integrate FAQs / questions with answers':return hasFAQ?85:(/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ')+' '+(cs.headings?.H3||[]).join(' '))?70:55);case'Readable, NLP-friendly language':return clamp01num(r.score||0);case'Title tag (≈50–60 chars) w/ primary keyword':{const len=(title||'').length;return (len>=50&&len<=60)?88:(len?68:45)}case'Meta description (≈140–160 chars) + CTA':{const len=(meta||'').length;const hasCTA=/learn|get|try|start|buy|sign|download|contact/i.test(meta||'');return (len>=140&&len<=160)?(hasCTA?90:82):(len?65:48)}case'Canonical tag set correctly':return ps.canonical?85:55;case'Indexable & listed in XML sitemap':return robots.includes('noindex')?20:80;case'Robots directives valid':return (robots&&/(noindex|none)/.test(robots))?45:75;}return 60}
+
+    function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label+' best practices'));if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});chipAuto.textContent=autoGood;}
+
+    /* API Calls */
+    async function callApi(endpoint, url) {
         const res = await fetch(endpoint, {
             method: 'POST',
-            headers: {'Accept':'application/json', 'Content-Type':'application/json', 'X-CSRF-TOKEN': csrfToken},
-            body: JSON.stringify({ url, _token: csrfToken })
+            headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+            body: JSON.stringify({ url })
         });
         if (!res.ok) {
-            const errorBody = await res.json().catch(() => ({ error: `The server returned an HTTP ${res.status} error.` }));
-            const detail = errorBody.error || errorBody.detail || errorBody.message || JSON.stringify(errorBody);
-            throw new Error(detail);
+            const errorText = await res.text();
+            throw new Error(`API Error at ${endpoint} (${res.status}): ${errorText.slice(0, 800)}`);
         }
         return res.json();
-    } catch (err) {
-        throw new Error(`A network or parsing error occurred: ${err.message}`);
     }
-  }
+    
+    // Specific API call wrappers
+    const callAnalyzer = (url) => callApi('/api/semantic-analyze', url);
+    const callTechnicalSeoApi = (url) => callApi('/api/technical-seo-analyze', url);
+    const callKeywordApi = (url) => callApi('/api/keyword-analyze', url);
+    const callContentEngineApi = (url) => callApi('/api/content-engine-analyze', url);
+    const callPSI = (url) => callApi('/semantic-analyzer/psi', url);
 
-  // --- UI Population Functions ---
-  function populateContentOptimizationUI(coResult) {
-      if (coResult.status === 'fulfilled' && coResult.value && coResult.value.content_optimization && typeof coResult.value.content_optimization.nlp_score === 'number') {
-          const co = coResult.value.content_optimization;
-          const score = clamp01(co.nlp_score);
-          
-          setWheel(el.mwRing, el.mwNum, el.mw, score);
-          setChip(el.chipOverall, 'Overall', `${score} / 100`, score);
-          setWheel(el.ringContent, el.numContent, el.mwContent, score);
-          
-          // ... (rest of population logic) ...
-      } else {
-          // Handle failure case
-          setWheel(el.mwRing, el.mwNum, el.mw, 0);
-          el.mwNum.textContent = 'N/A';
-          setChip(el.chipOverall, 'Overall', 'N/A', 0);
-          setWheel(el.ringContent, el.numContent, el.mwContent, 0);
-          el.numContent.textContent = 'N/A';
-          if(coResult.status === 'rejected') {
-              showError('Content Optimization Failed.', coResult.reason.message);
-          } else {
-              showError('Content Optimization Failed.', 'The AI returned an incomplete or invalid data structure for the score.');
-          }
-      }
-  }
-  
-  // ... (you would have similar populate functions for TSI, Keywords, etc.)
 
-  // --- Main Event Listener ---
-  el.analyzeBtn?.addEventListener('click', async e => {
+    function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.style.opacity=isOn?.6:1;analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze'}
+    
+    /* Speed helpers */
+    const band = s => s>=80?'good':(s>=60?'warn':'bad');
+    const scoreFromBounds=(val,good,poor)=>{if(val==null||isNaN(val))return 0;if(val<=good)return 100;if(val>=poor)return 0;return Math.round(100*(1-((val-good)/(poor-good))))};
+    function setWheel(elRing, elNum, container, score, prefix){
+        if (!elRing || !elNum || !container) return; // Guard clause
+        const b=band(score);
+        container.classList.remove('good','warn','bad');
+        container.classList.add(b);
+        elRing.style.setProperty('--v',score);
+        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
+    }
+    
+    function setSpeedCircle(circleEl, score) {
+        if (!circleEl) return;
+        const r = circleEl.r.baseVal.value;
+        const circumference = 2 * Math.PI * r;
+        const offset = circumference - (score / 100) * circumference;
+        circleEl.style.strokeDasharray = `${circumference} ${circumference}`;
+        circleEl.style.strokeDashoffset = offset;
+        const color = score >= 80 ? 'var(--green-1)' : score >= 60 ? 'var(--yellow-1)' : 'var(--red-1)';
+        circleEl.style.stroke = color;
+    }
+
+
+    /* ===== Analyze ===== */
+    $('#analyzeBtn')?.addEventListener('click', async e=>{
       e.preventDefault();
       clearError();
-      const url = el.urlInput.value.trim();
-      if (!url) { showError('Please enter a URL.'); return; }
-      
-      try {
-          setRunning(true);
-          
-          // ✅ THE FIX: Using Promise.allSettled to handle individual failures gracefully.
-          const results = await Promise.allSettled([
-              callApi('{{ route("semantic.analyze") }}', url),
-              callApi('{{ route("api.content-optimization") }}', url),
-              callApi('{{ route("api.technical-seo") }}', url),
-              callApi('{{ route("api.keyword-analyze") }}', url),
-              callApi('{{ route("api.content-engine") }}', url),
-              callApi('{{ route("semantic.psi") }}', url)
-          ]);
+      const url=(urlInput.value||'').trim();
+      if(!url){showError('Please enter a URL.');return;}
+      try{
+        setRunning(true);
+        
+        // --- Reset UIs before fetching ---
+        [kiSemanticResearch, kiIntentClassification, kiRelatedTerms, kiCompetitorGaps, kiLongTail, caeTopicClusters, caeEntities, caeKeywords, caeIntent].forEach(el => {
+            if(el) el.innerHTML = '<span class="chip">Analyzing...</span>';
+        });
 
-          const [localDataResult, coDataResult, tsiDataResult, kiDataResult, caeDataResult, psiDataResult] = results;
+        // --- Fire all API calls in parallel ---
+        const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
+            callAnalyzer(url).catch(err => { showError('Content analysis failed.', err.message); return null; }),
+            callTechnicalSeoApi(url).catch(err => { showError('Tech SEO analysis failed.', err.message); return null; }),
+            callKeywordApi(url).catch(err => { showError('Keyword analysis failed.', err.message); return null; }),
+            callContentEngineApi(url).catch(err => { showError('Content Engine analysis failed.', err.message); return null; }),
+            callPSI(url).catch(err => {
+                speedOverviewText.textContent = `⚠️ PageSpeed Insights API request failed. ${err.message}`;
+                return null;
+            })
+        ]);
 
-          if (localDataResult.status === 'rejected') {
-              throw new Error(localDataResult.reason.message);
-          }
-          if (!localDataResult.value.ok) {
-               throw new Error(localDataResult.value.error || 'Local data parsing failed');
-          }
-          
-          const localData = localDataResult.value;
-          // ... (populate local data UI)
+        if(!data||data.error) throw new Error(data?.error||'Local data parsing failed');
 
-          // Populate each section individually, handling its specific result
-          populateContentOptimizationUI(coDataResult);
-          // populateTechnicalSeoUI(tsiDataResult); 
-          // ... and so on for other sections
+        window.__lastData={...data,url};
 
-      } catch (err) {
-          console.error(err);
-          showError('Analysis Failed.', String(err.message || 'An unknown error occurred.'));
-      } finally {
-          setRunning(false);
+        const score=clamp01(data.overall_score||0);
+        setWheel(mwRing, mwNum, mw, score, '');
+        
+        overallFill.style.width=score+'%';
+        overallPct.textContent=score+'%';
+        setChip(chipOverall,'Overall',`${score} /100`,score);
+
+        const cmap={};(data.categories||[]).forEach(c=>cmap[c.name]=c.score??0);
+        const contentScore=Math.round(([cmap['Content & Keywords'],cmap['Content Quality']].filter(v=>typeof v==='number').reduce((a,b)=>a+b,0))/2||0);
+        setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
+
+        const r=data.readability||{};
+        const human=clamp01(Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3));
+        const ai=clamp01(100-human);
+        setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
+        setChip(chipHuman,'Human-like',`${human} %`,human);
+        setChip(chipAI,'AI-like',`${ai} %`,100-human);
+        
+        // --- Meta & Heading population logic ---
+        if (data.content_structure) {
+            titleVal.textContent = data.content_structure.title || 'Not Found';
+            metaVal.textContent = data.content_structure.meta_description || 'Not Found';
+            
+            const hs = data.content_structure.headings || {};
+            chipH.textContent = `H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
+            headingMap.innerHTML = ''; 
+            
+            const allowedHeadings = ['H1', 'H2', 'H3', 'H4'];
+            let hasHeadings = false;
+            
+            Object.entries(hs).forEach(([lvl, arr]) => {
+                if (!arr || !arr.length || !allowedHeadings.includes(lvl)) return;
+                hasHeadings = true;
+                const box = document.createElement('div');
+                box.className = 'cat-card'; 
+                box.innerHTML = `<div class="cat-card-title uppercase">${lvl} (${arr.length})</div><div style="display:flex; flex-direction:column; gap: 4px; margin-top: 8px;">` + arr.map(t => `<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('') + `</div>`;
+                headingMap.appendChild(box);
+            });
+
+            if (!hasHeadings) {
+                headingMap.innerHTML = `<p style="font-size:13px; color:#94a3b8;">No H1-H4 headings were found on the analyzed page.</p>`;
+            }
+        }
+        
+        chipHttp.textContent='200';
+        chipCanon.textContent=(data.page_signals?.canonical||'—')||'—';
+        chipRobots.textContent=(data.page_signals?.robots||'—')||'—';
+        chipViewport.textContent=data.page_signals?.has_viewport?'yes':'—';
+        chipIntChip.textContent=data.quick_stats?.internal_links??0;
+        chipSchema.textContent=(data.page_signals?.schema_types||[]).length;
+        
+        // --- POPULATE CONTENT OPTIMIZATION ---
+        if (data.content_optimization && window.__coElements) {
+            const co = data.content_optimization;
+            const { coTopicCoverageText, coTopicCoverageProgress, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag } = window.__coElements;
+
+            setWheel(ringContent, numContent, mwContent, clamp01(co.nlp_score || 0), '');
+
+            if (co.topic_coverage) {
+                coTopicCoverageText.innerHTML = `Covers <strong>${co.topic_coverage.covered} of ${co.topic_coverage.total}</strong> key topics.`;
+                coTopicCoverageProgress.style.width = co.topic_coverage.percentage + '%';
+            }
+            const contentGapsData = Array.isArray(co.content_gaps?.missing_topics) ? co.content_gaps.missing_topics : [];
+            coContentGapsTags.innerHTML = contentGapsData.map(topic => `<span class="chip ${topic.severity}"><i>${topic.severity==='bad'?'🔴':'🟧'}</i><span>${topic.term}</span></span>`).join('');
+            
+            const schemaSuggestionsData = Array.isArray(co.schema_suggestions) ? co.schema_suggestions : [];
+            coSchemaTags.innerHTML = schemaSuggestionsData.map(schema => `<span class="chip good"><i>✅</i><span>${schema}</span></span>`).join('');
+
+            if (co.readability_intent) {
+                coIntentTag.innerHTML = `Intent: ${co.readability_intent.intent}`;
+                coGradeTag.innerHTML = `Grade Level: ${co.readability_intent.grade_level}`;
+            }
+        }
+        
+        // --- POPULATE TECHNICAL SEO INTEGRATION ---
+        if (tsiData) {
+            const tsi = tsiData;
+            setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
+            const internalLinkingData = Array.isArray(tsi.internal_linking) ? tsi.internal_linking : [];
+            tsiInternalLinks.innerHTML = internalLinkingData.map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
+            
+            tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
+            tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
+            tsiMetaTitle.textContent = tsi.meta_optimization?.title || 'N/A';
+            tsiMetaDescription.textContent = tsi.meta_optimization?.description || 'N/A';
+
+            const altTextData = Array.isArray(tsi.alt_text_suggestions) ? tsi.alt_text_suggestions : [];
+            tsiAltTexts.innerHTML = altTextData.map(a => `<li><code>${a.image_src}</code> → "${a.suggestion}"</li>`).join('') || '<li>No suggestions.</li>';
+            
+            tsiSiteMap.innerHTML = tsi.site_structure_map || 'N/A';
+
+            const suggestionsData = Array.isArray(tsi.suggestions) ? tsi.suggestions : [];
+            tsiSuggestionsList.innerHTML = suggestionsData.map(s => `<li class="${s.type}">${s.text}</li>`).join('') || '<li>No suggestions.</li>';
+        }
+        
+        // --- POPULATE KEYWORD INTELLIGENCE ---
+        if(kiData) {
+            const ki = kiData;
+            const semanticResearchData = Array.isArray(ki.semantic_research) ? ki.semantic_research : [];
+            kiSemanticResearch.innerHTML = semanticResearchData.map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
+
+            const intentClassificationData = Array.isArray(ki.intent_classification) ? ki.intent_classification : [];
+            kiIntentClassification.innerHTML = intentClassificationData.map(k => {
+                let intentClass = 'intent-info';
+                if (k && k.intent && typeof k.intent === 'string') {
+                    if (k.intent.toLowerCase().includes('trans')) intentClass = 'intent-trans';
+                    if (k.intent.toLowerCase().includes('nav')) intentClass = 'intent-nav';
+                }
+                return `<span class="chip ${intentClass}">${k.keyword || ''} <i>(${k.intent || 'N/A'})</i></span>`;
+            }).join('') || '<span class="chip">No data</span>';
+
+            const relatedTermsData = Array.isArray(ki.related_terms) ? ki.related_terms : [];
+            kiRelatedTerms.innerHTML = relatedTermsData.map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
+
+            const competitorGapsData = Array.isArray(ki.competitor_gaps) ? ki.competitor_gaps : [];
+            kiCompetitorGaps.innerHTML = competitorGapsData.map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No gaps found.</div>';
+
+            const longTailData = Array.isArray(ki.long_tail_suggestions) ? ki.long_tail_suggestions : [];
+            kiLongTail.innerHTML = longTailData.map(k => `<div class="ki-list-item">• ${k}</div>`).join('') || '<div class="ki-list-item">No suggestions.</div>';
+        }
+        
+        // --- POPULATE CONTENT ANALYSIS ENGINE ---
+        if(caeData) {
+            const cae = caeData;
+            setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
+
+            const topicClustersData = Array.isArray(cae.topic_clusters) ? cae.topic_clusters : [];
+            caeTopicClusters.innerHTML = topicClustersData.map(t => `<span class="chip">${t}</span>`).join('');
+            
+            const entitiesData = Array.isArray(cae.entities) ? cae.entities : [];
+            caeEntities.innerHTML = entitiesData.map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
+            
+            const keywordsData = Array.isArray(cae.semantic_keywords) ? cae.semantic_keywords : [];
+            caeKeywords.innerHTML = keywordsData.map(k => `<span class="chip">${k}</span>`).join('');
+            
+            const relScore = clamp01(cae.relevance_score || 0);
+            caeRelevanceScore.textContent = `${relScore}%`;
+            caeRelevanceBar.style.width = `${relScore}%`;
+            caeIntent.innerHTML = `<span class="chip good">${cae.context_intent || 'N/A'}</span>`;
+        }
+
+        renderCategories(data,url,'');
+
+        // --- POPULATE PSI / SPEED ---
+        if(psiData) {
+            const mobile = psiData.mobile || {};
+            const desktop = psiData.desktop || {};
+            const overallScore = Math.round(((mobile.score || 0) + (desktop.score || 0)) / 2);
+
+            $('#speedBadge').textContent = bandName(overallScore).charAt(0).toUpperCase() + bandName(overallScore).slice(1);
+            $('#speedBadge').className = 'speed-badge ' + bandName(overallScore);
+            speedOverviewBar.style.width = overallScore + '%';
+            speedOverviewText.textContent = `Overall performance is ${bandName(overallScore)}. Mobile: ${mobile.score}, Desktop: ${desktop.score}.`;
+
+            mobileScoreVal.textContent = mobile.score || 0;
+            setSpeedCircle(mobileScoreCircle, mobile.score || 0);
+            desktopScoreVal.textContent = desktop.score || 0;
+            setSpeedCircle(desktopScoreCircle, desktop.score || 0);
+
+            mobileLcp.textContent = mobile.lcp_s ? `${mobile.lcp_s.toFixed(2)}s` : 'N/A';
+            mobileInp.textContent = mobile.inp_ms ? `${mobile.inp_ms}ms` : 'N/A';
+            mobileCls.textContent = mobile.cls ? mobile.cls.toFixed(3) : 'N/A';
+            desktopLcp.textContent = desktop.lcp_s ? `${desktop.lcp_s.toFixed(2)}s` : 'N/A';
+            desktopInp.textContent = desktop.inp_ms ? `${desktop.inp_ms}ms` : 'N/A';
+            desktopCls.textContent = desktop.cls ? desktop.cls.toFixed(3) : 'N/A';
+
+            const tips = Array.isArray(psiData.opportunities) ? psiData.opportunities : [];
+            if(tips.length > 0) {
+                 speedOpportunitiesList.innerHTML = tips.map(tip => `<li>${tip}</li>`).join('');
+            } else {
+                 speedOpportunitiesList.innerHTML = '<li>No specific opportunities found. Great job!</li>';
+            }
+        }
+      }catch(err){
+        console.error(err);
+        showError('Analyze failed.',String(err.message||err));
+      }finally{
+        setRunning(false);
       }
-  });
+    });
 
+    // Utility buttons
+    pasteBtn && pasteBtn.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
+    importBtn && importBtn.addEventListener('click',()=>importFile.click());
+    importFile && importFile.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)});
+    printBtn && printBtn.addEventListener('click',()=>window.print());
+    resetBtn && resetBtn.addEventListener('click',()=>location.reload());
+    exportBtn && exportBtn.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)});
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else { init(); }
 })();
 </script>
 @endpush
