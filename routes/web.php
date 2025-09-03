@@ -54,7 +54,7 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
     | access to session state, CSRF protection, and the authenticated user.
     | This is crucial for logging and enforcing user-specific quotas.
     */
-    Route::prefix('api')->middleware('quota')->group(function() {
+    Route::prefix('api')->middleware('throttle:seoapi')->group(function() {
         // Main local parsing and AI analysis routes
         Route::post('/semantic-analyze', [AnalyzerController::class, 'analyze'])->name('api.semantic');
         Route::post('/content-optimization', [AnalyzerController::class, 'analyzeContentOptimization'])->name('api.content-optimization');
@@ -70,7 +70,7 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
     // PageSpeed Insights Proxy - also protected by auth and quota
     Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
         ->name('semantic.psi')
-        ->middleware('quota');
+        ->middleware('throttle:seoapi');
 });
 
 /*
