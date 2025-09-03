@@ -445,6 +445,32 @@
     /* ============== Element refs ============== */
     const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
     const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
+// Content Optimization (fixed)
+let beContent = data.content_optimization_score;
+if (beContent == null && data.payload && typeof data.payload === 'object') {
+  beContent = data.payload.content_optimization_score;
+}
+
+if (Number.isFinite(beContent)) {
+  const contentScore = clamp01(Math.round(beContent));
+  setChip(chipContent, 'Content', `${contentScore} /100`, contentScore);
+} else {
+  const cmap = {};
+  (data.categories || []).forEach(c => cmap[c.name] = c.score ?? 0);
+
+  const parts = [
+    cmap['Content & Keywords'] ?? cmap['Content'],
+    cmap['Optimization'] ?? cmap['On-page Optimization']
+  ].filter(v => typeof v === 'number');
+
+  const derived = parts.length
+    ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length)
+    : 0;
+
+  const contentScore = clamp01(derived);
+  setChip(chipContent, 'Content', `${contentScore} /100`, contentScore);
+}
+
     const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
 
     const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn'),
