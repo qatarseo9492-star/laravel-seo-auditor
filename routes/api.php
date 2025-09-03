@@ -18,7 +18,7 @@ Route::get('/status', function () {
     return response()->json([
         'ok'      => true,
         'service' => 'Semantic SEO Master Analyzer API',
-        'version' => '2.0', // Updated version
+        'version' => '2.1', // Updated version
         'time'    => now()->toIso8601String(),
     ]);
 })->name('api.status');
@@ -26,28 +26,25 @@ Route::get('/status', function () {
 // Group all analysis endpoints under a throttle middleware to prevent abuse
 Route::middleware('throttle:seoapi')->group(function () {
     
-    // 1. Initial Local HTML Parsing (Does not use AI or count against limits)
-    Route::post('/semantic-analyze', [AnalyzerController::class, 'semanticAnalyze'])
+    // 1. Initial Local HTML Parsing
+    Route::post('/semantic-analyze', [AnalyzerController::class, 'handleLocalAnalysis'])
         ->name('api.semantic');
 
-    // 2. Google PageSpeed Insights Proxy (Counts against its own limit)
+    // 2. Google PageSpeed Insights Proxy
     Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
         ->name('api.psi');
 
-    // 3. NEW Unified AI Request Handler (For all new AI features)
-    // This single endpoint handles 'brief', 'suggestions', 'competitor', 'trends', etc.
+    // 3. Unified AI Request Handler (For new AI features)
     Route::post('/openai-request', [AnalyzerController::class, 'handleOpenAiRequest'])
         ->name('api.openai');
 
-    // --- DEPRECATED BUT SUPPORTED ROUTES ---
-    // These routes are kept for backward compatibility with older frontend versions.
-    // They now internally call the new `handleOpenAiRequest` method.
+    // --- Legacy Routes for older frontend compatibility ---
     
     // Technical SEO analysis
     Route::post('/technical-seo-analyze', [AnalyzerController::class, 'technicalSeoAnalyze'])
         ->name('api.technical-seo');
         
-    // Keyword Intelligence analysis
+    // Keyword Intelligence analysis - CORRECTED METHOD NAME
     Route::post('/keyword-analyze', [AnalyzerController::class, 'keywordAnalyze'])
         ->name('api.keyword-analyze');
 
