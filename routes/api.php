@@ -31,7 +31,7 @@ Route::middleware('throttle:seoapi')->group(function () {
         ->name('api.semantic');
 
     // 2. Google PageSpeed Insights Proxy (Counts against its own limit)
-    Route::post('/pageSpeed-insights', [AnalyzerController::class, 'pageSpeedInsights'])
+    Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
         ->name('api.psi');
 
     // 3. NEW Unified AI Request Handler (For all new AI features)
