@@ -27,11 +27,11 @@ Route::get('/status', function () {
 Route::middleware('throttle:seoapi')->group(function () {
     
     // 1. Initial Local HTML Parsing (Does not use AI or count against limits)
-    Route::post('/semantic-analyze', [AnalyzerController::class, 'semanticAnalyze'])
+    Route::post('/semantic-analyze', [AnalyzerController::class, 'analyzeSemantic'])
         ->name('api.semantic');
 
     // 2. Google PageSpeed Insights Proxy (Counts against its own limit)
-    Route::post('/pageSpeed-insights', [AnalyzerController::class, 'pageSpeedInsights'])
+    Route::post('/pageSpeed-insights', [AnalyzerController::class, 'analyzePageSpeed'])
         ->name('api.psi');
 
     // 3. NEW Unified AI Request Handler (For all new AI features)
@@ -44,15 +44,15 @@ Route::middleware('throttle:seoapi')->group(function () {
     // They now internally call the new `handleOpenAiRequest` method.
     
     // Technical SEO analysis
-    Route::post('/technical-seo-analyze', [AnalyzerController::class, 'technicalSeoAnalyze'])
+    Route::post('/technical-seo-analyze', [AnalyzerController::class, 'analyzeTechnicalSeo'])
         ->name('api.technical-seo');
         
     // Keyword Intelligence analysis
-    Route::post('/keyword-analyze', [AnalyzerController::class, 'keywordAnalyze'])
+    Route::post('/keyword-analyze', [AnalyzerController::class, 'analyzeKeywords'])
         ->name('api.keyword-analyze');
 
     // Content Analysis Engine
-    Route::post('/content-engine-analyze', [AnalyzerController::class, 'contentEngineAnalyze'])
+    Route::post('/content-engine-analyze', [AnalyzerController::class, 'analyzeContentEngine'])
         ->name('api.content-engine');
 });
 
