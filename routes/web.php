@@ -1,11 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AnalyzerController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\UserAdminController;
+use Illuminate-Support-Facades-Route;
+use App-Http-Controllers-AuthController;
+use App-Http-Controllers-ProfileController;
+use App-Http-Controllers-AnalyzerController;
+use App-Http-Controllers-Admin-DashboardController;
+use App-Http-Controllers-Admin-UserAdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,11 +33,6 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
     Route::view('/semantic-analyzer', 'analyzers.semantic')->name('semantic.analyzer');
     Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
     Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
-    
-    // PageSpeed Insights Proxy - Logic moved to controller
-    Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
-        ->name('semantic.psi')
-        ->middleware('quota');
 
     // Profile Management
     Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
@@ -46,6 +41,37 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
         Route::post('/password', 'updatePassword')->name('password');
         Route::post('/avatar', 'updateAvatar')->name('avatar');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Internal API Routes for the Analyzer
+    |--------------------------------------------------------------------------
+    | ✅ MOVED: These routes now use the 'web' middleware group, giving them
+    | access to session state, CSRF protection, and the authenticated user.
+    | This is crucial for logging and enforcing user-specific quotas.
+    */
+    Route::prefix('api')->middleware('quota')->group(function() {
+        // Main content analysis
+        Route::post('/semantic-analyze', [AnalyzerController::class, 'analyze'])->name('api.semantic');
+
+        // Technical SEO analysis
+        Route::post('/technical-seo-analyze', [AnalyzerController::class, 'analyzeTechnicalSeo'])->name('api.technical-seo');
+        
+        // Keyword Intelligence analysis
+        Route::post('/keyword-analyze', [AnalyzerController::class, 'analyzeKeywords'])->name('api.keyword-analyze');
+
+        // Content Analysis Engine
+        Route::post('/content-engine-analyze', [AnalyzerController::class, 'analyzeContentEngine'])->name('api.content-engine');
+
+        // Optional stubs (safe to keep)
+        Route::post('/ai-check', [AnalyzerController::class, 'aiCheck'])->name('api.aicheck');
+        Route::post('/topic-cluster', [AnalyzerController::class, 'topicClusterAnalyze'])->name('api.topiccluster');
+    });
+
+    // PageSpeed Insights Proxy
+    Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
+        ->name('semantic.psi')
+        ->middleware('quota');
 });
 
 /*
@@ -53,13 +79,10 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
 | Admin Routes
 |--------------------------------------------------------------------------
 */
-// ✅ SECURED: Added 'admin' middleware to protect all admin routes.
 Route::middleware(['auth', 'ban', 'presence', 'admin'])
     ->prefix('admin')->name('admin.')
     ->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-        // ✅ UPDATED: Routes now match the new controller methods for better REST practices.
         Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');
         Route::patch('/users/{user}/ban', [UserAdminController::class, 'toggleBan'])->name('users.ban');
     });
@@ -71,3 +94,4 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
 */
 Route::get('/_up', fn () => response('OK', 200))->name('_up');
 Route::fallback(fn () => redirect()->route('home'));
+
