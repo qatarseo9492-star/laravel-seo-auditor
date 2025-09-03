@@ -45,7 +45,7 @@ class AnalyzerController extends Controller
     }
 
     /**
-     * Handles only the local HTML parsing.
+     * Handles only the local HTML parsing. This does not count against AI quota.
      */
     public function analyze(Request $request): JsonResponse
     {
@@ -53,8 +53,8 @@ class AnalyzerController extends Controller
             $validated = $request->validate(['url' => ['required', 'url']]);
             $urlToAnalyze = $validated['url'];
 
-            // Note: The main 'analyze' does not count against AI quota, just logs as a general search.
-            if (($limitCheck = $this->checkAndLog($request, 'local_parse')) !== true) return $limitCheck;
+            // We can log this as a "page view" or a simple, non-quota action if desired
+            // For now, we assume only AI calls consume the quota.
 
             $contentStructure = []; $pageSignals = []; $quickStats = [];
             $response = Http::timeout(15)->get($urlToAnalyze);
@@ -98,7 +98,7 @@ class AnalyzerController extends Controller
     }
 
     /**
-     * ✅ NEW: A single, robust handler for all OpenAI requests.
+     * ✅ UPDATED: A single, robust handler for all OpenAI requests with improved error handling.
      */
     private function handleAiRequest(Request $request, string $toolName, string $promptTemplate, array $expectedKeys): JsonResponse
     {
@@ -123,10 +123,16 @@ class AnalyzerController extends Controller
             ]);
 
             if ($response->failed()) {
-                return response()->json(['message' => "AI service returned an error for {$toolName} analysis."], 502);
+                Log::error("AI API Call Failed for {$toolName}", ['status' => $response->status(), 'body' => $response->body()]);
+                return response()->json(['message' => "The AI service returned an error for the {$toolName} analysis.", 'detail' => $response->body()], 502);
             }
 
             $result = json_decode($response->json('choices.0.message.content'), true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                Log::error("Invalid JSON from AI for {$toolName}", ['body' => $response->json('choices.0.message.content')]);
+                return response()->json(['message' => "The AI service returned invalid JSON for the {$toolName} analysis."], 500);
+            }
 
             foreach ($expectedKeys as $key) {
                 if (!isset($result[$key]) || !is_array($result[$key])) $result[$key] = [];
@@ -138,11 +144,11 @@ class AnalyzerController extends Controller
 
         } catch (\Exception $e) {
             Log::error("AI Analysis Exception for {$toolName}", ['message' => $e->getMessage()]);
-            return response()->json(['message' => "An unexpected server error occurred during the {$toolName} analysis.", 'detail' => $e->getMessage()], 500);
+            return response()->json(['message' => "A server error occurred during the {$toolName} analysis.", 'detail' => $e->getMessage()], 500);
         }
     }
 
-    // All AI endpoints now use the central handler
+    // All AI endpoints use the central handler
     public function analyzeContentOptimization(Request $request) {
         $prompt = "Analyze content at '{{URL}}' for SEO. Return JSON with 'content_optimization' containing: 'nlp_score' (0-100), 'topic_coverage' {'percentage', 'total', 'covered'}, 'content_gaps' {'missing_topics':[{'term', 'severity'}]}, 'schema_suggestions' (array of strings), and 'readability_intent' {'intent', 'grade_level'}.";
         return $this->handleAiRequest($request, 'content_optimization', $prompt, ['content_optimization']);
@@ -163,9 +169,6 @@ class AnalyzerController extends Controller
         return $this->handleAiRequest($request, 'content_engine', $prompt, ['topic_clusters', 'entities', 'semantic_keywords']);
     }
 
-    /**
-     * ✅ UPDATED: PSI Proxy now also uses the central checkAndLog function.
-     */
     public function psiProxy(Request $request): JsonResponse
     {
         try {
@@ -182,13 +185,15 @@ class AnalyzerController extends Controller
                 $cacheKey = "psi:{$strategy}:" . md5($url);
                 return Cache::remember($cacheKey, now()->addMinutes(15), function () use ($url, $key, $strategy) {
                     $res = Http::timeout(40)->get('https://www.googleapis.com/pagespeedonline/v5/runPagespeed', ['url' => $url, 'strategy' => $strategy, 'category' => 'performance', 'key' => $key]);
-                    if (!$res->ok()) return ['ok' => false, 'score' => 0];
+                    if (!$res->ok()) return ['ok' => false, 'score' => 0, 'opportunities' => ['Failed to fetch PSI data.']];
                     $j = $res->json() ?: []; $lr = $j['lighthouseResult'] ?? []; $audits = $lr['audits'] ?? []; $perfRaw = $lr['categories']['performance']['score'] ?? null;
+                    $opportunities = collect($lr['audits'] ?? [])->filter(fn($audit) => ($audit['score'] ?? 1) < 0.9 && isset($audit['details']['overallSavingsMs']) && $audit['details']['overallSavingsMs'] > 100)->map(fn($audit) => $audit['title'])->values()->toArray();
                     return [
                         'ok' => true, 'score' => is_null($perfRaw) ? 0 : (int) round($perfRaw * 100),
                         'lcp_s' => round(($audits['largest-contentful-paint']['numericValue'] ?? 0) / 1000, 2),
                         'cls' => round($audits['cumulative-layout-shift']['numericValue'] ?? 0, 3),
                         'inp_ms' => (int) round($audits['interaction-to-next-paint']['numericValue'] ?? 0),
+                        'opportunities' => $opportunities,
                     ];
                 });
             };
