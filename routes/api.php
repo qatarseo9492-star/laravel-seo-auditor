@@ -58,3 +58,4 @@ Route::middleware('throttle:seoapi')->group(function () {
 
 // A catch-all for CORS preflight requests to ensure smooth frontend integration
 Route::options('/{any}', fn () => response()->noContent(204))->where('any', '.*');
+
