@@ -529,10 +529,16 @@ ${detail}`:''); };
     
     const handleApiError = (toolName, error) => {
         let message = error.message || 'An unknown error occurred.';
-        // Extract a JSON error message like {"error":"You have reached your usage quota."}
-        const jsonMatch = message.match(/\{"error":"([^"]+)"\}/);
-        if (jsonMatch && jsonMatch[1]) {
-            message = jsonMatch[1];
+        // Try to find and parse a JSON object within the error string
+        const jsonStringMatch = message.match(/(\{.*\})/);
+        if (jsonStringMatch && jsonStringMatch[1]) {
+            try {
+                const errorJson = JSON.parse(jsonStringMatch[1]);
+                // Use the 'error' or 'message' key from the parsed JSON
+                message = errorJson.error || errorJson.message || jsonStringMatch[1];
+            } catch (e) {
+                // Not valid JSON, just use the original message
+            }
         }
         showError(`${toolName} analysis failed`, message);
         return null; // Allow Promise.all to resolve
@@ -806,14 +812,17 @@ ${detail}`:''); };
         // This top-level catch will now primarily handle the `callAnalyzer` failure.
         // We'll add the same error parsing here for a cleaner message.
         let message = err.message || 'An unknown error occurred.';
-        const jsonMatch = message.match(/\{"error":"([^"]+)".*\}/);
-        if (jsonMatch && jsonMatch[1]) {
-            message = jsonMatch[1];
-        } else {
-            // Clean up the generic API error message if it wasn't a JSON error
-            const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
-            if(apiErrorMatch && apiErrorMatch[1]) {
-                message = apiErrorMatch[1];
+        const jsonStringMatch = message.match(/(\{.*\})/);
+        if (jsonStringMatch && jsonStringMatch[1]) {
+            try {
+                const errorJson = JSON.parse(jsonStringMatch[1]);
+                message = errorJson.error || errorJson.message || jsonStringMatch[1];
+            } catch (e) {
+                // Not valid JSON, just use the original message but try to clean it
+                 const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
+                if(apiErrorMatch && apiErrorMatch[1]) {
+                    message = apiErrorMatch[1];
+                }
             }
         }
         showError('A critical error occurred during analysis.', message);
