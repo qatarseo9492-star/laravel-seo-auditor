@@ -143,6 +143,13 @@ class AnalyzerController extends Controller
                     return response()->json(['message' => "The AI response was missing the expected '{$key}' data structure."], 500);
                 }
             }
+            
+            // Specifically check for nlp_score in content_optimization
+            if ($toolName === 'content_optimization' && !isset($result['content_optimization']['nlp_score'])) {
+                 Log::error("Missing 'nlp_score' key from AI for {$toolName}", ['result' => $result]);
+                 return response()->json(['message' => "The AI response was missing the critical 'nlp_score' data."], 500);
+            }
+
 
             AnalysisCache::create(['url' => $url, 'type' => $toolName, 'results' => $result]);
             
