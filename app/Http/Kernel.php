@@ -32,7 +32,6 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
-            // ✅ **THE FIX:** This class provides the $errors variable to your views.
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -63,9 +62,8 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         // Custom Aliases
         'admin' => \App\Http\Middleware\AdminCheck::class,
-        'ban' => \App\Http\Middleware\BanCheck::class, // Can be used as alias too
+        'ban' => \App\Http\Middleware\BanCheck::class, 
         'quota' => \App\Http\Middleware\QuotaGuard::class,
-        'presence' => \App\Http\Middleware\TouchPresence::class, // Can be used as alias too
+        'presence' => \App\Http\Middleware\TouchPresence::class,
     ];
 }
-```
