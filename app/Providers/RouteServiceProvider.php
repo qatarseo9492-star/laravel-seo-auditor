@@ -24,18 +24,16 @@ class RouteServiceProvider extends ServiceProvider
 
     protected function configureRateLimiting(): void
     {
-        // Default API limiter (unchanged)
+        // Default API limiter
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?? $request->ip());
         });
 
-        // SEO analyzer limiter: 200 requests in a 24-hour rolling window per user (fallback to IP)
+        // SEO analyzer limiter: 200 requests in a rolling 24h per user (fallback to IP)
         RateLimiter::for('seoapi', function (Request $request) {
-            // Use user id if available, else IP
             $key = $request->user()?->id ?? $request->ip();
 
-            return Limit::perMinute(200)
-                ->decayMinutes(1440) // 24 hours
+            return Limit::perMinutes(1440, 200)
                 ->by($key)
                 ->response(function () {
                     return response()->json([
