@@ -95,7 +95,7 @@ class AnalyzerController extends Controller
     }
 
     /**
-     * ✅ UPDATED: A single, robust handler for all OpenAI requests with improved response validation.
+     * A single, robust handler for all OpenAI requests with improved response validation.
      */
     private function handleAiRequest(Request $request, string $toolName, string $promptTemplate, array $expectedKeys): JsonResponse
     {
@@ -136,7 +136,6 @@ class AnalyzerController extends Controller
                 return response()->json(['message' => "The AI service returned invalid JSON for the {$toolName} analysis."], 500);
             }
 
-            // ✅ THE FIX: Stricter validation of the AI's response structure.
             foreach ($expectedKeys as $key) {
                 if (!isset($result[$key])) {
                     Log::error("Missing expected key '{$key}' from AI for {$toolName}", ['result' => $result]);
