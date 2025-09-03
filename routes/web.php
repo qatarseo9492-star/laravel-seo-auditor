@@ -11,6 +11,10 @@ use App\Http\Controllers\Admin\UserAdminController;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
+|
+| These routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group.
+|
 */
 
 // Homepage
@@ -51,24 +55,19 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
     | This is crucial for logging and enforcing user-specific quotas.
     */
     Route::prefix('api')->middleware('quota')->group(function() {
-        // Main content analysis
+        // Main local parsing and AI analysis routes
         Route::post('/semantic-analyze', [AnalyzerController::class, 'analyze'])->name('api.semantic');
-
-        // Technical SEO analysis
+        Route::post('/content-optimization', [AnalyzerController::class, 'analyzeContentOptimization'])->name('api.content-optimization');
         Route::post('/technical-seo-analyze', [AnalyzerController::class, 'analyzeTechnicalSeo'])->name('api.technical-seo');
-        
-        // Keyword Intelligence analysis
         Route::post('/keyword-analyze', [AnalyzerController::class, 'analyzeKeywords'])->name('api.keyword-analyze');
-
-        // Content Analysis Engine
         Route::post('/content-engine-analyze', [AnalyzerController::class, 'analyzeContentEngine'])->name('api.content-engine');
 
-        // Optional stubs (safe to keep)
+        // Optional stubs
         Route::post('/ai-check', [AnalyzerController::class, 'aiCheck'])->name('api.aicheck');
         Route::post('/topic-cluster', [AnalyzerController::class, 'topicClusterAnalyze'])->name('api.topiccluster');
     });
 
-    // PageSpeed Insights Proxy
+    // PageSpeed Insights Proxy - also protected by auth and quota
     Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
         ->name('semantic.psi')
         ->middleware('quota');
@@ -94,4 +93,3 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
 */
 Route::get('/_up', fn () => response('OK', 200))->name('_up');
 Route::fallback(fn () => redirect()->route('home'));
-
