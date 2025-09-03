@@ -4,6 +4,7 @@
 
 @push('head')
     <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 @endpush
 
 @section('content')
@@ -62,6 +63,7 @@
         <div class="tabs">
             <button class="tab-button active" onclick="openTab(event, 'users')">User Management</button>
             <button class="tab-button" onclick="openTab(event, 'searches')">Search History</button>
+             <button class="tab-button" onclick="openTab(event, 'analytics')">Analytics</button>
         </div>
 
         <!-- Users Tab -->
@@ -93,7 +95,8 @@
                                 </td>
                                 <td>{{ $user->limit->searches_today ?? 0 }} / {{ $user->limit->searches_this_month ?? 0 }}</td>
                                 <td>
-                                    <form action="{{-- route('admin.users.limit', $user) --}}" method="POST" class="limit-form">
+                                    {{-- ✅ THE FIX IS HERE --}}
+                                    <form action="{{ route('admin.users.limit', $user) }}" method="POST" class="limit-form">
                                         @csrf
                                         @method('PATCH')
                                         <input type="number" name="daily_limit" class="limit-input" value="{{ $user->limit->daily_limit ?? 10 }}">
@@ -102,7 +105,8 @@
                                     </form>
                                 </td>
                                 <td>
-                                    <form action="{{-- route('admin.users.ban', $user) --}}" method="POST">
+                                    {{-- ✅ AND THE FIX IS HERE --}}
+                                    <form action="{{ route('admin.users.ban', $user) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
                                         <button type="submit" class="btn-ban {{ $user->is_banned ? 'btn-unban' : '' }}">
@@ -126,8 +130,13 @@
         <div id="searches" class="tab-content">
            <p style="text-align:center; padding: 2rem;">Search history table would go here.</p>
         </div>
+        
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="chart-container">
+                 <canvas id="dailyUsageChart"></canvas>
+            </div>
+        </div>
     </div>
 </div>
-
-<script src="{{ asset('js/admin-dashboard.js') }}"></script>
 @endsection
