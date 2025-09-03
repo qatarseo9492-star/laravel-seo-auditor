@@ -2,17 +2,25 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AnalyzeLog extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'user_id','analyzer','url','ip','country','tokens_used','success',
+        'user_id',
+        'tool',
+        'url',
+        'ip_address',
+        'country',
+        'successful',
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 }
+
