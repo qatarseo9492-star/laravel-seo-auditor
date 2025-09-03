@@ -151,10 +151,69 @@ class AnalyzerController extends Controller
     }
 
     // All AI endpoints use the central handler
-    public function analyzeContentOptimization(Request $request) {
-        $prompt = "Analyze content at '{{URL}}' for SEO. Return JSON with 'content_optimization' containing: 'nlp_score' (0-100), 'topic_coverage' {'percentage', 'total', 'covered'}, 'content_gaps' {'missing_topics':[{'term', 'severity'}]}, 'schema_suggestions' (array of strings), and 'readability_intent' {'intent', 'grade_level'}.";
-        return $this->handleAiRequest($request, 'content_optimization', $prompt, ['content_optimization']);
+    public function analyzeContentOptimization(Request $request)
+{
+    $url = trim($request->input('url'));
+
+    // Run your existing handler / analysis path. We purposefully do NOT change your analysis logic.
+    // If your handleAiRequest returns a Response, unwrap its JSON; otherwise accept an array.
+    $raw = $this->handleAiRequest($request, 'content_optimization', 'Content Optimization Analysis', ['content_optimization']);
+
+    // Normalize $results into an array
+    $results = [];
+    if ($raw instanceof \Illuminate\Http\JsonResponse) {
+        $payload = $raw->getData(true);
+        // common shapes: ['data' => [...]] or already flat
+        if (is_array($payload)) {
+            $results = $payload['data'] ?? $payload;
+        }
+    } elseif (is_string($raw)) {
+        $decoded = json_decode($raw, true);
+        $results = is_array($decoded) ? $decoded : [];
+    } elseif (is_array($raw)) {
+        $results = $raw;
     }
+
+    // Normalize keys the frontend expects (do not alter scoring logic, just surface under stable names)
+    $overall  = data_get($results, 'overall_score');
+    if (is_null($overall)) {
+        $overall = data_get($results, 'scores.overall');
+    }
+
+    $contentScore = data_get($results, 'content_optimization_score');
+    if (is_null($contentScore)) {
+        $contentScore = data_get($results, 'scores.content');
+    }
+
+    // Reflect normalized keys back into $results (harmless if already present)
+    $results['overall_score'] = $overall;
+    $results['content_optimization_score'] = $contentScore;
+
+    // Persist to analysis_cache (model cast 'results' => 'array' recommended but not required)
+    try {
+        \App\Models\AnalysisCache::updateOrCreate(
+            ['url' => $url, 'type' => 'content_optimization'],
+            ['results' => $results, 'updated_at' => now()]
+        );
+    } catch (\Throwable $e) {
+        // Do not fail the user flow if cache write fails; just proceed.
+        \Log::warning('analysis_cache write failed for content_optimization', [
+            'url' => $url,
+            'error' => $e->getMessage(),
+        ]);
+    }
+
+    // Return the normalized fields in the same request (never change UI contract)
+    return response()->json([
+        'ok' => true,
+        'data' => [
+            'overall_score'              => $overall,
+            'content_optimization_score' => $contentScore,
+            // Include the rest of the analysis payload for UI that needs it
+            'payload' => $results,
+        ],
+    ], 200);
+}
 
     public function analyzeTechnicalSeo(Request $request) {
         $prompt = "Analyze technical SEO of {{URL}}. Return JSON with: 'score' (0-100), 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map' (HTML ul string), and 'suggestions':[{'text','type'}].";
