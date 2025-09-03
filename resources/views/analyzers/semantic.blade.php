@@ -600,8 +600,10 @@ ${detail}`:''); };
         });
 
         // --- Fire all API calls in parallel ---
+        // FIX: Removed .catch from callAnalyzer. If it fails, Promise.all will reject, 
+        // and the main try/catch will handle the error, preventing the generic "parsing failed" message.
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
-            callAnalyzer(url).catch(err => { showError('Content analysis failed.', err.message); return null; }),
+            callAnalyzer(url),
             callTechnicalSeoApi(url).catch(err => { showError('Tech SEO analysis failed.', err.message); return null; }),
             callKeywordApi(url).catch(err => { showError('Keyword analysis failed.', err.message); return null; }),
             callContentEngineApi(url).catch(err => { showError('Content Engine analysis failed.', err.message); return null; }),
@@ -611,7 +613,8 @@ ${detail}`:''); };
             })
         ]);
 
-        if(!data||data.error) throw new Error(data?.error||'Local data parsing failed');
+        // This check is now for data integrity, not for null from a caught error.
+        if(!data || data.error) throw new Error(data?.error || 'Local data parsing failed');
 
         window.__lastData={...data,url};
 
