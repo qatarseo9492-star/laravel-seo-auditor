@@ -1,64 +1,142 @@
-/**
- * analyze_button_fix.js
- * Safe, idempotent listener that wires #analyzeBtn to POST /api/semantic-analyze
- * Requires:
- *   - <meta name="csrf-token" content="{{ csrf_token() }}">
- *   - <button id="analyzeBtn">Analyze</button>
- *   - <input id="targetUrl" type="url">
- * Does not change any of your existing logic; just sends the request
- * and dispatches a custom event with the response for your existing
- * UI code to hook into.
- */
-(function () {
-  if (window.__ANALYZE_BTN_BOUND__) return;
-  window.__ANALYZE_BTN_BOUND__ = true;
+(() => {
+  function log(...args){ try{ console.log('[AnalyzeFix]', ...args); }catch(_){} }
+  function once(el, type, handler){
+    if (!el || !type || !handler) return;
+    const key = `__bound_${type}`;
+    if (el[key]) return;
+    el.addEventListener(type, handler);
+    el[key] = true;
+  }
 
-  function $(id){ return document.getElementById(id); }
-  const btn = $('analyzeBtn');
-  const urlInput = $('targetUrl');
-  if (!btn || !urlInput) { console.warn('[analyze_button_fix] Missing #analyzeBtn or #targetUrl'); return; }
+  function getCsrf(){
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta && meta.content) return meta.content;
+    const hidden = document.querySelector('input[name="_token"]');
+    return hidden ? hidden.value : null;
+  }
 
-  const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  function getUrl(){
+    const candidates = [
+      '#urlInput', '#inputUrl', '#url', '#pageUrl',
+      'input[name="url"]', 'input[type="url"]',
+      '.url-input', '.js-url-input'
+    ];
+    for (const sel of candidates){
+      const el = document.querySelector(sel);
+      if (el && el.value) return el.value.trim();
+    }
+    return '';
+  }
 
-  btn.addEventListener('click', async (ev) => {
-    ev.preventDefault();
+  async function defaultAnalyze(url){
+    const csrf = getCsrf();
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+    if (csrf) headers['X-CSRF-TOKEN'] = csrf;
 
-    const url = (urlInput.value || '').trim();
-    if (!url) { alert('Please enter a URL.'); urlInput.focus(); return; }
+    const res = await fetch('/api/semantic-analyze', {
+      method: 'POST',
+      headers,
+      credentials: 'same-origin',
+      body: JSON.stringify({ url })
+    });
 
-    btn.disabled = true;
-    btn.dataset.loading = '1';
+    // Try to parse JSON even if not ok
+    let data = null;
+    try { data = await res.json(); } catch(_) {}
 
-    try {
-      const res = await fetch('/api/semantic-analyze', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': csrf
-        },
-        body: JSON.stringify({ url })
-      });
+    if (res.status === 419){
+      throw new Error('CSRF (419). Missing or invalid CSRF token.');
+    }
+    if (!res.ok){
+      const msg = (data && (data.message || data.error)) || `HTTP ${res.status}`;
+      const err = new Error('Analyze request failed: ' + msg);
+      err.response = data;
+      throw err;
+    }
+    return data;
+  }
 
-      if (res.status === 401) { alert('Please log in to analyze.'); return; }
-      if (res.status === 429) { alert('You have reached your usage quota.'); return; }
+  function callExistingIfAny(url){
+    const fns = [
+      'runAnalyze', 'startAnalyze', 'startAnalysis', 'doAnalyze', 'analyze',
+      'window.runAnalyze', 'window.startAnalyze', 'window.startAnalysis'
+    ];
+    for (const name of fns){
+      const fn = name.split('.').reduce((acc, k)=> acc && acc[k], window);
+      if (typeof fn === 'function'){
+        log('Using existing function:', name);
+        try { fn(url); return true; } catch(e){ log('Existing fn errored', e); }
+      }
+    }
+    return false;
+  }
 
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok || json?.ok === false) {
-        console.error('[analyze_button_fix] Server error:', json);
-        alert(json?.error || json?.message || 'Analysis failed.');
+  async function onAnalyzeClick(ev){
+    try{
+      ev && ev.preventDefault && ev.preventDefault();
+      const url = getUrl();
+      if (!url){
+        alert('Please enter a valid URL first.');
         return;
       }
+      // Prefer existing site logic if present
+      if (callExistingIfAny(url)) return;
 
-      // Bubble the result for your existing UI to consume.
-      // Listen elsewhere with: window.addEventListener('semantic:analyzed', (e) => { console.log(e.detail); });
-      window.dispatchEvent(new CustomEvent('semantic:analyzed', { detail: json }));
-      console.log('[analyze_button_fix] Analysis complete:', json);
-    } catch (err) {
-      console.error('[analyze_button_fix] Network error:', err);
-      alert('Network or server error.');
-    } finally {
-      btn.disabled = false;
-      delete btn.dataset.loading;
+      // Fallback minimal request so button "does something"
+      log('No existing global function found. Using default /api/semantic-analyze');
+      const result = await defaultAnalyze(url);
+      log('Semantic analyze result:', result);
+      // emit an event so the page (if listening) can react
+      document.dispatchEvent(new CustomEvent('analysis:semantic:done', { detail: result }));
+    }catch(err){
+      log('Analyze error:', err);
+      // Surface helpful hints without taking over the UI
+      if (String(err.message || '').includes('CSRF')){
+        console.error('CSRF token missing/invalid. Ensure <meta name="csrf-token" content="{{ csrf_token() }}"> is in your layout and the request includes X-CSRF-TOKEN.');
+        alert('Your session might have expired. Please refresh and try again.');
+      }
     }
-  });
+  }
+
+  function wire(){
+    const buttonSelectors = [
+      '#analyzeBtn', '#analyze_button', '#btnAnalyze', 'button#analyze',
+      'button[data-action="analyze"]', '.analyze-btn', '.js-analyze'
+    ];
+    let wired = false;
+    for (const sel of buttonSelectors){
+      const btn = document.querySelector(sel);
+      if (btn){
+        once(btn, 'click', onAnalyzeClick);
+        wired = true;
+      }
+    }
+    // Also wire Enter key in URL input
+    const urlInputSel = ['#urlInput', '#inputUrl', '#url', '#pageUrl', 'input[name="url"]', 'input[type="url"]', '.url-input', '.js-url-input'];
+    for (const sel of urlInputSel){
+      const el = document.querySelector(sel);
+      if (el){
+        once(el, 'keydown', (e) => {
+          if (e.key === 'Enter'){ onAnalyzeClick(e); }
+        });
+      }
+    }
+    if (!wired){
+      // As a last resort, delegate on document for any click on elements with data-action="analyze"
+      once(document, 'click', (e) => {
+        const t = e.target.closest('[data-action="analyze"]');
+        if (t) onAnalyzeClick(e);
+      });
+    }
+    log('Analyze button wiring complete.');
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', wire, { once: true });
+  } else {
+    wire();
+  }
 })();
