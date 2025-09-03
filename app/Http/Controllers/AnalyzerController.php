@@ -139,9 +139,9 @@ class AnalyzerController extends Controller
             return response()->json(Cache::get($cacheKey));
         }
         
-        if (($limitCheck = $this->checkAndLog($request, 'ai_' . $task)) !== true) {
-            return $limitCheck;
-        }
+        // if (($limitCheck = $this->checkAndLog($request, 'ai_' . $task)) !== true) {
+        //     return $limitCheck;
+        // }
 
         $apiKey = env('OPENAI_API_KEY');
         if (!$apiKey) {
@@ -246,7 +246,7 @@ class AnalyzerController extends Controller
             $validated = $request->validate(['url' => 'required|url']);
             $url = $validated['url'];
 
-            if (($limitCheck = $this->checkAndLog($request, 'psi')) !== true) return $limitCheck;
+            // if (($limitCheck = $this->checkAndLog($request, 'psi')) !== true) return $limitCheck;
 
             $apiKey = env('PAGESPEED_API_KEY');
             if (!$apiKey) return response()->json(['error' => 'PageSpeed API key is not configured.'], 500);
