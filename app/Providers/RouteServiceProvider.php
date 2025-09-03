@@ -24,15 +24,25 @@ class RouteServiceProvider extends ServiceProvider
 
     protected function configureRateLimiting(): void
     {
+        // Default API limiter (unchanged)
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?? $request->ip());
         });
 
+        // SEO analyzer limiter: 200 requests in a 24-hour rolling window per user (fallback to IP)
         RateLimiter::for('seoapi', function (Request $request) {
-            $key = ($request->user()?->id ?? 'guest').'|'.$request->ip();
-            return Limit::perMinute(240)->by($key)->response(function () {
-                return response()->json(['ok'=>false,'error'=>'Too many requests'], 429);
-            });
+            // Use user id if available, else IP
+            $key = $request->user()?->id ?? $request->ip();
+
+            return Limit::perMinute(200)
+                ->decayMinutes(1440) // 24 hours
+                ->by($key)
+                ->response(function () {
+                    return response()->json([
+                        'ok'    => false,
+                        'error' => 'Daily limit reached (200). Try again later.',
+                    ], 429);
+                });
         });
     }
 }
