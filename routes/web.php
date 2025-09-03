@@ -1,5 +1,27 @@
 <?php
+leware('throttle:seoapi');
+});
 
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'ban', 'presence', 'admin'])
+    ->prefix('admin')->name('admin.')
+    ->group(function () {
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');
+        Route::patch('/users/{user}/ban', [UserAdminController::class, 'toggleBan'])->name('users.ban');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| Utility & Fallback Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('/_up', fn () => response('OK', 200))->name('_up');
+Route::fallback(fn () => redirect()->route('home'));
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
@@ -46,29 +68,7 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
         Route::post('/avatar', 'updateAvatar')->name('avatar');
     });
 
-    // PageSpeed Insights Proxy - Kept here as it was in the original structure
-    Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
+    // PageSpeed Insights Proxy - Corrected to use pageSpeedInsights method
+    Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'pageSpeedInsights'])
         ->name('semantic.psi')
-        ->middleware('throttle:seoapi');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Admin Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'ban', 'presence', 'admin'])
-    ->prefix('admin')->name('admin.')
-    ->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');
-        Route::patch('/users/{user}/ban', [UserAdminController::class, 'toggleBan'])->name('users.ban');
-    });
-
-/*
-|--------------------------------------------------------------------------
-| Utility & Fallback Routes
-|--------------------------------------------------------------------------
-*/
-Route::get('/_up', fn () => response('OK', 200))->name('_up');
-Route::fallback(fn () => redirect()->route('home'));
+        ->midd
