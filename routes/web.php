@@ -1,95 +1,47 @@
 <?php
 
+namespace App\Providers;
+
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AnalyzerController;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\UserAdminController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| These routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group.
-|
-*/
+class RouteServiceProvider extends ServiceProvider
+{
+    public const HOME = '/dashboard';
 
-// Homepage
-Route::view('/', 'home')->name('home');
+    public function boot(): void
+    {
+        $this->configureRateLimiting();
 
-// Authentication Routes
-Route::controller(AuthController::class)->group(function () {
-    Route::get('/login', 'showLogin')->name('login');
-    Route::post('/login', 'login')->name('login.post');
-    Route::get('/register', 'showRegister')->name('register');
-    Route::post('/register', 'register')->name('register.post');
-    Route::post('/logout', 'logout')->name('logout');
-});
+        $this->routes(function () {
+            Route::prefix('api')->middleware('api')->group(base_path('routes/api.php'));
+            Route::middleware('web')->group(base_path('routes/web.php'));
+        });
+    }
 
-// Authenticated User Routes
-Route::middleware(['auth', 'ban', 'presence'])->group(function () {
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    protected function configureRateLimiting(): void
+    {
+        // Default API limiter (unchanged)
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?? $request->ip());
+        });
 
-    // Analyzer UI Pages
-    Route::view('/semantic-analyzer', 'analyzers.semantic')->name('semantic.analyzer');
-    Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
-    Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
+        // SEO analyzer limiter: 200 requests in a 24-hour rolling window per user (fallback to IP)
+        RateLimiter::for('seoapi', function (Request $request) {
+            $key = $request->user()?->id ?? $request->ip();
 
-    // Profile Management
-    Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', 'edit')->name('edit');
-        Route::post('/update', 'updateProfile')->name('update');
-        Route::post('/password', 'updatePassword')->name('password');
-        Route::post('/avatar', 'updateAvatar')->name('avatar');
-    });
-
-    /*
-    |--------------------------------------------------------------------------
-    | Internal API Routes for the Analyzer
-    |--------------------------------------------------------------------------
-    | ✅ MOVED: These routes now use the 'web' middleware group, giving them
-    | access to session state, CSRF protection, and the authenticated user.
-    | This is crucial for logging and enforcing user-specific quotas.
-    */
-    Route::prefix('api')->middleware('throttle:seoapi')->group(function() {
-        // Main local parsing and AI analysis routes
-        Route::post('/semantic-analyze', [AnalyzerController::class, 'analyze'])->name('api.semantic');
-        Route::post('/content-optimization', [AnalyzerController::class, 'analyzeContentOptimization'])->name('api.content-optimization');
-        Route::post('/technical-seo-analyze', [AnalyzerController::class, 'analyzeTechnicalSeo'])->name('api.technical-seo');
-        Route::post('/keyword-analyze', [AnalyzerController::class, 'analyzeKeywords'])->name('api.keyword-analyze');
-        Route::post('/content-engine-analyze', [AnalyzerController::class, 'analyzeContentEngine'])->name('api.content-engine');
-
-        // Optional stubs
-        Route::post('/ai-check', [AnalyzerController::class, 'aiCheck'])->name('api.aicheck');
-        Route::post('/topic-cluster', [AnalyzerController::class, 'topicClusterAnalyze'])->name('api.topiccluster');
-    });
-
-    // PageSpeed Insights Proxy - also protected by auth and quota
-    Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
-        ->name('semantic.psi')
-        ->middleware('throttle:seoapi');
-});
-
-/*
-|--------------------------------------------------------------------------
-| Admin Routes
-|--------------------------------------------------------------------------
-*/
-Route::middleware(['auth', 'ban', 'presence', 'admin'])
-    ->prefix('admin')->name('admin.')
-    ->group(function () {
-        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');
-        Route::patch('/users/{user}/ban', [UserAdminController::class, 'toggleBan'])->name('users.ban');
-    });
-
-/*
-|--------------------------------------------------------------------------
-| Utility & Fallback Routes
-|--------------------------------------------------------------------------
-*/
-Route::get('/_up', fn () => response('OK', 200))->name('_up');
-Route::fallback(fn () => redirect()->route('home'));
+            // Use perMinutes instead of ->decayMinutes() for compatibility
+            return Limit::perMinutes(1440, 200)
+                ->by($key)
+                ->response(function () {
+                    return response()->json([
+                        'ok'    => false,
+                        'error' => 'Daily limit reached (200). Try again later.',
+                    ], 429);
+                });
+        });
+    }
+}
