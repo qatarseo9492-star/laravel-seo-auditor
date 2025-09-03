@@ -53,9 +53,6 @@ class AnalyzerController extends Controller
             $validated = $request->validate(['url' => ['required', 'url']]);
             $urlToAnalyze = $validated['url'];
 
-            // We can log this as a "page view" or a simple, non-quota action if desired
-            // For now, we assume only AI calls consume the quota.
-
             $contentStructure = []; $pageSignals = []; $quickStats = [];
             $response = Http::timeout(15)->get($urlToAnalyze);
             if ($response->failed()) return response()->json(['ok' => false, 'error' => "Failed to fetch URL. Status: {$response->status()}"], 400);
@@ -127,15 +124,20 @@ class AnalyzerController extends Controller
                 return response()->json(['message' => "The AI service returned an error for the {$toolName} analysis.", 'detail' => $response->body()], 502);
             }
 
-            $result = json_decode($response->json('choices.0.message.content'), true);
-            
+            $rawContent = $response->json('choices.0.message.content');
+            if (empty($rawContent)) {
+                Log::error("Empty content from AI for {$toolName}", ['response' => $response->json()]);
+                return response()->json(['message' => "The AI service returned an empty response for the {$toolName} analysis."], 500);
+            }
+
+            $result = json_decode($rawContent, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                Log::error("Invalid JSON from AI for {$toolName}", ['body' => $response->json('choices.0.message.content')]);
+                Log::error("Invalid JSON from AI for {$toolName}", ['body' => $rawContent]);
                 return response()->json(['message' => "The AI service returned invalid JSON for the {$toolName} analysis."], 500);
             }
 
             foreach ($expectedKeys as $key) {
-                if (!isset($result[$key]) || !is_array($result[$key])) $result[$key] = [];
+                if (!isset($result[$key])) $result[$key] = []; // Ensure root keys exist
             }
 
             AnalysisCache::create(['url' => $url, 'type' => $toolName, 'results' => $result]);
