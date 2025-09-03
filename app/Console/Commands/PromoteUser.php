@@ -11,11 +11,15 @@ class PromoteUser extends Command
      * The name and signature of the console command.
      *
      * Usage: php artisan user:promote {email} {role=admin}
+     *
+     * @var string
      */
     protected $signature = 'user:promote {email} {role=admin}';
 
     /**
      * The console command description.
+     *
+     * @var string
      */
     protected $description = 'Promote a user to a given role (default: admin)';
 
@@ -34,6 +38,7 @@ class PromoteUser extends Command
             return 1;
         }
 
+        // Assuming your User model has a 'role' column
         $user->role = $role;
         $user->save();
 
