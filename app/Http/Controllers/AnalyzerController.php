@@ -125,7 +125,7 @@ class AnalyzerController extends Controller
             }
 
             $rawContent = $response->json('choices.0.message.content');
-            Log::info("Raw AI Response for {$toolName}", ['content' => $rawContent]); // Log the raw response for debugging
+            Log::info("Raw AI Response for {$toolName}", ['content' => $rawContent]);
 
             if (empty($rawContent)) {
                 return response()->json(['message' => "The AI service returned an empty response for the {$toolName} analysis."], 500);
