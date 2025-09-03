@@ -66,7 +66,9 @@
   .chip.warn{background:linear-gradient(135deg,#2a1f06,#3f2c07);border-color:#f59e0b72;box-shadow:0 0 24px rgba(245,158,11,.2)}
   .chip.bad{background:linear-gradient(135deg,#2e1010,#4a1616);border-color:#ef444472;box-shadow:0 0 24px rgba(239,68,68,.2)}
 
-  .btn{padding:10px 14px;border-radius:12px;font-weight:900;border:1px solid #ffffff22;color:#0b1020;font-size:13px}
+  .btn{padding:10px 14px;border-radius:12px;font-weight:900;border:1px solid #ffffff22;color:#0b1020;font-size:13px; cursor: pointer; transition: all .2s ease;}
+  .btn:hover{filter: brightness(1.2); transform: translateY(-1px);}
+  .btn:active{transform: translateY(0px);}
   .btn-green{background:linear-gradient(90deg,var(--green-1),var(--green-2))}
   .btn-blue{background:linear-gradient(90deg,var(--blue-1),var(--blue-2))}
   .btn-orange{background:linear-gradient(90deg,var(--yellow-1),var(--orange-1));color:#2b1600}
@@ -227,7 +229,7 @@
     .speed-opportunities-title { display: flex; align-items: center; gap: 8px; color: #FBBF24; font-weight: 700; margin-bottom: 8px; }
     .speed-opportunities ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12px; color: var(--sub); }
   
-  /* ===================== Content Optimization (Futuristic) ===================== */
+  /* Animations */
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
   .animated-icon {
@@ -239,40 +241,26 @@
   .animated-icon.pulse {
       animation: pulse 3s ease-in-out infinite, spin 12s linear infinite reverse;
   }
-
-  .co-card {
-    --co-bg: #191919;
-    --co-border: var(--outline);
-
-    border-radius: 20px;
-    background: var(--co-bg);
-    border: 1px solid var(--co-border);
-    padding: 16px;
-    margin-top: 12px;
-    background-image:
-      radial-gradient(circle at 10% 10%, rgba(138,43,226,.12), transparent 40%),
-      radial-gradient(circle at 90% 80%, rgba(0,198,255,.12), transparent 50%);
-  }
   
-  .co-grid, .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
-  @media (max-width: 920px){.co-grid, .tsi-grid, .cae-grid {grid-template-columns:1fr}}
+  .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
+  @media (max-width: 920px){.tsi-grid, .cae-grid {grid-template-columns:1fr}}
 
   /* Info Items Grid */
-  .co-info-grid, .tsi-info-grid, .cae-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  @media (max-width:500px){.co-info-grid, .tsi-info-grid, .cae-info-grid {grid-template-columns:1fr}}
-  .co-info-item, .tsi-info-item, .cae-info-item {
+  .tsi-info-grid, .cae-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  @media (max-width:500px){.tsi-info-grid, .cae-info-grid {grid-template-columns:1fr}}
+  .tsi-info-item, .cae-info-item {
     border-radius:14px;
     padding:14px;
     background:#1E1E1E;
     border:1px solid var(--outline);
     box-shadow:0 8px 24px rgba(0,0,0,.3);
   }
-  .co-info-icon, .tsi-info-icon, .cae-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
-  .co-info-icon svg, .tsi-info-icon svg, .cae-info-icon svg {width:18px;height:18px}
-  .co-info-header, .tsi-info-header, .cae-info-header {display:flex;align-items:center;gap:10px;margin-bottom:8px}
-  .co-info-title, .tsi-info-title, .cae-info-title {font-weight:800;color:var(--ink)}
-  .co-info-item p, .tsi-info-item p, .cae-info-item p {font-size:12px;color:#aab3c2;margin:0 0 10px}
-  .co-tags, .tsi-tags, .cae-tags {display:flex;flex-wrap:wrap;gap:6px}
+  .tsi-info-icon, .cae-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
+  .tsi-info-icon svg, .cae-info-icon svg {width:18px;height:18px}
+  .tsi-info-header, .cae-info-header {display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .tsi-info-title, .cae-info-title {font-weight:800;color:var(--ink)}
+  .tsi-info-item p, .cae-info-item p {font-size:12px;color:#aab3c2;margin:0 0 10px}
+  .tsi-tags, .cae-tags {display:flex;flex-wrap:wrap;gap:6px}
   
   .tsi-info-item ul { list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
   .tsi-info-item li { font-size: 13px; line-height: 1.5; }
@@ -281,16 +269,6 @@
   .site-map-container { background: #111; border-radius: 12px; padding: 12px; font-size: 12px; line-height: 1.6; max-height: 200px; overflow-y: auto;}
   .site-map-container ul { padding-left: 16px; margin: 0; }
   .site-map-container li { list-style-type: '— '; }
-
-  /* === Badges & Tips for Content Optimization === */
-  .co-badge{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:6px 10px;font-weight:700;font-size:12px;letter-spacing:.2px;border:1px solid var(--outline);background:#1a1a1a;color:#dbe7ff}
-  .co-badge.small{padding:4px 8px;font-size:11px}
-  .co-badge.good{background:rgba(0,255,138,.12);border-color:rgba(0,255,138,.35);color:#86efac}
-  .co-badge.warn{background:rgba(255,215,0,.12);border-color:rgba(255,165,0,.35);color:#facc15}
-  .co-badge.bad{background:rgba(255,20,147,.12);border-color:rgba(138,43,226,.35);color:#fda4af}
-  .co-tips{display:flex;flex-direction:column;gap:8px;margin-top:8px}
-  .co-tips .tip{border-left:3px solid #2a3b66;padding-left:10px;color:#cdd6ef;font-size:12px}
-
 
   /* ========================================================== */
   /* === 🎨 NEW STYLES for Technical SEO Integration 🎨 === */
@@ -378,6 +356,62 @@
   .ki-tags .chip.intent-trans { background: #2f1d08; border-color: #ff8c0072; color: #ffefd5;}
   .ki-tags .chip.intent-nav { background: #231a33; border-color: #8a2be272; color: #e9d5ff;}
   .ki-list { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #ffedd5;}
+
+  /* =================================================== */
+  /* === 🤖 NEW STYLES for AI-Powered Features 🤖 === */
+  /* =================================================== */
+  .ai-card {
+    background: linear-gradient(145deg, #0c212b, #0c1a2e);
+    border: 1px solid var(--blue-1);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+  }
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .ai-item {
+    background: rgba(5, 20, 25, 0.7);
+    border: 1px solid rgba(0, 198, 255, 0.3);
+    border-radius: 14px;
+    padding: 14px;
+    backdrop-filter: blur(4px);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ai-item-title {
+    font-weight: 800; font-size: 15px;
+    background: linear-gradient(90deg, var(--blue-1), var(--green-1));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 4px; display:flex; align-items:center; gap: 8px;
+  }
+  .ai-item p {
+      font-size: 13px; color: #c3e6ff; margin: 0;
+  }
+  .ai-input-row { display: flex; gap: 8px; margin-top: auto; }
+  .ai-input-row input {
+      flex-grow: 1;
+      background: #081220;
+      border: 1px solid #1c3d52;
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: var(--ink);
+      font-size: 13px;
+  }
+   .ai-input-row input:focus { outline: none; border-color: var(--blue-1); box-shadow: 0 0 8px var(--blue-1);}
+  .ai-result-box {
+      background: #081220;
+      border: 1px solid #1c3d52;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 13px;
+      color: #e0f2fe;
+      min-height: 80px;
+      white-space: pre-wrap;
+      overflow-y: auto;
+  }
 
   /* ======================================================= */
   /* === 🚀 NEW STYLES for Content Analysis Engine 🚀 === */
@@ -473,21 +507,6 @@
     const mobileLcp = $('#mobileLcp'), mobileInp = $('#mobileInp'), mobileCls = $('#mobileCls');
     const desktopLcp = $('#desktopLcp'), desktopInp = $('#desktopInp'), desktopCls = $('#desktopCls');
     const speedOpportunitiesList = $('#speedOpportunitiesList');
-
-
-    /* --- Content Optimization UI refs --- */
-    const mwContent=$('#mwContent'), ringContent=$('#ringContent'), numContent=$('#numContent');
-    const coCard = $('#contentOptimizationCard');
-    if (coCard) {
-        const coTopicCoverageText = coCard.querySelector('#coTopicCoverageText');
-        const coTopicCoverageProgress = coCard.querySelector('#coTopicCoverageProgress');
-        const coContentGapsText = coCard.querySelector('#coContentGapsText');
-        const coContentGapsTags = coCard.querySelector('#coContentGapsTags');
-        const coSchemaTags = coCard.querySelector('#coSchemaTags');
-        const coIntentTag = coCard.querySelector('#coIntentTag');
-        const coGradeTag = coCard.querySelector('#coGradeTag');
-        window.__coElements = { coTopicCoverageText, coTopicCoverageProgress, coContentGapsText, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag };
-    }
     
     /* --- Technical SEO Integration UI refs --- */
     const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI');
@@ -515,6 +534,9 @@
     const caeRelevanceScore = $('#caeRelevanceScore');
     const caeRelevanceBar = $('#caeRelevanceBar');
     const caeIntent = $('#caeIntent');
+    
+    /* --- NEW: AI-Powered Features UI refs --- */
+    const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult');
 
 
     /* Helpers */
@@ -553,11 +575,11 @@
     function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label+' best practices'));if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});chipAuto.textContent=autoGood;}
 
     /* API Calls */
-    async function callApi(endpoint, url) {
+    async function callApi(endpoint, data) {
         const res = await fetch(endpoint, {
             method: 'POST',
             headers: {'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
-            body: JSON.stringify({ url })
+            body: JSON.stringify(data)
         });
         if (!res.ok) {
             const errorText = await res.text();
@@ -567,11 +589,13 @@
     }
     
     // Specific API call wrappers
-    const callAnalyzer = (url) => callApi('/api/semantic-analyze', url);
-    const callTechnicalSeoApi = (url) => callApi('/api/technical-seo-analyze', url);
-    const callKeywordApi = (url) => callApi('/api/keyword-analyze', url);
-    const callContentEngineApi = (url) => callApi('/api/content-engine-analyze', url);
-    const callPSI = (url) => callApi('/semantic-analyzer/psi', url);
+    const callAnalyzer = (url) => callApi('/api/semantic-analyze', { url });
+    const callTechnicalSeoApi = (url) => callApi('/api/technical-seo-analyze', { url });
+    const callKeywordApi = (url) => callApi('/api/keyword-analyze', { url });
+    const callContentEngineApi = (url) => callApi('/api/content-engine-analyze', { url });
+    const callPSI = (url) => callApi('/semantic-analyzer/psi', { url });
+    // NEW: OpenAI API Wrapper
+    const callOpenAiApi = (task, prompt, url = null) => callApi('/api/openai-request', { task, prompt, url });
 
 
     function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.style.opacity=isOn?.6:1;analyzeBtn.textContent=isOn?'Analyzing…':'🔍 Analyze'}
@@ -682,29 +706,6 @@
         chipViewport.textContent=data.page_signals?.has_viewport?'yes':'—';
         chipIntChip.textContent=data.quick_stats?.internal_links??0;
         chipSchema.textContent=(data.page_signals?.schema_types||[]).length;
-        
-        // --- POPULATE CONTENT OPTIMIZATION ---
-        if (data.content_optimization && window.__coElements) {
-            const co = data.content_optimization;
-            const { coTopicCoverageText, coTopicCoverageProgress, coContentGapsTags, coSchemaTags, coIntentTag, coGradeTag } = window.__coElements;
-
-            setWheel(ringContent, numContent, mwContent, clamp01(co.nlp_score || 0), '');
-
-            if (co.topic_coverage) {
-                coTopicCoverageText.innerHTML = `Covers <strong>${co.topic_coverage.covered} of ${co.topic_coverage.total}</strong> key topics.`;
-                coTopicCoverageProgress.style.width = co.topic_coverage.percentage + '%';
-            }
-            const contentGapsData = Array.isArray(co.content_gaps?.missing_topics) ? co.content_gaps.missing_topics : [];
-            coContentGapsTags.innerHTML = contentGapsData.map(topic => `<span class="chip ${topic.severity}"><i>${topic.severity==='bad'?'🔴':'🟧'}</i><span>${topic.term}</span></span>`).join('');
-            
-            const schemaSuggestionsData = Array.isArray(co.schema_suggestions) ? co.schema_suggestions : [];
-            coSchemaTags.innerHTML = schemaSuggestionsData.map(schema => `<span class="chip good"><i>✅</i><span>${schema}</span></span>`).join('');
-
-            if (co.readability_intent) {
-                coIntentTag.innerHTML = `Intent: ${co.readability_intent.intent}`;
-                coGradeTag.innerHTML = `Grade Level: ${co.readability_intent.grade_level}`;
-            }
-        }
         
         // --- POPULATE TECHNICAL SEO INTEGRATION ---
         if (tsiData) {
@@ -829,6 +830,30 @@
       }
     });
 
+    // --- AI Feature Event Listeners ---
+    aiBriefBtn?.addEventListener('click', async () => {
+        const prompt = aiBriefInput.value.trim();
+        const url = urlInput.value.trim();
+        if (!prompt) {
+            aiBriefResult.textContent = 'Please enter a topic or keyword.';
+            return;
+        }
+        
+        aiBriefBtn.disabled = true;
+        aiBriefBtn.textContent = 'Generating...';
+        aiBriefResult.textContent = 'AI is crafting your brief...';
+
+        try {
+            const result = await callOpenAiApi('brief', prompt, url);
+            aiBriefResult.textContent = result.content || 'No content returned from AI.';
+        } catch (error) {
+            aiBriefResult.textContent = `Error: ${error.message}`;
+        } finally {
+            aiBriefBtn.disabled = false;
+            aiBriefBtn.textContent = 'Generate';
+        }
+    });
+
     // Utility buttons
     pasteBtn && pasteBtn.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
     importBtn && importBtn.addEventListener('click',()=>importFile.click());
@@ -916,68 +941,8 @@
     </div>
   </div>
 
-  <!-- Content Optimization -->
+  <!-- NEW: Content Analysis Engine -->
   <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
-    <span class="animated-icon" style="color:var(--green-1);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"></path><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"></path></svg>
-    </span>
-    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Optimization</h3>
-    <span class="animated-icon pulse" style="color:var(--pink-1);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
-    </span>
-  </div>
-
-<div class="co-card" id="contentOptimizationCard">
-    <div class="co-grid">
-      <div style="display:grid;place-items:center;padding:10px">
-        <div class="mw warn" id="mwContent">
-          <div class="mw-ring" id="ringContent" style="--v:0"></div>
-          <div class="mw-center" id="numContent">0%</div>
-        </div>
-      </div>
-
-      <div class="co-info-grid">
-        <div class="co-info-item">
-          <div class="co-info-header">
-            <div class="co-info-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div>
-            <span class="co-info-title">Topic Coverage</span>
-          </div>
-          <p id="coTopicCoverageText">Run analysis to get data.</p>
-          <div class="progress"><span id="coTopicCoverageProgress" style="width:0%;"></span></div>
-        </div>
-
-        <div class="co-info-item">
-          <div class="co-info-header">
-            <div class="co-info-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
-            <span class="co-info-title">Content Gaps</span>
-          </div>
-          <div class="co-tags" id="coContentGapsTags"></div>
-        </div>
-    
-        <div class="co-info-item">
-          <div class="co-info-header">
-            <div class="co-info-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg></div>
-            <span class="co-info-title">Schema Suggestions</span>
-          </div>
-         <div class="co-tags" id="coSchemaTags"></div>
-      </div>
-    
-      <div class="co-info-item">
-        <div class="co-info-header">
-          <div class="co-info-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg></div>
-          <span class="co-info-title">Readability & Intent</span>
-        </div>
-         <div class="co-tags">
-          <span id="coIntentTag" class="chip">Intent: —</span>
-          <span id="coGradeTag" class="chip">Grade Level: —</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- NEW: Content Analysis Engine -->
-<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
     <span class="animated-icon" style="color:var(--blue-1);">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20.94c1.5 0 2.75 1.25 2.75 2.75S13.5 26.44 12 26.44 9.25 25.19 9.25 23.69s1.25-2.75 2.75-2.75z"></path><path d="M12 2.56c1.5 0 2.75 1.25 2.75 2.75S13.5 8.06 12 8.06 9.25 6.81 9.25 5.31s1.25-2.75 2.75-2.75z"></path></svg>
     </span>
@@ -985,8 +950,8 @@
     <span class="animated-icon pulse" style="color:var(--purple-1);">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.21 17.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path><path d="M19.79 6.5c1.1 0 2 0.9 2 2s-0.9 2-2 2-2-0.9-2-2 0.9-2 2-2z"></path></svg>
     </span>
-</div>
-<div class="cae-card" id="contentAnalysisEngineCard">
+  </div>
+  <div class="cae-card" id="contentAnalysisEngineCard">
     <div class="cae-grid">
       <div style="display:grid;place-items:center;padding:10px">
         <div class="mw" id="mwCAE">
@@ -1015,16 +980,16 @@
         </div>
       </div>
     </div>
-</div>
+  </div>
 
-<!-- Technical SEO Integration -->
-<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+  <!-- Technical SEO Integration -->
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
     <span class="animated-icon pulse" style="color:var(--purple-1);">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m18 16 4-4-4-4"></path><path d="m6 8-4 4 4 4"></path><path d="m14.5 4-5 16"></path></svg>
     </span>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
-</div>
-<div class="tsi-card" id="technicalSeoCard">
+  </div>
+  <div class="tsi-card" id="technicalSeoCard">
     <div class="tsi-grid">
       <div style="display:grid;place-items:center;padding:10px">
         <div class="mw" id="mwTSI">
@@ -1061,16 +1026,16 @@
         <h4><span class="animated-icon">💡</span> Technical SEO Suggestions</h4>
         <ul id="tsiSuggestionsList"></ul>
     </div>
-</div>
+  </div>
 
-<!-- Keyword Intelligence -->
-<div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+  <!-- Keyword Intelligence -->
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
     <span class="animated-icon" style="color:var(--yellow-1);">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     </span>
     <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
-</div>
-<div class="ki-card" id="keywordIntelligenceCard">
+  </div>
+  <div class="ki-card" id="keywordIntelligenceCard">
     <div class="ki-grid">
         <div class="ki-item">
             <h4 class="ki-item-title"><span class="animated-icon pulse" style="color:var(--yellow-1);">🧠</span>Semantic Keyword Research</h4>
@@ -1093,10 +1058,69 @@
             <div id="kiLongTail" class="ki-list"></div>
         </div>
     </div>
-</div>
+  </div>
 
-<!-- Meta Info Layout -->
-<div class="card meta-card" style="margin-top:24px;">
+  <!-- AI-Powered Features -->
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+    <span class="animated-icon" style="color:var(--blue-1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect x="8" y="16" width="8" height="4" rx="1"/><path d="M12 16v-4"/><path d="M16 8V4h-4"/></svg>
+    </span>
+    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI-Powered Features</h3>
+    <span class="animated-icon pulse" style="color:var(--green-2);">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+    </span>
+  </div>
+  <div class="ai-card" id="aiPoweredFeaturesCard">
+      <div class="ai-grid">
+          <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon pulse" style="color:var(--blue-1);">📝</span>Content Brief Generation</h4>
+              <p>AI-generated semantic content briefs based on your target keyword.</p>
+              <div class="ai-input-row">
+                  <input id="aiBriefInput" type="text" placeholder="Enter target keyword...">
+                  <button id="aiBriefBtn" class="btn btn-blue">Generate</button>
+              </div>
+              <div id="aiBriefResult" class="ai-result-box">Brief will appear here...</div>
+          </div>
+          <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon" style="color:var(--green-1);">💡</span>Automated Content Suggestions</h4>
+              <p>Real-time content improvement recommendations for the analyzed URL.</p>
+              <div class="ai-input-row">
+                <button class="btn btn-green" style="width:100%">Get Suggestions</button>
+              </div>
+              <div class="ai-result-box">Suggestions will appear here...</div>
+          </div>
+          <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon pulse" style="color:var(--yellow-1);">🕵️</span>Competitor Content Analysis</h4>
+              <p>Deep dive into competitor semantic strategies. (Uses analyzed URL)</p>
+               <div class="ai-input-row">
+                <input type="url" placeholder="Enter competitor URL...">
+                <button class="btn btn-orange">Analyze</button>
+              </div>
+              <div class="ai-result-box">Analysis will appear here...</div>
+          </div>
+           <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon" style="color:var(--pink-1);">📈</span>Trend Prediction</h4>
+              <p>Forecast emerging semantic trends in your niche based on a keyword.</p>
+               <div class="ai-input-row">
+                <input type="text" placeholder="Enter topic or niche...">
+                <button class="btn btn-purple">Predict</button>
+              </div>
+              <div class="ai-result-box">Trends will appear here...</div>
+          </div>
+          <div class="ai-item" style="grid-column: 1 / -1;">
+              <h4 class="ai-item-title"><span class="animated-icon pulse" style="color:var(--red-1);">🧮</span>Bulk Content Analysis</h4>
+              <p>Process multiple pages simultaneously. Enter one URL per line.</p>
+               <div style="display: flex; flex-direction: column; gap: 8px;">
+                <textarea class="ai-result-box" style="min-height: 100px;" placeholder="https://example.com/page1&#10;https://example.com/page2"></textarea>
+                <button class="btn btn-orange">Analyze Bulk</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+
+  <!-- Meta Info Layout -->
+  <div class="card meta-card" style="margin-top:24px;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
         <span class="animated-icon pulse" style="color:var(--blue-1);">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72"></path></svg>
@@ -1117,10 +1141,10 @@
             <div id="headingMap" class="space-y-2" style="margin-top:8px;"></div>
         </div>
     </div>
-</div>
+  </div>
 
-<!-- Site Speed & Core Web Vitals (NEW LAYOUT) -->
-<div class="speed-card-new" id="speedCard">
+  <!-- Site Speed & Core Web Vitals (NEW LAYOUT) -->
+  <div class="speed-card-new" id="speedCard">
     <div class="speed-header">
         <div class="speed-title">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
@@ -1219,4 +1243,3 @@
 
 </section>
 @endsection
-
