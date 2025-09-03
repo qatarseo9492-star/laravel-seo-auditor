@@ -961,4 +961,3 @@ ${detail}`;
 
 </section>
 @endsection
-
