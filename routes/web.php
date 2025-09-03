@@ -46,28 +46,7 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
         Route::post('/avatar', 'updateAvatar')->name('avatar');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Internal API Routes for the Analyzer
-    |--------------------------------------------------------------------------
-    | ✅ MOVED: These routes now use the 'web' middleware group, giving them
-    | access to session state, CSRF protection, and the authenticated user.
-    | This is crucial for logging and enforcing user-specific quotas.
-    */
-    Route::prefix('api')->middleware('throttle:seoapi')->group(function() {
-        // Main local parsing and AI analysis routes
-        Route::post('/semantic-analyze', [AnalyzerController::class, 'analyze'])->name('api.semantic');
-        Route::post('/content-optimization', [AnalyzerController::class, 'analyzeContentOptimization'])->name('api.content-optimization');
-        Route::post('/technical-seo-analyze', [AnalyzerController::class, 'analyzeTechnicalSeo'])->name('api.technical-seo');
-        Route::post('/keyword-analyze', [AnalyzerController::class, 'analyzeKeywords'])->name('api.keyword-analyze');
-        Route::post('/content-engine-analyze', [AnalyzerController::class, 'analyzeContentEngine'])->name('api.content-engine');
-
-        // Optional stubs
-        Route::post('/ai-check', [AnalyzerController::class, 'aiCheck'])->name('api.aicheck');
-        Route::post('/topic-cluster', [AnalyzerController::class, 'topicClusterAnalyze'])->name('api.topiccluster');
-    });
-
-    // PageSpeed Insights Proxy - also protected by auth and throttle
+    // PageSpeed Insights Proxy - Kept here as it was in the original structure
     Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'psiProxy'])
         ->name('semantic.psi')
         ->middleware('throttle:seoapi');
