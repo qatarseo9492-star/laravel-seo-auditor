@@ -15,13 +15,13 @@
             <h1 class="header-title">Dashboard</h1>
             <p class="breadcrumbs">Admin / Overview</p>
         </div>
-        <div class="header-gauge" data-value="{{ $searchesToday }}" data-max="1000">
+        <div class="header-gauge" data-value="{{ $searchesToday ?? 0 }}" data-max="1000">
             <svg viewBox="0 0 36 36">
                 <path class="gauge-track" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                 <path class="gauge-progress" id="dailyUsageGauge" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
             </svg>
             <div class="gauge-label">
-                <span id="dailyUsageValue">{{ $searchesToday }}</span>
+                <span id="dailyUsageValue">{{ $searchesToday ?? 0 }}</span>
                 <span class="gauge-sublabel">Searches Today</span>
             </div>
         </div>
@@ -33,21 +33,21 @@
             <div class="card-icon icon-users"></div>
             <div>
                 <p class="card-title">Total Users</p>
-                <p class="card-value">{{ $totalUsers }}</p>
+                <p class="card-value">{{ $totalUsers ?? 0 }}</p>
             </div>
         </div>
         <div class="stat-card">
             <div class="card-icon icon-openai"></div>
             <div>
                 <p class="card-title">OpenAI Cost Today</p>
-                <p class="card-value">${{ number_format($openAiCostToday, 4) }}</p>
+                <p class="card-value">${{ number_format($openAiCostToday ?? 0, 4) }}</p>
             </div>
         </div>
         <div class="stat-card">
             <div class="card-icon icon-active"></div>
             <div>
                 <p class="card-title">Active Users (5 min)</p>
-                <p class="card-value">{{ $activeUsers }}</p>
+                <p class="card-value">{{ $activeUsers ?? 0 }}</p>
             </div>
         </div>
     </div>
@@ -121,9 +121,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($users)
             <div class="pagination-links">
                 {{ $users->links() }}
             </div>
+            @endif
         </div>
 
         <!-- Searches Tab -->
@@ -139,4 +141,6 @@
         </div>
     </div>
 </div>
+
+<script src="{{ asset('js/admin-dashboard.js') }}"></script>
 @endsection
