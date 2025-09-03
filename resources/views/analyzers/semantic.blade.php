@@ -523,6 +523,7 @@
     const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
     function setChip(el,label,value,score){ if(!el)return; el.classList.remove('good','warn','bad'); const b=bandName(score); el.classList.add(b); el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`; };
     const showError=(msg,detail)=>{ errorBox.style.display='block'; errorBox.textContent=msg+(detail?`: ${detail}`:''); };
+    const clearError=()=>{ errorBox.style.display='none'; errorBox.textContent=''; };
     
     const handleApiError = (toolName, error) => {
         let message = error.message || 'An unknown error occurred.';
