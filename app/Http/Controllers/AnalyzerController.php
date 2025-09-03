@@ -18,9 +18,12 @@ use App\Models\OpenAiUsage;
 use App\Support\Logs\UsageLogger;
 use App\Support\Costs\OpenAiCost;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 
 class AnalyzerController extends Controller
 {
+    // ... checkAndLogSearch and performAiAnalysis methods remain the same ...
+
     private function checkAndLogSearch(string $url, Request $request)
     {
         $user = Auth::user();
@@ -48,7 +51,7 @@ class AnalyzerController extends Controller
         return true;
     }
 
-    private function performAiAnalysis(string $urlToAnalyze, string $prompt, string $cacheType, array $expectedKeys)
+    private function performAiAnalysis(string $urlToAnalyze, string $prompt, string $cacheType, array $expectedKeys): JsonResponse
     {
         $cached = AnalysisCache::where('url', $urlToAnalyze)
             ->where('type', $cacheType)
@@ -94,37 +97,35 @@ class AnalyzerController extends Controller
             return response()->json($result);
 
         } catch (\Exception $e) {
-            // ✅ THE FIX: Log the detailed error and send a more specific message to the frontend.
-            Log::error("AI Analysis Exception for type: {$cacheType}", [
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]);
-            return response()->json([
-                'message' => "An unexpected error occurred during the {$cacheType} analysis.",
-                'detail' => $e->getMessage() // This will show the real error on the frontend.
-            ], 500);
+            Log::error("AI Analysis Exception for type: {$cacheType}", ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => "An unexpected error occurred during the {$cacheType} analysis.", 'detail' => $e->getMessage()], 500);
         }
     }
 
-    public function analyze(Request $request)
+    /**
+     * ✅ UPDATED: Handles the initial local HTML parsing with better error handling.
+     */
+    public function analyze(Request $request): JsonResponse
     {
-        $validated = $request->validate(['url' => ['required', 'url']]);
-        $urlToAnalyze = $validated['url'];
-
-        $limitCheck = $this->checkAndLogSearch($urlToAnalyze, $request);
-        if ($limitCheck !== true) return $limitCheck;
-
-        $contentStructure = []; $pageSignals = []; $quickStats = [];
-
         try {
+            $validated = $request->validate(['url' => ['required', 'url']]);
+            $urlToAnalyze = $validated['url'];
+
+            // This now happens inside the main try-catch block
+            $limitCheck = $this->checkAndLogSearch($urlToAnalyze, $request);
+            if ($limitCheck !== true) return $limitCheck;
+
+            $contentStructure = []; $pageSignals = []; $quickStats = [];
+
             $response = Http::timeout(15)->get($urlToAnalyze);
             if ($response->failed()) {
-                return response()->json(['ok' => false, 'error' => "Failed to fetch the provided URL. Status: {$response->status()}"], 400);
+                return response()->json(['ok' => false, 'error' => "Failed to fetch the provided URL. The server responded with status: {$response->status()}"], 400);
             }
             $html = $response->body();
             $dom = new DOMDocument();
-            @$dom->loadHTML($html);
+            libxml_use_internal_errors(true);
+            $dom->loadHTML($html);
+            libxml_clear_errors();
             $xpath = new DOMXPath($dom);
 
             $contentStructure['title'] = optional($xpath->query('//title')->item(0))->textContent;
@@ -150,19 +151,21 @@ class AnalyzerController extends Controller
             }
             $quickStats['internal_links'] = $internalLinks;
             $quickStats['schema_types'] = [];
+
+            return response()->json([
+                "ok" => true,
+                "content_structure" => $contentStructure,
+                "page_signals" => $pageSignals,
+                "quick_stats" => $quickStats,
+            ]);
+
         } catch (\Exception $e) {
-            Log::error('Local HTML Parsing Failed', ['message' => $e->getMessage()]);
-            return response()->json(['ok' => false, 'error' => "Could not parse the URL's HTML. It may be malformed or protected."], 500);
+            Log::error('Local HTML Parsing or Limit Check Failed', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['ok' => false, 'error' => "A server error occurred during the analysis.", 'detail' => $e->getMessage()], 500);
         }
-
-        return response()->json([
-            "ok" => true,
-            "content_structure" => $contentStructure,
-            "page_signals" => $pageSignals,
-            "quick_stats" => $quickStats,
-        ]);
     }
-
+    
+    // All other methods remain the same...
     public function psiProxy(Request $request) { /* ... unchanged ... */ }
     public function analyzeContentOptimization(Request $request) { /* ... unchanged ... */ }
     public function analyzeTechnicalSeo(Request $request) { /* ... unchanged ... */ }
