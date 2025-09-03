@@ -18,7 +18,7 @@ Route::get('/status', function () {
     return response()->json([
         'ok'      => true,
         'service' => 'Semantic SEO Master Analyzer API',
-        'version' => '2.4', // Updated version
+        'version' => '2.5', // Updated version
         'time'    => now()->toIso8601String(),
     ]);
 })->name('api.status');
@@ -27,6 +27,7 @@ Route::get('/status', function () {
 Route::middleware('throttle:seoapi')->group(function () {
     
     // 1. Initial Local HTML Parsing
+    // This route MUST point to 'handleLocalAnalysis' to match the controller.
     Route::post('/semantic-analyze', [AnalyzerController::class, 'handleLocalAnalysis'])
         ->name('api.semantic');
 
@@ -44,7 +45,7 @@ Route::middleware('throttle:seoapi')->group(function () {
     Route::post('/technical-seo-analyze', [AnalyzerController::class, 'technicalSeoAnalyze'])
         ->name('api.technical-seo');
         
-    // Keyword Intelligence analysis - CORRECTED
+    // Keyword Intelligence analysis
     Route::post('/keyword-analyze', [AnalyzerController::class, 'keywordAnalyze'])
         ->name('api.keyword-analyze');
 
