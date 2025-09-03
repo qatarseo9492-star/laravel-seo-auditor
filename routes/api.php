@@ -18,7 +18,7 @@ Route::get('/status', function () {
     return response()->json([
         'ok'      => true,
         'service' => 'Semantic SEO Master Analyzer API',
-        'version' => '2.3', // Updated version
+        'version' => '2.4', // Updated version
         'time'    => now()->toIso8601String(),
     ]);
 })->name('api.status');
@@ -44,15 +44,14 @@ Route::middleware('throttle:seoapi')->group(function () {
     Route::post('/technical-seo-analyze', [AnalyzerController::class, 'technicalSeoAnalyze'])
         ->name('api.technical-seo');
         
-    // Keyword Intelligence analysis
+    // Keyword Intelligence analysis - CORRECTED
     Route::post('/keyword-analyze', [AnalyzerController::class, 'keywordAnalyze'])
         ->name('api.keyword-analyze');
 
-    // Content Analysis Engine - CORRECTED METHOD NAME
+    // Content Analysis Engine
     Route::post('/content-engine-analyze', [AnalyzerController::class, 'contentEngineAnalyze'])
         ->name('api.content-engine');
 });
 
 // A catch-all for CORS preflight requests to ensure smooth frontend integration
 Route::options('/{any}', fn () => response()->noContent(204))->where('any', '.*');
-
