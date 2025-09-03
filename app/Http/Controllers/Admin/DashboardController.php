@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\AnalyzeLog;
 use App\Models\OpenAiUsage;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;   // ⬅️ add this
 
 class DashboardController extends Controller
