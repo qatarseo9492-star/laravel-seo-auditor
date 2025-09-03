@@ -526,6 +526,17 @@
 
 ${detail}`:''); };
     const clearError=()=>{ errorBox.style.display='none'; errorBox.textContent=''; };
+    
+    const handleApiError = (toolName, error) => {
+        let message = error.message || 'An unknown error occurred.';
+        // Extract a JSON error message like {"error":"You have reached your usage quota."}
+        const jsonMatch = message.match(/\{"error":"([^"]+)"\}/);
+        if (jsonMatch && jsonMatch[1]) {
+            message = jsonMatch[1];
+        }
+        showError(`${toolName} analysis failed`, message);
+        return null; // Allow Promise.all to resolve
+    };
 
     /* ===== Category/KB/scoring (unchanged logic) ===== */
     const CATS=[{name:'User Signals & Experience',icon:'📱',checks:['Mobile-friendly, responsive layout','Optimized speed (compression, lazy-load)','Core Web Vitals passing (LCP/INP/CLS)','Clear CTAs and next steps','Accessible basics (alt text, contrast)']},{name:'Entities & Context',icon:'🧩',checks:['sameAs/Organization details present','Valid schema markup (Article/FAQ/Product)','Related entities covered with context','Primary entity clearly defined','Organization contact/about page visible']},{name:'Structure & Architecture',icon:'🏗️',checks:['Logical H2/H3 headings & topic clusters','Internal links to hub/related pages','Clean, descriptive URL slug','Breadcrumbs enabled (+ schema)','XML sitemap logical structure']},{name:'Content Quality',icon:'🧠',checks:['E-E-A-T signals (author, date, expertise)','Unique value vs. top competitors','Facts & citations up to date','Helpful media (images/video) w/ captions','Up-to-date examples & screenshots']},{name:'Content & Keywords',icon:'📝',checks:['Define search intent & primary topic','Map target & related keywords (synonyms/PAA)','H1 includes primary topic naturally','Integrate FAQs / questions with answers','Readable, NLP-friendly language']},{name:'Technical Elements',icon:'⚙️',checks:['Title tag (≈50–60 chars) w/ primary keyword','Meta description (≈140–160 chars) + CTA','Canonical tag set correctly','Indexable & listed in XML sitemap','Robots directives valid']}];
@@ -600,20 +611,19 @@ ${detail}`:''); };
         });
 
         // --- Fire all API calls in parallel ---
-        // FIX: Removed .catch from callAnalyzer. If it fails, Promise.all will reject, 
-        // and the main try/catch will handle the error, preventing the generic "parsing failed" message.
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
-            callAnalyzer(url),
-            callTechnicalSeoApi(url).catch(err => { showError('Tech SEO analysis failed.', err.message); return null; }),
-            callKeywordApi(url).catch(err => { showError('Keyword analysis failed.', err.message); return null; }),
-            callContentEngineApi(url).catch(err => { showError('Content Engine analysis failed.', err.message); return null; }),
+            callAnalyzer(url), // Critical path: if this fails, the whole thing stops.
+            callTechnicalSeoApi(url).catch(err => handleApiError('Technical SEO', err)),
+            callKeywordApi(url).catch(err => handleApiError('Keyword Intelligence', err)),
+            callContentEngineApi(url).catch(err => handleApiError('Content Engine', err)),
             callPSI(url).catch(err => {
-                speedOverviewText.textContent = `⚠️ PageSpeed Insights API request failed. ${err.message}`;
+                handleApiError('PageSpeed Insights', err); // Use the handler for consistency
+                speedOverviewText.textContent = `⚠️ PageSpeed Insights analysis failed.`; // Keep UI update separate
                 return null;
             })
         ]);
 
-        // This check is now for data integrity, not for null from a caught error.
+        // This check is for the critical 'callAnalyzer' response.
         if(!data || data.error) throw new Error(data?.error || 'Local data parsing failed');
 
         window.__lastData={...data,url};
@@ -793,7 +803,20 @@ ${detail}`:''); };
         }
       }catch(err){
         console.error(err);
-        showError('Analyze failed.',String(err.message||err));
+        // This top-level catch will now primarily handle the `callAnalyzer` failure.
+        // We'll add the same error parsing here for a cleaner message.
+        let message = err.message || 'An unknown error occurred.';
+        const jsonMatch = message.match(/\{"error":"([^"]+)".*\}/);
+        if (jsonMatch && jsonMatch[1]) {
+            message = jsonMatch[1];
+        } else {
+            // Clean up the generic API error message if it wasn't a JSON error
+            const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
+            if(apiErrorMatch && apiErrorMatch[1]) {
+                message = apiErrorMatch[1];
+            }
+        }
+        showError('A critical error occurred during analysis.', message);
       }finally{
         setRunning(false);
       }
@@ -1189,3 +1212,4 @@ ${detail}`:''); };
 
 </section>
 @endsection
+
