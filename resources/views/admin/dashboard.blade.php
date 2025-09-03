@@ -11,30 +11,28 @@
   }
   body{ background: radial-gradient(1200px 600px at 70% -200px, rgba(0,114,255,.18), transparent 60%), var(--bg); }
   :is(a,button,input,select,textarea):focus-visible{ outline:2px solid var(--blue-1); outline-offset:2px; }
-  .wrap{ max-width: 1320px; margin:18px auto 80px; padding:0 14px; color:var(--fg); }
 
+  .wrap{ max-width: 1320px; margin:18px auto 80px; padding:0 14px; color:var(--fg); }
   .hdr{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; }
   .title{ font-weight:900; letter-spacing:.3px; font-size:clamp(20px,2.2vw,28px); display:flex; gap:10px; align-items:center;}
   .badge{ background:linear-gradient(135deg,var(--blue-1),var(--mag-2)); color:#071228; padding:4px 10px; border-radius:999px; font-size:11px; box-shadow:0 8px 18px rgba(0,114,255,.30); }
   .pill{ background: rgba(255,255,255,.06); border:1px solid var(--bdr); border-radius:999px; padding:4px 10px; font-size:12px; color:var(--fg); }
 
-  /* KPI */
-  .kpis{ display:grid; grid-template-columns: repeat(4, minmax(220px,1fr)); gap:14px; margin: 14px 0 18px; }
+  /* KPI cards */
+  .kpis{ display:grid; grid-template-columns: repeat(5, minmax(180px,1fr)); gap:14px; margin: 14px 0 18px; }
   .kpi{ position:relative; background: var(--bg-3); border:1px solid var(--bdr); border-radius: 18px; padding:16px; box-shadow: var(--shadow); overflow:hidden; }
   .kpi:before{ content:""; position:absolute; inset:-1px; border-radius: 18px; padding:1px; background: linear-gradient(135deg, var(--blue-1), var(--mag-2));
     -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
-  .kpi[data-accent="green"]:before{ background:linear-gradient(135deg,var(--green-1),var(--green-2)); }
-  .kpi[data-accent="amber"]:before{ background:linear-gradient(135deg,var(--amber-1),var(--amber-2)); }
-  .kpi[data-accent="purple"]:before{ background:linear-gradient(135deg,var(--mag-1),var(--mag-2)); }
   .kpi-title{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.35px; }
   .kpi-val{ font-size: clamp(22px, 3.4vw, 34px); font-weight: 900; line-height: 1.1; margin-top:6px; }
 
-  /* Panels */
+  /* Panels / grids */
   .grid{ display:grid; grid-template-columns: 1.1fr .9fr; gap:14px; }
   .panel{ background: var(--bg-2); border:1px solid var(--bdr); border-radius: 18px; box-shadow: var(--shadow); overflow:hidden; }
   .panel-h{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--bdr); background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,0)); }
   .panel-h h3{ font-size:14px; letter-spacing:.3px; text-transform:uppercase; color:var(--muted); }
   .panel-b{ padding: 14px; }
+  .gap12{display:grid; grid-template-columns: repeat(2,1fr); gap:12px;}
 
   /* Table */
   .table{ width:100%; border-collapse:separate; border-spacing:0; }
@@ -47,46 +45,79 @@
   .btn.ghost{ color: var(--fg); background: transparent; border:1px solid var(--bdr); box-shadow:none; }
   .btn.danger{ background: linear-gradient(135deg,#ff6b6b,#ff3355); color:#1a0910; }
   .btn.slim{ padding:6px 10px; border-radius:10px; font-weight:700; }
+  .save-btn{min-width:70px}
+  .save-btn[disabled]{opacity:.6; cursor:not-allowed}
 
-  /* Drawer (user history) */
-  .drawer{ position:fixed; top:0; right:-560px; width:560px; height:100vh; background:var(--bg-2); border-left:1px solid var(--bdr); box-shadow: -20px 0 40px rgba(0,0,0,.4);
-    transition:right .26s ease; z-index: 50; display:flex; flex-direction:column; }
-  .drawer.open{ right:0; }
-  .drawer-h{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--bdr); }
-  .drawer-b{ padding:12px 14px; overflow:auto; flex:1; }
+  /* Activity feed */
+  .activity{list-style:none; padding:0; margin:0;}
+  .activity li{display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom:1px solid var(--bdr);}
+  .chip{font-size:11px; padding:4px 8px; border-radius:999px; border:1px solid var(--bdr); background:rgba(255,255,255,.05);}
 
-  @media (max-width: 1100px){ .kpis{ grid-template-columns: repeat(2,1fr);} .grid{ grid-template-columns: 1fr; } .drawer{ width:100%; } }
+  /* Presence */
+  .status-dot{width:8px; height:8px; border-radius:6px; display:inline-block; margin-right:6px; background:#22d3ee;}
+
+  /* Per-user dashboard modal */
+  .ud-modal{position:fixed; inset:0; display:none; background:rgba(0,0,0,.45); backdrop-filter:blur(2px); z-index:60;}
+  .ud-modal.open{display:block;}
+  .ud-card{position:absolute; right:0; top:0; height:100vh; width:min(1080px, 100%); background:var(--bg-2); border-left:1px solid var(--bdr); box-shadow:-24px 0 56px rgba(0,0,0,.45); display:flex; flex-direction:column;}
+  .ud-head{padding:16px; border-bottom:1px solid var(--bdr); display:flex; align-items:center; gap:10px;}
+  .ud-hero{display:grid; grid-template-columns: 1.2fr .8fr; gap:12px; padding:12px;}
+  .ud-col{background:var(--bg-2); border:1px solid var(--bdr); border-radius:14px; overflow:hidden;}
+  .ud-col-h{display:flex; justify-content:space-between; padding:10px 12px; border-bottom:1px solid var(--bdr); background:rgba(255,255,255,.04);}
+  .ud-col-b{padding:12px;}
+  @media (max-width:1100px){ .kpis{ grid-template-columns: repeat(2,1fr);} .grid{ grid-template-columns: 1fr; } .ud-hero{grid-template-columns:1fr;} }
 </style>
 @endpush
 
 @section('content')
 <div class="wrap">
   <div class="hdr">
-    <div class="title">Admin Dashboard <span class="badge">SEO Essentials</span></div>
-    <div class="pill">Only admins see global history & usage</div>
+    <div class="title">Admin Dashboard <span class="badge">SEO Analytics</span></div>
+    <div class="pill">Admin-only</div>
   </div>
 
-  {{-- KPIs --}}
+  {{-- KPI CARDS --}}
   <section class="kpis">
-    <div class="kpi" data-accent="blue"><div class="kpi-title">Searches Today</div><div class="kpi-val">{{ $stats['searchesToday'] ?? ($searchesToday ?? 0) }}</div></div>
-    <div class="kpi" data-accent="green"><div class="kpi-title">Total Users</div><div class="kpi-val">{{ $stats['totalUsers'] ?? ($totalUsers ?? 0) }}</div></div>
-    <div class="kpi" data-accent="amber"><div class="kpi-title">OpenAI Cost Today</div><div class="kpi-val">${{ number_format($stats['costToday'] ?? ($openAiCostToday ?? 0), 4) }}</div></div>
-    <div class="kpi" data-accent="purple"><div class="kpi-title">Active Users (live)</div><div class="kpi-val" id="activeLive">{{ $stats['active5m'] ?? ($activeUsers ?? 0) }}</div></div>
+    <div class="kpi"><div class="kpi-title">Searches Today</div><div class="kpi-val">{{ $stats['searchesToday'] ?? ($searchesToday ?? 0) }}</div></div>
+    <div class="kpi"><div class="kpi-title">Total Users</div><div class="kpi-val">{{ $stats['totalUsers'] ?? ($totalUsers ?? 0) }}</div></div>
+    <div class="kpi"><div class="kpi-title">OpenAI Cost Today</div><div class="kpi-val">${{ number_format($stats['costToday'] ?? ($openAiCostToday ?? 0), 4) }}</div></div>
+    <div class="kpi"><div class="kpi-title">DAU / MAU</div><div class="kpi-val">{{ ($stats['dau'] ?? 0) }} / {{ ($stats['mau'] ?? 0) }}</div></div>
+    <div class="kpi"><div class="kpi-title">Active (5m live)</div><div class="kpi-val" id="activeLive">{{ $stats['active5m'] ?? ($activeUsers ?? 0) }}</div></div>
   </section>
 
-  {{-- Usage & System --}}
+  {{-- CHARTS: OpenAI & PSI --}}
   <section class="grid">
     <div class="panel">
       <div class="panel-h"><h3>OpenAI Usage — Cost (30 days)</h3><span class="pill">USD</span></div>
       <div class="panel-b"><canvas id="openaiChart" height="120"></canvas></div>
     </div>
     <div class="panel">
-      <div class="panel-h"><h3>PSI Usage — Requests (30 days)</h3><span class="pill">Count / avg ms</span></div>
+      <div class="panel-h"><h3>PSI Usage — Requests (30 days)</h3><span class="pill">Count</span></div>
       <div class="panel-b"><canvas id="psiChart" height="120"></canvas></div>
     </div>
   </section>
 
-  {{-- System & Presence --}}
+  {{-- ACTIVITY + CORE ANALYTICS --}}
+  <section class="grid" style="margin-top:14px">
+    <div class="panel">
+      <div class="panel-h"><h3>Real-time Activity</h3><button class="btn slim ghost" onclick="loadActivity()">Refresh</button></div>
+      <div class="panel-b" style="max-height:260px; overflow:auto">
+        <ul class="activity" id="activityList"><li style="color:var(--muted)">Loading…</li></ul>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h3>Core Analytics</h3></div>
+      <div class="panel-b gap12">
+        <div class="kpi"><div class="kpi-title">DAU</div><div class="kpi-val">{{ $stats['dau'] ?? 0 }}</div></div>
+        <div class="kpi"><div class="kpi-title">MAU</div><div class="kpi-val">{{ $stats['mau'] ?? 0 }}</div></div>
+        <div class="kpi"><div class="kpi-title">New this month</div><div class="kpi-val">{{ $stats['new'] ?? 0 }}</div></div>
+        <div class="kpi"><div class="kpi-title">Returning</div><div class="kpi-val">{{ $stats['returning'] ?? 0 }}</div></div>
+      </div>
+    </div>
+  </section>
+
+  {{-- SYSTEM + PRESENCE --}}
   <section class="grid" style="margin-top:14px">
     <div class="panel">
       <div class="panel-h"><h3>System Status</h3></div>
@@ -113,7 +144,7 @@
           <tbody>
             @foreach(($presence['online'] ?? []) as $p)
               <tr>
-                <td>{{ $p['email'] ?? '—' }}</td>
+                <td><span class="status-dot"></span>{{ $p['email'] ?? '—' }}</td>
                 <td>{{ $p['last_seen_at'] ?? '—' }}</td>
                 <td>{{ $p['last_login_at'] ?? '—' }}</td>
                 <td>{{ $p['last_logout_at'] ?? '—' }}</td>
@@ -127,15 +158,10 @@
     </div>
   </section>
 
-  {{-- Users --}}
+  {{-- USERS --}}
   <section style="margin-top:16px">
     <div class="panel">
-      <div class="panel-h">
-        <h3>Users</h3>
-        <div>
-          <button class="btn slim ghost" id="openPwdModal">Change Password</button>
-        </div>
-      </div>
+      <div class="panel-h"><h3>Users</h3></div>
       <div class="panel-b" style="overflow:auto">
         <table class="table">
           <thead>
@@ -152,21 +178,24 @@
               <td>
                 <div style="font-weight:700">{{ $u->name }}</div>
                 <div style="color:var(--muted)">{{ $u->email }}</div>
-                <button class="btn slim ghost" data-user-id="{{ $u->id }}" data-user-email="{{ $u->email }}" onclick="openUserDrawer(this)">View History</button>
+                <button class="btn slim ghost"
+                        data-user-id="{{ $u->id }}"
+                        data-user-email="{{ $u->email }}"
+                        data-user-name="{{ $u->name }}"
+                        onclick="openUserDash(this)">View Dashboard</button>
               </td>
               <td>
                 <span class="pill">{{ ($u->banned ?? false) ? 'Banned' : 'Active' }}</span>
                 <span class="pill">{{ $u->today_count ?? 0 }} / {{ $u->month_count ?? 0 }}</span>
               </td>
               <td>
-                <form class="inline-form"
+                <form class="inline-form user-limit-form"
                       action="{{ route('admin.users.limit', $u->id) }}"
-                      method="POST">
-                  @csrf
-                  @method('PATCH')
-                  <input class="in" type="number" name="daily" value="{{ optional($u->limit)->daily ?? 50 }}" min="0">
+                      method="POST" onsubmit="return saveLimitAjax(event, this)">
+                  @csrf @method('PATCH')
+                  <input class="in" type="number" name="daily"   value="{{ optional($u->limit)->daily ?? 50 }}" min="0">
                   <input class="in" type="number" name="monthly" value="{{ optional($u->limit)->monthly ?? 300 }}" min="0">
-                  <button class="btn" type="submit">Save</button>
+                  <button class="btn save-btn" type="submit">Save</button>
                 </form>
               </td>
               <td>
@@ -174,8 +203,7 @@
                       action="{{ route('admin.users.ban', $u->id) }}"
                       method="POST"
                       onsubmit="return confirm('Ban/unban this user?')">
-                  @csrf
-                  @method('PATCH')
+                  @csrf @method('PATCH')
                   <button class="btn danger" type="submit">{{ ($u->banned ?? false) ? 'Unban' : 'Ban' }}</button>
                 </form>
               </td>
@@ -193,7 +221,7 @@
     </div>
   </section>
 
-  {{-- Global History --}}
+  {{-- GLOBAL HISTORY (ADMIN ONLY) --}}
   <section style="margin-top:16px">
     <div class="panel">
       <div class="panel-h">
@@ -210,11 +238,7 @@
           </thead>
           <tbody>
           @php
-            function _domain($u) {
-              if(!$u) return '';
-              $p = parse_url($u);
-              return isset($p['host']) ? $p['host'] : '';
-            }
+            function _domain($u) { if(!$u) return ''; $p=parse_url($u); return $p['host']??''; }
           @endphp
           @forelse(($history ?? []) as $h)
             @php
@@ -224,83 +248,102 @@
             @endphp
             <tr>
               <td>{{ optional($h->created_at)->format('Y-m-d H:i') }}</td>
-              <td data-email="{{ optional($h->user)->email ?? '' }}">{{ optional($h->user)->email ?? '—' }}</td>
+              <td>{{ optional($h->user)->email ?? '—' }}</td>
               <td>{{ $dom }}</td>
-              <td style="max-width:460px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">
-                {{ $disp }}
-              </td>
+              <td style="max-width:460px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ $disp }}</td>
               <td>{{ $h->tool ?? 'Analyzer' }}</td>
               <td>{{ $h->tokens ?? '—' }}</td>
               <td>${{ number_format($h->cost ?? 0, 4) }}</td>
             </tr>
           @empty
-            @for($i=0;$i<6;$i++)
-              <tr>
-                <td>{{ now()->subMinutes($i*9)->format('Y-m-d H:i') }}</td>
-                <td>demo@site.com</td>
-                <td>example.com</td>
-                <td>https://example.com/page-{{ $i }}</td>
-                <td>Analyzer</td>
-                <td>{{ rand(400,1500) }}</td>
-                <td>${{ number_format(rand(1,30)/100, 4) }}</td>
-              </tr>
-            @endfor
+            <tr><td colspan="7" style="color:var(--muted)">No history yet.</td></tr>
           @endforelse
           </tbody>
         </table>
       </div>
     </div>
   </section>
-
 </div>
 
-{{-- ===== User Drawer (per-user history) ===== --}}
-<aside class="drawer" id="userDrawer" aria-hidden="true">
-  <div class="drawer-h">
-    <strong id="drawerTitle">User History</strong>
-    <button class="btn slim ghost" onclick="closeUserDrawer()">Close</button>
-  </div>
-  <div class="drawer-b">
-    <table class="table" id="userHistTbl">
-      <thead><tr><th>When</th><th>URL / Query</th><th>Tool</th><th>Tokens</th><th>Cost</th></tr></thead>
-      <tbody><tr><td colspan="5" style="color:var(--muted)">Loading…</td></tr></tbody>
-    </table>
-  </div>
-</aside>
-
-{{-- ===== Password Modal ===== --}}
-<dialog id="pwdModal" style="border:none; border-radius:14px; padding:0; width:min(520px, 96vw); background:var(--bg-2); color:var(--fg);">
-  <form method="dialog" style="padding:14px; border-bottom:1px solid var(--bdr)">
-    <strong>Change User Password</strong>
-    <button class="btn slim ghost" value="cancel" style="float:right">Close</button>
-  </form>
-  <form id="pwdForm" method="POST" style="padding:14px" onsubmit="return submitPwdChange(event)">
-    @csrf
-    @method('PATCH')
-    <input type="hidden" name="user_id" id="pwdUserId">
-    <label>Email
-      <input class="in" id="pwdEmail" style="width:100%" disabled>
-    </label>
-    <label style="display:block; margin-top:10px">New Password
-      <input class="in" type="password" name="new_password" id="pwdNew" style="width:100%" minlength="8" required>
-    </label>
-    <div style="display:flex; gap:10px; margin-top:12px">
-      <button class="btn" type="submit">Update Password</button>
-      <button class="btn ghost" type="button" onclick="document.getElementById('pwdModal').close()">Cancel</button>
+{{-- ===== PER-USER DASHBOARD MODAL ===== --}}
+<div class="ud-modal" id="ud" aria-hidden="true">
+  <div class="ud-card">
+    <div class="ud-head">
+      <div style="font-weight:900" id="udTitle">User Dashboard</div>
+      <div class="chip" id="udPlan">Plan: Free</div>
+      <div style="margin-left:auto" class="chip" id="udStatus">Active</div>
+      <button class="btn slim ghost" onclick="closeUserDash()">Close</button>
     </div>
-  </form>
-</dialog>
+
+    <div class="ud-hero">
+      <div class="ud-col">
+        <div class="ud-col-h"><strong>Overview</strong></div>
+        <div class="ud-col-b">
+          <div class="gap12">
+            <div class="kpi"><div class="kpi-title">Today</div><div class="kpi-val" id="udToday">0</div></div>
+            <div class="kpi"><div class="kpi-title">This Month</div><div class="kpi-val" id="udMonth">0</div></div>
+            <div class="kpi"><div class="kpi-title">Total</div><div class="kpi-val" id="udTotal">0</div></div>
+            <div class="kpi"><div class="kpi-title">Sessions</div><div class="kpi-val" id="udSessions">0</div></div>
+          </div>
+          <div class="gap12" style="margin-top:12px">
+            <div class="ud-col">
+              <div class="ud-col-h"><strong>Daily Usage (14d)</strong></div>
+              <div class="ud-col-b"><canvas id="udDaily" height="120"></canvas></div>
+            </div>
+            <div class="ud-col">
+              <div class="ud-col-h"><strong>Today’s Usage</strong></div>
+              <div class="ud-col-b">
+                <canvas id="udWheel" height="160"></canvas>
+                <div style="color:var(--muted); margin-top:6px">Login: <span id="udLogin">—</span> • IP: <span id="udIP">—</span> • Country: <span id="udCountry">—</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="gap12" style="margin-top:12px">
+            <div class="kpi"><div class="kpi-title">Avg Session (sec)</div><div class="kpi-val" id="udAvgSess">0</div></div>
+            <div class="kpi"><div class="kpi-title">Bounce %</div><div class="kpi-val" id="udBounce">0</div></div>
+            <div class="kpi"><div class="kpi-title">Conv. %</div><div class="kpi-val" id="udConv">0</div></div>
+            <div class="kpi"><div class="kpi-title">Limits</div><div class="kpi-val"><span id="udLimitDay">0</span>/<span id="udLimitMon">0</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ud-col">
+        <div class="ud-col-h"><strong>User Tech & Channels</strong></div>
+        <div class="ud-col-b">
+          <div class="gap12">
+            <div><canvas id="udDevice" height="120"></canvas></div>
+            <div><canvas id="udBrowser" height="120"></canvas></div>
+          </div>
+          <div class="gap12" style="margin-top:12px">
+            <div><canvas id="udOS" height="120"></canvas></div>
+            <div><canvas id="udChannels" height="120"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ud-col" style="margin:12px">
+      <div class="ud-col-h"><strong>Daily History (latest 100)</strong></div>
+      <div class="ud-col-b" style="overflow:auto">
+        <table class="table" id="udHist">
+          <thead><tr><th>When</th><th>Country</th><th>URL / Query</th><th>Tool</th><th>Tokens</th><th>Cost</th></tr></thead>
+          <tbody><tr><td colspan="6" style="color:var(--muted)">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/datatables.net@2.1.7/js/dataTables.min.js"></script>
 <script>
-  // ------ Data passed from controller (safe fallbacks) ------
+  // ---------- Data from controller (safe fallbacks) ----------
   const openAiDaily = @json($openAiDaily ?? ['labels'=>[], 'costs'=>[]]);
-  const psiDaily    = @json($psiDaily ?? ['labels'=>[], 'counts'=>[], 'avg_ms'=>[]]);
+  const psiDaily    = @json($psiDaily ?? ['labels'=>[], 'counts'=>[]]);
 
-  // ------ Charts ------
+  // ---------- Charts: OpenAI & PSI ----------
   (function(){
     const oc = document.getElementById('openaiChart');
     if (oc && openAiDaily.labels.length){
@@ -312,46 +355,44 @@
     }
     const pc = document.getElementById('psiChart');
     if (pc && psiDaily.labels.length){
-      const ds = [{ label:'Requests', data: psiDaily.counts, tension:.35, fill:true }];
-      if ((psiDaily.avg_ms||[]).length){ ds.push({ label:'Avg ms', data: psiDaily.avg_ms, yAxisID:'y1' }); }
       new Chart(pc, {
         type:'line',
-        data:{ labels: psiDaily.labels, datasets: ds },
-        options:{ scales:{ y:{ beginAtZero:true }, y1:{ beginAtZero:true, position:'right' }}, plugins:{ legend:{ labels:{ color:'#e6e9f0' } } } }
+        data:{ labels: psiDaily.labels, datasets:[ { label:'Requests', data: psiDaily.counts, tension:.35, fill:true } ] },
+        options:{ scales:{ y:{ beginAtZero:true }}, plugins:{ legend:{ labels:{ color:'#e6e9f0' } } } }
       });
     }
   })();
 
-  // ------ DataTable (Global History) ------
-  let histDT;
-  (function(){
-    if (!window.DataTable) return;
-    histDT = new DataTable('#historyTable', { pageLength: 12, lengthChange: false, order:[[0,'desc']] });
-    const input = document.getElementById('histFilter');
-    if (input) input.addEventListener('input', ()=> histDT.search(input.value).draw());
-  })();
+  // ---------- Activity Feed ----------
+  async function loadActivity(){
+    const res = await fetch(`{{ route('admin.dashboard') }}?partial=activity`, {headers:{'X-Requested-With':'fetch'}});
+    if(!res.ok) return;
+    const data = await res.json();
+    const ul = document.getElementById('activityList'); ul.innerHTML = '';
+    (data.items||[]).forEach(it=>{
+      const li = document.createElement('li');
+      li.innerHTML = `<span class="chip">${it.when}</span>
+                      <span class="chip">${it.tool}</span>
+                      <strong>${it.email}</strong>
+                      <span style="color:var(--muted);max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.display||''}</span>`;
+      ul.appendChild(li);
+    });
+    if(!(data.items||[]).length) ul.innerHTML = '<li style="color:var(--muted)">No recent activity.</li>';
+  }
+  loadActivity(); setInterval(loadActivity, 30000);
 
-  // Export CSV
-  window.exportCSV = () => {
-    const rows = [...document.querySelectorAll('#historyTable tbody tr')].map(tr=> [...tr.children].map(td=> '"'+td.innerText.replace(/"/g,'\\"')+'"').join(','));
-    const csv = ['When,User,Domain,URL/Query,Tool,Tokens,Cost', ...rows].join('\n');
-    const blob = new Blob([csv], {type:'text/csv'});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'global-history.csv'; a.click(); URL.revokeObjectURL(a.href);
-  };
-
-  // ------ Live Presence (auto-refresh every 30s via the SAME route) ------
+  // ---------- Presence ----------
   async function refreshPresence(){
     try{
       const res = await fetch(`{{ route('admin.dashboard') }}?partial=presence`, { headers:{'X-Requested-With':'fetch'} });
       if(!res.ok) return;
       const data = await res.json();
       document.getElementById('activeLive').textContent = data.activeCount ?? 0;
-
       const tbody = document.querySelector('#presenceTbl tbody');
       tbody.innerHTML = '';
       (data.online||[]).forEach(p=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.email||'—'}</td><td>${p.last_seen_at||'—'}</td><td>${p.last_login_at||'—'}</td><td>${p.last_logout_at||'—'}</td><td><span class="pill">${p.status||'—'}</span></td>`;
+        tr.innerHTML = `<td><span class="status-dot"></span>${p.email||'—'}</td><td>${p.last_seen_at||'—'}</td><td>${p.last_login_at||'—'}</td><td>${p.last_logout_at||'—'}</td><td><span class="pill">${p.status||'—'}</span></td>`;
         tbody.appendChild(tr);
       });
       if(!(data.online||[]).length){
@@ -362,61 +403,113 @@
   document.getElementById('refreshPresence')?.addEventListener('click', refreshPresence);
   setInterval(refreshPresence, 30000);
 
-  // ------ Per-user drawer ------
-  window.openUserDrawer = async (btn)=>{
-    const id = btn.getAttribute('data-user-id');
-    const email = btn.getAttribute('data-user-email');
-    document.getElementById('drawerTitle').textContent = `History — ${email}`;
-    const dr = document.getElementById('userDrawer'); dr.classList.add('open');
+  // ---------- DataTable (Global History) ----------
+  let histDT;
+  (function(){
+    if (!window.DataTable) return;
+    histDT = new DataTable('#historyTable', { pageLength: 12, lengthChange: false, order:[[0,'desc']] });
+    const input = document.getElementById('histFilter');
+    if (input) input.addEventListener('input', ()=> histDT.search(input.value).draw());
+  })();
 
-    const tbody = document.querySelector('#userHistTbl tbody');
-    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted)">Loading…</td></tr>`;
-    try{
-      const res = await fetch(`{{ route('admin.dashboard') }}?partial=userHistory&user_id=${encodeURIComponent(id)}`, { headers:{'X-Requested-With':'fetch'} });
-      const data = await res.json();
-      tbody.innerHTML = '';
-      (data.items||[]).forEach(h=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${h.when||''}</td><td style="max-width:320px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.display||''}</td><td>${h.tool||''}</td><td>${h.tokens??'—'}</td><td>${h.cost??'0.0000'}</td>`;
-        tbody.appendChild(tr);
-      });
-      if(!(data.items||[]).length){
-        tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted)">No history.</td></tr>`;
-      }
-    }catch(e){
-      tbody.innerHTML = `<tr><td colspan="5" style="color:var(--muted)">Failed to load.</td></tr>`;
-    }
+  // CSV export
+  window.exportCSV = () => {
+    const rows = [...document.querySelectorAll('#historyTable tbody tr')].map(tr=> [...tr.children].map(td=> '"'+td.innerText.replace(/"/g,'\\"')+'"').join(','));
+    const csv = ['When,User,Domain,URL/Query,Tool,Tokens,Cost', ...rows].join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'global-history.csv'; a.click(); URL.revokeObjectURL(a.href);
   };
-  window.closeUserDrawer = ()=> document.getElementById('userDrawer').classList.remove('open');
 
-  // ------ Password Change (admin) ------
-  const pwdModal = document.getElementById('pwdModal');
-  document.getElementById('openPwdModal')?.addEventListener('click', ()=>{
-    const row = document.querySelector('table.table tbody tr'); // pick first user row to preload form; you can add a per-user button if preferred
-    if(row){
-      const email = row.querySelector('td:nth-child(1) div[style*="color"]').textContent.trim();
-      const id = row.querySelector('[data-user-id]')?.getAttribute('data-user-id');
-      document.getElementById('pwdEmail').value = email||'';
-      document.getElementById('pwdUserId').value = id||'';
-    }
-    pwdModal.showModal();
-  });
-
-  async function submitPwdChange(e){
+  // ---------- Professional limits editor (AJAX) ----------
+  async function saveLimitAjax(e, form){
     e.preventDefault();
-    const id = document.getElementById('pwdUserId').value;
-    const pass = document.getElementById('pwdNew').value;
-    if(!id || !pass) return;
-    // POST to existing ban route with a special field new_password (Controller checks & updates)
-    const res = await fetch(`{{ url('/admin/users') }}/${encodeURIComponent(id)}/ban`, {
-      method:'POST',
-      headers:{'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept':'application/json'},
-      body: new URLSearchParams({ _method:'PATCH', new_password: pass })
-    });
-    pwdModal.close();
-    alert(res.ok ? 'Password updated.' : 'Request sent. Verify controller handles new_password.');
+    const btn = form.querySelector('.save-btn'); btn.disabled = true; btn.textContent='Saving…';
+    const res = await fetch(form.action, {method:'POST', headers:{'X-CSRF-TOKEN':document.querySelector('meta[name="csrf-token"]').content}, body:new FormData(form)});
+    btn.disabled = false; btn.textContent = res.ok ? 'Saved' : 'Save';
+    if(!res.ok) alert('Save failed');
+    setTimeout(()=>{ btn.textContent='Save'; }, 1200);
     return false;
   }
-  window.submitPwdChange = submitPwdChange;
+  window.saveLimitAjax = saveLimitAjax;
+
+  // ---------- Per-user Dashboard ----------
+  let udCharts = {};
+  function closeUserDash(){ document.getElementById('ud').classList.remove('open'); }
+  async function openUserDash(btn){
+    const id = btn.getAttribute('data-user-id');
+    const name = btn.getAttribute('data-user-name');
+    const email= btn.getAttribute('data-user-email');
+    document.getElementById('udTitle').textContent = `${name} — ${email}`;
+    document.getElementById('ud').classList.add('open');
+
+    const res = await fetch(`{{ route('admin.dashboard') }}?partial=userDashboard&user_id=${encodeURIComponent(id)}`, {headers:{'X-Requested-With':'fetch'}});
+    const d = res.ok ? await res.json() : {};
+
+    // Badges / status
+    document.getElementById('udPlan').textContent   = `Plan: ${d.plan?.name || 'Free'}`;
+    document.getElementById('udStatus').textContent = d.account?.status || '—';
+
+    // KPIs
+    document.getElementById('udToday').textContent   = d.stats?.today ?? 0;
+    document.getElementById('udMonth').textContent   = d.stats?.month ?? 0;
+    document.getElementById('udTotal').textContent   = d.stats?.total ?? 0;
+    document.getElementById('udSessions').textContent= d.stats?.sessions ?? 0;
+    document.getElementById('udAvgSess').textContent = d.stats?.avgSessionSec ?? 0;
+    document.getElementById('udBounce').textContent  = d.stats?.bounceRate ?? 0;
+    document.getElementById('udConv').textContent    = d.stats?.conversionRate ?? 0;
+    document.getElementById('udLimitDay').textContent= d.limits?.daily ?? 0;
+    document.getElementById('udLimitMon').textContent= d.limits?.monthly ?? 0;
+
+    // Presence
+    document.getElementById('udLogin').textContent   = d.account?.last_login_at || '—';
+    document.getElementById('udIP').textContent      = d.account?.ip || '—';
+    document.getElementById('udCountry').textContent = d.account?.country || '—';
+
+    // Destroy old charts
+    for (const k in udCharts){ try{ udCharts[k].destroy(); }catch{} } udCharts = {};
+
+    const C = Chart;
+    // Daily 14d
+    const labels = (d.daily||[]).map(x=>x.d), values=(d.daily||[]).map(x=>x.c);
+    if (document.getElementById('udDaily') && C) {
+      udCharts.daily = new C(document.getElementById('udDaily'), {
+        type:'bar', data:{labels,datasets:[{label:'Searches', data:values}]},
+        options:{scales:{y:{beginAtZero:true}}}
+      });
+    }
+    // Wheel (usage today vs limit)
+    const pct = d.stats?.usagePct ?? 0;
+    if (document.getElementById('udWheel') && C) {
+      udCharts.wheel = new C(document.getElementById('udWheel'), {
+        type:'doughnut', data:{labels:['Used','Free'], datasets:[{data:[pct, Math.max(0,100-pct)]}]},
+        options:{cutout:'70%', plugins:{legend:{display:false}, tooltip:{enabled:false}}}
+      });
+      // center label
+      setTimeout(()=>{
+        const cnv = document.getElementById('udWheel');
+        const ctx = cnv.getContext('2d');
+        ctx.save(); ctx.fillStyle='#e6e9f0'; ctx.font='700 20px system-ui'; ctx.textAlign='center';
+        ctx.fillText(`${pct}%`, cnv.width/2, cnv.height/2+6); ctx.restore();
+      },80);
+    }
+    // Device / Browser / OS / Channels pies
+    const pie = (el, obj)=>{ const labs=Object.keys(obj||{}), dat=Object.values(obj||{}); if(!labs.length) return;
+      udCharts[el] = new C(document.getElementById(el), {type:'doughnut', data:{labels:labs, datasets:[{data:dat}]}, options:{plugins:{legend:{position:'bottom'}}}});
+    };
+    pie('udDevice', d.device); pie('udBrowser', d.browser); pie('udOS', d.os); pie('udChannels', d.channels);
+
+    // History table
+    const tb = document.querySelector('#udHist tbody'); tb.innerHTML='';
+    (d.history||[]).forEach(h=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${h.when||''}</td><td>${h.country||''}</td>
+                      <td style="max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.display||''}</td>
+                      <td>${h.tool||''}</td><td>${h.tokens??'—'}</td><td>${h.cost??'0.0000'}</td>`;
+      tb.appendChild(tr);
+    });
+    if(!(d.history||[]).length){ tb.innerHTML = `<tr><td colspan="6" style="color:var(--muted)">No history.</td></tr>`; }
+  }
+  window.openUserDash = openUserDash; window.closeUserDash = closeUserDash;
+
 </script>
 @endpush
