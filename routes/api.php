@@ -18,7 +18,7 @@ Route::get('/status', function () {
     return response()->json([
         'ok'      => true,
         'service' => 'Semantic SEO Master Analyzer API',
-        'version' => '2.2', // Updated version
+        'version' => '2.3', // Updated version
         'time'    => now()->toIso8601String(),
     ]);
 })->name('api.status');
@@ -26,8 +26,7 @@ Route::get('/status', function () {
 // Group all analysis endpoints under a throttle middleware to prevent abuse
 Route::middleware('throttle:seoapi')->group(function () {
     
-    // 1. Initial Local HTML Parsing - CORRECTED
-    // This route now correctly points to the 'handleLocalAnalysis' method.
+    // 1. Initial Local HTML Parsing
     Route::post('/semantic-analyze', [AnalyzerController::class, 'handleLocalAnalysis'])
         ->name('api.semantic');
 
@@ -49,7 +48,7 @@ Route::middleware('throttle:seoapi')->group(function () {
     Route::post('/keyword-analyze', [AnalyzerController::class, 'keywordAnalyze'])
         ->name('api.keyword-analyze');
 
-    // Content Analysis Engine
+    // Content Analysis Engine - CORRECTED METHOD NAME
     Route::post('/content-engine-analyze', [AnalyzerController::class, 'contentEngineAnalyze'])
         ->name('api.content-engine');
 });
