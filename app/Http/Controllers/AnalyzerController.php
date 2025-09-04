@@ -126,8 +126,8 @@ class AnalyzerController extends Controller
     public function handleOpenAiRequest(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'task' => ['required', 'string', Rule::in(['brief', 'suggestions', 'competitor', 'trends', 'technical_seo', 'keyword_intelligence', 'content_engine'])],
-            'prompt' => 'nullable|string|max:2000', // Prompt is for competitor URL, keywords, etc.
+            'task' => ['required', 'string', Rule::in(['brief', 'suggestions', 'competitor', 'trends', 'technical_seo', 'keyword_intelligence', 'content_engine', 'readability_tone'])],
+            'prompt' => 'nullable|string|max:8000', // Increased limit for text analysis
             'url' => 'required|url' // The primary URL being analyzed
         ]);
 
@@ -154,13 +154,13 @@ class AnalyzerController extends Controller
         }
 
         try {
-            $isJsonMode = in_array($task, ['technical_seo', 'keyword_intelligence', 'content_engine']);
+            $isJsonMode = in_array($task, ['technical_seo', 'keyword_intelligence', 'content_engine', 'readability_tone']);
             
             $response = Http::withToken($apiKey)->timeout(90)->post('https://api.openai.com/v1/chat/completions', [
                 'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
                 'messages' => [['role' => 'system', 'content' => $systemMessage], ['role' => 'user', 'content' => $userMessage]],
-                'temperature' => 0.5,
-                'max_tokens' => 1024,
+                'temperature' => 0.3,
+                'max_tokens' => 1500,
                 'response_format' => $isJsonMode ? ['type' => 'json_object'] : null,
             ]);
 
@@ -200,7 +200,7 @@ class AnalyzerController extends Controller
         $prompt = $validatedData['prompt'] ?? '';
         $url = $validatedData['url'];
 
-        $systemMessage = "You are a world-class Semantic SEO expert. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format (JSON or plain text).";
+        $systemMessage = "You are a world-class Semantic SEO expert and copy editor. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format (JSON or plain text).";
         $userMessage = "";
 
         switch ($task) {
@@ -231,6 +231,10 @@ class AnalyzerController extends Controller
             case 'content_engine':
                 $systemMessage .= " Respond only with the requested JSON object.";
                 $userMessage = "Analyze content at {$url}. Return valid JSON: {'score': int, 'topic_clusters':[string], 'entities':[{'term','type'}], 'semantic_keywords':[string], 'relevance_score': int, 'context_intent': string}.";
+                break;
+            case 'readability_tone':
+                $systemMessage .= " Respond only with the requested JSON object. Do not provide explanations.";
+                $userMessage = "Analyze the following text for readability and tone. Return a valid JSON object with the exact structure: {\"overall_tone\": \"string\", \"grade_level\": \"string\", \"word_count\": int, \"passive_voice_percent\": int, \"suggestions\": [{\"original\": \"string\", \"suggestion\": \"string\"}]}. Text to analyze: " . $prompt;
                 break;
         }
 
