@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-// Combined and cleaned dependencies from both file versions
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -22,7 +21,6 @@ class AnalyzerController extends Controller
 {
     /**
      * Centralized function to check limits and log any analysis tool usage.
-     * This is production-ready logic from your previous file.
      */
     private function checkAndLog(Request $request, string $tool): bool|JsonResponse
     {
@@ -31,7 +29,6 @@ class AnalyzerController extends Controller
         $user = Auth::user();
         $limit = UserLimit::firstOrCreate(['user_id' => $user->id]);
 
-        // Reset counters if a new day or month has started
         if (!$limit->updated_at->isToday()) $limit->searches_today = 0;
         if (!$limit->updated_at->isSameMonth(now())) $limit->searches_this_month = 0;
 
@@ -39,7 +36,6 @@ class AnalyzerController extends Controller
             return response()->json(['error' => 'You have reached your usage quota for today/this month.'], 429);
         }
 
-        // Log the usage and increment counters
         (new UsageLogger())->logAnalysis($request, $tool, true);
         $limit->increment('searches_today');
         $limit->increment('searches_this_month');
@@ -50,7 +46,6 @@ class AnalyzerController extends Controller
 
     /**
      * Handles the initial, non-AI analysis by parsing the page's raw HTML.
-     * This does not count against any user quota.
      */
     public function semanticAnalyze(Request $request): JsonResponse
     {
@@ -58,7 +53,6 @@ class AnalyzerController extends Controller
             $validated = $request->validate(['url' => ['required', 'url']]);
             $urlToAnalyze = $validated['url'];
 
-            $contentStructure = []; $pageSignals = []; $quickStats = []; $imagesAltCount = 0;
             $response = Http::timeout(15)->get($urlToAnalyze);
             if ($response->failed()) return response()->json(['error' => "Failed to fetch URL. Status: {$response->status()}"], 400);
 
@@ -69,7 +63,6 @@ class AnalyzerController extends Controller
             libxml_clear_errors();
             $xpath = new DOMXPath($dom);
 
-            // Extract basic on-page elements
             $contentStructure['title'] = optional($xpath->query('//title')->item(0))->textContent;
             $contentStructure['meta_description'] = optional($xpath->query("//meta[@name='description']/@content")->item(0))->nodeValue;
             $contentStructure['headings'] = [];
@@ -83,7 +76,6 @@ class AnalyzerController extends Controller
             $pageSignals['robots'] = optional($xpath->query("//meta[@name='robots']/@content")->item(0))->nodeValue;
             $pageSignals['has_viewport'] = $xpath->query("//meta[@name='viewport']")->length > 0;
 
-            // Perform link analysis
             $links = $dom->getElementsByTagName('a');
             $internalLinks = 0; $externalLinks = 0;
             $host = parse_url($urlToAnalyze, PHP_URL_HOST) ?? '';
@@ -96,14 +88,12 @@ class AnalyzerController extends Controller
             $quickStats['internal_links'] = $internalLinks;
             $quickStats['external_links'] = $externalLinks;
 
-            // Count images with alt text
+            $imagesAltCount = 0;
             foreach ($dom->getElementsByTagName('img') as $image) {
                 if ($image->hasAttribute('alt') && !empty(trim($image->getAttribute('alt')))) $imagesAltCount++;
             }
 
-            // Return a combined response structure for the frontend
             return response()->json([
-                // Placeholders; real scores would be calculated from all data points
                 'overall_score' => 78,
                 'readability' => ['score' => 75, 'passive_ratio' => 10],
                 'categories' => [['name' => 'Content & Keywords', 'score' => 82], ['name' => 'Content Quality', 'score' => 75]],
@@ -121,7 +111,6 @@ class AnalyzerController extends Controller
 
     /**
      * A single, unified handler for all OpenAI-powered features.
-     * It incorporates usage limits, caching, and dynamic prompt generation.
      */
     public function handleOpenAiRequest(Request $request): JsonResponse
     {
@@ -129,12 +118,14 @@ class AnalyzerController extends Controller
             'task' => ['required', 'string', Rule::in([
                 'brief', 'suggestions', 'competitor', 'trends', 
                 'technical_seo', 'keyword_intelligence', 'content_engine',
-                // New tasks for the added features
-                'topic_coverage', 'intent_alignment', 'question_mining',
-                'rewrite_titles', 'audit_headings', 'keyword_health', 'rewrite_readability'
+                // New Full Semantic Audit tasks
+                'topic_coverage', 'intent_match', 'snippet_readiness', 'question_mining',
+                'heading_audit', 'readability_coach', 'semantic_variants', 'eeat_signals',
+                'internal_links', 'title_meta_rewrite', 'image_seo', 'structured_content',
+                'schema_picker', 'content_freshness', 'cannibalization_check', 'content_ux'
             ])],
-            'prompt' => 'nullable|string|max:2000', // Prompt is for competitor URL, keywords, etc.
-            'url' => 'required|url' // The primary URL being analyzed
+            'prompt' => 'nullable|string|max:2000',
+            'url' => 'required|url'
         ]);
 
         $task = $validated['task'];
@@ -144,10 +135,6 @@ class AnalyzerController extends Controller
         if (Cache::has($cacheKey)) {
             return response()->json(Cache::get($cacheKey));
         }
-        
-        // if (($limitCheck = $this->checkAndLog($request, 'ai_' . $task)) !== true) {
-        //     return $limitCheck;
-        // }
 
         $apiKey = env('OPENAI_API_KEY');
         if (!$apiKey) {
@@ -160,13 +147,13 @@ class AnalyzerController extends Controller
         }
 
         try {
-            $isJsonMode = in_array($task, ['technical_seo', 'keyword_intelligence', 'content_engine']);
+            $isJsonMode = in_array($task, ['technical_seo', 'keyword_intelligence', 'content_engine', 'schema_picker']);
             
             $response = Http::withToken($apiKey)->timeout(90)->post('https://api.openai.com/v1/chat/completions', [
                 'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
                 'messages' => [['role' => 'system', 'content' => $systemMessage], ['role' => 'user', 'content' => $userMessage]],
-                'temperature' => 0.5,
-                'max_tokens' => 1024,
+                'temperature' => 0.4,
+                'max_tokens' => 1200,
                 'response_format' => $isJsonMode ? ['type' => 'json_object'] : null,
             ]);
 
@@ -206,55 +193,75 @@ class AnalyzerController extends Controller
         $prompt = $validatedData['prompt'] ?? '';
         $url = $validatedData['url'];
 
-        $systemMessage = "You are a world-class Semantic SEO expert. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format (JSON or plain text).";
+        $systemMessage = "You are a world-class Semantic SEO expert. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format.";
         $userMessage = "";
 
         switch ($task) {
+            // Existing cases
             case 'brief':
-                $systemMessage .= " Format your response in clean, readable plain text.";
                 $userMessage = "Generate a semantic content brief for the primary keyword: '{$prompt}'. Include a suggested H1, a meta description (155 chars max), 3-5 LSI keywords, and 3-5 FAQs. Target URL: {$url}";
                 break;
             case 'suggestions':
-                $systemMessage .= " Format as a plain text list.";
                 $userMessage = "Analyze the content at '{$url}'. Provide 3-5 actionable recommendations to improve its semantic relevance and user engagement.";
                 break;
             case 'competitor':
-                $systemMessage .= " Format as plain text, focusing on strategic differences.";
-                $userMessage = "Analyze the user's page at '{$url}' against a competitor at '{$prompt}'. Identify the top 3-5 semantic strategy gaps on the user's page. What topics, entities, or questions does the competitor cover that the user is missing?";
+                $userMessage = "Analyze the user's page at '{$url}' against a competitor at '{$prompt}'. Identify the top 3-5 semantic strategy gaps on the user's page.";
                 break;
             case 'trends':
-                 $systemMessage .= " Format as a plain text list.";
-                 $userMessage = "Forecast emerging semantic trends for the niche: '{$prompt}'. Identify 3-4 related concepts or questions likely to grow in search importance over the next 6-12 months.";
+                 $userMessage = "Forecast emerging semantic trends for the niche: '{$prompt}'. Identify 3-4 related concepts or questions likely to grow in search importance.";
                  break;
-            // New Feature Prompts
+
+            // New Full Semantic Audit Prompts
             case 'topic_coverage':
-                $systemMessage .= " Format as a plain text list. For each item, provide a 2-3 sentence explanation.";
-                $userMessage = "Analyze the content at {$url}. Compare it to top search results for its likely primary keyword. Identify and list missing semantic entities (people, places, terms). For each missing entity, explain its relevance in 2-3 sentences. Output: 'You’re missing: Vectorization, Tokenizer, Stop-Words… (Add 2–3 sentences each).'";
+                $userMessage = "Analyze URL: {$url}. Compare its content to top SERP pages for its main topic. List the top 5 missing semantic entities/subtopics. For each, suggest which H2/H3 section it could be added to. Format: 'Missing: [Entity1] → Add to \"[Section Title]\".\nMissing: [Entity2] → Add to \"[Section Title]\"...'";
                 break;
-            case 'intent_alignment':
-                $systemMessage .= " Provide a concise, one-line analysis and a one-line recommendation.";
-                $userMessage = "Analyze the content at {$url}. Determine the primary search intent (Informational, Commercial, Transactional, Navigational). Then, analyze the introduction. Flag if the content's tone mismatches the intent and suggest a correction. Output: 'Intro is commercial; query is informational → add definition + how-to steps.'";
+            case 'intent_match':
+                $userMessage = "Analyze URL: {$url}. What is the primary search intent (Informational, Commercial, Transactional)? Does the introduction's tone match this intent? If not, flag the mismatch and give a one-sentence rewrite suggestion. Format: 'Primary Intent: [Intent]. Intro Tone: [Matched/Mismatched]. Suggestion: [Rewrite suggestion]'";
+                break;
+            case 'snippet_readiness':
+                $userMessage = "Analyze content at URL: {$url}. Does it have a clear definition (40-60 words) for a featured snippet? If not, generate one based on the content. Output only the snippet-ready paragraph.";
                 break;
             case 'question_mining':
-                $systemMessage .= " Format as a single line of suggestions.";
-                $userMessage = "Based on the content at {$url}, find relevant unanswered questions from 'People Also Ask' and forums related to its main topic. Suggest 3-5 high-potential questions to add as new H2/H3 sections. Output: 'Add section: ‘Is <term> free?, How to fix <issue>?, <term> vs <alt>’'";
+                $userMessage = "For the topic at URL: {$url}, find 3-5 frequent questions from 'People Also Ask' and forums. For each, provide a suggested H2/H3 heading and a concise 1-2 paragraph answer. Format as: '### [Question 1]\n[Answer 1]\n\n### [Question 2]\n[Answer 2]...'";
                 break;
-            case 'rewrite_titles':
-                $systemMessage .= " Format the response as three distinct drafts, each with a title and meta description. Plain text.";
-                $userMessage = "Analyze {$url}. Rewrite its title and meta description for better CTR. Generate 3 improved, distinct options. For each, provide a title (50–60 chars) and a meta description (140–160 chars). Use power words.";
+            case 'heading_audit':
+                $userMessage = "Analyze heading structure of {$url}. Check for: 1) A single H1. 2) Logical H2->H3 flow. 3) Any H2 sections with less than 120 words. List issues and specific recommendations. Format: '- [Issue]: [Recommendation]'";
                 break;
-            case 'audit_headings':
-                $systemMessage .= " Provide a concise, one-line analysis and a one-line recommendation.";
-                $userMessage = "Analyze the heading structure (H1-H4) from {$url}. Catch missing H1, multiple H1s, or H2s with very thin content (under 50 words). Provide a specific, actionable recommendation. Output: 'H2 ‘Setup’ has 40 words; expand to 120–250 with steps/bullets.'";
+            case 'readability_coach':
+                $userMessage = "Analyze the content at {$url}. Identify the single most complex paragraph. Provide a simplified rewrite of that paragraph to a Grade 7-9 reading level. Output only the rewritten paragraph.";
                 break;
-            case 'keyword_health':
-                $systemMessage .= " Provide a concise, one-line analysis and a one-line recommendation.";
-                $userMessage = "Analyze the content at {$url} for keyword density of its likely primary keyword. If it's over-optimized (>2%), recommend reducing it to ~1.0% and suggest 3-5 semantic variants to add. Output: 'Reduce exact ‘matlab download’ density from 2.7%→1.0%. Add variants: ‘get MATLAB’, ‘install MATLAB’, ‘MATLAB for Windows 11’.'";
+            case 'semantic_variants':
+                $userMessage = "Analyze content at {$url} for its main keyword. Is exact-match density high (>1.5%)? Suggest reducing it and list 5-10 semantic variants. Format: 'Density: [X.X%]. Recommendation: [Reduce/OK]. Variants: [variant1, variant2, ...]'";
                 break;
-            case 'rewrite_readability':
-                $systemMessage .= " First, provide a one-line analysis, then provide the rewritten paragraph. Plain text.";
-                $userMessage = "Analyze the content at {$url}. Identify the single most complex paragraph based on readability. First, state its issues. Then, provide a 'Simplified Rewrite' of that paragraph to make it easier to understand.";
+            case 'eeat_signals':
+                $userMessage = "Analyze {$url}. Check for: Author byline, author bio link, 'last updated' date, and outbound links to credible sources. List what's present and missing. For missing items, suggest where to add them. Format: '- Byline: [Present/Missing - Suggestion]\n- Bio: [Present/Missing - Suggestion]...'";
                 break;
+            case 'internal_links':
+                $userMessage = "Scan content of {$url}. Identify 3-5 phrases for internal links. Suggest anchor text and a hypothetical relevant topic. Format: '- In paragraph \"[...first 10 words...]\", link \"[anchor text]\" to a page about \"[topic]\".'";
+                break;
+            case 'title_meta_rewrite':
+                $userMessage = "The page at {$url} needs better CTR. Generate 3 distinct and improved Title/Meta description drafts. Use power words. Titles < 60 chars, metas < 160. Format: 'Draft 1:\nTitle: [Title]\nMeta: [Meta]\n\nDraft 2:\n...'";
+                break;
+            case 'image_seo':
+                $userMessage = "Analyze images on {$url}. Check for: 1) Hero image. 2) At least 3 images. 3) Alt text quality. For one image with poor alt text, generate a descriptive, 125-character alternative. Note if images seem oversized (>200KB). Format: 'Hero: [Yes/No]. Image Count: [Number]. Alt Text Fix for [image_src]: \"[Generated Alt]\"'";
+                break;
+            case 'structured_content':
+                $userMessage = "Analyze {$url}. Is it suitable for a comparison table or checklist? If so, draft a simple markdown table or checklist from the content. If not, state 'Content not suitable for table/checklist.'";
+                break;
+            case 'schema_picker':
+                $systemMessage .= " Respond only with a valid JSON object.";
+                $userMessage = "Based on content at {$url}, determine the best primary Schema type (Article, HowTo, FAQPage, Product). Generate ready-to-paste JSON-LD for it, populating with placeholders from the page. Output ONLY the valid JSON-LD code block.";
+                break;
+            case 'content_freshness':
+                $userMessage = "Scan {$url} for outdated info like years ('in 2022'), version numbers, or 'last year'. Highlight up to 3 stale elements and suggest updates. Format: '- Found \"[stale text]\", suggest updating to \"[fresh text]\".'";
+                break;
+            case 'cannibalization_check':
+                $userMessage = "Based on {$url}'s primary keyword/intent, suggest 2-3 other keyword variations a different page could target to avoid cannibalization. Format: 'Primary Intent: [Intent]. Avoid conflict by targeting: [Keyword1, Keyword2]. Recommendation: [Consolidate/OK]'";
+                break;
+            case 'content_ux':
+                $userMessage = "Analyze content structure at {$url} for potential CWV issues. 1) Clear hero image for LCP? 2) Table of Contents that might cause CLS? 3) Heavy widgets hurting INP? Provide a 1-2 sentence summary for each. Format: 'LCP: [Summary]. CLS: [Summary]. INP: [Summary].'";
+                break;
+
             // JSON-mode tasks
             case 'technical_seo':
                 $systemMessage .= " Respond only with the requested JSON object.";
@@ -281,8 +288,6 @@ class AnalyzerController extends Controller
         try {
             $validated = $request->validate(['url' => 'required|url']);
             $url = $validated['url'];
-
-            // if (($limitCheck = $this->checkAndLog($request, 'psi')) !== true) return $limitCheck;
 
             $apiKey = env('PAGESPEED_API_KEY');
             if (!$apiKey) return response()->json(['error' => 'PageSpeed API key is not configured.'], 500);
@@ -323,8 +328,6 @@ class AnalyzerController extends Controller
     }
 
     // --- DEPRECATED AI ENDPOINTS ---
-    // These methods now call the new unified handler for backward compatibility.
-    // The goal is to eventually phase these out in favor of the single /api/openai-request route.
     public function technicalSeoAnalyze(Request $request) {
         $request->merge(['task' => 'technical_seo']);
         return $this->handleOpenAiRequest($request);
@@ -340,3 +343,4 @@ class AnalyzerController extends Controller
         return $this->handleOpenAiRequest($request);
     }
 }
+
