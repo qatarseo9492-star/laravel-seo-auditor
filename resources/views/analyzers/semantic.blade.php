@@ -725,7 +725,7 @@
 
         // --- Fire all API calls in parallel ---
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
-            callAnalyzer(url), // Critical path: if this fails, the whole thing stops.
+            callAnalyzer(url).catch(err => handleApiError('Initial Analysis', err)), // ✨ FIX: Added error handling
             callTechnicalSeoApi(url).catch(err => handleApiError('Technical SEO', err)),
             callKeywordApi(url).catch(err => handleApiError('Keyword Intelligence', err)),
             callContentEngineApi(url).catch(err => handleApiError('Content Engine', err)),
@@ -736,8 +736,13 @@
             })
         ]);
 
-        // This check is for the critical 'callAnalyzer' response.
-        if(!data || data.error) throw new Error(data?.error || 'Local data parsing failed');
+        // If the main data fetch fails, `data` will be null, so we stop.
+        if(!data || data.error) {
+            // The error is already shown by handleApiError, so we just stop.
+            // But if there's an error property, show it too.
+            if(data?.error) showError('Initial Analysis Failed', data.error);
+            return; 
+        }
 
         window.__lastData={...data,url};
 
