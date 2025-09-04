@@ -49,10 +49,39 @@ class AnalyzerController extends Controller
     }
 
     /**
-     * Handles the initial, non-AI analysis by parsing the page's raw HTML.
-     * This does not count against any user quota.
+     * ✨ NEW: Helper function to intelligently extract the main text content from HTML.
      */
-    public function semanticAnalyze(Request $request): JsonResponse
+    private function extractMainContent(DOMDocument $dom): string
+    {
+        $xpath = new DOMXPath($dom);
+
+        // Remove common non-content elements
+        foreach (['nav', 'footer', 'header', 'script', 'style', 'aside', '.ads', '[data-ad-slot]'] as $selector) {
+            $nodes = $xpath->query('//' . $selector);
+            foreach ($nodes as $node) {
+                if ($node->parentNode) {
+                    $node->parentNode->removeChild($node);
+                }
+            }
+        }
+
+        // Try to find the main content container
+        $mainNode = $xpath->query('//main')->item(0)
+            ?? $xpath->query('//article')->item(0)
+            ?? $xpath->query("//*[@id='content']")->item(0)
+            ?? $xpath->query("//*[@class='post-content']")->item(0)
+            ?? $xpath->query('//body')->item(0);
+
+        $textContent = $mainNode ? trim($mainNode->textContent) : '';
+
+        // Clean up excessive whitespace
+        return preg_replace('/\s{2,}/', "\n\n", $textContent);
+    }
+
+    /**
+     * ✨ RENAMED: Handles the initial, non-AI analysis by parsing the page's raw HTML.
+     */
+    public function handleLocalAnalysis(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate(['url' => ['required', 'url']]);
@@ -67,7 +96,15 @@ class AnalyzerController extends Controller
             libxml_use_internal_errors(true);
             $dom->loadHTML($html);
             libxml_clear_errors();
+            
+            // Extract main content BEFORE modifications
+            $mainContent = $this->extractMainContent($dom);
+            
+            // Re-load HTML to get a fresh DOM for other extractions, as the previous one was modified
+            $dom->loadHTML($html);
+            libxml_clear_errors();
             $xpath = new DOMXPath($dom);
+
 
             // Extract basic on-page elements
             $contentStructure['title'] = optional($xpath->query('//title')->item(0))->textContent;
@@ -100,10 +137,9 @@ class AnalyzerController extends Controller
             foreach ($dom->getElementsByTagName('img') as $image) {
                 if ($image->hasAttribute('alt') && !empty(trim($image->getAttribute('alt')))) $imagesAltCount++;
             }
-
+            
             // Return a combined response structure for the frontend
             return response()->json([
-                // Placeholders; real scores would be calculated from all data points
                 'overall_score' => 78,
                 'readability' => ['score' => 75, 'passive_ratio' => 10],
                 'categories' => [['name' => 'Content & Keywords', 'score' => 82], ['name' => 'Content Quality', 'score' => 75]],
@@ -111,6 +147,7 @@ class AnalyzerController extends Controller
                 'page_signals' => $pageSignals,
                 'quick_stats' => $quickStats,
                 'images_alt_count' => $imagesAltCount,
+                'main_content' => $mainContent, // The extracted text
             ]);
             
         } catch (\Exception $e) {
@@ -128,11 +165,11 @@ class AnalyzerController extends Controller
         $validated = $request->validate([
             'task' => ['required', 'string', Rule::in(['brief', 'suggestions', 'competitor', 'trends', 'technical_seo', 'keyword_intelligence', 'content_engine', 'readability_tone'])],
             'prompt' => 'nullable|string|max:8000', // Increased limit for text analysis
-            'url' => 'required|url' // The primary URL being analyzed
+            'url' => 'nullable|url' 
         ]);
 
         $task = $validated['task'];
-        $url = $validated['url'];
+        $url = $validated['url'] ?? 'N/A';
         
         $cacheKey = "ai:{$task}:" . md5($url . ($validated['prompt'] ?? ''));
         if (Cache::has($cacheKey)) {
@@ -198,7 +235,7 @@ class AnalyzerController extends Controller
     {
         $task = $validatedData['task'];
         $prompt = $validatedData['prompt'] ?? '';
-        $url = $validatedData['url'];
+        $url = $validatedData['url'] ?? '';
 
         $systemMessage = "You are a world-class Semantic SEO expert and copy editor. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format (JSON or plain text).";
         $userMessage = "";
@@ -236,6 +273,7 @@ class AnalyzerController extends Controller
                 $systemMessage .= " Respond only with the requested JSON object. Do not provide explanations.";
                 $userMessage = "Analyze the following text for readability and tone. Return a valid JSON object with the exact structure: {\"overall_tone\": \"string\", \"grade_level\": \"string\", \"word_count\": int, \"passive_voice_percent\": int, \"suggestions\": [{\"original\": \"string\", \"suggestion\": \"string\"}]}. Text to analyze: " . $prompt;
                 break;
+
         }
 
         return [$systemMessage, $userMessage];
@@ -291,8 +329,6 @@ class AnalyzerController extends Controller
     }
 
     // --- DEPRECATED AI ENDPOINTS ---
-    // These methods now call the new unified handler for backward compatibility.
-    // The goal is to eventually phase these out in favor of the single /api/openai-request route.
     public function technicalSeoAnalyze(Request $request) {
         $request->merge(['task' => 'technical_seo']);
         return $this->handleOpenAiRequest($request);
