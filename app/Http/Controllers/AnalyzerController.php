@@ -126,7 +126,13 @@ class AnalyzerController extends Controller
     public function handleOpenAiRequest(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'task' => ['required', 'string', Rule::in(['brief', 'suggestions', 'competitor', 'trends', 'technical_seo', 'keyword_intelligence', 'content_engine'])],
+            'task' => ['required', 'string', Rule::in([
+                'brief', 'suggestions', 'competitor', 'trends', 
+                'technical_seo', 'keyword_intelligence', 'content_engine',
+                // New tasks for the added features
+                'topic_coverage', 'intent_alignment', 'question_mining',
+                'rewrite_titles', 'audit_headings', 'keyword_health', 'rewrite_readability'
+            ])],
             'prompt' => 'nullable|string|max:2000', // Prompt is for competitor URL, keywords, etc.
             'url' => 'required|url' // The primary URL being analyzed
         ]);
@@ -220,6 +226,36 @@ class AnalyzerController extends Controller
                  $systemMessage .= " Format as a plain text list.";
                  $userMessage = "Forecast emerging semantic trends for the niche: '{$prompt}'. Identify 3-4 related concepts or questions likely to grow in search importance over the next 6-12 months.";
                  break;
+            // New Feature Prompts
+            case 'topic_coverage':
+                $systemMessage .= " Format as a plain text list. For each item, provide a 2-3 sentence explanation.";
+                $userMessage = "Analyze the content at {$url}. Compare it to top search results for its likely primary keyword. Identify and list missing semantic entities (people, places, terms). For each missing entity, explain its relevance in 2-3 sentences. Output: 'You’re missing: Vectorization, Tokenizer, Stop-Words… (Add 2–3 sentences each).'";
+                break;
+            case 'intent_alignment':
+                $systemMessage .= " Provide a concise, one-line analysis and a one-line recommendation.";
+                $userMessage = "Analyze the content at {$url}. Determine the primary search intent (Informational, Commercial, Transactional, Navigational). Then, analyze the introduction. Flag if the content's tone mismatches the intent and suggest a correction. Output: 'Intro is commercial; query is informational → add definition + how-to steps.'";
+                break;
+            case 'question_mining':
+                $systemMessage .= " Format as a single line of suggestions.";
+                $userMessage = "Based on the content at {$url}, find relevant unanswered questions from 'People Also Ask' and forums related to its main topic. Suggest 3-5 high-potential questions to add as new H2/H3 sections. Output: 'Add section: ‘Is <term> free?, How to fix <issue>?, <term> vs <alt>’'";
+                break;
+            case 'rewrite_titles':
+                $systemMessage .= " Format the response as three distinct drafts, each with a title and meta description. Plain text.";
+                $userMessage = "Analyze {$url}. Rewrite its title and meta description for better CTR. Generate 3 improved, distinct options. For each, provide a title (50–60 chars) and a meta description (140–160 chars). Use power words.";
+                break;
+            case 'audit_headings':
+                $systemMessage .= " Provide a concise, one-line analysis and a one-line recommendation.";
+                $userMessage = "Analyze the heading structure (H1-H4) from {$url}. Catch missing H1, multiple H1s, or H2s with very thin content (under 50 words). Provide a specific, actionable recommendation. Output: 'H2 ‘Setup’ has 40 words; expand to 120–250 with steps/bullets.'";
+                break;
+            case 'keyword_health':
+                $systemMessage .= " Provide a concise, one-line analysis and a one-line recommendation.";
+                $userMessage = "Analyze the content at {$url} for keyword density of its likely primary keyword. If it's over-optimized (>2%), recommend reducing it to ~1.0% and suggest 3-5 semantic variants to add. Output: 'Reduce exact ‘matlab download’ density from 2.7%→1.0%. Add variants: ‘get MATLAB’, ‘install MATLAB’, ‘MATLAB for Windows 11’.'";
+                break;
+            case 'rewrite_readability':
+                $systemMessage .= " First, provide a one-line analysis, then provide the rewritten paragraph. Plain text.";
+                $userMessage = "Analyze the content at {$url}. Identify the single most complex paragraph based on readability. First, state its issues. Then, provide a 'Simplified Rewrite' of that paragraph to make it easier to understand.";
+                break;
+            // JSON-mode tasks
             case 'technical_seo':
                 $systemMessage .= " Respond only with the requested JSON object.";
                 $userMessage = "Analyze technical SEO of {$url}. Return valid JSON: {'score': int, 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map': '<ul><li>...</li></ul>', 'suggestions':[{'text','type':'good'|'warn'|'bad'}]}.";
@@ -304,4 +340,3 @@ class AnalyzerController extends Controller
         return $this->handleOpenAiRequest($request);
     }
 }
-
