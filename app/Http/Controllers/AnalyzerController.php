@@ -306,7 +306,7 @@ class AnalyzerController extends Controller
                     return [
                         'ok' => true, 'score' => is_null($perfRaw) ? 0 : (int) round($perfRaw * 100),
                         'lcp_s' => round(($audits['largest-contentful-paint']['numericValue'] ?? 0) / 1000, 2),
-                        'cls' => round($audits['cumulative-layout-shift']['numericValue'] ?? 0, 3),
+                        'cls' => round(($audits['cumulative-layout-shift']['numericValue'] ?? 0, 3),
                         'inp_ms' => (int) round($audits['interaction-to-next-paint']['numericValue'] ?? 0),
                         'opportunities' => $opportunities,
                     ];
