@@ -9,22 +9,19 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use DOMDocument;
 use DOMXPath;
-use App\Models\User; // Assuming these models exist as per your project structure
+use App\Models\User;
 use App\Models\UserLimit;
 use App\Models\AnalysisCache;
-use App\Support\Logs\UsageLogger; // Assuming this class exists
+use App\Support\Logs\UsageLogger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
 
 class AnalyzerController extends Controller
 {
-    /**
-     * Centralized function to check limits and log any analysis tool usage.
-     */
     private function checkAndLog(Request $request, string $tool): bool|JsonResponse
     {
-        if (!Auth::check()) return true; // Don't check limits for guests
+        if (!Auth::check()) return true;
 
         $user = Auth::user();
         $limit = UserLimit::firstOrCreate(['user_id' => $user->id]);
@@ -44,15 +41,13 @@ class AnalyzerController extends Controller
         return true;
     }
 
-    /**
-     * Handles the initial, non-AI analysis by parsing the page's raw HTML.
-     */
     public function semanticAnalyze(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate(['url' => ['required', 'url']]);
             $urlToAnalyze = $validated['url'];
 
+            $contentStructure = []; $pageSignals = []; $quickStats = []; $imagesAltCount = 0;
             $response = Http::timeout(15)->get($urlToAnalyze);
             if ($response->failed()) return response()->json(['error' => "Failed to fetch URL. Status: {$response->status()}"], 400);
 
@@ -88,7 +83,6 @@ class AnalyzerController extends Controller
             $quickStats['internal_links'] = $internalLinks;
             $quickStats['external_links'] = $externalLinks;
 
-            $imagesAltCount = 0;
             foreach ($dom->getElementsByTagName('img') as $image) {
                 if ($image->hasAttribute('alt') && !empty(trim($image->getAttribute('alt')))) $imagesAltCount++;
             }
@@ -109,21 +103,18 @@ class AnalyzerController extends Controller
         }
     }
 
-    /**
-     * A single, unified handler for all OpenAI-powered features.
-     */
     public function handleOpenAiRequest(Request $request): JsonResponse
     {
+        // CORRECTED: Added all new task names to the validation array to fix the 422 error.
+        $validTasks = [
+            'brief', 'suggestions', 'competitor', 'trends', 'technical_seo', 'keyword_intelligence', 'content_engine',
+            'topic_coverage', 'intent_alignment', 'snippet_readiness', 'question_mining', 'heading_hierarchy',
+            'readability_simplification', 'semantic_variants', 'eeat_signals', 'internal_links', 'title_meta_rewrite',
+            'image_seo', 'tables_checklists', 'schema_picker', 'content_freshness', 'cannibalization_check', 'ux_impact'
+        ];
+
         $validated = $request->validate([
-            'task' => ['required', 'string', Rule::in([
-                'brief', 'suggestions', 'competitor', 'trends', 
-                'technical_seo', 'keyword_intelligence', 'content_engine',
-                // New Full Semantic Audit tasks
-                'topic_coverage', 'intent_match', 'snippet_readiness', 'question_mining',
-                'heading_audit', 'readability_coach', 'semantic_variants', 'eeat_signals',
-                'internal_links', 'title_meta_rewrite', 'image_seo', 'structured_content',
-                'schema_picker', 'content_freshness', 'cannibalization_check', 'content_ux'
-            ])],
+            'task' => ['required', 'string', Rule::in($validTasks)],
             'prompt' => 'nullable|string|max:2000',
             'url' => 'required|url'
         ]);
@@ -147,13 +138,15 @@ class AnalyzerController extends Controller
         }
 
         try {
-            $isJsonMode = in_array($task, ['technical_seo', 'keyword_intelligence', 'content_engine', 'schema_picker']);
+            $isJsonMode = in_array($task, [
+                'technical_seo', 'keyword_intelligence', 'content_engine', 'title_meta_rewrite', 'schema_picker', 'image_seo'
+            ]);
             
             $response = Http::withToken($apiKey)->timeout(90)->post('https://api.openai.com/v1/chat/completions', [
                 'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
                 'messages' => [['role' => 'system', 'content' => $systemMessage], ['role' => 'user', 'content' => $userMessage]],
-                'temperature' => 0.4,
-                'max_tokens' => 1200,
+                'temperature' => 0.5,
+                'max_tokens' => 2048,
                 'response_format' => $isJsonMode ? ['type' => 'json_object'] : null,
             ]);
 
@@ -184,85 +177,32 @@ class AnalyzerController extends Controller
         }
     }
     
-    /**
-     * Helper to generate system and user prompts for the AI based on the requested task.
-     */
     private function generateAiPrompts(array $validatedData): array
     {
         $task = $validatedData['task'];
         $prompt = $validatedData['prompt'] ?? '';
         $url = $validatedData['url'];
 
-        $systemMessage = "You are a world-class Semantic SEO expert. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format.";
+        $systemMessage = "You are a world-class Semantic SEO expert. Analyze the content from the provided URL. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format.";
         $userMessage = "";
 
         switch ($task) {
-            // Existing cases
             case 'brief':
-                $userMessage = "Generate a semantic content brief for the primary keyword: '{$prompt}'. Include a suggested H1, a meta description (155 chars max), 3-5 LSI keywords, and 3-5 FAQs. Target URL: {$url}";
+                $systemMessage .= " Format your response in clean, readable plain text.";
+                $userMessage = "Generate a semantic content brief for the primary keyword: '{$prompt}'. Include a suggested H1, a meta description (155 chars max), 3-5 LSI keywords, and 3-5 FAQs. Target URL for context: {$url}";
                 break;
             case 'suggestions':
-                $userMessage = "Analyze the content at '{$url}'. Provide 3-5 actionable recommendations to improve its semantic relevance and user engagement.";
+                $systemMessage .= " Format as a plain text list of 3-5 key points.";
+                $userMessage = "Analyze the content at '{$url}'. Provide the top 3-5 most impactful recommendations to improve its semantic relevance and user engagement.";
                 break;
             case 'competitor':
-                $userMessage = "Analyze the user's page at '{$url}' against a competitor at '{$prompt}'. Identify the top 3-5 semantic strategy gaps on the user's page.";
+                $systemMessage .= " Format as plain text, focusing on strategic differences.";
+                $userMessage = "Analyze the user's page at '{$url}' against a competitor at '{$prompt}'. Identify the top 3-5 semantic strategy gaps on the user's page. What topics, entities, or questions does the competitor cover that the user is missing?";
                 break;
             case 'trends':
-                 $userMessage = "Forecast emerging semantic trends for the niche: '{$prompt}'. Identify 3-4 related concepts or questions likely to grow in search importance.";
+                 $systemMessage .= " Format as a plain text list of emerging topics.";
+                 $userMessage = "Forecast emerging semantic trends for the niche: '{$prompt}'. Identify 3-4 related concepts or questions likely to grow in search importance over the next 6-12 months, using {$url} as context.";
                  break;
-
-            // New Full Semantic Audit Prompts
-            case 'topic_coverage':
-                $userMessage = "Analyze URL: {$url}. Compare its content to top SERP pages for its main topic. List the top 5 missing semantic entities/subtopics. For each, suggest which H2/H3 section it could be added to. Format: 'Missing: [Entity1] → Add to \"[Section Title]\".\nMissing: [Entity2] → Add to \"[Section Title]\"...'";
-                break;
-            case 'intent_match':
-                $userMessage = "Analyze URL: {$url}. What is the primary search intent (Informational, Commercial, Transactional)? Does the introduction's tone match this intent? If not, flag the mismatch and give a one-sentence rewrite suggestion. Format: 'Primary Intent: [Intent]. Intro Tone: [Matched/Mismatched]. Suggestion: [Rewrite suggestion]'";
-                break;
-            case 'snippet_readiness':
-                $userMessage = "Analyze content at URL: {$url}. Does it have a clear definition (40-60 words) for a featured snippet? If not, generate one based on the content. Output only the snippet-ready paragraph.";
-                break;
-            case 'question_mining':
-                $userMessage = "For the topic at URL: {$url}, find 3-5 frequent questions from 'People Also Ask' and forums. For each, provide a suggested H2/H3 heading and a concise 1-2 paragraph answer. Format as: '### [Question 1]\n[Answer 1]\n\n### [Question 2]\n[Answer 2]...'";
-                break;
-            case 'heading_audit':
-                $userMessage = "Analyze heading structure of {$url}. Check for: 1) A single H1. 2) Logical H2->H3 flow. 3) Any H2 sections with less than 120 words. List issues and specific recommendations. Format: '- [Issue]: [Recommendation]'";
-                break;
-            case 'readability_coach':
-                $userMessage = "Analyze the content at {$url}. Identify the single most complex paragraph. Provide a simplified rewrite of that paragraph to a Grade 7-9 reading level. Output only the rewritten paragraph.";
-                break;
-            case 'semantic_variants':
-                $userMessage = "Analyze content at {$url} for its main keyword. Is exact-match density high (>1.5%)? Suggest reducing it and list 5-10 semantic variants. Format: 'Density: [X.X%]. Recommendation: [Reduce/OK]. Variants: [variant1, variant2, ...]'";
-                break;
-            case 'eeat_signals':
-                $userMessage = "Analyze {$url}. Check for: Author byline, author bio link, 'last updated' date, and outbound links to credible sources. List what's present and missing. For missing items, suggest where to add them. Format: '- Byline: [Present/Missing - Suggestion]\n- Bio: [Present/Missing - Suggestion]...'";
-                break;
-            case 'internal_links':
-                $userMessage = "Scan content of {$url}. Identify 3-5 phrases for internal links. Suggest anchor text and a hypothetical relevant topic. Format: '- In paragraph \"[...first 10 words...]\", link \"[anchor text]\" to a page about \"[topic]\".'";
-                break;
-            case 'title_meta_rewrite':
-                $userMessage = "The page at {$url} needs better CTR. Generate 3 distinct and improved Title/Meta description drafts. Use power words. Titles < 60 chars, metas < 160. Format: 'Draft 1:\nTitle: [Title]\nMeta: [Meta]\n\nDraft 2:\n...'";
-                break;
-            case 'image_seo':
-                $userMessage = "Analyze images on {$url}. Check for: 1) Hero image. 2) At least 3 images. 3) Alt text quality. For one image with poor alt text, generate a descriptive, 125-character alternative. Note if images seem oversized (>200KB). Format: 'Hero: [Yes/No]. Image Count: [Number]. Alt Text Fix for [image_src]: \"[Generated Alt]\"'";
-                break;
-            case 'structured_content':
-                $userMessage = "Analyze {$url}. Is it suitable for a comparison table or checklist? If so, draft a simple markdown table or checklist from the content. If not, state 'Content not suitable for table/checklist.'";
-                break;
-            case 'schema_picker':
-                $systemMessage .= " Respond only with a valid JSON object.";
-                $userMessage = "Based on content at {$url}, determine the best primary Schema type (Article, HowTo, FAQPage, Product). Generate ready-to-paste JSON-LD for it, populating with placeholders from the page. Output ONLY the valid JSON-LD code block.";
-                break;
-            case 'content_freshness':
-                $userMessage = "Scan {$url} for outdated info like years ('in 2022'), version numbers, or 'last year'. Highlight up to 3 stale elements and suggest updates. Format: '- Found \"[stale text]\", suggest updating to \"[fresh text]\".'";
-                break;
-            case 'cannibalization_check':
-                $userMessage = "Based on {$url}'s primary keyword/intent, suggest 2-3 other keyword variations a different page could target to avoid cannibalization. Format: 'Primary Intent: [Intent]. Avoid conflict by targeting: [Keyword1, Keyword2]. Recommendation: [Consolidate/OK]'";
-                break;
-            case 'content_ux':
-                $userMessage = "Analyze content structure at {$url} for potential CWV issues. 1) Clear hero image for LCP? 2) Table of Contents that might cause CLS? 3) Heavy widgets hurting INP? Provide a 1-2 sentence summary for each. Format: 'LCP: [Summary]. CLS: [Summary]. INP: [Summary].'";
-                break;
-
-            // JSON-mode tasks
             case 'technical_seo':
                 $systemMessage .= " Respond only with the requested JSON object.";
                 $userMessage = "Analyze technical SEO of {$url}. Return valid JSON: {'score': int, 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map': '<ul><li>...</li></ul>', 'suggestions':[{'text','type':'good'|'warn'|'bad'}]}.";
@@ -275,14 +215,63 @@ class AnalyzerController extends Controller
                 $systemMessage .= " Respond only with the requested JSON object.";
                 $userMessage = "Analyze content at {$url}. Return valid JSON: {'score': int, 'topic_clusters':[string], 'entities':[{'term','type'}], 'semantic_keywords':[string], 'relevance_score': int, 'context_intent': string}.";
                 break;
+            // NEW PROMPTS FOR UPGRADED FEATURES
+            case 'topic_coverage':
+                $userMessage = "For the content at {$url}, extract the main entities/subtopics. List the top 5-7 entities that are clearly missing compared to what a top-ranking page for this topic should have. For each missing entity, write 1-2 sentences explaining why it's important to add. Output as plain text.";
+                break;
+            case 'intent_alignment':
+                $userMessage = "Analyze the search intent (Informational, Commercial, Transactional, Navigational) for the likely query that leads to {$url}. Then, analyze the tone of the page's introduction, body, and conclusion. Flag any sections that misalign with the primary user intent and suggest a brief fix. Example: 'Intro is commercial; query is informational → add a clear definition first.' Output as plain text.";
+                break;
+            case 'snippet_readiness':
+                $userMessage = "Analyze the content at {$url} for Featured Snippet readiness. Check for a concise 40-60 word definition block (like a 'What is...' section), a numbered list for steps, or a simple bulleted list. If missing, generate a ready-to-paste, optimized 50-word definition block based on the content. Output as plain text.";
+                break;
+            case 'question_mining':
+                $userMessage = "Based on the topic of the content at {$url}, suggest 3-5 highly relevant, unanswered questions that would make excellent H2/H3 sections. Source ideas from 'People Also Ask' and common forum questions for this topic. Output as a plain text list of questions.";
+                break;
+            case 'heading_hierarchy':
+                $userMessage = "Audit the heading hierarchy (H1-H4) of the page at {$url}. Check for a single H1, logical H2->H3 flow, and thin H2 sections (under 120 words). Provide a single, most important recommendation for improvement. E.g., 'H2 'Setup' is too thin; expand it with bullet points.' Output as plain text.";
+                break;
+            case 'readability_simplification':
+                $userMessage = "Analyze the content at {$url}. Identify the single most complex or difficult-to-read paragraph. Provide a one-click 'simplified' rewrite of that paragraph, aiming for a Grade 7-9 reading level, reducing passive voice and sentence length. Output as plain text, starting with 'Original:' and then 'Simplified:'.";
+                break;
+            case 'semantic_variants':
+                $userMessage = "Analyze the content at {$url}. Detect the primary keyword. If it's over-optimized (stuffed), suggest reducing its density. Then, suggest 5-7 semantic variants or LSI keywords that are missing and should be naturally integrated. Output as plain text.";
+                break;
+            case 'eeat_signals':
+                $userMessage = "Check the page at {$url} for E-E-A-T signals. Look for an author byline, author bio, last updated date, and outbound citations to authoritative sources. List which of these four signals are present and which are missing. For missing signals, suggest a specific fix, like 'Add a 'Last Updated' timestamp.' Output as a plain text list.";
+                break;
+            case 'internal_links':
+                $userMessage = "Analyze the content at {$url}. Suggest 3-5 specific internal link opportunities from this page to other relevant pages that would likely exist on the same website. For each, provide the suggested anchor text. Output as a plain text list.";
+                break;
+            case 'title_meta_rewrite':
+                $systemMessage .= " Respond only with the requested JSON object.";
+                $userMessage = "Analyze the title and meta description for {$url}. Generate 3 improved, CTR-aware options for the title and meta description. The response must be valid JSON: {'suggestions': [{'title': string (max 60 chars), 'meta': string (max 155 chars)}, {'title': string, 'meta': string}, {'title': string, 'meta': string}]}.";
+                break;
+            case 'image_seo':
+                $systemMessage .= " Respond only with the requested JSON object.";
+                $userMessage = "Analyze the image SEO for {$url}. Check for a hero image, alt text quality, and oversized images. Provide a JSON response: {'hero_image_present': boolean, 'alt_text_suggestions': [{'image_src': string, 'suggestion': 'A descriptive alt text suggestion'}], 'optimization_targets': [{'image_src': string, 'suggestion': 'Convert to WebP and resize to 800px width.'}]}. Limit suggestions to the top 3 most important images.";
+                break;
+            case 'tables_checklists':
+                $userMessage = "Analyze the content at {$url}. Determine if the topic would benefit from a data table, checklist, or side-by-side comparison. If so, auto-draft a simple, ready-to-paste HTML block for a comparison table or a checklist based on the content. If not needed, state that. Output as plain text (with HTML if applicable).";
+                break;
+            case 'schema_picker':
+                $systemMessage .= " Respond only with the requested JSON object.";
+                $userMessage = "Analyze the content at {$url} and determine the most appropriate and impactful Schema.org type (e.g., Article, FAQPage, HowTo, Product). Provide a valid, ready-to-paste JSON-LD script for that schema, populated with details from the page. The response must be valid JSON: {'schema_type': string, 'json_ld': { ... }}.";
+                break;
+            case 'content_freshness':
+                $userMessage = "Scan the content at {$url} for signs of being outdated. Look for old years (e.g., 'in 2022'), outdated version numbers, or references to old UI/events. Highlight the top 2-3 most stale elements and suggest an update. Output as a plain text list.";
+                break;
+            case 'cannibalization_check':
+                $userMessage = "Assume you are analyzing the entire website that {$url} belongs to. Based on the primary keyword/intent of this page, identify 1-2 other potential keywords that could cause content cannibalization if separate pages were created for them. Recommend either consolidating them into this page or creating a distinct angle. Output as plain text.";
+                break;
+            case 'ux_impact':
+                $userMessage = "Analyze the content structure at {$url} from a UX perspective that impacts rankings. Check for a clear hero element (likely LCP), the potential for CLS from late-loading images or ads within the article body, and the presence of heavy widgets that could increase INP. Provide one key recommendation. Output as plain text.";
+                break;
         }
 
         return [$systemMessage, $userMessage];
     }
 
-    /**
-     * Proxies requests to the Google PageSpeed Insights API with robust caching.
-     */
     public function pageSpeedInsights(Request $request): JsonResponse
     {
         try {
@@ -327,7 +316,6 @@ class AnalyzerController extends Controller
         }
     }
 
-    // --- DEPRECATED AI ENDPOINTS ---
     public function technicalSeoAnalyze(Request $request) {
         $request->merge(['task' => 'technical_seo']);
         return $this->handleOpenAiRequest($request);
