@@ -537,6 +537,17 @@
     
     /* --- NEW: AI-Powered Features UI refs --- */
     const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult');
+    
+    /* --- NEW: Core Semantic Coverage Refs --- */
+    const topicCoverageBtn = $('#topicCoverageBtn'), topicCoverageResult = $('#topicCoverageResult');
+    const intentAlignmentBtn = $('#intentAlignmentBtn'), intentAlignmentResult = $('#intentAlignmentResult');
+    const questionMiningBtn = $('#questionMiningBtn'), questionMiningResult = $('#questionMiningResult');
+
+    /* --- NEW: On-Page Optimization Refs --- */
+    const titleMetaRewriteBtn = $('#titleMetaRewriteBtn'), titleMetaRewriteResult = $('#titleMetaRewriteResult');
+    const headingAuditBtn = $('#headingAuditBtn'), headingAuditResult = $('#headingAuditResult');
+    const keywordHealthBtn = $('#keywordHealthBtn'), keywordHealthResult = $('#keywordHealthResult');
+    const readabilityCoachBtn = $('#readabilityCoachBtn'), readabilityCoachResult = $('#readabilityCoachResult');
 
 
     /* Helpers */
@@ -831,11 +842,39 @@
     });
 
     // --- AI Feature Event Listeners ---
+    
+    // Generic function to handle AI feature clicks
+    async function handleAiFeatureClick(task, buttonEl, resultEl, prompt = '') {
+        const url = urlInput.value.trim();
+        if (!url) {
+            showError('Please enter a URL to analyze first.');
+            return;
+        }
+
+        buttonEl.disabled = true;
+        buttonEl.textContent = 'Working...';
+        resultEl.textContent = 'AI is analyzing...';
+
+        try {
+            const result = await callOpenAiApi(task, prompt, url);
+            resultEl.textContent = result.content || 'No content returned from AI.';
+        } catch (error) {
+            resultEl.textContent = `Error: ${error.message}`;
+        } finally {
+            buttonEl.disabled = false;
+            buttonEl.textContent = 'Analyze';
+        }
+    }
+
     aiBriefBtn?.addEventListener('click', async () => {
         const prompt = aiBriefInput.value.trim();
         const url = urlInput.value.trim();
         if (!prompt) {
             aiBriefResult.textContent = 'Please enter a topic or keyword.';
+            return;
+        }
+        if (!url) {
+            showError('Please enter a URL to analyze first.');
             return;
         }
         
@@ -853,6 +892,16 @@
             aiBriefBtn.textContent = 'Generate';
         }
     });
+
+    // Event listeners for new features
+    topicCoverageBtn?.addEventListener('click', () => handleAiFeatureClick('topic_coverage', topicCoverageBtn, topicCoverageResult));
+    intentAlignmentBtn?.addEventListener('click', () => handleAiFeatureClick('intent_alignment', intentAlignmentBtn, intentAlignmentResult));
+    questionMiningBtn?.addEventListener('click', () => handleAiFeatureClick('question_mining', questionMiningBtn, questionMiningResult));
+    titleMetaRewriteBtn?.addEventListener('click', () => handleAiFeatureClick('rewrite_titles', titleMetaRewriteBtn, titleMetaRewriteResult));
+    headingAuditBtn?.addEventListener('click', () => handleAiFeatureClick('audit_headings', headingAuditBtn, headingAuditResult));
+    keywordHealthBtn?.addEventListener('click', () => handleAiFeatureClick('keyword_health', keywordHealthBtn, keywordHealthResult));
+    readabilityCoachBtn?.addEventListener('click', () => handleAiFeatureClick('rewrite_readability', readabilityCoachBtn, readabilityCoachResult));
+
 
     // Utility buttons
     pasteBtn && pasteBtn.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
@@ -941,7 +990,7 @@
     </div>
   </div>
 
-  <!-- NEW: Content Analysis Engine -->
+  <!-- Content Analysis Engine -->
   <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
     <span class="animated-icon" style="color:var(--blue-1);">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20.94c1.5 0 2.75 1.25 2.75 2.75S13.5 26.44 12 26.44 9.25 25.19 9.25 23.69s1.25-2.75 2.75-2.75z"></path><path d="M12 2.56c1.5 0 2.75 1.25 2.75 2.75S13.5 8.06 12 8.06 9.25 6.81 9.25 5.31s1.25-2.75 2.75-2.75z"></path></svg>
@@ -1059,6 +1108,89 @@
         </div>
     </div>
   </div>
+
+  <!-- START: NEW Core Semantic Coverage -->
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+    <span class="animated-icon pulse" style="color:var(--green-1);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M21 21l-4.3-4.3"/></svg>
+    </span>
+    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Core Semantic Coverage</h3>
+  </div>
+  <div class="ai-card" id="coreSemanticCard">
+      <div class="ai-grid">
+          <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon" style="color:var(--green-1);">🗺️</span>Topic Coverage Map</h4>
+              <p>Find missing entities (people, places, terms) your competitors rank for.</p>
+              <div class="ai-input-row">
+                <button id="topicCoverageBtn" class="btn btn-green" style="width:100%">Analyze</button>
+              </div>
+              <div id="topicCoverageResult" class="ai-result-box">Click "Analyze" to find semantic gaps.</div>
+          </div>
+          <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon pulse" style="color:var(--blue-1);">🧭</span>Query-Intent Alignment</h4>
+              <p>Flag sections where content tone doesn't match the primary search intent.</p>
+              <div class="ai-input-row">
+                <button id="intentAlignmentBtn" class="btn btn-blue" style="width:100%">Analyze</button>
+              </div>
+              <div id="intentAlignmentResult" class="ai-result-box">Click "Analyze" to check intent alignment.</div>
+          </div>
+          <div class="ai-item" style="grid-column: 1 / -1;">
+              <h4 class="ai-item-title"><span class="animated-icon" style="color:var(--purple-1);">❓</span>Question Mining (PAA + Forums)</h4>
+              <p>Suggest unanswered questions from PAA and forums to add as new H2/H3s.</p>
+               <div class="ai-input-row">
+                <button id="questionMiningBtn" class="btn btn-purple" style="width:100%">Analyze</button>
+              </div>
+              <div id="questionMiningResult" class="ai-result-box">Click "Analyze" to find new questions to answer.</div>
+          </div>
+      </div>
+  </div>
+  <!-- END: NEW Core Semantic Coverage -->
+
+  <!-- START: NEW On-Page Optimization -->
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
+    <span class="animated-icon pulse" style="color:var(--orange-1);">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-4.44a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.38"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </span>
+    <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">On-Page Optimization</h3>
+  </div>
+  <div class="ai-card" id="onPageOptoCard">
+      <div class="ai-grid">
+          <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon" style="color:var(--orange-1);">✍️</span>Title & Meta Rewriter</h4>
+              <p>Generate 3 improved, CTR-aware options for your title and meta description.</p>
+              <div class="ai-input-row">
+                <button id="titleMetaRewriteBtn" class="btn btn-orange" style="width:100%">Rewrite</button>
+              </div>
+              <div id="titleMetaRewriteResult" class="ai-result-box">Click "Rewrite" to get new title/meta drafts.</div>
+          </div>
+          <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon pulse" style="color:var(--red-1);">🏗️</span>Heading Hierarchy Auditor</h4>
+              <p>Catch missing H1s, multiple H1s, orphan H3s, and thin H2 content.</p>
+              <div class="ai-input-row">
+                <button id="headingAuditBtn" class="btn" style="width:100%; background:linear-gradient(90deg,var(--red-1),var(--pink-1)); color:#fff;">Audit</button>
+              </div>
+              <div id="headingAuditResult" class="ai-result-box">Click "Audit" to check heading structure.</div>
+          </div>
+          <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon" style="color:var(--yellow-1);">🌡️</span>Keyword Health Check</h4>
+              <p>Detect over-optimization and get recommendations for semantic variants.</p>
+               <div class="ai-input-row">
+                <button id="keywordHealthBtn" class="btn btn-orange" style="width:100%">Check Health</button>
+              </div>
+              <div id="keywordHealthResult" class="ai-result-box">Click "Check Health" to analyze keyword density.</div>
+          </div>
+           <div class="ai-item">
+              <h4 class="ai-item-title"><span class="animated-icon pulse" style="color:var(--blue-1);">🧑‍🏫</span>Readability & Tone Coach</h4>
+              <p>Get a simplified rewrite for the most complex paragraph on your page.</p>
+               <div class="ai-input-row">
+                <button id="readabilityCoachBtn" class="btn btn-blue" style="width:100%">Simplify</button>
+              </div>
+              <div id="readabilityCoachResult" class="ai-result-box">Click "Simplify" to improve the hardest paragraph.</div>
+          </div>
+      </div>
+  </div>
+  <!-- END: NEW On-Page Optimization -->
+
 
   <!-- AI-Powered Features -->
   <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:24px;">
