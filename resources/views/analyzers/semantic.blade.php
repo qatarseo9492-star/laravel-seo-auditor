@@ -246,7 +246,7 @@
   .onpage-card { background: linear-gradient(145deg, #0c212b, #0c1a2e); border: 1px solid var(--blue-1); border-radius: 20px; padding: 16px; margin-top: 24px; box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
   .onpage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
   .onpage-item { position: relative; background: rgba(5, 20, 25, 0.7); border: 1px solid rgba(0, 198, 255, 0.3); border-radius: 14px; padding: 14px; }
-  .onpage-item-title { font-weight: 800; font-size: 15px; background: linear-gradient(90deg, var(--blue-1), var(--green-1)); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .onpage-item-title { font-weight: 800; font-size: 15px; background: linear-gradient(90deg, var(--blue-1), var(--green-1)); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 0; }
 
   /* =================================================== */
   /* === 💅 NEW STYLES for UX Polish 💅 === */
@@ -393,7 +393,7 @@
         setRunning(true);
         
         // --- Reset Core UIs ---
-        document.querySelectorAll('.ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList, #tsiAltTexts, .site-map-container, #headingMap, #cats').forEach(el => el.innerHTML = '');
+        document.querySelectorAll('.ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList ul, #tsiAltTexts, .site-map-container, #headingMap, #cats').forEach(el => el.innerHTML = '');
         
         // --- Fire Original API Calls ---
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
