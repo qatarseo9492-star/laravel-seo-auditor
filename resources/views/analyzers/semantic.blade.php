@@ -438,10 +438,10 @@
             const contentScore=clamp01((data.categories || []).reduce((acc, c) => acc + (c.score || 0), 0) / (data.categories?.length || 1));
             setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
             const r=data.readability||{};
-            const human=clamp01(70+(r.score||0)/5-(r.passive_ratio||0)/3);
+            const human=clamp01(70+(r.score||0)/5-(r.passive_ratio||0)/3); // CORRECTED CALCULATION
             setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
-            setChip(chipHuman,'Human-like',`${human} %`,human);
-            setChip(chipAI,'AI-like',`${100-human} %`,100-human);
+            setChip(chipHuman,'Human-like',`${human.toFixed(2)} %`,human);
+            setChip(chipAI,'AI-like',`${(100-human).toFixed(2)} %`,100-human);
             const cs=data.content_structure||{};
             if(titleVal) titleVal.textContent = cs.title || 'N/A';
             if(metaVal) metaVal.textContent = cs.meta_description || 'N/A';
