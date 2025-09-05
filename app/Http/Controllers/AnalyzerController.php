@@ -81,10 +81,9 @@ class AnalyzerController extends Controller
 
             // Return a combined response structure for the frontend
             return response()->json([
-                // NOTE: These scores are placeholders; the real scores are calculated client-side in the JS
-                'overall_score' => 78,
-                'readability' => ['score' => 75, 'passive_ratio' => 10],
-                'categories' => [['name' => 'Content & Keywords', 'score' => 82], ['name' => 'Content Quality', 'score' => 75]],
+                'overall_score' => 78, // Placeholder, client-side calculates real score
+                'readability' => ['score' => 75, 'passive_ratio' => 10], // Placeholder
+                'categories' => [['name' => 'Content & Keywords', 'score' => 82], ['name' => 'Content Quality', 'score' => 75]], // Placeholders
                 'content_structure' => $contentStructure,
                 'page_signals' => $pageSignals,
                 'quick_stats' => $quickStats,
@@ -104,7 +103,6 @@ class AnalyzerController extends Controller
     {
         $validTasks = [
             'brief', 'suggestions', 'competitor', 'trends', 'technical_seo', 'keyword_intelligence', 'content_engine',
-            // --- All 16 new tasks are now validated ---
             'topic_coverage', 'intent_alignment', 'snippet_readiness', 'question_mining',
             'heading_hierarchy', 'readability_simplification', 'semantic_variants', 'eeat_signals',
             'internal_links', 'title_meta_rewrite', 'image_seo', 'tables_checklists',
@@ -285,3 +283,4 @@ class AnalyzerController extends Controller
         return $this->handleOpenAiRequest($request);
     }
 }
+
