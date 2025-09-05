@@ -81,6 +81,7 @@ class AnalyzerController extends Controller
 
             // Return a combined response structure for the frontend
             return response()->json([
+                // NOTE: These scores are placeholders; the real scores are calculated client-side in the JS
                 'overall_score' => 78,
                 'readability' => ['score' => 75, 'passive_ratio' => 10],
                 'categories' => [['name' => 'Content & Keywords', 'score' => 82], ['name' => 'Content Quality', 'score' => 75]],
@@ -284,3 +285,4 @@ class AnalyzerController extends Controller
         return $this->handleOpenAiRequest($request);
     }
 }
+
