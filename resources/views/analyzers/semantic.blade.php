@@ -278,37 +278,61 @@
 </style>
 
 <script defer>
+// --- THIS IS THE FULLY REPAIRED AND MERGED SCRIPT ---
 (function(){
   const init = () => {
     const $ = s=>document.querySelector(s);
 
-    /* ============== Element refs ============== */
+    // --- All Element References ---
     const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
-    const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn');
+    const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn'),
+          importBtn=$('#importBtn'), importFile=$('#importFile'), printBtn=$('#printBtn'),
+          resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn');
     const errorBox = $('#errorBox');
+    const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
+    const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
+    const chipHttp=$('#chipHttp'), chipCanon=$('#chipCanon'), chipRobots=$('#chipRobots'), chipViewport=$('#chipViewport'),
+          chipH=$('#chipH'), chipIntChip=$('#chipInt'), chipSchema=$('#chipSchema'), chipAuto=$('#chipAuto'),
+          chipTitle = $('#chipTitle'), chipMeta = $('#chipMeta');
+    const titleVal=$('#titleVal'), metaVal=$('#metaVal'), headingMap=$('#headingMap');
+    const speedBadge = $('#speedBadge'), speedOverviewBar = $('#speedOverviewBar'), speedOverviewText = $('#speedOverviewText'),
+          mobileScoreVal = $('#mobileScoreVal'), mobileScoreCircle = $('#mobileScoreCircle'),
+          desktopScoreVal = $('#desktopScoreVal'), desktopScoreCircle = $('#desktopScoreCircle'),
+          mobileLcp = $('#mobileLcp'), mobileInp = $('#mobileInp'), mobileCls = $('#mobileCls'),
+          desktopLcp = $('#desktopLcp'), desktopInp = $('#desktopInp'), desktopCls = $('#desktopCls'),
+          speedOpportunitiesList = $('#speedOpportunitiesList');
+    const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI'),
+          tsiMetaTitle = $('#tsiMetaTitle'), tsiMetaDescription = $('#tsiMetaDescription'),
+          tsiAltTexts = $('#tsiAltTexts'), tsiSiteMap = $('#tsiSiteMap'), tsiSuggestionsList = $('#tsiSuggestionsList');
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE'),
+          caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities'),
+          caeKeywords = $('#caeKeywords'), caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
+    const kiSemanticResearch = $('#kiSemanticResearch'), kiIntentClassification = $('#kiIntentClassification'),
+          kiRelatedTerms = $('#kiRelatedTerms'), kiCompetitorGaps = $('#kiCompetitorGaps'), kiLongTail = $('#kiLongTail');
+    const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult'),
+          aiSuggestionsBtn = $('#aiSuggestionsBtn'), aiSuggestionsResult = $('#aiSuggestionsResult'),
+          aiCompetitorInput = $('#aiCompetitorInput'), aiCompetitorBtn = $('#aiCompetitorBtn'), aiCompetitorResult = $('#aiCompetitorResult'),
+          aiTrendsInput = $('#aiTrendsInput'), aiTrendsBtn = $('#aiTrendsBtn'), aiTrendsResult = $('#aiTrendsResult');
+    const modal=$('#improveModal'), mTitle=$('#improveTitle'), mCat=$('#improveCategory'),
+          mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
+          mTips=$('#improveTips'), mLink=$('#improveSearch');
     
-    /* ... (all other original element refs are assumed to be here) ... */
-
-    /* Helpers */
+    // --- All Helper Functions (Restored) ---
     const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
     const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
+    const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
     const showError=(msg,detail)=>{ errorBox.style.display='block'; errorBox.textContent=msg+(detail?`: ${detail}`:''); };
     const clearError=()=>{ errorBox.style.display='none'; errorBox.textContent=''; };
+    const setChip=(el,label,value,score)=>{ if(!el)return; el.classList.remove('good','warn','bad'); const b=bandName(score); el.classList.add(b); el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`; };
+
+    const CATS=[{name:'User Signals & Experience',icon:'📱',checks:['Mobile-friendly, responsive layout','Optimized speed (compression, lazy-load)','Core Web Vitals passing (LCP/INP/CLS)','Clear CTAs and next steps','Accessible basics (alt text, contrast)']},{name:'Entities & Context',icon:'🧩',checks:['sameAs/Organization details present','Valid schema markup (Article/FAQ/Product)','Related entities covered with context','Primary entity clearly defined','Organization contact/about page visible']},{name:'Structure & Architecture',icon:'🏗️',checks:['Logical H2/H3 headings & topic clusters','Internal links to hub/related pages','Clean, descriptive URL slug','Breadcrumbs enabled (+ schema)','XML sitemap logical structure']},{name:'Content Quality',icon:'🧠',checks:['E-E-A-T signals (author, date, expertise)','Unique value vs. top competitors','Facts & citations up to date','Helpful media (images/video) w/ captions','Up-to-date examples & screenshots']},{name:'Content & Keywords',icon:'📝',checks:['Define search intent & primary topic','Map target & related keywords (synonyms/PAA)','H1 includes primary topic naturally','Integrate FAQs / questions with answers','Readable, NLP-friendly language']},{name:'Technical Elements',icon:'⚙️',checks:['Title tag (≈50–60 chars) w/ primary keyword','Meta description (≈140–160 chars) + CTA','Canonical tag set correctly','Indexable & listed in XML sitemap','Robots directives valid']}];
+    const KB={'Mobile-friendly, responsive layout':{why:'Most traffic is mobile; poor UX kills engagement.',tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'],link:'https://search.google.com/test/mobile-friendly'},'Optimized speed (compression, lazy-load)':{why:'Speed affects abandonment and CWV.',tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'],link:'https://web.dev/fast/'},'Core Web Vitals passing (LCP/INP/CLS)':{why:'Passing CWV improves experience & stability.',tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'],link:'https://web.dev/vitals/'},'Clear CTAs and next steps':{why:'Clarity increases conversions and task completion.',tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'],link:'https://www.nngroup.com/articles/call-to-action-buttons/'},'Accessible basics (alt text, contrast)':{why:'Accessibility broadens reach and reduces risk.',tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'],link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},'sameAs/Organization details present':{why:'Entity grounding disambiguates your brand.',tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'],link:'https://schema.org/Organization'},'Valid schema markup (Article/FAQ/Product)':{why:'Structured data unlocks rich results.',tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'],link:'https://search.google.com/test/rich-results'},'Related entities covered with context':{why:'Covering related entities builds topical depth.',tips:['Mention related concepts.','Explain relationships.','Link to references.'],link:'https://developers.google.com/knowledge-graph'},'Primary entity clearly defined':{why:'A single main entity clarifies page purpose.',tips:['Define at the top.','Use consistent naming.','Add schema about it.'],link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},'Organization contact/about page visible':{why:'Trust & contact clarity support E-E-A-T.',tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'],link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},'Logical H2/H3 headings & topic clusters':{why:'Hierarchy helps skimming and indexing.',tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'],link:'https://moz.com/learn/seo/site-structure'},'Internal links to hub/related pages':{why:'Internal links distribute authority & context.',tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'],link:'https://ahrefs.com/blog/internal-links/'},'Clean, descriptive URL slug':{why:'Readable slugs improve CTR & clarity.',tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'],link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},'Breadcrumbs enabled (+ schema)':{why:'Breadcrumbs clarify location & show in SERP.',tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'],link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},'XML sitemap logical structure':{why:'Sitemap accelerates discovery & updates.',tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'],link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},'E-E-A-T signals (author, date, expertise)':{why:'Trust signals reduce bounce & build credibility.',tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'],link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},'Unique value vs. top competitors':{why:'Differentiation is necessary to rank & retain.',tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'],link:'https://backlinko.com/seo-techniques'},'Facts & citations up to date':{why:'Freshness + accuracy boosts trust.',tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'],link:'https://scholar.google.com/'},'Helpful media (images/video) w/ captions':{why:'Media improves comprehension & dwell time.',tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'],link:'https://web.dev/optimize-lcp/'},'Up-to-date examples & screenshots':{why:'Current visuals reflect product reality.',tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'],link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},'Define search intent & primary topic':{why:'Matching intent drives relevance & time on page.',tips:['State outcome early.','Align format to intent.','Use concrete examples.'],link:'https://ahrefs.com/blog/search-intent/'},'Map target & related keywords (synonyms/PAA)':{why:'Variants improve recall & completeness.',tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'],link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},'H1 includes primary topic naturally':{why:'Clear topic helps users and algorithms.',tips:['One H1 per page.','Topic near the start.','Be descriptive.'],link:'https://web.dev/learn/html/semantics/#headings'},'Integrate FAQs / questions with answers':{why:'Captures long-tail & can earn rich results.',tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'],link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},'Readable, NLP-friendly language':{why:'Plain, direct writing improves comprehension.',tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'],link:'https://www.plainlanguage.gov/guidelines/'},'Title tag (≈50–60 chars) w/ primary keyword':{why:'Title remains the strongest on-page signal.',tips:['50–60 chars.','Primary topic first.','Avoid duplication.'],link:'https://moz.com/learn/seo/title-tag'},'Meta description (≈140–160 chars) + CTA':{why:'Meta drives CTR which correlates with rankings.',tips:['140–160 chars.','Benefit + CTA.','Match intent.'],link:'https://moz.com/learn/seo/meta-description'},'Canonical tag set correctly':{why:'Avoid duplicates; consolidate signals.',tips:['One canonical.','Absolute URL.','No conflicting canonicals.'],link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},'Indexable & listed in XML sitemap':{why:'Indexation is prerequisite to ranking.',tips:['No noindex.','Include in sitemap.','Submit in Search Console.'],link:'https://developers.google.com/search/docs/crawling-indexing/overview'},'Robots directives valid':{why:'Avoid accidental noindex/nofollow.',tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'],link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}};
     
-    const handleApiError = (toolName, error) => {
-        let message = error.message || 'An unknown error occurred.';
-        const jsonStringMatch = message.match(/(\{.*\})/);
-        if (jsonStringMatch && jsonStringMatch[1]) {
-            try {
-                const errorJson = JSON.parse(jsonStringMatch[1]);
-                message = errorJson.error || errorJson.message || jsonStringMatch[1];
-            } catch (e) { /* Not valid JSON */ }
-        }
-        showError(`${toolName} analysis failed`, message);
-        return null;
-    };
+    function scoreChecklist(label,data,url,targetKw=''){const qs=data.quick_stats||{};const cs=data.content_structure||{};const ps=data.page_signals||{};const r=data.readability||{};const h1=(cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;const h2=(cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;const h3=(cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;const title=(cs.title||'');const meta=(cs.meta_description||'');const internal=Number(qs.internal_links||0);const external=Number(qs.external_links||0);const schemaTypes=new Set((data.page_signals?.schema_types)||[]);const robots=(data.page_signals?.robots||'').toLowerCase();const hasFAQ=schemaTypes.has('FAQPage');const hasArticle=schemaTypes.has('Article')||schemaTypes.has('NewsArticle')||schemaTypes.has('BlogPosting');const urlPath=(()=>{try{return new URL(url).pathname;}catch{return '/';}})();const slugScore=(()=>{const hasQuery=url.includes('?');const segs=urlPath.split('/').filter(Boolean);const words=segs.join('-').split('-').filter(Boolean);if(hasQuery)return 55;if(segs.length>6)return 60;if(words.some(w=>w.length>24))return 65;return 85;})();switch(label){case'Mobile-friendly, responsive layout':return ps.has_viewport?88:58;case'Optimized speed (compression, lazy-load)':return 60;case'Core Web Vitals passing (LCP/INP/CLS)':return 60;case'Clear CTAs and next steps':return meta.length>=140&&/learn|get|try|start|buy|sign|download|contact/i.test(meta)?80:60;case'Accessible basics (alt text, contrast)':return (data.images_alt_count||0)>=3?82:((data.images_alt_count||0)>=1?68:48);case'sameAs/Organization details present':return ps.has_org_sameas?90:55;case'Valid schema markup (Article/FAQ/Product)':return (hasArticle||hasFAQ||schemaTypes.has('Product'))?85:(schemaTypes.size>0?70:50);case'Related entities covered with context':return external>=2?72:60;case'Primary entity clearly defined':return ps.has_main_entity?85:(h1>0?72:58);case'Organization contact/about page visible':return 60;case'Logical H2/H3 headings & topic clusters':return (h2>=3&&h3>=2)?85:(h2>=2?70:55);case'Internal links to hub/related pages':return internal>=5?85:(internal>=2?65:45);case'Clean, descriptive URL slug':return slugScore;case'Breadcrumbs enabled (+ schema)':return ps.has_breadcrumbs?85:55;case'XML sitemap logical structure':return 60;case'E-E-A-T signals (author, date, expertise)':return ps.has_org_sameas?75:65;case'Unique value vs. top competitors':return 60;case'Facts & citations up to date':return external>=2?78:58;case'Helpful media (images/video) w/ captions':return (data.images_alt_count||0)>=3?82:58;case'Up-to-date examples & screenshots':return 60;case'Define search intent & primary topic':return (title&&h1>0)?78:60;case'Map target & related keywords (synonyms/PAA)':{const kw=(targetKw||'').trim();if(!kw)return 60;const found=(title.toLowerCase().includes(kw.toLowerCase())||(cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));return found?80:62}case'H1 includes primary topic naturally':{const kw=(targetKw||'').trim();if(h1===0)return 45;if(!kw)return 72;const found=(cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));return found?84:72}case'Integrate FAQs / questions with answers':return hasFAQ?85:(/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ')+' '+(cs.headings?.H3||[]).join(' '))?70:55);case'Readable, NLP-friendly language':return clamp01(r.score||0);case'Title tag (≈50–60 chars) w/ primary keyword':{const len=(title||'').length;return (len>=50&&len<=60)?88:(len?68:45)}case'Meta description (≈140–160 chars) + CTA':{const len=(meta||'').length;const hasCTA=/learn|get|try|start|buy|sign|download|contact/i.test(meta||'');return (len>=140&&len<=160)?(hasCTA?90:82):(len?65:48)}case'Canonical tag set correctly':return ps.canonical?85:55;case'Indexable & listed in XML sitemap':return robots.includes('noindex')?20:80;case'Robots directives valid':return (robots&&/(noindex|none)/.test(robots))?45:75;}return 60}
     
-    /* API Calls */
+    function renderCategories(data,url,targetKw){const catsEl=$('#cats');if(!catsEl)return;catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80&&$('#autoCheck')?.checked)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label+' best practices'));if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});if(chipAuto)chipAuto.textContent=autoGood;}
+    
+    // --- API & UI Helpers (Restored & Upgraded) ---
     async function callApi(endpoint, data) {
         const res = await fetch(endpoint, {
             method: 'POST',
@@ -321,35 +345,30 @@
         }
         return res.json();
     }
-    
-    function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="animated-icon">⚙️</span> Analyzing...':'🔍 Analyze'}
-    
+    const setRunning=(isOn)=>{if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="animated-icon">⚙️</span> Analyzing...':'🚀 Analyze & Upgrade All Sections'};
     function setWheel(elRing, elNum, container, score, prefix){
         if (!elRing || !elNum || !container) return;
-        const b=bandName(score);
-        container.classList.remove('good','warn','bad');
-        container.classList.add(b);
-        elRing.style.setProperty('--v',score);
-        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
+        const s=clamp01(score);const b=bandName(s);
+        container.classList.remove('good','warn','bad');container.classList.add(b);
+        elRing.style.setProperty('--v',s);elNum.textContent=(prefix?prefix+' ':'')+s+'%';
     }
-
-    // =====================================================
-    // === 💅 NEW SKELETON LOADER AND COPY FUNCTIONALITY 💅 ===
-    // =====================================================
+    function setSpeedCircle(circleEl, score) {
+        if (!circleEl) return;
+        const s = clamp01(score); const r = circleEl.r.baseVal.value;
+        const circumference = 2 * Math.PI * r;
+        const offset = circumference - (s / 100) * circumference;
+        circleEl.style.strokeDasharray = `${circumference} ${circumference}`;
+        circleEl.style.strokeDashoffset = offset;
+        const color = s >= 80 ? 'var(--green-1)' : s >= 60 ? 'var(--yellow-1)' : 'var(--red-1)';
+        circleEl.style.stroke = color;
+    }
     const skeletonHtml = `<div class="skeleton-loader"><div class="line line-long"></div><div class="line line-short"></div><div class="line line-long"></div></div>`;
-    
     function addCopyToClipboard(element) {
-        // First, remove any existing copy button to prevent duplicates
         const existingBtn = element.querySelector('.copy-btn');
-        if (existingBtn) {
-            existingBtn.remove();
-        }
-
+        if (existingBtn) existingBtn.remove();
         const copyBtn = document.createElement('button');
-        copyBtn.className = 'copy-btn';
-        copyBtn.title = 'Copy to clipboard';
+        copyBtn.className = 'copy-btn'; copyBtn.title = 'Copy to clipboard';
         copyBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-        
         let originalText = copyBtn.innerHTML;
         copyBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -357,22 +376,13 @@
             navigator.clipboard.writeText(textToCopy).then(() => {
                 copyBtn.innerHTML = 'Copied!';
                 setTimeout(() => { copyBtn.innerHTML = originalText; }, 2000);
-            }, () => {
-                copyBtn.innerHTML = 'Failed!';
-                 setTimeout(() => { copyBtn.innerHTML = originalText; }, 2000);
             });
         });
         element.appendChild(copyBtn);
     }
-    
-    // Function to check for Arabic characters to set text direction
-    function containsRtl(s) {
-        if (typeof s !== 'string') return false;
-        const rtlChars = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/;
-        return rtlChars.test(s);
-    }
+    function containsRtl(s) { if (typeof s !== 'string') return false; const rtlChars = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/; return rtlChars.test(s); }
 
-    /* ===== Main Analyze Logic ===== */
+    // --- Main Analyze Logic (Restored & Merged) ---
     analyzeBtn?.addEventListener('click', async e=>{
       e.preventDefault();
       clearError();
@@ -382,81 +392,184 @@
       try{
         setRunning(true);
         
-        // --- Fire all ORIGINAL API calls in parallel (simplified for brevity) ---
-        const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
-            callApi('/api/semantic-analyze', { url }),
-            callApi('/api/technical-seo-analyze', { url }).catch(err => handleApiError('Technical SEO', err)),
-            callApi('/api/keyword-analyze', { url }).catch(err => handleApiError('Keyword Intelligence', err)),
-            callApi('/api/content-engine-analyze', { url }).catch(err => handleApiError('Content Engine', err)),
-            callApi('/semantic-analyzer/psi', { url }).catch(err => handleApiError('PageSpeed Insights', err))
-        ]);
-
-        if(!data || data.error) throw new Error(data?.error || 'Local data parsing failed');
-        window.__lastData={...data,url};
-
-        // --- All original UI population logic would go here ---
-        // Example: setWheel(mwRing, mwNum, mw, data.overall_score || 0);
-        // This part is kept from your full file.
-        // ... (imagine the full 500+ lines of original UI logic is here) ...
-
-        /* ================================================= */
-        /* === UPGRADED: Logic for 16 New Features === */
-        /* ================================================= */
+        // --- Reset All UIs ---
+        document.querySelectorAll('.ai-result-box, .ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList ul, #tsiAltTexts, .site-map-container, #headingMap').forEach(el => el.innerHTML = '');
+        
+        // --- Fire All API Calls in Parallel ---
+        const allApiPromises = [
+            callApi('/api/semantic-analyze', { url }).catch(err => {showError('Failed to fetch and parse URL', err.message); return null;}),
+            callApi('/api/technical-seo-analyze', { url }).catch(err => {showError('Technical SEO API Error', err.message); return null;}),
+            callApi('/api/keyword-analyze', { url }).catch(err => {showError('Keyword API Error', err.message); return null;}),
+            callApi('/api/content-engine-analyze', { url }).catch(err => {showError('Content Engine API Error', err.message); return null;}),
+            callApi('/semantic-analyzer/psi', { url }).catch(err => {showError('PageSpeed API Error', err.message); return null;})
+        ];
+        
+        // --- Add all 16 new tasks to the parallel execution ---
         const allNewTasks = [
-            { task: 'topic_coverage', elementId: 'topicCoverageResult' },
-            { task: 'intent_alignment', elementId: 'intentAlignmentResult' },
-            { task: 'snippet_readiness', elementId: 'snippetReadinessResult' },
-            { task: 'question_mining', elementId: 'questionMiningResult' },
-            { task: 'heading_hierarchy', elementId: 'headingHierarchyResult' },
-            { task: 'readability_simplification', elementId: 'readabilitySimplificationResult' },
-            { task: 'semantic_variants', elementId: 'semanticVariantsResult' },
-            { task: 'eeat_signals', elementId: 'eeatSignalsResult' },
-            { task: 'internal_links', elementId: 'internalLinksResult' },
-            { task: 'tables_checklists', elementId: 'tablesChecklistsResult' },
-            { task: 'content_freshness', elementId: 'contentFreshnessResult' },
-            { task: 'cannibalization_check', elementId: 'cannibalizationCheckResult' },
+            { task: 'topic_coverage', elementId: 'topicCoverageResult' }, { task: 'intent_alignment', elementId: 'intentAlignmentResult' },
+            { task: 'snippet_readiness', elementId: 'snippetReadinessResult' }, { task: 'question_mining', elementId: 'questionMiningResult' },
+            { task: 'heading_hierarchy', elementId: 'headingHierarchyResult' }, { task: 'readability_simplification', elementId: 'readabilitySimplificationResult' },
+            { task: 'semantic_variants', elementId: 'semanticVariantsResult' }, { task: 'eeat_signals', elementId: 'eeatSignalsResult' },
+            { task: 'internal_links', elementId: 'internalLinksResult' }, { task: 'tables_checklists', elementId: 'tablesChecklistsResult' },
+            { task: 'content_freshness', elementId: 'contentFreshnessResult' }, { task: 'cannibalization_check', elementId: 'cannibalizationCheckResult' },
             { task: 'ux_impact', elementId: 'uxImpactResult' },
             { task: 'title_meta_rewrite', elementId: 'titleMetaRewriteResult', isJson: true, formatter: data => (data.suggestions || []).map((s, i) => `<p><strong>Option ${i+1}:</strong><br><strong>Title:</strong> ${s.title}<br><strong>Meta:</strong> ${s.meta}</p>`).join('') },
-            { task: 'image_seo', elementId: 'imageSeoResult', isJson: true, formatter: data => `<p><strong>Hero Image Present:</strong> ${data.hero_image_present ? 'Yes' : 'No'}</p>` + ((data.alt_text_suggestions||[]).length > 0 ? '<strong>Alt Text Suggestions:</strong><ul>' + data.alt_text_suggestions.map(s => `<li><code>${s.image_src}</code>: "${s.suggestion}"</li>`).join('') + '</ul>':'') },
+            { task: 'image_seo', elementId: 'imageSeoResult', isJson: true, formatter: data => `<p><strong>Hero Image Present:</strong> ${data.hero_image_present ? 'Yes' : 'No'}</p>` + ((data.alt_text_suggestions||[]).length > 0 ? '<strong>Alt Text Suggestions:</strong><ul>' + data.alt_text_suggestions.map(s => `<li><code>${s.image_src.substring(s.image_src.lastIndexOf('/')+1)}</code>: "${s.suggestion}"</li>`).join('') + '</ul>':'') },
             { task: 'schema_picker', elementId: 'schemaPickerResult', isJson: true, formatter: data => data.json_ld ? `<p><strong>Recommended Schema:</strong> ${data.schema_type}</p><pre><code>${JSON.stringify(data.json_ld, null, 2)}</code></pre>` : 'No schema suggestion.' },
         ];
         
-        // Show skeleton loaders
         allNewTasks.forEach(item => { const el = $(`#${item.elementId}`); if(el) el.innerHTML = skeletonHtml; });
+        allNewTasks.forEach(item => allApiPromises.push(callApi('/api/openai-request', {task: item.task, url}).catch(err => ({task: item.task, error: err}))));
 
-        const newPromises = allNewTasks.map(item => callApi('/api/openai-request', {task: item.task, url}).then(data => ({ ...item, data })).catch(error => ({ ...item, error })));
-        const newResults = await Promise.all(newPromises);
+        const allResults = await Promise.all(allApiPromises);
+        
+        // --- Process All Results ---
+        const [data, tsiData, kiData, caeData, psiData] = allResults.slice(0, 5);
+        const newFeatureResults = allResults.slice(5);
 
-        newResults.forEach(result => {
-            const el = $(`#${result.elementId}`);
+        // --- Populate Original Sections (FIXED) ---
+        if(data) {
+            window.__lastData={...data,url};
+            const score=clamp01(data.overall_score||0);
+            setWheel(mwRing, mwNum, mw, score, '');
+            if(overallFill) overallFill.style.width=score+'%';
+            if(overallPct) overallPct.textContent=score+'%';
+            setChip(chipOverall,'Overall',`${score} /100`,score);
+            const contentScore=clamp01((data.categories || []).reduce((acc, c) => acc + c.score, 0) / (data.categories?.length || 1));
+            setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
+            const r=data.readability||{};
+            const human=clamp01(70+(r.score||0)/5-(r.passive_ratio||0)/3);
+            setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
+            setChip(chipHuman,'Human-like',`${human} %`,human);
+            setChip(chipAI,'AI-like',`${100-human} %`,100-human);
+            const cs=data.content_structure||{};
+            if(titleVal) titleVal.textContent = cs.title || 'N/A';
+            if(metaVal) metaVal.textContent = cs.meta_description || 'N/A';
+            const hs = cs.headings || {};
+            if(chipH) chipH.textContent = `H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
+            if(headingMap) {
+                headingMap.innerHTML = ''; ['H1', 'H2', 'H3', 'H4'].forEach(lvl => {
+                    if(!hs[lvl] || !hs[lvl].length) return;
+                    headingMap.innerHTML += `<div class="cat-card"><div class="cat-card-title">${lvl} (${hs[lvl].length})</div><div class="space-y-1 mt-2">` + hs[lvl].map(t => `<div class="text-sm">• ${t}</div>`).join('') + `</div></div>`;
+                });
+            }
+            const ps=data.page_signals||{};
+            if(chipHttp) chipHttp.textContent='200';
+            if(chipCanon) chipCanon.textContent=ps.canonical?'Yes':'No';
+            if(chipRobots) chipRobots.textContent=ps.robots||'N/A';
+            if(chipViewport) chipViewport.textContent=ps.has_viewport?'Yes':'No';
+            if(chipIntChip) chipIntChip.textContent=data.quick_stats?.internal_links||0;
+            if(chipSchema) chipSchema.textContent=(ps.schema_types||[]).length;
+            renderCategories(data,url,''); // This renders Semantic Ground
+        }
+
+        if(tsiData) {
+            setWheel(ringTSI, numTSI, mwTSI, tsiData.score || 0, '');
+            if(tsiMetaTitle) tsiMetaTitle.textContent = tsiData.meta_optimization?.title || 'N/A';
+            if(tsiMetaDescription) tsiMetaDescription.textContent = tsiData.meta_optimization?.description || 'N/A';
+            if(tsiAltTexts) tsiAltTexts.innerHTML = (tsiData.alt_text_suggestions||[]).map(a => `<li><code>.../${a.image_src.substring(a.image_src.lastIndexOf('/')+1)}</code> → "${a.suggestion}"</li>`).join('') || '<li>No suggestions.</li>';
+            if(tsiSiteMap) tsiSiteMap.innerHTML = tsiData.site_structure_map || 'N/A';
+            if(tsiSuggestionsList) tsiSuggestionsList.innerHTML = (tsiData.suggestions||[]).map(s => `<li>${s.text}</li>`).join('') || '<li>No suggestions.</li>';
+        }
+        
+        if(kiData) {
+            if(kiSemanticResearch) kiSemanticResearch.innerHTML = (kiData.semantic_research||[]).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
+            if(kiIntentClassification) kiIntentClassification.innerHTML = (kiData.intent_classification||[]).map(k => `<span class="chip intent-info">${k.keyword} <i>(${k.intent})</i></span>`).join('') || '<span class="chip">No data</span>';
+            if(kiRelatedTerms) kiRelatedTerms.innerHTML = (kiData.related_terms||[]).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="chip">No data</span>';
+            if(kiCompetitorGaps) kiCompetitorGaps.innerHTML = (kiData.competitor_gaps||[]).map(k => `<li>${k}</li>`).join('') || '<li>No gaps found.</li>';
+            if(kiLongTail) kiLongTail.innerHTML = (kiData.long_tail_suggestions||[]).map(k => `<li>${k}</li>`).join('') || '<li>No suggestions.</li>';
+        }
+        
+        if(caeData) {
+            setWheel(ringCAE, numCAE, mwCAE, caeData.score || 0, '');
+            if(caeTopicClusters) caeTopicClusters.innerHTML = (caeData.topic_clusters||[]).map(t => `<span class="chip">${t}</span>`).join('');
+            if(caeEntities) caeEntities.innerHTML = (caeData.entities||[]).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
+            if(caeKeywords) caeKeywords.innerHTML = (caeData.semantic_keywords||[]).map(k => `<span class="chip">${k}</span>`).join('');
+            const relScore = clamp01(caeData.relevance_score || 0);
+            if(caeRelevanceBar) caeRelevanceBar.style.width = `${relScore}%`;
+            if(caeIntent) caeIntent.innerHTML = `<span class="chip good">${caeData.context_intent || 'N/A'}</span>`;
+        }
+
+        if(psiData) {
+            const mobile = psiData.mobile || {}, desktop = psiData.desktop || {};
+            const overallScore = Math.round(((mobile.score || 0) + (desktop.score || 0)) / 2);
+            if(speedBadge){ speedBadge.textContent = bandName(overallScore); speedBadge.className = 'speed-badge ' + bandName(overallScore); }
+            if(speedOverviewBar) speedOverviewBar.style.width = overallScore + '%';
+            if(speedOverviewText) speedOverviewText.textContent = `Overall performance score: ${overallScore}. Mobile: ${mobile.score}, Desktop: ${desktop.score}.`;
+            if(mobileScoreVal) mobileScoreVal.textContent = mobile.score || 0;
+            setSpeedCircle(mobileScoreCircle, mobile.score || 0);
+            if(desktopScoreVal) desktopScoreVal.textContent = desktop.score || 0;
+            setSpeedCircle(desktopScoreCircle, desktop.score || 0);
+            if(mobileLcp) mobileLcp.textContent = mobile.lcp_s ? `${mobile.lcp_s.toFixed(2)}s` : 'N/A';
+            if(mobileInp) mobileInp.textContent = mobile.inp_ms ? `${mobile.inp_ms}ms` : 'N/A';
+            if(mobileCls) mobileCls.textContent = mobile.cls ? mobile.cls.toFixed(3) : 'N/A';
+            if(desktopLcp) desktopLcp.textContent = desktop.lcp_s ? `${desktop.lcp_s.toFixed(2)}s` : 'N/A';
+            if(desktopInp) desktopInp.textContent = desktop.inp_ms ? `${desktop.inp_ms}ms` : 'N/A';
+            if(desktopCls) desktopCls.textContent = desktop.cls ? desktop.cls.toFixed(3) : 'N/A';
+            if(speedOpportunitiesList) speedOpportunitiesList.innerHTML = (psiData.opportunities||[]).length > 0 ? (psiData.opportunities||[]).map(tip => `<li>${tip}</li>`).join('') : '<li>No specific opportunities found. Great job!</li>';
+        }
+
+        // --- Populate New Upgraded Sections (FIXED) ---
+        newFeatureResults.forEach(result => {
+            if(!result || !result.task) return;
+            const taskInfo = allNewTasks.find(t => t.task === result.task);
+            if (!taskInfo) return;
+            const el = $(`#${taskInfo.elementId}`);
             if (!el) return;
             
             let content = '';
-            if (result.error) { content = `<span style="color:var(--red-1);">Error: ${result.error.message}</span>`; } 
-            else if (result.isJson) { content = result.formatter(result.data); }
-            else { content = result.data.content || 'No suggestions found.'; }
+            if (result.error) { content = `<span style="color:var(--red-1);">Error: ${result.error.message}</span>`; }
+            else if (taskInfo.isJson) { content = taskInfo.formatter(result); }
+            else { content = result.content || 'No suggestions found.'; }
 
-            // Set content and add copy button + RTL support
             el.innerHTML = content;
-            if (containsRtl(content)) {
-                el.setAttribute('dir', 'rtl');
-            } else {
-                el.removeAttribute('dir');
-            }
-            if (!result.error) {
-                addCopyToClipboard(el);
-            }
+            if (containsRtl(content)) el.setAttribute('dir', 'rtl');
+            else el.removeAttribute('dir');
+            if (!result.error) addCopyToClipboard(el);
         });
 
       }catch(err){
-        showError('A critical error occurred during analysis', err.message);
+        showError('A critical error occurred', err.message);
       }finally{
         setRunning(false);
       }
     });
     
-    // --- This is the full, original script from your file, now with the upgrades integrated ---
-    
+    // --- All Other Original Event Listeners (Restored) ---
+    pasteBtn?.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
+    importBtn?.addEventListener('click',()=>importFile.click());
+    importFile?.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)});
+    printBtn?.addEventListener('click',()=>window.print());
+    resetBtn?.addEventListener('click',()=>location.reload());
+    exportBtn?.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)});
+    const setupAiListener = (btn, input, resultEl, task) => {
+        btn?.addEventListener('click', async () => {
+            const prompt = input ? input.value.trim() : null;
+            const url = urlInput.value.trim();
+            if (input && !prompt) { resultEl.textContent = 'Please provide an input.'; return; }
+            if (!url && (task === 'suggestions' || task === 'competitor')) { resultEl.textContent = 'Please analyze a primary URL first.'; return; }
+            btn.disabled = true; btn.textContent = '...'; resultEl.innerHTML = skeletonHtml;
+            try {
+                const res = await callApi('/api/openai-request', { task, prompt, url });
+                const content = res.content || 'No content returned.';
+                resultEl.textContent = content;
+                if(containsRtl(content)) resultEl.setAttribute('dir', 'rtl'); else resultEl.removeAttribute('dir');
+                addCopyToClipboard(resultEl);
+            } catch (err) {
+                resultEl.textContent = `Error: ${err.message}`;
+            } finally {
+                btn.disabled = false; btn.textContent = btn.dataset.originalText || 'Analyze';
+            }
+        });
+    };
+    aiBriefBtn.dataset.originalText = 'Generate';
+    aiSuggestionsBtn.dataset.originalText = 'Get Suggestions';
+    aiCompetitorBtn.dataset.originalText = 'Analyze';
+    aiTrendsBtn.dataset.originalText = 'Predict';
+    setupAiListener(aiBriefBtn, aiBriefInput, aiBriefResult, 'brief');
+    setupAiListener(aiSuggestionsBtn, null, aiSuggestionsResult, 'suggestions');
+    setupAiListener(aiCompetitorBtn, aiCompetitorInput, aiCompetitorResult, 'competitor');
+    setupAiListener(aiTrendsBtn, aiTrendsInput, aiTrendsResult, 'trends');
   };
 
   if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', init, { once: true }); } else { init(); }
@@ -467,9 +580,6 @@
 @section('content')
 
 <section class="maxw px-4 pb-10">
-
-  {{-- This section contains all of your original HTML layouts. --}}
-  {{-- The only change is adding the new result containers at the bottom of each relevant card. --}}
 
   <div class="title-wrap">
     <div class="king">👑</div>
@@ -504,7 +614,7 @@
       <div style="flex:1"></div>
       <input id="importFile" type="file" accept="application/json" style="display:none"/>
       <button id="importBtn" type="button" class="btn btn-purple">⇪ Import</button>
-      <button id="analyzeBtn" type="button" class="btn btn-green">🔍 Analyze</button>
+      <button id="analyzeBtn" type="button" class="btn btn-green">🚀 Analyze & Upgrade All Sections</button>
       <button id="printBtn"   type="button" class="btn btn-blue">🖨️ Print</button>
       <button id="resetBtn"   type="button" class="btn btn-orange">↻ Reset</button>
       <button id="exportBtn"  type="button" class="btn btn-purple">⬇︎ Export</button>
@@ -528,7 +638,6 @@
   <div class="cae-card" id="contentAnalysisEngineCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content & Intent Analysis</h3></div>
     <div class="cae-grid">
-      {{-- Original CAE layout is here --}}
       <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE" style="--v:0"></div><div class="mw-center" id="numCAE">0%</div></div></div>
       <div class="cae-info-grid">
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon animated-icon">🧩</div><span class="cae-info-title">Topic Clustering Analysis</span></div><div class="cae-tags" id="caeTopicClusters"></div></div>
@@ -549,7 +658,6 @@
   <div class="tsi-card" id="technicalSeoCard">
      <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical & On-Page SEO</h3></div>
      <div class="tsi-grid">
-      {{-- Original TSI layout is here --}}
       <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI" style="--v:0"></div><div class="mw-center" id="numTSI">0%</div></div></div>
       <div class="tsi-info-grid">
         <div class="tsi-info-item" style="grid-column: span 2;"><div class="tsi-info-header"><span>📰</span><span class="tsi-info-title">Meta Tags</span></div><p><strong>Title:</strong> <span id="tsiMetaTitle">—</span></p><p><strong>Description:</strong> <span id="tsiMetaDescription">—</span></p></div>
@@ -576,12 +684,11 @@
   <div class="ki-card" id="keywordIntelligenceCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword & Competitor Intelligence</h3></div>
     <div class="ki-grid">
-        {{-- Original KI layout is here --}}
         <div class="ki-item"><h4 class="ki-item-title"><span>🧠</span>Semantic Keyword Research</h4><div id="kiSemanticResearch" class="ki-tags"></div></div>
         <div class="ki-item"><h4 class="ki-item-title"><span>🎯</span>Keyword Intent Classification</h4><div id="kiIntentClassification" class="ki-tags"></div></div>
         <div class="ki-item"><h4 class="ki-item-title"><span>🗺️</span>Related Terms Mapping</h4><div id="kiRelatedTerms" class="ki-tags"></div></div>
-        <div class="ki-item"><h4 class="ki-item-title"><span>📊</span>Competitor Keyword Gap Analysis</h4><div id="kiCompetitorGaps" class="ki-list"></div></div>
-        <div class="ki-item" style="grid-column: 1 / -1;"><h4 class="ki-item-title"><span>🔑</span>Long-tail Semantic Suggestions</h4><div id="kiLongTail" class="ki-list"></div></div>
+        <div class="ki-item"><h4 class="ki-item-title"><span>📊</span>Competitor Keyword Gap Analysis</h4><ul id="kiCompetitorGaps" class="ki-list"></ul></div>
+        <div class="ki-item" style="grid-column: 1 / -1;"><h4 class="ki-item-title"><span>🔑</span>Long-tail Semantic Suggestions</h4><ul id="kiLongTail" class="ki-list"></ul></div>
     </div>
     <div class="upgraded-grid">
         <div class="onpage-item"><h4 class="onpage-item-title"><span>❓</span>Questions to Add (PAA & Forums)</h4><div id="questionMiningResult" class="ai-result-box"></div></div>
@@ -589,7 +696,7 @@
     </div>
   </div>
   
-  <!-- AI-Powered Features (Original Interactive Layout - UNTOUCHED) -->
+  <!-- AI-Powered Features (Original Interactive Layout) -->
   <div class="ai-card" id="aiPoweredFeaturesCard">
       <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI-Powered Features</h3></div>
       <div class="ai-grid">
@@ -616,7 +723,7 @@
       </div>
   </div>
 
-  <!-- Meta Info Layout (Original - UNTOUCHED) -->
+  <!-- Meta Info Layout (Original) -->
   <div class="card meta-card" style="margin-top:24px;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;"><h3 class="t-grad">Meta & Heading Structure</h3></div>
     <div class="space-y-3">
@@ -626,7 +733,7 @@
     </div>
   </div>
 
-  <!-- Site Speed & Core Web Vitals (Original - UNTOUCHED) -->
+  <!-- Site Speed & Core Web Vitals (Original) -->
   <div class="speed-card-new" id="speedCard">
     <div class="speed-header"><div class="speed-title"><span>🚀</span> Site Speed & Core Web Vitals</div><span id="speedBadge" class="speed-badge">Checking...</span></div>
     <div class="speed-overview-bar"><div id="speedOverviewBar"></div></div>
@@ -650,13 +757,13 @@
     <div class="speed-opportunities"><div class="speed-opportunities-title">🚀 Opportunities</div><ul id="speedOpportunitiesList"><li>Run analysis to see opportunities.</li></ul></div>
   </div>
 
-  <!-- Ground Slab (Original - UNTOUCHED) -->
+  <!-- Ground Slab (Original) -->
   <div class="ground-slab">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="king">🧭</div><div><div class="t-grad">Semantic SEO Ground</div><div style="font-size:12px;color:#b6c2cf">Six categories • Five checks each • Click “Improve” for guidance</div></div></div>
     <div id="cats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"></div>
   </div>
 
-  <!-- Modal Dialog (Original - UNTOUCHED) -->
+  <!-- Modal Dialog (Original) -->
   <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
     <div class="card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px"><h4 id="improveTitle" class="t-grad">Improve</h4><form method="dialog"><button class="pill">Close</button></form></div>
@@ -672,4 +779,3 @@
 
 </section>
 @endsection
-
