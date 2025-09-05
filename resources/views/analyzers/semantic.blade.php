@@ -141,7 +141,7 @@
   .speed-card-new { background: #0D1120; border: 1px solid #2A3659; border-radius: 16px; padding: 16px; margin-top: 24px; }
   .speed-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .speed-title { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--ink); }
-  .speed-badge { font-size: 11px; padding: 4px 8px; border-radius: 999px; font-weight: 700; }
+  .speed-badge { font-size: 11px; padding: 4px 8px; border-radius: 9999px; font-weight: 700; }
   .speed-badge.good { background: #10B9811A; color: #6EE7B7; border: 1px solid #10B981; }
   .speed-badge.warn { background: #F59E0B1A; color: #FBBF24; border: 1px solid #F59E0B; }
   .speed-badge.bad { background: #EF44441A; color: #F87171; border: 1px solid #EF4444; }
