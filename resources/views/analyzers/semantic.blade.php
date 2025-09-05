@@ -345,7 +345,7 @@
         }
         return res.json();
     }
-    const setRunning=(isOn)=>{if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="animated-icon">⚙️</span> Analyzing...':'🚀 Analyze Core Sections'};
+    const setRunning=(isOn)=>{if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="animated-icon">⚙️</span> Analyzing...':'🚀 Analyze Core & New Features'};
     function setWheel(elRing, elNum, container, score, prefix){
         if (!elRing || !elNum || !container) return;
         const s=clamp01(score);const b=bandName(s);
@@ -381,6 +381,7 @@
         element.appendChild(copyBtn);
     }
     function containsRtl(s) { if (typeof s !== 'string') return false; const rtlChars = /[\u0591-\u07FF\uFB1D-\uFDFD\uFE70-\uFEFC]/; return rtlChars.test(s); }
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
     // --- Main Analyze Logic (This now only runs the original core analysis) ---
     analyzeBtn?.addEventListener('click', async e=>{
@@ -488,6 +489,45 @@
             if(desktopCls) desktopCls.textContent = desktop.cls ? desktop.cls.toFixed(3) : 'N/A';
             if(speedOpportunitiesList) speedOpportunitiesList.innerHTML = (psiData.opportunities||[]).length > 0 ? (psiData.opportunities||[]).map(tip => `<li>${tip}</li>`).join('') : '<li>No specific opportunities found. Great job!</li>';
         }
+        
+        // --- NEW: SEQUENTIAL ANALYSIS FOR UPGRADED FEATURES ---
+        const newTasks = [
+            { task: 'topic_coverage', elementId: 'topicCoverageResult', isJson: false }, { task: 'intent_alignment', elementId: 'intentAlignmentResult', isJson: false },
+            { task: 'snippet_readiness', elementId: 'snippetReadinessResult', isJson: false }, { task: 'question_mining', elementId: 'questionMiningResult', isJson: false },
+            { task: 'heading_hierarchy', elementId: 'headingHierarchyResult', isJson: false }, { task: 'readability_simplification', elementId: 'readabilitySimplificationResult', isJson: false },
+            { task: 'semantic_variants', elementId: 'semanticVariantsResult', isJson: false }, { task: 'eeat_signals', elementId: 'eeatSignalsResult', isJson: false },
+            { task: 'internal_links', elementId: 'internalLinksResult', isJson: false }, { task: 'tables_checklists', elementId: 'tablesChecklistsResult', isJson: false },
+            { task: 'content_freshness', elementId: 'contentFreshnessResult', isJson: false }, { task: 'cannibalization_check', elementId: 'cannibalizationCheckResult', isJson: false },
+            { task: 'ux_impact', elementId: 'uxImpactResult', isJson: false },
+            { task: 'title_meta_rewrite', elementId: 'titleMetaRewriteResult', isJson: true, formatter: data => (data.suggestions || []).map((s, i) => `<p><strong>Option ${i+1}:</strong><br><strong>Title:</strong> ${s.title}<br><strong>Meta:</strong> ${s.meta}</p>`).join('') },
+            { task: 'image_seo', elementId: 'imageSeoResult', isJson: true, formatter: data => `<p><strong>Hero Image Present:</strong> ${data.hero_image_present ? 'Yes' : 'No'}</p>` + ((data.alt_text_suggestions||[]).length > 0 ? '<strong>Alt Text Suggestions:</strong><ul>' + data.alt_text_suggestions.map(s => `<li><code>${s.image_src.substring(s.image_src.lastIndexOf('/')+1)}</code>: "${s.suggestion}"</li>`).join('') + '</ul>':'') },
+            { task: 'schema_picker', elementId: 'schemaPickerResult', isJson: true, formatter: data => data.json_ld ? `<p><strong>Recommended Schema:</strong> ${data.schema_type}</p><pre><code>${JSON.stringify(data.json_ld, null, 2)}</code></pre>` : 'No schema suggestion.' },
+        ];
+        
+        // Set all to skeleton loader initially
+        newTasks.forEach(item => { const el = $(`#${item.elementId}`); if(el) el.innerHTML = skeletonHtml; });
+
+        // Process queue sequentially
+        for (const item of newTasks) {
+            const resultEl = $(`#${item.elementId}`);
+            if (resultEl) {
+                try {
+                    const res = await callApi('/api/openai-request', { task: item.task, url });
+                    let content = '';
+                    if (item.isJson) { content = item.formatter(res); } 
+                    else { content = res.content || 'No suggestions found.'; }
+                    
+                    resultEl.innerHTML = content;
+                    if (containsRtl(content)) resultEl.setAttribute('dir', 'rtl');
+                    else resultEl.removeAttribute('dir');
+                    addCopyToClipboard(resultEl);
+                    await sleep(200); // Small delay to avoid hitting rate limits
+                } catch (err) {
+                    resultEl.innerHTML = `<span style="color:var(--red-1);">Error: ${err.message}</span>`;
+                }
+            }
+        }
+
       }catch(err){
         showError('A critical error occurred during analysis', err.message);
       }finally{
@@ -495,47 +535,6 @@
       }
     });
     
-    // --- Event Listeners for NEW "Analyze on Demand" buttons ---
-    const newTasks = [
-        { task: 'topic_coverage', elementId: 'topicCoverageResult' }, { task: 'intent_alignment', elementId: 'intentAlignmentResult' },
-        { task: 'snippet_readiness', elementId: 'snippetReadinessResult' }, { task: 'question_mining', elementId: 'questionMiningResult' },
-        { task: 'heading_hierarchy', elementId: 'headingHierarchyResult' }, { task: 'readability_simplification', elementId: 'readabilitySimplificationResult' },
-        { task: 'semantic_variants', elementId: 'semanticVariantsResult' }, { task: 'eeat_signals', elementId: 'eeatSignalsResult' },
-        { task: 'internal_links', elementId: 'internalLinksResult' }, { task: 'tables_checklists', elementId: 'tablesChecklistsResult' },
-        { task: 'content_freshness', elementId: 'contentFreshnessResult' }, { task: 'cannibalization_check', elementId: 'cannibalizationCheckResult' },
-        { task: 'ux_impact', elementId: 'uxImpactResult' },
-        { task: 'title_meta_rewrite', elementId: 'titleMetaRewriteResult', isJson: true, formatter: data => (data.suggestions || []).map((s, i) => `<p><strong>Option ${i+1}:</strong><br><strong>Title:</strong> ${s.title}<br><strong>Meta:</strong> ${s.meta}</p>`).join('') },
-        { task: 'image_seo', elementId: 'imageSeoResult', isJson: true, formatter: data => `<p><strong>Hero Image Present:</strong> ${data.hero_image_present ? 'Yes' : 'No'}</p>` + ((data.alt_text_suggestions||[]).length > 0 ? '<strong>Alt Text Suggestions:</strong><ul>' + data.alt_text_suggestions.map(s => `<li><code>${s.image_src.substring(s.image_src.lastIndexOf('/')+1)}</code>: "${s.suggestion}"</li>`).join('') + '</ul>':'') },
-        { task: 'schema_picker', elementId: 'schemaPickerResult', isJson: true, formatter: data => data.json_ld ? `<p><strong>Recommended Schema:</strong> ${data.schema_type}</p><pre><code>${JSON.stringify(data.json_ld, null, 2)}</code></pre>` : 'No schema suggestion.' },
-    ];
-    
-    newTasks.forEach(item => {
-        const btn = $(`#${item.elementId}Btn`);
-        const resultEl = $(`#${item.elementId}`);
-        btn?.addEventListener('click', async () => {
-            const url = urlInput.value.trim();
-            if(!url) { showError('Please enter a URL first.'); return; }
-            btn.disabled = true; btn.textContent = '...';
-            if(resultEl) resultEl.innerHTML = skeletonHtml;
-            try {
-                const res = await callApi('/api/openai-request', { task: item.task, url });
-                let content = '';
-                if(item.isJson) { content = item.formatter(res); }
-                else { content = res.content || 'No suggestions found.'; }
-                
-                if(resultEl) {
-                    resultEl.innerHTML = content;
-                    if(containsRtl(content)) resultEl.setAttribute('dir', 'rtl'); else resultEl.removeAttribute('dir');
-                    addCopyToClipboard(resultEl);
-                }
-            } catch (err) {
-                if(resultEl) resultEl.innerHTML = `<span style="color:var(--red-1);">Error: ${err.message}</span>`;
-            } finally {
-                btn.disabled = false; btn.textContent = 'Analyze';
-            }
-        });
-    });
-
     // --- All Other Original Event Listeners (Restored) ---
     pasteBtn?.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
     importBtn?.addEventListener('click',()=>importFile.click());
@@ -615,7 +614,7 @@
       <div style="flex:1"></div>
       <input id="importFile" type="file" accept="application/json" style="display:none"/>
       <button id="importBtn" type="button" class="btn btn-purple">⇪ Import</button>
-      <button id="analyzeBtn" type="button" class="btn btn-green">🚀 Analyze Core Sections</button>
+      <button id="analyzeBtn" type="button" class="btn btn-green">🚀 Analyze</button>
       <button id="printBtn"   type="button" class="btn btn-blue">🖨️ Print</button>
       <button id="resetBtn"   type="button" class="btn btn-orange">↻ Reset</button>
       <button id="exportBtn"  type="button" class="btn btn-purple">⬇︎ Export</button>
@@ -648,10 +647,10 @@
       </div>
     </div>
     <div class="upgraded-grid">
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🗺️</span>Topic Coverage & Gaps</h4><button class="btn btn-blue btn-sm" id="topicCoverageResultBtn">Analyze</button></div><div class="ai-result-box" id="topicCoverageResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🧭</span>Search Intent Match</h4><button class="btn btn-blue btn-sm" id="intentAlignmentResultBtn">Analyze</button></div><div class="ai-result-box" id="intentAlignmentResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🏆</span>Featured Snippet Readiness</h4><button class="btn btn-blue btn-sm" id="snippetReadinessResultBtn">Analyze</button></div><div class="ai-result-box" id="snippetReadinessResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>📖</span>Readability & Simplification</h4><button class="btn btn-blue btn-sm" id="readabilitySimplificationResultBtn">Analyze</button></div><div class="ai-result-box" id="readabilitySimplificationResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🗺️</span>Topic Coverage & Gaps</h4></div><div class="ai-result-box" id="topicCoverageResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🧭</span>Search Intent Match</h4></div><div class="ai-result-box" id="intentAlignmentResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🏆</span>Featured Snippet Readiness</h4></div><div class="ai-result-box" id="snippetReadinessResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>📖</span>Readability & Simplification</h4></div><div class="ai-result-box" id="readabilitySimplificationResult"></div></div>
     </div>
   </div>
 
@@ -668,16 +667,16 @@
     </div>
     <div class="tsi-suggestions"><h4 class="flex items-center gap-2">💡 Technical SEO Suggestions</h4><ul id="tsiSuggestionsList"></ul></div>
     <div class="upgraded-grid">
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>✍️</span>Title & Meta Rewriter</h4><button class="btn btn-blue btn-sm" id="titleMetaRewriteResultBtn">Analyze</button></div><div class="ai-result-box" id="titleMetaRewriteResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🧐</span>Heading Hierarchy Auditor</h4><button class="btn btn-blue btn-sm" id="headingHierarchyResultBtn">Analyze</button></div><div class="ai-result-box" id="headingHierarchyResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🔗</span>Internal Link Opportunities</h4><button class="btn btn-blue btn-sm" id="internalLinksResultBtn">Analyze</button></div><div class="ai-result-box" id="internalLinksResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🖼️</span>Media & Image SEO</h4><button class="btn btn-blue btn-sm" id="imageSeoResultBtn">Analyze</button></div><div class="ai-result-box" id="imageSeoResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⚡</span>UX that Impacts Rankings</h4><button class="btn btn-blue btn-sm" id="uxImpactResultBtn">Analyze</button></div><div class="ai-result-box" id="uxImpactResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🔄</span>Cannibalization Signals</h4><button class="btn btn-blue btn-sm" id="cannibalizationCheckResultBtn">Analyze</button></div><div class="ai-result-box" id="cannibalizationCheckResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⏳</span>Content Freshness</h4><button class="btn btn-blue btn-sm" id="contentFreshnessResultBtn">Analyze</button></div><div class="ai-result-box" id="contentFreshnessResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⭐</span>E-E-A-T Signals</h4><button class="btn btn-blue btn-sm" id="eeatSignalsResultBtn">Analyze</button></div><div class="ai-result-box" id="eeatSignalsResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>📋</span>Tables, Checklists & Examples</h4><button class="btn btn-blue btn-sm" id="tablesChecklistsResultBtn">Analyze</button></div><div class="ai-result-box" id="tablesChecklistsResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🏗️</span>Schema Smart-Picker</h4><button class="btn btn-blue btn-sm" id="schemaPickerResultBtn">Analyze</button></div><div class="ai-result-box" id="schemaPickerResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>✍️</span>Title & Meta Rewriter</h4></div><div class="ai-result-box" id="titleMetaRewriteResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🧐</span>Heading Hierarchy Auditor</h4></div><div class="ai-result-box" id="headingHierarchyResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🔗</span>Internal Link Opportunities</h4></div><div class="ai-result-box" id="internalLinksResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🖼️</span>Media & Image SEO</h4></div><div class="ai-result-box" id="imageSeoResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⚡</span>UX that Impacts Rankings</h4></div><div class="ai-result-box" id="uxImpactResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🔄</span>Cannibalization Signals</h4></div><div class="ai-result-box" id="cannibalizationCheckResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⏳</span>Content Freshness</h4></div><div class="ai-result-box" id="contentFreshnessResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⭐</span>E-E-A-T Signals</h4></div><div class="ai-result-box" id="eeatSignalsResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>📋</span>Tables, Checklists & Examples</h4></div><div class="ai-result-box" id="tablesChecklistsResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🏗️</span>Schema Smart-Picker</h4></div><div class="ai-result-box" id="schemaPickerResult"></div></div>
     </div>
   </div>
 
@@ -692,8 +691,8 @@
         <div class="ki-item" style="grid-column: 1 / -1;"><h4 class="ki-item-title"><span>🔑</span>Long-tail Semantic Suggestions</h4><ul id="kiLongTail" class="ki-list"></ul></div>
     </div>
     <div class="upgraded-grid">
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>❓</span>Questions to Add (PAA & Forums)</h4><button class="btn btn-blue btn-sm" id="questionMiningResultBtn">Analyze</button></div><div class="ai-result-box" id="questionMiningResult"></div></div>
-        <div class="onpage-item"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🌿</span>Semantic Variants (No Stuffing)</h4><button class="btn btn-blue btn-sm" id="semanticVariantsResultBtn">Analyze</button></div><div class="ai-result-box" id="semanticVariantsResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>❓</span>Questions to Add (PAA & Forums)</h4></div><div class="ai-result-box" id="questionMiningResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🌿</span>Semantic Variants (No Stuffing)</h4></div><div class="ai-result-box" id="semanticVariantsResult"></div></div>
     </div>
   </div>
   
