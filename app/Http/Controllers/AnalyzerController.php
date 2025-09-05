@@ -328,9 +328,6 @@ class AnalyzerController extends Controller
         }
     }
 
-    // --- DEPRECATED AI ENDPOINTS ---
-    // These methods now call the new unified handler for backward compatibility.
-    // The goal is to eventually phase these out in favor of the single /api/openai-request route.
     public function technicalSeoAnalyze(Request $request) {
         $request->merge(['task' => 'technical_seo']);
         return $this->handleOpenAiRequest($request);
