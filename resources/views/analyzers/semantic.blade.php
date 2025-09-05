@@ -345,7 +345,7 @@
         }
         return res.json();
     }
-    const setRunning=(isOn)=>{if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="animated-icon">⚙️</span> Analyzing...':'🚀 Analyze All Sections'};
+    const setRunning=(isOn)=>{if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="animated-icon">⚙️</span> Analyzing...':'🚀 Analyze Core Sections'};
     function setWheel(elRing, elNum, container, score, prefix){
         if (!elRing || !elNum || !container) return;
         const s=clamp01(score);const b=bandName(s);
@@ -393,7 +393,7 @@
         setRunning(true);
         
         // --- Reset Core UIs ---
-        document.querySelectorAll('.ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList ul, #tsiAltTexts, .site-map-container, #headingMap, #cats').forEach(el => el.innerHTML = '');
+        document.querySelectorAll('.ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList, #tsiAltTexts, .site-map-container, #headingMap, #cats').forEach(el => el.innerHTML = '');
         
         // --- Fire Original API Calls ---
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
@@ -407,7 +407,7 @@
         // --- Populate Original Sections (FIXED) ---
         if(data) {
             window.__lastData={...data,url};
-            const score=clamp01(data.overall_score||78);
+            const score=clamp01(data.overall_score||78); // Using placeholder as a fallback
             setWheel(mwRing, mwNum, mw, score, '');
             if(overallFill) overallFill.style.width=score+'%';
             if(overallPct) overallPct.textContent=score+'%';
@@ -614,7 +614,7 @@
       <div style="flex:1"></div>
       <input id="importFile" type="file" accept="application/json" style="display:none"/>
       <button id="importBtn" type="button" class="btn btn-purple">⇪ Import</button>
-      <button id="analyzeBtn" type="button" class="btn btn-green">🚀 Analyze</button>
+      <button id="analyzeBtn" type="button" class="btn btn-green">🚀 Analyze Core Sections</button>
       <button id="printBtn"   type="button" class="btn btn-blue">🖨️ Print</button>
       <button id="resetBtn"   type="button" class="btn btn-orange">↻ Reset</button>
       <button id="exportBtn"  type="button" class="btn btn-purple">⬇︎ Export</button>
@@ -647,10 +647,10 @@
       </div>
     </div>
     <div class="upgraded-grid">
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🗺️</span>Topic Coverage & Gaps</h4><div class="ai-result-box" id="topicCoverageResult"></div><button class="btn btn-blue" id="topicCoverageResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🧭</span>Search Intent Match</h4><div class="ai-result-box" id="intentAlignmentResult"></div><button class="btn btn-blue" id="intentAlignmentResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🏆</span>Featured Snippet Readiness</h4><div class="ai-result-box" id="snippetReadinessResult"></div><button class="btn btn-blue" id="snippetReadinessResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>📖</span>Readability & Simplification</h4><div class="ai-result-box" id="readabilitySimplificationResult"></div><button class="btn btn-blue" id="readabilitySimplificationResultBtn">Analyze</button></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🗺️</span>Topic Coverage & Gaps</h4><button class="btn btn-blue" id="topicCoverageResultBtn">Analyze</button></div><div class="ai-result-box" id="topicCoverageResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🧭</span>Search Intent Match</h4><button class="btn btn-blue" id="intentAlignmentResultBtn">Analyze</button></div><div class="ai-result-box" id="intentAlignmentResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🏆</span>Featured Snippet Readiness</h4><button class="btn btn-blue" id="snippetReadinessResultBtn">Analyze</button></div><div class="ai-result-box" id="snippetReadinessResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>📖</span>Readability & Simplification</h4><button class="btn btn-blue" id="readabilitySimplificationResultBtn">Analyze</button></div><div class="ai-result-box" id="readabilitySimplificationResult"></div></div>
     </div>
   </div>
 
@@ -667,16 +667,16 @@
     </div>
     <div class="tsi-suggestions"><h4 class="flex items-center gap-2">💡 Technical SEO Suggestions</h4><ul id="tsiSuggestionsList"></ul></div>
     <div class="upgraded-grid">
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>✍️</span>Title & Meta Rewriter</h4><div class="ai-result-box" id="titleMetaRewriteResult"></div><button class="btn btn-blue" id="titleMetaRewriteResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🧐</span>Heading Hierarchy Auditor</h4><div class="ai-result-box" id="headingHierarchyResult"></div><button class="btn btn-blue" id="headingHierarchyResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🔗</span>Internal Link Opportunities</h4><div class="ai-result-box" id="internalLinksResult"></div><button class="btn btn-blue" id="internalLinksResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🖼️</span>Media & Image SEO</h4><div class="ai-result-box" id="imageSeoResult"></div><button class="btn btn-blue" id="imageSeoResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>⚡</span>UX that Impacts Rankings</h4><div class="ai-result-box" id="uxImpactResult"></div><button class="btn btn-blue" id="uxImpactResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🔄</span>Cannibalization Signals</h4><div class="ai-result-box" id="cannibalizationCheckResult"></div><button class="btn btn-blue" id="cannibalizationCheckResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>⏳</span>Content Freshness</h4><div class="ai-result-box" id="contentFreshnessResult"></div><button class="btn btn-blue" id="contentFreshnessResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>⭐</span>E-E-A-T Signals</h4><div class="ai-result-box" id="eeatSignalsResult"></div><button class="btn btn-blue" id="eeatSignalsResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>📋</span>Tables, Checklists & Examples</h4><div class="ai-result-box" id="tablesChecklistsResult"></div><button class="btn btn-blue" id="tablesChecklistsResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🏗️</span>Schema Smart-Picker</h4><div class="ai-result-box" id="schemaPickerResult"></div><button class="btn btn-blue" id="schemaPickerResultBtn">Analyze</button></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>✍️</span>Title & Meta Rewriter</h4><button class="btn btn-blue" id="titleMetaRewriteResultBtn">Analyze</button></div><div class="ai-result-box" id="titleMetaRewriteResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🧐</span>Heading Hierarchy Auditor</h4><button class="btn btn-blue" id="headingHierarchyResultBtn">Analyze</button></div><div class="ai-result-box" id="headingHierarchyResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🔗</span>Internal Link Opportunities</h4><button class="btn btn-blue" id="internalLinksResultBtn">Analyze</button></div><div class="ai-result-box" id="internalLinksResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🖼️</span>Media & Image SEO</h4><button class="btn btn-blue" id="imageSeoResultBtn">Analyze</button></div><div class="ai-result-box" id="imageSeoResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⚡</span>UX that Impacts Rankings</h4><button class="btn btn-blue" id="uxImpactResultBtn">Analyze</button></div><div class="ai-result-box" id="uxImpactResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🔄</span>Cannibalization Signals</h4><button class="btn btn-blue" id="cannibalizationCheckResultBtn">Analyze</button></div><div class="ai-result-box" id="cannibalizationCheckResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⏳</span>Content Freshness</h4><button class="btn btn-blue" id="contentFreshnessResultBtn">Analyze</button></div><div class="ai-result-box" id="contentFreshnessResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>⭐</span>E-E-A-T Signals</h4><button class="btn btn-blue" id="eeatSignalsResultBtn">Analyze</button></div><div class="ai-result-box" id="eeatSignalsResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>📋</span>Tables, Checklists & Examples</h4><button class="btn btn-blue" id="tablesChecklistsResultBtn">Analyze</button></div><div class="ai-result-box" id="tablesChecklistsResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🏗️</span>Schema Smart-Picker</h4><button class="btn btn-blue" id="schemaPickerResultBtn">Analyze</button></div><div class="ai-result-box" id="schemaPickerResult"></div></div>
     </div>
   </div>
 
@@ -691,8 +691,8 @@
         <div class="ki-item" style="grid-column: 1 / -1;"><h4 class="ki-item-title"><span>🔑</span>Long-tail Semantic Suggestions</h4><ul id="kiLongTail" class="ki-list"></ul></div>
     </div>
     <div class="upgraded-grid">
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>❓</span>Questions to Add (PAA & Forums)</h4><div class="ai-result-box" id="questionMiningResult"></div><button class="btn btn-blue" id="questionMiningResultBtn">Analyze</button></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span>🌿</span>Semantic Variants (No Stuffing)</h4><div class="ai-result-box" id="semanticVariantsResult"></div><button class="btn btn-blue" id="semanticVariantsResultBtn">Analyze</button></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>❓</span>Questions to Add (PAA & Forums)</h4><button class="btn btn-blue" id="questionMiningResultBtn">Analyze</button></div><div class="ai-result-box" id="questionMiningResult"></div></div>
+        <div class="onpage-item"><div class="onpage-item-title-wrapper" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;"><h4 class="onpage-item-title" style="margin:0;"><span>🌿</span>Semantic Variants (No Stuffing)</h4><button class="btn btn-blue" id="semanticVariantsResultBtn">Analyze</button></div><div class="ai-result-box" id="semanticVariantsResult"></div></div>
     </div>
   </div>
   
