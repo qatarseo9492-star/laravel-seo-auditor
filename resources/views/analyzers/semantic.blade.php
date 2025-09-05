@@ -393,7 +393,7 @@
         setRunning(true);
         
         // --- Reset All UIs ---
-        document.querySelectorAll('.ai-result-box, .ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList ul, #tsiAltTexts, .site-map-container, #headingMap').forEach(el => el.innerHTML = '');
+        document.querySelectorAll('.ai-result-box, .ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList, #tsiAltTexts, .site-map-container, #headingMap, #cats').forEach(el => el.innerHTML = '');
         
         // --- Fire All API Calls in Parallel ---
         const allApiPromises = [
@@ -435,7 +435,7 @@
             if(overallFill) overallFill.style.width=score+'%';
             if(overallPct) overallPct.textContent=score+'%';
             setChip(chipOverall,'Overall',`${score} /100`,score);
-            const contentScore=clamp01((data.categories || []).reduce((acc, c) => acc + c.score, 0) / (data.categories?.length || 1));
+            const contentScore=clamp01((data.categories || []).reduce((acc, c) => acc + (c.score || 0), 0) / (data.categories?.length || 1));
             setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
             const r=data.readability||{};
             const human=clamp01(70+(r.score||0)/5-(r.passive_ratio||0)/3);
@@ -445,12 +445,14 @@
             const cs=data.content_structure||{};
             if(titleVal) titleVal.textContent = cs.title || 'N/A';
             if(metaVal) metaVal.textContent = cs.meta_description || 'N/A';
+            if(chipTitle) chipTitle.textContent = (cs.title || '').length;
+            if(chipMeta) chipMeta.textContent = (cs.meta_description || '').length;
             const hs = cs.headings || {};
             if(chipH) chipH.textContent = `H1:${(hs.H1||[]).length} • H2:${(hs.H2||[]).length} • H3:${(hs.H3||[]).length}`;
             if(headingMap) {
                 headingMap.innerHTML = ''; ['H1', 'H2', 'H3', 'H4'].forEach(lvl => {
                     if(!hs[lvl] || !hs[lvl].length) return;
-                    headingMap.innerHTML += `<div class="cat-card"><div class="cat-card-title">${lvl} (${hs[lvl].length})</div><div class="space-y-1 mt-2">` + hs[lvl].map(t => `<div class="text-sm">• ${t}</div>`).join('') + `</div></div>`;
+                    headingMap.innerHTML += `<div class="cat-card"><div class="cat-card-title">${lvl} (${hs[lvl].length})</div><div class="space-y-1 mt-2">` + hs[lvl].map(t => `<div style="font-size:13px; line-height:1.4;">• ${t}</div>`).join('') + `</div></div>`;
                 });
             }
             const ps=data.page_signals||{};
@@ -518,10 +520,13 @@
             if (!el) return;
             
             let content = '';
-            if (result.error) { content = `<span style="color:var(--red-1);">Error: ${result.error.message}</span>`; }
-            else if (taskInfo.isJson) { content = taskInfo.formatter(result); }
-            else { content = result.content || 'No suggestions found.'; }
-
+            if (result.error) { content = `<span style="color:var(--red-1);">Error: ${result.error.message || 'Unknown error'}</span>`; }
+            else {
+                const data = result.data || result;
+                if (taskInfo.isJson) { content = taskInfo.formatter(data); }
+                else { content = data.content || 'No suggestions found.'; }
+            }
+            
             el.innerHTML = content;
             if (containsRtl(content)) el.setAttribute('dir', 'rtl');
             else el.removeAttribute('dir');
