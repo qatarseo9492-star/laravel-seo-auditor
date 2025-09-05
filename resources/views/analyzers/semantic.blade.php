@@ -304,7 +304,7 @@
     const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI'),
           tsiMetaTitle = $('#tsiMetaTitle'), tsiMetaDescription = $('#tsiMetaDescription'),
           tsiAltTexts = $('#tsiAltTexts'), tsiSiteMap = $('#tsiSiteMap'), tsiSuggestionsList = $('#tsiSuggestionsList');
-    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numTSI = $('#numTSI'),
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numTSI = $('#numCAE'),
           caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities'),
           caeKeywords = $('#caeKeywords'), caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
     const kiSemanticResearch = $('#kiSemanticResearch'), kiIntentClassification = $('#kiIntentClassification'),
