@@ -304,7 +304,7 @@
     const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI'),
           tsiMetaTitle = $('#tsiMetaTitle'), tsiMetaDescription = $('#tsiMetaDescription'),
           tsiAltTexts = $('#tsiAltTexts'), tsiSiteMap = $('#tsiSiteMap'), tsiSuggestionsList = $('#tsiSuggestionsList');
-    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numTSI = $('#numCAE'),
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numTSI = $('#numTSI'),
           caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities'),
           caeKeywords = $('#caeKeywords'), caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
     const kiSemanticResearch = $('#kiSemanticResearch'), kiIntentClassification = $('#kiIntentClassification'),
@@ -393,7 +393,7 @@
         setRunning(true);
         
         // --- Reset Core UIs ---
-        document.querySelectorAll('.ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList ul, #tsiAltTexts, .site-map-container, #headingMap, #cats').forEach(el => el.innerHTML = '');
+        document.querySelectorAll('.ki-tags, .ki-list, .cae-tags, #tsiSuggestionsList, #tsiAltTexts, .site-map-container, #headingMap, #cats').forEach(el => el.innerHTML = '');
         
         // --- Fire Original API Calls ---
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
@@ -472,7 +472,8 @@
         if(psiData) {
             const mobile = psiData.mobile || {}, desktop = psiData.desktop || {};
             const overallScore = Math.round(((mobile.score || 0) + (desktop.score || 0)) / 2);
-            if(speedBadge){ speedBadge.textContent = bandName(overallScore); speedBadge.className = 'speed-badge ' + bandName(overallScore); }
+            const speedBadge = $('#speedBadge');
+            if(speedBadge){ speedBadge.textContent = bandName(overallScore).charAt(0).toUpperCase() + bandName(overallScore).slice(1); speedBadge.className = 'speed-badge ' + bandName(overallScore); }
             if(speedOverviewBar) speedOverviewBar.style.width = overallScore + '%';
             if(speedOverviewText) speedOverviewText.textContent = `Overall performance score: ${overallScore}. Mobile: ${mobile.score}, Desktop: ${desktop.score}.`;
             if(mobileScoreVal) mobileScoreVal.textContent = mobile.score || 0;
