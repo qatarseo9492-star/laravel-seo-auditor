@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+// Combined and cleaned dependencies from both file versions
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -9,23 +10,28 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use DOMDocument;
 use DOMXPath;
-use App\Models\User;
+use App\Models\User; // Assuming these models exist as per your project structure
 use App\Models\UserLimit;
 use App\Models\AnalysisCache;
-use App\Support\Logs\UsageLogger;
+use App\Support\Logs\UsageLogger; // Assuming this class exists
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
 
 class AnalyzerController extends Controller
 {
+    /**
+     * Centralized function to check limits and log any analysis tool usage.
+     * This is production-ready logic from your previous file.
+     */
     private function checkAndLog(Request $request, string $tool): bool|JsonResponse
     {
-        if (!Auth::check()) return true;
+        if (!Auth::check()) return true; // Don't check limits for guests
 
         $user = Auth::user();
         $limit = UserLimit::firstOrCreate(['user_id' => $user->id]);
 
+        // Reset counters if a new day or month has started
         if (!$limit->updated_at->isToday()) $limit->searches_today = 0;
         if (!$limit->updated_at->isSameMonth(now())) $limit->searches_this_month = 0;
 
@@ -70,6 +76,20 @@ class AnalyzerController extends Controller
             $pageSignals['canonical'] = optional($xpath->query("//link[@rel='canonical']/@href")->item(0))->nodeValue;
             $pageSignals['robots'] = optional($xpath->query("//meta[@name='robots']/@content")->item(0))->nodeValue;
             $pageSignals['has_viewport'] = $xpath->query("//meta[@name='viewport']")->length > 0;
+            
+            $schemaScripts = $xpath->query('//script[@type="application/ld+json"]');
+            $schemaTypes = [];
+            foreach($schemaScripts as $script) {
+                $json = json_decode($script->textContent, true);
+                if (isset($json['@type'])) {
+                    $types = is_array($json['@type']) ? $json['@type'] : [$json['@type']];
+                    $schemaTypes = array_merge($schemaTypes, $types);
+                }
+            }
+            $pageSignals['schema_types'] = array_values(array_unique($schemaTypes));
+            $pageSignals['has_breadcrumbs'] = in_array('BreadcrumbList', $schemaTypes);
+            $pageSignals['has_org_sameas'] = in_array('Organization', $schemaTypes);
+            $pageSignals['has_main_entity'] = false; // Simplified for this example
 
             $links = $dom->getElementsByTagName('a');
             $internalLinks = 0; $externalLinks = 0;
@@ -308,6 +328,9 @@ class AnalyzerController extends Controller
         }
     }
 
+    // --- DEPRECATED AI ENDPOINTS ---
+    // These methods now call the new unified handler for backward compatibility.
+    // The goal is to eventually phase these out in favor of the single /api/openai-request route.
     public function technicalSeoAnalyze(Request $request) {
         $request->merge(['task' => 'technical_seo']);
         return $this->handleOpenAiRequest($request);
