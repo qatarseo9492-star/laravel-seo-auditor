@@ -285,4 +285,3 @@ class AnalyzerController extends Controller
         return $this->handleOpenAiRequest($request);
     }
 }
-
