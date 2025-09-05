@@ -304,7 +304,7 @@
     const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI'),
           tsiMetaTitle = $('#tsiMetaTitle'), tsiMetaDescription = $('#tsiMetaDescription'),
           tsiAltTexts = $('#tsiAltTexts'), tsiSiteMap = $('#tsiSiteMap'), tsiSuggestionsList = $('#tsiSuggestionsList');
-    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE'),
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numTSI = $('#numCAE'),
           caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities'),
           caeKeywords = $('#caeKeywords'), caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
     const kiSemanticResearch = $('#kiSemanticResearch'), kiIntentClassification = $('#kiIntentClassification'),
@@ -483,7 +483,7 @@
         }
         
         if(caeData) {
-            setWheel(ringCAE, numCAE, mwCAE, caeData.score || 0, '');
+            setWheel(ringCAE, numTSI, mwCAE, caeData.score || 0, '');
             if(caeTopicClusters) caeTopicClusters.innerHTML = (caeData.topic_clusters||[]).map(t => `<span class="chip">${t}</span>`).join('');
             if(caeEntities) caeEntities.innerHTML = (caeData.entities||[]).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
             if(caeKeywords) caeKeywords.innerHTML = (caeData.semantic_keywords||[]).map(k => `<span class="chip">${k}</span>`).join('');
@@ -784,3 +784,4 @@
 
 </section>
 @endsection
+
