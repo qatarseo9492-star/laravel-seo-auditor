@@ -103,6 +103,7 @@ class AnalyzerController extends Controller
     {
         $validTasks = [
             'brief', 'suggestions', 'competitor', 'trends', 'technical_seo', 'keyword_intelligence', 'content_engine',
+            // --- All 16 new tasks are now validated ---
             'topic_coverage', 'intent_alignment', 'snippet_readiness', 'question_mining',
             'heading_hierarchy', 'readability_simplification', 'semantic_variants', 'eeat_signals',
             'internal_links', 'title_meta_rewrite', 'image_seo', 'tables_checklists',
