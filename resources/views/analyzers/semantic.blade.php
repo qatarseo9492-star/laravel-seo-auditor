@@ -279,7 +279,7 @@
     const kiRelatedTerms = $('#kiRelatedTerms'), kiCompetitorGaps = $('#kiCompetitorGaps');
     const kiLongTail = $('#kiLongTail');
 
-    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numTSI = $('#numCAE');
     const caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities');
     const caeKeywords = $('#caeKeywords'), caeRelevanceScore = $('#caeRelevanceScore');
     const caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
@@ -763,4 +763,3 @@
 
 </section>
 @endsection
-
