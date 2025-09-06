@@ -80,105 +80,188 @@
 
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
   
+  /* ======================================= */
+  /* === 🎨 NEW NEON-TECH SCORE WHEELS 🎨 === */
+  /* ======================================= */
   .mw {
-    --v: 0; --size: 200px; --track-width: 14px; --progress-percent: calc(var(--v) * 1%);
-    width: var(--size); height: var(--size); position: relative; transition: filter .4s ease;
+    --v: 0;
+    --size: 200px;
+    --track-width: 14px;
+    --progress-percent: calc(var(--v) * 1%);
+
+    width: var(--size);
+    height: var(--size);
+    position: relative;
+    transition: filter .4s ease;
   }
+  
   .mw-ring {
-    position: absolute; inset: 0; border-radius: 50%;
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
     background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
-    box-shadow: inset 0 0 4px 1px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+    box-shadow:
+      inset 0 0 4px 1px rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,255,255,0.05);
   }
+
   .mw-ring::before {
-    content: ""; position: absolute; inset: 0px; border-radius: 50%;
-    background: conic-gradient(from -90deg, var(--blue-1) 0%, var(--green-1) 25%, var(--yellow-1) 50%, var(--red-1) 75%, var(--purple-1) 90%, var(--blue-1) 100%);
-    -webkit-mask-image: conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)), radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+    content: "";
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    background: conic-gradient(from -90deg,
+        var(--blue-1) 0%, var(--green-1) 25%,
+        var(--yellow-1) 50%, var(--red-1) 75%,
+        var(--purple-1) 90%, var(--blue-1) 100%);
+    -webkit-mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
     -webkit-mask-composite: source-in;
-     mask-image: conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)), radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+     mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
      mask-composite: intersect;
-     animation: rainbowSlide 4s linear infinite; background-size: 200% 100%;
+     animation: rainbowSlide 4s linear infinite;
+     background-size: 200% 100%;
   }
+  
   .mw-ring::after {
-    content: ''; position: absolute; inset: calc(var(--track-width) - 4px); border-radius: 50%;
+    content: '';
+    position: absolute;
+    inset: calc(var(--track-width) - 4px);
+    border-radius: 50%;
     background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 70%);
     box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
   }
+
   .mw-center {
-    position: absolute; inset: 0; display: grid; place-items: center;
-    font-size: calc(var(--size) * 0.24); font-weight: 900; color: #fff;
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: calc(var(--size) * 0.24);
+    font-weight: 900;
+    color: #fff;
     text-shadow: 0 0 12px rgba(255,255,255,0.3);
   }
+  
   .mw.good { filter: drop-shadow(0 0 10px var(--green-1)) drop-shadow(0 0 20px var(--green-1)); }
   .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)) drop-shadow(0 0 20px var(--orange-1)); }
   .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)) drop-shadow(0 0 20px var(--red-1)); }
-  .mw-sm { --size: 170px; --track-width: 12px; }
+
+  .mw-sm {
+    --size: 170px;
+    --track-width: 12px;
+  }
   
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
   .waterbox .fill{
-    position:absolute; inset:0; width:0%; transition:width .9s ease;
+    position:absolute;
+    inset:0;
+    width:0%;
+    transition:width .9s ease;
     background: linear-gradient(90deg, var(--red-1), var(--orange-1), var(--yellow-1), var(--green-1), var(--blue-1), var(--purple-1));
-    background-size: 300% 100%; animation: rainbowSlide 5s linear infinite;
+    background-size: 300% 100%;
+    animation: rainbowSlide 5s linear infinite;
   }
   .waterbox .label{position:absolute;inset:0;display:grid;place-items:center;font-weight:900;color:var(--ink);font-size:11px}
+
   .progress{width:100%;height:10px;border-radius:9999px;background:#222;overflow:hidden;border:1px solid var(--outline)}
   .progress>span{display:block;height:100%;border-radius:9999px;background:linear-gradient(90deg,var(--red-1),var(--yellow-1),var(--green-1));transition:width .5s ease}
+
   .check{display:flex;align-items:center;justify-content:space-between;border-radius:12px;padding:10px 12px;border:1px solid var(--outline);background:#191919}
   .score-pill{padding:3px 7px;border-radius:10px;font-weight:800;background:#222;border:1px solid #ffffff22;color:var(--ink);font-size:12px}
   .score-pill--green{background:linear-gradient(135deg,#113d2a,#0f3325);border-color:#10b98166;color:#bbf7d0}
   .score-pill--orange{background:linear-gradient(135deg,#3d2e11,#33270f);border-color:#f59e0b66;color:#fde68a}
   .score-pill--red{background:linear-gradient(135deg,#3d111f,#331016);border-color:#ef444466;color:#fecaca}
+
   .improve-btn{padding:6px 9px;border-radius:10px;color:#0b1020;font-weight:800;border:1px solid transparent;transition:transform .08s ease;font-size:12px}
   .improve-btn:active{transform:translateY(1px)}
   .fill-green {background:linear-gradient(135deg,var(--green-1),var(--green-2));color:#05240f}
   .fill-orange{background:linear-gradient(135deg,var(--yellow-1),var(--orange-1));color:#3a2400}
   .fill-red   {background:linear-gradient(135deg,var(--red-1),var(--pink-1));color:#2f0606}
-  
+  .outline-green{border-color:#22c55edd!important;box-shadow:0 0 0 2px #22c55e8c inset,0 0 16px #22c55e55}
+  .outline-orange{border-color:#f59e0bdd!important;box-shadow:0 0 0 2px #f59e0b8c inset,0 0 16px #f59e0b55}
+  .outline-red{border-color:#ef4444dd!important;box-shadow:0 0 0 2px #ef44448c inset,0 0 16px #ef444455}
+
   dialog[open]{display:block} dialog::backdrop{background:rgba(0,0,0,.6)}
   #improveModal .card{background:#1B1B1B;border:1px solid var(--outline)}
   #improveModal .card .card{background:#1A1A1A;border-color:var(--outline)}
+
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
 
-  .speed-card-new { background: #0D1120; border: 1px solid #2A3659; border-radius: 16px; padding: 16px; margin-top: 24px; }
-  .speed-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  .speed-title { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--ink); }
-  .speed-badge { font-size: 11px; padding: 4px 8px; border-radius: 999px; font-weight: 700; }
-  .speed-badge.good { background: #10B9811A; color: #6EE7B7; border: 1px solid #10B981; }
-  .speed-badge.warn { background: #F59E0B1A; color: #FBBF24; border: 1px solid #F59E0B; }
-  .speed-badge.bad { background: #EF44441A; color: #F87171; border: 1px solid #EF4444; }
-  .speed-overview-bar { height: 6px; background: #1F2937; border-radius: 999px; margin-top: 8px; }
-  .speed-overview-bar > div { height: 100%; width: 0%; border-radius: 999px; transition: width 0.8s ease; background: linear-gradient(90deg, var(--red-1), var(--yellow-1), var(--green-1)); }
-  .speed-overview-text { font-size: 12px; color: var(--sub); margin-top: 4px; }
-  .speed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
-  @media (max-width: 600px) { .speed-grid { grid-template-columns: 1fr; } }
-  .speed-device-card { background: #111827; border-radius: 12px; padding: 12px; border: 1px solid #1F2937; }
-  .speed-device-header { display: flex; align-items: center; gap: 8px; font-weight: 700; }
-  .speed-device-score { width: 60px; height: 60px; position: relative; }
-  .speed-device-score-val { position: absolute; inset: 0; display: grid; place-items: center; font-size: 18px; font-weight: 800; }
-  .speed-device-score svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-  .speed-device-score circle { fill: none; stroke-width: 6; }
-  .speed-device-score .track { stroke: #374151; }
-  .speed-device-score .progress { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
-  .speed-device-metrics { display: grid; gap: 8px; font-size: 12px; flex-grow:1; }
-  .speed-device-metric { display: flex; justify-content: space-between; align-items: center; }
-  .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 12px; padding: 12px; margin-top: 16px; }
-  .speed-opportunities-title { display: flex; align-items: center; gap: 8px; color: #FBBF24; font-weight: 700; margin-bottom: 8px; }
-  .speed-opportunities ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12px; color: var(--sub); }
+  /* ============================================= */
+  /* === 🎨 NEW STYLES for Site Speed Section 🎨 === */
+  /* ============================================= */
+    .speed-card-new {
+        background: #0D1120;
+        border: 1px solid #2A3659;
+        border-radius: 16px;
+        padding: 16px;
+        margin-top: 24px;
+    }
+    .speed-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .speed-title { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--ink); }
+    .speed-badge { font-size: 11px; padding: 4px 8px; border-radius: 999px; font-weight: 700; }
+    .speed-badge.good { background: #10B9811A; color: #6EE7B7; border: 1px solid #10B981; }
+    .speed-badge.warn { background: #F59E0B1A; color: #FBBF24; border: 1px solid #F59E0B; }
+    .speed-badge.bad { background: #EF44441A; color: #F87171; border: 1px solid #EF4444; }
+    .speed-overview-bar { height: 6px; background: #1F2937; border-radius: 999px; margin-top: 8px; }
+    .speed-overview-bar > div { height: 100%; width: 0%; border-radius: 999px; transition: width 0.8s ease; background: linear-gradient(90deg, var(--red-1), var(--yellow-1), var(--green-1)); }
+    .speed-overview-text { font-size: 12px; color: var(--sub); margin-top: 4px; }
+
+    .speed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    @media (max-width: 600px) { .speed-grid { grid-template-columns: 1fr; } }
+    .speed-device-card { background: #111827; border-radius: 12px; padding: 12px; border: 1px solid #1F2937; }
+    .speed-device-header { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .speed-device-score {
+        width: 60px; height: 60px;
+        position: relative;
+    }
+    .speed-device-score-val { position: absolute; inset: 0; display: grid; place-items: center; font-size: 18px; font-weight: 800; }
+    .speed-device-score svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .speed-device-score circle { fill: none; stroke-width: 6; }
+    .speed-device-score .track { stroke: #374151; }
+    .speed-device-score .progress { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+    .speed-device-metrics { display: grid; gap: 8px; font-size: 12px; flex-grow:1; }
+    .speed-device-metric { display: flex; justify-content: space-between; align-items: center; }
+    .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 12px; padding: 12px; margin-top: 16px; }
+    .speed-opportunities-title { display: flex; align-items: center; gap: 8px; color: #FBBF24; font-weight: 700; margin-bottom: 8px; }
+    .speed-opportunities ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12px; color: var(--sub); }
   
+  /* Animations */
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
-  .animated-icon { display: inline-flex; align-items: center; justify-content: center; animation: spin 8s linear infinite; }
-  .animated-icon.pulse { animation: pulse 3s ease-in-out infinite, spin 12s linear infinite reverse; }
+  .animated-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      animation: spin 8s linear infinite;
+  }
+  .animated-icon.pulse {
+      animation: pulse 3s ease-in-out infinite, spin 12s linear infinite reverse;
+  }
   
   .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
   @media (max-width: 920px){.tsi-grid, .cae-grid {grid-template-columns:1fr}}
 
+  /* Info Items Grid */
   .tsi-info-grid, .cae-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   @media (max-width:500px){.tsi-info-grid, .cae-info-grid {grid-template-columns:1fr}}
-  .tsi-info-item, .cae-info-item { border-radius:14px; padding:14px; background:#1E1E1E; border:1px solid var(--outline); box-shadow:0 8px 24px rgba(0,0,0,.3); }
+  .tsi-info-item, .cae-info-item {
+    border-radius:14px;
+    padding:14px;
+    background:#1E1E1E;
+    border:1px solid var(--outline);
+    box-shadow:0 8px 24px rgba(0,0,0,.3);
+  }
   .tsi-info-icon, .cae-info-icon {width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(135deg,#23234a,#182e3a);border:1px solid #2e2e2e}
+  .tsi-info-icon svg, .cae-info-icon svg {width:18px;height:18px}
   .tsi-info-header, .cae-info-header {display:flex;align-items:center;gap:10px;margin-bottom:8px}
   .tsi-info-title, .cae-info-title {font-weight:800;color:var(--ink)}
   .tsi-info-item p, .cae-info-item p {font-size:12px;color:#aab3c2;margin:0 0 10px}
+  .tsi-tags, .cae-tags {display:flex;flex-wrap:wrap;gap:6px}
   
   .tsi-info-item ul { list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
   .tsi-info-item li { font-size: 13px; line-height: 1.5; }
@@ -188,80 +271,273 @@
   .site-map-container ul { padding-left: 16px; margin: 0; }
   .site-map-container li { list-style-type: '— '; }
 
+  /* ========================================================== */
+  /* === 🎨 NEW STYLES for Technical SEO Integration 🎨 === */
+  /* ========================================================== */
   .tsi-card {
-    background: linear-gradient(145deg, #0d0f2b, #1f0c2e); border: 1px solid var(--purple-1); border-radius: 20px;
-    padding: 16px; margin-top: 24px; box-shadow: 0 0 32px rgba(138, 43, 226, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5);
-    background-image: radial-gradient(circle at 100% 0%, rgba(0,198,255,.15), transparent 30%), radial-gradient(circle at 0% 100%, rgba(138,43,226,.15), transparent 30%);
+    background: linear-gradient(145deg, #0d0f2b, #1f0c2e);
+    border: 1px solid var(--purple-1);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 0 32px rgba(138, 43, 226, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5);
+    background-image: 
+      radial-gradient(circle at 100% 0%, rgba(0,198,255,.15), transparent 30%),
+      radial-gradient(circle at 0% 100%, rgba(138,43,226,.15), transparent 30%);
   }
-  .tsi-info-item { background: rgba(8, 5, 20, 0.7); border: 1px solid rgba(138, 43, 226, 0.3); backdrop-filter: blur(4px); transition: transform 0.2s ease, border-color 0.2s ease; }
-  .tsi-info-item:hover { transform: translateY(-3px); border-color: rgba(0, 198, 255, 0.5); }
-  .tsi-info-title { background: linear-gradient(90deg, var(--blue-1), var(--pink-1)); -webkit-background-clip: text; background-clip: text; color: transparent; font-size: 15px; }
+  .tsi-info-item {
+    background: rgba(8, 5, 20, 0.7);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    backdrop-filter: blur(4px);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .tsi-info-item:hover {
+    transform: translateY(-3px);
+    border-color: rgba(0, 198, 255, 0.5);
+  }
+  .tsi-info-title {
+    background: linear-gradient(90deg, var(--blue-1), var(--pink-1));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    font-size: 15px;
+  }
   .tsi-suggestions {
-    border-radius: 14px; padding:14px; margin-top:16px;
-    background-image: linear-gradient(to right, #1a0f2b, #1a0f2b), linear-gradient(90deg, var(--pink-1), var(--purple-1));
+    border: 1px solid transparent;
+    border-radius: 14px;
+    padding:14px; margin-top:16px;
+    background-image: 
+        linear-gradient(to right, #1a0f2b, #1a0f2b), 
+        linear-gradient(90deg, var(--pink-1), var(--purple-1));
     box-shadow: 0 0 24px rgba(255, 20, 147, 0.3);
   }
-  .tsi-suggestions h4 { margin:0 0 10px; font-weight:900; display:flex; align-items:center; gap:8px; background: linear-gradient(90deg, var(--pink-1), var(--yellow-1)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tsi-suggestions h4 {
+    margin:0 0 10px; font-weight:900;
+    display:flex; align-items:center; gap:8px;
+    background: linear-gradient(90deg, var(--pink-1), var(--yellow-1));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
   .tsi-suggestions ul { margin:0; padding-left:0; list-style:none; display:grid; gap:8px;}
   .tsi-suggestions li { color: #e2d8ff; font-size:13px; padding-left:10px; position:relative; }
   .tsi-suggestions li::before { content: '💡'; position: absolute; left: -10px; top:0; }
   
-  .ki-card { background: linear-gradient(145deg, #2b210c, #2e0c1f); border: 1px solid var(--orange-1); border-radius: 20px; padding: 16px; margin-top: 24px; box-shadow: 0 0 32px rgba(255, 165, 0, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
-  .ki-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-  .ki-item { background: rgba(25, 15, 5, 0.7); border: 1px solid rgba(255, 165, 0, 0.3); border-radius: 14px; padding: 14px; backdrop-filter: blur(4px); }
-  .ki-item-title { font-weight: 800; font-size: 15px; background: linear-gradient(90deg, var(--yellow-1), var(--pink-1)); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 12px; display:flex; align-items:center; gap: 8px; }
+  
+  /* =============================================== */
+  /* === 🎨 NEW STYLES for Keyword Intelligence 🎨 === */
+  /* =============================================== */
+  .ki-card {
+    background: linear-gradient(145deg, #2b210c, #2e0c1f);
+    border: 1px solid var(--orange-1);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 0 32px rgba(255, 165, 0, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+  }
+  .ki-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .ki-item {
+    background: rgba(25, 15, 5, 0.7);
+    border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 14px;
+    padding: 14px;
+    backdrop-filter: blur(4px);
+  }
+  .ki-item-title {
+    font-weight: 800; font-size: 15px;
+    background: linear-gradient(90deg, var(--yellow-1), var(--pink-1));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 12px; display:flex; align-items:center; gap: 8px;
+  }
   .ki-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-  .ki-tags .chip { background: #2f2508; border-color: #f59e0b72; color: #fde68a; }
+  .ki-tags .chip {
+    background: #2f2508; border-color: #f59e0b72; color: #fde68a;
+  }
   .ki-tags .chip.intent-info { background: #112d3d; border-color: #00c6ff72; color: #cffcff;}
   .ki-tags .chip.intent-trans { background: #2f1d08; border-color: #ff8c0072; color: #ffefd5;}
   .ki-tags .chip.intent-nav { background: #231a33; border-color: #8a2be272; color: #e9d5ff;}
   .ki-list { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #ffedd5;}
 
-  .ai-card { background: linear-gradient(145deg, #0c212b, #0c1a2e); border: 1px solid var(--blue-1); border-radius: 20px; padding: 16px; margin-top: 24px; box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
-  .ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
-  .ai-item { background: rgba(5, 20, 25, 0.7); border: 1px solid rgba(0, 198, 255, 0.3); border-radius: 14px; padding: 14px; backdrop-filter: blur(4px); display: flex; flex-direction: column; gap: 10px; }
-  .ai-item-title { font-weight: 800; font-size: 15px; background: linear-gradient(90deg, var(--blue-1), var(--green-1)); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 4px; display:flex; align-items:center; gap: 8px; }
-  .ai-item p { font-size: 13px; color: #c3e6ff; margin: 0; }
+  /* =================================================== */
+  /* === 🤖 NEW STYLES for AI-Powered Features 🤖 === */
+  /* =================================================== */
+  .ai-card {
+    background: linear-gradient(145deg, #0c212b, #0c1a2e);
+    border: 1px solid var(--blue-1);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+  }
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .ai-item {
+    background: rgba(5, 20, 25, 0.7);
+    border: 1px solid rgba(0, 198, 255, 0.3);
+    border-radius: 14px;
+    padding: 14px;
+    backdrop-filter: blur(4px);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ai-item-title {
+    font-weight: 800; font-size: 15px;
+    background: linear-gradient(90deg, var(--blue-1), var(--green-1));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 4px; display:flex; align-items:center; gap: 8px;
+  }
+  .ai-item p {
+      font-size: 13px; color: #c3e6ff; margin: 0;
+  }
   .ai-input-row { display: flex; gap: 8px; margin-top: auto; }
-  .ai-input-row input { flex-grow: 1; background: #081220; border: 1px solid #1c3d52; border-radius: 10px; padding: 8px 12px; color: var(--ink); font-size: 13px; }
-  .ai-input-row input:focus { outline: none; border-color: var(--blue-1); box-shadow: 0 0 8px var(--blue-1);}
+  .ai-input-row input {
+      flex-grow: 1;
+      background: #081220;
+      border: 1px solid #1c3d52;
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: var(--ink);
+      font-size: 13px;
+  }
+   .ai-input-row input:focus { outline: none; border-color: var(--blue-1); box-shadow: 0 0 8px var(--blue-1);}
   .ai-result-box {
-    background: #081220; border: 1px solid #1c3d52; border-radius: 10px;
-    padding: 12px; font-size: 13px; color: #e0f2fe; min-height: 80px;
-    white-space: pre-wrap; overflow-y: auto; position: relative;
+      background: #081220;
+      border: 1px solid #1c3d52;
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 13px;
+      color: #e0f2fe;
+      min-height: 80px;
+      white-space: pre-wrap;
+      overflow-y: auto;
   }
 
-  .cae-card { background: linear-gradient(145deg, #0d0f2b, #1f0c2e); border: 1px solid var(--blue-1); border-radius: 20px; padding: 16px; margin-top: 24px; box-shadow: 0 0 32px rgba(0, 198, 255, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5); }
-  .cae-info-item { background: rgba(5, 15, 25, 0.7); border: 1px solid rgba(0, 198, 255, 0.3); backdrop-filter: blur(4px); }
-  .cae-info-title { background: linear-gradient(90deg, var(--blue-1), var(--green-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .cae-relevance-bar { height: 12px; border-radius: 9999px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
-  .cae-relevance-bar > span { display:block; height:100%; width:0%; border-radius: 9999px; background: linear-gradient(90deg, var(--blue-1), var(--green-1)); box-shadow: 0 0 8px var(--green-1); transition: width 0.9s ease; }
+  /* ======================================================= */
+  /* === 🚀 NEW STYLES for Content Analysis Engine 🚀 === */
+  /* ======================================================= */
+  .cae-card {
+    background: linear-gradient(145deg, #0d0f2b, #1f0c2e);
+    border: 1px solid var(--blue-1);
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: 0 0 32px rgba(0, 198, 255, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5);
+  }
+  .cae-info-item {
+    background: rgba(5, 15, 25, 0.7);
+    border: 1px solid rgba(0, 198, 255, 0.3);
+    backdrop-filter: blur(4px);
+  }
+  .cae-info-title {
+    background: linear-gradient(90deg, var(--blue-1), var(--green-2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .cae-relevance-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.1);
+  }
+  .cae-relevance-bar > span {
+      display:block; height:100%; width:0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--blue-1), var(--green-1));
+      box-shadow: 0 0 8px var(--green-1);
+      transition: width 0.9s ease;
+  }
   
-  .meta-card { background: #10122e; border: 1px solid #2a2f5a; }
-  .meta-card .cat-card { background: #14173a; border-color: #2a2f5a; }
-  .meta-card .t-grad { font-size: 20px; }
-  .meta-card .cat-card-title { background: linear-gradient(90deg, var(--green-1), var(--blue-1)); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; }
+  /* =================================================== */
+  /* === 🎨 NEW STYLES for Meta & Heading Section 🎨 === */
+  /* =================================================== */
+  .meta-card {
+      background: #10122e;
+      border: 1px solid #2a2f5a;
+  }
+  .meta-card .cat-card {
+      background: #14173a;
+      border-color: #2a2f5a;
+  }
+  .meta-card .t-grad {
+      font-size: 20px;
+  }
+  .meta-card .cat-card-title {
+      background: linear-gradient(90deg, var(--green-1), var(--blue-1));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      font-weight: 800;
+  }
+  
+  /* ADDED FOR UPGRADE */
+  .upgraded-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+      border-top: 1px solid var(--outline);
+      padding-top: 16px;
+  }
+
+  .onpage-card {
+      background: linear-gradient(145deg, #0c212b, #0c1a2e);
+      border: 1px solid var(--blue-1);
+      border-radius: 20px;
+      padding: 16px;
+      margin-top: 24px;
+      box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+  }
+  .onpage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 12px;
+  }
+  .onpage-item {
+      background: rgba(5, 20, 25, 0.7);
+      border: 1px solid rgba(0, 198, 255, 0.3);
+      border-radius: 14px;
+      padding: 14px;
+  }
+  .onpage-item-title {
+      font-weight: 800;
+      font-size: 15px;
+      background: linear-gradient(90deg, var(--blue-1), var(--green-1));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+  }
+
 </style>
 
 <script defer>
+/* This is the complete, combined script. It includes all of your original logic
+   plus the new logic for the 16 upgraded features, all integrated correctly. */
 (function(){
   const init = () => {
     const $ = s=>document.querySelector(s);
 
-    /* ============== Element refs ============== */
+    /* ============== Element refs (Original + New) ============== */
     const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
+    const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
+    const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
+
     const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn'),
           importBtn=$('#importBtn'), importFile=$('#importFile'), printBtn=$('#printBtn'),
           resetBtn=$('#resetBtn'), exportBtn=$('#exportBtn');
-    const errorBox = $('#errorBox');
-    
-    const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
-    const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
-    const chipHttp=$('#chipHttp'), chipCanon=$('#chipCanon'), chipRobots=$('#chipRobots'), chipViewport=$('#chipViewport'),
-          chipH=$('#chipH'), chipIntChip=$('#chipInt'), chipSchema=$('#chipSchema'), chipAuto=$('#chipAuto');
 
     const titleVal=$('#titleVal'), metaVal=$('#metaVal'), headingMap=$('#headingMap');
     
+    const chipHttp=$('#chipHttp'), chipCanon=$('#chipCanon'), chipRobots=$('#chipRobots'), chipViewport=$('#chipViewport'),
+          chipH=$('#chipH'), chipIntChip=$('#chipInt'), chipSchema=$('#chipSchema'), chipAuto=$('#chipAuto');
+
+    const errorBox = $('#errorBox');
+    const modal=$('#improveModal'), mTitle=$('#improveTitle'), mCat=$('#improveCategory'),
+          mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
+          mTips=$('#improveTips'), mLink=$('#improveSearch');
+
     const speedOverviewBar = $('#speedOverviewBar'), speedOverviewText = $('#speedOverviewText');
     const mobileScoreVal = $('#mobileScoreVal'), mobileScoreCircle = $('#mobileScoreCircle');
     const desktopScoreVal = $('#desktopScoreVal'), desktopScoreCircle = $('#desktopScoreCircle');
@@ -279,18 +555,14 @@
     const kiRelatedTerms = $('#kiRelatedTerms'), kiCompetitorGaps = $('#kiCompetitorGaps');
     const kiLongTail = $('#kiLongTail');
 
-    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numTSI = $('#numCAE');
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
     const caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities');
     const caeKeywords = $('#caeKeywords'), caeRelevanceScore = $('#caeRelevanceScore');
     const caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
     
     const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult');
 
-    const modal=$('#improveModal'), mTitle=$('#improveTitle'), mCat=$('#improveCategory'),
-          mScore=$('#improveScore'), mBand=$('#improveBand'), mWhy=$('#improveWhy'),
-          mTips=$('#improveTips'), mLink=$('#improveSearch');
-    
-    /* Helpers */
+    /* Helpers (Unchanged) */
     const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
     const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
     const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
@@ -310,10 +582,10 @@
         showError(`${toolName} analysis failed`, message);
         return null;
     };
-    
+
     const CATS=[{name:'User Signals & Experience',icon:'📱',checks:['Mobile-friendly, responsive layout','Optimized speed (compression, lazy-load)','Core Web Vitals passing (LCP/INP/CLS)','Clear CTAs and next steps','Accessible basics (alt text, contrast)']},{name:'Entities & Context',icon:'🧩',checks:['sameAs/Organization details present','Valid schema markup (Article/FAQ/Product)','Related entities covered with context','Primary entity clearly defined','Organization contact/about page visible']},{name:'Structure & Architecture',icon:'🏗️',checks:['Logical H2/H3 headings & topic clusters','Internal links to hub/related pages','Clean, descriptive URL slug','Breadcrumbs enabled (+ schema)','XML sitemap logical structure']},{name:'Content Quality',icon:'🧠',checks:['E-E-A-T signals (author, date, expertise)','Unique value vs. top competitors','Facts & citations up to date','Helpful media (images/video) w/ captions','Up-to-date examples & screenshots']},{name:'Content & Keywords',icon:'📝',checks:['Define search intent & primary topic','Map target & related keywords (synonyms/PAA)','H1 includes primary topic naturally','Integrate FAQs / questions with answers','Readable, NLP-friendly language']},{name:'Technical Elements',icon:'⚙️',checks:['Title tag (≈50–60 chars) w/ primary keyword','Meta description (≈140–160 chars) + CTA','Canonical tag set correctly','Indexable & listed in XML sitemap','Robots directives valid']}];
     const KB={'Mobile-friendly, responsive layout':{why:'Most traffic is mobile; poor UX kills engagement.',tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'],link:'https://search.google.com/test/mobile-friendly'},'Optimized speed (compression, lazy-load)':{why:'Speed affects abandonment and CWV.',tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'],link:'https://web.dev/fast/'},'Core Web Vitals passing (LCP/INP/CLS)':{why:'Passing CWV improves experience & stability.',tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'],link:'https://web.dev/vitals/'},'Clear CTAs and next steps':{why:'Clarity increases conversions and task completion.',tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'],link:'https://www.nngroup.com/articles/call-to-action-buttons/'},'Accessible basics (alt text, contrast)':{why:'Accessibility broadens reach and reduces risk.',tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'],link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},'sameAs/Organization details present':{why:'Entity grounding disambiguates your brand.',tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'],link:'https://schema.org/Organization'},'Valid schema markup (Article/FAQ/Product)':{why:'Structured data unlocks rich results.',tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'],link:'https://search.google.com/test/rich-results'},'Related entities covered with context':{why:'Covering related entities builds topical depth.',tips:['Mention related concepts.','Explain relationships.','Link to references.'],link:'https://developers.google.com/knowledge-graph'},'Primary entity clearly defined':{why:'A single main entity clarifies page purpose.',tips:['Define at the top.','Use consistent naming.','Add schema about it.'],link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},'Organization contact/about page visible':{why:'Trust & contact clarity support E-E-A-T.',tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'],link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},'Logical H2/H3 headings & topic clusters':{why:'Hierarchy helps skimming and indexing.',tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'],link:'https://moz.com/learn/seo/site-structure'},'Internal links to hub/related pages':{why:'Internal links distribute authority & context.',tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'],link:'https://ahrefs.com/blog/internal-links/'},'Clean, descriptive URL slug':{why:'Readable slugs improve CTR & clarity.',tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'],link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},'Breadcrumbs enabled (+ schema)':{why:'Breadcrumbs clarify location & show in SERP.',tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'],link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},'XML sitemap logical structure':{why:'Sitemap accelerates discovery & updates.',tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'],link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},'E-E-A-T signals (author, date, expertise)':{why:'Trust signals reduce bounce & build credibility.',tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'],link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},'Unique value vs. top competitors':{why:'Differentiation is necessary to rank & retain.',tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'],link:'https://backlinko.com/seo-techniques'},'Facts & citations up to date':{why:'Freshness + accuracy boosts trust.',tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'],link:'https://scholar.google.com/'},'Helpful media (images/video) w/ captions':{why:'Media improves comprehension & dwell time.',tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'],link:'https://web.dev/optimize-lcp/'},'Up-to-date examples & screenshots':{why:'Current visuals reflect product reality.',tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'],link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},'Define search intent & primary topic':{why:'Matching intent drives relevance & time on page.',tips:['State outcome early.','Align format to intent.','Use concrete examples.'],link:'https://ahrefs.com/blog/search-intent/'},'Map target & related keywords (synonyms/PAA)':{why:'Variants improve recall & completeness.',tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'],link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},'H1 includes primary topic naturally':{why:'Clear topic helps users and algorithms.',tips:['One H1 per page.','Topic near the start.','Be descriptive.'],link:'https://web.dev/learn/html/semantics/#headings'},'Integrate FAQs / questions with answers':{why:'Captures long-tail & can earn rich results.',tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'],link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},'Readable, NLP-friendly language':{why:'Plain, direct writing improves comprehension.',tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'],link:'https://www.plainlanguage.gov/guidelines/'},'Title tag (≈50–60 chars) w/ primary keyword':{why:'Title remains the strongest on-page signal.',tips:['50–60 chars.','Primary topic first.','Avoid duplication.'],link:'https://moz.com/learn/seo/title-tag'},'Meta description (≈140–160 chars) + CTA':{why:'Meta drives CTR which correlates with rankings.',tips:['140–160 chars.','Benefit + CTA.','Match intent.'],link:'https://moz.com/learn/seo/meta-description'},'Canonical tag set correctly':{why:'Avoid duplicates; consolidate signals.',tips:['One canonical.','Absolute URL.','No conflicting canonicals.'],link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},'Indexable & listed in XML sitemap':{why:'Indexation is prerequisite to ranking.',tips:['No noindex.','Include in sitemap.','Submit in Search Console.'],link:'https://developers.google.com/search/docs/crawling-indexing/overview'},'Robots directives valid':{why:'Avoid accidental noindex/nofollow.',tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'],link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}};
-    
+    function clamp01num(n){return Math.max(0,Math.min(100,Number(n)||0))}
     function scoreChecklist(label,data,url,targetKw=''){const qs=data.quick_stats||{};const cs=data.content_structure||{};const ps=data.page_signals||{};const r=data.readability||{};const h1=(cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;const h2=(cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;const h3=(cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;const title=(cs.title||'');const meta=(cs.meta_description||'');const internal=Number(qs.internal_links||0);const external=Number(qs.external_links||0);const schemaTypes=new Set((data.page_signals?.schema_types)||[]);const robots=(data.page_signals?.robots||'').toLowerCase();const hasFAQ=schemaTypes.has('FAQPage');const hasArticle=schemaTypes.has('Article')||schemaTypes.has('NewsArticle')||schemaTypes.has('BlogPosting');const urlPath=(()=>{try{return new URL(url).pathname;}catch{return '/';}})();const slugScore=(()=>{const hasQuery=url.includes('?');const segs=urlPath.split('/').filter(Boolean);const words=segs.join('-').split('-').filter(Boolean);if(hasQuery)return 55;if(segs.length>6)return 60;if(words.some(w=>w.length>24))return 65;return 85;})();switch(label){case'Mobile-friendly, responsive layout':return ps.has_viewport?88:58;case'Optimized speed (compression, lazy-load)':return 60;case'Core Web Vitals passing (LCP/INP/CLS)':return 60;case'Clear CTAs and next steps':return meta.length>=140&&/learn|get|try|start|buy|sign|download|contact/i.test(meta)?80:60;case'Accessible basics (alt text, contrast)':return (data.images_alt_count||0)>=3?82:((data.images_alt_count||0)>=1?68:48);case'sameAs/Organization details present':return ps.has_org_sameas?90:55;case'Valid schema markup (Article/FAQ/Product)':return (hasArticle||hasFAQ||schemaTypes.has('Product'))?85:(schemaTypes.size>0?70:50);case'Related entities covered with context':return external>=2?72:60;case'Primary entity clearly defined':return ps.has_main_entity?85:(h1>0?72:58);case'Organization contact/about page visible':return 60;case'Logical H2/H3 headings & topic clusters':return (h2>=3&&h3>=2)?85:(h2>=2?70:55);case'Internal links to hub/related pages':return internal>=5?85:(internal>=2?65:45);case'Clean, descriptive URL slug':return slugScore;case'Breadcrumbs enabled (+ schema)':return ps.has_breadcrumbs?85:55;case'XML sitemap logical structure':return 60;case'E-E-A-T signals (author, date, expertise)':return ps.has_org_sameas?75:65;case'Unique value vs. top competitors':return 60;case'Facts & citations up to date':return external>=2?78:58;case'Helpful media (images/video) w/ captions':return (data.images_alt_count||0)>=3?82:58;case'Up-to-date examples & screenshots':return 60;case'Define search intent & primary topic':return (title&&h1>0)?78:60;case'Map target & related keywords (synonyms/PAA)':{const kw=(targetKw||'').trim();if(!kw)return 60;const found=(title.toLowerCase().includes(kw.toLowerCase())||(cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));return found?80:62}case'H1 includes primary topic naturally':{const kw=(targetKw||'').trim();if(h1===0)return 45;if(!kw)return 72;const found=(cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));return found?84:72}case'Integrate FAQs / questions with answers':return hasFAQ?85:(/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ')+' '+(cs.headings?.H3||[]).join(' '))?70:55);case'Readable, NLP-friendly language':return clamp01num(r.score||0);case'Title tag (≈50–60 chars) w/ primary keyword':{const len=(title||'').length;return (len>=50&&len<=60)?88:(len?68:45)}case'Meta description (≈140–160 chars) + CTA':{const len=(meta||'').length;const hasCTA=/learn|get|try|start|buy|sign|download|contact/i.test(meta||'');return (len>=140&&len<=160)?(hasCTA?90:82):(len?65:48)}case'Canonical tag set correctly':return ps.canonical?85:55;case'Indexable & listed in XML sitemap':return robots.includes('noindex')?20:80;case'Robots directives valid':return (robots&&/(noindex|none)/.test(robots))?45:75;}return 60}
     function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');if(!catsEl)return;catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label+' best practices'));if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});if(chipAuto)chipAuto.textContent=autoGood;}
 
@@ -361,7 +633,7 @@
     }
 
 
-    /* ===== Analyze Button Logic ===== */
+    /* ===== Analyze Button Logic (ORIGINAL + UPGRADED) ===== */
     analyzeBtn?.addEventListener('click', async e=>{
       e.preventDefault();
       clearError();
@@ -371,12 +643,12 @@
       try{
         setRunning(true);
         
-        // --- Reset UIs ---
+        // --- Reset UIs (Original) ---
         [kiSemanticResearch, kiIntentClassification, kiRelatedTerms, kiCompetitorGaps, kiLongTail, caeTopicClusters, caeEntities, caeKeywords, caeIntent].forEach(el => {
             if(el) el.innerHTML = '<span class="chip">Analyzing...</span>';
         });
 
-        // --- Fire all API calls in parallel ---
+        // --- Fire all ORIGINAL API calls in parallel ---
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
             callAnalyzer(url),
             callTechnicalSeoApi(url).catch(err => handleApiError('Technical SEO', err)),
@@ -490,6 +762,42 @@
             if(desktopCls) desktopCls.textContent = desktop.cls ? desktop.cls.toFixed(3) : 'N/A';
             if(speedOpportunitiesList) speedOpportunitiesList.innerHTML = (psiData.opportunities||[]).length > 0 ? (psiData.opportunities||[]).map(tip => `<li>${tip}</li>`).join('') : '<li>No specific opportunities found. Great job!</li>';
         }
+        
+        /* ================================================= */
+        /* === NEW LOGIC FOR UPGRADED FEATURES ADDED HERE === */
+        /* ================================================= */
+        const allNewTasks = [
+            { task: 'topic_coverage', elementId: 'topicCoverageResult', type: 'text' },
+            { task: 'intent_alignment', elementId: 'intentAlignmentResult', type: 'text' },
+            { task: 'snippet_readiness', elementId: 'snippetReadinessResult', type: 'text' },
+            { task: 'question_mining', elementId: 'questionMiningResult', type: 'text' },
+            { task: 'heading_hierarchy', elementId: 'headingHierarchyResult', type: 'text' },
+            { task: 'readability_simplification', elementId: 'readabilitySimplificationResult', type: 'text' },
+            { task: 'semantic_variants', elementId: 'semanticVariantsResult', type: 'text' },
+            { task: 'eeat_signals', elementId: 'eeatSignalsResult', type: 'text' },
+            { task: 'internal_links', elementId: 'internalLinksResult', type: 'text' },
+            { task: 'tables_checklists', elementId: 'tablesChecklistsResult', type: 'html' },
+            { task: 'content_freshness', elementId: 'contentFreshnessResult', type: 'text' },
+            { task: 'cannibalization_check', elementId: 'cannibalizationCheckResult', type: 'text' },
+            { task: 'ux_impact', elementId: 'uxImpactResult', type: 'text' },
+            { task: 'title_meta_rewrite', elementId: 'titleMetaRewriteResult', type: 'json', formatter: data => (data.suggestions || []).map((s, i) => `<p><strong>Option ${i+1}:</strong><br><strong>Title:</strong> ${s.title}<br><strong>Meta:</strong> ${s.meta}</p>`).join('') || 'No suggestions.' },
+            { task: 'image_seo', elementId: 'imageSeoResult', type: 'json', formatter: data => { let html = `<p><strong>Hero Image Present:</strong> ${data.hero_image_present ? 'Yes' : 'No'}</p>`; if (data.alt_text_suggestions && data.alt_text_suggestions.length > 0) { html += '<strong>Alt Text Suggestions:</strong><ul>' + data.alt_text_suggestions.map(s => `<li><code>${s.image_src}</code>: "${s.suggestion}"</li>`).join('') + '</ul>'; } return html; }},
+            { task: 'schema_picker', elementId: 'schemaPickerResult', type: 'json', formatter: data => data.json_ld ? `<p><strong>Recommended Schema:</strong> ${data.schema_type}</p><pre><code>${JSON.stringify(data.json_ld, null, 2)}</code></pre>` : 'No schema suggestion.' },
+        ];
+        
+        allNewTasks.forEach(item => { const el = $(`#${item.elementId}`); if(el) el.innerHTML = 'Analyzing...'; });
+
+        const newPromises = allNewTasks.map(item => callApi('/api/openai-request', {task: item.task, url}).then(data => ({ ...item, data })).catch(error => ({ ...item, error })));
+        const newResults = await Promise.all(newPromises);
+
+        newResults.forEach(result => {
+            const el = $(`#${result.elementId}`);
+            if (!el) return;
+            if (result.error) { el.textContent = `Error: ${result.error.message}`; } 
+            else if (result.type === 'json') { el.innerHTML = result.formatter(result.data); }
+            else { const content = result.data.content || 'No suggestions found.'; el.innerHTML = result.type === 'html' ? content : content.replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+        });
+
       }catch(err){
         console.error(err);
         let message = err.message || 'An unknown error occurred.';
@@ -510,30 +818,15 @@
     });
 
     aiBriefBtn?.addEventListener('click', async () => {
-        const prompt = aiBriefInput.value.trim();
-        const url = urlInput.value.trim();
-        if (!prompt) {
-            aiBriefResult.textContent = 'Please enter a topic or keyword.';
-            return;
-        }
-        aiBriefBtn.disabled = true;
-        aiBriefBtn.textContent = 'Generating...';
-        aiBriefResult.textContent = 'AI is crafting your brief...';
-        try {
-            const result = await callOpenAiApi('brief', prompt, url);
-            aiBriefResult.textContent = result.content || 'No content returned from AI.';
-        } catch (error) {
-            aiBriefResult.textContent = `Error: ${error.message}`;
-        } finally {
-            aiBriefBtn.disabled = false;
-            aiBriefBtn.textContent = 'Generate';
-        }
+        const prompt = aiBriefInput.value.trim(); const url = urlInput.value.trim();
+        if (!prompt) { aiBriefResult.textContent = 'Please enter a topic or keyword.'; return; }
+        aiBriefBtn.disabled = true; aiBriefBtn.textContent = 'Generating...'; aiBriefResult.textContent = 'AI is crafting your brief...';
+        try { const result = await callOpenAiApi('brief', prompt, url); aiBriefResult.textContent = result.content || 'No content returned from AI.';
+        } catch (error) { aiBriefResult.textContent = `Error: ${error.message}`;
+        } finally { aiBriefBtn.disabled = false; aiBriefBtn.textContent = 'Generate'; }
     });
 
-    pasteBtn && pasteBtn.addEventListener('click', async e => {
-      e.preventDefault();
-      try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{}
-    });
+    pasteBtn && pasteBtn.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
     importBtn && importBtn.addEventListener('click',()=>importFile.click());
     importFile && importFile.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)});
     printBtn && printBtn.addEventListener('click',()=>window.print());
@@ -616,7 +909,7 @@
     </div>
   </div>
 
-  <!-- Content Analysis Engine -->
+  <!-- Content Analysis Engine (Original Layout with Upgrades) -->
   <div class="cae-card" id="contentAnalysisEngineCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3></div>
     <div class="cae-grid">
@@ -628,9 +921,16 @@
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon animated-icon pulse">🎯</div><span class="cae-info-title">Content Relevance & Intent</span></div><div class="cae-relevance-bar"><span id="caeRelevanceBar" style="width:0%"></span></div><div id="caeIntent" style="margin-top:8px"></div></div>
       </div>
     </div>
+    {{-- UPGRADED SECTION --}}
+    <div class="upgraded-grid">
+        <div class="cae-info-item"><div class="cae-info-header"><span class="animated-icon">🗺️</span><span class="cae-info-title">Topic Coverage & Entity Gaps</span></div><div id="topicCoverageResult" class="ai-result-box"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><span class="animated-icon pulse">🧭</span><span class="cae-info-title">Search Intent Match</span></div><div id="intentAlignmentResult" class="ai-result-box"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><span class="animated-icon">🏆</span><span class="cae-info-title">Featured Snippet Readiness</span></div><div id="snippetReadinessResult" class="ai-result-box"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><span class="animated-icon">📖</span><span class="cae-info-title">Readability & Simplification</span></div><div id="readabilitySimplificationResult" class="ai-result-box"></div></div>
+    </div>
   </div>
 
-  <!-- Technical SEO Integration -->
+  <!-- Technical SEO Integration (Original Layout with Upgrades) -->
   <div class="tsi-card" id="technicalSeoCard">
      <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3></div>
      <div class="tsi-grid">
@@ -644,9 +944,18 @@
       </div>
     </div>
     <div class="tsi-suggestions"><h4 class="flex items-center gap-2">💡 Technical SEO Suggestions</h4><ul id="tsiSuggestionsList"></ul></div>
+    {{-- UPGRADED SECTION --}}
+    <div class="upgraded-grid">
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon">🔗</span><span class="tsi-info-title">Internal Link Opportunities</span></div><div id="internalLinksResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon pulse">🖼️</span><span class="tsi-info-title">Media & Image SEO</span></div><div id="imageSeoResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon">⚡</span><span class="tsi-info-title">UX that Impacts Rankings</span></div><div id="uxImpactResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon pulse">🔄</span><span class="tsi-info-title">Cannibalization Signals</span></div><div id="cannibalizationCheckResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon">⏳</span><span class="tsi-info-title">Content Freshness</span></div><div id="contentFreshnessResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon pulse">⭐</span><span class="tsi-info-title">E-E-A-T Signals</span></div><div id="eeatSignalsResult" class="ai-result-box"></div></div>
+    </div>
   </div>
 
-  <!-- Keyword Intelligence -->
+  <!-- Keyword Intelligence (Original Layout with Upgrades) -->
   <div class="ki-card" id="keywordIntelligenceCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3></div>
     <div class="ki-grid">
@@ -656,9 +965,27 @@
         <div class="ki-item"><h4 class="ki-item-title"><span>📊</span>Competitor Keyword Gap Analysis</h4><div id="kiCompetitorGaps" class="ki-list"></div></div>
         <div class="ki-item" style="grid-column: 1 / -1;"><h4 class="ki-item-title"><span>🔑</span>Long-tail Semantic Suggestions</h4><div id="kiLongTail" class="ki-list"></div></div>
     </div>
+     {{-- UPGRADED SECTION --}}
+    <div class="upgraded-grid">
+        <div class="ki-item"><h4 class="ki-item-title"><span class="animated-icon">❓</span>Questions to Add (PAA & Forums)</h4><div id="questionMiningResult" class="ai-result-box"></div></div>
+        <div class="ki-item"><h4 class="ki-item-title"><span class="animated-icon pulse">🌿</span>Semantic Variants (No Stuffing)</h4><div id="semanticVariantsResult" class="ai-result-box"></div></div>
+    </div>
   </div>
   
-  <!-- AI-Powered Features -->
+  <!-- On-Page Optimization Tools (This is a new card for some of the new features) -->
+  <div class="onpage-card" id="onPageOptimizationCard">
+    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+        <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">On-Page Optimization Tools</h3>
+    </div>
+    <div class="onpage-grid">
+        <div class="onpage-item"><h4 class="onpage-item-title"><span class="animated-icon">✍️</span>Title & Meta Rewriter</h4><div id="titleMetaRewriteResult" class="ai-result-box"></div></div>
+        <div class="onpage-item"><h4 class="onpage-item-title"><span class="animated-icon pulse">🧐</span>Heading Hierarchy Auditor</h4><div id="headingHierarchyResult" class="ai-result-box"></div></div>
+        <div class="onpage-item"><h4 class="onpage-item-title"><span class="animated-icon">📋</span>Tables, Checklists & Examples</h4><div id="tablesChecklistsResult" class="ai-result-box"></div></div>
+        <div class="onpage-item"><h4 class="onpage-item-title"><span class="animated-icon pulse">🏗️</span>Schema Smart-Picker</h4><div id="schemaPickerResult" class="ai-result-box"></div></div>
+    </div>
+  </div>
+
+  <!-- AI-Powered Features (Original Interactive Layout - UNTOUCHED) -->
   <div class="ai-card" id="aiPoweredFeaturesCard">
       <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI-Powered Features</h3></div>
       <div class="ai-grid">
@@ -685,6 +1012,7 @@
       </div>
   </div>
 
+  <!-- Meta Info Layout (Original - UNTOUCHED) -->
   <div class="card meta-card" style="margin-top:24px;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;"><h3 class="t-grad">Meta & Heading Structure</h3></div>
     <div class="space-y-3">
@@ -694,60 +1022,37 @@
     </div>
   </div>
 
+  <!-- Site Speed & Core Web Vitals (Original - UNTOUCHED) -->
   <div class="speed-card-new" id="speedCard">
-    <div class="speed-header">
-        <div class="speed-title"><span>🚀</span> Site Speed & Core Web Vitals</div>
-        <span id="speedBadge" class="speed-badge">Checking...</span>
-    </div>
+    <div class="speed-header"><div class="speed-title"><span>🚀</span> Site Speed & Core Web Vitals</div><span id="speedBadge" class="speed-badge">Checking...</span></div>
     <div class="speed-overview-bar"><div id="speedOverviewBar"></div></div>
     <p class="speed-overview-text" id="speedOverviewText">Overview not available yet.</p>
     <div class="speed-grid">
         <div class="speed-device-card">
             <div class="speed-device-header"><span>📱</span> Mobile</div>
             <div style="display:flex; align-items:center; gap: 16px; margin-top:12px;">
-                <div class="speed-device-score">
-                    <svg><circle class="track" cx="30" cy="30" r="26"></circle><circle id="mobileScoreCircle" class="progress" cx="30" cy="30" r="26"></circle></svg>
-                    <div id="mobileScoreVal" class="speed-device-score-val">0</div>
-                </div>
-                <div class="speed-device-metrics">
-                    <div class="speed-device-metric"><span>LCP</span><strong id="mobileLcp"></strong></div>
-                    <div class="speed-device-metric"><span>INP</span><strong id="mobileInp"></strong></div>
-                    <div class="speed-device-metric"><span>CLS</span><strong id="mobileCls"></strong></div>
-                </div>
+                <div class="speed-device-score"><svg><circle class="track" cx="30" cy="30" r="26"></circle><circle id="mobileScoreCircle" class="progress" cx="30" cy="30" r="26"></circle></svg><div id="mobileScoreVal" class="speed-device-score-val">0</div></div>
+                <div class="speed-device-metrics"><div class="speed-device-metric"><span>LCP</span><strong id="mobileLcp"></strong></div><div class="speed-device-metric"><span>INP</span><strong id="mobileInp"></strong></div><div class="speed-device-metric"><span>CLS</span><strong id="mobileCls"></strong></div></div>
             </div>
         </div>
         <div class="speed-device-card">
             <div class="speed-device-header"><span>💻</span> Desktop</div>
              <div style="display:flex; align-items:center; gap: 16px; margin-top:12px;">
-                <div class="speed-device-score">
-                    <svg><circle class="track" cx="30" cy="30" r="26"></circle><circle id="desktopScoreCircle" class="progress" cx="30" cy="30" r="26"></circle></svg>
-                    <div id="desktopScoreVal" class="speed-device-score-val">0</div>
-                </div>
-                <div class="speed-device-metrics">
-                    <div class="speed-device-metric"><span>LCP</span><strong id="desktopLcp"></strong></div>
-                    <div class="speed-device-metric"><span>INP</span><strong id="desktopInp"></strong></div>
-                    <div class="speed-device-metric"><span>CLS</span><strong id="desktopCls"></strong></div>
-                </div>
+                <div class="speed-device-score"><svg><circle class="track" cx="30" cy="30" r="26"></circle><circle id="desktopScoreCircle" class="progress" cx="30" cy="30" r="26"></circle></svg><div id="desktopScoreVal" class="speed-device-score-val">0</div></div>
+                <div class="speed-device-metrics"><div class="speed-device-metric"><span>LCP</span><strong id="desktopLcp"></strong></div><div class="speed-device-metric"><span>INP</span><strong id="desktopInp"></strong></div><div class="speed-device-metric"><span>CLS</span><strong id="desktopCls"></strong></div></div>
             </div>
         </div>
     </div>
-    <div class="speed-opportunities">
-        <div class="speed-opportunities-title">🚀 Opportunities</div>
-        <ul id="speedOpportunitiesList"><li>Run analysis to see opportunities.</li></ul>
-    </div>
-</div>
+    <div class="speed-opportunities"><div class="speed-opportunities-title">🚀 Opportunities</div><ul id="speedOpportunitiesList"><li>Run analysis to see opportunities.</li></ul></div>
+  </div>
 
+  <!-- Ground Slab (Original - UNTOUCHED) -->
   <div class="ground-slab">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-      <div class="king">🧭</div>
-      <div>
-        <div class="t-grad">Semantic SEO Ground</div>
-        <div style="font-size:12px;color:#b6c2cf">Six categories • Five checks each • Click “Improve” for guidance</div>
-      </div>
-    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="king">🧭</div><div><div class="t-grad">Semantic SEO Ground</div><div style="font-size:12px;color:#b6c2cf">Six categories • Five checks each • Click “Improve” for guidance</div></div></div>
     <div id="cats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"></div>
   </div>
 
+  <!-- Modal Dialog (Original - UNTOUCHED) -->
   <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
     <div class="card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px"><h4 id="improveTitle" class="t-grad">Improve</h4><form method="dialog"><button class="pill">Close</button></form></div>
@@ -763,3 +1068,4 @@
 
 </section>
 @endsection
+
