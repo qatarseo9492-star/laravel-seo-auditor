@@ -73,3 +73,38 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
 Route::get('/_up', fn () => response('OK', 200))->name('_up');
 Route::fallback(fn () => redirect()->route('home'));
 
+
+/*
+|--------------------------------------------------------------------------
+| Admin v3 (additive, non-breaking)
+|--------------------------------------------------------------------------
+| Two new routes:
+| 1) /admin/dashboard-v3  -> preview the upgraded dashboard view without touching the existing one
+| 2) PATCH /admin/users/{user}/limits -> enable/disable & set daily limit (controller already created)
+|
+| Notes:
+| - Uses fully-qualified class names to avoid adding 'use' imports.
+| - Wrapped in its own group so it doesn't interfere with your current groups.
+| - Read-only view for dashboard-v3; if 'admin.dashboard-v3' view doesn't exist,
+|   it will fallback to 'admin.dashboard' so you can reuse your current view.
+*/
+Route::middleware(['auth','can:admin'])->prefix('admin')->name('admin.')->group(function () {
+    // Dashboard v3 preview (safe, read-only)
+    Route::get('/dashboard-v3', function () {
+        $view = \Illuminate\Support\Facades\View::exists('admin.dashboard-v3') ? 'admin.dashboard-v3' : 'admin.dashboard';
+        // Provide empty arrays so the view renders even without controller data
+        return view($view, [
+            'kpis' => [],
+            'traffic' => [],
+            'services' => [],
+            'topQueries' => [],
+            'errors' => [],
+            'limitsSummary' => [],
+            'health' => [],
+        ]);
+    })->name('dashboard.v3');
+
+    // User limits update (enable/disable + limit value)
+    Route::patch('/users/{user}/limits', [\App\Http\Controllers\Admin\UserLimitsController::class, 'update'])
+        ->name('users.updateLimits');
+});
