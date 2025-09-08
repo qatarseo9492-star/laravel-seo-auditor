@@ -6,7 +6,6 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AnalyzerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserAdminController;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -73,7 +72,12 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
 Route::get('/_up', fn () => response('OK', 200))->name('_up');
 Route::fallback(fn () => redirect()->route('home'));
 
-
+// === Admin dashboard live (no new controller file needed) ===
+Route::middleware(['auth','can:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard/live', [\App\Http\Controllers\Admin\DashboardController::class, 'live'])->name('dashboard.live');
+    Route::get('/users/{user}/live', [\App\Http\Controllers\Admin\DashboardController::class, 'userLive'])->name('users.live');
+    Route::patch('/users/{user}/limits', [\App\Http\Controllers\Admin\UserLimitsController::class, 'update'])->name('users.updateLimits');
+});
 /*
 |--------------------------------------------------------------------------
 | Admin v3 (additive, non-breaking)
