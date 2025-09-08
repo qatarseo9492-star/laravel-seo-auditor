@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title','Admin — Dashboard')
+@section('title','Admin — Dashboard v3')
 
 @push('head')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-dt@2.1.7/css/dataTables.dataTables.min.css">
@@ -66,6 +66,19 @@
   .ud-col-h{display:flex; justify-content:space-between; padding:10px 12px; border-bottom:1px solid var(--bdr); background:rgba(255,255,255,.04);}
   .ud-col-b{padding:12px;}
   @media (max-width:1100px){ .kpis{ grid-template-columns: repeat(2,1fr);} .grid{ grid-template-columns: 1fr; } .ud-hero{grid-template-columns:1fr;} }
+
+  /* === v3 Additions (non-breaking) === */
+  .v3-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin:14px 0}
+  @media (max-width:1024px){.v3-grid{grid-template-columns:1fr}}
+  .v3-card{background:var(--bg-2, #0c1327);border:1px solid var(--bdr, rgba(255,255,255,.1));
+           border-radius:16px;padding:16px;box-shadow:var(--shadow, 0 10px 30px rgba(0,0,0,.35))}
+  .v3-sec-title{font-weight:700;margin:6px 0 10px}
+  .v3-table{width:100%;border-collapse:collapse}
+  .v3-table th,.v3-table td{border-bottom:1px solid var(--bdr, rgba(255,255,255,.1));padding:10px 8px;text-align:left;font-size:14px}
+  .v3-pill{font-size:12px;padding:4px 8px;border-radius:999px;border:1px solid var(--bdr, rgba(255,255,255,.1));background:rgba(255,255,255,.04);display:inline-flex;gap:6px;align-items:center}
+  .v3-dot{width:8px;height:8px;border-radius:999px;display:inline-block}
+  .v3-good{color:var(--green-1, #00ff8a)} .v3-warn{color:var(--amber-1, #ffd700)} .v3-bad{color:var(--red-1, #ff3b30)}
+  .v3-btn{background:linear-gradient(90deg,var(--blue-1,#00c6ff),var(--blue-2,#0072ff));border:none;color:#05101a;font-weight:700;padding:10px 12px;border-radius:10px;cursor:pointer;text-decoration:none;display:inline-block}
 </style>
 @endpush
 
@@ -84,6 +97,43 @@
     <div class="kpi"><div class="kpi-title">DAU / MAU</div><div class="kpi-val">{{ ($stats['dau'] ?? 0) }} / {{ ($stats['mau'] ?? 0) }}</div></div>
     <div class="kpi"><div class="kpi-title">Active (5m live)</div><div class="kpi-val" id="activeLive">{{ $stats['active5m'] ?? ($activeUsers ?? 0) }}</div></div>
   </section>
+  {{-- v3 ADDITIONS: System Health + User Limits (read-only) --}}
+  <section class="v3-grid">
+    <div class="v3-card">
+      <div class="v3-sec-title">System Health</div>
+      <table class="v3-table">
+        <tr><th>Service</th><th>Status</th><th>Latency</th></tr>
+        @php $services = $services ?? []; @endphp
+        @forelse($services as $s)
+          <tr>
+            <td>{{ $s['name'] }}</td>
+            <td>
+              @php $ok = !empty($s['ok']); @endphp
+              <span class="v3-pill">
+                <span class="v3-dot" style="background: {{ $ok ? 'var(--green-1,#00ff8a)' : 'var(--red-1,#ff3b30)' }}"></span>
+                {{ $ok ? 'Operational' : 'Down' }}
+              </span>
+            </td>
+            <td>{{ $s['latency_ms'] ?? '—' }} {{ isset($s['latency_ms']) ? 'ms' : '' }}</td>
+          </tr>
+        @empty
+          <tr><td colspan="3" style="color:var(--muted)">Hook this to DB/Redis/Queue checks later.</td></tr>
+        @endforelse
+      </table>
+    </div>
+    <div class="v3-card">
+      <div class="v3-sec-title">User Limits</div>
+      @php $ls = $limitsSummary ?? []; @endphp
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="v3-pill"><span class="v3-dot" style="background:var(--green-1,#00ff8a)"></span> Enabled: {{ number_format($ls['enabled'] ?? 0) }}</span>
+        <span class="v3-pill"><span class="v3-dot" style="background:var(--red-1,#ff3b30)"></span> Disabled: {{ number_format($ls['disabled'] ?? 0) }}</span>
+        <span class="v3-pill"><span class="v3-dot" style="background:var(--blue-1,#00c6ff)"></span> Default Limit: {{ number_format($ls['default'] ?? 200) }}</span>
+      </div>
+      <a href="{{ url('/admin/users') }}" class="v3-btn">Manage Users</a>
+      <div class="hint" style="margin-top:8px">Read-only summary; toggles live on the Users page.</div>
+    </div>
+  </section>
+
 
   {{-- CHARTS: OpenAI & PSI --}}
   <section class="grid">
