@@ -91,17 +91,17 @@
 
   {{-- KPI CARDS --}}
   <section class="kpis">
-    <div class="kpi"><div class="kpi-title">Searches Today</div><div class="kpi-val">{{ $stats['searchesToday'] ?? ($searchesToday ?? 0) }}</div></div>
-    <div class="kpi"><div class="kpi-title">Total Users</div><div class="kpi-val">{{ $stats['totalUsers'] ?? ($totalUsers ?? 0) }}</div></div>
-    <div class="kpi"><div class="kpi-title">OpenAI Cost Today</div><div class="kpi-val">${{ number_format($stats['costToday'] ?? ($openAiCostToday ?? 0), 4) }}</div></div>
-    <div class="kpi"><div class="kpi-title">DAU / MAU</div><div class="kpi-val">{{ ($stats['dau'] ?? 0) }} / {{ ($stats['mau'] ?? 0) }}</div></div>
+    <div class="kpi"><div class="kpi-title">Searches Today</div><div class="kpi-val id="kpi-searches-today"">{{ $stats['searchesToday'] ?? ($searchesToday ?? 0) }}</div></div>
+    <div class="kpi"><div class="kpi-title">Total Users</div><div class="kpi-val id="kpi-total-users"">{{ $stats['totalUsers'] ?? ($totalUsers ?? 0) }}</div></div>
+    <div class="kpi"><div class="kpi-title">OpenAI Cost Today</div><div class="kpi-val id="kpi-openai-cost-today"">${{ number_format($stats['costToday'] ?? ($openAiCostToday ?? 0), 4) }}</div></div>
+    <div class="kpi"><div class="kpi-title">DAU / MAU</div><div class="kpi-val"><span id="kpi-dau">{{ ($stats['dau'] ?? 0) }}</span> / <span id="kpi-mau">{{ ($stats['mau'] ?? 0) }}</span></div></div>
     <div class="kpi"><div class="kpi-title">Active (5m live)</div><div class="kpi-val" id="activeLive">{{ $stats['active5m'] ?? ($activeUsers ?? 0) }}</div></div>
   </section>
   {{-- v3 ADDITIONS: System Health + User Limits (read-only) --}}
   <section class="v3-grid">
     <div class="v3-card">
       <div class="v3-sec-title">System Health</div>
-      <table class="v3-table">
+      <table class="v3-table" id="system-health">
         <tr><th>Service</th><th>Status</th><th>Latency</th></tr>
         @php $services = $services ?? []; @endphp
         @forelse($services as $s)
@@ -560,6 +560,43 @@
     if(!(d.history||[]).length){ tb.innerHTML = `<tr><td colspan="6" style="color:var(--muted)">No history.</td></tr>`; }
   }
   window.openUserDash = openUserDash; window.closeUserDash = closeUserDash;
+<script>
+(function(){
+  async function tickLive(){
+    try{
+      const res = await fetch('/admin/dashboard/live', { headers:{'X-Requested-With':'fetch'} });
+      if(!res.ok) return;
+      const d = await res.json();
+      const k = d.kpis || {};
+      const setText = (id, val) => { const el = document.getElementById(id); if(el){ el.textContent = val; } };
+      const fmt = (n) => new Intl.NumberFormat().format(n||0);
+      const money = (n) => '$' + (Number(n||0).toFixed(4));
+      setText('kpi-searches-today', fmt(k.searchesToday));
+      setText('kpi-total-users', fmt(k.totalUsers));
+      setText('kpi-openai-cost-today', money(k.cost24h));
+      setText('kpi-dau', fmt(k.dau));
+      setText('kpi-mau', fmt(k.mau));
+      setText('activeLive', fmt(k.active5m));
 
+      // System Health
+      const tbl = document.querySelector('#system-health tbody') || document.querySelector('#system-health');
+      if (tbl && d.services){
+        // if table has tbody, fill that, else replace innerHTML
+        const hasTbody = !!document.querySelector('#system-health tbody');
+        const rows = (d.services||[]).map(s => {
+          const dot = s.ok ? '#00ff8a' : '#ff3b30';
+          return `<tr>
+            <td>${s.name||''}</td>
+            <td><span class="v3-pill"><span class="v3-dot" style="background:${dot}"></span>${s.ok?'Operational':'Down'}</span></td>
+            <td>${s.latency_ms ?? '—'} ${s.latency_ms ? 'ms' : ''}</td>
+          </tr>`;
+        }).join('') || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
+        if (hasTbody) { tbl.innerHTML = rows; } else { document.getElementById('system-health').innerHTML = rows; }
+      }
+    }catch(e){ /* silent */ }
+  }
+  window.addEventListener('load', ()=>{ tickLive(); setInterval(tickLive, 10000); });
+})();
 </script>
+
 @endpush
