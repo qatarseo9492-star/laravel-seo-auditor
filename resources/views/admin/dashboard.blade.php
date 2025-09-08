@@ -94,14 +94,14 @@
     <div class="kpi"><div class="kpi-title">Searches Today</div><div class="kpi-val id="kpi-searches-today"">{{ $stats['searchesToday'] ?? ($searchesToday ?? 0) }}</div></div>
     <div class="kpi"><div class="kpi-title">Total Users</div><div class="kpi-val id="kpi-total-users"">{{ $stats['totalUsers'] ?? ($totalUsers ?? 0) }}</div></div>
     <div class="kpi"><div class="kpi-title">OpenAI Cost Today</div><div class="kpi-val id="kpi-openai-cost-today"">${{ number_format($stats['costToday'] ?? ($openAiCostToday ?? 0), 4) }}</div></div>
-    <div class="kpi"><div class="kpi-title">DAU / MAU</div><div class="kpi-val"><span id="kpi-dau">{{ ($stats['dau'] ?? 0) }}</span> / <span id="kpi-mau">{{ ($stats['mau'] ?? 0) }}</span></div></div>
+    <div class="kpi"><div class="kpi-title">DAU / MAU</div><div class="kpi-val"><span id="kpi-dau">0</span> / <span id="kpi-mau">0</span></div></div>
     <div class="kpi"><div class="kpi-title">Active (5m live)</div><div class="kpi-val" id="activeLive">{{ $stats['active5m'] ?? ($activeUsers ?? 0) }}</div></div>
   </section>
   {{-- v3 ADDITIONS: System Health + User Limits (read-only) --}}
   <section class="v3-grid">
     <div class="v3-card">
       <div class="v3-sec-title">System Health</div>
-      <table class="v3-table" id="system-health">
+      <table class="v3-table id="system-health"">
         <tr><th>Service</th><th>Status</th><th>Latency</th></tr>
         @php $services = $services ?? []; @endphp
         @forelse($services as $s)
@@ -560,43 +560,182 @@
     if(!(d.history||[]).length){ tb.innerHTML = `<tr><td colspan="6" style="color:var(--muted)">No history.</td></tr>`; }
   }
   window.openUserDash = openUserDash; window.closeUserDash = closeUserDash;
-<script>
-(function(){
-  async function tickLive(){
-    try{
-      const res = await fetch('/admin/dashboard/live', { headers:{'X-Requested-With':'fetch'} });
-      if(!res.ok) return;
-      const d = await res.json();
-      const k = d.kpis || {};
-      const setText = (id, val) => { const el = document.getElementById(id); if(el){ el.textContent = val; } };
-      const fmt = (n) => new Intl.NumberFormat().format(n||0);
-      const money = (n) => '$' + (Number(n||0).toFixed(4));
-      setText('kpi-searches-today', fmt(k.searchesToday));
-      setText('kpi-total-users', fmt(k.totalUsers));
-      setText('kpi-openai-cost-today', money(k.cost24h));
-      setText('kpi-dau', fmt(k.dau));
-      setText('kpi-mau', fmt(k.mau));
-      setText('activeLive', fmt(k.active5m));
 
-      // System Health
-      const tbl = document.querySelector('#system-health tbody') || document.querySelector('#system-health');
-      if (tbl && d.services){
-        // if table has tbody, fill that, else replace innerHTML
-        const hasTbody = !!document.querySelector('#system-health tbody');
-        const rows = (d.services||[]).map(s => {
-          const dot = s.ok ? '#00ff8a' : '#ff3b30';
-          return `<tr>
-            <td>${s.name||''}</td>
-            <td><span class="v3-pill"><span class="v3-dot" style="background:${dot}"></span>${s.ok?'Operational':'Down'}</span></td>
-            <td>${s.latency_ms ?? '—'} ${s.latency_ms ? 'ms' : ''}</td>
-          </tr>`;
-        }).join('') || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
-        if (hasTbody) { tbl.innerHTML = rows; } else { document.getElementById('system-health').innerHTML = rows; }
+</script>
+
+@push('scripts')
+<script>
+(function () {
+  const LIVE_URL = (window.DASH_LIVE_URL || '/admin/dashboard/live');
+  const USER_URL = (id) => `/admin/users/${id}/live`;
+  const LIMIT_URL = (id) => `/admin/users/${id}/limits`;
+  const CSRF = '{{ csrf_token() }}';
+
+  const $ = (sel, n=document) => n.querySelector(sel);
+  const fmt = (n) => new Intl.NumberFormat().format(Number(n||0));
+  const money = (n) => '$' + (Number(n||0).toFixed(4));
+  const txt = (id, v) => { const el=document.getElementById(id); if(el) el.textContent = v; };
+
+  function renderKPIs(k){
+    txt('kpi-searches-today', fmt(k.searchesToday));
+    txt('kpi-total-users', fmt(k.totalUsers));
+    txt('kpi-openai-cost-today', money(k.cost24h));
+    txt('kpi-dau', fmt(k.dau)); txt('kpi-mau', fmt(k.mau));
+    const al = document.getElementById('activeLive'); if (al) al.textContent = fmt(k.active5m);
+  }
+
+  function renderServices(list){
+    const tbl = document.querySelector('#system-health tbody') || document.querySelector('#system-health');
+    if (!tbl) return;
+    const hasBody = !!document.querySelector('#system-health tbody');
+    const rows = (list||[]).map(s=>{
+      const dot = s.ok ? '#00ff8a' : '#ff3b30';
+      return `<tr>
+        <td>${s.name||''}</td>
+        <td><span class="v3-pill"><span class="v3-dot" style="background:${dot}"></span>${s.ok?'Operational':'Down'}</span></td>
+        <td>${s.latency_ms ?? '—'} ${s.latency_ms?'ms':''}</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="3" style="color:var(--muted)">No data.</td></tr>`;
+    if (hasBody) { tbl.innerHTML = rows; } else { document.getElementById('system-health').innerHTML = rows; }
+  }
+
+  function renderHistory(rows){
+    const tb = document.querySelector('#global-history tbody');
+    if (!tb) return;
+    tb.innerHTML = '';
+    if (!rows || !rows.length){
+      tb.innerHTML = '<tr><td colspan="6" style="color:#9aa6b2">No recent history.</td></tr>';
+      return;
+    }
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.when||''}</td>
+        <td>${r.user||''}</td>
+        <td style="max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.display||''}</td>
+        <td>${r.tool||''}</td>
+        <td>${r.tokens ?? '—'}</td>
+        <td>${r.cost ?? '0.0000'}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  async function tick(){
+    try{
+      const res = await fetch(LIVE_URL + '?fresh=1', { headers:{'X-Requested-With':'XMLHttpRequest'} });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.kpis) renderKPIs(data.kpis);
+      if (data.services) renderServices(data.services);
+      if (data.history) renderHistory(data.history);
+      if (data.traffic && window.AdminTrafficChart){
+        const labels = data.traffic.map(x=>x.day);
+        const counts = data.traffic.map(x=>x.count);
+        window.AdminTrafficChart.data.labels = labels;
+        window.AdminTrafficChart.data.datasets[0].data = counts;
+        window.AdminTrafficChart.update('none');
       }
     }catch(e){ /* silent */ }
   }
-  window.addEventListener('load', ()=>{ tickLive(); setInterval(tickLive, 10000); });
+
+  // User drawer (inline manage)
+  window.openUserDrawer = async function(userId){
+    const panel = document.getElementById('userDrawer');
+    const body  = document.getElementById('udBody');
+    if (!panel || !body) return;
+    panel.classList.remove('hidden');
+    body.innerHTML = '<div style="opacity:.7">Loading...</div>';
+    try{
+      const res = await fetch(USER_URL(userId), { headers:{'X-Requested-With':'XMLHttpRequest'} });
+      const d = await res.json();
+      const u = d.user || {};
+      const L = d.limit || { daily_limit:200, is_enabled:true, reason:'' };
+      document.getElementById('udTitle').textContent = (u.name||u.email||('User #'+userId));
+      body.innerHTML = `
+        <div class="v3-card" style="margin-bottom:10px">
+          <div style="font-weight:700;margin-bottom:6px">Account</div>
+          <div>Email: ${u.email||''}</div>
+          <div>Last seen: ${u.last_seen_at||'—'} (${u.last_ip||'—'} ${u.last_country?'- '+u.last_country:''})</div>
+          <div>Last login: ${u.last_login_at||'—'}</div>
+          <div>Last logout: ${u.last_logout_at||'—'}</div>
+        </div>
+        <div class="v3-card" style="margin-bottom:10px">
+          <div style="font-weight:700;margin-bottom:6px">Limits</div>
+          <label style="display:flex;gap:6px;align-items:center;margin-bottom:6px">
+            <input type="checkbox" id="udEnabled" ${L.is_enabled ? 'checked' : ''} /> Limits enabled
+          </label>
+          <label>Daily limit <input id="udDaily" type="number" min="0" value="${L.daily_limit}" style="max-width:140px;margin-left:8px"/></label>
+          <input id="udReason" type="text" placeholder="Reason (optional)" value="${L.reason||''}" class="form-control" style="margin-top:8px"/>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button class="v3-btn" onclick="saveUserLimit(${userId})">Save</button>
+            <button class="v3-btn" style="background:linear-gradient(90deg,#ff6a6a,#ff3b30)" onclick="closeUserDrawer()">Close</button>
+          </div>
+        </div>
+        <div class="v3-card">
+          <div style="font-weight:700;margin-bottom:6px">Recent Activity</div>
+          <div id="udHist" style="max-height:220px;overflow:auto"></div>
+        </div>`;
+      // render latest rows
+      const hist = Array.isArray(d.latest) ? d.latest : [];
+      const histDiv = document.getElementById('udHist');
+      histDiv.innerHTML = hist.map(h=>`<div style="padding:4px 0;border-bottom:1px solid rgba(255,255,255,.08)">
+        <div>${h.created_at||''} — ${h.type||'—'}</div>
+        <div style="opacity:.8">${h.query||h.url||h.domain||''}</div>
+      </div>`).join('') || '<div style="opacity:.7">No recent activity.</div>';
+    }catch(e){
+      body.innerHTML = '<div style="color:#ff3b30">Failed to load user.</div>';
+    }
+  };
+
+  window.closeUserDrawer = function(){
+    const panel = document.getElementById('userDrawer');
+    if (panel) panel.classList.add('hidden');
+  };
+
+  window.saveUserLimit = async function(userId){
+    const daily = Number(document.getElementById('udDaily').value || 200);
+    const enabled = document.getElementById('udEnabled').checked ? 1 : 0;
+    const reason = document.getElementById('udReason').value || '';
+    try{
+      const res = await fetch(LIMIT_URL(userId), {
+        method:'PATCH',
+        headers:{
+          'Content-Type':'application/json',
+          'X-CSRF-TOKEN': CSRF,
+          'X-Requested-With':'XMLHttpRequest'
+        },
+        body: JSON.stringify({ daily_limit: daily, is_enabled: enabled, reason })
+      });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      alert('Saved.');
+    }catch(e){
+      alert('Failed to save.');
+    }
+  };
+
+  // boot
+  window.addEventListener('load', function(){
+    tick();
+    setInterval(tick, 10000);
+  });
 })();
 </script>
+
+{{-- Inline drawer (hidden until used) --}}
+<style>
+  .drawer-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;justify-content:flex-end;z-index:9999}
+  .drawer{width:min(420px,100%);height:100%;background:var(--bg-2,#0c1327);border-left:1px solid rgba(255,255,255,.12);padding:16px;overflow:auto}
+  .hidden{display:none}
+</style>
+<div id="userDrawer" class="drawer-backdrop hidden" onclick="if(event.target===this) closeUserDrawer()">
+  <div class="drawer v3-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div id="udTitle" style="font-weight:800">User</div>
+      <button class="v3-btn" onclick="closeUserDrawer()">Close</button>
+    </div>
+    <div id="udBody">Loading…</div>
+  </div>
+</div>
+@endpush
 
 @endpush
