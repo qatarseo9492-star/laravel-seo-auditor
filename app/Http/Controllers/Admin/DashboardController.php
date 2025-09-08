@@ -80,6 +80,43 @@ class DashboardController extends Controller
             }
             $h->display = ''; return $h;
         });
+        // === v3 additive data (read-only, safe) ===
+        $services = [];
+        try {
+            $t = microtime(true);
+            DB::select('select 1');
+            $services[] = ['name' => 'DB', 'ok' => true, 'latency_ms' => round((microtime(true) - $t) * 1000)];
+        } catch (\Throwable $e) {
+            $services[] = ['name' => 'DB', 'ok' => false, 'latency_ms' => null];
+        }
+
+        if (Schema::hasTable('jobs')) {
+            try {
+                $backlog = DB::table('jobs')->count();
+                $services[] = ['name' => 'Queue', 'ok' => $backlog < 1000, 'latency_ms' => $backlog]; // using backlog as metric
+            } catch (\Throwable $e) {
+                $services[] = ['name' => 'Queue', 'ok' => true, 'latency_ms' => null];
+            }
+        }
+
+        // OpenAI API heartbeat (based on recent usage logs if table exists)
+        $apiOk = true;
+        try {
+            if (Schema::hasTable((new \App\Models\OpenAiUsage)->getTable())) {
+                $apiOk = OpenAiUsage::where('created_at', '>=', now()->subHours(6))->exists();
+            }
+        } catch (\Throwable $e) { $apiOk = true; }
+        $services[] = ['name' => 'OpenAI API', 'ok' => (bool)$apiOk, 'latency_ms' => null];
+
+        // User limits summary (only if table exists)
+        $limitsSummary = ['enabled' => 0, 'disabled' => 0, 'default' => 200];
+        if (Schema::hasTable('user_limits')) {
+            try {
+                $limitsSummary['enabled'] = (int) DB::table('user_limits')->where('is_enabled', 1)->count();
+                $limitsSummary['disabled'] = (int) DB::table('user_limits')->where('is_enabled', 0)->count();
+            } catch (\Throwable $e) {}
+        }
+
 
         return view('admin.dashboard', compact(
             'totalUsers','searchesToday','activeUsers','openAiCostToday','users',
