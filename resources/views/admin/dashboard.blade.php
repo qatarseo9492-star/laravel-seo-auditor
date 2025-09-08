@@ -21,7 +21,12 @@
     </div>
     <div class="toolbar">
       <button class="btn ghost" id="refreshNow">Refresh</button>
-      <a class="btn primary" href="{{ route('admin.users.index', [], false) ?? '#' }}">Manage Users</a>
+      @php
+        $usersUrl = \Illuminate\Support\Facades\Route::has('admin.users.index')
+          ? route('admin.users.index')
+          : url('/admin/users');
+      @endphp
+      <a class="btn primary" href="{{ $usersUrl }}">Manage Users</a>
     </div>
   </div>
 
@@ -167,11 +172,16 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+@php
+  $liveUrl = \Illuminate\Support\Facades\Route::has('admin.dashboard.live')
+    ? route('admin.dashboard.live')
+    : url('/admin/dashboard/live');
+@endphp
 <script>
   window.AURORA = {
-    live: @json(route('admin.dashboard.live', [], false) ?? '/admin/dashboard/live'),
-    userLive: function(id){ return ({{ json_encode(url('/admin/users')) }} + '/' + id + '/live'); },
-    userSave: function(id){ return ({{ json_encode(url('/admin/users')) }} + '/' + id + '/limits'); },
+    live: @json($liveUrl),
+    userLive: function(id){ return (@json(url('/admin/users')) + '/' + id + '/live'); },
+    userSave: function(id){ return (@json(url('/admin/users')) + '/' + id + '/limits'); },
     csrf: '{{ csrf_token() }}'
   };
 </script>
