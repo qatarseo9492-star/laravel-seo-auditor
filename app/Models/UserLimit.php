@@ -2,48 +2,39 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class UserLimit extends Model
 {
     use HasFactory;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
     protected $table = 'user_limits';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'user_id',
         'daily_limit',
-        'searches_today',
-        'monthly_limit',
-        'searches_this_month',
+        'is_enabled',
+        'reset_at',
+        'reason',
     ];
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'is_enabled' => 'boolean',
+        'reset_at'   => 'datetime',
     ];
 
-    /**
-     * Get the user that the limit belongs to.
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
+    /** Scopes */
+    public function scopeEnabled($q)         { return $q->where('is_enabled', true); }
+    public function scopeForUser($q, $id)    { return $q->where('user_id', $id); }
+
+    /** Helpers */
+    public function enable(?string $reason=null): void  { $this->is_enabled = true;  $this->reason = $reason; $this->save(); }
+    public function disable(?string $reason=null): void { $this->is_enabled = false; $this->reason = $reason; $this->save(); }
+    public function isEnabled(): bool { return (bool) $this->is_enabled; }
 }
