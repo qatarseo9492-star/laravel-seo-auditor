@@ -9,6 +9,7 @@ use App\Models\OpenAiUsage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
@@ -81,6 +82,7 @@ class DashboardController extends Controller
             $h->display = ''; return $h;
         });
         // === v3 additive data (read-only, safe) ===
+        $services = Cache::remember('dash:services', 60, function(){
         $services = [];
         try {
             $t = microtime(true);
@@ -89,6 +91,8 @@ class DashboardController extends Controller
         } catch (\Throwable $e) {
             $services[] = ['name' => 'DB', 'ok' => false, 'latency_ms' => null];
         }
+        return $limitsSummary;
+        });
 
         if (Schema::hasTable('jobs')) {
             try {
@@ -108,7 +112,19 @@ class DashboardController extends Controller
         } catch (\Throwable $e) { $apiOk = true; }
         $services[] = ['name' => 'OpenAI API', 'ok' => (bool)$apiOk, 'latency_ms' => null];
 
+                // Scheduler heartbeat check (set by console command)
+        $beat = Cache::get('dash:heartbeat_at');
+        $fresh = false;
+        if ($beat) {
+            try { $fresh = now()->diffInSeconds($beat) <= 120; } catch (\Throwable $e) { $fresh = false; }
+        }
+        $services[] = ['name' => 'Scheduler', 'ok' => $fresh, 'latency_ms' => null];
+
+        return $services;
+        });
+
         // User limits summary (only if table exists)
+        $limitsSummary = Cache::remember('dash:limitsSummary', 60, function(){
         $limitsSummary = ['enabled' => 0, 'disabled' => 0, 'default' => 200];
         if (Schema::hasTable('user_limits')) {
             try {
