@@ -113,40 +113,66 @@ class DashboardController extends Controller
     {
         $events = [];
 
-        /* 1) analyze_logs — conditional user join */
+        /* 1) analyze_logs — conditional join + tolerant extraction */
         try {
             if (Schema::hasTable('analyze_logs')) {
-                $has = fn(string $c) => Schema::hasColumn('analyze_logs', $c);
-
                 $q = DB::table('analyze_logs as a');
-                $select = ['a.created_at'];
+                $select = ['a.*'];
 
-                // Optional join
                 if (Schema::hasColumn('analyze_logs', 'user_id') && Schema::hasTable('users')) {
                     $q->leftJoin('users as u', 'u.id', '=', 'a.user_id');
-                    $select[] = 'u.email';
-                    $select[] = 'u.name';
+                    $select[] = 'u.email'; $select[] = 'u.name';
                 } else {
-                    // fallback direct columns if exist
-                    if ($has('user_email')) $select[] = 'a.user_email';
-                    if ($has('email'))      $select[] = 'a.email';
-                    if ($has('user_name'))  $select[] = 'a.user_name';
+                    foreach (['user_email','email','user_name','username'] as $col) {
+                        if (Schema::hasColumn('analyze_logs',$col)) $select[] = "a.$col";
+                    }
                 }
-
-                if ($has('keyword'))   $select[] = DB::raw('a.keyword as kw');
-                if ($has('query'))     $select[] = DB::raw('a.query as qry');
-                if ($has('prompt'))    $select[] = DB::raw('a.prompt as prm');
-                if ($has('url'))       $select[] = DB::raw('a.url as url');
-                if ($has('type'))      $select[] = DB::raw('a.type as type');
-                if ($has('tool'))      $select[] = 'a.tool';
-                if ($has('tokens'))    $select[] = 'a.tokens';
-                if ($has('cost_usd'))  $select[] = 'a.cost_usd';
-                if (!$has('cost_usd') && $has('cost')) $select[] = DB::raw('a.cost as cost');
 
                 $rows = $q->orderByDesc('a.id')->limit(100)->get($select);
 
                 foreach ($rows as $r) {
-                    $events[] = $this->normEventFromAnalyzeWithUserFallback($r);
+                    $ts = $this->firstNonNull([
+                        $this->prop($r,'created_at'), $this->prop($r,'updated_at'),
+                        $this->prop($r,'analyzed_at'), $this->prop($r,'run_at'),
+                        $this->prop($r,'generated_at'), $this->prop($r,'completed_at'),
+                        $this->prop($r,'date'),
+                    ]);
+
+                    [$url,$kw,$title,$userFromJson] = $this->extractGenericFromRow($r);
+
+                    $user = $this->firstNonEmpty([
+                        $this->prop($r,'name'), $this->prop($r,'user_name'), $this->prop($r,'username'),
+                        $this->prop($r,'email'), $this->prop($r,'user_email'), $userFromJson
+                    ]);
+
+                    $tool = $this->firstNonEmpty([
+                        $this->prop($r,'tool'), $this->prop($r,'type'), $this->prop($r,'mode'), 'semantic'
+                    ]);
+
+                    $tokens = $this->firstNonNull([
+                        $this->prop($r,'tokens'),
+                        $this->prop($r,'token_count'),
+                        $this->prop($r,'total_tokens'),
+                    ]);
+
+                    $cost = $this->firstNonNull([
+                        $this->prop($r,'cost_usd'),
+                        $this->prop($r,'cost'),
+                        $this->prop($r,'price_usd'),
+                    ]);
+
+                    $display = $url ? ('Analyzed URL '.$this->shortUrl($url))
+                                    : ($kw ? 'Analyzed "'.$kw.'"' : ($title ?: 'Analysis'));
+
+                    $events[] = [
+                        'ts'      => $ts,
+                        'when'    => $this->fmt($ts),
+                        'user'    => $user ?: '—',
+                        'display' => $display,
+                        'tool'    => $tool,
+                        'tokens'  => $tokens ?? '—',
+                        'cost'    => number_format((float)($cost ?? 0), 4),
+                    ];
                 }
             }
         } catch (\Throwable $e) { /* ignore */ }
@@ -158,8 +184,7 @@ class DashboardController extends Controller
                 $select = ['c.*'];
                 if (Schema::hasColumn('analysis_cache','user_id') && Schema::hasTable('users')) {
                     $q->leftJoin('users as u', 'u.id', '=', 'c.user_id');
-                    $select[] = 'u.email';
-                    $select[] = 'u.name';
+                    $select[] = 'u.email'; $select[] = 'u.name';
                 } else {
                     foreach (['user_email','email','user_name','username'] as $col) {
                         if (Schema::hasColumn('analysis_cache',$col)) $select[] = "c.$col";
@@ -170,27 +195,21 @@ class DashboardController extends Controller
 
                 foreach ($rows as $r) {
                     $ts = $this->firstNonNull([
-                        $this->prop($r,'created_at'),
-                        $this->prop($r,'updated_at'),
-                        $this->prop($r,'analyzed_at'),
-                        $this->prop($r,'run_at'),
-                        $this->prop($r,'generated_at'),
-                        $this->prop($r,'completed_at'),
+                        $this->prop($r,'created_at'), $this->prop($r,'updated_at'),
+                        $this->prop($r,'analyzed_at'), $this->prop($r,'run_at'),
+                        $this->prop($r,'generated_at'), $this->prop($r,'completed_at'),
                         $this->prop($r,'date'),
                     ]);
 
-                    $tool = $this->firstNonEmpty([
-                        $this->prop($r,'tool'),
-                        $this->prop($r,'type'),
-                        $this->prop($r,'mode'),
-                        'semantic'
-                    ]);
+                    [$url,$kw,$title,$userFromJson] = $this->extractGenericFromRow($r);
 
-                    [$url, $kw, $title, $userFromJson] = $this->extractFromCacheRowPlusUser($r);
                     $user = $this->firstNonEmpty([
                         $this->prop($r,'name'), $this->prop($r,'user_name'), $this->prop($r,'username'),
-                        $this->prop($r,'email'), $this->prop($r,'user_email'),
-                        $userFromJson
+                        $this->prop($r,'email'), $this->prop($r,'user_email'), $userFromJson
+                    ]);
+
+                    $tool = $this->firstNonEmpty([
+                        $this->prop($r,'tool'), $this->prop($r,'type'), $this->prop($r,'mode'), 'semantic'
                     ]);
 
                     $display = $url ? ('Analyzed URL '.$this->shortUrl($url))
@@ -216,8 +235,7 @@ class DashboardController extends Controller
                 $select = ['t.*'];
                 if (Schema::hasColumn('topic_analyses','user_id') && Schema::hasTable('users')) {
                     $q->leftJoin('users as u', 'u.id', '=', 't.user_id');
-                    $select[] = 'u.email';
-                    $select[] = 'u.name';
+                    $select[] = 'u.email'; $select[] = 'u.name';
                 } else {
                     foreach (['user_email','email','user_name','username'] as $col) {
                         if (Schema::hasColumn('topic_analyses',$col)) $select[] = "t.$col";
@@ -294,7 +312,7 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
-        /* 5) Logins (user_sessions) */
+        /* 5) Logins */
         try {
             if (Schema::hasTable('user_sessions')) {
                 $rows = DB::table('user_sessions as s')
@@ -344,7 +362,6 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
-        // Sort newest first & cap at 50
         usort($events, fn($a,$b) => $this->tsToSortable($b['ts']) <=> $this->tsToSortable($a['ts']));
         return array_values(array_slice($events, 0, 50));
     }
@@ -387,76 +404,24 @@ class DashboardController extends Controller
 
     /* ====================== Helpers ========================= */
 
-    private function normEventFromAnalyzeWithUserFallback($r): array
+    private function extractGenericFromRow(object $r): array
     {
-        $ts = $r->created_at ?? null;
-
-        $kw  = $this->prop($r,'kw');
-        $qry = $this->prop($r,'qry');
-        $prm = $this->prop($r,'prm');
-        $url = $this->prop($r,'url');
-        $typ = $this->prop($r,'type');
-
-        $display = $url ? ('Analyzed URL '.$this->shortUrl($url))
-                  : ($kw ? 'Analyzed "'.$kw.'"'
-                  : ($qry ? 'Query "'.$qry.'"'
-                  : ($prm ? 'Prompt "'.(function_exists('mb_strimwidth') ? mb_strimwidth($prm,0,40,'…') : substr($prm,0,40).'…').'"'
-                  : ($typ ?: 'Analysis'))));
-
-        $tool   = $this->prop($r,'tool') ?: 'semantic';
-        $tokens = $this->prop($r,'tokens') ?? '—';
-        $cost   = $this->prop($r,'cost_usd') ?? $this->prop($r,'cost') ?? 0;
-
-        $user   = $this->firstNonEmpty([
-            $this->prop($r,'name'), $this->prop($r,'user_name'), $this->prop($r,'username'),
-            $this->prop($r,'email'), $this->prop($r,'user_email')
-        ]);
-
-        return [
-            'ts'      => $ts,
-            'when'    => $this->fmt($ts),
-            'user'    => $user ?: '—',
-            'display' => $display,
-            'tool'    => $tool,
-            'tokens'  => $tokens,
-            'cost'    => number_format((float)($cost ?: 0), 4),
-        ];
-    }
-
-    private function extractFromCacheRowPlusUser(object $r): array
-    {
-        [$url, $kw, $title] = $this->extractFromCacheRow($r);
-        $userFromJson = null;
-
-        foreach (['payload','data','request','inputs','meta','json','result','response'] as $col) {
-            $raw = $this->prop($r, $col);
-            if (!$raw) continue;
-            $arr = $this->safeJson($raw);
-            if (!is_array($arr)) continue;
-
-            $userFromJson = $userFromJson ?: $this->firstNonEmpty([
-                $arr['user_name'] ?? null, $arr['username'] ?? null, $arr['user'] ?? null,
-                $arr['userEmail'] ?? null, $arr['user_email'] ?? null, $arr['email'] ?? null,
-            ]);
-            if ($userFromJson) break;
-        }
-
-        return [$url, $kw, $title, $userFromJson];
-    }
-
-    private function extractFromCacheRow(object $r): array
-    {
+        // column-based discovery
         $url = $this->firstNonEmpty([
             $this->prop($r,'url'), $this->prop($r,'page_url'), $this->prop($r,'target_url'),
             $this->prop($r,'input_url'), $this->prop($r,'request_url'), $this->prop($r,'source_url'), $this->prop($r,'link'),
         ]);
 
         $kw = $this->firstNonEmpty([
-            $this->prop($r,'keyword'), $this->prop($r,'query'), $this->prop($r,'term'), $this->prop($r,'topic'), $this->prop($r,'search'),
+            $this->prop($r,'keyword'), $this->prop($r,'query'), $this->prop($r,'term'),
+            $this->prop($r,'topic'), $this->prop($r,'search'),
         ]);
 
         $title = $this->firstNonEmpty([$this->prop($r,'title'), $this->prop($r,'page_title')]);
 
+        $userFromJson = null;
+
+        // JSON blobs
         foreach (['payload','data','request','inputs','meta','json','result','response'] as $col) {
             $raw = $this->prop($r, $col);
             if (!$raw) continue;
@@ -467,16 +432,23 @@ class DashboardController extends Controller
                 $arr['url'] ?? null, $arr['page_url'] ?? null, $arr['target_url'] ?? null,
                 $arr['input_url'] ?? null, $arr['request_url'] ?? null, $arr['source_url'] ?? null,
             ]);
+
             $kw = $kw ?: $this->firstNonEmpty([
                 $arr['keyword'] ?? null, $arr['query'] ?? null, $arr['term'] ?? null,
                 $arr['topic'] ?? null, $arr['search'] ?? null,
             ]);
+
             $title = $title ?: $this->firstNonEmpty([$arr['title'] ?? null, $arr['page_title'] ?? null]);
 
-            if ($url && $kw && $title) break;
+            $userFromJson = $userFromJson ?: $this->firstNonEmpty([
+                $arr['user_name'] ?? null, $arr['username'] ?? null, $arr['user'] ?? null,
+                $arr['userEmail'] ?? null, $arr['user_email'] ?? null, $arr['email'] ?? null,
+            ]);
+
+            if ($url && ($kw || $title)) break;
         }
 
-        return [$url, $kw, $title];
+        return [$url, $kw, $title, $userFromJson];
     }
 
     private function shortUrl(?string $url): string
