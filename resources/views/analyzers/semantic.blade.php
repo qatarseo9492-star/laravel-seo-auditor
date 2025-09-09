@@ -85,15 +85,14 @@
 
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
   
-  /* ======================================= */
-  /* === 🎨 NEW NEON-TECH SCORE WHEELS 🎨 === */
-  /* ======================================= */
+  /* ==================================================== */
+  /* === 🎨 UPGRADED: 2-COLOR NEON-TECH SCORE WHEELS 🎨 === */
+  /* ==================================================== */
   .mw {
     --v: 0;
     --size: 200px;
     --track-width: 14px;
     --progress-percent: calc(var(--v) * 1%);
-
     width: var(--size);
     height: var(--size);
     position: relative;
@@ -115,10 +114,12 @@
     position: absolute;
     inset: 0px;
     border-radius: 50%;
-    background: conic-gradient(from -90deg,
-        var(--blue-1) 0%, var(--green-1) 25%,
-        var(--yellow-1) 50%, var(--red-1) 75%,
-        var(--purple-1) 90%, var(--blue-1) 100%);
+    
+    /* Default gradient for 'bad' score */
+    --grad-start: var(--red-1);
+    --grad-end: var(--pink-1);
+    background: conic-gradient(from -90deg, var(--grad-start), var(--grad-end));
+    
     -webkit-mask-image: 
         conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
         radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
@@ -127,8 +128,16 @@
         conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
         radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
      mask-composite: intersect;
-     animation: rainbowSlide 4s linear infinite;
-     background-size: 200% 100%;
+  }
+  
+  /* Gradient overrides for 'warn' and 'good' scores */
+  .mw.warn .mw-ring::before {
+    --grad-start: var(--yellow-1);
+    --grad-end: var(--orange-1);
+  }
+  .mw.good .mw-ring::before {
+    --grad-start: var(--green-1);
+    --grad-end: var(--blue-1);
   }
   
   .mw-ring::after {
@@ -280,7 +289,7 @@
   .tsi-info-item, .cae-info-item {
     border-radius:14px;
     padding:14px;
-    background:#1E1E1E;
+    background:rgba(0,0,0,0.2);
     border:1px solid var(--outline);
     box-shadow:0 8px 24px rgba(0,0,0,.3);
   }
@@ -302,9 +311,6 @@
   /* ========================================================== */
   /* === 🎨 NEW STYLES for Technical SEO Integration 🎨 === */
   /* ========================================================== */
-  .tsi-card {
-    /* Replaced with unified class */
-  }
   .tsi-info-item {
     background: rgba(8, 5, 20, 0.7);
     border: 1px solid rgba(138, 43, 226, 0.3);
@@ -321,13 +327,10 @@
     font-size: 15px;
   }
   .tsi-suggestions {
-    border: 1px solid transparent;
     border-radius: 14px;
     padding:14px; margin-top:16px;
-    background-image: 
-        linear-gradient(to right, #1a0f2b, #1a0f2b), 
-        linear-gradient(90deg, var(--pink-1), var(--purple-1));
-    box-shadow: 0 0 24px rgba(255, 20, 147, 0.3);
+    background: rgba(8, 5, 20, 0.7);
+    border: 1px solid rgba(138, 43, 226, 0.3);
   }
   .tsi-suggestions h4 {
     margin:0 0 10px; font-weight:900;
@@ -343,9 +346,6 @@
   /* =============================================== */
   /* === 🎨 NEW STYLES for Keyword Intelligence 🎨 === */
   /* =============================================== */
-  .ki-card {
-     /* Replaced with unified class */
-  }
   .ki-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -376,9 +376,6 @@
   /* =================================================== */
   /* === 🤖 NEW STYLES for AI-Powered Features 🤖 === */
   /* =================================================== */
-  .ai-card {
-     /* Replaced with unified class */
-  }
   .ai-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -427,9 +424,6 @@
   /* ======================================================= */
   /* === 🚀 NEW STYLES for Content Analysis Engine 🚀 === */
   /* ======================================================= */
-  .cae-card {
-     /* Replaced with unified class */
-  }
   .cae-info-item {
     background: rgba(5, 15, 25, 0.7);
     border: 1px solid rgba(0, 198, 255, 0.3);
@@ -457,8 +451,9 @@
   /* === 🎨 NEW STYLES for Meta & Heading Section 🎨 === */
   /* =================================================== */
   .meta-card {
-      background: #10122e;
+      background: var(--unified-bg);
       border: 1px solid #2a2f5a;
+      border-radius: 16px;
   }
   .meta-card .cat-card {
       background: #14173a;
@@ -483,9 +478,6 @@
       padding-top: 16px;
   }
 
-  .onpage-card {
-      /* Replaced with unified class */
-  }
   .onpage-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -511,16 +503,12 @@
   }
 
   /* ============================================================ */
-  /* === ✨ NEW STYLES for AI Readability & Humanizer ✨ === */
+  /* === ✨ UPGRADED: AI Readability & Humanizer ✨ === */
   /* ============================================================ */
   #humanizerCard {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 24px;
-    align-items: center;
+    /* REMOVED GRID for simpler centered layout */
+    padding: 16px 0;
   }
-  @media (max-width: 920px) { #humanizerCard { grid-template-columns: 1fr; } }
-  
   #humanizerResult {
     display: flex;
     flex-direction: column;
@@ -528,7 +516,6 @@
     justify-content: center;
     text-align: center;
     gap: 8px;
-    transition: background-color .4s ease;
   }
   .humanizer-result-header {
     display: flex;
@@ -537,8 +524,8 @@
     gap: 12px;
   }
   .badge-icon-wrapper {
-    width: 48px;
-    height: 48px;
+    width: 64px; /* Increased size */
+    height: 64px;
     position: relative;
     display: flex;
     align-items: center;
@@ -550,27 +537,27 @@
     animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   }
   @keyframes badge-pop-in {
-    from { transform: scale(0.5); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    from { transform: scale(0.5) rotate(-15deg); opacity: 0; }
+    to { transform: scale(1) rotate(0deg); opacity: 1; }
   }
   .badge-icon .glow {
     animation: badge-glow 3s ease-in-out infinite;
   }
   @keyframes badge-glow {
     0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.3); }
+    50% { filter: brightness(1.4); }
   }
 
   .score-display {
     text-align: center;
   }
   .score-display strong {
-    font-size: 14px;
+    font-size: 16px; /* Increased size */
     color: var(--sub);
     font-weight: 700;
   }
   .score-display .score-value {
-    font-size: 32px;
+    font-size: 48px; /* Increased size */
     font-weight: 900;
     line-height: 1;
     display: block;
@@ -578,28 +565,30 @@
     animation: score-slide-in .6s .2s cubic-bezier(0.25, 1, 0.5, 1) backwards;
   }
   @keyframes score-slide-in {
-    from { transform: translateY(10px); opacity: 0; }
+    from { transform: translateY(15px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
-  .score-value.success { color: var(--green-1); text-shadow: 0 0 12px var(--green-1);}
-  .score-value.warning { color: var(--yellow-1); text-shadow: 0 0 12px var(--yellow-1);}
-  .score-value.danger { color: var(--red-1); text-shadow: 0 0 12px var(--red-1);}
+  .score-value.success { color: var(--green-1); text-shadow: 0 0 16px var(--green-1);}
+  .score-value.warning { color: var(--yellow-1); text-shadow: 0 0 16px var(--yellow-1);}
+  .score-value.danger { color: var(--red-1); text-shadow: 0 0 16px var(--red-1);}
 
   .recommendation {
-    font-size: 14px;
+    font-size: 16px; /* Increased size */
     font-weight: 700;
     color: var(--ink);
-    margin: 12px 0;
+    margin: 16px 0;
     max-width: 90%;
+    line-height: 1.6;
     animation: fade-in .6s .4s backwards;
   }
   
   #humanizerSuggestionsWrapper {
     text-align: left;
     width: 100%;
+    max-width: 500px;
     max-height: 150px;
     overflow-y: auto;
-    padding: 8px;
+    padding: 12px;
     background: #081220;
     border: 1px solid #1c3d52;
     border-radius: 10px;
@@ -754,16 +743,13 @@
         const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
         if (apiErrorMatch && apiErrorMatch[1]) {
             try {
-                // Try to parse the error message as JSON
                 const errorJson = JSON.parse(apiErrorMatch[1]);
                 message = errorJson.error || errorJson.message || apiErrorMatch[1];
             } catch(e) { 
-                // If it's not JSON, just use the text
                 message = apiErrorMatch[1]; 
             }
         }
         
-        // Sanitize potential HTML in the error message to prevent XSS
         const sanitizedMessage = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         if (card) {
@@ -773,7 +759,6 @@
                 <p style="font-size: 12px; margin-top: 4px;">${sanitizedMessage}</p>
             </div>`;
         } else {
-            // Fallback to the main error box if a specific card isn't found
             showError(`${toolName} analysis failed`, sanitizedMessage);
         }
         return null; // Important: return null so Promise.all continues
@@ -838,10 +823,9 @@
     
     function renderHumanizerResult(data) {
         const { human_score, suggestions, recommendation, badge_type, google_search_url } = data;
-        setWheel(ringHumanizer, numHumanizer, mwHumanizer, human_score, '');
-
+        
         const badgeSvgs = {
-            success: `<svg class="badge-icon success" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_success)" stroke-width="4"/><path d="M22 32.5L28.5 39L43 24" stroke="var(--green-1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="paint0_linear_success" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--green-2)'}"/><stop offset="1" stop-color="${'var(--green-1)'}"/></linearGradient></defs></svg>`,
+            success: `<svg class="badge-icon success" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_success)" stroke-width="4"/><path d="M22 32.5L28.5 39L43 24" stroke="var(--green-1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="paint0_linear_success" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--green-2)'}"/><stop offset="1" stop-color="${'var(--green-1)'}"/></linearGradient></defs></svg>`,
             warning: `<svg class="badge-icon warning" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_warning)" stroke-width="4"/><path d="M32 23V36" stroke="var(--yellow-1)" stroke-width="4" stroke-linecap="round"/><path d="M32 43V44" stroke="var(--yellow-1)" stroke-width="5" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_warning" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--orange-1)'}"/><stop offset="1" stop-color="${'var(--yellow-1)'}"/></linearGradient></defs></svg>`,
             danger: `<svg class="badge-icon danger" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_danger)" stroke-width="4"/><path d="M40 24L24 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><path d="M24 24L40 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_danger" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--pink-1)'}"/><stop offset="1" stop-color="${'var(--red-1)'}"/></linearGradient></defs></svg>`
         };
@@ -1161,11 +1145,10 @@
       <input id="urlInput" name="url" type="url" placeholder="https://example.com/page" />
       <button id="pasteBtn" type="button" class="paste">Paste</button>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
-      <label style="display:flex;align-items:center;gap:8px;font-size:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px; flex-wrap: wrap; justify-content: flex-end;">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px; margin-right: auto;">
         <input id="autoCheck" type="checkbox" class="accent-emerald-400" checked/> Auto-apply checkmarks (≥ 80)
       </label>
-      <div style="flex:1"></div>
       <input id="importFile" type="file" accept="application/json" style="display:none"/>
       <button id="importBtn" type="button" class="btn btn-purple"><span class="btn-icon">⇪</span><span>Import</span></button>
       <button id="analyzeBtn" type="button" class="btn btn-green"><span class="btn-icon">🔍</span><span>Analyze</span></button>
@@ -1195,14 +1178,8 @@
             <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Readability & Humanizer</h3>
         </div>
         <div id="humanizerCard">
-            <div style="display:grid;place-items:center;padding:10px">
-              <div class="mw mw-sm" id="mwHumanizer">
-                <div class="mw-ring" id="ringHumanizer" style="--v:0"></div>
-                <div class="mw-center" id="numHumanizer">0%</div>
-              </div>
-            </div>
-            <div id="humanizerResult">
-                <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7;">
+             <div id="humanizerResult">
+                <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; margin-bottom: 8px;"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12 6C11.17 6 10.5 6.67 10.5 7.5C10.5 8.33 11.17 9 12 9C12.83 9 13.5 8.33 13.5 7.5C13.5 6.67 12.83 6 12 6ZM7 12C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H7Z" fill="currentColor"/></svg>
                     Run an analysis or check a text snippet...
                 </div>
@@ -1322,7 +1299,7 @@
       </div>
   </div>
 
-  <div class="card meta-card" style="margin-top:24px;">
+  <div class="meta-card" style="margin-top:24px;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
       <span class="c-icon pulse">📑</span>
       <h3 class="t-grad">Meta & Heading Structure</h3>
