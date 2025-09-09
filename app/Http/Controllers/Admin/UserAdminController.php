@@ -34,26 +34,27 @@ class UserAdminController extends Controller
 
             $q = trim((string) $request->get('q', ''));
 
-            $hasAnalyze    = Schema::hasTable('analyze_logs');
-            $hasLimits     = Schema::hasTable('user_limits');
-            $hasLastSeen   = Schema::hasColumn('users', 'last_seen_at');
-            $hasLastLogin  = Schema::hasColumn('users', 'last_login_at');
-            $hasIp         = Schema::hasColumn('users', 'last_ip');
-            $hasCountry    = Schema::hasColumn('users', 'country');
-            $hasLastCountry= Schema::hasColumn('users', 'last_country'); // some schemas use this
-            $hasBanned     = Schema::hasColumn('users', 'is_banned');
-            $hasCreated    = Schema::hasColumn('users', 'created_at');
+            // Discover optional columns/tables
+            $hasAnalyze     = Schema::hasTable('analyze_logs');
+            $hasLimits      = Schema::hasTable('user_limits');
+            $hasLastSeen    = Schema::hasColumn('users', 'last_seen_at');
+            $hasLastLogin   = Schema::hasColumn('users', 'last_login_at');
+            $hasIp          = Schema::hasColumn('users', 'last_ip');
+            $hasCountry     = Schema::hasColumn('users', 'country');
+            $hasLastCountry = Schema::hasColumn('users', 'last_country'); // alternative
+            $hasBanned      = Schema::hasColumn('users', 'is_banned');
+            $hasCreated     = Schema::hasColumn('users', 'created_at');
 
-            // Base select (only columns that exist)
-            $query = DB::table('users as u')
-                ->select('u.id', 'u.name', 'u.email');
-
+            // Base select — only include columns that exist
+            $query = DB::table('users as u')->select('u.id', 'u.name', 'u.email');
             if ($hasCreated)   $query->addSelect('u.created_at');
             if ($hasLastSeen)  $query->addSelect('u.last_seen_at');
             if ($hasLastLogin) $query->addSelect('u.last_login_at');
             if ($hasIp)        $query->addSelect('u.last_ip');
             if ($hasCountry)   $query->addSelect('u.country');
-            if ($hasLastCountry && !$hasCountry) $query->addSelect(DB::raw('u.last_country as country'));
+            if (!$hasCountry && $hasLastCountry) {
+                $query->addSelect(DB::raw('u.last_country as country'));
+            }
             if ($hasBanned)    $query->addSelect('u.is_banned');
 
             // Latest analysis per user (subquery -> last_activity)
@@ -86,14 +87,14 @@ class UserAdminController extends Controller
                 });
             }
 
-            // Order by the best available timestamp (fall back to id desc)
+            // Order by best available timestamp (fallback to id desc)
             $orderParts = [];
             if ($hasLastSeen)  $orderParts[] = 'u.last_seen_at';
             if ($hasAnalyze)   $orderParts[] = 'a.last_activity';
             if ($hasLastLogin) $orderParts[] = 'u.last_login_at';
             if ($hasCreated)   $orderParts[] = 'u.created_at';
 
-            if (!empty($orderParts)) {
+            if ($orderParts) {
                 $query->orderByRaw('COALESCE(' . implode(',', $orderParts) . ') DESC');
             } else {
                 $query->orderBy('u.id', 'desc');
@@ -102,31 +103,39 @@ class UserAdminController extends Controller
             $rows = $query->limit(20)->get();
 
             $out = $rows->map(function ($r) {
-                $last = $r->last_seen_at
-                    ?? $r->last_login_at
-                    ?? $r->last_activity
-                    ?? ($r->created_at ?? null);
+                // Fetch fields defensively; stdClass may not have the property
+                $last = null;
+                if (property_exists($r, 'last_seen_at')   && $r->last_seen_at)   $last = $r->last_seen_at;
+                if (!$last && property_exists($r, 'last_login_at') && $r->last_login_at) $last = $r->last_login_at;
+                if (!$last && property_exists($r, 'last_activity') && $r->last_activity) $last = $r->last_activity;
+                if (!$last && property_exists($r, 'created_at')    && $r->created_at)    $last = $r->created_at;
+
+                $ip      = property_exists($r, 'last_ip') ? $r->last_ip : null;
+                $country = property_exists($r, 'country') ? $r->country : null;
+                $limit   = property_exists($r, 'daily_limit') ? $r->daily_limit : null;
+                $enabled = property_exists($r, 'is_enabled') ? (int) $r->is_enabled : 1;
+                $banned  = property_exists($r, 'is_banned')  ? (bool) $r->is_banned : false;
 
                 return [
                     'id'        => (int) $r->id,
                     'user'      => $r->name ?: $r->email,
                     'email'     => $r->email,
                     'last_seen' => $this->fmt($last),
-                    'ip'        => $r->last_ip ?? '—',
-                    'country'   => $r->country ?? null,
-                    'limit'     => $r->daily_limit ?? null,
-                    'enabled'   => isset($r->is_enabled) ? (int) $r->is_enabled : 1,
-                    'banned'    => isset($r->is_banned) ? (bool) $r->is_banned : false,
+                    'ip'        => $ip ?: '—',
+                    'country'   => $country ?: null,
+                    'limit'     => $limit,
+                    'enabled'   => $enabled,
+                    'banned'    => $banned,
                 ];
             });
 
             return response()->json(['rows' => $out]);
         } catch (\Throwable $e) {
-            // Never 500 the UI; send empty set + hint
+            // Never 500 the UI; send empty set + hint so you can see the issue in Network → Preview
             return response()->json([
                 'rows'  => [],
                 'error' => $e->getMessage(),
-            ]);
+            ], 200);
         }
     }
 
@@ -178,7 +187,6 @@ class UserAdminController extends Controller
 
     /**
      * PATCH /admin/users/{user}/limits
-     * Accepts: daily_limit (int), is_enabled (bool), reason (string|null)
      */
     public function updateUserLimit(Request $request, User $user)
     {
@@ -249,7 +257,6 @@ class UserAdminController extends Controller
 
     /**
      * GET /admin/users/{user}/sessions
-     * Returns best-effort session activity.
      */
     public function sessions(User $user)
     {
@@ -266,7 +273,7 @@ class UserAdminController extends Controller
                 $dt = $s->last_activity ? Carbon::createFromTimestamp($s->last_activity) : null;
                 return [
                     'login_at'  => $this->fmt($dt),
-                    'logout_at' => null,
+                    'logout_at' => null, // not tracked by default sessions table
                     'ip'        => $s->ip_address,
                     'ua'        => $s->user_agent,
                     'country'   => null,
@@ -278,7 +285,6 @@ class UserAdminController extends Controller
 
     /**
      * PATCH /admin/users/{user}/upgrade
-     * Upgrade a user's plan (works with subscriptions table or users.plan fallback).
      */
     public function upgrade(Request $request, User $user)
     {
