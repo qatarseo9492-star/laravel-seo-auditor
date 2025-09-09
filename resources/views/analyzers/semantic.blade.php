@@ -15,7 +15,6 @@
     --sub:#BFC7CF;
     --outline: #ffffff1a;
     
-
     /* Neon wheel palette */
     --blue-1:#00C6FF;
     --blue-2:#0072FF;
@@ -26,6 +25,9 @@
     --red-1:#FF4500;
     --pink-1:#FF1493;
     --purple-1:#8A2BE2;
+
+    /* UPGRADED: Unified dark background */
+    --unified-bg: linear-gradient(145deg, #0D1120, #111827);
   }
 
   /* =============== Base page styles (colors only changed) =============== */
@@ -67,13 +69,16 @@
   .chip.warn{background:linear-gradient(135deg,#2a1f06,#3f2c07);border-color:#f59e0b72;box-shadow:0 0 24px rgba(245,158,11,.2)}
   .chip.bad{background:linear-gradient(135deg,#2e1010,#4a1616);border-color:#ef444472;box-shadow:0 0 24px rgba(239,68,68,.2)}
 
-  .btn{padding:10px 14px;border-radius:12px;font-weight:900;border:1px solid #ffffff22;color:#0b1020;font-size:13px; cursor: pointer; transition: all .2s ease;}
-  .btn:hover{filter: brightness(1.2); transform: translateY(-1px);}
-  .btn:active{transform: translateY(0px);}
+  /* UPGRADED: Button styles */
+  .btn{padding:10px 14px;border-radius:12px;font-weight:900;border:1px solid transparent;color:#0b1020;font-size:13px; cursor: pointer; transition: all .2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
+  .btn:hover{filter: brightness(1.2); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.4);}
+  .btn:active{transform: translateY(0px); filter: brightness(1.1);}
+  .btn .btn-icon { animation: bob 3s ease-in-out infinite; }
   .btn-green{background:linear-gradient(90deg,var(--green-1),var(--green-2))}
   .btn-blue{background:linear-gradient(90deg,var(--blue-1),var(--blue-2))}
   .btn-orange{background:linear-gradient(90deg,var(--yellow-1),var(--orange-1));color:#2b1600}
   .btn-purple{background:linear-gradient(90deg,var(--pink-1),var(--purple-1));color:#19041a}
+  
   .url-row{display:flex;align-items:center;gap:10px;border:1px solid var(--outline);background:#181818;border-radius:12px;padding:8px 10px}
   .url-row input{background:transparent;border:none;outline:none;color:var(--ink);width:100%}
   .url-row .paste{padding:6px 10px;border-radius:10px;border:1px solid #ffffff26;background:#232323;color:var(--ink)}
@@ -190,12 +195,31 @@
   #improveModal .card .card{background:#1A1A1A;border-color:var(--outline)}
 
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
+  
+  /* ===================================== */
+  /* === ✨ UNIFIED CARD STYLES ✨ === */
+  /* ===================================== */
+  .unified-card {
+    background: var(--unified-bg);
+    border: 1px solid;
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
+    background-image: 
+      radial-gradient(circle at 100% 0%, rgba(255,255,255,.05), transparent 30%),
+      radial-gradient(circle at 0% 100%, rgba(255,255,255,.05), transparent 30%);
+  }
+  .unified-card--blue { border-color: var(--blue-1); box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
+  .unified-card--purple { border-color: var(--purple-1); box-shadow: 0 0 32px rgba(138, 43, 226, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5); }
+  .unified-card--orange { border-color: var(--orange-1); box-shadow: 0 0 32px rgba(255, 165, 0, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
+  .unified-card--green { border-color: var(--green-1); box-shadow: 0 0 32px rgba(0, 255, 138, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
 
   /* ============================================= */
   /* === 🎨 NEW STYLES for Site Speed Section 🎨 === */
   /* ============================================= */
     .speed-card-new {
-        background: #0D1120;
+        background: var(--unified-bg);
         border: 1px solid #2A3659;
         border-radius: 16px;
         padding: 16px;
@@ -279,15 +303,7 @@
   /* === 🎨 NEW STYLES for Technical SEO Integration 🎨 === */
   /* ========================================================== */
   .tsi-card {
-    background: linear-gradient(145deg, #0d0f2b, #1f0c2e);
-    border: 1px solid var(--purple-1);
-    border-radius: 20px;
-    padding: 16px;
-    margin-top: 24px;
-    box-shadow: 0 0 32px rgba(138, 43, 226, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5);
-    background-image: 
-      radial-gradient(circle at 100% 0%, rgba(0,198,255,.15), transparent 30%),
-      radial-gradient(circle at 0% 100%, rgba(138,43,226,.15), transparent 30%);
+    /* Replaced with unified class */
   }
   .tsi-info-item {
     background: rgba(8, 5, 20, 0.7);
@@ -328,12 +344,7 @@
   /* === 🎨 NEW STYLES for Keyword Intelligence 🎨 === */
   /* =============================================== */
   .ki-card {
-    background: linear-gradient(145deg, #2b210c, #2e0c1f);
-    border: 1px solid var(--orange-1);
-    border-radius: 20px;
-    padding: 16px;
-    margin-top: 24px;
-    box-shadow: 0 0 32px rgba(255, 165, 0, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+     /* Replaced with unified class */
   }
   .ki-grid {
     display: grid;
@@ -366,12 +377,7 @@
   /* === 🤖 NEW STYLES for AI-Powered Features 🤖 === */
   /* =================================================== */
   .ai-card {
-    background: linear-gradient(145deg, #0c212b, #0c1a2e);
-    border: 1px solid var(--blue-1);
-    border-radius: 20px;
-    padding: 16px;
-    margin-top: 24px;
-    box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+     /* Replaced with unified class */
   }
   .ai-grid {
     display: grid;
@@ -422,12 +428,7 @@
   /* === 🚀 NEW STYLES for Content Analysis Engine 🚀 === */
   /* ======================================================= */
   .cae-card {
-    background: linear-gradient(145deg, #0d0f2b, #1f0c2e);
-    border: 1px solid var(--blue-1);
-    border-radius: 20px;
-    padding: 16px;
-    margin-top: 24px;
-    box-shadow: 0 0 32px rgba(0, 198, 255, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5);
+     /* Replaced with unified class */
   }
   .cae-info-item {
     background: rgba(5, 15, 25, 0.7);
@@ -483,12 +484,7 @@
   }
 
   .onpage-card {
-      background: linear-gradient(145deg, #0c212b, #0c1a2e);
-      border: 1px solid var(--blue-1);
-      border-radius: 20px;
-      padding: 16px;
-      margin-top: 24px;
-      box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5);
+      /* Replaced with unified class */
   }
   .onpage-grid {
       display: grid;
@@ -613,6 +609,67 @@
     from { opacity: 0; }
     to { opacity: 1; }
   }
+
+  /* ================================== */
+  /* === ✨ NEW UI/UX ELEMENTS ✨ === */
+  /* ================================== */
+  #welcome-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translate(-50%, 200%);
+    background: linear-gradient(135deg, #1a0f2b, #1f0c2e);
+    color: var(--ink);
+    padding: 16px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--purple-1);
+    box-shadow: 0 8px 32px rgba(138, 43, 226, 0.5);
+    z-index: 1000;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  #welcome-toast.show {
+    transform: translate(-50%, 0);
+  }
+  #welcome-toast button {
+    background: transparent; border: none; font-size: 20px; color: var(--sub); cursor: pointer;
+  }
+
+  #loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(1, 5, 26, 0.8);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: none; /* Initially hidden */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    gap: 20px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity .3s ease;
+  }
+  #loading-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  #loading-overlay .spinner {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: conic-gradient(from -90deg, var(--blue-1), var(--green-1), var(--yellow-1), var(--red-1), var(--purple-1), var(--blue-1));
+    animation: spin 1.5s linear infinite;
+    -webkit-mask-image: radial-gradient(farthest-side, transparent calc(100% - 8px), #000 0);
+  }
+  #loading-overlay .loading-text {
+    font-size: 18px;
+    font-weight: 800;
+    max-width: 400px;
+    line-height: 1.5;
+  }
   
 </style>
 
@@ -628,8 +685,9 @@
     const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
     const chipOverall=$('#chipOverall'), chipContent=$('#chipContent');
     
-    // Removed old humanizer chips
-    // const chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
+    // UI/UX Elements
+    const loadingOverlay = $('#loading-overlay');
+    const welcomeToast = $('#welcome-toast');
 
     const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn'),
           importBtn=$('#importBtn'), importFile=$('#importFile'), printBtn=$('#printBtn'),
@@ -674,6 +732,12 @@
     const mwHumanizer = $('#mwHumanizer'), ringHumanizer = $('#ringHumanizer'), numHumanizer = $('#numHumanizer');
     
     const aiCheckTextarea = $('#aiCheckTextarea'), aiCheckBtn = $('#aiCheckBtn');
+
+    // Show welcome message
+    setTimeout(() => {
+        if(welcomeToast) welcomeToast.classList.add('show');
+    }, 800);
+    $('#close-toast')?.addEventListener('click', () => welcomeToast.classList.remove('show'));
 
 
     /* Helpers (Unchanged) */
@@ -742,7 +806,15 @@
     const callPSI = (url) => callApi('/semantic-analyzer/psi', { url });
     const callOpenAiApi = (task, prompt, url = null) => callApi('/api/openai-request', { task, prompt, url });
 
-    function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="c-icon spin">⚙️</span> Analyzing...':'🔍 Analyze'}
+    function setRunning(isOn){
+        if(!analyzeBtn) return;
+        analyzeBtn.disabled=isOn;
+        if(isOn) {
+            loadingOverlay.classList.add('show');
+        } else {
+            loadingOverlay.classList.remove('show');
+        }
+    }
     
     function setWheel(elRing, elNum, container, score, prefix){
         if (!elRing || !elNum || !container) return;
@@ -780,8 +852,8 @@
         }
 
         let googleLinkHtml = '';
-        if (badge_type !== 'success') {
-            googleLinkHtml = `<a href="${google_search_url}" target="_blank" class="btn btn-blue" style="margin-top: 15px; display: inline-block;">Search Google for more tips</a>`;
+        if (badge_type !== 'success' && google_search_url) {
+            googleLinkHtml = `<a href="${google_search_url}" target="_blank" class="btn btn-blue" style="margin-top: 15px; display: inline-block;"><span class="btn-icon">💡</span><span>Get More Tips</span></a>`;
         }
 
         humanizerResult.innerHTML = `
@@ -992,7 +1064,7 @@
         aiBriefBtn.disabled = true; aiBriefBtn.textContent = 'Generating...'; aiBriefResult.textContent = 'AI is crafting your brief...';
         try { const result = await callOpenAiApi('brief', prompt, url); aiBriefResult.textContent = result.content || 'No content returned from AI.';
         } catch (error) { aiBriefResult.textContent = `Error: ${error.message}`;
-        } finally { aiBriefBtn.disabled = false; aiBriefBtn.textContent = 'Generate'; }
+        } finally { aiBriefBtn.disabled = false; aiBriefBtn.innerHTML = `<span class="btn-icon">✨</span><span>Generate</span>`; }
     });
 
     aiCheckBtn?.addEventListener('click', async () => {
@@ -1015,7 +1087,7 @@
             humanizerResult.innerHTML = `<p style="color: var(--red-1);">Error: ${message}</p>`;
         } finally {
             aiCheckBtn.disabled = false;
-            aiCheckBtn.innerHTML = '🤖 Check Snippet';
+            aiCheckBtn.innerHTML = '<span class="btn-icon">🤖</span><span>Check Snippet</span>';
         }
     });
 
@@ -1033,6 +1105,22 @@
 @endpush
 
 @section('content')
+
+<div id="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">
+        Stay with us... we're analyzing the semantic universe of your page.
+    </div>
+</div>
+
+<div id="welcome-toast">
+    <span>👋</span>
+    <div>
+        <strong>Welcome to the Semantic SEO Analyzer!</strong>
+        <p style="font-size:13px; color: var(--sub); margin:0;">Paste a URL to begin your analysis.</p>
+    </div>
+    <button id="close-toast" type="button">×</button>
+</div>
 
 <section class="maxw px-4 pb-10">
 
@@ -1079,11 +1167,11 @@
       </label>
       <div style="flex:1"></div>
       <input id="importFile" type="file" accept="application/json" style="display:none"/>
-      <button id="importBtn" type="button" class="btn btn-purple">⇪ Import</button>
-      <button id="analyzeBtn" type="button" class="btn btn-green">🔍 Analyze</button>
-      <button id="printBtn"   type="button" class="btn btn-blue">🖨️ Print</button>
-      <button id="resetBtn"   type="button" class="btn btn-orange">↻ Reset</button>
-      <button id="exportBtn"  type="button" class="btn btn-purple">⬇︎ Export</button>
+      <button id="importBtn" type="button" class="btn btn-purple"><span class="btn-icon">⇪</span><span>Import</span></button>
+      <button id="analyzeBtn" type="button" class="btn btn-green"><span class="btn-icon">🔍</span><span>Analyze</span></button>
+      <button id="printBtn"   type="button" class="btn btn-blue"><span class="btn-icon">🖨️</span><span>Print</span></button>
+      <button id="resetBtn"   type="button" class="btn btn-orange"><span class="btn-icon">↻</span><span>Reset</span></button>
+      <button id="exportBtn"  type="button" class="btn btn-purple"><span class="btn-icon">⬇︎</span><span>Export</span></button>
     </div>
     <div id="errorBox"></div>
 
@@ -1101,8 +1189,7 @@
     </div>
   </div>
   
-  <!-- AI Readability & Humanizer -->
-    <div class="ai-card" id="aiContentCheckerCard">
+  <div class="unified-card unified-card--blue" id="aiContentCheckerCard">
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
             <span class="c-icon pulse">🤖</span>
             <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Readability & Humanizer</h3>
@@ -1123,12 +1210,11 @@
         </div>
         <div style="border-top: 1px solid var(--outline); padding-top: 16px; margin-top: 16px;">
             <textarea id="aiCheckTextarea" placeholder="Or, paste a text snippet here to analyze it separately... (Min: 50 characters)" style="width: 100%; height: 100px; background: #081220; border: 1px solid #1c3d52; border-radius: 10px; padding: 12px; color: var(--ink); font-size: 13px; resize: vertical;"></textarea>
-            <button id="aiCheckBtn" class="btn btn-green" style="width: 100%; margin-top: 10px;">🤖 Check Snippet</button>
+            <button id="aiCheckBtn" class="btn btn-green" style="width: 100%; margin-top: 10px;"><span class="btn-icon">🤖</span><span>Check Snippet</span></button>
         </div>
     </div>
 
-  <!-- Content Analysis Engine -->
-  <div class="cae-card" id="contentAnalysisEngineCard">
+  <div class="unified-card unified-card--blue" id="contentAnalysisEngineCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon spin">🚀</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
@@ -1150,8 +1236,7 @@
     </div>
   </div>
 
-  <!-- Technical SEO Integration -->
-  <div class="tsi-card" id="technicalSeoCard">
+  <div class="unified-card unified-card--purple" id="technicalSeoCard">
      <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon pulse">⚙️</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
@@ -1177,8 +1262,7 @@
     </div>
   </div>
 
-  <!-- Keyword Intelligence -->
-  <div class="ki-card" id="keywordIntelligenceCard">
+  <div class="unified-card unified-card--orange" id="keywordIntelligenceCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon float">🔑</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
@@ -1196,8 +1280,7 @@
     </div>
   </div>
   
-  <!-- On-Page Optimization Tools -->
-  <div class="onpage-card" id="onPageOptimizationCard">
+  <div class="unified-card unified-card--blue" id="onPageOptimizationCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon spin">🛠️</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">On-Page Optimization Tools</h3>
@@ -1210,8 +1293,7 @@
     </div>
   </div>
 
-  <!-- AI-Powered Features -->
-  <div class="ai-card" id="aiPoweredFeaturesCard">
+  <div class="unified-card unified-card--blue" id="aiPoweredFeaturesCard">
       <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
         <span class="c-icon float">✨</span>
         <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI-Powered Features</h3>
@@ -1219,28 +1301,27 @@
       <div class="ai-grid">
           <div class="ai-item">
               <h4 class="ai-item-title"><span class="c-icon spin">📝</span>Content Brief Generation</h4><p>AI-generated semantic content briefs based on your target keyword.</p>
-              <div class="ai-input-row"><input id="aiBriefInput" type="text" placeholder="Enter target keyword..."><button id="aiBriefBtn" class="btn btn-blue">Generate</button></div>
+              <div class="ai-input-row"><input id="aiBriefInput" type="text" placeholder="Enter target keyword..."><button id="aiBriefBtn" class="btn btn-blue"><span class="btn-icon">✨</span><span>Generate</span></button></div>
               <div id="aiBriefResult" class="ai-result-box">Brief will appear here...</div>
           </div>
           <div class="ai-item">
               <h4 class="ai-item-title"><span class="c-icon pulse">💡</span>Automated Content Suggestions</h4><p>Real-time content improvement recommendations for the analyzed URL.</p>
-              <div class="ai-input-row"><button class="btn btn-green" style="width:100%">Get Suggestions</button></div>
+              <div class="ai-input-row"><button class="btn btn-green" style="width:100%"><span class="btn-icon">💡</span><span>Get Suggestions</span></button></div>
               <div class="ai-result-box">Suggestions will appear here...</div>
           </div>
           <div class="ai-item">
               <h4 class="ai-item-title"><span class="c-icon spin">🕵️</span>Competitor Content Analysis</h4><p>Deep dive into competitor semantic strategies. (Uses analyzed URL)</p>
-               <div class="ai-input-row"><input type="url" placeholder="Enter competitor URL..."><button class="btn btn-orange">Analyze</button></div>
+               <div class="ai-input-row"><input type="url" placeholder="Enter competitor URL..."><button class="btn btn-orange"><span class="btn-icon">🕵️</span><span>Analyze</span></button></div>
               <div class="ai-result-box">Analysis will appear here...</div>
           </div>
            <div class="ai-item">
               <h4 class="ai-item-title"><span class="c-icon pulse">📈</span>Trend Prediction</h4><p>Forecast emerging semantic trends in your niche based on a keyword.</p>
-               <div class="ai-input-row"><input type="text" placeholder="Enter topic or niche..."><button class="btn btn-purple">Predict</button></div>
+               <div class="ai-input-row"><input type="text" placeholder="Enter topic or niche..."><button class="btn btn-purple"><span class="btn-icon">📈</span><span>Predict</span></button></div>
               <div class="ai-result-box">Trends will appear here...</div>
           </div>
       </div>
   </div>
 
-  <!-- Meta Info Layout -->
   <div class="card meta-card" style="margin-top:24px;">
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
       <span class="c-icon pulse">📑</span>
@@ -1253,7 +1334,6 @@
     </div>
   </div>
 
-  <!-- Site Speed & Core Web Vitals -->
   <div class="speed-card-new" id="speedCard">
     <div class="speed-header"><div class="speed-title"><span class="c-icon spin">🚀</span> Site Speed & Core Web Vitals</div><span id="speedBadge" class="speed-badge">Checking...</span></div>
     <div class="speed-overview-bar"><div id="speedOverviewBar"></div></div>
@@ -1277,13 +1357,11 @@
     <div class="speed-opportunities"><div class="speed-opportunities-title"><span class="c-icon float">💡</span> Opportunities</div><ul id="speedOpportunitiesList"><li>Run analysis to see opportunities.</li></ul></div>
   </div>
 
-  <!-- Ground Slab (Original - UNTOUCHED) -->
   <div class="ground-slab">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="king"><span class="c-icon float">🧭</span></div><div><div class="t-grad">Semantic SEO Ground</div><div style="font-size:12px;color:#b6c2cf">Six categories • Five checks each • Click “Improve” for guidance</div></div></div>
     <div id="cats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"></div>
   </div>
 
-  <!-- Modal Dialog (Original - UNTOUCHED) -->
   <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
     <div class="card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px"><h4 id="improveTitle" class="t-grad">Improve</h4><form method="dialog"><button class="pill">Close</button></form></div>
