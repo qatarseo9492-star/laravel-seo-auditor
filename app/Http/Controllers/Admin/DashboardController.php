@@ -31,10 +31,10 @@ class DashboardController extends Controller
 
     public function live(Request $request)
     {
-        try { $kpis     = $this->computeKpis();     } catch (\Throwable $e) { $kpis     = []; }
-        try { $services = $this->serviceHealth();   } catch (\Throwable $e) { $services = []; }
-        try { $history  = $this->recentHistory();   } catch (\Throwable $e) { $history  = []; }
-        try { $traffic  = $this->trafficSeries();   } catch (\Throwable $e) { $traffic  = []; }
+        try { $kpis     = $this->computeKpis();   } catch (\Throwable $e) { $kpis     = []; }
+        try { $services = $this->serviceHealth(); } catch (\Throwable $e) { $services = []; }
+        try { $history  = $this->recentHistory(); } catch (\Throwable $e) { $history  = []; }
+        try { $traffic  = $this->trafficSeries(); } catch (\Throwable $e) { $traffic  = []; }
 
         return response()->json(compact('kpis','services','history','traffic'));
     }
@@ -108,26 +108,31 @@ class DashboardController extends Controller
     }
 
     /* ======================= History ======================== */
-
+    /**
+     * New approach:
+     *  - Build "analysis" events from analyze_logs + analysis_cache
+     *  - Build "other" events (OpenAI usage, logins, signups) with small caps
+     *  - Reserve slots for analysis so they always show up
+     */
     private function recentHistory(): array
     {
-        $events = [];
+        $analysis = [];
+        $other    = [];
 
-        /* 1) ANALYSES from analyze_logs (robust + explicit columns) */
+        /* ANALYSES: analyze_logs */
         try {
             if (Schema::hasTable('analyze_logs')) {
                 $q = DB::table('analyze_logs as a');
                 $select = ['a.id','a.created_at','a.tool','a.url'];
 
-                // tokens: tokens_used or tokens or total_tokens
+                // tokens: prefer tokens_used -> tokens -> total_tokens
                 if (Schema::hasColumn('analyze_logs','tokens_used')) $select[] = 'a.tokens_used';
                 if (Schema::hasColumn('analyze_logs','tokens'))      $select[] = 'a.tokens';
                 if (Schema::hasColumn('analyze_logs','total_tokens'))$select[] = 'a.total_tokens';
-                // optional costs
+
                 if (Schema::hasColumn('analyze_logs','cost_usd'))    $select[] = 'a.cost_usd';
                 if (Schema::hasColumn('analyze_logs','cost'))        $select[] = 'a.cost';
 
-                // join users only if user_id exists
                 if (Schema::hasColumn('analyze_logs','user_id') && Schema::hasTable('users')) {
                     $q->leftJoin('users as u','u.id','=','a.user_id');
                     $select[] = 'u.email'; $select[] = 'u.name';
@@ -137,8 +142,8 @@ class DashboardController extends Controller
                     }
                 }
 
-                // pull the latest 40 analyses
-                $rows = $q->orderByDesc('a.id')->limit(40)->get($select);
+                // Pull a generous batch (older runs still relevant)
+                $rows = $q->orderByDesc('a.id')->limit(200)->get($select);
 
                 foreach ($rows as $r) {
                     $ts   = $r->created_at ?? null;
@@ -150,7 +155,7 @@ class DashboardController extends Controller
                     ]);
                     $cost = $this->firstNonNull([$this->prop($r,'cost_usd'), $this->prop($r,'cost')]);
 
-                    $events[] = [
+                    $analysis[] = [
                         'ts'      => $ts,
                         'when'    => $this->fmt($ts),
                         'user'    => $this->firstNonEmpty([$this->prop($r,'name'),$this->prop($r,'email'),$this->prop($r,'user_name'),$this->prop($r,'user_email')]) ?: '—',
@@ -161,9 +166,9 @@ class DashboardController extends Controller
                     ];
                 }
             }
-        } catch (\Throwable $e) { /* ignore to keep dashboard resilient */ }
+        } catch (\Throwable $e) { /* keep dashboard resilient */ }
 
-        /* 2) ANALYSES from analysis_cache (optional fallback) */
+        /* ANALYSES: analysis_cache (fallback) */
         try {
             if (Schema::hasTable('analysis_cache')) {
                 $q = DB::table('analysis_cache as c');
@@ -178,12 +183,12 @@ class DashboardController extends Controller
                     }
                 }
 
-                $rows = $q->orderByDesc('c.id')->limit(20)->get($select);
+                $rows = $q->orderByDesc('c.id')->limit(200)->get($select);
 
                 foreach ($rows as $r) {
                     [$url,$kw,$title] = $this->extractFromCacheRow($r);
 
-                    $events[] = [
+                    $analysis[] = [
                         'ts'      => $r->created_at ?? null,
                         'when'    => $this->fmt($r->created_at ?? null),
                         'user'    => $this->firstNonEmpty([$this->prop($r,'name'),$this->prop($r,'email'),$this->prop($r,'user_name'),$this->prop($r,'user_email')]) ?: '—',
@@ -196,7 +201,7 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
-        /* 3) OpenAI usage (optional; low weight) */
+        /* OTHER: OpenAI usage (small cap) */
         try {
             $usage = Schema::hasTable('open_ai_usages') ? 'open_ai_usages' : (Schema::hasTable('openai_usage') ? 'openai_usage' : null);
             if ($usage) {
@@ -206,9 +211,9 @@ class DashboardController extends Controller
                     $q->leftJoin('users as u','u.id','=','x.user_id');
                     $select[] = 'u.email'; $select[] = 'u.name';
                 }
-                $rows = $q->orderByDesc('x.id')->limit(10)->get($select);
+                $rows = $q->orderByDesc('x.id')->limit(20)->get($select);
                 foreach ($rows as $r) {
-                    $events[] = [
+                    $other[] = [
                         'ts'      => $r->created_at ?? null,
                         'when'    => $this->fmt($r->created_at ?? null),
                         'user'    => $this->firstNonEmpty([$this->prop($r,'name'),$this->prop($r,'email')]) ?: '—',
@@ -221,13 +226,13 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
-        /* 4) Logins (cap hard so they don't flood) */
+        /* OTHER: Logins (small cap) */
         try {
             if (Schema::hasTable('user_sessions')) {
                 $rows = DB::table('user_sessions as s')
                     ->leftJoin('users as u','u.id','=','s.user_id')
                     ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
-                    ->limit(10) // cap
+                    ->limit(20)
                     ->get(['s.*','u.email','u.name']);
 
                 foreach ($rows as $r) {
@@ -235,7 +240,7 @@ class DashboardController extends Controller
                     $ip = $this->firstNonEmpty([$this->prop($r,'ip'), $this->prop($r,'ip_address')]);
                     $country = $this->firstNonEmpty([$this->prop($r,'country'), $this->prop($r,'country_code')]);
 
-                    $events[] = [
+                    $other[] = [
                         'ts'      => $ts,
                         'when'    => $this->fmt($ts),
                         'user'    => $this->firstNonEmpty([$this->prop($r,'name'),$this->prop($r,'email')]) ?: '—',
@@ -248,17 +253,17 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
-        /* 5) Signups (cap hard) */
+        /* OTHER: Signups (small cap) */
         try {
             if (Schema::hasTable('users')) {
                 $rows = DB::table('users as u')
                     ->orderByRaw('COALESCE(u.last_seen_at, u.updated_at, u.created_at) DESC')
-                    ->limit(10) // cap
+                    ->limit(20)
                     ->get(['u.name','u.email','u.created_at','u.updated_at','u.last_seen_at']);
 
                 foreach ($rows as $r) {
                     $ts = $this->firstNonNull([$this->prop($r,'last_seen_at'), $this->prop($r,'updated_at'), $this->prop($r,'created_at')]);
-                    $events[] = [
+                    $other[] = [
                         'ts'      => $ts,
                         'when'    => $this->fmt($ts),
                         'user'    => $this->firstNonEmpty([$this->prop($r,'name'),$this->prop($r,'email')]) ?: '—',
@@ -271,9 +276,18 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
-        // Newest first & cap to 50 overall
-        usort($events, fn($a,$b) => $this->tsToSortable($b['ts']) <=> $this->tsToSortable($a['ts']));
-        return array_values(array_slice($events, 0, 50));
+        // Sort each bucket newest-first
+        usort($analysis, fn($a,$b) => $this->tsToSortable($b['ts']) <=> $this->tsToSortable($a['ts']));
+        usort($other,    fn($a,$b) => $this->tsToSortable($b['ts']) <=> $this->tsToSortable($a['ts']));
+
+        // Reserve slots for analysis so they always appear
+        $MAX_TOTAL     = 50;
+        $RESERVE_ANALY = 35; // keep majority for analyses
+        $takeAnalysis  = array_slice($analysis, 0, $RESERVE_ANALY);
+        $takeOther     = array_slice($other, 0, max(0, $MAX_TOTAL - count($takeAnalysis)));
+
+        // Merge (interleave not required — UI is simple list)
+        return array_values(array_merge($takeAnalysis, $takeOther));
     }
 
     /* ====================== Traffic ========================= */
@@ -316,7 +330,6 @@ class DashboardController extends Controller
 
     private function extractFromCacheRow(object $r): array
     {
-        // column-first
         $url = $this->firstNonEmpty([
             $this->prop($r,'url'), $this->prop($r,'page_url'), $this->prop($r,'target_url'),
             $this->prop($r,'input_url'), $this->prop($r,'request_url'), $this->prop($r,'source_url'), $this->prop($r,'link'),
@@ -329,7 +342,6 @@ class DashboardController extends Controller
 
         $title = $this->firstNonEmpty([$this->prop($r,'title'), $this->prop($r,'page_title')]);
 
-        // json-next
         foreach (['payload','data','request','inputs','meta','json','result','response'] as $col) {
             $raw = $this->prop($r, $col);
             if (!$raw) continue;
