@@ -517,17 +517,24 @@
   /* ============================================================ */
   /* === ✨ NEW STYLES for AI Readability & Humanizer ✨ === */
   /* ============================================================ */
-  #aiCheckResult {
+  #humanizerCard {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  @media (max-width: 920px) { #humanizerCard { grid-template-columns: 1fr; } }
+  
+  #humanizerResult {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
     gap: 8px;
-    height: 295px; /* Match textarea + button height */
     transition: background-color .4s ease;
   }
-  .ai-result-header {
+  .humanizer-result-header {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -552,9 +559,6 @@
   }
   .badge-icon .glow {
     animation: badge-glow 3s ease-in-out infinite;
-  }
-  .badge-icon .spin-slow {
-      animation: spin 20s linear infinite;
   }
   @keyframes badge-glow {
     0%, 100% { filter: brightness(1); }
@@ -591,12 +595,16 @@
     max-width: 90%;
     animation: fade-in .6s .4s backwards;
   }
-
-  #aiCheckResult .suggestions-wrapper {
+  
+  #humanizerSuggestionsWrapper {
     text-align: left;
     width: 100%;
+    max-height: 150px;
     overflow-y: auto;
-    padding: 0 8px;
+    padding: 8px;
+    background: #081220;
+    border: 1px solid #1c3d52;
+    border-radius: 10px;
   }
   
   @keyframes fade-in {
@@ -616,7 +624,10 @@
     /* ============== Element refs (Original + New) ============== */
     const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
     const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
-    const chipOverall=$('#chipOverall'), chipContent=$('#chipContent'), chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
+    const chipOverall=$('#chipOverall'), chipContent=$('#chipContent');
+    
+    // Removed old humanizer chips
+    // const chipWriter=$('#chipWriter'), chipHuman=$('#chipHuman'), chipAI=$('#chipAI');
 
     const urlInput=$('#urlInput'), analyzeBtn=$('#analyzeBtn'), pasteBtn=$('#pasteBtn'),
           importBtn=$('#importBtn'), importFile=$('#importFile'), printBtn=$('#printBtn'),
@@ -656,7 +667,11 @@
     
     const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult');
     
-    const aiCheckTextarea = $('#aiCheckTextarea'), aiCheckBtn = $('#aiCheckBtn'), aiCheckResult = $('#aiCheckResult');
+    // New Humanizer section elements
+    const humanizerResult = $('#humanizerResult');
+    const mwHumanizer = $('#mwHumanizer'), ringHumanizer = $('#ringHumanizer'), numHumanizer = $('#numHumanizer');
+    
+    const aiCheckTextarea = $('#aiCheckTextarea'), aiCheckBtn = $('#aiCheckBtn');
 
 
     /* Helpers (Unchanged) */
@@ -683,7 +698,7 @@
     const CATS=[{name:'User Signals & Experience',icon:'📱',checks:['Mobile-friendly, responsive layout','Optimized speed (compression, lazy-load)','Core Web Vitals passing (LCP/INP/CLS)','Clear CTAs and next steps','Accessible basics (alt text, contrast)']},{name:'Entities & Context',icon:'🧩',checks:['sameAs/Organization details present','Valid schema markup (Article/FAQ/Product)','Related entities covered with context','Primary entity clearly defined','Organization contact/about page visible']},{name:'Structure & Architecture',icon:'🏗️',checks:['Logical H2/H3 headings & topic clusters','Internal links to hub/related pages','Clean, descriptive URL slug','Breadcrumbs enabled (+ schema)','XML sitemap logical structure']},{name:'Content Quality',icon:'🧠',checks:['E-E-A-T signals (author, date, expertise)','Unique value vs. top competitors','Facts & citations up to date','Helpful media (images/video) w/ captions','Up-to-date examples & screenshots']},{name:'Content & Keywords',icon:'📝',checks:['Define search intent & primary topic','Map target & related keywords (synonyms/PAA)','H1 includes primary topic naturally','Integrate FAQs / questions with answers','Readable, NLP-friendly language']},{name:'Technical Elements',icon:'⚙️',checks:['Title tag (≈50–60 chars) w/ primary keyword','Meta description (≈140–160 chars) + CTA','Canonical tag set correctly','Indexable & listed in XML sitemap','Robots directives valid']}];
     const KB={'Mobile-friendly, responsive layout':{why:'Most traffic is mobile; poor UX kills engagement.',tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'],link:'https://search.google.com/test/mobile-friendly'},'Optimized speed (compression, lazy-load)':{why:'Speed affects abandonment and CWV.',tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'],link:'https://web.dev/fast/'},'Core Web Vitals passing (LCP/INP/CLS)':{why:'Passing CWV improves experience & stability.',tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'],link:'https://web.dev/vitals/'},'Clear CTAs and next steps':{why:'Clarity increases conversions and task completion.',tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'],link:'https://www.nngroup.com/articles/call-to-action-buttons/'},'Accessible basics (alt text, contrast)':{why:'Accessibility broadens reach and reduces risk.',tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'],link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},'sameAs/Organization details present':{why:'Entity grounding disambiguates your brand.',tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'],link:'https://schema.org/Organization'},'Valid schema markup (Article/FAQ/Product)':{why:'Structured data unlocks rich results.',tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'],link:'https://search.google.com/test/rich-results'},'Related entities covered with context':{why:'Covering related entities builds topical depth.',tips:['Mention related concepts.','Explain relationships.','Link to references.'],link:'https://developers.google.com/knowledge-graph'},'Primary entity clearly defined':{why:'A single main entity clarifies page purpose.',tips:['Define at the top.','Use consistent naming.','Add schema about it.'],link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},'Organization contact/about page visible':{why:'Trust & contact clarity support E-E-A-T.',tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'],link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},'Logical H2/H3 headings & topic clusters':{why:'Hierarchy helps skimming and indexing.',tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'],link:'https://moz.com/learn/seo/site-structure'},'Internal links to hub/related pages':{why:'Internal links distribute authority & context.',tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'],link:'https://ahrefs.com/blog/internal-links/'},'Clean, descriptive URL slug':{why:'Readable slugs improve CTR & clarity.',tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'],link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},'Breadcrumbs enabled (+ schema)':{why:'Breadcrumbs clarify location & show in SERP.',tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'],link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},'XML sitemap logical structure':{why:'Sitemap accelerates discovery & updates.',tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'],link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},'E-E-A-T signals (author, date, expertise)':{why:'Trust signals reduce bounce & build credibility.',tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'],link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},'Unique value vs. top competitors':{why:'Differentiation is necessary to rank & retain.',tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'],link:'https://backlinko.com/seo-techniques'},'Facts & citations up to date':{why:'Freshness + accuracy boosts trust.',tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'],link:'https://scholar.google.com/'},'Helpful media (images/video) w/ captions':{why:'Media improves comprehension & dwell time.',tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'],link:'https://web.dev/optimize-lcp/'},'Up-to-date examples & screenshots':{why:'Current visuals reflect product reality.',tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'],link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},'Define search intent & primary topic':{why:'Matching intent drives relevance & time on page.',tips:['State outcome early.','Align format to intent.','Use concrete examples.'],link:'https://ahrefs.com/blog/search-intent/'},'Map target & related keywords (synonyms/PAA)':{why:'Variants improve recall & completeness.',tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'],link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},'H1 includes primary topic naturally':{why:'Clear topic helps users and algorithms.',tips:['One H1 per page.','Topic near the start.','Be descriptive.'],link:'https://web.dev/learn/html/semantics/#headings'},'Integrate FAQs / questions with answers':{why:'Captures long-tail & can earn rich results.',tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'],link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},'Readable, NLP-friendly language':{why:'Plain, direct writing improves comprehension.',tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'],link:'https://www.plainlanguage.gov/guidelines/'},'Title tag (≈50–60 chars) w/ primary keyword':{why:'Title remains the strongest on-page signal.',tips:['50–60 chars.','Primary topic first.','Avoid duplication.'],link:'https://moz.com/learn/seo/title-tag'},'Meta description (≈140–160 chars) + CTA':{why:'Meta drives CTR which correlates with rankings.',tips:['140–160 chars.','Benefit + CTA.','Match intent.'],link:'https://moz.com/learn/seo/meta-description'},'Canonical tag set correctly':{why:'Avoid duplicates; consolidate signals.',tips:['One canonical.','Absolute URL.','No conflicting canonicals.'],link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},'Indexable & listed in XML sitemap':{why:'Indexation is prerequisite to ranking.',tips:['No noindex.','Include in sitemap.','Submit in Search Console.'],link:'https://developers.google.com/search/docs/crawling-indexing/overview'},'Robots directives valid':{why:'Avoid accidental noindex/nofollow.',tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'],link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}};
     function clamp01num(n){return Math.max(0,Math.min(100,Number(n)||0))}
-    function scoreChecklist(label,data,url,targetKw=''){const qs=data.quick_stats||{};const cs=data.content_structure||{};const ps=data.page_signals||{};const r=data.readability||{};const h1=(cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;const h2=(cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;const h3=(cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;const title=(cs.title||'');const meta=(cs.meta_description||'');const internal=Number(qs.internal_links||0);const external=Number(qs.external_links||0);const schemaTypes=new Set((data.page_signals?.schema_types)||[]);const robots=(data.page_signals?.robots||'').toLowerCase();const hasFAQ=schemaTypes.has('FAQPage');const hasArticle=schemaTypes.has('Article')||schemaTypes.has('NewsArticle')||schemaTypes.has('BlogPosting');const urlPath=(()=>{try{return new URL(url).pathname;}catch{return '/';}})();const slugScore=(()=>{const hasQuery=url.includes('?');const segs=urlPath.split('/').filter(Boolean);const words=segs.join('-').split('-').filter(Boolean);if(hasQuery)return 55;if(segs.length>6)return 60;if(words.some(w=>w.length>24))return 65;return 85;})();switch(label){case'Mobile-friendly, responsive layout':return ps.has_viewport?88:58;case'Optimized speed (compression, lazy-load)':return 60;case'Core Web Vitals passing (LCP/INP/CLS)':return 60;case'Clear CTAs and next steps':return meta.length>=140&&/learn|get|try|start|buy|sign|download|contact/i.test(meta)?80:60;case'Accessible basics (alt text, contrast)':return (data.images_alt_count||0)>=3?82:((data.images_alt_count||0)>=1?68:48);case'sameAs/Organization details present':return ps.has_org_sameas?90:55;case'Valid schema markup (Article/FAQ/Product)':return (hasArticle||hasFAQ||schemaTypes.has('Product'))?85:(schemaTypes.size>0?70:50);case'Related entities covered with context':return external>=2?72:60;case'Primary entity clearly defined':return ps.has_main_entity?85:(h1>0?72:58);case'Organization contact/about page visible':return 60;case'Logical H2/H3 headings & topic clusters':return (h2>=3&&h3>=2)?85:(h2>=2?70:55);case'Internal links to hub/related pages':return internal>=5?85:(internal>=2?65:45);case'Clean, descriptive URL slug':return slugScore;case'Breadcrumbs enabled (+ schema)':return ps.has_breadcrumbs?85:55;case'XML sitemap logical structure':return 60;case'E-E-A-T signals (author, date, expertise)':return ps.has_org_sameas?75:65;case'Unique value vs. top competitors':return 60;case'Facts & citations up to date':return external>=2?78:58;case'Helpful media (images/video) w/ captions':return (data.images_alt_count||0)>=3?82:58;case'Up-to-date examples & screenshots':return 60;case'Define search intent & primary topic':return (title&&h1>0)?78:60;case'Map target & related keywords (synonyms/PAA)':{const kw=(targetKw||'').trim();if(!kw)return 60;const found=(title.toLowerCase().includes(kw.toLowerCase())||(cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));return found?80:62}case'H1 includes primary topic naturally':{const kw=(targetKw||'').trim();if(h1===0)return 45;if(!kw)return 72;const found=(cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));return found?84:72}case'Integrate FAQs / questions with answers':return hasFAQ?85:(/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ')+' '+(cs.headings?.H3||[]).join(' '))?70:55);case'Readable, NLP-friendly language':return clamp01num(r.score||0);case'Title tag (≈50–60 chars) w/ primary keyword':{const len=(title||'').length;return (len>=50&&len<=60)?88:(len?68:45)}case'Meta description (≈140–160 chars) + CTA':{const len=(meta||'').length;const hasCTA=/learn|get|try|start|buy|sign|download|contact/i.test(meta||'');return (len>=140&&len<=160)?(hasCTA?90:82):(len?65:48)}case'Canonical tag set correctly':return ps.canonical?85:55;case'Indexable & listed in XML sitemap':return robots.includes('noindex')?20:80;case'Robots directives valid':return (robots&&/(noindex|none)/.test(robots))?45:75;}return 60}
+    function scoreChecklist(label,data,url,targetKw=''){const qs=data.quick_stats||{};const cs=data.content_structure||{};const ps=data.page_signals||{};const r=data.readability||{};const h1=(cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;const h2=(cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;const h3=(cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;const title=(cs.title||'');const meta=(cs.meta_description||'');const internal=Number(qs.internal_links||0);const external=Number(qs.external_links||0);const schemaTypes=new Set((data.page_signals?.schema_types)||[]);const robots=(data.page_signals?.robots||'').toLowerCase();const hasFAQ=schemaTypes.has('FAQPage');const hasArticle=schemaTypes.has('Article')||schemaTypes.has('NewsArticle')||schemaTypes.has('BlogPosting');const urlPath=(()=>{try{return new URL(url).pathname;}catch{return '/';}})();const slugScore=(()=>{const hasQuery=url.includes('?');const segs=urlPath.split('/').filter(Boolean);const words=segs.join('-').split('-').filter(Boolean);if(hasQuery)return 55;if(segs.length>6)return 60;if(words.some(w=>w.length>24))return 65;return 85;})();switch(label){case'Mobile-friendly, responsive layout':return ps.has_viewport?88:58;case'Optimized speed (compression, lazy-load)':return 60;case'Core Web Vitals passing (LCP/INP/CLS)':return 60;case'Clear CTAs and next steps':return meta.length>=140&&/learn|get|try|start|buy|sign|download|contact/i.test(meta)?80:60;case'Accessible basics (alt text, contrast)':return (data.images_alt_count||0)>=3?82:((data.images_alt_count||0)>=1?68:48);case'sameAs/Organization details present':return ps.has_org_sameas?90:55;case'Valid schema markup (Article/FAQ/Product)':return (hasArticle||hasFAQ||schemaTypes.has('Product'))?85:(schemaTypes.size>0?70:50);case'Related entities covered with context':return external>=2?72:60;case'Primary entity clearly defined':return ps.has_main_entity?85:(h1>0?72:58);case'Organization contact/about page visible':return 60;case'Logical H2/H3 headings & topic clusters':return (h2>=3&&h3>=2)?85:(h2>=2?70:55);case'Internal links to hub/related pages':return internal>=5?85:(internal>=2?65:45);case'Clean, descriptive URL slug':return slugScore;case'Breadcrumbs enabled (+ schema)':return ps.has_breadcrumbs?85:55;case'XML sitemap logical structure':return 60;case'E-E-A-T signals (author, date, expertise)':return ps.has_org_sameas?75:65;case'Unique value vs. top competitors':return 60;case'Facts & citations up to date':return external>=2?78:58;case'Helpful media (images/video) w/ captions':return (data.images_alt_count||0)>=3?82:58;case'Up-to-date examples & screenshots':return 60;case'Define search intent & primary topic':return (title&&h1>0)?78:60;case'Map target & related keywords (synonyms/PAA)':{const kw=(targetKw||'').trim();if(!kw)return 60;const found=(title.toLowerCase().includes(kw.toLowerCase())||(cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));return found?80:62}case'H1 includes primary topic naturally':{const kw=(targetKw||'').trim();if(h1===0)return 45;if(!kw)return 72;const found=(cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));return found?84:72}case'Integrate FAQs / questions with answers':return hasFAQ?85:(/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ')+' '+(cs.headings?.H3||[]).join(' '))?70:55);case'Readable, NLP-friendly language':return clamp01num((data.humanizer?.human_score || r.score) ?? 0);case'Title tag (≈50–60 chars) w/ primary keyword':{const len=(title||'').length;return (len>=50&&len<=60)?88:(len?68:45)}case'Meta description (≈140–160 chars) + CTA':{const len=(meta||'').length;const hasCTA=/learn|get|try|start|buy|sign|download|contact/i.test(meta||'');return (len>=140&&len<=160)?(hasCTA?90:82):(len?65:48)}case'Canonical tag set correctly':return ps.canonical?85:55;case'Indexable & listed in XML sitemap':return robots.includes('noindex')?20:80;case'Robots directives valid':return (robots&&/(noindex|none)/.test(robots))?45:75;}return 60}
     function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');if(!catsEl)return;catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label)+' best practices');if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});if(chipAuto)chipAuto.textContent=autoGood;}
 
     /* API Calls */
@@ -728,7 +743,42 @@
         const color = score >= 80 ? 'var(--green-1)' : score >= 60 ? 'var(--yellow-1)' : 'var(--red-1)';
         circleEl.style.stroke = color;
     }
+    
+    function renderHumanizerResult(data) {
+        const { human_score, suggestions, recommendation, badge_type, google_search_url } = data;
+        setWheel(ringHumanizer, numHumanizer, mwHumanizer, human_score, '');
 
+        const badgeSvgs = {
+            success: `<svg class="badge-icon success" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_success)" stroke-width="4"/><path d="M22 32.5L28.5 39L43 24" stroke="var(--green-1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="paint0_linear_success" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--green-2)'}"/><stop offset="1" stop-color="${'var(--green-1)'}"/></linearGradient></defs></svg>`,
+            warning: `<svg class="badge-icon warning" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_warning)" stroke-width="4"/><path d="M32 23V36" stroke="var(--yellow-1)" stroke-width="4" stroke-linecap="round"/><path d="M32 43V44" stroke="var(--yellow-1)" stroke-width="5" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_warning" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--orange-1)'}"/><stop offset="1" stop-color="${'var(--yellow-1)'}"/></linearGradient></defs></svg>`,
+            danger: `<svg class="badge-icon danger" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_danger)" stroke-width="4"/><path d="M40 24L24 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><path d="M24 24L40 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_danger" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--pink-1)'}"/><stop offset="1" stop-color="${'var(--red-1)'}"/></linearGradient></defs></svg>`
+        };
+        
+        let suggestionsHtml = '';
+        if (badge_type !== 'success' && suggestions) {
+            suggestionsHtml = `<div id="humanizerSuggestionsWrapper"><h4 style="color: var(--blue-1); margin: 0 0 8px;">💡 AI Suggestions to Improve:</h4><div style="white-space: pre-wrap; font-size: 13px; line-height: 1.6;">${suggestions}</div></div>`;
+        }
+
+        let googleLinkHtml = '';
+        if (badge_type !== 'success') {
+            googleLinkHtml = `<a href="${google_search_url}" target="_blank" class="btn btn-blue" style="margin-top: 15px; display: inline-block;">Search Google for more tips</a>`;
+        }
+
+        humanizerResult.innerHTML = `
+            <div class="humanizer-result-header">
+                <div class="badge-icon-wrapper">${badgeSvgs[badge_type] || ''}</div>
+                <div class="score-display">
+                    <strong>Human-like Score</strong>
+                    <span class="score-value ${badge_type}">${human_score}%</span>
+                </div>
+            </div>
+            <div>
+                <p class="recommendation">${recommendation}</p>
+                ${suggestionsHtml}
+                ${googleLinkHtml}
+            </div>
+        `;
+    }
 
     /* ===== Analyze Button Logic (ORIGINAL + UPGRADED) ===== */
     analyzeBtn?.addEventListener('click', async e=>{
@@ -771,12 +821,10 @@
         const contentScore=Math.round(([cmap['Content & Keywords'],cmap['Content Quality']].filter(v=>typeof v==='number').reduce((a,b)=>a+b,0))/2||0);
         setChip(chipContent,'Content',`${contentScore} /100`,contentScore);
 
-        const r=data.readability||{};
-        const human=clamp01(Math.round(70+(r.score||0)/5-(r.passive_ratio||0)/3));
-        const ai=clamp01(100-human);
-        setChip(chipWriter,'Writer',human>=60?'Likely Human':'Possibly AI',human);
-        setChip(chipHuman,'Human-like',`${human} %`,human);
-        setChip(chipAI,'AI-like',`${ai} %`,100-human);
+        // Populate the new Humanizer section with data from the main analysis
+        if(data.humanizer) {
+            renderHumanizerResult(data.humanizer);
+        }
         
         if (data.content_structure) {
             if(titleVal) titleVal.textContent = data.content_structure.title || 'Not Found';
@@ -926,74 +974,24 @@
     aiCheckBtn?.addEventListener('click', async () => {
         const text = aiCheckTextarea.value.trim();
         if (text.length < 50) {
-            aiCheckResult.innerHTML = '<p style="color: var(--orange-1);">Please enter at least 50 characters to analyze.</p>';
+            humanizerResult.innerHTML = '<p style="color: var(--orange-1);">Please enter at least 50 characters to analyze.</p>';
             return;
         }
 
         aiCheckBtn.disabled = true;
         aiCheckBtn.innerHTML = '<span class="c-icon spin">🤖</span> Analyzing...';
-        aiCheckResult.innerHTML = '<p>Checking AI score and generating suggestions...</p>';
+        humanizerResult.innerHTML = '<p>Checking AI score and generating suggestions...</p>';
 
         try {
             const result = await callApi('/api/ai-content-check', { text });
             if (result.error) throw new Error(result.error);
-
-            const { human_score, suggestions, recommendation, badge_type, google_search_url } = result;
-
-            const badgeSvgs = {
-                success: `
-                    <svg class="badge-icon success" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_success)" stroke-width="4"/>
-                        <path d="M22 32.5L28.5 39L43 24" stroke="var(--green-1)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                        <defs><linearGradient id="paint0_linear_success" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--green-2)'}"/><stop offset="1" stop-color="${'var(--green-1)'}"/></linearGradient></defs>
-                    </svg>`,
-                warning: `
-                    <svg class="badge-icon warning" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_warning)" stroke-width="4"/>
-                        <path d="M32 23V36" stroke="var(--yellow-1)" stroke-width="4" stroke-linecap="round"/><path d="M32 43V44" stroke="var(--yellow-1)" stroke-width="5" stroke-linecap="round"/>
-                        <defs><linearGradient id="paint0_linear_warning" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--orange-1)'}"/><stop offset="1" stop-color="${'var(--yellow-1)'}"/></linearGradient></defs>
-                    </svg>`,
-                danger: `
-                     <svg class="badge-icon danger" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_danger)" stroke-width="4"/>
-                        <path d="M40 24L24 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><path d="M24 24L40 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/>
-                        <defs><linearGradient id="paint0_linear_danger" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--pink-1)'}"/><stop offset="1" stop-color="${'var(--red-1)'}"/></linearGradient></defs>
-                    </svg>`
-            };
-            
-            let suggestionsHtml = '';
-            if (badge_type !== 'success' && suggestions) {
-                suggestionsHtml = `
-                    <div class="suggestions-wrapper">
-                        <h4 style="color: var(--blue-1); margin: 10px 0 8px;">💡 AI Suggestions to Improve:</h4>
-                        <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.6;">${suggestions}</div>
-                    </div>`;
-            }
-
-            let googleLinkHtml = '';
-            if (badge_type !== 'success') {
-                googleLinkHtml = `<a href="${google_search_url}" target="_blank" class="btn btn-blue" style="margin-top: 15px; display: inline-block;">Search Google for more tips</a>`;
-            }
-
-            aiCheckResult.innerHTML = `
-                <div class="ai-result-header">
-                    <div class="badge-icon-wrapper">${badgeSvgs[badge_type] || ''}</div>
-                    <div class="score-display">
-                        <strong>Human-like Score</strong>
-                        <span class="score-value ${badge_type}">${human_score}%</span>
-                    </div>
-                </div>
-                <p class="recommendation">${recommendation}</p>
-                ${suggestionsHtml}
-                ${googleLinkHtml}
-            `;
-
+            renderHumanizerResult(result);
         } catch (error) {
             let message = error.message || 'An unknown error occurred.';
-            aiCheckResult.innerHTML = `<p style="color: var(--red-1);">Error: ${message}</p>`;
+            humanizerResult.innerHTML = `<p style="color: var(--red-1);">Error: ${message}</p>`;
         } finally {
             aiCheckBtn.disabled = false;
-            aiCheckBtn.innerHTML = '🤖 Check Content';
+            aiCheckBtn.innerHTML = '🤖 Check Snippet';
         }
     });
 
@@ -1037,9 +1035,6 @@
       <div style="display:flex;flex-wrap:wrap;gap:6px">
         <span id="chipOverall" class="chip warn"><i>🟧</i><span>Overall: 0 /100</span></span>
         <span id="chipContent" class="chip warn"><i>🟧</i><span>Content: —</span></span>
-        <span id="chipWriter"  class="chip"><i>🟧</i><span>Writer: —</span></span>
-        <span id="chipHuman"   class="chip"><i>🟧</i><span>Human-like: — %</span></span>
-        <span id="chipAI"      class="chip"><i>🟧</i><span>AI-like: — %</span></span>
       </div>
       <div id="overallBar" class="waterbox warn">
         <div class="fill" id="overallFill" style="width:0%"></div>
@@ -1082,24 +1077,28 @@
     </div>
   </div>
   
-  <!-- AI Content Checker & Humanizer -->
+  <!-- AI Readability & Humanizer -->
     <div class="ai-card" id="aiContentCheckerCard">
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
             <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Readability & Humanizer</h3>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
-            <div>
-                <textarea id="aiCheckTextarea" placeholder="Paste your text here to check its AI score and get suggestions to make it more human-like... (Min: 50 characters)" style="width: 100%; height: 250px; background: #081220; border: 1px solid #1c3d52; border-radius: 10px; padding: 12px; color: var(--ink); font-size: 13px; resize: vertical;"></textarea>
-                <button id="aiCheckBtn" class="btn btn-green" style="width: 100%; margin-top: 10px;">🤖 Check Content</button>
+        <div id="humanizerCard">
+            <div style="display:grid;place-items:center;padding:10px">
+              <div class="mw mw-sm" id="mwHumanizer">
+                <div class="mw-ring" id="ringHumanizer" style="--v:0"></div>
+                <div class="mw-center" id="numHumanizer">0%</div>
+              </div>
             </div>
-            <div>
-                <div id="aiCheckResult" class="ai-result-box">
-                     <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7;">
-                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; margin-bottom: 8px;"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12 6C11.17 6 10.5 6.67 10.5 7.5C10.5 8.33 11.17 9 12 9C12.83 9 13.5 8.33 13.5 7.5C13.5 6.67 12.83 6 12 6ZM7 12C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H7Z" fill="currentColor"/></svg>
-                        Results will appear here...
-                     </div>
+            <div id="humanizerResult">
+                <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7;">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; margin-bottom: 8px;"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12 6C11.17 6 10.5 6.67 10.5 7.5C10.5 8.33 11.17 9 12 9C12.83 9 13.5 8.33 13.5 7.5C13.5 6.67 12.83 6 12 6ZM7 12C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H7Z" fill="currentColor"/></svg>
+                    Run an analysis or check a text snippet...
                 </div>
             </div>
+        </div>
+        <div style="border-top: 1px solid var(--outline); padding-top: 16px; margin-top: 16px;">
+            <textarea id="aiCheckTextarea" placeholder="Or, paste a text snippet here to analyze it separately... (Min: 50 characters)" style="width: 100%; height: 100px; background: #081220; border: 1px solid #1c3d52; border-radius: 10px; padding: 12px; color: var(--ink); font-size: 13px; resize: vertical;"></textarea>
+            <button id="aiCheckBtn" class="btn btn-green" style="width: 100%; margin-top: 10px;">🤖 Check Snippet</button>
         </div>
     </div>
 
@@ -1237,7 +1236,7 @@
             </div>
         </div>
     </div>
-    <div class="speed-opportunities"><div class="speed-opportunities-title">🚀 Opportunities</div><ul id="speedOpportunitiesList"><li>Run analysis to see opportunities.</li></ul></div>
+    <div class="speed-opportunities"><div class="speed-opportunities-title"><span class="c-icon float">💡</span> Opportunities</div><ul id="speedOpportunitiesList"><li>Run analysis to see opportunities.</li></ul></div>
   </div>
 
   <!-- Ground Slab (Original - UNTOUCHED) -->
