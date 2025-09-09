@@ -3,9 +3,8 @@
 @section('title', 'Admin Dashboard — Aurora v4')
 
 @push('styles')
+{{-- We will use your existing v4 CSS file --}}
 <link rel="stylesheet" href="{{ asset('css/admin-v4.css') }}">
-{{-- NEW: Link to the new stylesheet for improvements --}}
-<link rel="stylesheet" href="{{ asset('css/dashboard-improvements.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,6 +12,7 @@
 
 @section('content')
 <div class="aurora container">
+  {{-- TOP BAR --}}
   <div class="topbar">
     <div class="brand">
       <span class="logo">∎</span>
@@ -22,12 +22,12 @@
       </div>
     </div>
     <div class="toolbar">
-      <button class="btn ghost" id="refreshNow">Refresh</button>
+      <button class="btn ghost" onclick="window.location.reload()">Refresh</button>
       <a class="btn primary" href="#">Manage Users</a>
     </div>
   </div>
 
-  {{-- KPI row --}}
+  {{-- KPI CARDS ROW --}}
   <div class="grid kpis">
     <div class="card kpi">
       <div class="kpi-label">Searches Today</div>
@@ -51,31 +51,37 @@
     </div>
   </div>
 
+  {{-- MAIN CONTENT GRID --}}
   <div class="grid main">
+    {{-- System Health Card --}}
     <div class="card span-2">
       <div class="card-head">
         <div>
           <div class="card-title">System Health</div>
           <div class="card-sub">Live snapshots of core services</div>
         </div>
-        <div class="chip {{ ($systemHealth[2]['ok'] ?? false) ? 'ok' : 'warn' }}">Checking…</div>
+        <div class="chip ok">All Systems Go</div>
       </div>
       <table class="table" id="system-health">
         <thead><tr><th>Service</th><th>Status</th><th>Latency</th></tr></thead>
         <tbody>
-        @forelse($systemHealth as $service)
-            <tr>
-                <td>{{ $service['name'] }}</td>
-                <td>{{ $service['status'] }}</td>
-                <td>{{ $service['latency'] }}</td>
-            </tr>
+        @forelse($systemHealth ?? [] as $service)
+          <tr>
+            <td>{{ $service['name'] }}</td>
+            <td>
+                <span class="dot {{ $service['ok'] ? 'ok' : 'warn' }}"></span>
+                {{ $service['status'] }}
+            </td>
+            <td>{{ $service['latency'] }}ms</td>
+          </tr>
         @empty
-            <tr><td colspan="3" class="muted">No data yet.</td></tr>
+          <tr><td colspan="3" class="muted">No data yet.</td></tr>
         @endforelse
         </tbody>
       </table>
     </div>
 
+    {{-- User Limits Card --}}
     <div class="card">
       <div class="card-head">
         <div>
@@ -88,64 +94,45 @@
         <div class="bubble"><span class="dot warn"></span> Disabled: <b>{{ $limitsSummary['disabled'] ?? 0 }}</b></div>
         <div class="bubble"><span class="dot"></span> Default: <b>{{ $limitsSummary['default'] ?? 200 }}</b></div>
       </div>
-      <button class="btn outline" onclick="alert('Navigate to user management page')">Adjust Limits</button>
+      <button class="btn outline" style="margin-top:10px;">Adjust Limits</button>
     </div>
 
-    {{-- NEW: User Overview Table --}}
-    <div class="card span-2">
-        <div class="card-head">
-            <div>
-                <div class="card-title">User Overview</div>
-                <div class="card-sub">Recent users and their activity</div>
-            </div>
-            <div class="head-actions">
-                <input id="userFilter" class="input" placeholder="Filter by email or IP..." />
-            </div>
+    {{-- User Overview Card --}}
+    <div class="card span-3">
+      <div class="card-head">
+        <div>
+          <div class="card-title">User Overview</div>
+          <div class="card-sub">Recent users and their activity</div>
         </div>
-        <table class="table" id="user-overview-table">
-            <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Daily Usage</th>
-                    <th>Last Login IP</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            @forelse($users as $user)
-                <tr>
-                    <td>
-                        <div class="user-info">
-                            <div class="user-name">{{ $user->name }}</div>
-                            <div class="user-email">{{ $user->email }}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="usage-bar-container">
-                            <div class="usage-bar" style="width: {{ min(100, $user->usage_percent) }}%;"></div>
-                        </div>
-                        <div class="usage-text">{{ $user->today_count }} / {{ $user->daily_limit }}</div>
-                    </td>
-                    <td class="ip-address">{{ $user->last_login_ip }}</td>
-                    <td><a href="#" class="btn-details">View</a></td>
-                </tr>
+        <div class="head-actions">
+          <input id="historyFilter" class="input" placeholder="Filter by email or name..." />
+        </div>
+      </div>
+      <table class="table user-table" id="global-history">
+        <thead><tr><th>User</th><th>Daily Searches</th><th>Last Login IP</th><th>Actions</th></tr></thead>
+        <tbody>
+            @forelse ($users ?? [] as $user)
+            <tr>
+                <td>
+                    <div class="user-name">{{ $user->name }}</div>
+                    <div class="user-email">{{ $user->email }}</div>
+                </td>
+                <td>{{ $user->today_count }} / {{ optional($user->limit)->daily ?? 200 }}</td>
+                <td>{{ $user->last_login_ip ?? 'N/A' }}</td>
+                <td><button class="btn-details">View</button></td>
+            </tr>
             @empty
-                <tr><td colspan="4" class="muted">No users found.</td></tr>
+            <tr>
+                <td colspan="4" class="muted">No users found.</td>
+            </tr>
             @endforelse
-            </tbody>
-        </table>
-        {{-- Pagination Links --}}
-        <div class="pagination-links">
-            {{ $users->links() }}
+        </tbody>
+      </table>
+       <div class="pagination-links">
+            {{ ($users ?? null) ? $users->links() : '' }}
         </div>
     </div>
-    
   </div>
 </div>
 @endsection
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-{{-- You can link to a new JS file here if you add interactivity --}}
-{{-- <script src="{{ asset('js/admin-dashboard.js') }}" defer></script> --}}
-@endpush
