@@ -400,20 +400,35 @@ class AnalyzerController extends Controller
             $aiLikelihood = $this->getAiLikelihood($textContent);
 
             $readabilityData = [];
+            $humanScore = 0;
             if ($aiLikelihood !== -1) {
-                // If OpenAI check was successful, reverse-engineer the readability score for the frontend
                 $humanScore = 100 - $aiLikelihood;
-                $passiveRatio = 10; // Use a constant, reasonable passive ratio
-                // Formula from frontend: human = 70 + (score / 5) - (passive_ratio / 3)
-                // Reversed: score = 5 * (human - 70 + (passive_ratio / 3))
+                $passiveRatio = 10;
                 $fleschScore = 5 * ($humanScore - 70 + ($passiveRatio / 3));
-                
                 $readabilityData['score'] = (int) max(0, min(100, round($fleschScore)));
                 $readabilityData['passive_ratio'] = $passiveRatio;
             } else {
-                // Fallback to local readability analysis if OpenAI isn't available
                 $readabilityData = $this->analyzeReadability($textContent);
+                // Calculate human score based on local readability if AI fails
+                $humanScore = (int) max(0, min(100, round(70 + ($readabilityData['score'] / 5) - ($readabilityData['passive_ratio'] / 3))));
+                $aiLikelihood = 100 - $humanScore;
             }
+
+            // Generate humanizer recommendations based on the score
+            $humanizerData = [];
+            if ($humanScore < 60) {
+                $humanizerData['recommendation'] = 'This content has a high probability of being AI-generated. We strongly recommend rewriting it for better engagement and authenticity.';
+                $humanizerData['badge_type'] = 'danger';
+            } elseif ($humanScore < 80) {
+                $humanizerData['recommendation'] = 'This content could be more engaging. Use the suggestions below to make it sound more human.';
+                $humanizerData['badge_type'] = 'warning';
+            } else {
+                $humanizerData['recommendation'] = 'Great job! This content reads like it was written by a human.';
+                $humanizerData['badge_type'] = 'success';
+            }
+            $humanizerData['suggestions'] = ($humanScore < 100) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
+            $humanizerData['google_search_url'] = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
+
 
             $contentStructure = [];
             $contentStructure['title'] = optional($xpath->query('//title')->item(0))->textContent;
@@ -465,7 +480,8 @@ class AnalyzerController extends Controller
 
             return response()->json([
                 'overall_score' => $scores['overall_score'],
-                'readability' => $readabilityData, // Use the dynamic readability data
+                'readability' => $readabilityData,
+                'humanizer' => array_merge(['human_score' => $humanScore, 'ai_score' => $aiLikelihood], $humanizerData),
                 'categories' => $scores['categories'],
                 'content_structure' => $contentStructure,
                 'page_signals' => $pageSignals,
