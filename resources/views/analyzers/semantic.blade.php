@@ -203,7 +203,7 @@
     }
     .speed-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .speed-title { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--ink); }
-    .speed-badge { font-size: 11px; padding: 4px 8px; border-radius: 999px; font-weight: 700; }
+    .speed-badge { font-size: 11px; padding: 4px 8px; border-radius: 9999px; font-weight: 700; }
     .speed-badge.good { background: #10B9811A; color: #6EE7B7; border: 1px solid #10B981; }
     .speed-badge.warn { background: #F59E0B1A; color: #FBBF24; border: 1px solid #F59E0B; }
     .speed-badge.bad { background: #EF44441A; color: #F87171; border: 1px solid #EF4444; }
@@ -440,13 +440,13 @@
   }
   .cae-relevance-bar {
       height: 12px;
-      border-radius: 999px;
+      border-radius: 9999px;
       background: rgba(0,0,0,0.3);
       border: 1px solid rgba(255,255,255,0.1);
   }
   .cae-relevance-bar > span {
       display:block; height:100%; width:0%;
-      border-radius: 999px;
+      border-radius: 9999px;
       background: linear-gradient(90deg, var(--blue-1), var(--green-1));
       box-shadow: 0 0 8px var(--green-1);
       transition: width 0.9s ease;
@@ -684,16 +684,27 @@
     const showError=(msg,detail)=>{ errorBox.style.display='block'; errorBox.textContent=msg+(detail?`: ${detail}`:''); };
     const clearError=()=>{ errorBox.style.display='none'; errorBox.textContent=''; };
     
-    const handleApiError = (toolName, error) => {
+    const showInlineError = (cardSelector, toolName, error) => {
+        const card = $(cardSelector);
         let message = error.message || 'An unknown error occurred.';
-        const jsonStringMatch = message.match(/(\{.*\})/);
-        if (jsonStringMatch && jsonStringMatch[1]) {
+        const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
+        if (apiErrorMatch && apiErrorMatch[1]) {
             try {
-                const errorJson = JSON.parse(jsonStringMatch[1]);
-                message = errorJson.error || errorJson.message || jsonStringMatch[1];
-            } catch (e) { /* Not valid JSON */ }
+                const errorJson = JSON.parse(apiErrorMatch[1]);
+                message = errorJson.error || errorJson.message || apiErrorMatch[1];
+            } catch(e) { message = apiErrorMatch[1]; }
         }
-        showError(`${toolName} analysis failed`, message);
+
+        if (card) {
+            card.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--red-1);">
+                <h4 class="t-grad">${toolName}</h4>
+                <p style="color: var(--sub); font-size: 14px; margin-top: 8px;">Analysis Failed</p>
+                <p style="font-size: 12px; margin-top: 4px;">${message}</p>
+            </div>`;
+        } else {
+            // Fallback to the main error box if a specific card isn't found
+            showError(`${toolName} analysis failed`, message);
+        }
         return null;
     };
 
@@ -800,14 +811,10 @@
         // --- Fire all ORIGINAL API calls in parallel ---
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
             callAnalyzer(url),
-            callTechnicalSeoApi(url).catch(err => handleApiError('Technical SEO', err)),
-            callKeywordApi(url).catch(err => handleApiError('Keyword Intelligence', err)),
-            callContentEngineApi(url).catch(err => handleApiError('Content Engine', err)),
-            callPSI(url).catch(err => {
-                handleApiError('PageSpeed Insights', err);
-                if(speedOverviewText) speedOverviewText.textContent = `⚠️ PageSpeed Insights analysis failed.`;
-                return null;
-            })
+            callTechnicalSeoApi(url).catch(err => showInlineError('#technicalSeoCard', 'Technical SEO', err)),
+            callKeywordApi(url).catch(err => showInlineError('#keywordIntelligenceCard', 'Keyword Intelligence', err)),
+            callContentEngineApi(url).catch(err => showInlineError('#contentAnalysisEngineCard', 'Content Analysis', err)),
+            callPSI(url).catch(err => showInlineError('#speedCard', 'PageSpeed Insights', err))
         ]);
 
         if(!data || data.error) throw new Error(data?.error || 'Local data parsing failed');
