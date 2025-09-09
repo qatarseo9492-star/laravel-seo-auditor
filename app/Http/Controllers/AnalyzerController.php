@@ -176,7 +176,7 @@ class AnalyzerController extends Controller
             return ['score' => 0, 'passive_ratio' => 0];
         }
 
-        $words = preg_split('/[\s,]+/', $text, -1, PREG_SPL_IT_NO_EMPTY);
+        $words = preg_split('/[\s,]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
         $wordCount = count($words);
 
         // Not enough content for a meaningful analysis, return a good default.
@@ -233,7 +233,7 @@ class AnalyzerController extends Controller
         }
 
         // Limit text to avoid excessive token usage (approx. 1000 words)
-        $words = preg_split('/[\s]+/', $text, -1, PREG_SPL_IT_NO_EMPTY);
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
         $truncatedText = implode(' ', array_slice($words, 0, 1000));
 
         if (empty($truncatedText)) {
@@ -290,7 +290,7 @@ class AnalyzerController extends Controller
             return 'OpenAI API key is not configured.';
         }
         
-        $words = preg_split('/[\s]+/', $text, -1, PREG_SPL_IT_NO_EMPTY);
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
         $truncatedText = implode(' ', array_slice($words, 0, 1000));
 
         if (empty($truncatedText)) {
