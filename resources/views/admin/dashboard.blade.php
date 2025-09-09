@@ -129,6 +129,33 @@
           </table>
         </div>
       </div>
+
+      <!-- NEW: Users — Live (add-only) -->
+      <div class="sx-card sx-span-2">
+        <div class="sx-head">
+          <div>
+            <div class="sx-head-title">Users — Live</div>
+            <div class="sx-head-sub">Top 20 by last seen · search & quick actions</div>
+          </div>
+          <div class="sx-actions gap">
+            <input id="sxUsersSearch" class="sx-input" placeholder="Search email / name / IP" />
+            <button id="sxUsersRefresh" class="sx-btn sx-ghost">Refresh</button>
+          </div>
+        </div>
+        <div class="sx-table-wrap">
+          <table class="sx-table">
+            <thead>
+              <tr>
+                <th>ID</th><th>User</th><th>Status</th><th>Last seen</th><th>IP / Country</th><th>Limit</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="sxUsersBody">
+              <tr><td colspan="7" class="sx-muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- /Users — Live -->
     </div>
   </div>
 
@@ -208,6 +235,8 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
   const LIVE = @json($liveUrl);
   const USER = (id)=> @json(url('/admin/users')) + '/' + id + '/live';
   const LIMIT= (id)=> @json(url('/admin/users')) + '/' + id + '/limits';
+  const USERS_TABLE = @json(url('/admin/users/table'));
+  const SESSIONS = (id)=> @json(url('/admin/users')) + '/' + id + '/sessions';
   const CSRF = @json(csrf_token());
 
   const $ = (s,n=document)=>n.querySelector(s);
@@ -298,11 +327,105 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
     }
   }
 
+  // ---- NEW: Users — Live panel helpers ----
+  async function sxLoadUsers(){
+    try{
+      const q  = (document.getElementById('sxUsersSearch')?.value || '').trim();
+      const qs = q ? ('?q=' + encodeURIComponent(q)) : '';
+      const res = await fetch(USERS_TABLE + qs, {
+        headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},
+        credentials:'same-origin'
+      });
+      const text = await res.text();
+      let j; try { j = JSON.parse(text); } catch(e){ return sxUsersRenderError('Non-JSON response'); }
+      sxUsersRender(j.rows || []);
+    }catch(e){
+      sxUsersRenderError('Failed to load');
+    }
+  }
+  function sxUsersRenderError(msg){
+    const tb = document.getElementById('sxUsersBody');
+    if (!tb) return;
+    tb.innerHTML = `<tr><td colspan="7" class="sx-muted">${msg}</td></tr>`;
+  }
+  function sxUsersRender(rows){
+    const tb = document.getElementById('sxUsersBody'); if(!tb) return;
+    if(!rows.length){ tb.innerHTML = `<tr><td colspan="7" class="sx-muted">No users.</td></tr>`; return; }
+    tb.innerHTML = '';
+    rows.forEach(r=>{
+      const status = r.banned ? 'Banned' : (r.enabled ? 'Enabled' : 'Disabled');
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${r.id}</td>
+        <td><div class="sx-text" title="${r.email}">${r.name || '—'}<br><span class="sx-head-sub">${r.email}</span></div></td>
+        <td>${status}</td>
+        <td>${r.last_seen}</td>
+        <td>${r.ip || '—'} ${r.country ? '· '+r.country : ''}</td>
+        <td>
+          <input type="number" min="0" value="${r.limit}" style="width:86px" class="sx-input" id="sxL${r.id}">
+          <select class="sx-input" id="sxE${r.id}" style="width:110px">
+            <option value="1" ${r.enabled?'selected':''}>Enabled</option>
+            <option value="0" ${!r.enabled?'selected':''}>Disabled</option>
+          </select>
+        </td>
+        <td>
+          <button class="sx-btn sx-ghost" onclick="sxOpenDrawer(${r.id})">Manage</button>
+          <button class="sx-btn sx-ghost" onclick="sxSaveLimitInline(${r.id})">Save</button>
+          <button class="sx-btn sx-ghost" onclick="sxToggleBan(${r.id})">${r.banned?'Unban':'Ban'}</button>
+          <button class="sx-btn sx-ghost" onclick="sxShowSessions(${r.id})">Sessions</button>
+        </td>`;
+      tb.appendChild(tr);
+    });
+  }
+  async function sxSaveLimitInline(id){
+    const daily = Number(document.getElementById('sxL'+id).value || 200);
+    const en    = Number(document.getElementById('sxE'+id).value || 1);
+    try {
+      const res = await fetch(@json(url('/admin/users'))+'/'+id+'/limits', {
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': CSRF},
+        credentials:'same-origin',
+        body: JSON.stringify({ daily_limit: daily, is_enabled: en, reason: '' })
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      sxLoadUsers();
+    } catch(e){ alert('Save failed'); }
+  }
+  async function sxToggleBan(id){
+    try {
+      const res = await fetch(@json(url('/admin/users'))+'/'+id+'/ban', {
+        method:'PATCH',
+        headers:{'X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN': CSRF},
+        credentials:'same-origin'
+      });
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      sxLoadUsers();
+    } catch(e){ alert('Ban/Unban failed'); }
+  }
+  async function sxShowSessions(id){
+    try {
+      const res = await fetch(SESSIONS(id), {
+        headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},
+        credentials:'same-origin'
+      });
+      const j = await res.json();
+      const list = (j.rows || []).map(s=>`<div class="sx-row"><span class="sx-text">${s.login_at} → ${s.logout_at}</span><span class="sx-mono">${s.ip} ${s.country?'· '+s.country:''}</span></div>`).join('') || '<div class="sx-head-sub">No sessions.</div>';
+      // reuse drawer
+      sxOpenDrawer(id);
+      const body = document.getElementById('sxUdBody');
+      body.innerHTML += `<div style="margin-top:12px"><div class="sx-head-title">Sessions</div>${list}</div>`;
+    } catch(e){ alert('Failed to load sessions'); }
+  }
+  // ---- /Users — Live ----
+
   async function tick(){
     try{
-      const res = await fetch(LIVE + '?fresh=1', { headers:{'X-Requested-With':'XMLHttpRequest'} });
-      if(!res.ok) return;
-      const d = await res.json();
+      const res = await fetch(LIVE + '?fresh=1', {
+        headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},
+        credentials:'same-origin'
+      });
+      const text = await res.text();
+      let d; try { d = JSON.parse(text); } catch(e){ return; }
       d.kpis && renderKPIs(d.kpis);
       d.services && renderServices(d.services);
       d.traffic && renderTraffic(d.traffic);
@@ -317,7 +440,7 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
     const title = document.getElementById('sxUdTitle'); const sub = document.getElementById('sxUdSub');
     wrap.classList.remove('sx-hidden'); body.textContent='Loading…'; title.textContent='User #'+id; sub.textContent='—';
     try{
-      const res = await fetch(USER(id), { headers:{'X-Requested-With':'XMLHttpRequest'} });
+      const res = await fetch(USER(id), { headers:{'X-Requested-With':'XMLHttpRequest'}, credentials:'same-origin' });
       const j = await res.json(); const u=j.user||{}; const L=j.limit||{daily_limit:200,is_enabled:true,reason:''};
       sub.textContent = (u.email||'') + ' — Last seen ' + (u.last_seen_at||'—') + (u.last_ip? (' ('+u.last_ip+')') : '');
       body.innerHTML = `
@@ -336,14 +459,20 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
   window.sxSaveLimit = async function(id){
     const payload = { daily_limit:Number(document.getElementById('sxUdDaily').value||200), is_enabled:Number(document.getElementById('sxUdEnabled').value||1), reason:document.getElementById('sxUdReason').value||'' };
     try{
-      const res = await fetch(LIMIT(id), { method:'PATCH', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF}, body: JSON.stringify(payload) });
+      const res = await fetch(LIMIT(id), { method:'PATCH', headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest','X-CSRF-TOKEN':CSRF}, credentials:'same-origin', body: JSON.stringify(payload) });
       if(!res.ok) throw new Error('HTTP '+res.status);
-      alert('Saved'); sxCloseDrawer();
+      alert('Saved'); sxCloseDrawer(); sxLoadUsers();
     }catch(e){ alert('Failed to save'); }
   };
 
+  // Hooks
   document.getElementById('sxRefresh')?.addEventListener('click', tick);
+  document.getElementById('sxUsersRefresh')?.addEventListener('click', sxLoadUsers);
+  document.getElementById('sxUsersSearch')?.addEventListener('input', () => { clearTimeout(window._sxUsersT); window._sxUsersT=setTimeout(sxLoadUsers, 300); });
+
+  // initial loads and intervals
   tick(); setInterval(tick, 10000);
+  sxLoadUsers(); setInterval(sxLoadUsers, 15000);
 })();
 </script>
 @endsection
