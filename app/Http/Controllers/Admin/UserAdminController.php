@@ -32,13 +32,13 @@ class UserAdminController extends Controller
 
         $q = trim((string) $request->get('q', ''));
 
-        $hasAnalyze = Schema::hasTable('analyze_logs');
-        $hasLimits  = Schema::hasTable('user_limits');
-        $hasLastSeen = Schema::hasColumn('users', 'last_seen_at');
+        $hasAnalyze   = Schema::hasTable('analyze_logs');
+        $hasLimits    = Schema::hasTable('user_limits');
+        $hasLastSeen  = Schema::hasColumn('users', 'last_seen_at');
         $hasLastLogin = Schema::hasColumn('users', 'last_login_at');
-        $hasIp = Schema::hasColumn('users', 'last_ip');
-        $hasCountry = Schema::hasColumn('users', 'country');
-        $hasBanned = Schema::hasColumn('users', 'is_banned');
+        $hasIp        = Schema::hasColumn('users', 'last_ip');
+        $hasCountry   = Schema::hasColumn('users', 'country');
+        $hasBanned    = Schema::hasColumn('users', 'is_banned');
 
         $query = DB::table('users as u')
             ->addSelect('u.id', 'u.name', 'u.email', 'u.created_at');
@@ -264,5 +264,108 @@ class UserAdminController extends Controller
             });
 
         return response()->json(['rows' => $rows]);
+    }
+
+    /**
+     * Upgrade a user's subscription/plan (best-effort across schemas).
+     * Route: PATCH /admin/users/{user}/upgrade
+     *
+     * Accepts:
+     * - plan (string, required)  e.g., 'pro', 'agency'
+     * - provider (string, optional)  e.g., 'local', 'stripe'
+     * - mrr_cents (int, optional)   used if subscriptions.mrr_cents exists
+     * - reason (string, optional)
+     *
+     * Behavior:
+     * - If a 'subscriptions' table exists with common columns, upsert an active row for the user.
+     * - Else if 'users.plan' or 'users.subscription_plan' exists, set that column.
+     * - Returns JSON status without throwing if tables/columns are absent.
+     */
+    public function upgrade(Request $request, User $user)
+    {
+        $data = $request->validate([
+            'plan'      => 'required|string|max:100',
+            'provider'  => 'nullable|string|max:50',
+            'mrr_cents' => 'nullable|integer|min:0',
+            'reason'    => 'nullable|string|max:255',
+        ]);
+
+        $plan     = $data['plan'];
+        $provider = $data['provider'] ?? 'local';
+        $mrrCents = $data['mrr_cents'] ?? null;
+        $reason   = $data['reason'] ?? null;
+
+        $persisted = false;
+        $payload   = ['plan' => $plan];
+
+        // Try subscriptions table first
+        if (Schema::hasTable('subscriptions')) {
+            // Column availability checks
+            $cols = [
+                'user_id'   => Schema::hasColumn('subscriptions','user_id'),
+                'plan'      => Schema::hasColumn('subscriptions','plan'),
+                'status'    => Schema::hasColumn('subscriptions','status'),
+                'provider'  => Schema::hasColumn('subscriptions','provider'),
+                'mrr_cents' => Schema::hasColumn('subscriptions','mrr_cents'),
+                'reason'    => Schema::hasColumn('subscriptions','reason'),
+                'updated_at'=> Schema::hasColumn('subscriptions','updated_at'),
+                'created_at'=> Schema::hasColumn('subscriptions','created_at'),
+            ];
+
+            // Only proceed if we at least have user_id+plan
+            if ($cols['user_id'] && $cols['plan']) {
+                $upd = ['plan' => $plan];
+                if ($cols['status'])    $upd['status']    = 'active';
+                if ($cols['provider'])  $upd['provider']  = $provider;
+                if ($cols['mrr_cents'] && $mrrCents !== null) $upd['mrr_cents'] = (int) $mrrCents;
+                if ($cols['reason'])    $upd['reason']    = $reason;
+
+                // Find an active row if possible; otherwise upsert by user_id
+                $query = DB::table('subscriptions')->where('user_id', $user->id);
+                if ($cols['status']) $query->where('status', 'active');
+                $existing = $query->first();
+
+                if ($existing) {
+                    DB::table('subscriptions')->where('id', $existing->id)->update($upd + ($cols['updated_at'] ? ['updated_at' => now()] : []));
+                } else {
+                    $ins = ['user_id' => $user->id] + $upd;
+                    if ($cols['created_at']) $ins['created_at'] = now();
+                    if ($cols['updated_at']) $ins['updated_at'] = now();
+                    DB::table('subscriptions')->insert($ins);
+                }
+
+                $persisted = true;
+                $payload['provider'] = $provider;
+                if ($mrrCents !== null) $payload['mrr_cents'] = (int) $mrrCents;
+            }
+        }
+
+        // Fallback to a column on users table
+        if (!$persisted) {
+            $col = null;
+            if (Schema::hasColumn('users', 'plan')) {
+                $col = 'plan';
+            } elseif (Schema::hasColumn('users', 'subscription_plan')) {
+                $col = 'subscription_plan';
+            }
+
+            if ($col) {
+                $user->{$col} = $plan;
+                $user->save();
+                $persisted = true;
+            }
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok'       => (bool) $persisted,
+                'user_id'  => $user->id,
+                'plan'     => $plan,
+                'details'  => $payload,
+                'message'  => $persisted ? "User upgraded to {$plan}." : 'No subscription storage available to persist upgrade.',
+            ], $persisted ? 200 : 422);
+        }
+
+        return back()->with($persisted ? 'status' : 'error', $persisted ? "User upgraded to {$plan}." : 'No subscription storage available to persist upgrade.');
     }
 }
