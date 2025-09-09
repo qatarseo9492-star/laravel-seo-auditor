@@ -55,16 +55,20 @@ class Kernel extends HttpKernel
      * @var array<string, class-string|string>
      */
     protected $middlewareAliases = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
+        'auth'      => \App\Http\Middleware\Authenticate::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
-        'can' => \Illuminate\Auth\Middleware\Authorize::class,
-        'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-        'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        'can'       => \Illuminate\Auth\Middleware\Authorize::class,
+        'guest'     => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        'throttle'  => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        'verified'  => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+
         // Custom Aliases
-        'admin' => \App\Http\Middleware\AdminCheck::class,
-        'ban' => \App\Http\Middleware\BanCheck::class, 
-        'quota' => \App\Http\Middleware\QuotaGuard::class,
-        'presence' => \App\Http\Middleware\TouchPresence::class,
+        'admin'     => \App\Http\Middleware\AdminCheck::class,
+        'ban'       => \App\Http\Middleware\BanCheck::class,
+        'quota'     => \App\Http\Middleware\QuotaGuard::class,
+        'presence'  => \App\Http\Middleware\TouchPresence::class,
+
+        // ✅ New: Route-level analysis logger (usage: ->middleware('log.analysis:psi,url'))
+        'log.analysis' => \App\Http\Middleware\LogAnalysis::class,
     ];
 }
