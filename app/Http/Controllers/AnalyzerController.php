@@ -233,7 +233,7 @@ class AnalyzerController extends Controller
         }
 
         // Limit text to avoid excessive token usage (approx. 1000 words)
-        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPL_IT_NO_EMPTY);
         $truncatedText = implode(' ', array_slice($words, 0, 1000));
 
         if (empty($truncatedText)) {
@@ -290,7 +290,7 @@ class AnalyzerController extends Controller
             return 'OpenAI API key is not configured.';
         }
         
-        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPL_IT_NO_EMPTY);
         $truncatedText = implode(' ', array_slice($words, 0, 1000));
 
         if (empty($truncatedText)) {
@@ -333,20 +333,45 @@ class AnalyzerController extends Controller
         ]);
 
         $text = $validated['text'];
-
         $aiLikelihood = $this->getAiLikelihood($text);
 
         if ($aiLikelihood === -1) {
              return response()->json([
-                'error' => 'Could not determine AI likelihood. The local fallback method is not suitable for direct text input.'
+                'error' => 'Could not determine AI likelihood. The AI analysis service may be temporarily unavailable.'
             ], 500);
         }
 
-        $suggestions = $this->getHumanizeSuggestions($text, $aiLikelihood);
+        $humanScore = 100 - $aiLikelihood;
+        $suggestions = '';
+        
+        // Only get suggestions if the score is not perfect
+        if ($humanScore < 100) {
+            $suggestions = $this->getHumanizeSuggestions($text, $aiLikelihood);
+        }
+
+        $recommendation = '';
+        $badgeType = 'success';
+
+        if ($humanScore < 60) {
+            $recommendation = 'This content has a high probability of being AI-generated. We strongly recommend rewriting it for better engagement and authenticity.';
+            $badgeType = 'danger';
+        } elseif ($humanScore < 80) {
+            $recommendation = 'This content could be more engaging. Use the suggestions below to make it sound more human.';
+            $badgeType = 'warning';
+        } else {
+            $recommendation = 'Great job! This content reads like it was written by a human.';
+            $badgeType = 'success';
+        }
+
+        $googleSearchUrl = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
 
         return response()->json([
+            'human_score' => $humanScore,
             'ai_score' => $aiLikelihood,
             'suggestions' => $suggestions,
+            'recommendation' => $recommendation,
+            'badge_type' => $badgeType,
+            'google_search_url' => $googleSearchUrl,
         ]);
     }
 
@@ -371,12 +396,8 @@ class AnalyzerController extends Controller
             // Extract text for analysis
             $textContent = $this->extractTextFromDom($xpath);
             
-            // Get AI likelihood score and suggestions from OpenAI if available
+            // Get AI likelihood score from OpenAI if available
             $aiLikelihood = $this->getAiLikelihood($textContent);
-            $aiSuggestions = '';
-            if ($aiLikelihood !== -1 && $aiLikelihood >= 40) { // Get suggestions if AI score is 40+
-                $aiSuggestions = $this->getHumanizeSuggestions($textContent, $aiLikelihood);
-            }
 
             $readabilityData = [];
             if ($aiLikelihood !== -1) {
@@ -444,15 +465,12 @@ class AnalyzerController extends Controller
 
             return response()->json([
                 'overall_score' => $scores['overall_score'],
-                'readability' => $readabilityData,
+                'readability' => $readabilityData, // Use the dynamic readability data
                 'categories' => $scores['categories'],
                 'content_structure' => $contentStructure,
                 'page_signals' => $pageSignals,
                 'quick_stats' => $quickStats,
                 'images_alt_count' => $imagesAltCount,
-                'ai_score' => $aiLikelihood,
-                'ai_suggestions' => $aiSuggestions,
-                'source_text_for_ai_check' => mb_substr($textContent, 0, 8000),
             ]);
             
         } catch (\Exception $e) {
