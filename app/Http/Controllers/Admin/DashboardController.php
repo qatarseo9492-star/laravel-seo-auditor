@@ -109,10 +109,15 @@ class DashboardController extends Controller
         return $out;
     }
 
+    /**
+     * Show latest items from BOTH analyze_logs (primary) and recent analysis_cache (last 7 days),
+     * then de-duplicate, sort (desc), cap 50.
+     */
     private function recentHistory(): array
     {
         $out = [];
 
+        // ---------- A) analyze_logs ----------
         if (Schema::hasTable('analyze_logs')) {
             $q = DB::table('analyze_logs as a');
             $select = ['a.id','a.created_at','a.tool','a.url'];
@@ -121,13 +126,15 @@ class DashboardController extends Controller
             if (Schema::hasColumn('analyze_logs','cost_usd'))    $select[] = 'a.cost_usd';
             if (Schema::hasColumn('analyze_logs','cost'))        $select[] = 'a.cost';
 
-            if (Schema::hasColumn('analyze_logs','user_id') && Schema::hasTable('users')) {
+            $hasUser = Schema::hasColumn('analyze_logs','user_id') && Schema::hasTable('users');
+            if ($hasUser) {
                 $q->leftJoin('users as u','u.id','=','a.user_id');
                 $select[] = 'u.email'; $select[] = 'u.name';
             }
 
-            $rows = $q->orderByDesc('a.id')->limit(50)->get($select);
-            foreach ($rows as $r) {
+            $logs = $q->orderByDesc('a.id')->limit(100)->get($select);
+
+            foreach ($logs as $r) {
                 $out[] = [
                     'ts'      => $r->created_at,
                     'when'    => $this->fmt($r->created_at),
@@ -141,27 +148,31 @@ class DashboardController extends Controller
             }
         }
 
-        $needFallback = count($out) < 20;
-        if ($needFallback && Schema::hasTable('analysis_cache')) {
+        // ---------- B) analysis_cache (recent 7 days) ----------
+        if (Schema::hasTable('analysis_cache')) {
             $cols = DB::select('SHOW COLUMNS FROM analysis_cache');
             $has = function($name) use ($cols){ foreach ($cols as $c) if (($c->Field ?? null)===$name) return true; return false; };
 
-            $select = [];
-            foreach (['id','user_id','tool','url','created_at','updated_at'] as $c) if ($has($c)) $select[]=$c;
-            if (!in_array('created_at',$select,true) || !in_array('url',$select,true)) return $this->dedupeSortCap($out);
+            $need = ['id','created_at','url','tool'];
+            foreach ($need as $n) { if (!$has($n)) return $this->dedupeSortCap($out); }
 
-            $rows = DB::table('analysis_cache')->orderByDesc('id')->limit(100)->get($select);
+            $cacheQ = DB::table('analysis_cache')->where('created_at','>=',now()->subDays(7));
+            $select = ['id','created_at','url','tool'];
+            $hasUser = $has('user_id') && Schema::hasTable('users');
+            if ($hasUser) $select[]='user_id';
+
+            $cache = $cacheQ->orderByDesc('id')->limit(150)->get($select);
 
             $users = [];
-            if ($has('user_id') && Schema::hasTable('users')) {
-                $uids = $rows->pluck('user_id')->filter()->unique()->values();
+            if ($hasUser && $cache->count()) {
+                $uids = $cache->pluck('user_id')->filter()->unique()->values();
                 if ($uids->count()) {
-                    $users = DB::table('users')->whereIn('id',$uids)->get(['id','name','email'])->keyBy('id')->toArray();
+                    $users = DB::table('users')->whereIn('id',$uids)->get(['id','name','email'])->keyBy('id');
                 }
             }
 
-            foreach ($rows as $r) {
-                $u = (!empty($r->user_id) && isset($users[$r->user_id])) ? $users[$r->user_id] : null;
+            foreach ($cache as $r) {
+                $u = $hasUser ? ($users[$r->user_id] ?? null) : null;
                 $out[] = [
                     'ts'      => $r->created_at,
                     'when'    => $this->fmt($r->created_at),
