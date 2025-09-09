@@ -64,10 +64,10 @@ class DashboardController extends Controller
     }
 
     private function getSystemHealth() {
-        // Mock data for demonstration.
+        // **FIX**: Changed 'latency_ms' to 'latency' to match the view's expectation.
         return [
-            ['name' => 'Main API', 'status' => 'Operational', 'latency_ms' => 5, 'ok' => true],
-            ['name' => 'Database Cluster', 'status' => 'Operational', 'latency_ms' => 2, 'ok' => true],
+            ['name' => 'Main API', 'status' => 'Operational', 'latency' => 5, 'ok' => true],
+            ['name' => 'Database Cluster', 'status' => 'Operational', 'latency' => 2, 'ok' => true],
         ];
     }
     
@@ -122,4 +122,3 @@ class DashboardController extends Controller
             });
     }
 }
-
