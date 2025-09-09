@@ -13,7 +13,7 @@ use App\Models\UserLimit;
 class UserAdminController extends Controller
 {
     /**
-     * Page: Users — Live (table hydrates via /admin/users/table).
+     * “Users — Live” page.
      */
     public function index()
     {
@@ -23,7 +23,7 @@ class UserAdminController extends Controller
     /**
      * JSON: Top 20 users by last activity/seen with optional ?q= search.
      * Returns rows shaped for the UI:
-     *   id, user, email, last_seen, ip, country (optional), limit, enabled, banned
+     *  id, user, email, last_seen, ip, country, limit, enabled, banned
      */
     public function table(Request $request)
     {
@@ -42,7 +42,7 @@ class UserAdminController extends Controller
         $hasBanned    = Schema::hasColumn('users', 'is_banned');
 
         $query = DB::table('users as u')
-            ->addSelect('u.id', 'u.name', 'u.email', 'u.created_at');
+            ->select('u.id', 'u.name', 'u.email', 'u.created_at');
 
         if ($hasLastSeen)  $query->addSelect('u.last_seen_at');
         if ($hasLastLogin) $query->addSelect('u.last_login_at');
@@ -50,7 +50,7 @@ class UserAdminController extends Controller
         if ($hasCountry)   $query->addSelect('u.country');
         if ($hasBanned)    $query->addSelect('u.is_banned');
 
-        // Latest analyze activity -> last_activity
+        // Latest analysis per user (subquery -> last_activity)
         if ($hasAnalyze) {
             $agg = DB::table('analyze_logs')
                 ->select('user_id', DB::raw('MAX(created_at) as last_activity'))
@@ -80,25 +80,12 @@ class UserAdminController extends Controller
             });
         }
 
-        // Order by best-available signal
+        // Order by best available timestamp (no GROUP BY needed)
         $orderExpr = 'COALESCE('
             . ($hasLastSeen ? 'u.last_seen_at,' : '')
-            . 'last_activity,u.created_at) DESC';
+            . 'a.last_activity,u.created_at) DESC';
 
-        // Group-by to satisfy strict SQL modes
-        $groupCols = ['u.id', 'u.name', 'u.email', 'u.created_at'];
-        if ($hasLastSeen)  $groupCols[] = 'u.last_seen_at';
-        if ($hasLastLogin) $groupCols[] = 'u.last_login_at';
-        if ($hasIp)        $groupCols[] = 'u.last_ip';
-        if ($hasCountry)   $groupCols[] = 'u.country';
-        if ($hasBanned)    $groupCols[] = 'u.is_banned';
-        if ($hasAnalyze)   $groupCols[] = 'a.last_activity';
-        if ($hasLimits)    { $groupCols[] = 'ul.daily_limit'; $groupCols[] = 'ul.is_enabled'; }
-
-        $rows = $query->groupBy($groupCols)
-            ->orderByRaw($orderExpr)
-            ->limit(20)
-            ->get();
+        $rows = $query->orderByRaw($orderExpr)->limit(20)->get();
 
         $out = $rows->map(function ($r) {
             $last = $r->last_seen_at ?? $r->last_login_at ?? $r->last_activity ?? $r->created_at;
@@ -119,7 +106,7 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Drawer JSON for a single user (id/email/last_seen/ip + limit + latest activity).
+     * Drawer JSON for a single user (user + limit + latest activity).
      * Route: GET /admin/users/{user}/live
      */
     public function live(User $user)
@@ -165,9 +152,8 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Save limit (back-compat + new UI).
-     * Route: PATCH /admin/users/{user}/limits
-     * Accepts: daily_limit (int), is_enabled (bool), reason (nullable string)
+     * PATCH /admin/users/{user}/limits
+     * Accepts: daily_limit (int), is_enabled (bool), reason (string|null)
      */
     public function updateUserLimit(Request $request, User $user)
     {
@@ -211,8 +197,7 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Toggle ban/unban (requires users.is_banned boolean column).
-     * Route: PATCH /admin/users/{user}/ban
+     * PATCH /admin/users/{user}/ban
      */
     public function toggleBan(Request $request, User $user)
     {
@@ -238,8 +223,8 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Recent sessions for a user (best-effort; uses 'sessions' table if present).
-     * Route: GET /admin/users/{user}/sessions
+     * GET /admin/users/{user}/sessions
+     * Returns best-effort session activity.
      */
     public function sessions(User $user)
     {
@@ -247,7 +232,6 @@ class UserAdminController extends Controller
             return response()->json(['rows' => []]);
         }
 
-        // Default Laravel 'sessions' table: user_id (string), ip_address, last_activity (int timestamp)
         $rows = DB::table('sessions')
             ->where('user_id', (string) $user->getAuthIdentifier())
             ->orderByDesc('last_activity')
@@ -257,7 +241,7 @@ class UserAdminController extends Controller
                 $dt = $s->last_activity ? Carbon::createFromTimestamp($s->last_activity) : null;
                 return [
                     'login_at'  => $this->fmt($dt),
-                    'logout_at' => null, // not tracked in default sessions
+                    'logout_at' => null,
                     'ip'        => $s->ip_address,
                     'ua'        => $s->user_agent,
                     'country'   => null,
@@ -268,8 +252,8 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Upgrade a user's subscription/plan (best-effort across schemas).
-     * Route: PATCH /admin/users/{user}/upgrade
+     * PATCH /admin/users/{user}/upgrade
+     * Upgrade a user's plan (works with subscriptions table or users.plan fallback).
      */
     public function upgrade(Request $request, User $user)
     {
@@ -288,7 +272,6 @@ class UserAdminController extends Controller
         $persisted = false;
         $payload   = ['plan' => $plan];
 
-        // subscriptions table first
         if (Schema::hasTable('subscriptions')) {
             $cols = [
                 'user_id'   => Schema::hasColumn('subscriptions','user_id'),
@@ -328,7 +311,6 @@ class UserAdminController extends Controller
             }
         }
 
-        // fallback: users.plan or users.subscription_plan
         if (!$persisted) {
             $col = null;
             if (Schema::hasColumn('users', 'plan')) {
@@ -358,7 +340,7 @@ class UserAdminController extends Controller
     }
 
     /**
-     * Safe formatter for timestamps that may be strings or Carbon.
+     * Safe formatter for timestamps that may be strings, ints, or Carbon.
      */
     private function fmt($ts): ?string
     {
@@ -367,9 +349,11 @@ class UserAdminController extends Controller
             if ($ts instanceof \DateTimeInterface) {
                 return Carbon::instance($ts)->format('Y-m-d H:i');
             }
+            if (is_numeric($ts) && strlen((string) $ts) <= 10) {
+                return Carbon::createFromTimestamp((int) $ts)->format('Y-m-d H:i');
+            }
             return Carbon::parse((string) $ts)->format('Y-m-d H:i');
         } catch (\Throwable $e) {
-            // If parsing fails, return raw string
             return is_string($ts) ? $ts : null;
         }
     }
