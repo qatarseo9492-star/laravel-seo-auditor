@@ -6,22 +6,21 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\User;
 use App\Models\UserLimit;
 
 class DashboardController extends Controller
 {
-    /** Render the Blade (with limits summary for the right card) */
     public function index()
     {
         $limitsSummary = $this->limitsSummary();
         return view('admin.dashboard', compact('limitsSummary'));
     }
 
-    /** JSON for live dashboard polling */
+    /** Live JSON payload consumed by dashboard (poll ~10s) */
     public function live(Request $request)
     {
         $kpis     = Cache::remember('dash:kpis', 8, fn () => $this->kpis());
@@ -29,22 +28,27 @@ class DashboardController extends Controller
         $traffic  = Cache::remember('dash:traffic', 30, fn () => $this->traffic30());
         $history  = Cache::remember('dash:history', 12, fn () => $this->historyLatest());
 
-        return response()->json(compact('kpis', 'services', 'traffic', 'history'));
+        // NEW: top queries & error digest (additive, optional tables)
+        $top     = Cache::remember('dash:top7d', 60, fn () => $this->topQueries7d());
+        $errors  = Cache::remember('dash:errors24h', 60, fn () => $this->errorDigest24h());
+
+        return response()->json(compact('kpis', 'services', 'traffic', 'history', 'top', 'errors'));
     }
 
-    /** Drawer: per-user payload */
+    /** Drawer: per-user live payload */
     public function userLive(User $user)
     {
         $limit = $user->limit()->first();
         return response()->json([
             'user'  => [
-                'id'            => $user->id,
-                'email'         => $user->email,
-                'last_seen_at'  => optional($user->last_seen_at)->toDateTimeString(),
-                'last_ip'       => $user->last_ip,
-                'last_country'  => $user->last_country,
-                'last_login_at' => optional($user->last_login_at ?? null)->toDateTimeString(),
-                'last_logout_at'=> optional($user->last_logout_at ?? null)->toDateTimeString(),
+                'id'             => $user->id,
+                'email'          => $user->email,
+                'name'           => $user->name,
+                'last_seen_at'   => optional($user->last_seen_at)->toDateTimeString(),
+                'last_ip'        => $user->last_ip,
+                'last_country'   => $user->last_country,
+                'last_login_at'  => optional($user->last_login_at ?? null)->toDateTimeString(),
+                'last_logout_at' => optional($user->last_logout_at ?? null)->toDateTimeString(),
             ],
             'limit' => $limit ? [
                 'daily_limit' => (int) $limit->daily_limit,
@@ -54,105 +58,122 @@ class DashboardController extends Controller
         ]);
     }
 
-    /** Users — live JSON table (top 20 by last_seen). Supports ?q= filter */
+    /** Users — Live: table feed (top 20 by last_seen) */
     public function usersTable(Request $request)
     {
         $q = trim((string) $request->query('q', ''));
-
         $users = User::query()
             ->leftJoin('user_limits as ul', 'ul.user_id', '=', 'users.id')
-            ->when($q !== '', function ($qq) use ($q) {
-                $qq->where(function ($w) use ($q) {
-                    $w->where('users.email', 'like', "%{$q}%")
-                      ->orWhere('users.name', 'like', "%{$q}%")
-                      ->orWhere('users.last_ip', 'like', "%{$q}%");
+            ->select([
+                'users.id', 'users.name', 'users.email',
+                'users.last_seen_at', 'users.last_ip', 'users.last_country',
+                'users.is_banned',
+                DB::raw('COALESCE(ul.daily_limit, 200) as daily_limit'),
+                DB::raw('COALESCE(ul.is_enabled, 1) as is_enabled'),
+            ])
+            ->when($q !== '', function ($sql) use ($q) {
+                $qq = "%{$q}%";
+                $sql->where(function ($w) use ($qq) {
+                    $w->where('users.email', 'like', $qq)
+                      ->orWhere('users.name', 'like', $qq)
+                      ->orWhere('users.last_ip', 'like', $qq);
                 });
             })
             ->orderByDesc('users.last_seen_at')
             ->limit(20)
-            ->get([
-                'users.id','users.name','users.email','users.is_banned',
-                'users.last_seen_at','users.last_ip','users.last_country',
-                DB::raw('COALESCE(ul.daily_limit, 200) as daily_limit'),
-                DB::raw('COALESCE(ul.is_enabled, 1) as is_enabled'),
-            ]);
+            ->get();
 
         $rows = $users->map(function ($u) {
             return [
                 'id'       => $u->id,
                 'name'     => $u->name,
                 'email'    => $u->email,
-                'banned'   => (bool) $u->is_banned,
-                'enabled'  => (bool) $u->is_enabled,
-                'limit'    => (int)  $u->daily_limit,
-                'last_seen'=> optional($u->last_seen_at)->diffForHumans() ?? '—',
+                'last_seen'=> $u->last_seen_at ? Carbon::parse($u->last_seen_at)->diffForHumans() : '—',
                 'ip'       => $u->last_ip,
                 'country'  => $u->last_country,
+                'limit'    => (int) $u->daily_limit,
+                'enabled'  => (bool) $u->is_enabled,
+                'banned'   => (bool) $u->is_banned,
             ];
         })->toArray();
 
         return response()->json(['rows' => $rows]);
     }
 
-    /** User sessions list (last 30) if user_sessions table exists */
+    /** Users — Live: sessions drawer (if table exists) */
     public function userSessions(User $user)
     {
         if (!Schema::hasTable('user_sessions')) {
-            return response()->json(['rows' => []]);
+            return response()->json(['rows' => [], 'history' => []]);
         }
 
         $rows = DB::table('user_sessions')
             ->where('user_id', $user->id)
             ->orderByDesc('login_at')
-            ->limit(30)
-            ->get([
-                'login_at','logout_at','ip','country','user_agent'
-            ])->map(function ($r) {
-                return [
-                    'login_at'   => optional($r->login_at)->format('Y-m-d H:i'),
-                    'logout_at'  => $r->logout_at ? Carbon::parse($r->logout_at)->format('Y-m-d H:i') : '—',
-                    'ip'         => $r->ip,
-                    'country'    => $r->country,
-                    'user_agent' => $r->user_agent,
-                ];
-            })->toArray();
+            ->limit(50)
+            ->get(['login_at', 'logout_at', 'ip', 'country']);
 
-        return response()->json(['rows' => $rows]);
+        $out = $rows->map(fn ($r) => [
+            'login_at'  => $r->login_at ? Carbon::parse($r->login_at)->toDateTimeString() : '—',
+            'logout_at' => $r->logout_at ? Carbon::parse($r->logout_at)->toDateTimeString() : '—',
+            'ip'        => $r->ip,
+            'country'   => $r->country,
+        ])->toArray();
+
+        // Optional: quick per-user recent activity for the drawer, if analyze_logs exists
+        $history = [];
+        if (Schema::hasTable('analyze_logs')) {
+            $history = DB::table('analyze_logs')
+                ->where('user_id', $user->id)
+                ->orderByDesc('created_at')
+                ->limit(30)
+                ->get(['created_at',
+                       DB::raw("COALESCE(url, query, input, page_url) as display"),
+                       DB::raw("COALESCE(tool, tool_name, section) as tool"),
+                       DB::raw("COALESCE(tokens, total_tokens, 0) as tokens"),
+                       DB::raw("COALESCE(cost, cost_usd, usd_cost, 0) as cost")])
+                ->map(fn ($r) => [
+                    'when' => Carbon::parse($r->created_at)->format('Y-m-d H:i'),
+                    'display' => (string)($r->display ?? '—'),
+                    'tool' => (string)($r->tool ?? '—'),
+                    'tokens' => (int)($r->tokens ?? 0),
+                    'cost' => number_format((float)($r->cost ?? 0), 4, '.', ''),
+                ])->toArray();
+        }
+
+        return response()->json(['rows' => $out, 'history' => $history]);
     }
 
-    // ------------------------
-    // Helpers
-    // ------------------------
+    // ===== Helpers =====
 
     private function kpis(): array
     {
         $now = Carbon::now();
 
-        // totals & presence
-        $totalUsers = User::query()->count();
-        $active5m = User::query()
+        $totalUsers = (int) User::query()->count();
+
+        $active5m = (int) User::query()
             ->whereNotNull('last_seen_at')
             ->where('last_seen_at', '>=', $now->clone()->subMinutes(5))
             ->count();
 
-        // analyze_logs based metrics
         $searchesToday = 0; $dau = 0; $mau = 0; $active24h = 0;
         if (Schema::hasTable('analyze_logs')) {
-            $searchesToday = DB::table('analyze_logs')->whereDate('created_at', $now->toDateString())->count();
+            $searchesToday = (int) DB::table('analyze_logs')
+                ->whereDate('created_at', $now->toDateString())->count();
 
-            $dau = DB::table('analyze_logs')
+            $active24h = (int) DB::table('analyze_logs')
+                ->where('created_at', '>=', $now->clone()->subDay())->count();
+
+            $dau = (int) DB::table('analyze_logs')
                 ->where('created_at', '>=', $now->clone()->subDay())
                 ->distinct('user_id')->count('user_id');
 
-            $mau = DB::table('analyze_logs')
+            $mau = (int) DB::table('analyze_logs')
                 ->where('created_at', '>=', $now->clone()->subDays(30))
                 ->distinct('user_id')->count('user_id');
-
-            $active24h = DB::table('analyze_logs')
-                ->where('created_at', '>=', $now->clone()->subDay())->count();
         }
 
-        // OpenAI usage last 24h
         $cost24h = 0.0; $tokens24h = 0;
         if (Schema::hasTable('open_ai_usages')) {
             $q = DB::table('open_ai_usages')->where('created_at', '>=', $now->clone()->subDay());
@@ -186,26 +207,26 @@ class DashboardController extends Controller
             $services[] = ['name' => 'Database', 'ok' => false, 'latency_ms' => null];
         }
 
-        // Queue backlog
+        // Queue backlog (optional)
         if (Schema::hasTable('jobs')) {
             try {
                 $count = (int) DB::table('jobs')->count();
-                $services[] = ['name' => 'Queue', 'ok' => true, 'latency_ms' => $count.' pending'];
+                $services[] = ['name' => 'Queue', 'ok' => true, 'latency_ms' => $count . ' pending'];
             } catch (\Throwable $e) {
                 $services[] = ['name' => 'Queue', 'ok' => false, 'latency_ms' => null];
             }
         }
 
-        // Scheduler heartbeat from cron/command
-        $beatAt = Cache::get('dash:heartbeat_at'); // set by DashboardHealthPing
+        // Scheduler heartbeat (set by console command)
+        $beatAt = Cache::get('dash:heartbeat_at');
         if ($beatAt) {
             $diff = Carbon::parse($beatAt)->diffInSeconds(now());
-            $services[] = ['name' => 'Scheduler', 'ok' => $diff <= 120, 'latency_ms' => $diff.'s'];
+            $services[] = ['name' => 'Scheduler', 'ok' => $diff <= 120, 'latency_ms' => $diff . 's'];
         } else {
             $services[] = ['name' => 'Scheduler', 'ok' => false, 'latency_ms' => null];
         }
 
-        // OpenAI API heartbeat (recent usage within 6h)
+        // OpenAI API heartbeat (recent usage)
         if (Schema::hasTable('open_ai_usages')) {
             $apiOk = DB::table('open_ai_usages')->where('created_at', '>=', now()->subHours(6))->exists();
             $services[] = ['name' => 'OpenAI API', 'ok' => (bool) $apiOk, 'latency_ms' => null];
@@ -216,9 +237,7 @@ class DashboardController extends Controller
 
     private function traffic30(): array
     {
-        if (!Schema::hasTable('analyze_logs')) {
-            return [];
-        }
+        if (!Schema::hasTable('analyze_logs')) return [];
 
         $start = now()->startOfDay()->subDays(29);
         $raw = DB::table('analyze_logs')
@@ -238,9 +257,7 @@ class DashboardController extends Controller
 
     private function historyLatest(): array
     {
-        if (!Schema::hasTable('analyze_logs')) {
-            return [];
-        }
+        if (!Schema::hasTable('analyze_logs')) return [];
 
         $rows = DB::table('analyze_logs as a')
             ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
@@ -255,16 +272,44 @@ class DashboardController extends Controller
                 DB::raw("COALESCE(a.cost, a.cost_usd, a.usd_cost, 0) as cost"),
             ]);
 
-        return $rows->map(function ($r) {
-            return [
-                'when'    => Carbon::parse($r->created_at)->format('Y-m-d H:i'),
-                'user'    => $r->email ?? '—',
-                'display' => (string) ($r->display ?? '—'),
-                'tool'    => (string) ($r->tool ?? '—'),
-                'tokens'  => (int) ($r->tokens ?? 0),
-                'cost'    => number_format((float) ($r->cost ?? 0), 4, '.', ''),
-            ];
-        })->toArray();
+        return $rows->map(fn ($r) => [
+            'when'    => Carbon::parse($r->created_at)->format('Y-m-d H:i'),
+            'user'    => $r->email ?? '—',
+            'display' => (string) ($r->display ?? '—'),
+            'tool'    => (string) ($r->tool ?? '—'),
+            'tokens'  => (int) ($r->tokens ?? 0),
+            'cost'    => number_format((float) ($r->cost ?? 0), 4, '.', ''),
+        ])->toArray();
+    }
+
+    /** NEW: top queries over last 7 days (if your logs track queries) */
+    private function topQueries7d(): array
+    {
+        if (!Schema::hasTable('analyze_logs')) return [];
+        // try to aggregate on a generic "query" or "url"
+        $rows = DB::table('analyze_logs')
+            ->select(DB::raw("LOWER(TRIM(COALESCE(query, url, page_url, input))) as q"), DB::raw('COUNT(*) as c'))
+            ->where('created_at', '>=', now()->subDays(7))
+            ->whereNotNull(DB::raw("COALESCE(query, url, page_url, input)"))
+            ->groupBy('q')
+            ->orderByDesc('c')
+            ->limit(15)
+            ->get();
+        return $rows->map(fn ($r) => ['query' => $r->q, 'count' => (int) $r->c])->toArray();
+    }
+
+    /** NEW: error digest (if a simple error_logs table exists; else empty) */
+    private function errorDigest24h(): array
+    {
+        if (!Schema::hasTable('error_logs')) return [];
+        $rows = DB::table('error_logs')
+            ->select(DB::raw('message'), DB::raw('COUNT(*) as c'))
+            ->where('created_at', '>=', now()->subDay())
+            ->groupBy('message')
+            ->orderByDesc('c')
+            ->limit(15)
+            ->get();
+        return $rows->map(fn ($r) => ['message' => $r->message, 'count' => (int) $r->c])->toArray();
     }
 
     private function limitsSummary(): array
