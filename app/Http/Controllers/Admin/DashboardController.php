@@ -31,13 +31,26 @@ class DashboardController extends Controller
 
     public function live(Request $request)
     {
-        return response()->json([
-            'kpis'     => $this->computeKpis(),
-            'services' => $this->serviceHealth(),
-            'history'  => $this->recentHistory(),
-            'traffic'  => $this->trafficSeries(),
-        ]);
+        try {
+            $kpis     = $this->computeKpis();
+        } catch (\Throwable $e) { $kpis = []; }
+
+        try {
+            $services = $this->serviceHealth();
+        } catch (\Throwable $e) { $services = []; }
+
+        try {
+            $history  = $this->recentHistory();
+        } catch (\Throwable $e) { $history = []; }
+
+        try {
+            $traffic  = $this->trafficSeries();
+        } catch (\Throwable $e) { $traffic = []; }
+
+        return response()->json(compact('kpis', 'services', 'history', 'traffic'));
     }
+
+    /* ---------------- KPIs ---------------- */
 
     private function computeKpis(): array
     {
@@ -61,7 +74,7 @@ class DashboardController extends Controller
             }
         }
 
-        // Analyze logs (primary source for usage counts)
+        // Analyze logs (primary source for counts)
         if (Schema::hasTable('analyze_logs')) {
             $k['searchesToday'] = (int) DB::table('analyze_logs')
                 ->where('created_at', '>=', $today)
@@ -133,50 +146,63 @@ class DashboardController extends Controller
         return $out;
     }
 
-    /**
-     * Robust history composer:
-     * - analyze_logs (primary)
-     * - open_ai_usages / openai_usage (LLM calls)
-     * - user_sessions (logins)
-     * - users (signups/last seen) as last resort
-     */
+    /* ---------------- History ---------------- */
+
     private function recentHistory(): array
     {
         $events = [];
 
-        // 1) analyze_logs
+        // 1) analyze_logs (only select columns that exist)
         if (Schema::hasTable('analyze_logs')) {
-            $rows = DB::table('analyze_logs as a')
+            $sel = ['a.created_at'];
+            $has = fn(string $c) => Schema::hasColumn('analyze_logs', $c);
+
+            if ($has('keyword'))   $sel[] = DB::raw('a.keyword as kw');
+            if ($has('query'))     $sel[] = DB::raw('a.query as qry');
+            if ($has('prompt'))    $sel[] = DB::raw('a.prompt as prm');
+            if ($has('url'))       $sel[] = DB::raw('a.url as url');
+            if ($has('type'))      $sel[] = DB::raw('a.type as type');
+            if ($has('tool'))      $sel[] = 'a.tool';
+            if ($has('tokens'))    $sel[] = 'a.tokens';
+            if ($has('cost_usd'))  $sel[] = 'a.cost_usd';
+            if (!$has('cost_usd') && $has('cost')) $sel[] = DB::raw('a.cost as cost');
+
+            $q = DB::table('analyze_logs as a')
                 ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
                 ->orderByDesc('a.id')
-                ->limit(100)
-                ->get([
-                    'a.created_at',
-                    'u.email', 'u.name',
-                    // candidate columns (not all may exist in your schema, we'll handle nulls)
-                    DB::raw('a.keyword as kw'),
-                    DB::raw('a.query as qry'),
-                    DB::raw('a.tool as tool'),
-                    DB::raw('a.tokens as tokens'),
-                    DB::raw('a.cost_usd as cost_usd'),
-                    DB::raw('a.cost as cost_raw'),
-                ]);
+                ->limit(100);
+
+            $rows = $q->get(array_merge($sel, ['u.email','u.name']));
 
             foreach ($rows as $r) {
                 $ts = $r->created_at ?? null;
-                $display = null;
-                if (!empty($r->kw))  $display = 'Analyzed "'.$r->kw.'"';
-                if (!$display && !empty($r->qry)) $display = 'Query "'.$r->qry.'"';
-                if (!$display) $display = 'Analysis';
 
-                $cost = $r->cost_usd ?? $r->cost_raw ?? 0;
+                // Choose best display
+                $display = null;
+                $kw  = $this->prop($r, 'kw');
+                $qry = $this->prop($r, 'qry');
+                $prm = $this->prop($r, 'prm');
+                $url = $this->prop($r, 'url');
+                $typ = $this->prop($r, 'type');
+
+                if ($kw)       $display = 'Analyzed "'.$kw.'"';
+                elseif ($qry)  $display = 'Query "'.$qry.'"';
+                elseif ($prm)  $display = 'Prompt "'.mb_strimwidth($prm,0,40,'…').'"';
+                elseif ($url)  $display = 'URL '.$url;
+                elseif ($typ)  $display = ucfirst($typ);
+                else           $display = 'Analysis';
+
+                $tool   = $this->prop($r, 'tool') ?: 'semantic';
+                $tokens = $this->prop($r, 'tokens') ?? '—';
+                $cost   = $this->prop($r, 'cost_usd') ?? $this->prop($r, 'cost') ?? 0;
+
                 $events[] = [
                     'ts'      => $ts,
                     'when'    => $this->fmt($ts),
                     'user'    => $r->name ?: ($r->email ?? '—'),
                     'display' => $display,
-                    'tool'    => $r->tool ?: 'semantic',
-                    'tokens'  => $r->tokens ?? '—',
+                    'tool'    => $tool,
+                    'tokens'  => $tokens,
                     'cost'    => number_format((float)($cost ?: 0), 4),
                 ];
             }
@@ -211,20 +237,16 @@ class DashboardController extends Controller
 
             foreach ($rows as $r) {
                 $ts = $r->created_at ?? null;
-                $model = property_exists($r, 'model') ? $r->model : null;
-                $path  = property_exists($r, 'path') ? $r->path : null;
-                $disp = 'LLM call';
-                if ($model && $path) $disp = "$model — $path";
-                elseif ($model)      $disp = $model;
-                elseif ($path)       $disp = $path;
-
-                $tokens = property_exists($r, 'tokens') ? $r->tokens : '—';
-                $cost   = property_exists($r, 'cost_usd') ? $r->cost_usd : (property_exists($r, 'cost') ? $r->cost : 0);
+                $model = $this->prop($r, 'model');
+                $path  = $this->prop($r, 'path');
+                $disp  = $model && $path ? "$model — $path" : ($model ?: ($path ?: 'LLM call'));
+                $tokens = $this->prop($r, 'tokens') ?? '—';
+                $cost   = $this->prop($r, 'cost_usd') ?? $this->prop($r, 'cost') ?? 0;
 
                 $events[] = [
                     'ts'      => $ts,
                     'when'    => $this->fmt($ts),
-                    'user'    => property_exists($r, 'name') && $r->name ? $r->name : (property_exists($r, 'email') ? $r->email : '—'),
+                    'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
                     'display' => $disp,
                     'tool'    => 'openai',
                     'tokens'  => $tokens,
@@ -236,6 +258,7 @@ class DashboardController extends Controller
         // 3) user_sessions (logins)
         if (Schema::hasTable('user_sessions')) {
             $cols = $this->existingColumns('user_sessions', ['updated_at','login_at','created_at','ip','ip_address','country','country_code']);
+
             $select = [];
             if (isset($cols['updated_at'])) $select[] = 's.updated_at';
             if (isset($cols['login_at']))   $select[] = 's.login_at';
@@ -298,21 +321,15 @@ class DashboardController extends Controller
             }
         }
 
-        // Sort and limit
-        usort($events, function ($a, $b) {
-            $ta = $this->tsToSortable($a['ts']);
-            $tb = $this->tsToSortable($b['ts']);
-            return $tb <=> $ta; // desc
-        });
-
-        $events = array_slice($events, 0, 50);
-
-        return $events;
+        // Sort + limit 50
+        usort($events, fn($a,$b) => $this->tsToSortable($b['ts']) <=> $this->tsToSortable($a['ts']));
+        return array_slice($events, 0, 50);
     }
+
+    /* ---------------- Traffic ---------------- */
 
     private function trafficSeries(): array
     {
-        // Prefer analyze_logs; if absent, fall back to open_ai_usages counts
         if (Schema::hasTable('analyze_logs')) {
             return $this->seriesFromTable('analyze_logs');
         }
@@ -351,7 +368,7 @@ class DashboardController extends Controller
         return $out;
     }
 
-    /** ---------- helpers ---------- */
+    /* ---------------- helpers ---------------- */
 
     private function fmt($ts): ?string
     {
