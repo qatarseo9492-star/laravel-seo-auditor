@@ -21,27 +21,59 @@ class UserAdminController extends Controller
 
     /**
      * Legacy endpoint you already had: PATCH /admin/users/{user}/limit
-     * Kept for backward compatibility.
+     * Kept for backward compatibility with old UI.
+     *
+     * Accepts: daily_limit (int), is_enabled (bool), reason (string|null)
+     * Creates the user_limits row if it doesn't exist.
      */
     public function updateUserLimit(Request $request, User $user)
     {
+        // Accept partial updates to stay backward compatible
         $data = $request->validate([
-            'daily_limit' => 'nullable|integer|min:0',
+            'daily_limit' => 'nullable|integer|min:0|max:1000000',
             'is_enabled'  => 'nullable|boolean',
             'reason'      => 'nullable|string|max:255',
         ]);
 
-        $limit = $user->limit()->first() ?: new UserLimit(['user_id' => $user->id]);
+        // Read current record or defaults
+        $current = $user->limit()->first();
 
-        if (array_key_exists('daily_limit', $data)) $limit->daily_limit = (int) $data['daily_limit'];
-        if (array_key_exists('is_enabled', $data))  $limit->is_enabled  = (bool) $data['is_enabled'];
-        if (array_key_exists('reason', $data))      $limit->reason      = $data['reason'];
+        // Compute new values using incoming data or fallbacks
+        $newDaily   = array_key_exists('daily_limit', $data)
+                        ? (int) $data['daily_limit']
+                        : ($current?->daily_limit ?? 200);
+        $newEnabled = array_key_exists('is_enabled', $data)
+                        ? (bool) $data['is_enabled']
+                        : ($current?->is_enabled ?? true);
+        $newReason  = array_key_exists('reason', $data)
+                        ? ($data['reason'] ?? null)
+                        : ($current?->reason ?? null);
 
-        $limit->save();
+        // Upsert to guarantee row exists
+        $limit = UserLimit::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'daily_limit' => $newDaily,
+                'is_enabled'  => $newEnabled,
+                'reason'      => $newReason,
+            ]
+        );
 
-        return request()->expectsJson()
-            ? response()->json(['ok' => true])
-            : back()->with('status', 'Limit updated');
+        // JSON (new UI) or redirect back (old UI)
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok'    => true,
+                'user'  => $user->only(['id','email']),
+                'limit' => [
+                    'daily_limit' => (int) $limit->daily_limit,
+                    'is_enabled'  => (bool) $limit->is_enabled,
+                    'reason'      => $limit->reason,
+                ],
+                'message' => 'User limit updated.',
+            ]);
+        }
+
+        return back()->with('status', 'Limit updated');
     }
 
     /**
@@ -49,11 +81,18 @@ class UserAdminController extends Controller
      */
     public function toggleBan(Request $request, User $user)
     {
-        $user->is_banned = !$user->is_banned;
+        $user->is_banned = ! (bool) $user->is_banned;
         $user->save();
 
-        return $request->expectsJson()
-            ? response()->json(['ok' => true, 'banned' => $user->is_banned])
-            : back()->with('status', 'Ban status changed');
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok'        => true,
+                'user_id'   => $user->id,
+                'is_banned' => (bool) $user->is_banned,
+                'message'   => $user->is_banned ? 'User banned.' : 'User unbanned.',
+            ]);
+        }
+
+        return back()->with('status', $user->is_banned ? 'User banned.' : 'User unbanned.');
     }
 }
