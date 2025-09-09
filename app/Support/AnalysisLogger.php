@@ -7,48 +7,50 @@ use Illuminate\Support\Facades\Schema;
 
 class AnalysisLogger
 {
-    /**
-     * Log an analysis run into analyze_logs, only writing columns that exist.
-     */
     public static function log(string $tool, ?string $url = null, ?int $tokens = null, ?float $costUsd = null, array $extra = []): void
     {
         try {
             $req = request();
 
+            $notNullable = function (string $col): bool {
+                if (!Schema::hasColumn('analyze_logs', $col)) return false;
+                $c = DB::selectOne('SHOW COLUMNS FROM analyze_logs LIKE ?', [$col]);
+                return $c && isset($c->Null) && $c->Null === 'NO';
+            };
+
+            $userId = auth()->id();
+            if (Schema::hasColumn('analyze_logs','user_id') && $notNullable('user_id') && $userId === null) {
+                $userId = DB::table('users')->min('id');
+            }
+
             $data = [
-                'user_id'    => auth()->id(),
-                'tool'       => $tool,
+                'user_id'    => $userId,
+                'tool'       => $tool ?: 'semantic',
                 'url'        => $url,
                 'successful' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
 
-            // IP & country if you track them
-            if (Schema::hasColumn('analyze_logs', 'ip_address')) {
-                $data['ip_address'] = $req?->headers->get('CF-Connecting-IP') ?: $req?->ip();
+            if (Schema::hasColumn('analyze_logs','ip_address')) {
+                $ip = $req?->headers->get('CF-Connecting-IP') ?: $req?->ip();
+                if ($ip === null && $notNullable('ip_address')) $ip = '127.0.0.1';
+                $data['ip_address'] = $ip;
             }
-            if (Schema::hasColumn('analyze_logs', 'country')) {
-                $data['country'] = $req?->headers->get('CF-IPCountry') ?: null;
-            }
-
-            // Optional tokens/cost if your table has them
-            if (Schema::hasColumn('analyze_logs', 'tokens_used') && $tokens !== null) {
-                $data['tokens_used'] = $tokens;
-            }
-            if (Schema::hasColumn('analyze_logs', 'tokens') && $tokens !== null) {
-                $data['tokens'] = $tokens;
-            }
-            if (Schema::hasColumn('analyze_logs', 'cost_usd') && $costUsd !== null) {
-                $data['cost_usd'] = $costUsd;
-            }
-            if (Schema::hasColumn('analyze_logs', 'cost') && $costUsd !== null) {
-                $data['cost'] = $costUsd;
+            if (Schema::hasColumn('analyze_logs','country')) {
+                $cc = $req?->headers->get('CF-IPCountry') ?: null;
+                if (($cc === null || $cc === 'XX') && $notNullable('country')) $cc = 'XX';
+                $data['country'] = $cc;
             }
 
-            DB::table('analyze_logs')->insert($data + $extra);
+            if (Schema::hasColumn('analyze_logs','tokens_used')) $data['tokens_used'] = $tokens ?? ($notNullable('tokens_used') ? 0 : null);
+            if (Schema::hasColumn('analyze_logs','tokens'))      $data['tokens']      = $tokens ?? ($notNullable('tokens')      ? 0 : null);
+            if (Schema::hasColumn('analyze_logs','cost_usd'))    $data['cost_usd']    = $costUsd ?? ($notNullable('cost_usd')   ? 0 : null);
+            if (Schema::hasColumn('analyze_logs','cost'))        $data['cost']        = $costUsd ?? ($notNullable('cost')       ? 0 : null);
+
+            DB::table('analyze_logs')->insert(array_merge($data, $extra));
         } catch (\Throwable $e) {
-            // Never break the user flow because of logging
+            // never block the request due to logging
         }
     }
 }
