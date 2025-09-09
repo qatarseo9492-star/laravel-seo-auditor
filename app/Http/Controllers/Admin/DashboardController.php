@@ -12,20 +12,24 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    /**
-     * Display the admin dashboard.
-     *
-     * @param Request $request
-     * @return \Illuminate\View\View
-     */
     public function index(Request $request)
     {
         // Define all the data variables the view will need
         $stats = $this->getKpiStats();
-        $systemHealth = $this->getSystemHealth(); // This defines the missing variable
+        $systemHealth = $this->getSystemHealth();
         $limitsSummary = $this->getUserLimitsSummary();
         $trafficData = $this->getTrafficData();
         $history = $this->getGlobalHistory();
+
+        // The user data from your original controller was good, let's keep it.
+        // It's often better to show users on a dedicated user management page.
+        $users = User::with('limit')->latest()->paginate(10);
+        $users->getCollection()->transform(function ($u) {
+            $u->today_count = AnalyzeLog::where('user_id', $u->id)
+                              ->whereDate('created_at', today())->count();
+            return $u;
+        });
+
 
         // Pass all the variables to the view using compact()
         return view('admin.dashboard', compact(
@@ -33,46 +37,49 @@ class DashboardController extends Controller
             'systemHealth',
             'limitsSummary',
             'trafficData',
-            'history'
+            'history',
+            'users'
         ));
     }
 
     // --- Helper methods to fetch data ---
 
     private function getKpiStats() {
-        // Replace with your actual queries. Using mock data for now.
-        return [
+        $stats = [
             'searchesToday' => AnalyzeLog::whereDate('created_at', today())->count(),
             'totalUsers' => User::count(),
             'cost24h' => (float) OpenAiUsage::where('created_at', '>=', now()->subDay())->sum('cost'),
-            'tokens24h' => OpenAiUsage::where('created_at', '>=', now()->subDay())->sum('tokens'),
             'dau' => AnalyzeLog::where('created_at', '>=', now()->subDay())->distinct('user_id')->count(),
             'mau' => AnalyzeLog::where('created_at', '>=', now()->subDays(30))->distinct('user_id')->count(),
             'active5m' => User::where('updated_at', '>=', now()->subMinutes(5))->count(),
+            'tokens24h' => 0 // Default to 0
         ];
+
+        // **FIX**: Check if the 'tokens' column exists before trying to sum it.
+        if (Schema::hasColumn('open_ai_usages', 'tokens')) {
+            $stats['tokens24h'] = OpenAiUsage::where('created_at', '>=', now()->subDay())->sum('tokens');
+        }
+
+        return $stats;
     }
 
     private function getSystemHealth() {
-        // Replace with your actual service checks. Using mock data for demonstration.
+        // Mock data for demonstration.
         return [
             ['name' => 'Main API', 'status' => 'Operational', 'latency_ms' => 5, 'ok' => true],
             ['name' => 'Database Cluster', 'status' => 'Operational', 'latency_ms' => 2, 'ok' => true],
-            ['name' => 'Cache Service', 'status' => 'Degraded', 'latency_ms' => 89, 'ok' => false],
-            ['name' => 'Billing Endpoint', 'status' => 'Operational', 'latency_ms' => 25, 'ok' => true],
         ];
     }
     
     private function getUserLimitsSummary() {
-        // Replace with your actual queries.
         return [
             'enabled' => User::whereHas('limit', fn($q) => $q->where('is_enabled', true))->count(),
             'disabled' => User::whereHas('limit', fn($q) => $q->where('is_enabled', false))->count(),
-            'default' => 200, // Your default limit
+            'default' => 200,
         ];
     }
     
     private function getTrafficData() {
-        // Replace with your actual traffic data query.
         $traffic = AnalyzeLog::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
@@ -86,14 +93,31 @@ class DashboardController extends Controller
     }
 
     private function getGlobalHistory() {
-        // Add a 'display' column for easier access in the view
+        $logTable = 'analyze_logs';
+        
+        // **FIX**: Build the select query dynamically based on existing columns.
+        $selectColumns = ['id', 'user_id', 'created_at', 'tool'];
+        if (Schema::hasColumn($logTable, 'cost')) {
+            $selectColumns[] = 'cost';
+        }
+        if (Schema::hasColumn($logTable, 'tokens')) {
+            $selectColumns[] = 'tokens';
+        }
+        $displayColumn = collect(['query', 'keyword', 'url'])->first(fn($c) => Schema::hasColumn($logTable, $c));
+        if ($displayColumn) {
+            $selectColumns[] = $displayColumn;
+        }
+
         return AnalyzeLog::with('user:id,email')
+            ->select($selectColumns)
             ->latest()
             ->limit(100)
             ->get()
-            ->map(function ($log) {
-                // Find the first available field to display as the query
-                $log->display = $log->query ?? $log->url ?? $log->keyword ?? 'N/A';
+            ->map(function ($log) use ($displayColumn) {
+                // The view will safely handle missing attributes with '??'
+                if ($displayColumn) {
+                    $log->display = $log->{$displayColumn};
+                }
                 return $log;
             });
     }
