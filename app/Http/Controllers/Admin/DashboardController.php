@@ -49,6 +49,8 @@ class DashboardController extends Controller
             'mau'           => 0,
             'active5m'      => 0,
             'dailyLimit'    => 100,
+            // optional (filled if column exists)
+            'tokens24h'     => 0,
         ];
 
         if (Schema::hasTable('users')) {
@@ -76,6 +78,12 @@ class DashboardController extends Controller
             $k['cost24h'] = (float) DB::table('openai_usage')
                 ->where('created_at', '>=', now()->subDay())
                 ->sum('cost_usd');
+
+            if (Schema::hasColumn('openai_usage', 'tokens')) {
+                $k['tokens24h'] = (int) DB::table('openai_usage')
+                    ->where('created_at', '>=', now()->subDay())
+                    ->sum('tokens');
+            }
         }
 
         if (Schema::hasTable('user_limits') && Schema::hasColumn('user_limits', 'daily_limit')) {
@@ -113,26 +121,73 @@ class DashboardController extends Controller
 
     private function recentHistory(): array
     {
-        if (!Schema::hasTable('analyze_logs')) {
-            return [];
+        // 1) Primary: analyze_logs (preferred)
+        if (Schema::hasTable('analyze_logs')) {
+            $rows = DB::table('analyze_logs as a')
+                ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+                ->orderByDesc('a.id')
+                ->limit(50)
+                ->get(['a.created_at','u.email','u.name','a.keyword','a.tool','a.tokens','a.cost_usd']);
+
+            if ($rows->count()) {
+                return $rows->map(function ($r) {
+                    return [
+                        'when'   => optional($r->created_at)->format('Y-m-d H:i'),
+                        'user'   => $r->name ?: ($r->email ?? '—'),
+                        'display'=> $r->keyword ? ('Analyzed "' . $r->keyword . '"') : 'Analysis',
+                        'tool'   => $r->tool ?: 'semantic',
+                        'tokens' => $r->tokens,
+                        'cost'   => number_format((float)($r->cost_usd ?? 0), 4),
+                    ];
+                })->all();
+            }
         }
 
-        $rows = DB::table('analyze_logs as a')
-            ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
-            ->orderByDesc('a.id')
-            ->limit(50)
-            ->get(['a.created_at','u.email','u.name','a.keyword','a.tool','a.tokens','a.cost_usd']);
+        // 2) Fallback: user_sessions (login activity)
+        if (Schema::hasTable('user_sessions')) {
+            $rows = DB::table('user_sessions as s')
+                ->leftJoin('users as u', 'u.id', '=', 's.user_id')
+                ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at)'))
+                ->limit(50)
+                ->get(['s.login_at','s.updated_at','u.email','u.name','s.ip','s.country']);
 
-        return $rows->map(function ($r) {
-            return [
-                'when'   => optional($r->created_at)->format('Y-m-d H:i'),
-                'user'   => $r->name ?: ($r->email ?? '—'),
-                'display'=> $r->keyword ? ('Analyzed "' . $r->keyword . '"') : 'Analysis',
-                'tool'   => $r->tool ?: 'semantic',
-                'tokens' => $r->tokens,
-                'cost'   => number_format((float)($r->cost_usd ?? 0), 4),
-            ];
-        })->all();
+            if ($rows->count()) {
+                return $rows->map(function ($r) {
+                    $when = $r->updated_at ?? $r->login_at;
+                    return [
+                        'when'   => optional($when)->format('Y-m-d H:i'),
+                        'user'   => $r->name ?: ($r->email ?? '—'),
+                        'display'=> 'Login' . ($r->ip ? (' from ' . $r->ip . ($r->country ? ' · ' . $r->country : '')) : ''),
+                        'tool'   => 'auth',
+                        'tokens' => '—',
+                        'cost'   => '0.0000',
+                    ];
+                })->all();
+            }
+        }
+
+        // 3) Last resort: recent signups
+        if (Schema::hasTable('users')) {
+            $rows = DB::table('users')
+                ->orderByDesc('created_at')
+                ->limit(50)
+                ->get(['name','email','created_at']);
+
+            if ($rows->count()) {
+                return $rows->map(function ($r) {
+                    return [
+                        'when'   => optional($r->created_at)->format('Y-m-d H:i'),
+                        'user'   => $r->name ?: ($r->email ?? '—'),
+                        'display'=> 'Signup',
+                        'tool'   => 'onboarding',
+                        'tokens' => '—',
+                        'cost'   => '0.0000',
+                    ];
+                })->all();
+            }
+        }
+
+        return [];
     }
 
     private function trafficSeries(): array
