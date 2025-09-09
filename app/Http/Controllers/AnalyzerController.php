@@ -371,8 +371,12 @@ class AnalyzerController extends Controller
             // Extract text for analysis
             $textContent = $this->extractTextFromDom($xpath);
             
-            // Get AI likelihood score from OpenAI if available
+            // Get AI likelihood score and suggestions from OpenAI if available
             $aiLikelihood = $this->getAiLikelihood($textContent);
+            $aiSuggestions = '';
+            if ($aiLikelihood !== -1 && $aiLikelihood >= 40) { // Get suggestions if AI score is 40+
+                $aiSuggestions = $this->getHumanizeSuggestions($textContent, $aiLikelihood);
+            }
 
             $readabilityData = [];
             if ($aiLikelihood !== -1) {
@@ -440,12 +444,15 @@ class AnalyzerController extends Controller
 
             return response()->json([
                 'overall_score' => $scores['overall_score'],
-                'readability' => $readabilityData, // Use the dynamic readability data
+                'readability' => $readabilityData,
                 'categories' => $scores['categories'],
                 'content_structure' => $contentStructure,
                 'page_signals' => $pageSignals,
                 'quick_stats' => $quickStats,
                 'images_alt_count' => $imagesAltCount,
+                'ai_score' => $aiLikelihood,
+                'ai_suggestions' => $aiSuggestions,
+                'source_text_for_ai_check' => mb_substr($textContent, 0, 8000),
             ]);
             
         } catch (\Exception $e) {
