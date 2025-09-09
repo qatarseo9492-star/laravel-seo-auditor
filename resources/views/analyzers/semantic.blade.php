@@ -233,15 +233,15 @@
   /* Animations */
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.1); } }
-  .animated-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      animation: spin 8s linear infinite;
+  
+  .header-icon {
+    animation: spin 15s linear infinite;
+    transition: transform 0.3s ease;
   }
-  .animated-icon.pulse {
-      animation: pulse 3s ease-in-out infinite, spin 12s linear infinite reverse;
+  .header-icon:hover {
+    transform: scale(1.1) rotate(15deg);
   }
+
   
   .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
   @media (max-width: 920px){.tsi-grid, .cae-grid {grid-template-columns:1fr}}
@@ -412,6 +412,7 @@
       min-height: 80px;
       white-space: pre-wrap;
       overflow-y: auto;
+      line-height: 1.6;
   }
 
   /* ======================================================= */
@@ -562,7 +563,10 @@
     
     const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult');
     
-    const aiCheckTextarea = $('#aiCheckTextarea'), aiCheckBtn = $('#aiCheckBtn'), aiCheckResult = $('#aiCheckResult');
+    // NEW refs for AI Readability card
+    const mwAIReadability = $('#mwAIReadability'), ringAIReadability = $('#ringAIReadability'), numAIReadability = $('#numAIReadability');
+    const aiScoreText = $('#aiScoreText'), viewAnalyzedContentBtn = $('#viewAnalyzedContentBtn');
+    const aiSuggestionsBox = $('#aiSuggestionsBox'), analyzedContentWrapper = $('#analyzedContentWrapper'), analyzedContentBox = $('#analyzedContentBox');
 
 
     /* Helpers (Unchanged) */
@@ -613,7 +617,7 @@
     const callPSI = (url) => callApi('/semantic-analyzer/psi', { url });
     const callOpenAiApi = (task, prompt, url = null) => callApi('/api/openai-request', { task, prompt, url });
 
-    function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="animated-icon">⚙️</span> Analyzing...':'🔍 Analyze'}
+    function setRunning(isOn){if(!analyzeBtn)return;analyzeBtn.disabled=isOn;analyzeBtn.innerHTML=isOn?'<span class="header-icon">⚙️</span> Analyzing...':'🔍 Analyze'}
     
     function setWheel(elRing, elNum, container, score, prefix){
         if (!elRing || !elNum || !container) return;
@@ -684,6 +688,20 @@
         setChip(chipHuman,'Human-like',`${human} %`,human);
         setChip(chipAI,'AI-like',`${ai} %`,100-human);
         
+        // --- NEW: AI Readability Section Update ---
+        const aiScore = data.ai_score;
+        if (aiScore !== -1 && aiScore !== null) {
+            const humanScore = 100 - aiScore;
+            setWheel(ringAIReadability, numAIReadability.parentElement, mwAIReadability, humanScore, '');
+            numAIReadability.textContent = humanScore;
+            aiScoreText.textContent = `AI-Likelihood: ${aiScore}%. This content scores ${humanScore}% on the human-like scale.`;
+            aiSuggestionsBox.innerHTML = data.ai_suggestions ? data.ai_suggestions.replace(/\n/g, '<br>') : 'Content appears human-written. No suggestions needed.';
+            analyzedContentBox.textContent = data.source_text_for_ai_check || 'No content was fetched.';
+        } else {
+            aiSuggestionsBox.textContent = 'AI analysis could not be performed (API key may be missing or an error occurred).';
+            aiScoreText.textContent = 'AI analysis not available.';
+        }
+
         if (data.content_structure) {
             if(titleVal) titleVal.textContent = data.content_structure.title || 'Not Found';
             if(metaVal) metaVal.textContent = data.content_structure.meta_description || 'Not Found';
@@ -829,50 +847,10 @@
         } finally { aiBriefBtn.disabled = false; aiBriefBtn.textContent = 'Generate'; }
     });
 
-    aiCheckBtn?.addEventListener('click', async () => {
-        const text = aiCheckTextarea.value.trim();
-        if (text.length < 50) {
-            aiCheckResult.innerHTML = '<p style="color: var(--orange-1);">Please enter at least 50 characters to analyze.</p>';
-            return;
-        }
-
-        aiCheckBtn.disabled = true;
-        aiCheckBtn.innerHTML = '<span class="animated-icon">⚙️</span> Analyzing...';
-        aiCheckResult.innerHTML = '<p>Checking AI score and generating suggestions...</p>';
-
-        try {
-            const result = await callApi('/api/ai-content-check', { text });
-            if (result.error) {
-                throw new Error(result.error);
-            }
-            const aiScore = result.ai_score;
-            const humanScore = 100 - aiScore;
-            const suggestions = result.suggestions;
-            
-            const scoreColor = humanScore >= 80 ? 'var(--green-1)' : humanScore >= 60 ? 'var(--yellow-1)' : 'var(--red-1)';
-
-            aiCheckResult.innerHTML = `
-                <div style="text-align: center; margin-bottom: 12px;">
-                    <strong style="font-size: 16px;">Human-like Score: <span style="color: ${scoreColor}; font-size: 20px;">${humanScore}%</span></strong><br>
-                    <small>(AI-like: ${aiScore}%)</small>
-                </div>
-                <h4 style="color: var(--blue-1); margin-top: 0; margin-bottom: 8px;">💡 Suggestions to Improve:</h4>
-                <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.6;">${suggestions}</div>
-            `;
-        } catch (error) {
-            let message = error.message || 'An unknown error occurred.';
-             const jsonStringMatch = message.match(/(\{.*\})/);
-            if (jsonStringMatch && jsonStringMatch[1]) {
-                try {
-                    const errorJson = JSON.parse(jsonStringMatch[1]);
-                    message = errorJson.error || errorJson.message || jsonStringMatch[1];
-                } catch (e) { /* Not JSON */ }
-            }
-            aiCheckResult.innerHTML = `<p style="color: var(--red-1);">Error: ${message}</p>`;
-        } finally {
-            aiCheckBtn.disabled = false;
-            aiCheckBtn.innerHTML = '🤖 Check Content';
-        }
+    viewAnalyzedContentBtn?.addEventListener('click', () => {
+        const isVisible = analyzedContentWrapper.style.display === 'block';
+        analyzedContentWrapper.style.display = isVisible ? 'none' : 'block';
+        viewAnalyzedContentBtn.textContent = isVisible ? 'View Analyzed Content' : 'Hide Analyzed Content';
     });
 
     pasteBtn && pasteBtn.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
@@ -958,48 +936,66 @@
     </div>
   </div>
   
-  <!-- AI Content Checker & Humanizer -->
+  <!-- AI Readability & Humanizer (Upgraded) -->
     <div class="ai-card" id="aiContentCheckerCard">
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
-            <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Content Checker & Humanizer</h3>
+             <svg class="header-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--green-1)"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-4-3-4.5M12 22a7 7 0 0 1-7-7c0-2 1-4 3-4.5M12 22v-5M17 9a5 5 0 0 0-10 0"/><path d="M12 2v5"/></svg>
+            <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Readability & Humanizer</h3>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
-            <div>
-                <textarea id="aiCheckTextarea" placeholder="Paste your text here to check its AI score and get suggestions to make it more human-like... (Min: 50 characters)" style="width: 100%; height: 250px; background: #081220; border: 1px solid #1c3d52; border-radius: 10px; padding: 12px; color: var(--ink); font-size: 13px; resize: vertical;"></textarea>
-                <button id="aiCheckBtn" class="btn btn-green" style="width: 100%; margin-top: 10px;">🤖 Check Content</button>
+        <div style="display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start;">
+            <!-- Left side: Score wheel -->
+            <div style="display:flex; flex-direction: column; align-items:center; gap:10px;">
+                 <div class="mw mw-sm" id="mwAIReadability">
+                    <div class="mw-ring" id="ringAIReadability" style="--v:0"></div>
+                    <div class="mw-center" style="font-size:32px;"><span id="numAIReadability">0</span>%<div style="font-size: 12px; color: var(--sub); margin-top: 4px;">Human Score</div></div>
+                </div>
+                <p id="aiScoreText" style="font-size:12px; color: var(--sub); text-align:center;">Run analysis to see score.</p>
+                <button id="viewAnalyzedContentBtn" class="btn btn-blue" style="width:100%;">View Analyzed Content</button>
             </div>
+            <!-- Right side: Suggestions & Content -->
             <div>
-                <div id="aiCheckResult" class="ai-result-box" style="height: 295px;">
-                     <div style="display:flex; align-items:center; justify-content:center; height:100%; color: var(--sub);">Results will appear here...</div>
+                <h4 class="onpage-item-title" style="margin-bottom:8px;">💡 Improvement Suggestions</h4>
+                <div id="aiSuggestionsBox" class="ai-result-box" style="height: 250px;">Suggestions will appear here after analysis...</div>
+
+                <div id="analyzedContentWrapper" style="display:none; margin-top:16px;">
+                    <h4 class="onpage-item-title" style="margin-bottom:8px;">📝 Analyzed Content from URL</h4>
+                    <div id="analyzedContentBox" class="ai-result-box" style="height: 200px; white-space:pre-wrap; font-size:12px;"></div>
                 </div>
             </div>
         </div>
     </div>
 
+
   <!-- Content Analysis Engine (Original Layout with Upgrades) -->
   <div class="cae-card" id="contentAnalysisEngineCard">
-    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3></div>
+    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+        <svg class="header-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--blue-1)"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"/><path d="M12 12v-2a2.5 2.5 0 0 0-5 0v2"/><path d="m14 12.5 2.33.67.67-2.33-2.33-.67"/><path d="m12 15-1.165 1.165a2.828 2.828 0 1 0 4-4L12 10"/><path d="m18 11-.5-1.5L15 9"/></svg>
+        <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
+    </div>
     <div class="cae-grid">
       <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE" style="--v:0"></div><div class="mw-center" id="numCAE">0%</div></div></div>
       <div class="cae-info-grid">
-        <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon animated-icon">🧩</div><span class="cae-info-title">Topic Clustering Analysis</span></div><div class="cae-tags" id="caeTopicClusters"></div></div>
-        <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon animated-icon pulse">🏢</div><span class="cae-info-title">Entity Recognition</span></div><div class="cae-tags" id="caeEntities"></div></div>
-        <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon animated-icon">🔍</div><span class="cae-info-title">Semantic Keyword Discovery</span></div><div class="cae-tags" id="caeKeywords"></div></div>
-        <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon animated-icon pulse">🎯</div><span class="cae-info-title">Content Relevance & Intent</span></div><div class="cae-relevance-bar"><span id="caeRelevanceBar" style="width:0%"></span></div><div id="caeIntent" style="margin-top:8px"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon">🧩</div><span class="cae-info-title">Topic Clustering Analysis</span></div><div class="cae-tags" id="caeTopicClusters"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon">🏢</div><span class="cae-info-title">Entity Recognition</span></div><div class="cae-tags" id="caeEntities"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon">🔍</div><span class="cae-info-title">Semantic Keyword Discovery</span></div><div class="cae-tags" id="caeKeywords"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon">🎯</div><span class="cae-info-title">Content Relevance & Intent</span></div><div class="cae-relevance-bar"><span id="caeRelevanceBar" style="width:0%"></span></div><div id="caeIntent" style="margin-top:8px"></div></div>
       </div>
     </div>
     {{-- UPGRADED SECTION --}}
     <div class="upgraded-grid">
-        <div class="cae-info-item"><div class="cae-info-header"><span class="animated-icon">🗺️</span><span class="cae-info-title">Topic Coverage & Entity Gaps</span></div><div id="topicCoverageResult" class="ai-result-box"></div></div>
-        <div class="cae-info-item"><div class="cae-info-header"><span class="animated-icon pulse">🧭</span><span class="cae-info-title">Search Intent Match</span></div><div id="intentAlignmentResult" class="ai-result-box"></div></div>
-        <div class="cae-info-item"><div class="cae-info-header"><span class="animated-icon">🏆</span><span class="cae-info-title">Featured Snippet Readiness</span></div><div id="snippetReadinessResult" class="ai-result-box"></div></div>
-        <div class="cae-info-item"><div class="cae-info-header"><span class="animated-icon">📖</span><span class="cae-info-title">Readability & Simplification</span></div><div id="readabilitySimplificationResult" class="ai-result-box"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><span class="header-icon">🗺️</span><span class="cae-info-title">Topic Coverage & Entity Gaps</span></div><div id="topicCoverageResult" class="ai-result-box"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><span class="header-icon">🧭</span><span class="cae-info-title">Search Intent Match</span></div><div id="intentAlignmentResult" class="ai-result-box"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><span class="header-icon">🏆</span><span class="cae-info-title">Featured Snippet Readiness</span></div><div id="snippetReadinessResult" class="ai-result-box"></div></div>
+        <div class="cae-info-item"><div class="cae-info-header"><span class="header-icon">📖</span><span class="cae-info-title">Readability & Simplification</span></div><div id="readabilitySimplificationResult" class="ai-result-box"></div></div>
     </div>
   </div>
 
   <!-- Technical SEO Integration (Original Layout with Upgrades) -->
   <div class="tsi-card" id="technicalSeoCard">
-     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3></div>
+     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+        <svg class="header-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--purple-1)"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
+    </div>
      <div class="tsi-grid">
       <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI" style="--v:0"></div><div class="mw-center" id="numTSI">0%</div></div></div>
       <div class="tsi-info-grid">
@@ -1013,18 +1009,21 @@
     <div class="tsi-suggestions"><h4 class="flex items-center gap-2">💡 Technical SEO Suggestions</h4><ul id="tsiSuggestionsList"></ul></div>
     {{-- UPGRADED SECTION --}}
     <div class="upgraded-grid">
-        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon">🔗</span><span class="tsi-info-title">Internal Link Opportunities</span></div><div id="internalLinksResult" class="ai-result-box"></div></div>
-        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon pulse">🖼️</span><span class="tsi-info-title">Media & Image SEO</span></div><div id="imageSeoResult" class="ai-result-box"></div></div>
-        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon">⚡</span><span class="tsi-info-title">UX that Impacts Rankings</span></div><div id="uxImpactResult" class="ai-result-box"></div></div>
-        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon pulse">🔄</span><span class="tsi-info-title">Cannibalization Signals</span></div><div id="cannibalizationCheckResult" class="ai-result-box"></div></div>
-        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon">⏳</span><span class="tsi-info-title">Content Freshness</span></div><div id="contentFreshnessResult" class="ai-result-box"></div></div>
-        <div class="tsi-info-item"><div class="tsi-info-header"><span class="animated-icon pulse">⭐</span><span class="tsi-info-title">E-E-A-T Signals</span></div><div id="eeatSignalsResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="header-icon">🔗</span><span class="tsi-info-title">Internal Link Opportunities</span></div><div id="internalLinksResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="header-icon">🖼️</span><span class="tsi-info-title">Media & Image SEO</span></div><div id="imageSeoResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="header-icon">⚡</span><span class="tsi-info-title">UX that Impacts Rankings</span></div><div id="uxImpactResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="header-icon">🔄</span><span class="tsi-info-title">Cannibalization Signals</span></div><div id="cannibalizationCheckResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="header-icon">⏳</span><span class="tsi-info-title">Content Freshness</span></div><div id="contentFreshnessResult" class="ai-result-box"></div></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="header-icon">⭐</span><span class="tsi-info-title">E-E-A-T Signals</span></div><div id="eeatSignalsResult" class="ai-result-box"></div></div>
     </div>
   </div>
 
   <!-- Keyword Intelligence (Original Layout with Upgrades) -->
   <div class="ki-card" id="keywordIntelligenceCard">
-    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3></div>
+    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+        <svg class="header-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--orange-1)"><path d="M10 10-2 22"/><path d="m18 18 4 4"/><path d="m22 2-6 6"/><path d="m6 6-4-4"/><circle cx="12" cy="12" r="8"/></svg>
+        <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
+    </div>
     <div class="ki-grid">
         <div class="ki-item"><h4 class="ki-item-title"><span>🧠</span>Semantic Keyword Research</h4><div id="kiSemanticResearch" class="ki-tags"></div></div>
         <div class="ki-item"><h4 class="ki-item-title"><span>🎯</span>Keyword Intent Classification</h4><div id="kiIntentClassification" class="ki-tags"></div></div>
@@ -1034,21 +1033,22 @@
     </div>
      {{-- UPGRADED SECTION --}}
     <div class="upgraded-grid">
-        <div class="ki-item"><h4 class="ki-item-title"><span class="animated-icon">❓</span>Questions to Add (PAA & Forums)</h4><div id="questionMiningResult" class="ai-result-box"></div></div>
-        <div class="ki-item"><h4 class="ki-item-title"><span class="animated-icon pulse">🌿</span>Semantic Variants (No Stuffing)</h4><div id="semanticVariantsResult" class="ai-result-box"></div></div>
+        <div class="ki-item"><h4 class="ki-item-title"><span class="header-icon">❓</span>Questions to Add (PAA & Forums)</h4><div id="questionMiningResult" class="ai-result-box"></div></div>
+        <div class="ki-item"><h4 class="ki-item-title"><span class="header-icon">🌿</span>Semantic Variants (No Stuffing)</h4><div id="semanticVariantsResult" class="ai-result-box"></div></div>
     </div>
   </div>
   
   <!-- On-Page Optimization Tools (This is a new card for some of the new features) -->
   <div class="onpage-card" id="onPageOptimizationCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+        <svg class="header-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--pink-1)"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/><path d="m15 5 3 3"/></svg>
         <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">On-Page Optimization Tools</h3>
     </div>
     <div class="onpage-grid">
-        <div class="onpage-item"><h4 class="onpage-item-title"><span class="animated-icon">✍️</span>Title & Meta Rewriter</h4><div id="titleMetaRewriteResult" class="ai-result-box"></div></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span class="animated-icon pulse">🧐</span>Heading Hierarchy Auditor</h4><div id="headingHierarchyResult" class="ai-result-box"></div></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span class="animated-icon">📋</span>Tables, Checklists & Examples</h4><div id="tablesChecklistsResult" class="ai-result-box"></div></div>
-        <div class="onpage-item"><h4 class="onpage-item-title"><span class="animated-icon pulse">🏗️</span>Schema Smart-Picker</h4><div id="schemaPickerResult" class="ai-result-box"></div></div>
+        <div class="onpage-item"><h4 class="onpage-item-title"><span class="header-icon">✍️</span>Title & Meta Rewriter</h4><div id="titleMetaRewriteResult" class="ai-result-box"></div></div>
+        <div class="onpage-item"><h4 class="onpage-item-title"><span class="header-icon">🧐</span>Heading Hierarchy Auditor</h4><div id="headingHierarchyResult" class="ai-result-box"></div></div>
+        <div class="onpage-item"><h4 class="onpage-item-title"><span class="header-icon">📋</span>Tables, Checklists & Examples</h4><div id="tablesChecklistsResult" class="ai-result-box"></div></div>
+        <div class="onpage-item"><h4 class="onpage-item-title"><span class="header-icon">🏗️</span>Schema Smart-Picker</h4><div id="schemaPickerResult" class="ai-result-box"></div></div>
     </div>
   </div>
 
