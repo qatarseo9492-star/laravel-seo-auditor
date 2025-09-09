@@ -6,7 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AnalyzerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserAdminController;
-use App\Http\Controllers\Admin\UserLimitsController; // kept in case you still use it elsewhere
+use App\Http\Controllers\Admin\UserLimitsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,7 +21,7 @@ use App\Http\Controllers\Admin\UserLimitsController; // kept in case you still u
 // Homepage
 Route::view('/', 'home')->name('home');
 
-// Authentication
+// Authentication Routes
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLogin')->name('login');
     Route::post('/login', 'login')->name('login.post');
@@ -30,60 +30,59 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/logout', 'logout')->name('logout');
 });
 
-// Authenticated (non-admin) app
+// Authenticated User Routes
 Route::middleware(['auth', 'ban', 'presence'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
-    // Analyzer UI pages
+    // Analyzer UI Pages (views only)
     Route::view('/semantic-analyzer', 'analyzers.semantic')->name('semantic.analyzer');
     Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
     Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
 
-    // Profile
-    Route::prefix('profile')->name('profile.')->controller(ProfileController::class)->group(function () {
+    // Profile Management
+    Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
         Route::get('/', 'edit')->name('edit');
         Route::post('/update', 'updateProfile')->name('update');
         Route::post('/password', 'updatePassword')->name('password');
         Route::post('/avatar', 'updateAvatar')->name('avatar');
     });
 
-    // PageSpeed Insights proxy
+    // PageSpeed Insights Proxy
+    // ✅ Minimal, safe change: add route-level logger so each PSI run is written to analyze_logs
     Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'pageSpeedInsights'])
         ->name('semantic.psi')
-        ->middleware('throttle:seoapi');
+        ->middleware(['throttle:seoapi', 'log.analysis:psi,url']);
 });
 
 /*
 |--------------------------------------------------------------------------
-| Admin
+| Admin Routes
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'ban', 'presence', 'admin'])
-    ->prefix('admin')
-    ->name('admin.')
+    ->prefix('admin')->name('admin.')
     ->group(function () {
-        // Main Admin Dashboard
+
+        // Admin dashboard page
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // Live JSON feeds used by the upgraded dashboard (poll every ~10s)
         Route::get('/dashboard/live', [DashboardController::class, 'live'])->name('dashboard.live');
 
-        // Users — Live (page + JSON feeds)
-        // Name is 'admin.users' so {{ route('admin.users') }} works
-        Route::get('/users', [UserAdminController::class, 'index'])->name('users');
+        // Users — helpers for live drawer/table
+        Route::get('/users/table', [DashboardController::class, 'usersTable'])->name('users.table');
+        Route::get('/users/{user}/live', [DashboardController::class, 'userLive'])->name('users.live');
+        Route::get('/users/{user}/sessions', [DashboardController::class, 'userSessions'])->name('users.sessions');
 
-        // Data feeds used by the Users page
-        Route::get('/users/table', [UserAdminController::class, 'table'])->name('users.table');
-        Route::get('/users/{user}/live', [UserAdminController::class, 'live'])->name('users.live');
-        Route::get('/users/{user}/sessions', [UserAdminController::class, 'sessions'])->name('users.sessions');
-
-        // Actions
+        // User actions (existing + new limits endpoint)
+        Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');
         Route::patch('/users/{user}/ban', [UserAdminController::class, 'toggleBan'])->name('users.ban');
-        Route::patch('/users/{user}/upgrade', [UserAdminController::class, 'upgrade'])->name('users.upgrade');
+        Route::patch('/users/{user}/limits', [UserLimitsController::class, 'update'])->name('users.updateLimits');
 
-        // Limits (keep both: legacy + new)
-        Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');   // legacy
-        Route::patch('/users/{user}/limits', [UserAdminController::class, 'updateUserLimit'])->name('users.limits'); // new UI
+        // Users index
+        Route::get('/users', [UserAdminController::class, 'index'])->name('users.index');
 
-        // Optional: safe preview route (kept)
+        // Optional: preview of new dashboard (safe/read-only)
         Route::get('/dashboard-v3', function () {
             $view = \Illuminate\Support\Facades\View::exists('admin.dashboard-v3') ? 'admin.dashboard-v3' : 'admin.dashboard';
             return view($view, [
@@ -100,7 +99,7 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
 
 /*
 |--------------------------------------------------------------------------
-| Utility & Fallback
+| Utility & Fallback Routes
 |--------------------------------------------------------------------------
 */
 Route::get('/_up', fn () => response('OK', 200))->name('_up');
