@@ -1,124 +1,91 @@
 <?php
 
+
 namespace App\Http\Controllers\Admin;
 
+
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\AnalyzeLog;
-use App\Models\OpenAiUsage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Carbon;
+use App\Models\User;
+
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
-    {
-        // Define all the data variables the view will need
-        $stats = $this->getKpiStats();
-        $systemHealth = $this->getSystemHealth();
-        $limitsSummary = $this->getUserLimitsSummary();
-        $trafficData = $this->getTrafficData();
-        $history = $this->getGlobalHistory();
-
-        // The user data from your original controller was good, let's keep it.
-        // It's often better to show users on a dedicated user management page.
-        $users = User::with('limit')->latest()->paginate(10);
-        $users->getCollection()->transform(function ($u) {
-            $u->today_count = AnalyzeLog::where('user_id', $u->id)
-                              ->whereDate('created_at', today())->count();
-            return $u;
-        });
+public function index()
+{
+$kpis = $this->computeKpis();
+// Optional: MRR if you have a subscriptions table
+$mrr = null;
+if (Schema::hasTable('subscriptions')) {
+$mrr = '$' . number_format((float) DB::table('subscriptions')
+->where('status', 'active')
+->sum('mrr_cents') / 100, 2);
+}
 
 
-        // Pass all the variables to the view using compact()
-        return view('admin.dashboard', compact(
-            'stats',
-            'systemHealth',
-            'limitsSummary',
-            'trafficData',
-            'history',
-            'users'
-        ));
-    }
+return view('admin.dashboard', [
+'kpis' => $kpis,
+'mrr' => $mrr,
+]);
+}
 
-    // --- Helper methods to fetch data ---
 
-    private function getKpiStats() {
-        $stats = [
-            'searchesToday' => AnalyzeLog::whereDate('created_at', today())->count(),
-            'totalUsers' => User::count(),
-            'cost24h' => (float) OpenAiUsage::where('created_at', '>=', now()->subDay())->sum('cost'),
-            'dau' => AnalyzeLog::where('created_at', '>=', now()->subDay())->distinct('user_id')->count(),
-            'mau' => AnalyzeLog::where('created_at', '>=', now()->subDays(30))->distinct('user_id')->count(),
-            'active5m' => User::where('updated_at', '>=', now()->subMinutes(5))->count(),
-            'tokens24h' => 0 // Default to 0
-        ];
+public function live(Request $request)
+{
+// KPIs + health + history + traffic — lightweight and resilient
+return response()->json([
+'kpis' => $this->computeKpis(),
+'services' => $this->serviceHealth(),
+'history' => $this->recentHistory(),
+'traffic' => $this->trafficSeries(),
+]);
+}
 
-        // **FIX**: Check if the 'tokens' column exists before trying to sum it.
-        if (Schema::hasColumn('open_ai_usages', 'tokens')) {
-            $stats['tokens24h'] = OpenAiUsage::where('created_at', '>=', now()->subDay())->sum('tokens');
-        }
 
-        return $stats;
-    }
+private function computeKpis(): array
+{
+$today = now()->startOfDay();
+$k = [
+'searchesToday' => 0,
+'totalUsers' => 0,
+'cost24h' => 0.0,
+'dau' => 0,
+'mau' => 0,
+'active5m' => 0,
+'dailyLimit' => 100,
+];
 
-    private function getSystemHealth() {
-        // **FIX**: Changed 'latency_ms' to 'latency' to match the view's expectation.
-        return [
-            ['name' => 'Main API', 'status' => 'Operational', 'latency' => 5, 'ok' => true],
-            ['name' => 'Database Cluster', 'status' => 'Operational', 'latency' => 2, 'ok' => true],
-        ];
-    }
-    
-    private function getUserLimitsSummary() {
-        return [
-            'enabled' => User::whereHas('limit', fn($q) => $q->where('is_enabled', true))->count(),
-            'disabled' => User::whereHas('limit', fn($q) => $q->where('is_enabled', false))->count(),
-            'default' => 200,
-        ];
-    }
-    
-    private function getTrafficData() {
-        $traffic = AnalyzeLog::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
-            ->where('created_at', '>=', now()->subDays(30))
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get();
-        
-        return [
-            'labels' => $traffic->pluck('date'),
-            'data' => $traffic->pluck('count'),
-        ];
-    }
 
-    private function getGlobalHistory() {
-        $logTable = 'analyze_logs';
-        
-        // **FIX**: Build the select query dynamically based on existing columns.
-        $selectColumns = ['id', 'user_id', 'created_at', 'tool'];
-        if (Schema::hasColumn($logTable, 'cost')) {
-            $selectColumns[] = 'cost';
-        }
-        if (Schema::hasColumn($logTable, 'tokens')) {
-            $selectColumns[] = 'tokens';
-        }
-        $displayColumn = collect(['query', 'keyword', 'url'])->first(fn($c) => Schema::hasColumn($logTable, $c));
-        if ($displayColumn) {
-            $selectColumns[] = $displayColumn;
-        }
+// Users
+if (Schema::hasTable('users')) {
+$k['totalUsers'] = (int) User::count();
+// Active in last 5 minutes (if you track last_seen_at presence)
+if (Schema::hasColumn('users', 'last_seen_at')) {
+$k['active5m'] = (int) User::where('last_seen_at', '>=', now()->subMinutes(5))->count();
+}
+}
 
-        return AnalyzeLog::with('user:id,email')
-            ->select($selectColumns)
-            ->latest()
-            ->limit(100)
-            ->get()
-            ->map(function ($log) use ($displayColumn) {
-                // The view will safely handle missing attributes with '??'
-                if ($displayColumn) {
-                    $log->display = $log->{$displayColumn};
-                }
-                return $log;
-            });
-    }
+
+// Analyses
+if (Schema::hasTable('analyze_logs')) {
+$k['searchesToday'] = (int) DB::table('analyze_logs')
+->where('created_at', '>=', $today)
+->count();
+$k['dau'] = (int) DB::table('analyze_logs')
+->where('created_at', '>=', now()->subDay())
+->distinct('user_id')->count('user_id');
+$k['mau'] = (int) DB::table('analyze_logs')
+->where('created_at', '>=', now()->subDays(30))
+->distinct('user_id')->count('user_id');
+}
+
+
+// Cost in last 24h
+if (Schema::hasTable('openai_usage')) {
+$k['cost24h'] = (float) DB::table('openai_usage')
+->where('created_at', '>=', now()->subDay())
+->sum('cost_usd');
 }
