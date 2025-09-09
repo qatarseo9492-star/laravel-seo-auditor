@@ -49,8 +49,7 @@ class DashboardController extends Controller
             'mau'           => 0,
             'active5m'      => 0,
             'dailyLimit'    => 100,
-            // optional (filled if column exists)
-            'tokens24h'     => 0,
+            'tokens24h'     => 0, // optional if tokens available
         ];
 
         if (Schema::hasTable('users')) {
@@ -121,7 +120,7 @@ class DashboardController extends Controller
 
     private function recentHistory(): array
     {
-        // 1) Primary: analyze_logs (preferred)
+        // 1) Primary: analyze_logs
         if (Schema::hasTable('analyze_logs')) {
             $rows = DB::table('analyze_logs as a')
                 ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
@@ -144,16 +143,16 @@ class DashboardController extends Controller
         }
 
         // 2) Fallback: user_sessions (login activity)
-        if (Schema::hasTable('user_sessions')) {
+        if (Schema::hasTable('user_sessions'))) {
             $rows = DB::table('user_sessions as s')
                 ->leftJoin('users as u', 'u.id', '=', 's.user_id')
-                ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at)'))
+                ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
                 ->limit(50)
-                ->get(['s.login_at','s.updated_at','u.email','u.name','s.ip','s.country']);
+                ->get(['s.login_at','s.updated_at','s.created_at','u.email','u.name','s.ip','s.country']);
 
             if ($rows->count()) {
                 return $rows->map(function ($r) {
-                    $when = $r->updated_at ?? $r->login_at;
+                    $when = $r->updated_at ?? $r->login_at ?? $r->created_at;
                     return [
                         'when'   => optional($when)->format('Y-m-d H:i'),
                         'user'   => $r->name ?: ($r->email ?? '—'),
@@ -166,17 +165,39 @@ class DashboardController extends Controller
             }
         }
 
-        // 3) Last resort: recent signups
+        // 3) Last resort: recent users, using ANY timestamp column that exists.
         if (Schema::hasTable('users')) {
-            $rows = DB::table('users')
-                ->orderByDesc('created_at')
-                ->limit(50)
-                ->get(['name','email','created_at']);
+            $hasCreated = Schema::hasColumn('users', 'created_at');
+            $hasUpdated = Schema::hasColumn('users', 'updated_at');
+            $hasSeen    = Schema::hasColumn('users', 'last_seen_at');
 
+            $select = ['u.name','u.email','u.id'];
+            $coalesce = [];
+            if ($hasSeen)    { $select[] = 'u.last_seen_at'; $coalesce[] = 'u.last_seen_at'; }
+            if ($hasUpdated) { $select[] = 'u.updated_at';   $coalesce[] = 'u.updated_at'; }
+            if ($hasCreated) { $select[] = 'u.created_at';   $coalesce[] = 'u.created_at'; }
+
+            // If no timestamp columns exist, just order by id desc
+            $orderExpr = $coalesce
+                ? ('COALESCE('.implode(',', $coalesce).') DESC')
+                : 'u.id DESC';
+
+            $rows = DB::table('users as u')
+                ->select($select)
+                ->orderByRaw($orderExpr)
+                ->limit(50)
+                ->get();
+
+            // Even if timestamps are null, still produce rows
             if ($rows->count()) {
-                return $rows->map(function ($r) {
+                return $rows->map(function ($r) use ($hasSeen, $hasUpdated, $hasCreated) {
+                    $when = null;
+                    if ($hasSeen   && !empty($r->last_seen_at)) $when = $r->last_seen_at;
+                    elseif ($hasUpdated && !empty($r->updated_at)) $when = $r->updated_at;
+                    elseif ($hasCreated && !empty($r->created_at)) $when = $r->created_at;
+
                     return [
-                        'when'   => optional($r->created_at)->format('Y-m-d H:i'),
+                        'when'   => optional($when)->format('Y-m-d H:i'),
                         'user'   => $r->name ?: ($r->email ?? '—'),
                         'display'=> 'Signup',
                         'tool'   => 'onboarding',
