@@ -7,184 +7,222 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Carbon;
 
 use App\Models\User;
 use App\Models\UserLimit;
-use App\Models\AnalyzeLog;
-use App\Models\OpenAiUsage;
+
+// These are optional; the code checks tables first.
+use App\Models\AnalyzeLog;   // table: analyze_logs (history / traffic)
+use App\Models\OpenAiUsage;  // table: open_ai_usages (tokens / cost)
 
 class DashboardController extends Controller
 {
-    public function index(Request $request)
+    /** Render the Blade (namespaced SX Nova) */
+    public function index()
     {
-        // Keep your existing behavior; safe defaults
-        $services = Cache::remember('dash:services', 60, function () {
-            $services = [];
-            try { $t = microtime(true); DB::select('select 1'); $services[]=['name'=>'DB','ok'=>true,'latency_ms'=>round((microtime(true)-$t)*1000)]; }
-            catch (\Throwable $e) { $services[]=['name'=>'DB','ok'=>false,'latency_ms'=>null]; }
-            if (Schema::hasTable('jobs')) {
-                try { $backlog = DB::table('jobs')->count(); $services[]=['name'=>'Queue','ok'=>$backlog<1000,'latency_ms'=>$backlog]; }
-                catch (\Throwable $e) { $services[]=['name'=>'Queue','ok'=>true,'latency_ms'=>null]; }
-            }
-            $apiOk = true;
-            try {
-                if (Schema::hasTable((new OpenAiUsage)->getTable())) {
-                    $apiOk = OpenAiUsage::where('created_at','>=', now()->subHours(6))->exists();
-                }
-            } catch (\Throwable $e) { $apiOk = true; }
-            $services[] = ['name'=>'OpenAI API','ok'=>(bool)$apiOk,'latency_ms'=>null];
-
-            $beat = Cache::get('dash:heartbeat_at');
-            $fresh = false;
-            if ($beat) { try { $fresh = now()->diffInSeconds($beat) <= 120; } catch (\Throwable $e) { $fresh=false; } }
-            $services[] = ['name'=>'Scheduler','ok'=>$fresh,'latency_ms'=>null];
-            return $services;
-        });
-
-        $limitsSummary = Cache::remember('dash:limitsSummary', 60, function () {
-            $s = ['enabled'=>0,'disabled'=>0,'default'=>200];
-            if (Schema::hasTable('user_limits')) {
-                try {
-                    $s['enabled']  = (int) DB::table('user_limits')->where('is_enabled',1)->count();
-                    $s['disabled'] = (int) DB::table('user_limits')->where('is_enabled',0)->count();
-                } catch (\Throwable $e) {}
-            }
-            return $s;
-        });
-
-        $traffic = Cache::remember('dash:traffic', 60, function () {
-            try {
-                if (!Schema::hasTable((new AnalyzeLog)->getTable())) return [];
-                return AnalyzeLog::selectRaw('DATE(created_at) as day, COUNT(*) as count')
-                    ->where('created_at','>=', now()->subDays(29)->startOfDay())
-                    ->groupBy('day')->orderBy('day')->get()
-                    ->map(fn($r)=>['day'=>(string)$r->day,'count'=>(int)$r->count])->toArray();
-            } catch (\Throwable $e) { return []; }
-        });
-
-        $topQueries = Cache::remember('dash:topQueries7d', 60, function () {
-            try {
-                if (!Schema::hasTable((new AnalyzeLog)->getTable())) return [];
-                $cols = Schema::getColumnListing((new AnalyzeLog)->getTable());
-                $hasQuery = in_array('query',$cols,true);
-                $hasUrl   = in_array('url',$cols,true);
-                $hasType  = in_array('type',$cols,true);
-                $hasScore = in_array('score',$cols,true);
-                $expr = $hasQuery ? "NULLIF(query,'')" : ($hasUrl ? "NULLIF(url,'')" : ($hasType ? "NULLIF(type,'')" : "'—'"));
-                $select = "COALESCE($expr,'—') as q, COUNT(*) as count";
-                if ($hasScore) $select .= ", ROUND(AVG(score)) as avg_score";
-                $rows = AnalyzeLog::where('created_at','>=', now()->subDays(7))
-                    ->selectRaw($select)->groupBy('q')->orderByDesc('count')->limit(10)->get();
-                return $rows->map(function($r) use ($hasScore){
-                    return ['query'=>(string)($r->q??'—'),'count'=>(int)($r->count??0),'avg_score'=>$hasScore?(int)($r->avg_score??0):null];
-                })->toArray();
-            } catch (\Throwable $e) { return []; }
-        });
-
-        $errors = Cache::remember('dash:errors24h', 60, function () {
-            try {
-                if (!Schema::hasTable('failed_jobs')) return [];
-                $rows = DB::table('failed_jobs')
-                    ->where('failed_at','>=', now()->subDay())
-                    ->selectRaw('SUBSTRING(error,1,120) as message, COUNT(*) as count, MAX(failed_at) as last_seen')
-                    ->groupBy('message')->orderByDesc('count')->limit(10)->get();
-                return collect($rows)->map(fn($e)=>['message'=>(string)($e->message??'—'),'count'=>(int)($e->count??0),'last_seen'=>(string)($e->last_seen??'')])->toArray();
-            } catch (\Throwable $e) { return []; }
-        });
-
-        // Render your existing view (our Blade uses null-safe defaults)
-        return view('admin.dashboard', compact('services','limitsSummary','traffic','topQueries','errors'));
+        // You can pass a quick limits summary for the sidebar
+        $limitsSummary = $this->limitsSummary();
+        return view('admin.dashboard', compact('limitsSummary'));
     }
 
-    // === Built-in JSON endpoints used by the inline JS ===
-
+    /** JSON used by the dashboard for live updates (10s) */
     public function live(Request $request)
     {
-        // KPIs
-        $kpis = Cache::remember('dashlive:kpis', 10, function () {
-            $out = ['totalUsers'=>0,'searchesToday'=>0,'active5m'=>0,'active24h'=>0,'tokens24h'=>0,'cost24h'=>0.0,'dau'=>0,'mau'=>0];
-            try { $out['totalUsers'] = User::count(); } catch (\Throwable $e) {}
-            try { $out['active5m']   = User::where('last_seen_at','>=', now()->subMinutes(5))->count(); } catch (\Throwable $e) {}
-            try { $out['active24h']  = User::where('last_seen_at','>=', now()->subDay())->count(); } catch (\Throwable $e) {}
-            if (Schema::hasTable((new AnalyzeLog)->getTable())) {
-                try { $out['searchesToday'] = AnalyzeLog::whereDate('created_at', now()->toDateString())->count(); } catch (\Throwable $e) {}
-                try { $out['dau'] = AnalyzeLog::where('created_at','>=', now()->subDay())->distinct('user_id')->count('user_id'); } catch (\Throwable $e) {}
-                try { $out['mau'] = AnalyzeLog::where('created_at','>=', now()->subDays(30))->distinct('user_id')->count('user_id'); } catch (\Throwable $e) {}
-            }
-            if (Schema::hasTable((new OpenAiUsage)->getTable())) {
-                try { $out['tokens24h'] = (int) OpenAiUsage::where('created_at','>=', now()->subDay())->sum('tokens'); } catch (\Throwable $e) {}
-                try { $out['cost24h']   = (float) OpenAiUsage::where('created_at','>=', now()->subDay())->sum('cost_usd'); } catch (\Throwable $e) {}
-            }
-            return $out;
-        });
+        // tiny caches to avoid hammering DB
+        $kpis     = Cache::remember('dash:kpis', 8, fn () => $this->kpis());
+        $services = Cache::remember('dash:services', 20, fn () => $this->services());
+        $traffic  = Cache::remember('dash:traffic', 30, fn () => $this->traffic30());
+        $history  = Cache::remember('dash:history', 12, fn () => $this->historyLatest());
 
-        // Services
-        $services = Cache::remember('dashlive:services', 20, function () {
-            $arr = [];
-            try { $t=microtime(true); DB::select('select 1'); $arr[]=['name'=>'DB','ok'=>true,'latency_ms'=>round((microtime(true)-$t)*1000)]; }
-            catch (\Throwable $e) { $arr[]=['name'=>'DB','ok'=>false,'latency_ms'=>null]; }
-            if (Schema::hasTable('jobs')) { try { $backlog=DB::table('jobs')->count(); $arr[]=['name'=>'Queue','ok'=>$backlog<1000,'latency_ms'=>$backlog]; } catch (\Throwable $e) { $arr[]=['name'=>'Queue','ok'=>true,'latency_ms'=>null]; } }
-            $beat = Cache::get('dash:heartbeat_at'); $fresh=false; if ($beat) { try { $fresh = now()->diffInSeconds($beat) <= 120; } catch (\Throwable $e) {} }
-            $arr[]=['name'=>'Scheduler','ok'=>$fresh,'latency_ms'=>null];
-            return $arr;
-        });
+        return response()->json(compact('kpis', 'services', 'traffic', 'history'));
+    }
 
-        // Traffic (30d)
-        $traffic = Cache::remember('dashlive:traffic', 60, function () {
-            if (!Schema::hasTable((new AnalyzeLog)->getTable())) return [];
-            return AnalyzeLog::selectRaw('DATE(created_at) as day, COUNT(*) as count')
-                ->where('created_at','>=', now()->subDays(29)->startOfDay())
-                ->groupBy('day')->orderBy('day')->get()
-                ->map(fn($r)=>['day'=>(string)$r->day,'count'=>(int)$r->count])->toArray();
-        });
-
-        // Global history (100 newest)
-        $history = Cache::remember('dashlive:history', 10, function () {
-            if (!Schema::hasTable((new AnalyzeLog)->getTable())) return [];
-            $rows = AnalyzeLog::with('user:id,name,email')->orderByDesc('id')->limit(100)->get(['id','user_id','created_at','type','query','url','domain','tokens','cost_usd']);
-            return $rows->map(function($h){
-                $display = $h->query ?: ($h->url ?: ($h->domain ?: '—'));
-                return [
-                    'when' => optional($h->created_at)->toDateTimeString(),
-                    'user' => $h->user ? ($h->user->email ?? $h->user->name ?? ('#'.$h->user_id)) : ('#'.$h->user_id),
-                    'tool' => (string)($h->type ?? '—'),
-                    'display' => (string)$display,
-                    'tokens' => (int)($h->tokens ?? 0),
-                    'cost' => number_format((float)($h->cost_usd ?? 0), 4),
-                ];
-            })->toArray();
-        });
-
+    /** Drawer: per-user live payload */
+    public function userLive(User $user)
+    {
+        $limit = $user->limit()->first();
         return response()->json([
-            'kpis' => $kpis,
-            'services' => $services,
-            'traffic' => $traffic,
-            'history' => $history,
+            'user'  => [
+                'id'           => $user->id,
+                'email'        => $user->email,
+                'last_seen_at' => optional($user->last_seen_at)->toDateTimeString(),
+                'last_ip'      => $user->last_ip,
+                'last_country' => $user->last_country,
+                'last_login_at'=> optional($user->last_login_at ?? null)->toDateTimeString(),
+                'last_logout_at'=> optional($user->last_logout_at ?? null)->toDateTimeString(),
+            ],
+            'limit' => $limit ? [
+                'daily_limit' => (int) $limit->daily_limit,
+                'is_enabled'  => (bool) $limit->is_enabled,
+                'reason'      => $limit->reason,
+            ] : ['daily_limit' => 200, 'is_enabled' => true, 'reason' => ''],
         ]);
     }
 
-    public function userLive(User $user)
-    {
-        $limit = $user->limit;
-        $sessions = Schema::hasTable('user_sessions')
-            ? DB::table('user_sessions')->where('user_id',$user->id)->orderByDesc('login_at')->limit(10)->get()
-            : collect([]);
-        $latest = Schema::hasTable((new AnalyzeLog)->getTable())
-            ? AnalyzeLog::where('user_id',$user->id)->latest()->limit(10)->get(['created_at','type','query','url','domain','tokens','cost_usd'])
-            : collect([]);
+    // ------------------------
+    // Helpers
+    // ------------------------
 
-        return response()->json([
-            'user'=>[
-                'id'=>$user->id,'name'=>$user->name,'email'=>$user->email,
-                'is_admin'=>(bool)$user->is_admin,'is_banned'=>(bool)$user->is_banned,
-                'last_seen_at'=>optional($user->last_seen_at)->toDateTimeString(),
-                'last_ip'=>$user->last_ip,'last_country'=>$user->last_country,
-                'last_login_at'=>method_exists($user,'getAttribute')?(string)($user->getAttribute('last_login_at')??''):'',
-                'last_logout_at'=>method_exists($user,'getAttribute')?(string)($user->getAttribute('last_logout_at')??''):'',
-            ],
-            'limit'=>$limit?['daily_limit'=>(int)$limit->daily_limit,'is_enabled'=>(bool)$limit->is_enabled,'reason'=>(string)$limit->reason]:null,
-            'sessions'=>$sessions,
-            'latest'=>$latest,
-        ]);
+    private function kpis(): array
+    {
+        $now = Carbon::now();
+
+        // totals
+        $totalUsers = User::query()->count();
+
+        // presence
+        $active5m = User::query()
+            ->whereNotNull('last_seen_at')
+            ->where('last_seen_at', '>=', $now->clone()->subMinutes(5))
+            ->count();
+
+        // searches today, DAU, MAU from analyze_logs (if exists)
+        $searchesToday = 0; $dau = 0; $mau = 0; $active24h = 0;
+        if (Schema::hasTable('analyze_logs')) {
+            $searchesToday = DB::table('analyze_logs')
+                ->whereDate('created_at', $now->toDateString())->count();
+
+            $dau = DB::table('analyze_logs')
+                ->where('created_at', '>=', $now->clone()->subDay())
+                ->distinct('user_id')->count('user_id');
+
+            $mau = DB::table('analyze_logs')
+                ->where('created_at', '>=', $now->clone()->subDays(30))
+                ->distinct('user_id')->count('user_id');
+
+            $active24h = DB::table('analyze_logs')
+                ->where('created_at', '>=', $now->clone()->subDay())->count();
+        }
+
+        // OpenAI usage last 24h if table exists
+        $cost24h = 0.0; $tokens24h = 0;
+        if (Schema::hasTable('open_ai_usages')) {
+            $q = DB::table('open_ai_usages')
+                ->where('created_at', '>=', $now->clone()->subDay());
+
+            // flexible column names
+            $tokens24h = (int) ($q->sum('tokens') ?: $q->sum(DB::raw('prompt_tokens + completion_tokens')) ?: 0);
+            $cost24h   = (float) ($q->sum('cost_usd') ?: $q->sum('cost') ?: $q->sum('usd_cost') ?: 0.0);
+        }
+
+        return [
+            'searchesToday' => $searchesToday,
+            'totalUsers'    => $totalUsers,
+            'active5m'      => $active5m,
+            'active24h'     => $active24h,
+            'dau'           => $dau,
+            'mau'           => $mau,
+            'tokens24h'     => $tokens24h,
+            'cost24h'       => round($cost24h, 4),
+        ];
+    }
+
+    private function services(): array
+    {
+        $services = [];
+
+        // DB ping latency
+        try {
+            $t0 = microtime(true);
+            DB::select('SELECT 1');
+            $lat = (int) round((microtime(true) - $t0) * 1000);
+            $services[] = ['name' => 'Database', 'ok' => true, 'latency_ms' => $lat];
+        } catch (\Throwable $e) {
+            $services[] = ['name' => 'Database', 'ok' => false, 'latency_ms' => null];
+        }
+
+        // Queue backlog (if jobs table exists)
+        if (Schema::hasTable('jobs')) {
+            try {
+                $count = (int) DB::table('jobs')->count();
+                $services[] = ['name' => 'Queue', 'ok' => true, 'latency_ms' => $count.' pending'];
+            } catch (\Throwable $e) {
+                $services[] = ['name' => 'Queue', 'ok' => false, 'latency_ms' => null];
+            }
+        }
+
+        // Scheduler heartbeat (set by kernel schedule)
+        $beatAt = Cache::get('dash:heartbeat_at'); // set every minute
+        if ($beatAt) {
+            $diff = Carbon::parse($beatAt)->diffInSeconds(now());
+            $services[] = ['name' => 'Scheduler', 'ok' => $diff <= 120, 'latency_ms' => $diff.'s'];
+        } else {
+            $services[] = ['name' => 'Scheduler', 'ok' => false, 'latency_ms' => null];
+        }
+
+        // OpenAI API heartbeat (recent usage within 6h)
+        if (Schema::hasTable('open_ai_usages')) {
+            $apiOk = DB::table('open_ai_usages')->where('created_at', '>=', now()->subHours(6))->exists();
+            $services[] = ['name' => 'OpenAI API', 'ok' => (bool) $apiOk, 'latency_ms' => null];
+        }
+
+        return $services;
+    }
+
+    private function traffic30(): array
+    {
+        if (!Schema::hasTable('analyze_logs')) {
+            return [];
+        }
+
+        $start = now()->startOfDay()->subDays(29);
+        $raw = DB::table('analyze_logs')
+            ->select(DB::raw('DATE(created_at) as day'), DB::raw('COUNT(*) as c'))
+            ->where('created_at', '>=', $start)
+            ->groupBy(DB::raw('DATE(created_at)'))
+            ->orderBy('day', 'asc')
+            ->pluck('c', 'day'); // [ 'YYYY-MM-DD' => count ]
+
+        // Fill missing days
+        $out = [];
+        for ($d = $start->copy(); $d <= now()->startOfDay(); $d->addDay()) {
+            $key = $d->toDateString();
+            $out[] = ['day' => $key, 'count' => (int) ($raw[$key] ?? 0)];
+        }
+        return $out;
+    }
+
+    private function historyLatest(): array
+    {
+        if (!Schema::hasTable('analyze_logs')) {
+            return [];
+        }
+
+        // Try to pull columns flexibly: url/query/tool/tokens/cost
+        $rows = DB::table('analyze_logs as a')
+            ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+            ->orderByDesc('a.created_at')
+            ->limit(100)
+            ->get([
+                'a.created_at',
+                'u.email',
+                DB::raw("COALESCE(a.url, a.query, a.input, a.page_url) as display"),
+                DB::raw("COALESCE(a.tool, a.tool_name, a.section) as tool"),
+                DB::raw("COALESCE(a.tokens, a.total_tokens, 0) as tokens"),
+                DB::raw("COALESCE(a.cost, a.cost_usd, a.usd_cost, 0) as cost"),
+            ]);
+
+        return $rows->map(function ($r) {
+            return [
+                'when'    => Carbon::parse($r->created_at)->format('Y-m-d H:i'),
+                'user'    => $r->email ?? '—',
+                'display' => (string) ($r->display ?? '—'),
+                'tool'    => (string) ($r->tool ?? '—'),
+                'tokens'  => (int) ($r->tokens ?? 0),
+                'cost'    => number_format((float) ($r->cost ?? 0), 4, '.', ''),
+            ];
+        })->toArray();
+    }
+
+    private function limitsSummary(): array
+    {
+        if (!Schema::hasTable('user_limits')) {
+            return ['enabled' => 0, 'disabled' => 0, 'default' => 200];
+        }
+        $enabled  = (int) DB::table('user_limits')->where('is_enabled', true)->count();
+        $disabled = (int) DB::table('user_limits')->where('is_enabled', false)->count();
+        $default  = 200;
+        return compact('enabled', 'disabled', 'default');
     }
 }
