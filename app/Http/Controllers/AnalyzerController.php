@@ -44,7 +44,7 @@ class AnalyzerController extends Controller
     /**
      * Calculates dynamic SEO scores based on parsed page data.
      * @param array $data Parsed data from the URL.
-     * @return array An array containing overall_score, readability, and categories.
+     * @return array An array containing overall_score and categories.
      */
     private function calculateScores(array $data): array
     {
@@ -115,14 +115,239 @@ class AnalyzerController extends Controller
 
         return [
             'overall_score' => (int) $overallScore,
-            // Readability analysis is complex and often requires a dedicated library.
-            // Keeping it static unless a specific implementation is requested.
-            'readability' => ['score' => 75, 'passive_ratio' => 10],
             'categories' => [
                 ['name' => 'Content & Keywords', 'score' => (int)$contentKeywordsScore],
                 ['name' => 'Content Quality', 'score' => (int)$contentQualityScore]
             ]
         ];
+    }
+
+    /**
+     * Extracts clean text content from a DOMXPath object.
+     * @param DOMXPath $xpath The DOMXPath object of the page.
+     * @return string The clean text content.
+     */
+    private function extractTextFromDom(DOMXPath $xpath): string
+    {
+        // Remove script and style tags to avoid including their content
+        foreach ($xpath->query('//script | //style') as $node) {
+            $node->parentNode->removeChild($node);
+        }
+
+        $bodyNode = $xpath->query('//body')->item(0);
+        if (!$bodyNode) {
+            return '';
+        }
+        
+        // Get text content and normalize whitespace
+        $textContent = $bodyNode->textContent;
+        return trim(preg_replace('/\s+/', ' ', $textContent));
+    }
+
+    /**
+     * Approximates the number of syllables in a word.
+     * @param string $word The word to count syllables for.
+     * @return int The estimated number of syllables.
+     */
+    private function countSyllables(string $word): int
+    {
+        $word = strtolower(trim($word));
+        if (mb_strlen($word) <= 3) return 1;
+
+        // Reduces common suffixes that are not syllables.
+        $word = preg_replace('/(es|ed|e)$/', '', $word);
+        // Accounts for 'y' as a vowel sound.
+        $word = preg_replace('/^y/', '', $word);
+        
+        preg_match_all('/[aeiouy]{1,2}/', $word, $matches);
+        $syllableCount = count($matches[0]);
+        
+        return $syllableCount > 0 ? $syllableCount : 1;
+    }
+    
+    /**
+     * Analyzes text to calculate readability score and passive voice ratio.
+     * @param string $text The text content to analyze.
+     * @return array An array containing the readability score and passive ratio.
+     */
+    private function analyzeReadability(string $text): array
+    {
+        if (empty($text)) {
+            return ['score' => 0, 'passive_ratio' => 0];
+        }
+
+        $words = preg_split('/[\s,]+/', $text, -1, PREG_SPL_IT_NO_EMPTY);
+        $wordCount = count($words);
+
+        // Not enough content for a meaningful analysis, return a good default.
+        if ($wordCount < 100) {
+            return ['score' => 70, 'passive_ratio' => 5];
+        }
+
+        // Count sentences
+        $sentenceCount = preg_match_all('/[.!?]+/', $text, $matches);
+        $sentenceCount = $sentenceCount > 0 ? $sentenceCount : 1;
+
+        // Count syllables
+        $syllableCount = 0;
+        foreach ($words as $word) {
+            $syllableCount += $this->countSyllables($word);
+        }
+
+        // Flesch-Kincaid Reading Ease Score calculation
+        $fleschScore = 0;
+        if ($wordCount > 0 && $sentenceCount > 0 && $syllableCount > 0) {
+            $fleschScore = 206.835 - 1.015 * ($wordCount / $sentenceCount) - 84.6 * ($syllableCount / $wordCount);
+        }
+        $fleschScore = max(0, min(100, round($fleschScore)));
+
+        // Count passive voice sentences (heuristic). 
+        // NOTE: This is a simplified heuristic and may not be perfectly accurate.
+        $passiveCount = 0;
+        $sentences = preg_split('/(?<=[.!?])\s+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $beVerbs = 'is|am|are|was|were|be|being|been';
+        foreach ($sentences as $sentence) {
+            if (preg_match('/\b(' . $beVerbs . ')\s+([a-zA-Z]+(ed|en|t))\b/i', $sentence)) {
+                $passiveCount++;
+            }
+        }
+        
+        $passiveRatio = ($sentenceCount > 0) ? round(($passiveCount / $sentenceCount) * 100) : 0;
+        
+        return [
+            'score' => (int) $fleschScore,
+            'passive_ratio' => (int) $passiveRatio,
+        ];
+    }
+
+    /**
+     * Uses OpenAI API to get a likelihood score of content being AI-generated.
+     * @param string $text The text content to analyze.
+     * @return int The AI likelihood percentage (0-100), or -1 if API is not configured or fails.
+     */
+    private function getAiLikelihood(string $text): int
+    {
+        $apiKey = env('OPENAI_API_KEY');
+        if (!$apiKey) {
+            return -1; // Signal that API is not configured
+        }
+
+        // Limit text to avoid excessive token usage (approx. 1000 words)
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $truncatedText = implode(' ', array_slice($words, 0, 1000));
+
+        if (empty($truncatedText)) {
+            return -1;
+        }
+
+        $systemMessage = "You are an expert AI text classifier. Analyze the following text and determine the probability that it was written by an AI. Your response must be a single, valid JSON object with one key: \"ai_probability\", which must be an integer between 0 and 100.";
+
+        try {
+            $response = Http::withToken($apiKey)
+                ->timeout(60)
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemMessage],
+                        ['role' => 'user', 'content' => $truncatedText]
+                    ],
+                    'temperature' => 0.2,
+                    'max_tokens' => 50,
+                    'response_format' => ['type' => 'json_object'],
+                ]);
+
+            if ($response->failed()) {
+                Log::error('OpenAI AI Content Check API Error', ['status' => $response->status(), 'body' => $response->body()]);
+                return -1;
+            }
+
+            $content = $response->json('choices.0.message.content');
+            $result = json_decode($content, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && isset($result['ai_probability']) && is_numeric($result['ai_probability'])) {
+                return (int) max(0, min(100, $result['ai_probability']));
+            }
+
+            Log::warning('OpenAI AI Content Check returned invalid JSON', ['body' => $content]);
+            return -1;
+
+        } catch (\Exception $e) {
+            Log::error("Error calling OpenAI for AI Content Check", ['message' => $e->getMessage()]);
+            return -1;
+        }
+    }
+
+    /**
+     * Gets suggestions from OpenAI to make text sound more human.
+     * @param string $text The text to improve.
+     * @param int $aiLikelihood The AI likelihood score.
+     * @return string The suggestions, or an error message.
+     */
+    private function getHumanizeSuggestions(string $text, int $aiLikelihood): string
+    {
+        $apiKey = env('OPENAI_API_KEY');
+        if (!$apiKey) {
+            return 'OpenAI API key is not configured.';
+        }
+        
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $truncatedText = implode(' ', array_slice($words, 0, 1000));
+
+        if (empty($truncatedText)) {
+            return 'No text provided for analysis.';
+        }
+
+        $systemMessage = "You are an expert editor specializing in making AI-generated text sound more human. Your suggestions must be concise, actionable, and easy to understand. IMPORTANT: Detect the primary language of the provided text (e.g., English, Arabic, Portuguese) and write your entire response, including all suggestions, in that same language.";
+        $userMessage = "The following text has been flagged as {$aiLikelihood}% likely to be AI-generated. Please provide 3-5 specific, actionable suggestions to make it sound more natural, engaging, and human-written. Frame your suggestions as a list. Suggestions could include varying sentence structure, adding personal anecdotes or rhetorical questions, injecting more personality, or simplifying complex vocabulary. Here is the text:\n\n{$truncatedText}";
+        
+        try {
+            $response = Http::withToken($apiKey)
+                ->timeout(90)
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemMessage],
+                        ['role' => 'user', 'content' => $userMessage]
+                    ],
+                    'temperature' => 0.7,
+                    'max_tokens' => 500,
+                ]);
+
+            if ($response->failed()) {
+                Log::error('OpenAI Humanize Suggestions API Error', ['status' => $response->status(), 'body' => $response->body()]);
+                return 'Failed to get suggestions from the AI service.';
+            }
+
+            return trim($response->json('choices.0.message.content', 'No suggestions were returned.'));
+
+        } catch (\Exception $e) {
+            Log::error("Error calling OpenAI for Humanize Suggestions", ['message' => $e->getMessage()]);
+            return 'An internal server error occurred while getting suggestions.';
+        }
+    }
+    
+    public function aiContentCheck(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'text' => 'required|string|min:50|max:10000'
+        ]);
+
+        $text = $validated['text'];
+
+        $aiLikelihood = $this->getAiLikelihood($text);
+
+        if ($aiLikelihood === -1) {
+             return response()->json([
+                'error' => 'Could not determine AI likelihood. The local fallback method is not suitable for direct text input.'
+            ], 500);
+        }
+
+        $suggestions = $this->getHumanizeSuggestions($text, $aiLikelihood);
+
+        return response()->json([
+            'ai_score' => $aiLikelihood,
+            'suggestions' => $suggestions,
+        ]);
     }
 
     public function semanticAnalyze(Request $request): JsonResponse
@@ -142,6 +367,28 @@ class AnalyzerController extends Controller
             @$dom->loadHTML($html);
             libxml_clear_errors();
             $xpath = new DOMXPath($dom);
+            
+            // Extract text for analysis
+            $textContent = $this->extractTextFromDom($xpath);
+            
+            // Get AI likelihood score from OpenAI if available
+            $aiLikelihood = $this->getAiLikelihood($textContent);
+
+            $readabilityData = [];
+            if ($aiLikelihood !== -1) {
+                // If OpenAI check was successful, reverse-engineer the readability score for the frontend
+                $humanScore = 100 - $aiLikelihood;
+                $passiveRatio = 10; // Use a constant, reasonable passive ratio
+                // Formula from frontend: human = 70 + (score / 5) - (passive_ratio / 3)
+                // Reversed: score = 5 * (human - 70 + (passive_ratio / 3))
+                $fleschScore = 5 * ($humanScore - 70 + ($passiveRatio / 3));
+                
+                $readabilityData['score'] = (int) max(0, min(100, round($fleschScore)));
+                $readabilityData['passive_ratio'] = $passiveRatio;
+            } else {
+                // Fallback to local readability analysis if OpenAI isn't available
+                $readabilityData = $this->analyzeReadability($textContent);
+            }
 
             $contentStructure = [];
             $contentStructure['title'] = optional($xpath->query('//title')->item(0))->textContent;
@@ -188,17 +435,17 @@ class AnalyzerController extends Controller
                 'quick_stats' => $quickStats,
             ];
 
-            // Calculate dynamic scores
+            // Calculate dynamic SEO scores
             $scores = $this->calculateScores($parsedData);
 
             return response()->json([
                 'overall_score' => $scores['overall_score'],
-                'readability' => $scores['readability'],
+                'readability' => $readabilityData, // Use the dynamic readability data
                 'categories' => $scores['categories'],
                 'content_structure' => $contentStructure,
                 'page_signals' => $pageSignals,
                 'quick_stats' => $quickStats,
-                'images_alt_count' => $imagesAltCount, // Kept for frontend compatibility
+                'images_alt_count' => $imagesAltCount,
             ]);
             
         } catch (\Exception $e) {
