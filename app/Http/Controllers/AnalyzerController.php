@@ -179,9 +179,9 @@ class AnalyzerController extends Controller
         $words = preg_split('/[\s,]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
         $wordCount = count($words);
 
-        // Not enough content for a meaningful analysis, return a good default.
-        if ($wordCount < 100) {
-            return ['score' => 70, 'passive_ratio' => 5];
+        // Return a neutral score if there is not enough content for a meaningful analysis
+        if ($wordCount < 50) {
+            return ['score' => 65, 'passive_ratio' => 10];
         }
 
         // Count sentences
@@ -229,6 +229,7 @@ class AnalyzerController extends Controller
     {
         $apiKey = env('OPENAI_API_KEY');
         if (!$apiKey) {
+            Log::warning('OpenAI API key is not configured.');
             return -1; // Signal that API is not configured
         }
 
@@ -236,7 +237,8 @@ class AnalyzerController extends Controller
         $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
         $truncatedText = implode(' ', array_slice($words, 0, 1000));
 
-        if (empty($truncatedText)) {
+        if (empty($truncatedText) || count($words) < 50) {
+             // Not enough text to analyze reliably
             return -1;
         }
 
@@ -345,7 +347,7 @@ class AnalyzerController extends Controller
         $suggestions = '';
         
         // Only get suggestions if the score is not perfect
-        if ($humanScore < 100) {
+        if ($humanScore < 95) { // Broaden the suggestion threshold
             $suggestions = $this->getHumanizeSuggestions($text, $aiLikelihood);
         }
 
@@ -398,19 +400,18 @@ class AnalyzerController extends Controller
             
             // Get AI likelihood score from OpenAI if available
             $aiLikelihood = $this->getAiLikelihood($textContent);
-
-            $readabilityData = [];
+            
+            $readabilityData = $this->analyzeReadability($textContent);
             $humanScore = 0;
+
             if ($aiLikelihood !== -1) {
+                // Primary method: Use the AI score
                 $humanScore = 100 - $aiLikelihood;
-                $passiveRatio = 10;
-                $fleschScore = 5 * ($humanScore - 70 + ($passiveRatio / 3));
-                $readabilityData['score'] = (int) max(0, min(100, round($fleschScore)));
-                $readabilityData['passive_ratio'] = $passiveRatio;
             } else {
-                $readabilityData = $this->analyzeReadability($textContent);
-                // Calculate human score based on local readability if AI fails
-                $humanScore = (int) max(0, min(100, round(70 + ($readabilityData['score'] / 5) - ($readabilityData['passive_ratio'] / 3))));
+                // Fallback method: Use local readability analysis
+                // A Flesch score of 60-70 is standard. We can map this to a human-like score.
+                // A score of 100 is very easy to read (good), a score of 0 is very hard (bad).
+                $humanScore = (int) max(0, min(100, $readabilityData['score']));
                 $aiLikelihood = 100 - $humanScore;
             }
 
@@ -426,7 +427,7 @@ class AnalyzerController extends Controller
                 $humanizerData['recommendation'] = 'Great job! This content reads like it was written by a human.';
                 $humanizerData['badge_type'] = 'success';
             }
-            $humanizerData['suggestions'] = ($humanScore < 100) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
+            $humanizerData['suggestions'] = ($humanScore < 95 && $aiLikelihood !== -1) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
             $humanizerData['google_search_url'] = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
 
 
