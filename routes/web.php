@@ -6,6 +6,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AnalyzerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserAdminController;
+use App\Http\Controllers\Admin\UserLimitsController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -45,7 +47,7 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
         Route::post('/avatar', 'updateAvatar')->name('avatar');
     });
 
-    // PageSpeed Insights Proxy - Corrected to use pageSpeedInsights method
+    // PageSpeed Insights Proxy
     Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'pageSpeedInsights'])
         ->name('semantic.psi')
         ->middleware('throttle:seoapi');
@@ -59,9 +61,32 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
 Route::middleware(['auth', 'ban', 'presence', 'admin'])
     ->prefix('admin')->name('admin.')
     ->group(function () {
+
+        // Admin dashboard page
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+        // --- Live JSON feeds used by the upgraded dashboard (poll every 10s)
+        Route::get('/dashboard/live', [DashboardController::class, 'live'])->name('dashboard.live');
+        Route::get('/users/{user}/live', [DashboardController::class, 'userLive'])->name('users.live');
+
+        // --- User actions (existing + new limits endpoint)
         Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');
         Route::patch('/users/{user}/ban', [UserAdminController::class, 'toggleBan'])->name('users.ban');
+        Route::patch('/users/{user}/limits', [UserLimitsController::class, 'update'])->name('users.updateLimits');
+
+        // --- Optional: preview of the new dashboard view (safe/read-only)
+        Route::get('/dashboard-v3', function () {
+            $view = \Illuminate\Support\Facades\View::exists('admin.dashboard-v3') ? 'admin.dashboard-v3' : 'admin.dashboard';
+            return view($view, [
+                'kpis'          => [],
+                'traffic'       => [],
+                'services'      => [],
+                'topQueries'    => [],
+                'errors'        => [],
+                'limitsSummary' => [],
+                'health'        => [],
+            ]);
+        })->name('dashboard.v3');
     });
 
 /*
@@ -71,44 +96,3 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
 */
 Route::get('/_up', fn () => response('OK', 200))->name('_up');
 Route::fallback(fn () => redirect()->route('home'));
-
-// === Admin dashboard live (no new controller file needed) ===
-Route::middleware(['auth','can:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard/live', [\App\Http\Controllers\Admin\DashboardController::class, 'live'])->name('dashboard.live');
-    Route::get('/users/{user}/live', [\App\Http\Controllers\Admin\DashboardController::class, 'userLive'])->name('users.live');
-    Route::patch('/users/{user}/limits', [\App\Http\Controllers\Admin\UserLimitsController::class, 'update'])->name('users.updateLimits');
-});
-/*
-|--------------------------------------------------------------------------
-| Admin v3 (additive, non-breaking)
-|--------------------------------------------------------------------------
-| Two new routes:
-| 1) /admin/dashboard-v3  -> preview the upgraded dashboard view without touching the existing one
-| 2) PATCH /admin/users/{user}/limits -> enable/disable & set daily limit (controller already created)
-|
-| Notes:
-| - Uses fully-qualified class names to avoid adding 'use' imports.
-| - Wrapped in its own group so it doesn't interfere with your current groups.
-| - Read-only view for dashboard-v3; if 'admin.dashboard-v3' view doesn't exist,
-|   it will fallback to 'admin.dashboard' so you can reuse your current view.
-*/
-Route::middleware(['auth','can:admin'])->prefix('admin')->name('admin.')->group(function () {
-    // Dashboard v3 preview (safe, read-only)
-    Route::get('/dashboard-v3', function () {
-        $view = \Illuminate\Support\Facades\View::exists('admin.dashboard-v3') ? 'admin.dashboard-v3' : 'admin.dashboard';
-        // Provide empty arrays so the view renders even without controller data
-        return view($view, [
-            'kpis' => [],
-            'traffic' => [],
-            'services' => [],
-            'topQueries' => [],
-            'errors' => [],
-            'limitsSummary' => [],
-            'health' => [],
-        ]);
-    })->name('dashboard.v3');
-
-    // User limits update (enable/disable + limit value)
-    Route::patch('/users/{user}/limits', [\App\Http\Controllers\Admin\UserLimitsController::class, 'update'])
-        ->name('users.updateLimits');
-});
