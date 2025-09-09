@@ -55,7 +55,6 @@ class DashboardController extends Controller
             'dailyLimit'    => 100,
         ];
 
-        // Users
         if (Schema::hasTable('users')) {
             $k['totalUsers'] = (int) User::count();
             if (Schema::hasColumn('users', 'last_seen_at')) {
@@ -63,57 +62,31 @@ class DashboardController extends Controller
             }
         }
 
-        // Analyze logs preferred
         if (Schema::hasTable('analyze_logs')) {
-            $k['searchesToday'] = (int) DB::table('analyze_logs')
-                ->where('created_at', '>=', $today)->count();
-
-            $k['dau'] = (int) DB::table('analyze_logs')
-                ->where('created_at', '>=', now()->subDay())
-                ->distinct('user_id')->count('user_id');
-
-            $k['mau'] = (int) DB::table('analyze_logs')
-                ->where('created_at', '>=', now()->subDays(30))
-                ->distinct('user_id')->count('user_id');
-        }
-        // Fallback when activity is stored in analysis_cache
-        elseif (Schema::hasTable('analysis_cache')) {
-            $k['searchesToday'] = (int) DB::table('analysis_cache')
-                ->where('created_at', '>=', $today)->count();
-
-            $k['dau'] = (int) DB::table('analysis_cache')
-                ->where('created_at', '>=', now()->subDay())
-                ->distinct('user_id')->count('user_id');
-
-            $k['mau'] = (int) DB::table('analysis_cache')
-                ->where('created_at', '>=', now()->subDays(30))
-                ->distinct('user_id')->count('user_id');
+            $k['searchesToday'] = (int) DB::table('analyze_logs')->where('created_at', '>=', $today)->count();
+            $k['dau'] = (int) DB::table('analyze_logs')->where('created_at', '>=', now()->subDay())->distinct('user_id')->count('user_id');
+            $k['mau'] = (int) DB::table('analyze_logs')->where('created_at', '>=', now()->subDays(30))->distinct('user_id')->count('user_id');
+        } elseif (Schema::hasTable('analysis_cache')) {
+            $k['searchesToday'] = (int) DB::table('analysis_cache')->where('created_at', '>=', $today)->count();
+            $k['dau'] = (int) DB::table('analysis_cache')->where('created_at', '>=', now()->subDay())->distinct('user_id')->count('user_id');
+            $k['mau'] = (int) DB::table('analysis_cache')->where('created_at', '>=', now()->subDays(30))->distinct('user_id')->count('user_id');
         }
 
-        // OpenAI usage (cost/tokens)
         $usageTable = Schema::hasTable('open_ai_usages')
             ? 'open_ai_usages'
             : (Schema::hasTable('openai_usage') ? 'openai_usage' : null);
 
         if ($usageTable) {
             if (Schema::hasColumn($usageTable, 'cost_usd')) {
-                $k['cost24h'] = (float) DB::table($usageTable)
-                    ->where('created_at', '>=', now()->subDay())
-                    ->sum('cost_usd');
+                $k['cost24h'] = (float) DB::table($usageTable)->where('created_at', '>=', now()->subDay())->sum('cost_usd');
             } elseif (Schema::hasColumn($usageTable, 'cost')) {
-                $k['cost24h'] = (float) DB::table($usageTable)
-                    ->where('created_at', '>=', now()->subDay())
-                    ->sum('cost');
+                $k['cost24h'] = (float) DB::table($usageTable)->where('created_at', '>=', now()->subDay())->sum('cost');
             }
-
             if (Schema::hasColumn($usageTable, 'tokens')) {
-                $k['tokens24h'] = (int) DB::table($usageTable)
-                    ->where('created_at', '>=', now()->subDay())
-                    ->sum('tokens');
+                $k['tokens24h'] = (int) DB::table($usageTable)->where('created_at', '>=', now()->subDay())->sum('tokens');
             }
         }
 
-        // Daily limit avg
         if (Schema::hasTable('user_limits') && Schema::hasColumn('user_limits', 'daily_limit')) {
             $avg = DB::table('user_limits')->avg('daily_limit');
             $k['dailyLimit'] = (int) ($avg ?: 100);
@@ -146,195 +119,206 @@ class DashboardController extends Controller
     {
         $events = [];
 
-        /* 1) analyze_logs (if present) */
-        if (Schema::hasTable('analyze_logs')) {
-            $sel = ['a.created_at'];
-            $has = fn(string $c) => Schema::hasColumn('analyze_logs', $c);
+        // Each source is isolated so one failure never nukes the feed.
 
-            if ($has('keyword'))   $sel[] = DB::raw('a.keyword as kw');
-            if ($has('query'))     $sel[] = DB::raw('a.query as qry');
-            if ($has('prompt'))    $sel[] = DB::raw('a.prompt as prm');
-            if ($has('url'))       $sel[] = DB::raw('a.url as url');
-            if ($has('type'))      $sel[] = DB::raw('a.type as type');
-            if ($has('tool'))      $sel[] = 'a.tool';
-            if ($has('tokens'))    $sel[] = 'a.tokens';
-            if ($has('cost_usd'))  $sel[] = 'a.cost_usd';
-            if (!$has('cost_usd') && $has('cost')) $sel[] = DB::raw('a.cost as cost');
+        // 1) analyze_logs (if present)
+        try {
+            if (Schema::hasTable('analyze_logs')) {
+                $sel = ['a.created_at'];
+                $has = fn(string $c) => Schema::hasColumn('analyze_logs', $c);
+                if ($has('keyword'))   $sel[] = DB::raw('a.keyword as kw');
+                if ($has('query'))     $sel[] = DB::raw('a.query as qry');
+                if ($has('prompt'))    $sel[] = DB::raw('a.prompt as prm');
+                if ($has('url'))       $sel[] = DB::raw('a.url as url');
+                if ($has('type'))      $sel[] = DB::raw('a.type as type');
+                if ($has('tool'))      $sel[] = 'a.tool';
+                if ($has('tokens'))    $sel[] = 'a.tokens';
+                if ($has('cost_usd'))  $sel[] = 'a.cost_usd';
+                if (!$has('cost_usd') && $has('cost')) $sel[] = DB::raw('a.cost as cost');
 
-            $rows = DB::table('analyze_logs as a')
-                ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
-                ->orderByDesc('a.id')
-                ->limit(100)
-                ->get(array_merge($sel, ['u.email','u.name']));
+                $rows = DB::table('analyze_logs as a')
+                    ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
+                    ->orderByDesc('a.id')
+                    ->limit(100)
+                    ->get(array_merge($sel, ['u.email','u.name']));
 
-            foreach ($rows as $r) {
-                $events[] = $this->normEventFromAnalyze($r);
+                foreach ($rows as $r) $events[] = $this->normEventFromAnalyze($r);
             }
-        }
+        } catch (\Throwable $e) {}
 
-        /* 2) analysis_cache — tolerant extractor */
-        if (Schema::hasTable('analysis_cache')) {
-            // grab all columns so we can inspect dynamically
-            $rows = DB::table('analysis_cache as c')
-                ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
-                ->orderByDesc('c.id')
-                ->limit(100)
-                ->get(['c.*','u.email','u.name']);
+        // 2) analysis_cache — tolerant extractor
+        try {
+            if (Schema::hasTable('analysis_cache')) {
+                $rows = DB::table('analysis_cache as c')
+                    ->leftJoin('users as u', 'u.id', '=', 'c.user_id')
+                    ->orderByDesc('c.id')
+                    ->limit(100)
+                    ->get(['c.*','u.email','u.name']);
 
-            foreach ($rows as $r) {
-                $ts   = $this->prop($r,'created_at') ?: $this->prop($r,'updated_at') ?: null;
-                $tool = $this->firstNonEmpty([
-                    $this->prop($r,'tool'),
-                    $this->prop($r,'type'),
-                    $this->prop($r,'mode'),
-                    'semantic'
-                ]);
+                foreach ($rows as $r) {
+                    $ts   = $this->prop($r,'created_at') ?: $this->prop($r,'updated_at') ?: null;
+                    $tool = $this->firstNonEmpty([$this->prop($r,'tool'), $this->prop($r,'type'), $this->prop($r,'mode'), 'semantic']);
+                    [$url, $kw, $title] = $this->extractFromCacheRow($r);
+                    $display = $url ? ('Analyzed URL '.$this->shortUrl($url)) : ($kw ? 'Analyzed "'.$kw.'"' : ($title ?: 'Analysis'));
 
-                // tolerant URL/keyword discovery from columns and JSON blobs
-                [$url, $kw, $title] = $this->extractFromCacheRow($r);
-
-                $display = $url
-                    ? ('Analyzed URL '.$this->shortUrl($url))
-                    : ($kw ? 'Analyzed "'.$kw.'"' : ($title ?: 'Analysis'));
-
-                $events[] = [
-                    'ts'      => $ts,
-                    'when'    => $this->fmt($ts),
-                    'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
-                    'display' => $display,
-                    'tool'    => $tool,
-                    'tokens'  => '—',
-                    'cost'    => '0.0000',
-                ];
+                    $events[] = [
+                        'ts'      => $ts,
+                        'when'    => $this->fmt($ts),
+                        'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
+                        'display' => $display,
+                        'tool'    => $tool,
+                        'tokens'  => '—',
+                        'cost'    => '0.0000',
+                    ];
+                }
             }
-        }
+        } catch (\Throwable $e) {}
 
-        /* 3) topic_analyses (optional) */
-        if (Schema::hasTable('topic_analyses')) {
-            $rows = DB::table('topic_analyses as t')
-                ->leftJoin('users as u','u.id','=','t.user_id')
-                ->orderByDesc('t.id')->limit(100)
-                ->get(['t.*','u.email','u.name']);
+        // 3) topic_analyses (optional)
+        try {
+            if (Schema::hasTable('topic_analyses')) {
+                $rows = DB::table('topic_analyses as t')
+                    ->leftJoin('users as u','u.id','=','t.user_id')
+                    ->orderByDesc('t.id')->limit(100)
+                    ->get(['t.*','u.email','u.name']);
 
-            foreach ($rows as $r) {
-                $ts  = $this->prop($r,'created_at') ?: $this->prop($r,'updated_at');
-                $url = $this->firstNonEmpty([$this->prop($r,'url'), $this->prop($r,'page_url')]);
-                $kw  = $this->firstNonEmpty([$this->prop($r,'keyword'), $this->prop($r,'query'), $this->prop($r,'term')]);
+                foreach ($rows as $r) {
+                    $ts  = $this->prop($r,'created_at') ?: $this->prop($r,'updated_at');
+                    $url = $this->firstNonEmpty([$this->prop($r,'url'), $this->prop($r,'page_url')]);
+                    $kw  = $this->firstNonEmpty([$this->prop($r,'keyword'), $this->prop($r,'query'), $this->prop($r,'term')]);
+                    $display = $url ? ('Topic analysis '.$this->shortUrl($url)) : ($kw ? 'Topic analysis "'.$kw.'"' : 'Topic analysis');
 
-                $display = $url ? ('Topic analysis '.$this->shortUrl($url)) : ($kw ? 'Topic analysis "'.$kw.'"' : 'Topic analysis');
-
-                $events[] = [
-                    'ts'      => $ts,
-                    'when'    => $this->fmt($ts),
-                    'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
-                    'display' => $display,
-                    'tool'    => 'topic_cluster',
-                    'tokens'  => '—',
-                    'cost'    => '0.0000',
-                ];
+                    $events[] = [
+                        'ts'      => $ts,
+                        'when'    => $this->fmt($ts),
+                        'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
+                        'display' => $display,
+                        'tool'    => 'topic_cluster',
+                        'tokens'  => '—',
+                        'cost'    => '0.0000',
+                    ];
+                }
             }
-        }
+        } catch (\Throwable $e) {}
 
-        /* 4) OpenAI usage */
-        $usageTable = Schema::hasTable('open_ai_usages')
-            ? 'open_ai_usages'
-            : (Schema::hasTable('openai_usage') ? 'openai_usage' : null);
+        // 4) OpenAI usage
+        try {
+            $usageTable = Schema::hasTable('open_ai_usages')
+                ? 'open_ai_usages'
+                : (Schema::hasTable('openai_usage') ? 'openai_usage' : null);
 
-        if ($usageTable) {
-            $hasUserId  = Schema::hasColumn($usageTable, 'user_id');
-            $hasModel   = Schema::hasColumn($usageTable, 'model');
-            $hasPath    = Schema::hasColumn($usageTable, 'path');
-            $hasTokens  = Schema::hasColumn($usageTable, 'tokens');
-            $hasCostUsd = Schema::hasColumn($usageTable, 'cost_usd');
-            $hasCost    = Schema::hasColumn($usageTable, 'cost');
+            if ($usageTable) {
+                $hasUserId  = Schema::hasColumn($usageTable, 'user_id');
+                $hasModel   = Schema::hasColumn($usageTable, 'model');
+                $hasPath    = Schema::hasColumn($usageTable, 'path');
+                $hasTokens  = Schema::hasColumn($usageTable, 'tokens');
+                $hasCostUsd = Schema::hasColumn($usageTable, 'cost_usd');
+                $hasCost    = Schema::hasColumn($usageTable, 'cost');
 
-            $q = DB::table("$usageTable as x");
-            if ($hasUserId) { $q->leftJoin('users as u','u.id','=','x.user_id')->addSelect('u.email','u.name'); }
-            $q->orderByDesc('x.id')->limit(100);
-            $select = ['x.created_at'];
-            if ($hasModel)   $select[] = 'x.model';
-            if ($hasPath)    $select[] = 'x.path';
-            if ($hasTokens)  $select[] = 'x.tokens';
-            if ($hasCostUsd) $select[] = 'x.cost_usd';
-            if ($hasCost)    $select[] = 'x.cost';
+                $q = DB::table("$usageTable as x");
+                if ($hasUserId) { $q->leftJoin('users as u','u.id','=','x.user_id')->addSelect('u.email','u.name'); }
+                $q->orderByDesc('x.id')->limit(100);
+                $select = ['x.created_at'];
+                if ($hasModel)   $select[] = 'x.model';
+                if ($hasPath)    $select[] = 'x.path';
+                if ($hasTokens)  $select[] = 'x.tokens';
+                if ($hasCostUsd) $select[] = 'x.cost_usd';
+                if ($hasCost)    $select[] = 'x.cost';
 
-            $rows = $q->get($select);
-            foreach ($rows as $r) {
-                $ts = $r->created_at ?? null;
-                $model = $this->prop($r,'model');
-                $path  = $this->prop($r,'path');
-                $disp  = $model && $path ? "$model — $path" : ($model ?: ($path ?: 'LLM call'));
+                $rows = $q->get($select);
+                foreach ($rows as $r) {
+                    $ts = $r->created_at ?? null;
+                    $model = $this->prop($r,'model');
+                    $path  = $this->prop($r,'path');
+                    $disp  = $model && $path ? "$model — $path" : ($model ?: ($path ?: 'LLM call'));
 
-                $events[] = [
-                    'ts'      => $ts,
-                    'when'    => $this->fmt($ts),
-                    'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
-                    'display' => $disp,
-                    'tool'    => 'openai',
-                    'tokens'  => $this->prop($r,'tokens') ?? '—',
-                    'cost'    => number_format((float)($this->prop($r,'cost_usd') ?? $this->prop($r,'cost') ?? 0), 4),
-                ];
+                    $events[] = [
+                        'ts'      => $ts,
+                        'when'    => $this->fmt($ts),
+                        'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
+                        'display' => $disp,
+                        'tool'    => 'openai',
+                        'tokens'  => $this->prop($r,'tokens') ?? '—',
+                        'cost'    => number_format((float)($this->prop($r,'cost_usd') ?? $this->prop($r,'cost') ?? 0), 4),
+                    ];
+                }
             }
-        }
+        } catch (\Throwable $e) {}
 
-        /* 5) Logins */
-        if (Schema::hasTable('user_sessions')) {
-            $rows = DB::table('user_sessions as s')
-                ->leftJoin('users as u', 'u.id', '=', 's.user_id')
-                ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
-                ->limit(100)
-                ->get(['s.*','u.email','u.name']);
+        // 5) Logins
+        try {
+            if (Schema::hasTable('user_sessions')) {
+                $rows = DB::table('user_sessions as s')
+                    ->leftJoin('users as u', 'u.id', '=', 's.user_id')
+                    ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
+                    ->limit(100)
+                    ->get(['s.*','u.email','u.name']);
 
-            foreach ($rows as $r) {
-                $ts = $this->firstNonNull([$this->prop($r,'updated_at'), $this->prop($r,'login_at'), $this->prop($r,'created_at')]);
-                $ip = $this->firstNonEmpty([$this->prop($r,'ip'), $this->prop($r,'ip_address')]);
-                $country = $this->firstNonEmpty([$this->prop($r,'country'), $this->prop($r,'country_code')]);
+                foreach ($rows as $r) {
+                    $ts = $this->firstNonNull([$this->prop($r,'updated_at'), $this->prop($r,'login_at'), $this->prop($r,'created_at')]);
+                    $ip = $this->firstNonEmpty([$this->prop($r,'ip'), $this->prop($r,'ip_address')]);
+                    $country = $this->firstNonEmpty([$this->prop($r,'country'), $this->prop($r,'country_code')]);
 
-                $events[] = [
-                    'ts'      => $ts,
-                    'when'    => $this->fmt($ts),
-                    'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
-                    'display' => 'Login'.($ip ? (' from '.$ip.($country ? ' · '.$country : '')) : ''),
-                    'tool'    => 'auth',
-                    'tokens'  => '—',
-                    'cost'    => '0.0000',
-                ];
+                    $events[] = [
+                        'ts'      => $ts,
+                        'when'    => $this->fmt($ts),
+                        'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
+                        'display' => 'Login'.($ip ? (' from '.$ip.($country ? ' · '.$country : '')) : ''),
+                        'tool'    => 'auth',
+                        'tokens'  => '—',
+                        'cost'    => '0.0000',
+                    ];
+                }
             }
-        }
+        } catch (\Throwable $e) {}
 
-        /* 6) Signups */
-        if (Schema::hasTable('users')) {
-            $rows = DB::table('users as u')->orderByRaw('COALESCE(u.last_seen_at, u.updated_at, u.created_at) DESC')->limit(100)->get(['u.*']);
-            foreach ($rows as $r) {
-                $ts = $this->firstNonNull([$this->prop($r,'last_seen_at'), $this->prop($r,'updated_at'), $this->prop($r,'created_at')]);
-                $events[] = [
-                    'ts'      => $ts,
-                    'when'    => $this->fmt($ts),
-                    'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
-                    'display' => 'Signup',
-                    'tool'    => 'onboarding',
-                    'tokens'  => '—',
-                    'cost'    => '0.0000',
-                ];
+        // 6) Signups (guaranteed fallback so the box is never empty)
+        try {
+            if (Schema::hasTable('users')) {
+                $rows = DB::table('users as u')
+                    ->orderByRaw('COALESCE(u.last_seen_at, u.updated_at, u.created_at) DESC')
+                    ->limit(50)
+                    ->get(['u.name','u.email','u.created_at','u.updated_at','u.last_seen_at']);
+
+                foreach ($rows as $r) {
+                    $ts = $this->firstNonNull([$this->prop($r,'last_seen_at'), $this->prop($r,'updated_at'), $this->prop($r,'created_at')]);
+                    $events[] = [
+                        'ts'      => $ts,
+                        'when'    => $this->fmt($ts),
+                        'user'    => $this->prop($r,'name') ?: ($this->prop($r,'email') ?: '—'),
+                        'display' => 'Signup',
+                        'tool'    => 'onboarding',
+                        'tokens'  => '—',
+                        'cost'    => '0.0000',
+                    ];
+                }
             }
-        }
+        } catch (\Throwable $e) {}
 
-        // Sort + limit 50
+        // Sort + cap
         usort($events, fn($a,$b) => $this->tsToSortable($b['ts']) <=> $this->tsToSortable($a['ts']));
-        return array_slice($events, 0, 50);
+        $events = array_values(array_slice($events, 0, 50));
+
+        return $events;
     }
 
     /* ---------------- Traffic ---------------- */
 
     private function trafficSeries(): array
     {
-        if (Schema::hasTable('analyze_logs'))   return $this->seriesFromTable('analyze_logs');
-        if (Schema::hasTable('analysis_cache')) return $this->seriesFromTable('analysis_cache');
+        try {
+            if (Schema::hasTable('analyze_logs'))   return $this->seriesFromTable('analyze_logs');
+        } catch (\Throwable $e) {}
+        try {
+            if (Schema::hasTable('analysis_cache')) return $this->seriesFromTable('analysis_cache');
+        } catch (\Throwable $e) {}
 
         $usageTable = Schema::hasTable('open_ai_usages')
             ? 'open_ai_usages'
             : (Schema::hasTable('openai_usage') ? 'openai_usage' : null);
-        if ($usageTable) return $this->seriesFromTable($usageTable);
+        if ($usageTable) {
+            try { return $this->seriesFromTable($usageTable); } catch (\Throwable $e) {}
+        }
 
         return [];
     }
@@ -375,7 +359,7 @@ class DashboardController extends Controller
         $display = $url ? ('Analyzed URL '.$this->shortUrl($url))
                   : ($kw ? 'Analyzed "'.$kw.'"'
                   : ($qry ? 'Query "'.$qry.'"'
-                  : ($prm ? 'Prompt "'.mb_strimwidth($prm,0,40,'…').'"'
+                  : ($prm ? 'Prompt "'.(function_exists('mb_strimwidth') ? mb_strimwidth($prm,0,40,'…') : substr($prm,0,40).'…').'"'
                   : ($typ ?: 'Analysis'))));
 
         $tool   = $this->prop($r,'tool') ?: 'semantic';
@@ -395,7 +379,6 @@ class DashboardController extends Controller
 
     private function extractFromCacheRow(object $r): array
     {
-        // URL from many possible columns
         $url = $this->firstNonEmpty([
             $this->prop($r,'url'),
             $this->prop($r,'page_url'),
@@ -406,7 +389,6 @@ class DashboardController extends Controller
             $this->prop($r,'link'),
         ]);
 
-        // Keyword / query
         $kw = $this->firstNonEmpty([
             $this->prop($r,'keyword'),
             $this->prop($r,'query'),
@@ -420,7 +402,6 @@ class DashboardController extends Controller
             $this->prop($r,'page_title'),
         ]);
 
-        // If still empty, scan common JSON blob columns.
         foreach (['payload','data','request','inputs','meta','json','result','response'] as $col) {
             $raw = $this->prop($r, $col);
             if (!$raw) continue;
@@ -429,25 +410,17 @@ class DashboardController extends Controller
             if (!is_array($arr)) continue;
 
             $url = $url ?: $this->firstNonEmpty([
-                $arr['url'] ?? null,
-                $arr['page_url'] ?? null,
-                $arr['target_url'] ?? null,
-                $arr['input_url'] ?? null,
-                $arr['request_url'] ?? null,
-                $arr['source_url'] ?? null,
+                $arr['url'] ?? null, $arr['page_url'] ?? null, $arr['target_url'] ?? null,
+                $arr['input_url'] ?? null, $arr['request_url'] ?? null, $arr['source_url'] ?? null,
             ]);
 
             $kw = $kw ?: $this->firstNonEmpty([
-                $arr['keyword'] ?? null,
-                $arr['query'] ?? null,
-                $arr['term'] ?? null,
-                $arr['topic'] ?? null,
-                $arr['search'] ?? null,
+                $arr['keyword'] ?? null, $arr['query'] ?? null, $arr['term'] ?? null,
+                $arr['topic'] ?? null, $arr['search'] ?? null,
             ]);
 
             $title = $title ?: $this->firstNonEmpty([
-                $arr['title'] ?? null,
-                $arr['page_title'] ?? null,
+                $arr['title'] ?? null, $arr['page_title'] ?? null,
             ]);
 
             if ($url && $kw && $title) break;
@@ -463,7 +436,7 @@ class DashboardController extends Controller
             $p = parse_url($url);
             $host = $p['host'] ?? '';
             $path = isset($p['path']) ? rtrim($p['path'], '/') : '';
-            if (strlen($path) > 32) $path = mb_strimwidth($path, 0, 32, '…');
+            if (strlen($path) > 32) $path = (function_exists('mb_strimwidth') ? mb_strimwidth($path,0,32,'…') : substr($path,0,32).'…');
             return $host . $path;
         } catch (\Throwable $e) {
             return $url;
@@ -517,7 +490,7 @@ class DashboardController extends Controller
     {
         if (is_array($val)) return $val;
         if (!is_string($val) || $val === '') return null;
-        try { $d = json_decode($val, true, 512, JSON_THROW_ON_ERROR); return is_array($d) ? $d : null; }
+        try { $d = json_decode($val, true, 512, 0); return is_array($d) ? $d : null; }
         catch (\Throwable $e) { return null; }
     }
 }
