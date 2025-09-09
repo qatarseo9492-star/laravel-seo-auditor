@@ -41,23 +41,109 @@ class AnalyzerController extends Controller
         return true;
     }
 
+    /**
+     * Calculates dynamic SEO scores based on parsed page data.
+     * @param array $data Parsed data from the URL.
+     * @return array An array containing overall_score, readability, and categories.
+     */
+    private function calculateScores(array $data): array
+    {
+        $scores = [];
+        $contentStructure = $data['content_structure'] ?? [];
+        $pageSignals = $data['page_signals'] ?? [];
+        $quickStats = $data['quick_stats'] ?? [];
+
+        // 1. Title Score (Weight: 15)
+        $titleLength = isset($contentStructure['title']) ? mb_strlen($contentStructure['title']) : 0;
+        if ($titleLength >= 50 && $titleLength <= 65) {
+            $scores['title'] = 100;
+        } elseif ($titleLength > 0) {
+            $scores['title'] = 60;
+        } else {
+            $scores['title'] = 10;
+        }
+
+        // 2. Meta Description Score (Weight: 10)
+        $metaLength = isset($contentStructure['meta_description']) ? mb_strlen($contentStructure['meta_description']) : 0;
+        if ($metaLength >= 120 && $metaLength <= 160) {
+            $scores['meta'] = 100;
+        } elseif ($metaLength > 0) {
+            $scores['meta'] = 60;
+        } else {
+            $scores['meta'] = 10;
+        }
+
+        // 3. Headings Score (Weight: 20)
+        $h1Count = isset($contentStructure['headings']['H1']) ? count($contentStructure['headings']['H1']) : 0;
+        $h2Count = isset($contentStructure['headings']['H2']) ? count($contentStructure['headings']['H2']) : 0;
+        $h1Score = ($h1Count === 1) ? 100 : (($h1Count > 1) ? 20 : 10);
+        $h2Score = min(100, $h2Count * 15);
+        $scores['headings'] = ($h1Score * 0.6) + ($h2Score * 0.4);
+
+        // 4. Internal Links Score (Weight: 15)
+        $internalLinks = $quickStats['internal_links'] ?? 0;
+        $scores['internal_links'] = min(100, $internalLinks * 8);
+
+        // 5. Technical SEO Score (Weight: 20)
+        $canonicalScore = !empty($pageSignals['canonical']) ? 100 : 20;
+        $viewportScore = !empty($pageSignals['has_viewport']) ? 100 : 20;
+        $robotsContent = $pageSignals['robots'] ?? '';
+        $robotsScore = (stripos($robotsContent, 'noindex') === false) ? 100 : 10;
+        $scores['technical'] = ($canonicalScore + $viewportScore + $robotsScore) / 3;
+
+        // 6. Image Alt Text Score (Weight: 10)
+        $totalImages = $quickStats['total_images'] ?? 0;
+        $imagesWithAlt = $quickStats['images_alt_count'] ?? 0;
+        $scores['alt_text'] = ($totalImages > 0) ? round(($imagesWithAlt / $totalImages) * 100) : 100;
+
+        // Calculate weighted average for overall score
+        $weights = [
+            'title' => 15, 'meta' => 10, 'headings' => 20,
+            'internal_links' => 15, 'technical' => 20, 'alt_text' => 10,
+        ];
+        
+        $totalScore = 0;
+        $totalWeight = array_sum($weights);
+        foreach ($scores as $key => $score) {
+            $totalScore += $score * ($weights[$key] ?? 0);
+        }
+        $overallScore = ($totalWeight > 0) ? round($totalScore / $totalWeight) : 0;
+
+        // Define categories based on individual scores
+        $contentKeywordsScore = round(($scores['title'] + $scores['meta'] + $scores['headings']) / 3);
+        $contentQualityScore = round(($scores['internal_links'] + $scores['alt_text'] + $scores['technical']) / 3);
+
+        return [
+            'overall_score' => (int) $overallScore,
+            // Readability analysis is complex and often requires a dedicated library.
+            // Keeping it static unless a specific implementation is requested.
+            'readability' => ['score' => 75, 'passive_ratio' => 10],
+            'categories' => [
+                ['name' => 'Content & Keywords', 'score' => (int)$contentKeywordsScore],
+                ['name' => 'Content Quality', 'score' => (int)$contentQualityScore]
+            ]
+        ];
+    }
+
     public function semanticAnalyze(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate(['url' => ['required', 'url']]);
             $urlToAnalyze = $validated['url'];
 
-            $contentStructure = []; $pageSignals = []; $quickStats = []; $imagesAltCount = 0;
-            $response = Http::timeout(15)->get($urlToAnalyze);
-            if ($response->failed()) return response()->json(['error' => "Failed to fetch URL. Status: {$response->status()}"], 400);
+            $response = Http::timeout(20)->get($urlToAnalyze);
+            if ($response->failed()) {
+                return response()->json(['error' => "Failed to fetch URL. Status: {$response->status()}"], 400);
+            }
 
             $html = $response->body();
             $dom = new DOMDocument();
             libxml_use_internal_errors(true);
-            $dom->loadHTML($html);
+            @$dom->loadHTML($html);
             libxml_clear_errors();
             $xpath = new DOMXPath($dom);
 
+            $contentStructure = [];
             $contentStructure['title'] = optional($xpath->query('//title')->item(0))->textContent;
             $contentStructure['meta_description'] = optional($xpath->query("//meta[@name='description']/@content")->item(0))->nodeValue;
             $contentStructure['headings'] = [];
@@ -67,10 +153,13 @@ class AnalyzerController extends Controller
                 $contentStructure['headings'][$tagUpper] = [];
                 foreach ($headings as $heading) { $contentStructure['headings'][$tagUpper][] = trim($heading->textContent); }
             }
+            
+            $pageSignals = [];
             $pageSignals['canonical'] = optional($xpath->query("//link[@rel='canonical']/@href")->item(0))->nodeValue;
             $pageSignals['robots'] = optional($xpath->query("//meta[@name='robots']/@content")->item(0))->nodeValue;
             $pageSignals['has_viewport'] = $xpath->query("//meta[@name='viewport']")->length > 0;
 
+            $quickStats = [];
             $links = $dom->getElementsByTagName('a');
             $internalLinks = 0; $externalLinks = 0;
             $host = parse_url($urlToAnalyze, PHP_URL_HOST) ?? '';
@@ -83,18 +172,33 @@ class AnalyzerController extends Controller
             $quickStats['internal_links'] = $internalLinks;
             $quickStats['external_links'] = $externalLinks;
 
-            foreach ($dom->getElementsByTagName('img') as $image) {
-                if ($image->hasAttribute('alt') && !empty(trim($image->getAttribute('alt')))) $imagesAltCount++;
+            $images = $dom->getElementsByTagName('img');
+            $imagesAltCount = 0;
+            foreach ($images as $image) {
+                if ($image->hasAttribute('alt') && !empty(trim($image->getAttribute('alt')))) {
+                    $imagesAltCount++;
+                }
             }
-
-            return response()->json([
-                'overall_score' => 78,
-                'readability' => ['score' => 75, 'passive_ratio' => 10],
-                'categories' => [['name' => 'Content & Keywords', 'score' => 82], ['name' => 'Content Quality', 'score' => 75]],
+            $quickStats['total_images'] = $images->length;
+            $quickStats['images_alt_count'] = $imagesAltCount;
+            
+            $parsedData = [
                 'content_structure' => $contentStructure,
                 'page_signals' => $pageSignals,
                 'quick_stats' => $quickStats,
-                'images_alt_count' => $imagesAltCount,
+            ];
+
+            // Calculate dynamic scores
+            $scores = $this->calculateScores($parsedData);
+
+            return response()->json([
+                'overall_score' => $scores['overall_score'],
+                'readability' => $scores['readability'],
+                'categories' => $scores['categories'],
+                'content_structure' => $contentStructure,
+                'page_signals' => $pageSignals,
+                'quick_stats' => $quickStats,
+                'images_alt_count' => $imagesAltCount, // Kept for frontend compatibility
             ]);
             
         } catch (\Exception $e) {
@@ -102,6 +206,7 @@ class AnalyzerController extends Controller
             return response()->json(['error' => "Could not parse the URL's HTML.", 'detail' => $e->getMessage()], 500);
         }
     }
+
 
     public function handleOpenAiRequest(Request $request): JsonResponse
     {
@@ -323,4 +428,3 @@ class AnalyzerController extends Controller
         return $this->handleOpenAiRequest($request);
     }
 }
-
