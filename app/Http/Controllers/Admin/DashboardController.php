@@ -46,13 +46,14 @@ class DashboardController extends Controller
             'searchesToday' => 0,
             'totalUsers'    => 0,
             'cost24h'       => 0.0,
+            'tokens24h'     => 0,
             'dau'           => 0,
             'mau'           => 0,
             'active5m'      => 0,
             'dailyLimit'    => 100,
-            'tokens24h'     => 0, // optional if column exists
         ];
 
+        // Users
         if (Schema::hasTable('users')) {
             $k['totalUsers'] = (int) User::count();
             if (Schema::hasColumn('users', 'last_seen_at')) {
@@ -60,6 +61,7 @@ class DashboardController extends Controller
             }
         }
 
+        // Analyze logs (primary source for usage counts)
         if (Schema::hasTable('analyze_logs')) {
             $k['searchesToday'] = (int) DB::table('analyze_logs')
                 ->where('created_at', '>=', $today)
@@ -74,18 +76,30 @@ class DashboardController extends Controller
                 ->distinct('user_id')->count('user_id');
         }
 
-        if (Schema::hasTable('openai_usage')) {
-            $k['cost24h'] = (float) DB::table('openai_usage')
-                ->where('created_at', '>=', now()->subDay())
-                ->sum('cost_usd');
+        // OpenAI usage (cost/tokens) — support both table names + columns
+        $usageTable = Schema::hasTable('open_ai_usages')
+            ? 'open_ai_usages'
+            : (Schema::hasTable('openai_usage') ? 'openai_usage' : null);
 
-            if (Schema::hasColumn('openai_usage', 'tokens')) {
-                $k['tokens24h'] = (int) DB::table('openai_usage')
+        if ($usageTable) {
+            if (Schema::hasColumn($usageTable, 'cost_usd')) {
+                $k['cost24h'] = (float) DB::table($usageTable)
+                    ->where('created_at', '>=', now()->subDay())
+                    ->sum('cost_usd');
+            } elseif (Schema::hasColumn($usageTable, 'cost')) {
+                $k['cost24h'] = (float) DB::table($usageTable)
+                    ->where('created_at', '>=', now()->subDay())
+                    ->sum('cost');
+            }
+
+            if (Schema::hasColumn($usageTable, 'tokens')) {
+                $k['tokens24h'] = (int) DB::table($usageTable)
                     ->where('created_at', '>=', now()->subDay())
                     ->sum('tokens');
             }
         }
 
+        // Daily limit avg
         if (Schema::hasTable('user_limits') && Schema::hasColumn('user_limits', 'daily_limit')) {
             $avg = DB::table('user_limits')->avg('daily_limit');
             $k['dailyLimit'] = (int) ($avg ?: 100);
@@ -113,60 +127,148 @@ class DashboardController extends Controller
         $okQueue = Schema::hasTable('jobs') && Schema::hasTable('failed_jobs');
         $out[] = ['name' => 'Queue', 'ok' => $okQueue, 'latency_ms' => null];
 
-        $okOpenAI = Schema::hasTable('openai_usage');
-        $out[] = ['name' => 'OpenAI', 'ok' => $okOpenAI, 'latency_ms' => null];
+        $okUsage = Schema::hasTable('open_ai_usages') || Schema::hasTable('openai_usage');
+        $out[] = ['name' => 'OpenAI', 'ok' => $okUsage, 'latency_ms' => null];
 
         return $out;
     }
 
+    /**
+     * Robust history composer:
+     * - analyze_logs (primary)
+     * - open_ai_usages / openai_usage (LLM calls)
+     * - user_sessions (logins)
+     * - users (signups/last seen) as last resort
+     */
     private function recentHistory(): array
     {
-        // 1) Primary: analyze_logs
+        $events = [];
+
+        // 1) analyze_logs
         if (Schema::hasTable('analyze_logs')) {
             $rows = DB::table('analyze_logs as a')
                 ->leftJoin('users as u', 'u.id', '=', 'a.user_id')
                 ->orderByDesc('a.id')
-                ->limit(50)
-                ->get(['a.created_at','u.email','u.name','a.keyword','a.tool','a.tokens','a.cost_usd']);
+                ->limit(100)
+                ->get([
+                    'a.created_at',
+                    'u.email', 'u.name',
+                    // candidate columns (not all may exist in your schema, we'll handle nulls)
+                    DB::raw('a.keyword as kw'),
+                    DB::raw('a.query as qry'),
+                    DB::raw('a.tool as tool'),
+                    DB::raw('a.tokens as tokens'),
+                    DB::raw('a.cost_usd as cost_usd'),
+                    DB::raw('a.cost as cost_raw'),
+                ]);
 
-            if ($rows->count()) {
-                return $rows->map(function ($r) {
-                    return [
-                        'when'   => $this->fmt($r->created_at),
-                        'user'   => $r->name ?: ($r->email ?? '—'),
-                        'display'=> $r->keyword ? ('Analyzed "' . $r->keyword . '"') : 'Analysis',
-                        'tool'   => $r->tool ?: 'semantic',
-                        'tokens' => $r->tokens,
-                        'cost'   => number_format((float)($r->cost_usd ?? 0), 4),
-                    ];
-                })->all();
+            foreach ($rows as $r) {
+                $ts = $r->created_at ?? null;
+                $display = null;
+                if (!empty($r->kw))  $display = 'Analyzed "'.$r->kw.'"';
+                if (!$display && !empty($r->qry)) $display = 'Query "'.$r->qry.'"';
+                if (!$display) $display = 'Analysis';
+
+                $cost = $r->cost_usd ?? $r->cost_raw ?? 0;
+                $events[] = [
+                    'ts'      => $ts,
+                    'when'    => $this->fmt($ts),
+                    'user'    => $r->name ?: ($r->email ?? '—'),
+                    'display' => $display,
+                    'tool'    => $r->tool ?: 'semantic',
+                    'tokens'  => $r->tokens ?? '—',
+                    'cost'    => number_format((float)($cost ?: 0), 4),
+                ];
             }
         }
 
-        // 2) Fallback: user_sessions (login activity)
+        // 2) open_ai_usages / openai_usage
+        $usageTable = Schema::hasTable('open_ai_usages')
+            ? 'open_ai_usages'
+            : (Schema::hasTable('openai_usage') ? 'openai_usage' : null);
+
+        if ($usageTable) {
+            $hasUserId  = Schema::hasColumn($usageTable, 'user_id');
+            $hasModel   = Schema::hasColumn($usageTable, 'model');
+            $hasPath    = Schema::hasColumn($usageTable, 'path');
+            $hasTokens  = Schema::hasColumn($usageTable, 'tokens');
+            $hasCostUsd = Schema::hasColumn($usageTable, 'cost_usd');
+            $hasCost    = Schema::hasColumn($usageTable, 'cost');
+
+            $q = DB::table("$usageTable as x");
+            if ($hasUserId) {
+                $q->leftJoin('users as u', 'u.id', '=', 'x.user_id')
+                  ->addSelect('u.email', 'u.name');
+            }
+            $q->orderByDesc('x.id')->limit(100);
+            $select = ['x.created_at'];
+            if ($hasModel)   $select[] = 'x.model';
+            if ($hasPath)    $select[] = 'x.path';
+            if ($hasTokens)  $select[] = 'x.tokens';
+            if ($hasCostUsd) $select[] = 'x.cost_usd';
+            if ($hasCost)    $select[] = 'x.cost';
+            $rows = $q->get($select);
+
+            foreach ($rows as $r) {
+                $ts = $r->created_at ?? null;
+                $model = property_exists($r, 'model') ? $r->model : null;
+                $path  = property_exists($r, 'path') ? $r->path : null;
+                $disp = 'LLM call';
+                if ($model && $path) $disp = "$model — $path";
+                elseif ($model)      $disp = $model;
+                elseif ($path)       $disp = $path;
+
+                $tokens = property_exists($r, 'tokens') ? $r->tokens : '—';
+                $cost   = property_exists($r, 'cost_usd') ? $r->cost_usd : (property_exists($r, 'cost') ? $r->cost : 0);
+
+                $events[] = [
+                    'ts'      => $ts,
+                    'when'    => $this->fmt($ts),
+                    'user'    => property_exists($r, 'name') && $r->name ? $r->name : (property_exists($r, 'email') ? $r->email : '—'),
+                    'display' => $disp,
+                    'tool'    => 'openai',
+                    'tokens'  => $tokens,
+                    'cost'    => number_format((float)($cost ?: 0), 4),
+                ];
+            }
+        }
+
+        // 3) user_sessions (logins)
         if (Schema::hasTable('user_sessions')) {
+            $cols = $this->existingColumns('user_sessions', ['updated_at','login_at','created_at','ip','ip_address','country','country_code']);
+            $select = [];
+            if (isset($cols['updated_at'])) $select[] = 's.updated_at';
+            if (isset($cols['login_at']))   $select[] = 's.login_at';
+            if (isset($cols['created_at'])) $select[] = 's.created_at';
+            if (isset($cols['ip']))         $select[] = 's.ip';
+            if (isset($cols['ip_address'])) $select[] = DB::raw('s.ip_address as ip');
+            if (isset($cols['country']))    $select[] = 's.country';
+            if (isset($cols['country_code'])) $select[] = DB::raw('s.country_code as country');
+
             $rows = DB::table('user_sessions as s')
                 ->leftJoin('users as u', 'u.id', '=', 's.user_id')
                 ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
-                ->limit(50)
-                ->get(['s.login_at','s.updated_at','s.created_at','u.email','u.name','s.ip','s.country']);
+                ->limit(100)
+                ->get(array_merge($select, ['u.email','u.name']));
 
-            if ($rows->count()) {
-                return $rows->map(function ($r) {
-                    $when = $r->updated_at ?? $r->login_at ?? $r->created_at;
-                    return [
-                        'when'   => $this->fmt($when),
-                        'user'   => $r->name ?: ($r->email ?? '—'),
-                        'display'=> 'Login' . ($r->ip ? (' from ' . $r->ip . ($r->country ? ' · ' . $r->country : '')) : ''),
-                        'tool'   => 'auth',
-                        'tokens' => '—',
-                        'cost'   => '0.0000',
-                    ];
-                })->all();
+            foreach ($rows as $r) {
+                $ts = $this->firstNonNull([$this->prop($r,'updated_at'), $this->prop($r,'login_at'), $this->prop($r,'created_at')]);
+                $ip = $this->prop($r, 'ip');
+                $country = $this->prop($r, 'country');
+
+                $events[] = [
+                    'ts'      => $ts,
+                    'when'    => $this->fmt($ts),
+                    'user'    => $r->name ?: ($r->email ?? '—'),
+                    'display' => 'Login' . ($ip ? (' from '.$ip . ($country ? ' · '.$country : '')) : ''),
+                    'tool'    => 'auth',
+                    'tokens'  => '—',
+                    'cost'    => '0.0000',
+                ];
             }
         }
 
-        // 3) Last resort: recent users, using any timestamp that exists
+        // 4) users (signups / last seen) as last resort
         if (Schema::hasTable('users')) {
             $hasCreated = Schema::hasColumn('users', 'created_at');
             $hasUpdated = Schema::hasColumn('users', 'updated_at');
@@ -178,48 +280,60 @@ class DashboardController extends Controller
             if ($hasUpdated) { $select[] = 'u.updated_at';   $coalesce[] = 'u.updated_at'; }
             if ($hasCreated) { $select[] = 'u.created_at';   $coalesce[] = 'u.created_at'; }
 
-            $orderExpr = $coalesce
-                ? ('COALESCE('.implode(',', $coalesce).') DESC')
-                : 'u.id DESC';
+            $orderExpr = $coalesce ? ('COALESCE('.implode(',', $coalesce).') DESC') : 'u.id DESC';
 
-            $rows = DB::table('users as u')
-                ->select($select)
-                ->orderByRaw($orderExpr)
-                ->limit(50)
-                ->get();
+            $rows = DB::table('users as u')->select($select)->orderByRaw($orderExpr)->limit(100)->get();
 
-            if ($rows->count()) {
-                return $rows->map(function ($r) use ($hasSeen, $hasUpdated, $hasCreated) {
-                    $when = null;
-                    if ($hasSeen   && !empty($r->last_seen_at)) $when = $r->last_seen_at;
-                    elseif ($hasUpdated && !empty($r->updated_at)) $when = $r->updated_at;
-                    elseif ($hasCreated && !empty($r->created_at)) $when = $r->created_at;
-
-                    return [
-                        'when'   => $this->fmt($when),
-                        'user'   => $r->name ?: ($r->email ?? '—'),
-                        'display'=> 'Signup',
-                        'tool'   => 'onboarding',
-                        'tokens' => '—',
-                        'cost'   => '0.0000',
-                    ];
-                })->all();
+            foreach ($rows as $r) {
+                $ts = $this->firstNonNull([$this->prop($r,'last_seen_at'), $this->prop($r,'updated_at'), $this->prop($r,'created_at')]);
+                $events[] = [
+                    'ts'      => $ts,
+                    'when'    => $this->fmt($ts),
+                    'user'    => $r->name ?: ($r->email ?? '—'),
+                    'display' => 'Signup',
+                    'tool'    => 'onboarding',
+                    'tokens'  => '—',
+                    'cost'    => '0.0000',
+                ];
             }
+        }
+
+        // Sort and limit
+        usort($events, function ($a, $b) {
+            $ta = $this->tsToSortable($a['ts']);
+            $tb = $this->tsToSortable($b['ts']);
+            return $tb <=> $ta; // desc
+        });
+
+        $events = array_slice($events, 0, 50);
+
+        return $events;
+    }
+
+    private function trafficSeries(): array
+    {
+        // Prefer analyze_logs; if absent, fall back to open_ai_usages counts
+        if (Schema::hasTable('analyze_logs')) {
+            return $this->seriesFromTable('analyze_logs');
+        }
+
+        $usageTable = Schema::hasTable('open_ai_usages')
+            ? 'open_ai_usages'
+            : (Schema::hasTable('openai_usage') ? 'openai_usage' : null);
+
+        if ($usageTable) {
+            return $this->seriesFromTable($usageTable);
         }
 
         return [];
     }
 
-    private function trafficSeries(): array
+    private function seriesFromTable(string $table): array
     {
-        if (!Schema::hasTable('analyze_logs')) {
-            return [];
-        }
-
         $days = 14;
         $start = now()->subDays($days - 1)->startOfDay();
 
-        $raw = DB::table('analyze_logs')
+        $raw = DB::table($table)
             ->select(DB::raw('DATE(created_at) as d'), DB::raw('COUNT(*) as c'))
             ->where('created_at', '>=', $start)
             ->groupBy('d')
@@ -232,18 +346,13 @@ class DashboardController extends Controller
         for ($i = 0; $i < $days; $i++) {
             $d = $start->copy()->addDays($i)->toDateString();
             $row = $map->get($d);
-            $out[] = [
-                'day'   => $d,
-                'count' => (int) ($row->c ?? 0),
-            ];
+            $out[] = ['day' => $d, 'count' => (int) ($row->c ?? 0)];
         }
-
         return $out;
     }
 
-    /**
-     * Safe formatter for timestamps that may be strings, integers, or Carbon.
-     */
+    /** ---------- helpers ---------- */
+
     private function fmt($ts): ?string
     {
         if (!$ts) return null;
@@ -251,13 +360,41 @@ class DashboardController extends Controller
             if ($ts instanceof \DateTimeInterface) {
                 return Carbon::instance($ts)->format('Y-m-d H:i');
             }
-            // unix ts (int)
-            if (is_numeric($ts) && (int)$ts > 0 && strlen((string)$ts) <= 10) {
+            if (is_numeric($ts) && strlen((string) $ts) <= 10) {
                 return Carbon::createFromTimestamp((int) $ts)->format('Y-m-d H:i');
             }
             return Carbon::parse((string) $ts)->format('Y-m-d H:i');
         } catch (\Throwable $e) {
             return is_string($ts) ? $ts : null;
         }
+    }
+
+    private function prop(object $o, string $key)
+    {
+        return property_exists($o, $key) ? $o->{$key} : null;
+    }
+
+    private function firstNonNull(array $vals)
+    {
+        foreach ($vals as $v) if (!is_null($v)) return $v;
+        return null;
+    }
+
+    private function tsToSortable($ts): int
+    {
+        try {
+            if ($ts instanceof \DateTimeInterface) return (int) Carbon::instance($ts)->timestamp;
+            if (is_numeric($ts) && strlen((string) $ts) <= 10) return (int) $ts;
+            return Carbon::parse((string) $ts)->timestamp;
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    private function existingColumns(string $table, array $candidates): array
+    {
+        $out = [];
+        foreach ($candidates as $c) if (Schema::hasColumn($table, $c)) $out[$c] = true;
+        return $out;
     }
 }
