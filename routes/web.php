@@ -6,22 +6,22 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AnalyzerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserAdminController;
-use App\Http\Controllers\Admin\UserLimitsController;
+use App\Http\Controllers\Admin\UserLimitsController; // kept in case you still use it elsewhere
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
 |
-| These routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group.
+| These routes are loaded by the RouteServiceProvider within the "web"
+| middleware group.
 |
 */
 
 // Homepage
 Route::view('/', 'home')->name('home');
 
-// Authentication Routes
+// Authentication
 Route::controller(AuthController::class)->group(function () {
     Route::get('/login', 'showLogin')->name('login');
     Route::post('/login', 'login')->name('login.post');
@@ -30,24 +30,24 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/logout', 'logout')->name('logout');
 });
 
-// Authenticated User Routes
+// Authenticated (non-admin) app
 Route::middleware(['auth', 'ban', 'presence'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
 
-    // Analyzer UI Pages
+    // Analyzer UI pages
     Route::view('/semantic-analyzer', 'analyzers.semantic')->name('semantic.analyzer');
     Route::view('/ai-content-checker', 'analyzers.ai')->name('ai.checker');
     Route::view('/topic-cluster', 'analyzers.topic')->name('topic.cluster');
 
-    // Profile Management
-    Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
+    // Profile
+    Route::prefix('profile')->name('profile.')->controller(ProfileController::class)->group(function () {
         Route::get('/', 'edit')->name('edit');
         Route::post('/update', 'updateProfile')->name('update');
         Route::post('/password', 'updatePassword')->name('password');
         Route::post('/avatar', 'updateAvatar')->name('avatar');
     });
 
-    // PageSpeed Insights Proxy
+    // PageSpeed Insights proxy
     Route::post('/semantic-analyzer/psi', [AnalyzerController::class, 'pageSpeedInsights'])
         ->name('semantic.psi')
         ->middleware('throttle:seoapi');
@@ -55,33 +55,35 @@ Route::middleware(['auth', 'ban', 'presence'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Admin Routes
+| Admin
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'ban', 'presence', 'admin'])
-    ->prefix('admin')->name('admin.')
+    ->prefix('admin')
+    ->name('admin.')
     ->group(function () {
-
-        // Admin dashboard page
+        // Main Admin Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-        // --- Live JSON feeds used by the upgraded dashboard (poll every 10s)
         Route::get('/dashboard/live', [DashboardController::class, 'live'])->name('dashboard.live');
-        Route::get('/users/{user}/live', [DashboardController::class, 'userLive'])->name('users.live');
 
-        // --- User actions (existing + new limits endpoint)
-        Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');
+        // Users — Live (page + JSON feeds)
+        // Name is 'admin.users' so {{ route('admin.users') }} works
+        Route::get('/users', [UserAdminController::class, 'index'])->name('users');
+
+        // Data feeds used by the Users page
+        Route::get('/users/table', [UserAdminController::class, 'table'])->name('users.table');
+        Route::get('/users/{user}/live', [UserAdminController::class, 'live'])->name('users.live');
+        Route::get('/users/{user}/sessions', [UserAdminController::class, 'sessions'])->name('users.sessions');
+
+        // Actions
         Route::patch('/users/{user}/ban', [UserAdminController::class, 'toggleBan'])->name('users.ban');
-        Route::patch('/users/{user}/limits', [UserLimitsController::class, 'update'])->name('users.updateLimits');
+        Route::patch('/users/{user}/upgrade', [UserAdminController::class, 'upgrade'])->name('users.upgrade');
 
-        // --- NEW: Users — Live table & Sessions (add-only)
-        Route::get('/users/table', [DashboardController::class, 'usersTable'])->name('users.table');
-        Route::get('/users/{user}/sessions', [DashboardController::class, 'userSessions'])->name('users.sessions');
+        // Limits (keep both: legacy + new)
+        Route::patch('/users/{user}/limit', [UserAdminController::class, 'updateUserLimit'])->name('users.limit');   // legacy
+        Route::patch('/users/{user}/limits', [UserAdminController::class, 'updateUserLimit'])->name('users.limits'); // new UI
 
-        // --- ADDED: Users index so the "Manage Users" button has a valid target
-        Route::get('/users', [UserAdminController::class, 'index'])->name('users.index');
-
-        // --- Optional: preview of the new dashboard view (safe/read-only)
+        // Optional: safe preview route (kept)
         Route::get('/dashboard-v3', function () {
             $view = \Illuminate\Support\Facades\View::exists('admin.dashboard-v3') ? 'admin.dashboard-v3' : 'admin.dashboard';
             return view($view, [
@@ -98,7 +100,7 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
 
 /*
 |--------------------------------------------------------------------------
-| Utility & Fallback Routes
+| Utility & Fallback
 |--------------------------------------------------------------------------
 */
 Route::get('/_up', fn () => response('OK', 200))->name('_up');
