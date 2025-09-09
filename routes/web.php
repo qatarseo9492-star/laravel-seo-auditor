@@ -74,6 +74,10 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
         Route::patch('/users/{user}/ban', [UserAdminController::class, 'toggleBan'])->name('users.ban');
         Route::patch('/users/{user}/limits', [UserLimitsController::class, 'update'])->name('users.updateLimits');
 
+        // --- NEW: Users — Live table & Sessions (add-only)
+        Route::get('/users/table', [DashboardController::class, 'usersTable'])->name('users.table');
+        Route::get('/users/{user}/sessions', [DashboardController::class, 'userSessions'])->name('users.sessions');
+
         // --- Optional: preview of the new dashboard view (safe/read-only)
         Route::get('/dashboard-v3', function () {
             $view = \Illuminate\Support\Facades\View::exists('admin.dashboard-v3') ? 'admin.dashboard-v3' : 'admin.dashboard';
