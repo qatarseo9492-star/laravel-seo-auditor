@@ -259,51 +259,91 @@ class UserAdminController extends Controller
     /**
      * GET /admin/users/{user}/sessions
      * Prefers app-level user_sessions (TouchPresence), falls back to Laravel's sessions table.
+     * This version detects available columns dynamically to avoid SQL errors.
      */
     public function sessions(User $user)
     {
-        // Prefer app-level table populated by TouchPresence middleware
-        if (Schema::hasTable('user_sessions')) {
-            $rows = DB::table('user_sessions as s')
-                ->where('s.user_id', $user->id)
-                ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
-                ->limit(20)
-                ->get(['s.login_at','s.logout_at','s.ip','s.country','s.updated_at','s.created_at'])
-                ->map(function ($s) {
-                    $last = $s->updated_at ?? $s->login_at ?? $s->created_at;
+        try {
+            // Prefer app-level table populated by TouchPresence middleware
+            if (Schema::hasTable('user_sessions')) {
+                $cols = $this->existingColumns('user_sessions', [
+                    'login_at','logout_at','ip','ip_address','country','country_code','updated_at','created_at'
+                ]);
+
+                // Build SELECT list from available columns (use aliases for alternates)
+                $select = [];
+                if (isset($cols['login_at']))   $select[] = 's.login_at';
+                if (isset($cols['logout_at']))  $select[] = 's.logout_at';
+                if (isset($cols['ip']))         $select[] = 's.ip';
+                if (!isset($cols['ip']) && isset($cols['ip_address'])) $select[] = DB::raw('s.ip_address as ip');
+                if (isset($cols['country']))    $select[] = 's.country';
+                if (!isset($cols['country']) && isset($cols['country_code'])) $select[] = DB::raw('s.country_code as country');
+                if (isset($cols['updated_at'])) $select[] = 's.updated_at';
+                if (isset($cols['created_at'])) $select[] = 's.created_at';
+
+                if (empty($select)) {
+                    // If schema is very custom, at least select everything
+                    $select = [DB::raw('s.*')];
+                }
+
+                // Order by best timestamp we can find
+                $orderParts = [];
+                if (isset($cols['updated_at']))  $orderParts[] = 's.updated_at';
+                if (isset($cols['login_at']))    $orderParts[] = 's.login_at';
+                if (isset($cols['created_at']))  $orderParts[] = 's.created_at';
+
+                $query = DB::table('user_sessions as s')->where('s.user_id', $user->id);
+
+                if ($orderParts) {
+                    $query->orderByRaw('COALESCE(' . implode(',', $orderParts) . ') DESC');
+                } else {
+                    $query->orderByDesc('s.id');
+                }
+
+                $rows = $query->limit(20)->get($select)->map(function ($s) {
+                    // Normalize fields defensively
+                    $login   = $this->prop($s, 'login_at') ?? $this->prop($s, 'created_at') ?? $this->prop($s, 'updated_at');
+                    $logout  = $this->prop($s, 'logout_at');
+                    $ip      = $this->prop($s, 'ip') ?? $this->prop($s, 'ip_address');
+                    $country = $this->prop($s, 'country') ?? $this->prop($s, 'country_code');
+
                     return [
-                        'login_at'  => $this->fmt($s->login_at ?: $last),
-                        'logout_at' => $this->fmt($s->logout_at),
-                        'ip'        => $s->ip,
-                        'country'   => $s->country,
+                        'login_at'  => $this->fmt($login),
+                        'logout_at' => $this->fmt($logout),
+                        'ip'        => $ip,
+                        'country'   => $country,
                     ];
                 });
 
-            return response()->json(['rows' => $rows]);
+                return response()->json(['rows' => $rows]);
+            }
+
+            // Fallback: Laravel database-backed sessions (SESSION_DRIVER=database)
+            if (Schema::hasTable('sessions')) {
+                $rows = DB::table('sessions')
+                    ->where('user_id', (string) $user->getAuthIdentifier())
+                    ->orderByDesc('last_activity')
+                    ->limit(20)
+                    ->get(['ip_address', 'last_activity', 'user_agent'])
+                    ->map(function ($s) {
+                        $dt = $s->last_activity ? Carbon::createFromTimestamp($s->last_activity) : null;
+                        return [
+                            'login_at'  => $this->fmt($dt),
+                            'logout_at' => null, // not tracked in default sessions table
+                            'ip'        => $s->ip_address,
+                            'country'   => null,
+                        ];
+                    });
+
+                return response()->json(['rows' => $rows]);
+            }
+
+            // No session tables available
+            return response()->json(['rows' => []]);
+        } catch (\Throwable $e) {
+            // Never 500 the UI
+            return response()->json(['rows' => [], 'error' => $e->getMessage()], 200);
         }
-
-        // Fallback: Laravel database-backed sessions (SESSION_DRIVER=database)
-        if (Schema::hasTable('sessions')) {
-            $rows = DB::table('sessions')
-                ->where('user_id', (string) $user->getAuthIdentifier())
-                ->orderByDesc('last_activity')
-                ->limit(20)
-                ->get(['ip_address', 'last_activity', 'user_agent'])
-                ->map(function ($s) {
-                    $dt = $s->last_activity ? Carbon::createFromTimestamp($s->last_activity) : null;
-                    return [
-                        'login_at'  => $this->fmt($dt),
-                        'logout_at' => null, // not tracked in default sessions table
-                        'ip'        => $s->ip_address,
-                        'country'   => null,
-                    ];
-                });
-
-            return response()->json(['rows' => $rows]);
-        }
-
-        // No session tables available
-        return response()->json(['rows' => []]);
     }
 
     /**
@@ -411,5 +451,26 @@ class UserAdminController extends Controller
         } catch (\Throwable $e) {
             return is_string($ts) ? $ts : null;
         }
+    }
+
+    /**
+     * Get a map of which of the given columns exist on $table.
+     * @return array<string,bool>
+     */
+    private function existingColumns(string $table, array $candidates): array
+    {
+        $out = [];
+        foreach ($candidates as $c) {
+            if (Schema::hasColumn($table, $c)) $out[$c] = true;
+        }
+        return $out;
+    }
+
+    /**
+     * Safe property accessor on stdClass.
+     */
+    private function prop(object $o, string $key)
+    {
+        return property_exists($o, $key) ? $o->{$key} : null;
     }
 }
