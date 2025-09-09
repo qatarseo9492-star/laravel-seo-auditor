@@ -24,7 +24,7 @@ class QuotaGuard
             str_ends_with($path, '/api/keyword-analyze')          => 'keyword',
             str_ends_with($path, '/api/content-engine-analyze')   => 'content_engine',
             str_ends_with($path, '/semantic-analyzer/psi')        => 'psi',
-            default                                              => 'analyzer',
+            default                                               => 'analyzer',
         };
 
         // Read limits — prefer users table columns if they exist; otherwise fall back to user_limits
@@ -34,12 +34,11 @@ class QuotaGuard
         // Fallback to user_limits table if user fields are null
         if (is_null($dailyLimit) || is_null($monthlyLimit)) {
             try {
-                // Only attempt if table exists
                 if (DB::getSchemaBuilder()->hasTable('user_limits')) {
                     $ul = DB::table('user_limits')->where('user_id', $user->id)->first();
                     if ($ul) {
-                        $dailyLimit   = $dailyLimit   ?? $ul->daily_limit   ?? null;
-                        $monthlyLimit = $monthlyLimit ?? $ul->monthly_limit ?? null;
+                        $dailyLimit   = $dailyLimit   ?? ($ul->daily_limit   ?? null);
+                        $monthlyLimit = $monthlyLimit ?? ($ul->monthly_limit ?? null);
                     }
                 }
             } catch (\Throwable $e) {
@@ -47,16 +46,21 @@ class QuotaGuard
             }
         }
 
-        // If no limits configured anywhere, let it pass
-        if (is_null($dailyLimit) && is_null($monthlyLimit)) {
-            return $next($request);
-        }
+        // ------------------------
+        // ✅ Add +100 to everyone's daily limit (bonus)
+        //    If you want to enforce exactly 100 as default instead, replace the next line with:
+        //    $dailyLimit = $dailyLimit ?? 100;
+        $dailyLimit = is_null($dailyLimit) ? 100 : ($dailyLimit + 100);
+        // ------------------------
+
+        // If no limits configured anywhere (monthly only), we still enforce daily via the line above.
+        // If you also want a monthly bonus, you can do the same pattern here:
+        // $monthlyLimit = is_null($monthlyLimit) ? null : ($monthlyLimit + 100);
 
         $startOfDay   = now()->startOfDay();
         $startOfMonth = now()->startOfMonth();
 
-        // Count usage based on canonical analyze_logs schema (tool column, not analyzer)
-        // If you want to enforce global quotas (all tools), drop the ->where('tool', $tool) line(s)
+        // Count usage (global, not per-tool). If you want per-tool, add ->where('tool', $tool)
         $dailyCount = DB::table('analyze_logs')
             ->where('user_id', $user->id)
             ->where('created_at', '>=', $startOfDay)
