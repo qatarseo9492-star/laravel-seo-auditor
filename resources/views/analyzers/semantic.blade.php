@@ -561,6 +561,9 @@
     const caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
     
     const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult');
+    
+    const aiCheckTextarea = $('#aiCheckTextarea'), aiCheckBtn = $('#aiCheckBtn'), aiCheckResult = $('#aiCheckResult');
+
 
     /* Helpers (Unchanged) */
     const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
@@ -826,6 +829,52 @@
         } finally { aiBriefBtn.disabled = false; aiBriefBtn.textContent = 'Generate'; }
     });
 
+    aiCheckBtn?.addEventListener('click', async () => {
+        const text = aiCheckTextarea.value.trim();
+        if (text.length < 50) {
+            aiCheckResult.innerHTML = '<p style="color: var(--orange-1);">Please enter at least 50 characters to analyze.</p>';
+            return;
+        }
+
+        aiCheckBtn.disabled = true;
+        aiCheckBtn.innerHTML = '<span class="animated-icon">⚙️</span> Analyzing...';
+        aiCheckResult.innerHTML = '<p>Checking AI score and generating suggestions...</p>';
+
+        try {
+            const result = await callApi('/api/ai-content-check', { text });
+            if (result.error) {
+                throw new Error(result.error);
+            }
+            const aiScore = result.ai_score;
+            const humanScore = 100 - aiScore;
+            const suggestions = result.suggestions;
+            
+            const scoreColor = humanScore >= 80 ? 'var(--green-1)' : humanScore >= 60 ? 'var(--yellow-1)' : 'var(--red-1)';
+
+            aiCheckResult.innerHTML = `
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <strong style="font-size: 16px;">Human-like Score: <span style="color: ${scoreColor}; font-size: 20px;">${humanScore}%</span></strong><br>
+                    <small>(AI-like: ${aiScore}%)</small>
+                </div>
+                <h4 style="color: var(--blue-1); margin-top: 0; margin-bottom: 8px;">💡 Suggestions to Improve:</h4>
+                <div style="white-space: pre-wrap; font-size: 13px; line-height: 1.6;">${suggestions}</div>
+            `;
+        } catch (error) {
+            let message = error.message || 'An unknown error occurred.';
+             const jsonStringMatch = message.match(/(\{.*\})/);
+            if (jsonStringMatch && jsonStringMatch[1]) {
+                try {
+                    const errorJson = JSON.parse(jsonStringMatch[1]);
+                    message = errorJson.error || errorJson.message || jsonStringMatch[1];
+                } catch (e) { /* Not JSON */ }
+            }
+            aiCheckResult.innerHTML = `<p style="color: var(--red-1);">Error: ${message}</p>`;
+        } finally {
+            aiCheckBtn.disabled = false;
+            aiCheckBtn.innerHTML = '🤖 Check Content';
+        }
+    });
+
     pasteBtn && pasteBtn.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
     importBtn && importBtn.addEventListener('click',()=>importFile.click());
     importFile && importFile.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)});
@@ -908,6 +957,24 @@
       <div class="chip"><span class="t-grad">Auto-checked:</span>&nbsp;<span id="chipAuto">0</span></div>
     </div>
   </div>
+  
+  <!-- AI Content Checker & Humanizer -->
+    <div class="ai-card" id="aiContentCheckerCard">
+        <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+            <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Content Checker & Humanizer</h3>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start;">
+            <div>
+                <textarea id="aiCheckTextarea" placeholder="Paste your text here to check its AI score and get suggestions to make it more human-like... (Min: 50 characters)" style="width: 100%; height: 250px; background: #081220; border: 1px solid #1c3d52; border-radius: 10px; padding: 12px; color: var(--ink); font-size: 13px; resize: vertical;"></textarea>
+                <button id="aiCheckBtn" class="btn btn-green" style="width: 100%; margin-top: 10px;">🤖 Check Content</button>
+            </div>
+            <div>
+                <div id="aiCheckResult" class="ai-result-box" style="height: 295px;">
+                     <div style="display:flex; align-items:center; justify-content:center; height:100%; color: var(--sub);">Results will appear here...</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
   <!-- Content Analysis Engine (Original Layout with Upgrades) -->
   <div class="cae-card" id="contentAnalysisEngineCard">
