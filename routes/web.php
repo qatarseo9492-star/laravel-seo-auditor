@@ -78,6 +78,9 @@ Route::middleware(['auth', 'ban', 'presence', 'admin'])
         Route::get('/users/table', [DashboardController::class, 'usersTable'])->name('users.table');
         Route::get('/users/{user}/sessions', [DashboardController::class, 'userSessions'])->name('users.sessions');
 
+        // --- ADDED: Users index so the "Manage Users" button has a valid target
+        Route::get('/users', [UserAdminController::class, 'index'])->name('users.index');
+
         // --- Optional: preview of the new dashboard view (safe/read-only)
         Route::get('/dashboard-v3', function () {
             $view = \Illuminate\Support\Facades\View::exists('admin.dashboard-v3') ? 'admin.dashboard-v3' : 'admin.dashboard';
