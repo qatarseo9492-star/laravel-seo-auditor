@@ -31,10 +31,10 @@ class DashboardController extends Controller
 
     public function live(Request $request)
     {
-        try { $kpis = $this->computeKpis(); }     catch (\Throwable $e) { $kpis = []; }
+        try { $kpis = $this->computeKpis(); }      catch (\Throwable $e) { $kpis = []; }
         try { $services = $this->serviceHealth(); } catch (\Throwable $e) { $services = []; }
-        try { $history = $this->recentHistory(); }  catch (\Throwable $e) { $history = []; }
-        try { $traffic = $this->trafficSeries(); }  catch (\Throwable $e) { $traffic = []; }
+        try { $history  = $this->recentHistory(); }  catch (\Throwable $e) { $history  = []; }
+        try { $traffic  = $this->trafficSeries(); }  catch (\Throwable $e) { $traffic  = []; }
 
         return response()->json(compact('kpis','services','history','traffic'));
     }
@@ -98,12 +98,18 @@ class DashboardController extends Controller
     private function serviceHealth(): array
     {
         $out = [];
-        $dbStart = microtime(true);
-        try { DB::select('SELECT 1'); $out[] = ['name'=>'Database','ok'=>true,'latency_ms'=>(int)((microtime(true)-$dbStart)*1000)]; }
-        catch (\Throwable $e) { $out[] = ['name'=>'Database','ok'=>false,'latency_ms'=>null]; }
 
-        $out[] = ['name'=>'Queue','ok'=>Schema::hasTable('jobs') && Schema::hasTable('failed_jobs'),'latency_ms'=>null];
-        $out[] = ['name'=>'OpenAI','ok'=>Schema::hasTable('open_ai_usages') || Schema::hasTable('openai_usage'),'latency_ms'=>null];
+        $dbStart = microtime(true);
+        try {
+            DB::select('SELECT 1');
+            $out[] = ['name' => 'Database','ok' => true,'latency_ms' => (int)((microtime(true)-$dbStart)*1000)];
+        } catch (\Throwable $e) {
+            $out[] = ['name' => 'Database','ok' => false,'latency_ms' => null];
+        }
+
+        $out[] = ['name' => 'Queue',  'ok' => Schema::hasTable('jobs') && Schema::hasTable('failed_jobs'), 'latency_ms' => null];
+        $out[] = ['name' => 'OpenAI', 'ok' => Schema::hasTable('open_ai_usages') || Schema::hasTable('openai_usage'), 'latency_ms' => null];
+
         return $out;
     }
 
@@ -113,7 +119,7 @@ class DashboardController extends Controller
     {
         $events = [];
 
-        /* 1) analyze_logs — conditional join + tolerant extraction */
+        /* 1) analyze_logs — conditional join + tolerant extraction, includes tokens_used */
         try {
             if (Schema::hasTable('analyze_logs')) {
                 $q = DB::table('analyze_logs as a');
@@ -149,8 +155,10 @@ class DashboardController extends Controller
                         $this->prop($r,'tool'), $this->prop($r,'type'), $this->prop($r,'mode'), 'semantic'
                     ]);
 
+                    // NEW: support tokens_used
                     $tokens = $this->firstNonNull([
                         $this->prop($r,'tokens'),
+                        $this->prop($r,'tokens_used'),
                         $this->prop($r,'token_count'),
                         $this->prop($r,'total_tokens'),
                     ]);
@@ -312,13 +320,13 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
-        /* 5) Logins */
+        /* 5) Logins — cap to avoid flooding the feed */
         try {
             if (Schema::hasTable('user_sessions')) {
                 $rows = DB::table('user_sessions as s')
                     ->leftJoin('users as u', 'u.id', '=', 's.user_id')
                     ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
-                    ->limit(100)
+                    ->limit(15) // was 100
                     ->get(['s.*','u.email','u.name']);
 
                 foreach ($rows as $r) {
@@ -339,12 +347,12 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
-        /* 6) Signups (fallback) */
+        /* 6) Signups — cap to avoid flooding the feed */
         try {
             if (Schema::hasTable('users')) {
                 $rows = DB::table('users as u')
                     ->orderByRaw('COALESCE(u.last_seen_at, u.updated_at, u.created_at) DESC')
-                    ->limit(50)
+                    ->limit(15) // was 50
                     ->get(['u.name','u.email','u.created_at','u.updated_at','u.last_seen_at']);
 
                 foreach ($rows as $r) {
@@ -362,6 +370,7 @@ class DashboardController extends Controller
             }
         } catch (\Throwable $e) { /* ignore */ }
 
+        // Sort newest first & cap to 50
         usort($events, fn($a,$b) => $this->tsToSortable($b['ts']) <=> $this->tsToSortable($a['ts']));
         return array_values(array_slice($events, 0, 50));
     }
@@ -406,7 +415,6 @@ class DashboardController extends Controller
 
     private function extractGenericFromRow(object $r): array
     {
-        // column-based discovery
         $url = $this->firstNonEmpty([
             $this->prop($r,'url'), $this->prop($r,'page_url'), $this->prop($r,'target_url'),
             $this->prop($r,'input_url'), $this->prop($r,'request_url'), $this->prop($r,'source_url'), $this->prop($r,'link'),
@@ -421,7 +429,6 @@ class DashboardController extends Controller
 
         $userFromJson = null;
 
-        // JSON blobs
         foreach (['payload','data','request','inputs','meta','json','result','response'] as $col) {
             $raw = $this->prop($r, $col);
             if (!$raw) continue;
