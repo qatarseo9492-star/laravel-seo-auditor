@@ -339,7 +339,7 @@ class AnalyzerController extends Controller
 
         if ($aiLikelihood === -1) {
              return response()->json([
-                'error' => 'Could not determine AI likelihood. The AI analysis service may be temporarily unavailable.'
+                'error' => 'Could not determine AI likelihood. The AI analysis service may be temporarily unavailable or the text is too short.'
             ], 500);
         }
 
@@ -398,20 +398,22 @@ class AnalyzerController extends Controller
             // Extract text for analysis
             $textContent = $this->extractTextFromDom($xpath);
             
-            // Get AI likelihood score from OpenAI if available
+            // This is the primary method for scoring. It relies on a configured OpenAI API Key.
             $aiLikelihood = $this->getAiLikelihood($textContent);
             
-            $readabilityData = $this->analyzeReadability($textContent);
             $humanScore = 0;
 
             if ($aiLikelihood !== -1) {
-                // Primary method: Use the AI score
+                // Primary method: Use the AI score if the API call was successful.
                 $humanScore = 100 - $aiLikelihood;
             } else {
-                // Fallback method: Use local readability analysis
-                // A Flesch score of 60-70 is standard. We can map this to a human-like score.
-                // A score of 100 is very easy to read (good), a score of 0 is very hard (bad).
-                $humanScore = (int) max(0, min(100, $readabilityData['score']));
+                // Fallback method: If the API fails or is not configured, use local readability analysis.
+                // This provides a helpful estimate but is less accurate than the AI check.
+                $readabilityData = $this->analyzeReadability($textContent);
+                // The Flesch score (0-100) is mapped to our Human Score.
+                // A score of 100 is very easy to read, 65 is standard, 30 is difficult.
+                // This formula scales the result to provide a more intuitive "human-like" score.
+                $humanScore = (int) max(0, min(100, round(40 + ($readabilityData['score'] * 0.6))));
                 $aiLikelihood = 100 - $humanScore;
             }
 
@@ -427,6 +429,7 @@ class AnalyzerController extends Controller
                 $humanizerData['recommendation'] = 'Great job! This content reads like it was written by a human.';
                 $humanizerData['badge_type'] = 'success';
             }
+            // Only fetch suggestions if the score isn't perfect and the AI check was the source.
             $humanizerData['suggestions'] = ($humanScore < 95 && $aiLikelihood !== -1) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
             $humanizerData['google_search_url'] = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
 
@@ -481,7 +484,6 @@ class AnalyzerController extends Controller
 
             return response()->json([
                 'overall_score' => $scores['overall_score'],
-                'readability' => $readabilityData,
                 'humanizer' => array_merge(['human_score' => $humanScore, 'ai_score' => $aiLikelihood], $humanizerData),
                 'categories' => $scores['categories'],
                 'content_structure' => $contentStructure,
