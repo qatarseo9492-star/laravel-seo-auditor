@@ -225,4 +225,78 @@ class DashboardController extends Controller
         $default  = 200;
         return compact('enabled', 'disabled', 'default');
     }
+
+    // ---------------------------------------------------------------------
+    // ADD-ONLY: Users — Live table & Sessions JSON
+    // ---------------------------------------------------------------------
+
+    /**
+     * Live users table (searchable). Returns: rows[id,name,email,banned,last_seen,ip,country,limit,enabled]
+     */
+    public function usersTable(Request $request)
+    {
+        $limit = max(5, min(50, (int) $request->input('limit', 20)));
+        $q     = trim((string) $request->input('q', ''));
+
+        $query = DB::table('users as u')
+            ->leftJoin('user_limits as l', 'l.user_id', '=', 'u.id')
+            ->select([
+                'u.id','u.name','u.email','u.is_banned','u.last_seen_at','u.last_ip','u.last_country',
+                DB::raw('COALESCE(l.daily_limit, 200) as daily_limit'),
+                DB::raw('COALESCE(l.is_enabled, 1) as is_enabled'),
+            ])
+            ->when($q !== '', function ($w) use ($q) {
+                $w->where(function ($x) use ($q) {
+                    $x->where('u.email','like',"%{$q}%")
+                      ->orWhere('u.name','like',"%{$q}%")
+                      ->orWhere('u.last_ip','like',"%{$q}%");
+                });
+            })
+            ->orderByRaw('u.last_seen_at IS NULL, u.last_seen_at DESC')
+            ->limit($limit)
+            ->get();
+
+        $rows = $query->map(function ($r) {
+            return [
+                'id'        => (int) $r->id,
+                'name'      => $r->name ?? '—',
+                'email'     => $r->email ?? '—',
+                'banned'    => (bool) $r->is_banned,
+                'last_seen' => $r->last_seen_at ? Carbon::parse($r->last_seen_at)->diffForHumans() : '—',
+                'ip'        => $r->last_ip ?? '—',
+                'country'   => $r->last_country ?? '—',
+                'limit'     => (int) $r->daily_limit,
+                'enabled'   => (bool) $r->is_enabled,
+            ];
+        });
+
+        return response()->json(['rows' => $rows], 200);
+    }
+
+    /**
+     * Recent login sessions for a user (if user_sessions table exists).
+     * Returns: rows[login_at,logout_at,ip,country,ua]
+     */
+    public function userSessions(User $user)
+    {
+        if (!Schema::hasTable('user_sessions')) {
+            return response()->json(['rows' => []], 200);
+        }
+
+        $S = DB::table('user_sessions')
+            ->where('user_id', $user->id)
+            ->orderByDesc('login_at')
+            ->limit(20)
+            ->get(['login_at','logout_at','ip','country','user_agent']);
+
+        $rows = $S->map(fn($s) => [
+            'login_at'  => $s->login_at ? Carbon::parse($s->login_at)->toDateTimeString() : '—',
+            'logout_at' => $s->logout_at ? Carbon::parse($s->logout_at)->toDateTimeString() : '—',
+            'ip'        => $s->ip ?? '—',
+            'country'   => $s->country ?? '—',
+            'ua'        => $s->user_agent ? mb_strimwidth($s->user_agent, 0, 80, '…') : '—',
+        ]);
+
+        return response()->json(['rows' => $rows], 200);
+    }
 }
