@@ -27,82 +27,107 @@ class UserAdminController extends Controller
      */
     public function table(Request $request)
     {
-        if (!Schema::hasTable('users')) {
-            return response()->json(['rows' => []]);
-        }
+        try {
+            if (!Schema::hasTable('users')) {
+                return response()->json(['rows' => []]);
+            }
 
-        $q = trim((string) $request->get('q', ''));
+            $q = trim((string) $request->get('q', ''));
 
-        $hasAnalyze   = Schema::hasTable('analyze_logs');
-        $hasLimits    = Schema::hasTable('user_limits');
-        $hasLastSeen  = Schema::hasColumn('users', 'last_seen_at');
-        $hasLastLogin = Schema::hasColumn('users', 'last_login_at');
-        $hasIp        = Schema::hasColumn('users', 'last_ip');
-        $hasCountry   = Schema::hasColumn('users', 'country');
-        $hasBanned    = Schema::hasColumn('users', 'is_banned');
+            $hasAnalyze    = Schema::hasTable('analyze_logs');
+            $hasLimits     = Schema::hasTable('user_limits');
+            $hasLastSeen   = Schema::hasColumn('users', 'last_seen_at');
+            $hasLastLogin  = Schema::hasColumn('users', 'last_login_at');
+            $hasIp         = Schema::hasColumn('users', 'last_ip');
+            $hasCountry    = Schema::hasColumn('users', 'country');
+            $hasLastCountry= Schema::hasColumn('users', 'last_country'); // some schemas use this
+            $hasBanned     = Schema::hasColumn('users', 'is_banned');
+            $hasCreated    = Schema::hasColumn('users', 'created_at');
 
-        $query = DB::table('users as u')
-            ->select('u.id', 'u.name', 'u.email', 'u.created_at');
+            // Base select (only columns that exist)
+            $query = DB::table('users as u')
+                ->select('u.id', 'u.name', 'u.email');
 
-        if ($hasLastSeen)  $query->addSelect('u.last_seen_at');
-        if ($hasLastLogin) $query->addSelect('u.last_login_at');
-        if ($hasIp)        $query->addSelect('u.last_ip');
-        if ($hasCountry)   $query->addSelect('u.country');
-        if ($hasBanned)    $query->addSelect('u.is_banned');
+            if ($hasCreated)   $query->addSelect('u.created_at');
+            if ($hasLastSeen)  $query->addSelect('u.last_seen_at');
+            if ($hasLastLogin) $query->addSelect('u.last_login_at');
+            if ($hasIp)        $query->addSelect('u.last_ip');
+            if ($hasCountry)   $query->addSelect('u.country');
+            if ($hasLastCountry && !$hasCountry) $query->addSelect(DB::raw('u.last_country as country'));
+            if ($hasBanned)    $query->addSelect('u.is_banned');
 
-        // Latest analysis per user (subquery -> last_activity)
-        if ($hasAnalyze) {
-            $agg = DB::table('analyze_logs')
-                ->select('user_id', DB::raw('MAX(created_at) as last_activity'))
-                ->groupBy('user_id');
+            // Latest analysis per user (subquery -> last_activity)
+            if ($hasAnalyze) {
+                $agg = DB::table('analyze_logs')
+                    ->select('user_id', DB::raw('MAX(created_at) as last_activity'))
+                    ->groupBy('user_id');
 
-            $query->leftJoinSub($agg, 'a', function ($j) {
-                $j->on('a.user_id', '=', 'u.id');
-            })->addSelect('a.last_activity');
-        } else {
-            $query->addSelect(DB::raw('NULL as last_activity'));
-        }
+                $query->leftJoinSub($agg, 'a', function ($j) {
+                    $j->on('a.user_id', '=', 'u.id');
+                })->addSelect('a.last_activity');
+            } else {
+                $query->addSelect(DB::raw('NULL as last_activity'));
+            }
 
-        // Limits
-        if ($hasLimits) {
-            $query->leftJoin('user_limits as ul', 'ul.user_id', '=', 'u.id')
-                  ->addSelect('ul.daily_limit', 'ul.is_enabled');
-        } else {
-            $query->addSelect(DB::raw('NULL as daily_limit'), DB::raw('NULL as is_enabled'));
-        }
+            // Limits
+            if ($hasLimits) {
+                $query->leftJoin('user_limits as ul', 'ul.user_id', '=', 'u.id')
+                      ->addSelect('ul.daily_limit', 'ul.is_enabled');
+            } else {
+                $query->addSelect(DB::raw('NULL as daily_limit'), DB::raw('NULL as is_enabled'));
+            }
 
-        // Search
-        if ($q !== '') {
-            $query->where(function ($w) use ($q, $hasIp) {
-                $w->where('u.email', 'like', "%{$q}%")
-                  ->orWhere('u.name', 'like', "%{$q}%");
-                if ($hasIp) $w->orWhere('u.last_ip', 'like', "%{$q}%");
+            // Search
+            if ($q !== '') {
+                $query->where(function ($w) use ($q, $hasIp) {
+                    $w->where('u.email', 'like', "%{$q}%")
+                      ->orWhere('u.name', 'like', "%{$q}%");
+                    if ($hasIp) $w->orWhere('u.last_ip', 'like', "%{$q}%");
+                });
+            }
+
+            // Order by the best available timestamp (fall back to id desc)
+            $orderParts = [];
+            if ($hasLastSeen)  $orderParts[] = 'u.last_seen_at';
+            if ($hasAnalyze)   $orderParts[] = 'a.last_activity';
+            if ($hasLastLogin) $orderParts[] = 'u.last_login_at';
+            if ($hasCreated)   $orderParts[] = 'u.created_at';
+
+            if (!empty($orderParts)) {
+                $query->orderByRaw('COALESCE(' . implode(',', $orderParts) . ') DESC');
+            } else {
+                $query->orderBy('u.id', 'desc');
+            }
+
+            $rows = $query->limit(20)->get();
+
+            $out = $rows->map(function ($r) {
+                $last = $r->last_seen_at
+                    ?? $r->last_login_at
+                    ?? $r->last_activity
+                    ?? ($r->created_at ?? null);
+
+                return [
+                    'id'        => (int) $r->id,
+                    'user'      => $r->name ?: $r->email,
+                    'email'     => $r->email,
+                    'last_seen' => $this->fmt($last),
+                    'ip'        => $r->last_ip ?? '—',
+                    'country'   => $r->country ?? null,
+                    'limit'     => $r->daily_limit ?? null,
+                    'enabled'   => isset($r->is_enabled) ? (int) $r->is_enabled : 1,
+                    'banned'    => isset($r->is_banned) ? (bool) $r->is_banned : false,
+                ];
             });
+
+            return response()->json(['rows' => $out]);
+        } catch (\Throwable $e) {
+            // Never 500 the UI; send empty set + hint
+            return response()->json([
+                'rows'  => [],
+                'error' => $e->getMessage(),
+            ]);
         }
-
-        // Order by best available timestamp (no GROUP BY needed)
-        $orderExpr = 'COALESCE('
-            . ($hasLastSeen ? 'u.last_seen_at,' : '')
-            . 'a.last_activity,u.created_at) DESC';
-
-        $rows = $query->orderByRaw($orderExpr)->limit(20)->get();
-
-        $out = $rows->map(function ($r) {
-            $last = $r->last_seen_at ?? $r->last_login_at ?? $r->last_activity ?? $r->created_at;
-            return [
-                'id'        => (int) $r->id,
-                'user'      => $r->name ?: $r->email,
-                'email'     => $r->email,
-                'last_seen' => $this->fmt($last),
-                'ip'        => $r->last_ip ?? '—',
-                'country'   => $r->country ?? null,
-                'limit'     => $r->daily_limit ?? null,
-                'enabled'   => isset($r->is_enabled) ? (int) $r->is_enabled : 1,
-                'banned'    => isset($r->is_banned) ? (bool) $r->is_banned : false,
-            ];
-        });
-
-        return response()->json(['rows' => $out]);
     }
 
     /**
