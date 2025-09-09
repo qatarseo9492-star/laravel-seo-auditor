@@ -541,8 +541,8 @@
     gap: 12px;
   }
   .badge-icon-wrapper {
-    width: 64px;
-    height: 64px;
+    width: 48px;
+    height: 48px;
     position: relative;
     display: flex;
     align-items: center;
@@ -571,9 +571,10 @@
   .score-display strong {
     font-size: 14px;
     color: var(--sub);
+    font-weight: 700;
   }
   .score-display .score-value {
-    font-size: 28px;
+    font-size: 32px;
     font-weight: 900;
     line-height: 1;
     display: block;
@@ -590,6 +591,7 @@
 
   .recommendation {
     font-size: 14px;
+    font-weight: 700;
     color: var(--ink);
     margin: 12px 0;
     max-width: 90%;
@@ -1080,6 +1082,7 @@
   <!-- AI Readability & Humanizer -->
     <div class="ai-card" id="aiContentCheckerCard">
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+            <span class="c-icon pulse">🤖</span>
             <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Readability & Humanizer</h3>
         </div>
         <div id="humanizerCard">
@@ -1102,9 +1105,12 @@
         </div>
     </div>
 
-  <!-- Content Analysis Engine (Original Layout with Upgrades) -->
+  <!-- Content Analysis Engine -->
   <div class="cae-card" id="contentAnalysisEngineCard">
-    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3></div>
+    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+      <span class="c-icon spin">🚀</span>
+      <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
+    </div>
     <div class="cae-grid">
       <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE" style="--v:0"></div><div class="mw-center" id="numCAE">0%</div></div></div>
       <div class="cae-info-grid">
@@ -1114,7 +1120,6 @@
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon pulse">🎯</span></div><span class="cae-info-title">Content Relevance & Intent</span></div><div class="cae-relevance-bar"><span id="caeRelevanceBar" style="width:0%"></span></div><div id="caeIntent" style="margin-top:8px"></div></div>
       </div>
     </div>
-    {{-- UPGRADED SECTION --}}
     <div class="upgraded-grid">
         <div class="cae-info-item"><div class="cae-info-header"><span class="c-icon spin">🗺️</span><span class="cae-info-title">Topic Coverage & Entity Gaps</span></div><div id="topicCoverageResult" class="ai-result-box"></div></div>
         <div class="cae-info-item"><div class="cae-info-header"><span class="c-icon pulse">🧭</span><span class="cae-info-title">Search Intent Match</span></div><div id="intentAlignmentResult" class="ai-result-box"></div></div>
@@ -1123,9 +1128,12 @@
     </div>
   </div>
 
-  <!-- Technical SEO Integration (Original Layout with Upgrades) -->
+  <!-- Technical SEO Integration -->
   <div class="tsi-card" id="technicalSeoCard">
-     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3></div>
+     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+      <span class="c-icon pulse">⚙️</span>
+      <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
+    </div>
      <div class="tsi-grid">
       <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI" style="--v:0"></div><div class="mw-center" id="numTSI">0%</div></div></div>
       <div class="tsi-info-grid">
@@ -1137,7 +1145,6 @@
       </div>
     </div>
     <div class="tsi-suggestions"><h4 class="flex items-center gap-2">💡 Technical SEO Suggestions</h4><ul id="tsiSuggestionsList"></ul></div>
-    {{-- UPGRADED SECTION --}}
     <div class="upgraded-grid">
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon spin">🔗</span><span class="tsi-info-title">Internal Link Opportunities</span></div><div id="internalLinksResult" class="ai-result-box"></div></div>
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon pulse">🖼️</span><span class="tsi-info-title">Media & Image SEO</span></div><div id="imageSeoResult" class="ai-result-box"></div></div>
@@ -1148,9 +1155,12 @@
     </div>
   </div>
 
-  <!-- Keyword Intelligence (Original Layout with Upgrades) -->
+  <!-- Keyword Intelligence -->
   <div class="ki-card" id="keywordIntelligenceCard">
-    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3></div>
+    <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+      <span class="c-icon float">🔑</span>
+      <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
+    </div>
     <div class="ki-grid">
         <div class="ki-item"><h4 class="ki-item-title"><span class="c-icon pulse">🧠</span>Semantic Keyword Research</h4><div id="kiSemanticResearch" class="ki-tags"></div></div>
         <div class="ki-item"><h4 class="ki-item-title"><span class="c-icon pulse">🎯</span>Keyword Intent Classification</h4><div id="kiIntentClassification" class="ki-tags"></div></div>
@@ -1158,17 +1168,17 @@
         <div class="ki-item"><h4 class="ki-item-title"><span class="c-icon pulse">📊</span>Competitor Keyword Gap Analysis</h4><div id="kiCompetitorGaps" class="ki-list"></div></div>
         <div class="ki-item" style="grid-column: 1 / -1;"><h4 class="ki-item-title"><span class="c-icon pulse">🔑</span>Long-tail Semantic Suggestions</h4><div id="kiLongTail" class="ki-list"></div></div>
     </div>
-     {{-- UPGRADED SECTION --}}
     <div class="upgraded-grid">
         <div class="ki-item"><h4 class="ki-item-title"><span class="c-icon spin">❓</span>Questions to Add (PAA & Forums)</h4><div id="questionMiningResult" class="ai-result-box"></div></div>
         <div class="ki-item"><h4 class="ki-item-title"><span class="c-icon pulse">🌿</span>Semantic Variants (No Stuffing)</h4><div id="semanticVariantsResult" class="ai-result-box"></div></div>
     </div>
   </div>
   
-  <!-- On-Page Optimization Tools (This is a new card for some of the new features) -->
+  <!-- On-Page Optimization Tools -->
   <div class="onpage-card" id="onPageOptimizationCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
-        <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">On-Page Optimization Tools</h3>
+      <span class="c-icon spin">🛠️</span>
+      <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">On-Page Optimization Tools</h3>
     </div>
     <div class="onpage-grid">
         <div class="onpage-item"><h4 class="onpage-item-title"><span class="c-icon pulse">✍️</span>Title & Meta Rewriter</h4><div id="titleMetaRewriteResult" class="ai-result-box"></div></div>
@@ -1178,9 +1188,12 @@
     </div>
   </div>
 
-  <!-- AI-Powered Features (Original Interactive Layout - UNTOUCHED) -->
+  <!-- AI-Powered Features -->
   <div class="ai-card" id="aiPoweredFeaturesCard">
-      <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;"><h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI-Powered Features</h3></div>
+      <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
+        <span class="c-icon float">✨</span>
+        <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI-Powered Features</h3>
+      </div>
       <div class="ai-grid">
           <div class="ai-item">
               <h4 class="ai-item-title"><span class="c-icon spin">📝</span>Content Brief Generation</h4><p>AI-generated semantic content briefs based on your target keyword.</p>
@@ -1205,9 +1218,12 @@
       </div>
   </div>
 
-  <!-- Meta Info Layout (Original - UNTOUCHED) -->
+  <!-- Meta Info Layout -->
   <div class="card meta-card" style="margin-top:24px;">
-    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;"><h3 class="t-grad">Meta & Heading Structure</h3></div>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+      <span class="c-icon pulse">📑</span>
+      <h3 class="t-grad">Meta & Heading Structure</h3>
+    </div>
     <div class="space-y-3">
         <div class="cat-card"><div class="cat-card-title">Title Tag</div><div id="titleVal" style="color:var(--ink); margin-top:4px;"></div></div>
         <div class="cat-card"><div class="cat-card-title">Meta Description</div><div id="metaVal" style="color:var(--ink); margin-top:4px;"></div></div>
@@ -1215,7 +1231,7 @@
     </div>
   </div>
 
-  <!-- Site Speed & Core Web Vitals (Original - UNTOUCHED) -->
+  <!-- Site Speed & Core Web Vitals -->
   <div class="speed-card-new" id="speedCard">
     <div class="speed-header"><div class="speed-title"><span class="c-icon spin">🚀</span> Site Speed & Core Web Vitals</div><span id="speedBadge" class="speed-badge">Checking...</span></div>
     <div class="speed-overview-bar"><div id="speedOverviewBar"></div></div>
