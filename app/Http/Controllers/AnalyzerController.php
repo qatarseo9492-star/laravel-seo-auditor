@@ -401,6 +401,7 @@ class AnalyzerController extends Controller
             // This is the primary method for scoring. It relies on a configured OpenAI API Key.
             $aiLikelihood = $this->getAiLikelihood($textContent);
             
+            $readabilityData = $this->analyzeReadability($textContent);
             $humanScore = 0;
 
             if ($aiLikelihood !== -1) {
@@ -409,7 +410,6 @@ class AnalyzerController extends Controller
             } else {
                 // Fallback method: If the API fails or is not configured, use local readability analysis.
                 // This provides a helpful estimate but is less accurate than the AI check.
-                $readabilityData = $this->analyzeReadability($textContent);
                 // The Flesch score (0-100) is mapped to our Human Score.
                 // A score of 100 is very easy to read, 65 is standard, 30 is difficult.
                 // This formula scales the result to provide a more intuitive "human-like" score.
@@ -484,6 +484,7 @@ class AnalyzerController extends Controller
 
             return response()->json([
                 'overall_score' => $scores['overall_score'],
+                'readability' => $readabilityData,
                 'humanizer' => array_merge(['human_score' => $humanScore, 'ai_score' => $aiLikelihood], $humanizerData),
                 'categories' => $scores['categories'],
                 'content_structure' => $contentStructure,
