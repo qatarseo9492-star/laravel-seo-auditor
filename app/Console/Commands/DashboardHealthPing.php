@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\Cache;
 class DashboardHealthPing extends Command
 {
     protected $signature = 'dashboard:health-ping';
-    protected $description = 'Update the dashboard scheduler heartbeat timestamp (read-only cache).';
+    protected $description = 'Record a heartbeat timestamp for the admin dashboard health check';
 
     public function handle(): int
     {
         Cache::put('dash:heartbeat_at', now(), 180); // 3 minutes TTL
-        $this->info('dashboard:health-ping timestamp updated.');
+        $this->info('Dashboard heartbeat recorded at ' . now()->toDateTimeString());
         return self::SUCCESS;
     }
 }
