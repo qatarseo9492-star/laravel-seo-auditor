@@ -41,7 +41,7 @@ class UserAdminController extends Controller
             $hasLastLogin   = Schema::hasColumn('users', 'last_login_at');
             $hasIp          = Schema::hasColumn('users', 'last_ip');
             $hasCountry     = Schema::hasColumn('users', 'country');
-            $hasLastCountry = Schema::hasColumn('users', 'last_country'); // alternative
+            $hasLastCountry = Schema::hasColumn('users', 'last_country'); // alternative name
             $hasBanned      = Schema::hasColumn('users', 'is_banned');
             $hasCreated     = Schema::hasColumn('users', 'created_at');
 
@@ -187,6 +187,7 @@ class UserAdminController extends Controller
 
     /**
      * PATCH /admin/users/{user}/limits
+     * Accepts: daily_limit (int), is_enabled (bool), reason (string|null)
      */
     public function updateUserLimit(Request $request, User $user)
     {
@@ -257,34 +258,57 @@ class UserAdminController extends Controller
 
     /**
      * GET /admin/users/{user}/sessions
+     * Prefers app-level user_sessions (TouchPresence), falls back to Laravel's sessions table.
      */
     public function sessions(User $user)
     {
-        if (!Schema::hasTable('sessions')) {
-            return response()->json(['rows' => []]);
+        // Prefer app-level table populated by TouchPresence middleware
+        if (Schema::hasTable('user_sessions')) {
+            $rows = DB::table('user_sessions as s')
+                ->where('s.user_id', $user->id)
+                ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
+                ->limit(20)
+                ->get(['s.login_at','s.logout_at','s.ip','s.country','s.updated_at','s.created_at'])
+                ->map(function ($s) {
+                    $last = $s->updated_at ?? $s->login_at ?? $s->created_at;
+                    return [
+                        'login_at'  => $this->fmt($s->login_at ?: $last),
+                        'logout_at' => $this->fmt($s->logout_at),
+                        'ip'        => $s->ip,
+                        'country'   => $s->country,
+                    ];
+                });
+
+            return response()->json(['rows' => $rows]);
         }
 
-        $rows = DB::table('sessions')
-            ->where('user_id', (string) $user->getAuthIdentifier())
-            ->orderByDesc('last_activity')
-            ->limit(20)
-            ->get(['ip_address', 'last_activity', 'user_agent'])
-            ->map(function ($s) {
-                $dt = $s->last_activity ? Carbon::createFromTimestamp($s->last_activity) : null;
-                return [
-                    'login_at'  => $this->fmt($dt),
-                    'logout_at' => null, // not tracked by default sessions table
-                    'ip'        => $s->ip_address,
-                    'ua'        => $s->user_agent,
-                    'country'   => null,
-                ];
-            });
+        // Fallback: Laravel database-backed sessions (SESSION_DRIVER=database)
+        if (Schema::hasTable('sessions')) {
+            $rows = DB::table('sessions')
+                ->where('user_id', (string) $user->getAuthIdentifier())
+                ->orderByDesc('last_activity')
+                ->limit(20)
+                ->get(['ip_address', 'last_activity', 'user_agent'])
+                ->map(function ($s) {
+                    $dt = $s->last_activity ? Carbon::createFromTimestamp($s->last_activity) : null;
+                    return [
+                        'login_at'  => $this->fmt($dt),
+                        'logout_at' => null, // not tracked in default sessions table
+                        'ip'        => $s->ip_address,
+                        'country'   => null,
+                    ];
+                });
 
-        return response()->json(['rows' => $rows]);
+            return response()->json(['rows' => $rows]);
+        }
+
+        // No session tables available
+        return response()->json(['rows' => []]);
     }
 
     /**
      * PATCH /admin/users/{user}/upgrade
+     * Upgrade a user's plan (works with subscriptions table or users.plan fallback).
      */
     public function upgrade(Request $request, User $user)
     {
