@@ -690,22 +690,29 @@
         const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
         if (apiErrorMatch && apiErrorMatch[1]) {
             try {
+                // Try to parse the error message as JSON
                 const errorJson = JSON.parse(apiErrorMatch[1]);
                 message = errorJson.error || errorJson.message || apiErrorMatch[1];
-            } catch(e) { message = apiErrorMatch[1]; }
+            } catch(e) { 
+                // If it's not JSON, just use the text
+                message = apiErrorMatch[1]; 
+            }
         }
+        
+        // Sanitize potential HTML in the error message to prevent XSS
+        const sanitizedMessage = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         if (card) {
             card.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--red-1);">
                 <h4 class="t-grad">${toolName}</h4>
                 <p style="color: var(--sub); font-size: 14px; margin-top: 8px;">Analysis Failed</p>
-                <p style="font-size: 12px; margin-top: 4px;">${message}</p>
+                <p style="font-size: 12px; margin-top: 4px;">${sanitizedMessage}</p>
             </div>`;
         } else {
             // Fallback to the main error box if a specific card isn't found
-            showError(`${toolName} analysis failed`, message);
+            showError(`${toolName} analysis failed`, sanitizedMessage);
         }
-        return null;
+        return null; // Important: return null so Promise.all continues
     };
 
     const CATS=[{name:'User Signals & Experience',icon:'📱',checks:['Mobile-friendly, responsive layout','Optimized speed (compression, lazy-load)','Core Web Vitals passing (LCP/INP/CLS)','Clear CTAs and next steps','Accessible basics (alt text, contrast)']},{name:'Entities & Context',icon:'🧩',checks:['sameAs/Organization details present','Valid schema markup (Article/FAQ/Product)','Related entities covered with context','Primary entity clearly defined','Organization contact/about page visible']},{name:'Structure & Architecture',icon:'🏗️',checks:['Logical H2/H3 headings & topic clusters','Internal links to hub/related pages','Clean, descriptive URL slug','Breadcrumbs enabled (+ schema)','XML sitemap logical structure']},{name:'Content Quality',icon:'🧠',checks:['E-E-A-T signals (author, date, expertise)','Unique value vs. top competitors','Facts & citations up to date','Helpful media (images/video) w/ captions','Up-to-date examples & screenshots']},{name:'Content & Keywords',icon:'📝',checks:['Define search intent & primary topic','Map target & related keywords (synonyms/PAA)','H1 includes primary topic naturally','Integrate FAQs / questions with answers','Readable, NLP-friendly language']},{name:'Technical Elements',icon:'⚙️',checks:['Title tag (≈50–60 chars) w/ primary keyword','Meta description (≈140–160 chars) + CTA','Canonical tag set correctly','Indexable & listed in XML sitemap','Robots directives valid']}];
@@ -810,14 +817,22 @@
 
         // --- Fire all ORIGINAL API calls in parallel ---
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
-            callAnalyzer(url),
+            callAnalyzer(url).catch(err => {
+                // This is a critical failure. If the main analyzer fails, we can't proceed.
+                throw new Error(err.message || 'Local data parsing failed');
+            }),
             callTechnicalSeoApi(url).catch(err => showInlineError('#technicalSeoCard', 'Technical SEO', err)),
             callKeywordApi(url).catch(err => showInlineError('#keywordIntelligenceCard', 'Keyword Intelligence', err)),
             callContentEngineApi(url).catch(err => showInlineError('#contentAnalysisEngineCard', 'Content Analysis', err)),
             callPSI(url).catch(err => showInlineError('#speedCard', 'PageSpeed Insights', err))
         ]);
 
-        if(!data || data.error) throw new Error(data?.error || 'Local data parsing failed');
+        if (!data) {
+            // This condition is met if the critical callAnalyzer fails and its error is caught below.
+            // No need to proceed with rendering.
+            return;
+        }
+
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
