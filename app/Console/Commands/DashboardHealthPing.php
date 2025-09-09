@@ -12,7 +12,7 @@ class DashboardHealthPing extends Command
 
     public function handle(): int
     {
-        Cache::put('dash:heartbeat_at', now(), 180); // 3 minutes TTL
+        Cache::put('dash:heartbeat_at', now(), 180); // 3 min TTL
         $this->info('Dashboard heartbeat recorded at ' . now()->toDateTimeString());
         return self::SUCCESS;
     }
