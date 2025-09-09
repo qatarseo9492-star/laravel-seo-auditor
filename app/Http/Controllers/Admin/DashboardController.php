@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Carbon;
 use App\Models\User;
 
 class DashboardController extends Controller
@@ -19,7 +20,7 @@ class DashboardController extends Controller
             $sum = DB::table('subscriptions')
                 ->where('status', 'active')
                 ->sum('mrr_cents');
-            $mrr = '$' . number_format((float)$sum / 100, 2);
+            $mrr = '$' . number_format((float) $sum / 100, 2);
         }
 
         return view('admin.dashboard', [
@@ -49,7 +50,7 @@ class DashboardController extends Controller
             'mau'           => 0,
             'active5m'      => 0,
             'dailyLimit'    => 100,
-            'tokens24h'     => 0, // optional if tokens available
+            'tokens24h'     => 0, // optional if column exists
         ];
 
         if (Schema::hasTable('users')) {
@@ -131,7 +132,7 @@ class DashboardController extends Controller
             if ($rows->count()) {
                 return $rows->map(function ($r) {
                     return [
-                        'when'   => optional($r->created_at)->format('Y-m-d H:i'),
+                        'when'   => $this->fmt($r->created_at),
                         'user'   => $r->name ?: ($r->email ?? '—'),
                         'display'=> $r->keyword ? ('Analyzed "' . $r->keyword . '"') : 'Analysis',
                         'tool'   => $r->tool ?: 'semantic',
@@ -143,7 +144,7 @@ class DashboardController extends Controller
         }
 
         // 2) Fallback: user_sessions (login activity)
-        if (Schema::hasTable('user_sessions'))) {
+        if (Schema::hasTable('user_sessions')) {
             $rows = DB::table('user_sessions as s')
                 ->leftJoin('users as u', 'u.id', '=', 's.user_id')
                 ->orderByDesc(DB::raw('COALESCE(s.updated_at, s.login_at, s.created_at)'))
@@ -154,7 +155,7 @@ class DashboardController extends Controller
                 return $rows->map(function ($r) {
                     $when = $r->updated_at ?? $r->login_at ?? $r->created_at;
                     return [
-                        'when'   => optional($when)->format('Y-m-d H:i'),
+                        'when'   => $this->fmt($when),
                         'user'   => $r->name ?: ($r->email ?? '—'),
                         'display'=> 'Login' . ($r->ip ? (' from ' . $r->ip . ($r->country ? ' · ' . $r->country : '')) : ''),
                         'tool'   => 'auth',
@@ -165,7 +166,7 @@ class DashboardController extends Controller
             }
         }
 
-        // 3) Last resort: recent users, using ANY timestamp column that exists.
+        // 3) Last resort: recent users, using any timestamp that exists
         if (Schema::hasTable('users')) {
             $hasCreated = Schema::hasColumn('users', 'created_at');
             $hasUpdated = Schema::hasColumn('users', 'updated_at');
@@ -177,7 +178,6 @@ class DashboardController extends Controller
             if ($hasUpdated) { $select[] = 'u.updated_at';   $coalesce[] = 'u.updated_at'; }
             if ($hasCreated) { $select[] = 'u.created_at';   $coalesce[] = 'u.created_at'; }
 
-            // If no timestamp columns exist, just order by id desc
             $orderExpr = $coalesce
                 ? ('COALESCE('.implode(',', $coalesce).') DESC')
                 : 'u.id DESC';
@@ -188,7 +188,6 @@ class DashboardController extends Controller
                 ->limit(50)
                 ->get();
 
-            // Even if timestamps are null, still produce rows
             if ($rows->count()) {
                 return $rows->map(function ($r) use ($hasSeen, $hasUpdated, $hasCreated) {
                     $when = null;
@@ -197,7 +196,7 @@ class DashboardController extends Controller
                     elseif ($hasCreated && !empty($r->created_at)) $when = $r->created_at;
 
                     return [
-                        'when'   => optional($when)->format('Y-m-d H:i'),
+                        'when'   => $this->fmt($when),
                         'user'   => $r->name ?: ($r->email ?? '—'),
                         'display'=> 'Signup',
                         'tool'   => 'onboarding',
@@ -232,12 +231,33 @@ class DashboardController extends Controller
         $out = [];
         for ($i = 0; $i < $days; $i++) {
             $d = $start->copy()->addDays($i)->toDateString();
+            $row = $map->get($d);
             $out[] = [
-                'day' => $d,
-                'count' => (int) (($map[$d]->c ?? 0)),
+                'day'   => $d,
+                'count' => (int) ($row->c ?? 0),
             ];
         }
 
         return $out;
+    }
+
+    /**
+     * Safe formatter for timestamps that may be strings, integers, or Carbon.
+     */
+    private function fmt($ts): ?string
+    {
+        if (!$ts) return null;
+        try {
+            if ($ts instanceof \DateTimeInterface) {
+                return Carbon::instance($ts)->format('Y-m-d H:i');
+            }
+            // unix ts (int)
+            if (is_numeric($ts) && (int)$ts > 0 && strlen((string)$ts) <= 10) {
+                return Carbon::createFromTimestamp((int) $ts)->format('Y-m-d H:i');
+            }
+            return Carbon::parse((string) $ts)->format('Y-m-d H:i');
+        } catch (\Throwable $e) {
+            return is_string($ts) ? $ts : null;
+        }
     }
 }
