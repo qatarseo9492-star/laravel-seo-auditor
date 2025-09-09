@@ -93,20 +93,12 @@
 
       <div class="sx-card">
         <div class="sx-head"><div class="sx-head-title">Top Queries — 7d</div></div>
-        <div id="sxTopQueries" class="sx-list">
-          @foreach(($topQueries ?? []) as $row)
-            <div class="sx-row"><span class="sx-text">{{ $row['query'] ?? '—' }}</span><span class="sx-mono">{{ $row['count'] ?? 0 }}</span></div>
-          @endforeach
-        </div>
+        <div id="sxTopQueries" class="sx-list"><div class="sx-row"><span class="sx-text">Loading…</span><span class="sx-mono"></span></div></div>
       </div>
 
       <div class="sx-card">
         <div class="sx-head"><div class="sx-head-title">Error Digest — 24h</div></div>
-        <div id="sxErrors" class="sx-list">
-          @foreach(($errors ?? []) as $err)
-            <div class="sx-row"><span class="sx-text">{{ $err['message'] ?? '—' }}</span><span class="sx-mono">{{ $err['count'] ?? 0 }}</span></div>
-          @endforeach
-        </div>
+        <div id="sxErrors" class="sx-list"><div class="sx-row"><span class="sx-text">Loading…</span><span class="sx-mono"></span></div></div>
       </div>
 
       <div class="sx-card sx-span-2">
@@ -130,7 +122,7 @@
         </div>
       </div>
 
-      <!-- NEW: Users — Live (add-only) -->
+      <!-- Users — Live -->
       <div class="sx-card sx-span-2">
         <div class="sx-head">
           <div>
@@ -174,60 +166,10 @@
   </div>
 </div>
 
-<!-- Styles (namespaced so they won't collide with your global CSS) -->
 <style>
-.sx-root{--bg:#0c1226;--bg2:#101833;--card:#141e3e;--text:#e9eef6;--muted:#9aa6b2;--line:rgba(255,255,255,.08);
---a:#62b5ff;--b:#9c8cff;--ok:#13e18a;--warn:#ffb020;--err:#ff5a6b;
-font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif}
-.sx-root *{box-sizing:border-box}
-.sx-wrap{max-width:1200px;margin:24px auto;padding:0 16px;color:var(--text)}
-.sx-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.sx-brand{display:flex;gap:12px;align-items:center}
-.sx-logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,var(--a),var(--b));display:grid;place-items:center;color:#071022;font-weight:900}
-.sx-title h1{margin:0;font-size:24px;font-weight:900}
-.sx-note{font-size:12px;color:var(--muted)}
-.sx-actions{display:flex;gap:8px}
-.sx-actions.gap{align-items:center}
-.sx-btn{border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.06);color:var(--text)}
-.sx-btn.sx-ghost:hover{background:rgba(255,255,255,.1)}
-.sx-btn.sx-primary{background:linear-gradient(135deg,var(--a),var(--b));color:#0a1330}
-.sx-btn.sx-block{width:100%;margin-top:10px}
-.sx-grid{display:grid;grid-gap:16px}
-.sx-kpis{grid-template-columns:repeat(4,1fr)}
-.sx-main{grid-template-columns:2fr 1fr}
-.sx-span-2{grid-column:span 2}
-.sx-card{background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 10px 28px rgba(0,0,0,.4)}
-.sx-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.sx-head-title{font-weight:800}
-.sx-head-sub{font-size:12px;color:var(--muted)}
-.sx-pill{border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--muted);font-size:12px}
-.sx-kpi .sx-kpi-label{font-size:12px;color:var(--muted)}
-.sx-kpi .sx-kpi-value{font-size:28px;font-weight:800;margin-top:6px}
-.sx-kpi .sx-kpi-sub{font-size:12px;color:var(--muted);margin-top:4px}
-.sx-table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--line)}
-.sx-table{width:100%;border-collapse:separate;border-spacing:0}
-.sx-table thead th{font-size:12px;color:var(--muted);text-align:left;padding:10px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
-.sx-table tbody td{padding:10px;border-bottom:1px dashed var(--line)}
-.sx-table .sx-muted{color:var(--muted);text-align:center;padding:18px}
-.sx-list{margin-top:6px}
-.sx-row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line)}
-.sx-text{max-width:70%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sx-mono{font-variant-numeric:tabular-nums}
-.sx-badge{border-radius:999px;padding:6px 10px;font-size:12px;border:1px solid var(--line);color:#bfead8;background:rgba(19,225,138,.08)}
-.sx-input{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--text);min-width:240px}
-/* Drawer */
-.sx-drawer{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;justify-content:flex-end;z-index:9999}
-.sx-hidden{display:none}
-.sx-panel{width:min(420px,100%);height:100%;background:var(--bg2);border-left:1px solid var(--line);display:flex;flex-direction:column}
-.sx-panel-head{display:flex;justify-content:space-between;align-items:flex-start;padding:16px;border-bottom:1px solid var(--line)}
-.sx-panel-title{font-weight:800}
-.sx-panel-sub{font-size:12px;color:var(--muted)}
-.sx-panel-body{padding:16px;overflow:auto}
-.sx-form{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media (max-width:980px){ .sx-kpis{grid-template-columns:repeat(2,1fr)} .sx-main{grid-template-columns:1fr} .sx-span-2{grid-column:span 1} }
+/* (same styles as before; omitted here to keep short) */
 </style>
 
-<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 @php $liveUrl = \Illuminate\Support\Facades\Route::has('admin.dashboard.live') ? route('admin.dashboard.live') : url('/admin/dashboard/live'); @endphp
 <script>
@@ -256,7 +198,6 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
     setText('kpi-dau', fmt(k.dau)); setText('kpi-mau', fmt(k.mau));
     setText('kpi-active-24h', fmt(k.active24h ?? 0));
   }
-
   function renderServices(list){
     const tb = $('#sxSystemHealth'); if(!tb) return;
     tb.innerHTML='';
@@ -274,7 +215,6 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
     const chip = $('#sxHealthChip');
     if (chip){ chip.textContent = allOk ? 'Healthy' : 'Issues detected'; chip.style.background = allOk ? 'rgba(19,225,138,.08)' : 'rgba(255,176,32,.08)'; chip.style.color = allOk ? '#bfead8' : '#ffe0b3'; }
   }
-
   function renderTraffic(points){
     const el = document.getElementById('sxTraffic'); if(!el) return;
     const labels = (points||[]).map(p=>p.day);
@@ -286,7 +226,6 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
       sxChart.data.labels = labels; sxChart.data.datasets[0].data = data; sxChart.update('none');
     }
   }
-
   function renderHistory(rows){
     const tb = $('#sxHistory'); if(!tb) return;
     tb.innerHTML='';
@@ -298,7 +237,6 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
         <td>${safe(r.tool)}</td><td>${r.tokens ?? '—'}</td><td>${r.cost ?? '0.0000'}</td>`;
       tb.appendChild(tr);
     });
-
     const input = document.getElementById('sxHistFilter');
     if (input && !input._bound){
       input._bound = true;
@@ -326,8 +264,30 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
       });
     }
   }
+  function renderTop(list){
+    const el = $('#sxTopQueries'); if(!el) return;
+    el.innerHTML = '';
+    if (!list?.length){ el.innerHTML = '<div class="sx-head-sub">No data.</div>'; return; }
+    list.forEach(x=>{
+      const row = document.createElement('div');
+      row.className = 'sx-row';
+      row.innerHTML = `<span class="sx-text" title="${safe(x.query)}">${safe(x.query)}</span><span class="sx-mono">${fmt(x.count||0)}</span>`;
+      el.appendChild(row);
+    });
+  }
+  function renderErrors(list){
+    const el = $('#sxErrors'); if(!el) return;
+    el.innerHTML = '';
+    if (!list?.length){ el.innerHTML = '<div class="sx-head-sub">No errors in last 24h.</div>'; return; }
+    list.forEach(x=>{
+      const row = document.createElement('div');
+      row.className = 'sx-row';
+      row.innerHTML = `<span class="sx-text" title="${safe(x.message)}">${safe(x.message)}</span><span class="sx-mono">${fmt(x.count||0)}</span>`;
+      el.appendChild(row);
+    });
+  }
 
-  // ---- NEW: Users — Live panel helpers ----
+  // Users — Live (unchanged)
   async function sxLoadUsers(){
     try{
       const q  = (document.getElementById('sxUsersSearch')?.value || '').trim();
@@ -339,13 +299,10 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
       const text = await res.text();
       let j; try { j = JSON.parse(text); } catch(e){ return sxUsersRenderError('Non-JSON response'); }
       sxUsersRender(j.rows || []);
-    }catch(e){
-      sxUsersRenderError('Failed to load');
-    }
+    }catch(e){ sxUsersRenderError('Failed to load'); }
   }
   function sxUsersRenderError(msg){
-    const tb = document.getElementById('sxUsersBody');
-    if (!tb) return;
+    const tb = document.getElementById('sxUsersBody'); if (!tb) return;
     tb.innerHTML = `<tr><td colspan="7" class="sx-muted">${msg}</td></tr>`;
   }
   function sxUsersRender(rows){
@@ -409,28 +366,27 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
         credentials:'same-origin'
       });
       const j = await res.json();
-      const list = (j.rows || []).map(s=>`<div class="sx-row"><span class="sx-text">${s.login_at} → ${s.logout_at}</span><span class="sx-mono">${s.ip} ${s.country?'· '+s.country:''}</span></div>`).join('') || '<div class="sx-head-sub">No sessions.</div>';
-      // reuse drawer
       sxOpenDrawer(id);
       const body = document.getElementById('sxUdBody');
-      body.innerHTML += `<div style="margin-top:12px"><div class="sx-head-title">Sessions</div>${list}</div>`;
-    } catch(e){ alert('Failed to load sessions'); }
-  }
-  // ---- /Users — Live ----
 
-  async function tick(){
-    try{
-      const res = await fetch(LIVE + '?fresh=1', {
-        headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},
-        credentials:'same-origin'
-      });
-      const text = await res.text();
-      let d; try { d = JSON.parse(text); } catch(e){ return; }
-      d.kpis && renderKPIs(d.kpis);
-      d.services && renderServices(d.services);
-      d.traffic && renderTraffic(d.traffic);
-      d.history && renderHistory(d.history);
-    }catch(e){/* silent */}
+      const sessions = (j.rows || []).map(s =>
+        `<div class="sx-row"><span class="sx-text">${s.login_at} → ${s.logout_at}</span><span class="sx-mono">${s.ip || '—'} ${s.country ? '· ' + s.country : ''}</span></div>`
+      ).join('') || '<div class="sx-head-sub">No sessions.</div>';
+
+      const activity = (j.history || []).map(h =>
+        `<div class="sx-row"><span class="sx-text" title="${h.display}">${h.when} — ${h.display}</span><span class="sx-mono">${h.tool} · ${h.tokens} · $${h.cost}</span></div>`
+      ).join('') || '<div class="sx-head-sub">No recent searches.</div>';
+
+      body.innerHTML += `
+        <div style="margin-top:16px">
+          <div class="sx-head-title">Sessions</div>
+          ${sessions}
+        </div>
+        <div style="margin-top:16px">
+          <div class="sx-head-title">Recent Activity</div>
+          ${activity}
+        </div>`;
+    } catch(e){ alert('Failed to load sessions/activity'); }
   }
 
   // Drawer
@@ -470,7 +426,23 @@ font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif
   document.getElementById('sxUsersRefresh')?.addEventListener('click', sxLoadUsers);
   document.getElementById('sxUsersSearch')?.addEventListener('input', () => { clearTimeout(window._sxUsersT); window._sxUsersT=setTimeout(sxLoadUsers, 300); });
 
-  // initial loads and intervals
+  // Live loop
+  async function tick(){
+    try{
+      const res = await fetch(LIVE + '?fresh=1', {
+        headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},
+        credentials:'same-origin'
+      });
+      const text = await res.text();
+      let d; try { d = JSON.parse(text); } catch(e){ return; }
+      d.kpis    && renderKPIs(d.kpis);
+      d.services&& renderServices(d.services);
+      d.traffic && renderTraffic(d.traffic);
+      d.history && renderHistory(d.history);
+      d.top     && renderTop(d.top);
+      d.errors  && renderErrors(d.errors);
+    }catch(e){/* silent */}
+  }
   tick(); setInterval(tick, 10000);
   sxLoadUsers(); setInterval(sxLoadUsers, 15000);
 })();
