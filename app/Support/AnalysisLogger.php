@@ -2,55 +2,57 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Schema;
 
 class AnalysisLogger
 {
-    public static function log(string $tool, ?string $url = null, ?int $tokens = null, ?float $costUsd = null, array $extra = []): void
+    /**
+     * Write a single analysis log row (safe on mixed schemas).
+     *
+     * @param string      $tool    e.g. 'psi', 'content_engine', 'keyword_intelligence', 'technical_seo', 'topic_cluster'
+     * @param string|null $url
+     * @param int|null    $tokens
+     * @param float|null  $cost
+     * @param array       $extra   e.g. ['user_id'=>..., 'successful'=>1]
+     */
+    public static function log(string $tool, ?string $url = null, ?int $tokens = null, ?float $cost = null, array $extra = []): void
     {
         try {
-            $req = request();
-
-            $notNullable = function (string $col): bool {
-                if (!Schema::hasColumn('analyze_logs', $col)) return false;
-                $c = DB::selectOne('SHOW COLUMNS FROM analyze_logs LIKE ?', [$col]);
-                return $c && isset($c->Null) && $c->Null === 'NO';
-            };
-
-            $userId = auth()->id();
-            if (Schema::hasColumn('analyze_logs','user_id') && $notNullable('user_id') && $userId === null) {
-                $userId = DB::table('users')->min('id');
+            if (!Schema::hasTable('analyze_logs')) {
+                return; // nothing to do if the table doesn't exist
             }
 
-            $data = [
-                'user_id'    => $userId,
-                'tool'       => $tool ?: 'semantic',
+            // Resolve columns that may or may not exist on this install
+            $has = fn(string $col) => Schema::hasColumn('analyze_logs', $col);
+
+            $tokensCol = $has('tokens_used') ? 'tokens_used' : ($has('tokens') ? 'tokens' : null);
+            $costCol   = $has('cost_usd')    ? 'cost_usd'    : ($has('cost')   ? 'cost'   : null);
+
+            $now   = now();
+            $user  = $extra['user_id'] ?? Auth::id();
+            $ip    = Request::header('CF-Connecting-IP') ?: Request::ip();
+            $cc    = Request::header('CF-IPCountry') ?: Request::server('HTTP_CF_IPCOUNTRY');
+
+            $row = [
+                'user_id'    => $user,
+                'tool'       => $tool,
                 'url'        => $url,
-                'successful' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
+                'ip_address' => $has('ip_address') ? $ip : null,
+                'country'    => $has('country')    ? ($cc ?: null) : null,
+                'successful' => $has('successful') ? (int) ($extra['successful'] ?? 1) : null,
+                'created_at' => $now,
+                'updated_at' => $now,
             ];
 
-            if (Schema::hasColumn('analyze_logs','ip_address')) {
-                $ip = $req?->headers->get('CF-Connecting-IP') ?: $req?->ip();
-                if ($ip === null && $notNullable('ip_address')) $ip = '127.0.0.1';
-                $data['ip_address'] = $ip;
-            }
-            if (Schema::hasColumn('analyze_logs','country')) {
-                $cc = $req?->headers->get('CF-IPCountry') ?: null;
-                if (($cc === null || $cc === 'XX') && $notNullable('country')) $cc = 'XX';
-                $data['country'] = $cc;
-            }
+            if ($tokensCol !== null) $row[$tokensCol] = $tokens;
+            if ($costCol   !== null) $row[$costCol]   = $cost;
 
-            if (Schema::hasColumn('analyze_logs','tokens_used')) $data['tokens_used'] = $tokens ?? ($notNullable('tokens_used') ? 0 : null);
-            if (Schema::hasColumn('analyze_logs','tokens'))      $data['tokens']      = $tokens ?? ($notNullable('tokens')      ? 0 : null);
-            if (Schema::hasColumn('analyze_logs','cost_usd'))    $data['cost_usd']    = $costUsd ?? ($notNullable('cost_usd')   ? 0 : null);
-            if (Schema::hasColumn('analyze_logs','cost'))        $data['cost']        = $costUsd ?? ($notNullable('cost')       ? 0 : null);
-
-            DB::table('analyze_logs')->insert(array_merge($data, $extra));
+            DB::table('analyze_logs')->insert($row);
         } catch (\Throwable $e) {
-            // never block the request due to logging
+            // Never break the request due to logging
         }
     }
 }
