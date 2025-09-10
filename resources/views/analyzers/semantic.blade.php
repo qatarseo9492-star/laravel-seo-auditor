@@ -506,38 +506,30 @@
   /* === ✨ UPGRADED: AI Readability & Humanizer ✨ === */
   /* ============================================================ */
   #humanizerCard {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 24px;
-    align-items: center;
+    /* REMOVED GRID for simpler centered layout */
+    padding: 16px 0;
   }
-  @media (max-width: 640px) {
-    #humanizerCard {
-      grid-template-columns: 1fr;
-      text-align: center;
-    }
-  }
-
   #humanizerResult {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
   }
-   @media (max-width: 640px) {
-    #humanizerResult {
-      align-items: center;
-    }
-   }
-
+  .humanizer-result-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
   .badge-icon-wrapper {
-    width: 64px;
+    width: 64px; /* Increased size */
     height: 64px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
   }
   .badge-icon {
     width: 100%;
@@ -555,11 +547,37 @@
     0%, 100% { filter: brightness(1); }
     50% { filter: brightness(1.4); }
   }
-  
+
+  .score-display {
+    text-align: center;
+  }
+  .score-display strong {
+    font-size: 16px; /* Increased size */
+    color: var(--sub);
+    font-weight: 700;
+  }
+  .score-display .score-value {
+    font-size: 48px; /* Increased size */
+    font-weight: 900;
+    line-height: 1;
+    display: block;
+    margin-top: 4px;
+    animation: score-slide-in .6s .2s cubic-bezier(0.25, 1, 0.5, 1) backwards;
+  }
+  @keyframes score-slide-in {
+    from { transform: translateY(15px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .score-value.success { color: var(--green-1); text-shadow: 0 0 16px var(--green-1);}
+  .score-value.warning { color: var(--yellow-1); text-shadow: 0 0 16px var(--yellow-1);}
+  .score-value.danger { color: var(--red-1); text-shadow: 0 0 16px var(--red-1);}
+
   .recommendation {
-    font-size: 16px;
+    font-size: 16px; /* Increased size */
     font-weight: 700;
     color: var(--ink);
+    margin: 16px 0;
+    max-width: 90%;
     line-height: 1.6;
     animation: fade-in .6s .4s backwards;
   }
@@ -567,6 +585,7 @@
   #humanizerSuggestionsWrapper {
     text-align: left;
     width: 100%;
+    max-width: 500px;
     max-height: 150px;
     overflow-y: auto;
     padding: 12px;
@@ -698,8 +717,8 @@
     const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult');
     
     // New Humanizer section elements
-    const humanizerWheelContainer = $('#humanizerWheelContainer');
     const humanizerResult = $('#humanizerResult');
+    const mwHumanizer = $('#mwHumanizer'), ringHumanizer = $('#ringHumanizer'), numHumanizer = $('#numHumanizer');
     
     const aiCheckTextarea = $('#aiCheckTextarea'), aiCheckBtn = $('#aiCheckBtn');
 
@@ -782,15 +801,13 @@
         }
     }
     
-    function setWheel(el, score, prefix){
-        if (!el) return;
-        const ring = el.querySelector('.mw-ring');
-        const num = el.querySelector('.mw-center');
+    function setWheel(elRing, elNum, container, score, prefix){
+        if (!elRing || !elNum || !container) return;
         const b=bandName(score);
-        el.classList.remove('good','warn','bad');
-        el.classList.add(b);
-        ring.style.setProperty('--v',score);
-        num.textContent=(prefix?prefix+' ':'')+score+'%';
+        container.classList.remove('good','warn','bad');
+        container.classList.add(b);
+        elRing.style.setProperty('--v',score);
+        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
     }
     
     function setSpeedCircle(circleEl, score) {
@@ -807,12 +824,6 @@
     function renderHumanizerResult(data) {
         const { human_score, suggestions, recommendation, badge_type, google_search_url } = data;
         
-        // Update the score wheel
-        const wheel = $('#mwHumanizer');
-        if (wheel) {
-            setWheel(wheel, human_score, '');
-        }
-
         const badgeSvgs = {
             success: `<svg class="badge-icon success" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_success)" stroke-width="4"/><path d="M22 32.5L28.5 39L43 24" stroke="var(--green-1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="paint0_linear_success" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--green-2)'}"/><stop offset="1" stop-color="${'var(--green-1)'}"/></linearGradient></defs></svg>`,
             warning: `<svg class="badge-icon warning" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_warning)" stroke-width="4"/><path d="M32 23V36" stroke="var(--yellow-1)" stroke-width="4" stroke-linecap="round"/><path d="M32 43V44" stroke="var(--yellow-1)" stroke-width="5" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_warning" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--orange-1)'}"/><stop offset="1" stop-color="${'var(--yellow-1)'}"/></linearGradient></defs></svg>`,
@@ -826,14 +837,22 @@
 
         let googleLinkHtml = '';
         if (badge_type !== 'success' && google_search_url) {
-            googleLinkHtml = `<a href="${google_search_url}" target="_blank" class="btn btn-blue" style="margin-top: 15px;"><span class="btn-icon">💡</span><span>Find More on Google</span></a>`;
+            googleLinkHtml = `<a href="${google_search_url}" target="_blank" class="btn btn-blue" style="margin-top: 15px; display: inline-block;"><span class="btn-icon">💡</span><span>Get More Tips</span></a>`;
         }
 
         humanizerResult.innerHTML = `
-            <div class="badge-icon-wrapper">${badgeSvgs[badge_type] || ''}</div>
-            <p class="recommendation">${recommendation}</p>
-            ${suggestionsHtml}
-            ${googleLinkHtml}
+            <div class="humanizer-result-header">
+                <div class="badge-icon-wrapper">${badgeSvgs[badge_type] || ''}</div>
+                <div class="score-display">
+                    <strong>Human-like Score</strong>
+                    <span class="score-value ${badge_type}">${human_score}%</span>
+                </div>
+            </div>
+            <div>
+                <p class="recommendation">${recommendation}</p>
+                ${suggestionsHtml}
+                ${googleLinkHtml}
+            </div>
         `;
     }
 
@@ -873,7 +892,7 @@
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
-        setWheel($('#mw'), score, '');
+        setWheel(mwRing, mwNum, mw, score, '');
         if(overallFill) overallFill.style.width=score+'%';
         if(overallPct) overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
@@ -914,7 +933,7 @@
         
         if (tsiData) {
             const tsi = tsiData;
-            setWheel($('#mwTSI'), tsi.score || 0, '');
+            setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
             if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             if(tsiUrlClarityScore) tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             if(tsiUrlSuggestion) tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
@@ -936,7 +955,7 @@
         
         if(caeData) {
             const cae = caeData;
-            setWheel($('#mwCAE'), cae.score || 0, '');
+            setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
             if(caeTopicClusters) caeTopicClusters.innerHTML = (cae.topic_clusters||[]).map(t => `<span class="chip">${t}</span>`).join('');
             if(caeEntities) caeEntities.innerHTML = (cae.entities||[]).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
             if(caeKeywords) caeKeywords.innerHTML = (cae.semantic_keywords||[]).map(k => `<span class="chip">${k}</span>`).join('');
@@ -1159,16 +1178,10 @@
             <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Readability & Humanizer</h3>
         </div>
         <div id="humanizerCard">
-            <div id="humanizerWheelContainer" style="display:grid; place-items:center;">
-                <div class="mw mw-sm" id="mwHumanizer">
-                    <div class="mw-ring"></div>
-                    <div class="mw-center">0%</div>
-                </div>
-            </div>
              <div id="humanizerResult">
-                <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; text-align: center;">
+                <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; margin-bottom: 8px;"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12 6C11.17 6 10.5 6.67 10.5 7.5C10.5 8.33 11.17 9 12 9C12.83 9 13.5 8.33 13.5 7.5C13.5 6.67 12.83 6 12 6ZM7 12C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H7Z" fill="currentColor"/></svg>
-                    Run an analysis or check a text snippet to see the human-like score.
+                    Run an analysis or check a text snippet...
                 </div>
             </div>
         </div>
