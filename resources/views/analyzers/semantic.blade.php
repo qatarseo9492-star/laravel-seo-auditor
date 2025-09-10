@@ -517,43 +517,83 @@
     gap: 16px;
   }
 
-  .humanizer-badge-icon {
-    width: 64px;
-    height: 64px;
+  /* NEW: Score Wheel for Humanizer */
+  .humanizer-wheel {
+    --v: 0;
+    --size: 160px;
+    --track-width: 12px;
+    --progress-percent: calc(var(--v) * 1%);
+    width: var(--size);
+    height: var(--size);
+    position: relative;
     animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   }
+  .humanizer-wheel-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
+    box-shadow:
+      inset 0 0 4px 1px rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,255,255,0.05);
+  }
+  .humanizer-wheel-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    /* Multicolor Gradient */
+    background: conic-gradient(from -90deg, 
+      var(--red-1), 
+      var(--orange-1), 
+      var(--yellow-1), 
+      var(--green-1), 
+      var(--blue-1), 
+      var(--purple-1), 
+      var(--red-1));
+    animation: spin 8s linear infinite;
+    -webkit-mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+    -webkit-mask-composite: source-in;
+     mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+     mask-composite: intersect;
+  }
+  .humanizer-wheel-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .humanizer-wheel-score {
+    font-size: calc(var(--size) * 0.28);
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(255,255,255,0.3);
+  }
+  .humanizer-wheel-label {
+    font-size: calc(var(--size) * 0.09);
+    font-weight: 700;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .humanizer-wheel.good { filter: drop-shadow(0 0 8px var(--green-1)) drop-shadow(0 0 16px var(--green-1)); }
+  .humanizer-wheel.warn { filter: drop-shadow(0 0 8px var(--orange-1)) drop-shadow(0 0 16px var(--orange-1)); }
+  .humanizer-wheel.bad { filter: drop-shadow(0 0 8px var(--red-1)) drop-shadow(0 0 16px var(--red-1)); }
 
   @keyframes badge-pop-in {
     from { transform: scale(0.5) rotate(-15deg); opacity: 0; }
     to { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  .humanizer-badge-icon .glow {
-    animation: badge-glow 3s ease-in-out infinite;
-  }
-  @keyframes badge-glow {
-    0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.4); }
-  }
 
-  .humanizer-score-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-top: -8px; /* Pulls title closer to the icon */
-    animation: fade-in .6s .2s backwards;
-  }
-  
-  .humanizer-score-value {
-    font-size: 52px;
-    font-weight: 900;
-    line-height: 1;
-    display: block;
-    animation: score-slide-in .6s .3s cubic-bezier(0.25, 1, 0.5, 1) backwards;
-  }
-   @keyframes score-slide-in {
-    from { transform: translateY(15px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  
   .humanizer-recommendation-badge {
     padding: 12px 20px;
     border-radius: 14px;
@@ -565,38 +605,61 @@
     align-items: center;
     gap: 10px;
     animation: fade-in .6s .4s backwards;
+    margin-top: -8px; /* Pull closer to wheel */
   }
 
   .humanizer-recommendation-badge.success {
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(10, 150, 110, 0.2));
     border-color: var(--green-1);
+    box-shadow: 0 0 16px rgba(0, 255, 138, 0.2);
   }
   .humanizer-recommendation-badge.warning {
     background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
     border-color: var(--orange-1);
+    box-shadow: 0 0 16px rgba(255, 165, 0, 0.2);
   }
   .humanizer-recommendation-badge.danger {
     background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
     border-color: var(--red-1);
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
   }
 
+  /* NEW: Suggestions Box with multicolor border */
   #humanizerSuggestionsWrapper {
     text-align: left;
     width: 100%;
-    max-width: 500px;
-    max-height: 150px;
+    max-width: 550px;
+    max-height: 180px;
     overflow-y: auto;
-    padding: 12px;
-    background: #081220;
-    border: 1px solid #1c3d52;
-    border-radius: 10px;
+    padding: 2px; /* For border */
+    background: linear-gradient(135deg, var(--blue-1), var(--purple-1), var(--pink-1));
+    border-radius: 12px;
+    animation: fade-in .6s .5s backwards;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  #humanizerSuggestionsWrapper .inner {
+    background: #0D1120;
+    padding: 14px;
+    border-radius: 11px;
+  }
+  #humanizerSuggestionsWrapper h4 {
+    background: linear-gradient(90deg, var(--blue-1), var(--green-1));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin: 0 0 10px;
+    font-weight: 800;
+  }
+  #humanizerSuggestionsWrapper .suggestions-content {
+      white-space: pre-wrap; 
+      font-size: 13px; 
+      line-height: 1.7;
+      color: var(--sub);
   }
   
   @keyframes fade-in {
     from { opacity: 0; }
     to { opacity: 1; }
   }
-
+  
   /* ================================== */
   /* === ✨ NEW UI/UX ELEMENTS ✨ === */
   /* ================================== */
@@ -818,21 +881,25 @@
     function renderHumanizerResult(data) {
         const { human_score, suggestions, recommendation, badge_type, google_search_url } = data;
         
-        const badgeSvgs = {
-            success: `<svg class="humanizer-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_success)" stroke-width="4"/><path d="M22 32.5L28.5 39L43 24" stroke="var(--green-1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="paint0_linear_success" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--green-2)'}"/><stop offset="1" stop-color="${'var(--green-1)'}"/></linearGradient></defs></svg>`,
-            warning: `<svg class="humanizer-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_warning)" stroke-width="4"/><path d="M32 23V36" stroke="var(--yellow-1)" stroke-width="4" stroke-linecap="round"/><path d="M32 43V44" stroke="var(--yellow-1)" stroke-width="5" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_warning" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--orange-1)'}"/><stop offset="1" stop-color="${'var(--yellow-1)'}"/></linearGradient></defs></svg>`,
-            danger: `<svg class="humanizer-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_danger)" stroke-width="4"/><path d="M40 24L24 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><path d="M24 24L40 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_danger" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--pink-1)'}"/><stop offset="1" stop-color="${'var(--red-1)'}"/></linearGradient></defs></svg>`
-        };
-
         const badgeIcon = {
             success: '✅',
             warning: '⚠️',
             danger: '❗'
-        }
+        };
+
+        const scoreBand = human_score >= 80 ? 'good' : human_score >= 60 ? 'warn' : 'bad';
         
         let suggestionsHtml = '';
         if (badge_type !== 'success' && suggestions) {
-            suggestionsHtml = `<div id="humanizerSuggestionsWrapper"><h4 style="color: var(--blue-1); margin: 0 0 8px;">💡 AI Suggestions to Improve:</h4><div style="white-space: pre-wrap; font-size: 13px; line-height: 1.6;">${suggestions}</div></div>`;
+            // Sanitize suggestions to prevent HTML injection
+            const sanitizedSuggestions = suggestions.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            suggestionsHtml = `
+            <div id="humanizerSuggestionsWrapper">
+                <div class="inner">
+                    <h4>💡 AI Suggestions to Improve:</h4>
+                    <div class="suggestions-content">${sanitizedSuggestions}</div>
+                </div>
+            </div>`;
         }
 
         let googleLinkHtml = '';
@@ -841,10 +908,12 @@
         }
 
         humanizerResult.innerHTML = `
-            ${badgeSvgs[badge_type] || ''}
-            <div>
-                <strong class="humanizer-score-title t-grad">Human-like Score</strong>
-                <span class="humanizer-score-value t-grad">${human_score}%</span>
+            <div class="humanizer-wheel ${scoreBand}" style="--v:${human_score};">
+                <div class="humanizer-wheel-ring"></div>
+                <div class="humanizer-wheel-center">
+                    <span class="humanizer-wheel-score t-grad">${human_score}%</span>
+                    <span class="humanizer-wheel-label">Human Score</span>
+                </div>
             </div>
             <div class="humanizer-recommendation-badge ${badge_type}">
                <span class="c-icon float">${badgeIcon[badge_type] || '✅'}</span>
@@ -1155,8 +1224,16 @@
         <div id="humanizerCard">
              <div id="humanizerResult">
                 <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; margin-bottom: 8px;"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12 6C11.17 6 10.5 6.67 10.5 7.5C10.5 8.33 11.17 9 12 9C12.83 9 13.5 8.33 13.5 7.5C13.5 6.67 12.83 6 12 6ZM7 12C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H7Z" fill="currentColor"/></svg>
-                    Run an analysis to see the human-like score.
+                    <div class="humanizer-wheel" style="--v:0;">
+                        <div class="humanizer-wheel-ring"></div>
+                        <div class="humanizer-wheel-center">
+                            <span class="humanizer-wheel-score t-grad">-%</span>
+                            <span class="humanizer-wheel-label">Human Score</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 16px;">
+                        Run an analysis to see the human-like score.
+                    </div>
                 </div>
             </div>
         </div>
