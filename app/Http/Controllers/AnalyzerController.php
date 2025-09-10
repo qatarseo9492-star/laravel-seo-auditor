@@ -298,7 +298,8 @@ class AnalyzerController extends Controller
         if (empty($truncatedText)) {
             return 'No text provided for analysis.';
         }
-
+        
+        // ** MULTILINGUAL SUPPORT ADDED HERE **
         $systemMessage = "You are an expert editor specializing in making AI-generated text sound more human. Your suggestions must be concise, actionable, and easy to understand. IMPORTANT: Detect the primary language of the provided text (e.g., English, Arabic, Portuguese) and write your entire response, including all suggestions, in that same language.";
         $userMessage = "The following text has been flagged as {$aiLikelihood}% likely to be AI-generated. Please provide 3-5 specific, actionable suggestions to make it sound more natural, engaging, and human-written. Frame your suggestions as a list. Suggestions could include varying sentence structure, adding personal anecdotes or rhetorical questions, injecting more personality, or simplifying complex vocabulary. Here is the text:\n\n{$truncatedText}";
         
@@ -346,7 +347,7 @@ class AnalyzerController extends Controller
         $humanScore = 100 - $aiLikelihood;
         $suggestions = '';
         
-        // Only get suggestions if the score is not perfect
+        // Get suggestions if the score is below 80
         if ($humanScore < 80) {
             $suggestions = $this->getHumanizeSuggestions($text, $aiLikelihood);
         }
@@ -355,13 +356,13 @@ class AnalyzerController extends Controller
         $badgeType = 'success';
 
         if ($humanScore < 60) {
-            $recommendation = 'This content seems robotic. We strongly advise a rewrite to improve authenticity and connect with your audience.';
+            $recommendation = 'This content seems highly AI-generated. A full rewrite is strongly recommended to improve authenticity and reader engagement.';
             $badgeType = 'danger';
         } elseif ($humanScore < 80) {
-            $recommendation = 'This content could be more engaging. Please review the AI suggestions to make it sound more human.';
+            $recommendation = 'This content could be more engaging. Please review the AI suggestions below to make it sound more human.';
             $badgeType = 'warning';
         } else {
-            $recommendation = 'Great work! This content is well-written and reads like it was crafted by a human.';
+            $recommendation = 'Excellent! This content has a natural, human-like quality that readers will appreciate.';
             $badgeType = 'success';
         }
 
@@ -398,13 +399,17 @@ class AnalyzerController extends Controller
             // Extract text for analysis
             $textContent = $this->extractTextFromDom($xpath);
             
+            // This is the primary method for scoring. It relies on a configured OpenAI API Key.
             $aiLikelihood = $this->getAiLikelihood($textContent);
+            
             $readabilityData = $this->analyzeReadability($textContent);
             $humanScore = 0;
 
             if ($aiLikelihood !== -1) {
+                // Primary method: Use the AI score if the API call was successful.
                 $humanScore = 100 - $aiLikelihood;
             } else {
+                // Fallback method: If the API fails or is not configured, use local readability analysis.
                 $humanScore = (int) max(0, min(100, round(40 + ($readabilityData['score'] * 0.6))));
                 $aiLikelihood = 100 - $humanScore;
             }
@@ -412,16 +417,16 @@ class AnalyzerController extends Controller
             // Generate humanizer recommendations based on the score
             $humanizerData = [];
             if ($humanScore < 60) {
-                $humanizerData['recommendation'] = 'This content seems robotic. We strongly advise a rewrite to improve authenticity and connect with your audience.';
+                $humanizerData['recommendation'] = 'This content seems highly AI-generated. A full rewrite is strongly recommended to improve authenticity and reader engagement.';
                 $humanizerData['badge_type'] = 'danger';
             } elseif ($humanScore < 80) {
-                $humanizerData['recommendation'] = 'This content could be more engaging. Please review the AI suggestions to make it sound more human.';
+                $humanizerData['recommendation'] = 'This content could be more engaging. Please review the AI suggestions below to make it sound more human.';
                 $humanizerData['badge_type'] = 'warning';
             } else {
-                $humanizerData['recommendation'] = 'Great work! This content is well-written and reads like it was crafted by a human.';
+                $humanizerData['recommendation'] = 'Excellent! This content has a natural, human-like quality that readers will appreciate.';
                 $humanizerData['badge_type'] = 'success';
             }
-
+            // Only fetch suggestions if score is below 80 and the AI check was the source of the score.
             $humanizerData['suggestions'] = ($humanScore < 80 && $aiLikelihood !== -1) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
             $humanizerData['google_search_url'] = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
 
@@ -571,6 +576,7 @@ class AnalyzerController extends Controller
         $prompt = $validatedData['prompt'] ?? '';
         $url = $validatedData['url'];
 
+        // ** MULTILINGUAL SUPPORT ADDED HERE TO THE BASE SYSTEM MESSAGE **
         $systemMessage = "You are a world-class Semantic SEO expert. Analyze the content from the provided URL. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format. IMPORTANT: Detect the primary language of the content on the URL (e.g., English, Arabic, Portuguese) and write your entire response in that same language.";
         $userMessage = "";
 
