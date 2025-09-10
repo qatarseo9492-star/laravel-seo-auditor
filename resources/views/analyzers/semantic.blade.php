@@ -29,8 +29,8 @@
     /* UPGRADED: Unified dark background */
     --unified-bg: linear-gradient(145deg, #140424, #0D1120);
 
-    /* --- NEW: Multicolor Water SVG for Score Wheels --- */
-    --water-svg-multi: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3e%3cdefs%3e%3clinearGradient id='g' x1='0' y1='0' x2='100%25' y2='0'%3e%3cstop offset='0%25' stop-color='%238A2BE2'/%3e%3cstop offset='20%25' stop-color='%2300C6FF'/%3e%3cstop offset='40%25' stop-color='%2300FF8A'/%3e%3cstop offset='60%25' stop-color='%23FFD700'/%3e%3cstop offset='80%25' stop-color='%23FF4500'/%3e%3cstop offset='100%25' stop-color='%23FF1493'/%3e%3c/linearGradient%3e%3c/defs%3e%3cpath fill='url(%23g)' fill-opacity='0.4' d='M800 56.9c-155.5 0-204.9-50.3-400-50.3S155.5 56.9 0 56.9v31.8h800v-.2-31.6z'/%3e%3cpath fill='url(%23g)' fill-opacity='0.2' d='M0 56.9c155.5 0 204.9 26.4 400 26.4s244.5-26.4 400-26.4v31.8H0V56.9z'/%3e%3c/svg%3e");
+    /* --- NEW: Realistic Water SVG for Score Wheels --- */
+    --water-svg-realistic: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 100'%3e%3cdefs%3e%3clinearGradient id='g' x1='0' y1='0' x2='100%25' y2='0'%3e%3cstop offset='0%25' stop-color='%238A2BE2'/%3e%3cstop offset='20%25' stop-color='%2300C6FF'/%3e%3cstop offset='40%25' stop-color='%2300FF8A'/%3e%3cstop offset='60%25' stop-color='%23FFD700'/%3e%3cstop offset='80%25' stop-color='%23FF4500'/%3e%3cstop offset='100%25' stop-color='%23FF1493'/%3e%3c/linearGradient%3e%3c/defs%3e%3cpath fill='%23140424' opacity='0.75' d='M-10,100 L-10,50 Q200,10 400,50 T800,50 L810,50 L810,100 Z' /%3e%3cpath fill='none' stroke='url(%23g)' stroke-width='3' d='M-10,50 Q200,10 400,50 T800,50' /%3e%3c/svg%3e");
   }
 
   /* --- NEW: Keyframe animations for animated borders and water --- */
@@ -184,10 +184,11 @@
     left: 0;
     width: 200%;
     height: var(--progress-percent); /* --- NEW --- Dynamic height based on score */
-    background-size: 50% 100px;
+    background-size: 50% 100%;
     background-repeat: repeat-x;
-    background-image: var(--water-svg-multi); /* --- NEW --- Always multicolor */
-    animation: wave 4s linear infinite;
+    background-position: center bottom;
+    background-image: var(--water-svg-realistic); /* --- NEW --- Always multicolor */
+    animation: wave 8s linear infinite;
     z-index: 1;
     transition: height 0.9s cubic-bezier(0.6, 0, 0.4, 1); /* --- NEW --- Smooth fill animation */
   }
