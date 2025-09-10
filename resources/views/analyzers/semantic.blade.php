@@ -29,20 +29,18 @@
     /* UPGRADED: Unified dark background */
     --unified-bg: linear-gradient(145deg, #140424, #0D1120);
 
-    /* --- NEW: Water SVGs for Score Wheels --- */
-    --water-svg-bad: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3e%3cpath fill='%23FF450044' d='M800 56.9c-155.5 0-204.9-50.3-400-50.3S155.5 56.9 0 56.9v31.8h800v-.2-31.6z'/%3e%3cpath fill='%23FF149322' d='M0 56.9c155.5 0 204.9 26.4 400 26.4s244.5-26.4 400-26.4v31.8H0V56.9z'/%3e%3c/svg%3e");
-    --water-svg-warn: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3e%3cpath fill='%23FFA50044' d='M800 56.9c-155.5 0-204.9-50.3-400-50.3S155.5 56.9 0 56.9v31.8h800v-.2-31.6z'/%3e%3cpath fill='%23FFD70022' d='M0 56.9c155.5 0 204.9 26.4 400 26.4s244.5-26.4 400-26.4v31.8H0V56.9z'/%3e%3c/svg%3e");
-    --water-svg-good: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3e%3cpath fill='%2300FF8A44' d='M800 56.9c-155.5 0-204.9-50.3-400-50.3S155.5 56.9 0 56.9v31.8h800v-.2-31.6z'/%3e%3cpath fill='%2300C6FF22' d='M0 56.9c155.5 0 204.9 26.4 400 26.4s244.5-26.4 400-26.4v31.8H0V56.9z'/%3e%3c/svg%3e");
+    /* --- NEW: Multicolor Water SVG for Score Wheels --- */
+    --water-svg-multi: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3e%3cdefs%3e%3clinearGradient id='g' x1='0' y1='0' x2='100%25' y2='0'%3e%3cstop offset='0%25' stop-color='%238A2BE2'/%3e%3cstop offset='20%25' stop-color='%2300C6FF'/%3e%3cstop offset='40%25' stop-color='%2300FF8A'/%3e%3cstop offset='60%25' stop-color='%23FFD700'/%3e%3cstop offset='80%25' stop-color='%23FF4500'/%3e%3cstop offset='100%25' stop-color='%23FF1493'/%3e%3c/linearGradient%3e%3c/defs%3e%3cpath fill='url(%23g)' fill-opacity='0.4' d='M800 56.9c-155.5 0-204.9-50.3-400-50.3S155.5 56.9 0 56.9v31.8h800v-.2-31.6z'/%3e%3cpath fill='url(%23g)' fill-opacity='0.2' d='M0 56.9c155.5 0 204.9 26.4 400 26.4s244.5-26.4 400-26.4v31.8H0V56.9z'/%3e%3c/svg%3e");
   }
 
   /* --- NEW: Keyframe animations for animated borders and water --- */
   @keyframes rainbowGlow {
-    0%, 100% { border-color: var(--blue-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--blue-1), inset 0 0 12px #140424; }
-    16% { border-color: var(--purple-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--purple-1), inset 0 0 12px #140424; }
-    32% { border-color: var(--pink-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--pink-1), inset 0 0 12px #140424; }
-    48% { border-color: var(--red-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--red-1), inset 0 0 12px #140424; }
-    64% { border-color: var(--orange-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--orange-1), inset 0 0 12px #140424; }
-    80% { border-color: var(--green-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--green-1), inset 0 0 12px #140424; }
+    0%, 100% { border-color: var(--blue-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--blue-1), inset 0 0 12px #140424; }
+    16% { border-color: var(--purple-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--purple-1), inset 0 0 12px #140424; }
+    32% { border-color: var(--pink-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--pink-1), inset 0 0 12px #140424; }
+    48% { border-color: var(--red-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--red-1), inset 0 0 12px #140424; }
+    64% { border-color: var(--orange-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--orange-1), inset 0 0 12px #140424; }
+    80% { border-color: var(--green-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--green-1), inset 0 0 12px #140424; }
   }
   @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
@@ -79,12 +77,13 @@
     background: var(--unified-bg);
     border: 2px solid;
     animation: rainbowGlow 5s linear infinite;
+    border-radius: 24px; /* --- NEW --- More rounded corners */
   }
 
-  .card{border-radius:18px;padding:18px;}
-  .cat-card{border-radius:16px;padding:16px;}
-  .ground-slab{border-radius:22px;padding:20px; margin-top:20px;}
-  .unified-card {border-radius: 20px; padding: 16px; margin-top: 24px;}
+  .card{padding:18px;}
+  .cat-card{padding:16px;}
+  .ground-slab{padding:20px; margin-top:20px;}
+  .unified-card {padding: 16px; margin-top: 24px;}
   
   /* Remove old unified-card specific styles */
   .unified-card--blue, .unified-card--purple, .unified-card--orange, .unified-card--green {
@@ -130,11 +129,11 @@
   }
   .url-row .paste:hover { filter: brightness(1.3); }
 
-  .analyze-wrap{border-radius:16px;padding:12px;}
+  .analyze-wrap{padding:12px;}
   
-  /* ================================================== */
-  /* === 🎨 NEW SCORE WHEEL with Water Fill Effect 🎨 === */
-  /* ================================================== */
+  /* ========================================================= */
+  /* === 🎨 REVISED SCORE WHEEL with Dynamic Water Fill 🎨 === */
+  /* ========================================================= */
   .mw {
     --v: 0;
     --size: 200px;
@@ -162,8 +161,10 @@
     inset: 0px;
     border-radius: 50%;
     
-    --progress-color: var(--red-1); /* Default color */
-    background: var(--progress-color);
+    /* Default gradient for 'bad' score */
+    --grad-start: var(--red-1);
+    --grad-end: var(--pink-1);
+    background: conic-gradient(from -90deg, var(--grad-start), var(--grad-end));
     
     -webkit-mask-image: 
         conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
@@ -182,20 +183,24 @@
     bottom: 0;
     left: 0;
     width: 200%;
-    height: 25%;
-    background-size: 50% 100%;
+    height: var(--progress-percent); /* --- NEW --- Dynamic height based on score */
+    background-size: 50% 100px;
     background-repeat: repeat-x;
+    background-image: var(--water-svg-multi); /* --- NEW --- Always multicolor */
     animation: wave 4s linear infinite;
     z-index: 1;
-    --water-svg: var(--water-svg-bad); /* Default */
-    background-image: var(--water-svg);
+    transition: height 0.9s cubic-bezier(0.6, 0, 0.4, 1); /* --- NEW --- Smooth fill animation */
   }
   
-  /* Color overrides for score states */
-  .mw.warn .mw-ring::before { --progress-color: var(--orange-1); }
-  .mw.good .mw-ring::before { --progress-color: var(--green-1); }
-  .mw.warn .mw-ring::after { --water-svg: var(--water-svg-warn); }
-  .mw.good .mw-ring::after { --water-svg: var(--water-svg-good); }
+  /* Gradient overrides for 'warn' and 'good' scores */
+  .mw.warn .mw-ring::before {
+    --grad-start: var(--yellow-1);
+    --grad-end: var(--orange-1);
+  }
+  .mw.good .mw-ring::before {
+    --grad-start: var(--green-1);
+    --grad-end: var(--blue-1);
+  }
   
   .mw-center {
     position: absolute;
@@ -250,7 +255,7 @@
   .outline-red{border-color:#ef4444dd!important;box-shadow:0 0 0 2px #ef44448c inset,0 0 16px #ef444455}
 
   dialog[open]{display:block} dialog::backdrop{background:rgba(0,0,0,.6)}
-  #improveModal .card{background:#1B1B1B; animation: none;} /* Stop animation on modal */
+  #improveModal .card{background:#1B1B1B; animation: none; border-radius: 16px;} /* Stop animation on modal */
   #improveModal .card .card{background:#1A1A1A;border-color:var(--outline)}
 
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:12px;font-size:13px}
@@ -285,7 +290,7 @@
 
     .speed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
     @media (max-width: 600px) { .speed-grid { grid-template-columns: 1fr; } }
-    .speed-device-card { background: #111827; border-radius: 12px; padding: 12px; border: 1px solid #1F2937; }
+    .speed-device-card { background: #111827; border-radius: 18px; padding: 12px; border: 1px solid #1F2937; }
     .speed-device-header { display: flex; align-items: center; gap: 8px; font-weight: 700; }
     .speed-device-score {
         width: 60px; height: 60px;
@@ -298,7 +303,7 @@
     .speed-device-score .progress { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
     .speed-device-metrics { display: grid; gap: 8px; font-size: 12px; flex-grow:1; }
     .speed-device-metric { display: flex; justify-content: space-between; align-items: center; }
-    .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 12px; padding: 12px; margin-top: 16px; }
+    .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 18px; padding: 12px; margin-top: 16px; }
     .speed-opportunities-title { display: flex; align-items: center; gap: 8px; color: #FBBF24; font-weight: 700; margin-bottom: 8px; }
     .speed-opportunities ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12px; color: var(--sub); }
   
@@ -325,8 +330,8 @@
   /* Info Items Grid */
   .tsi-info-grid, .cae-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   @media (max-width:500px){.tsi-info-grid, .cae-info-grid {grid-template-columns:1fr}}
-  .tsi-info-item, .cae-info-item {
-    border-radius:14px;
+  .tsi-info-item, .cae-info-item, .ki-item, .ai-item, .onpage-item {
+    border-radius:18px; /* --- NEW --- Rounder corners */
     padding:14px;
     background:rgba(0,0,0,0.2);
     border:1px solid var(--outline);
@@ -366,7 +371,7 @@
     font-size: 15px;
   }
   .tsi-suggestions {
-    border-radius: 14px;
+    border-radius: 18px; /* --- NEW --- Rounder corners */
     padding:14px; margin-top:16px;
     background: rgba(8, 5, 20, 0.7);
     border: 1px solid rgba(138, 43, 226, 0.3);
@@ -393,8 +398,6 @@
   .ki-item {
     background: rgba(25, 15, 5, 0.7);
     border: 1px solid rgba(255, 165, 0, 0.3);
-    border-radius: 14px;
-    padding: 14px;
     backdrop-filter: blur(4px);
   }
   .ki-item-title {
@@ -423,8 +426,6 @@
   .ai-item {
     background: rgba(5, 20, 25, 0.7);
     border: 1px solid rgba(0, 198, 255, 0.3);
-    border-radius: 14px;
-    padding: 14px;
     backdrop-filter: blur(4px);
     display: flex; flex-direction: column; gap: 10px;
   }
@@ -490,9 +491,10 @@
   /* === 🎨 NEW STYLES for Meta & Heading Section 🎨 === */
   /* =================================================== */
   .meta-card .cat-card {
-      background: #14173a;
+      background: rgba(20, 4, 36, 0.5);
       border-color: #2a2f5a;
       animation: none; /* Turn off animation for nested cards */
+      border-radius: 18px; /* --- NEW --- Rounder corners */
   }
   .meta-card .t-grad {
       font-size: 20px;
@@ -521,8 +523,7 @@
   .onpage-item {
       background: rgba(5, 20, 25, 0.7);
       border: 1px solid rgba(0, 198, 255, 0.3);
-      border-radius: 14px;
-      padding: 14px;
+      backdrop-filter: blur(4px);
   }
   .onpage-item-title {
       font-weight: 800;
@@ -951,7 +952,8 @@
         humanizerResult.innerHTML = `
             <div class="humanizer-wheel ${scoreBand}" style="--v:${human_score};">
                 <div class="humanizer-wheel-ring"></div>
-                <div class="mw-ring"> <div class="humanizer-wheel-ring"></div>
+                <div class="mw-ring"> <!-- This is for the custom multicolor progress bar -->
+                    <div class="humanizer-wheel-ring"></div>
                 </div>
                 <div class="humanizer-wheel-center">
                     <span class="humanizer-wheel-score t-grad">${human_score}%</span>
@@ -1448,7 +1450,7 @@
     <div id="cats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"></div>
   </div>
 
-  <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
+  <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:24px">
     <div class="card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px"><h4 id="improveTitle" class="t-grad">Improve</h4><form method="dialog"><button class="pill">Close</button></form></div>
       <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px">
