@@ -85,158 +85,88 @@
 
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
   
-  /* ======================================================== */
-  /* === 💧 FUTURISTIC LIQUID-FILL SCORE WHEEL 💧 === */
-  /* ======================================================== */
-  .score-wheel {
-      --v: 0; /* The score value (0-100) */
-      --size: 200px;
-      --track-width: 14px;
-      --progress-percent: calc(var(--v) * 1%);
-      
-      /* Dynamic Color Rules */
-      --fill-color: var(--red-1); /* Default to red */
-      --glow-color: var(--red-1);
-      
-      width: var(--size);
-      height: var(--size);
-      position: relative;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      margin: 0 auto;
-  }
-
-  /* Set colors based on score class */
-  .score-wheel.good {
-      --fill-color: var(--green-1);
-      --glow-color: var(--green-1);
-  }
-  .score-wheel.warn {
-      --fill-color: var(--orange-1);
-      --glow-color: var(--orange-1);
-  }
-  .score-wheel.bad {
-      --fill-color: var(--red-1);
-      --glow-color: var(--red-1);
-  }
-
-  .score-wheel-outer {
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      padding: var(--track-width);
-      box-sizing: border-box;
-      background: conic-gradient(
-          var(--glow-color) var(--progress-percent), 
-          #1A1A1A var(--progress-percent)
-      );
-      filter: drop-shadow(0 0 8px var(--glow-color)) drop-shadow(0 0 16px var(--glow-color));
-      transition: all .5s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .score-wheel-inner {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      background: #1F1F1F;
-      box-shadow: inset 0 0 25px rgba(0,0,0,0.7);
-      position: relative;
-      overflow: hidden;
-  }
-
-  .score-wheel-text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: calc(var(--size) * 0.22);
-      font-weight: 900;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-      z-index: 10;
-  }
-  .score-wheel-text::after {
-      content: '%';
-      font-size: 0.5em;
-      margin-left: 0.1em;
-      opacity: 0.8;
-  }
-
-  .score-wheel-liquid {
-      position: absolute;
-      bottom: 0;
-      left: -50%;
-      width: 200%;
-      height: var(--progress-percent);
-      background: var(--fill-color);
-      transform-origin: bottom center;
-      z-index: 1;
-      opacity: 0.9;
-      box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 0 15px var(--glow-color);
-      transition: height .9s cubic-bezier(0.25, 1, 0.5, 1), background-color .5s ease;
-  }
-  .score-wheel-liquid::before, .score-wheel-liquid::after {
-      content: '';
-      position: absolute;
-      top: -20px;
-      left: 0;
-      width: 100%;
-      height: 20px;
-      background-size: 50% 100%;
-      background-repeat: repeat-x;
-  }
-  .score-wheel-liquid::before {
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path fill="%23000000" fill-opacity="0.2" d="M 0 10 C 25 20, 25 0, 50 10 S 75 20, 100 10 V 20 H 0 Z"></path></svg>');
-      animation: wave-animation 2s linear infinite;
-      opacity: 0.7;
-  }
-  .score-wheel-liquid::after {
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path fill="white" d="M 0 10 C 25 20, 25 0, 50 10 S 75 20, 100 10 V 20 H 0 Z"></path></svg>');
-      animation: wave-animation 2.5s linear infinite reverse;
-      opacity: 1;
-      top: -18px; /* Slightly offset for 3D effect */
-  }
-
-  @keyframes wave-animation {
-      0% { background-position: 0 0; }
-      100% { background-position: 100px 0; }
-  }
-
-
-  /* Bubbles */
-  .score-wheel-bubbles {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: var(--progress-percent);
-      z-index: 2;
-      transition: height .9s cubic-bezier(0.25, 1, 0.5, 1);
-  }
-
-  .score-wheel-bubbles span {
-      position: absolute;
-      bottom: -20px;
-      width: 5px;
-      height: 5px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      animation: bubble-rise 10s infinite ease-in;
-      transform-origin: center;
-  }
-
-  @keyframes bubble-rise {
-      0% { transform: translateY(0) scale(1); opacity: 1; }
-      100% { transform: translateY(-250px) scale(0); opacity: 0; }
+  /* ==================================================== */
+  /* === 🎨 UPGRADED: 2-COLOR NEON-TECH SCORE WHEELS 🎨 === */
+  /* ==================================================== */
+  .mw {
+    --v: 0;
+    --size: 200px;
+    --track-width: 14px;
+    --progress-percent: calc(var(--v) * 1%);
+    width: var(--size);
+    height: var(--size);
+    position: relative;
+    transition: filter .4s ease;
   }
   
-  .score-wheel-sm {
-      --size: 170px;
-      --track-width: 12px;
+  .mw-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
+    box-shadow:
+      inset 0 0 4px 1px rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,255,255,0.05);
   }
-  .score-wheel-xs {
-      --size: 160px;
-      --track-width: 12px;
+
+  .mw-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    
+    /* Default gradient for 'bad' score */
+    --grad-start: var(--red-1);
+    --grad-end: var(--pink-1);
+    background: conic-gradient(from -90deg, var(--grad-start), var(--grad-end));
+    
+    -webkit-mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+    -webkit-mask-composite: source-in;
+     mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+     mask-composite: intersect;
+  }
+  
+  /* Gradient overrides for 'warn' and 'good' scores */
+  .mw.warn .mw-ring::before {
+    --grad-start: var(--yellow-1);
+    --grad-end: var(--orange-1);
+  }
+  .mw.good .mw-ring::before {
+    --grad-start: var(--green-1);
+    --grad-end: var(--blue-1);
+  }
+  
+  .mw-ring::after {
+    content: '';
+    position: absolute;
+    inset: calc(var(--track-width) - 4px);
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 70%);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+  }
+
+  .mw-center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: calc(var(--size) * 0.24);
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(255,255,255,0.3);
+  }
+  
+  .mw.good { filter: drop-shadow(0 0 10px var(--green-1)) drop-shadow(0 0 20px var(--green-1)); }
+  .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)) drop-shadow(0 0 20px var(--orange-1)); }
+  .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)) drop-shadow(0 0 20px var(--red-1)); }
+
+  .mw-sm {
+    --size: 170px;
+    --track-width: 12px;
   }
   
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
@@ -351,7 +281,7 @@
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.08); opacity: 0.85; } }
   
-  .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: center;}
+  .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
   @media (max-width: 920px){.tsi-grid, .cae-grid {grid-template-columns:1fr}}
 
   /* Info Items Grid */
@@ -588,6 +518,65 @@
     gap: 16px;
   }
 
+  /* NEW: Score Wheel for Humanizer */
+  .humanizer-wheel {
+    --v: 0;
+    --size: 160px;
+    --track-width: 12px;
+    --progress-percent: calc(var(--v) * 1%);
+    width: var(--size);
+    height: var(--size);
+    position: relative;
+    animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+  .humanizer-wheel-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
+    box-shadow:
+      inset 0 0 4px 1px rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,255,255,0.05);
+  }
+  .humanizer-wheel-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    /* Multicolor Gradient */
+    background: conic-gradient(from -90deg, 
+      var(--red-1), 
+      var(--orange-1), 
+      var(--yellow-1), 
+      var(--green-1), 
+      var(--blue-1), 
+      var(--purple-1), 
+      var(--red-1));
+    animation: spin 8s linear infinite;
+    -webkit-mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+    -webkit-mask-composite: source-in;
+     mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+     mask-composite: intersect;
+  }
+  .humanizer-wheel-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .humanizer-wheel-score {
+    font-size: calc(var(--size) * 0.28);
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(255,255,255,0.3);
+  }
   .humanizer-wheel-label {
     font-size: calc(var(--size) * 0.09);
     font-weight: 700;
@@ -596,6 +585,10 @@
     letter-spacing: 0.5px;
     margin-top: 4px;
   }
+
+  .humanizer-wheel.good { filter: drop-shadow(0 0 8px var(--green-1)) drop-shadow(0 0 16px var(--green-1)); }
+  .humanizer-wheel.warn { filter: drop-shadow(0 0 8px var(--orange-1)) drop-shadow(0 0 16px var(--orange-1)); }
+  .humanizer-wheel.bad { filter: drop-shadow(0 0 8px var(--red-1)) drop-shadow(0 0 16px var(--red-1)); }
 
   @keyframes badge-pop-in {
     from { transform: scale(0.5) rotate(-15deg); opacity: 0; }
@@ -729,6 +722,20 @@
     line-height: 1.5;
   }
   
+
+  /* ====== Neon Water Wheel Upgrade (style-only, no logic change) ====== */
+  .speed-device-score { position: relative; }
+  .speed-device-score svg { position: relative; z-index: 0; }
+  .speed-device-score .speed-device-score-val { position:absolute; inset:0; display:grid; place-items:center; z-index:2; }
+  .speed-device-score .wheel-water{
+    position:absolute; 
+    left:8px; top:8px; right:8px; bottom:8px; 
+    border-radius:50%;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:1;
+    filter: drop-shadow(0 0 8px rgba(0,255,170,.4)) drop-shadow(0 0 16px rgba(0,255,170,.25));
+  }
 </style>
 
 <script defer>
@@ -739,7 +746,7 @@
     const $ = s=>document.querySelector(s);
 
     /* ============== Element refs (Original + New) ============== */
-    const mw=$('#mw'), mwNum=$('#mwNum');
+    const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
     const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
     const chipOverall=$('#chipOverall'), chipContent=$('#chipContent');
     
@@ -768,7 +775,7 @@
     const desktopLcp = $('#desktopLcp'), desktopInp = $('#desktopInp'), desktopCls = $('#desktopCls');
     const speedOpportunitiesList = $('#speedOpportunitiesList');
     
-    const mwTSI = $('#mwTSI'), numTSI = $('#numTSI');
+    const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI');
     const tsiInternalLinks = $('#tsiInternalLinks'), tsiUrlClarityScore = $('#tsiUrlClarityScore');
     const tsiUrlSuggestion = $('#tsiUrlSuggestion'), tsiMetaTitle = $('#tsiMetaTitle');
     const tsiMetaDescription = $('#tsiMetaDescription'), tsiAltTexts = $('#tsiAltTexts');
@@ -778,7 +785,7 @@
     const kiRelatedTerms = $('#kiRelatedTerms'), kiCompetitorGaps = $('#kiCompetitorGaps');
     const kiLongTail = $('#kiLongTail');
 
-    const mwCAE = $('#mwCAE'), numCAE = $('#numCAE');
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
     const caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities');
     const caeKeywords = $('#caeKeywords'), caeRelevanceScore = $('#caeRelevanceScore');
     const caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
@@ -796,7 +803,7 @@
 
     /* Helpers (Unchanged) */
     const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
-    const bandName=s=>s>80?'good':(s>=60?'warn':'bad');
+    const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
     const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
     function setChip(el,label,value,score){ if(!el)return; el.classList.remove('good','warn','bad'); const b=bandName(score); el.classList.add(b); el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`; };
     const showError=(title, detail)=>{ errorBox.style.display='block'; errorBox.innerHTML = `<strong>${title}</strong><div style="white-space:pre-wrap;">${detail || ''}</div>`; };
@@ -833,7 +840,7 @@
     const KB={'Mobile-friendly, responsive layout':{why:'Most traffic is mobile; poor UX kills engagement.',tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'],link:'https://search.google.com/test/mobile-friendly'},'Optimized speed (compression, lazy-load)':{why:'Speed affects abandonment and CWV.',tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'],link:'https://web.dev/fast/'},'Core Web Vitals passing (LCP/INP/CLS)':{why:'Passing CWV improves experience & stability.',tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'],link:'https://web.dev/vitals/'},'Clear CTAs and next steps':{why:'Clarity increases conversions and task completion.',tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'],link:'https://www.nngroup.com/articles/call-to-action-buttons/'},'Accessible basics (alt text, contrast)':{why:'Accessibility broadens reach and reduces risk.',tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'],link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},'sameAs/Organization details present':{why:'Entity grounding disambiguates your brand.',tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'],link:'https://schema.org/Organization'},'Valid schema markup (Article/FAQ/Product)':{why:'Structured data unlocks rich results.',tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'],link:'https://search.google.com/test/rich-results'},'Related entities covered with context':{why:'Covering related entities builds topical depth.',tips:['Mention related concepts.','Explain relationships.','Link to references.'],link:'https://developers.google.com/knowledge-graph'},'Primary entity clearly defined':{why:'A single main entity clarifies page purpose.',tips:['Define at the top.','Use consistent naming.','Add schema about it.'],link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},'Organization contact/about page visible':{why:'Trust & contact clarity support E-E-A-T.',tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'],link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},'Logical H2/H3 headings & topic clusters':{why:'Hierarchy helps skimming and indexing.',tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'],link:'https://moz.com/learn/seo/site-structure'},'Internal links to hub/related pages':{why:'Internal links distribute authority & context.',tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'],link:'https://ahrefs.com/blog/internal-links/'},'Clean, descriptive URL slug':{why:'Readable slugs improve CTR & clarity.',tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'],link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},'Breadcrumbs enabled (+ schema)':{why:'Breadcrumbs clarify location & show in SERP.',tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'],link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},'XML sitemap logical structure':{why:'Sitemap accelerates discovery & updates.',tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'],link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},'E-E-A-T signals (author, date, expertise)':{why:'Trust signals reduce bounce & build credibility.',tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'],link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},'Unique value vs. top competitors':{why:'Differentiation is necessary to rank & retain.',tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'],link:'https://backlinko.com/seo-techniques'},'Facts & citations up to date':{why:'Freshness + accuracy boosts trust.',tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'],link:'https://scholar.google.com/'},'Helpful media (images/video) w/ captions':{why:'Media improves comprehension & dwell time.',tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'],link:'https://web.dev/optimize-lcp/'},'Up-to-date examples & screenshots':{why:'Current visuals reflect product reality.',tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'],link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},'Define search intent & primary topic':{why:'Matching intent drives relevance & time on page.',tips:['State outcome early.','Align format to intent.','Use concrete examples.'],link:'https://ahrefs.com/blog/search-intent/'},'Map target & related keywords (synonyms/PAA)':{why:'Variants improve recall & completeness.',tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'],link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},'H1 includes primary topic naturally':{why:'Clear topic helps users and algorithms.',tips:['One H1 per page.','Topic near the start.','Be descriptive.'],link:'https://web.dev/learn/html/semantics/#headings'},'Integrate FAQs / questions with answers':{why:'Captures long-tail & can earn rich results.',tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'],link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},'Readable, NLP-friendly language':{why:'Plain, direct writing improves comprehension.',tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'],link:'https://www.plainlanguage.gov/guidelines/'},'Title tag (≈50–60 chars) w/ primary keyword':{why:'Title remains the strongest on-page signal.',tips:['50–60 chars.','Primary topic first.','Avoid duplication.'],link:'https://moz.com/learn/seo/title-tag'},'Meta description (≈140–160 chars) + CTA':{why:'Meta drives CTR which correlates with rankings.',tips:['140–160 chars.','Benefit + CTA.','Match intent.'],link:'https://moz.com/learn/seo/meta-description'},'Canonical tag set correctly':{why:'Avoid duplicates; consolidate signals.',tips:['One canonical.','Absolute URL.','No conflicting canonicals.'],link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},'Indexable & listed in XML sitemap':{why:'Indexation is prerequisite to ranking.',tips:['No noindex.','Include in sitemap.','Submit in Search Console.'],link:'https://developers.google.com/search/docs/crawling-indexing/overview'},'Robots directives valid':{why:'Avoid accidental noindex/nofollow.',tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'],link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}};
     function clamp01num(n){return Math.max(0,Math.min(100,Number(n)||0))}
     function scoreChecklist(label,data,url,targetKw=''){const qs=data.quick_stats||{};const cs=data.content_structure||{};const ps=data.page_signals||{};const r=data.readability||{};const h1=(cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;const h2=(cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;const h3=(cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;const title=(cs.title||'');const meta=(cs.meta_description||'');const internal=Number(qs.internal_links||0);const external=Number(qs.external_links||0);const schemaTypes=new Set((data.page_signals?.schema_types)||[]);const robots=(data.page_signals?.robots||'').toLowerCase();const hasFAQ=schemaTypes.has('FAQPage');const hasArticle=schemaTypes.has('Article')||schemaTypes.has('NewsArticle')||schemaTypes.has('BlogPosting');const urlPath=(()=>{try{return new URL(url).pathname;}catch{return '/';}})();const slugScore=(()=>{const hasQuery=url.includes('?');const segs=urlPath.split('/').filter(Boolean);const words=segs.join('-').split('-').filter(Boolean);if(hasQuery)return 55;if(segs.length>6)return 60;if(words.some(w=>w.length>24))return 65;return 85;})();switch(label){case'Mobile-friendly, responsive layout':return ps.has_viewport?88:58;case'Optimized speed (compression, lazy-load)':return 60;case'Core Web Vitals passing (LCP/INP/CLS)':return 60;case'Clear CTAs and next steps':return meta.length>=140&&/learn|get|try|start|buy|sign|download|contact/i.test(meta)?80:60;case'Accessible basics (alt text, contrast)':return (data.images_alt_count||0)>=3?82:((data.images_alt_count||0)>=1?68:48);case'sameAs/Organization details present':return ps.has_org_sameas?90:55;case'Valid schema markup (Article/FAQ/Product)':return (hasArticle||hasFAQ||schemaTypes.has('Product'))?85:(schemaTypes.size>0?70:50);case'Related entities covered with context':return external>=2?72:60;case'Primary entity clearly defined':return ps.has_main_entity?85:(h1>0?72:58);case'Organization contact/about page visible':return 60;case'Logical H2/H3 headings & topic clusters':return (h2>=3&&h3>=2)?85:(h2>=2?70:55);case'Internal links to hub/related pages':return internal>=5?85:(internal>=2?65:45);case'Clean, descriptive URL slug':return slugScore;case'Breadcrumbs enabled (+ schema)':return ps.has_breadcrumbs?85:55;case'XML sitemap logical structure':return 60;case'E-E-A-T signals (author, date, expertise)':return ps.has_org_sameas?75:65;case'Unique value vs. top competitors':return 60;case'Facts & citations up to date':return external>=2?78:58;case'Helpful media (images/video) w/ captions':return (data.images_alt_count||0)>=3?82:58;case'Up-to-date examples & screenshots':return 60;case'Define search intent & primary topic':return (title&&h1>0)?78:60;case'Map target & related keywords (synonyms/PAA)':{const kw=(targetKw||'').trim();if(!kw)return 60;const found=(title.toLowerCase().includes(kw.toLowerCase())||(cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));return found?80:62}case'H1 includes primary topic naturally':{const kw=(targetKw||'').trim();if(h1===0)return 45;if(!kw)return 72;const found=(cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));return found?84:72}case'Integrate FAQs / questions with answers':return hasFAQ?85:(/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ')+' '+(cs.headings?.H3||[]).join(' '))?70:55);case'Readable, NLP-friendly language':return clamp01num((data.humanizer?.human_score || r.score) ?? 0);case'Title tag (≈50–60 chars) w/ primary keyword':{const len=(title||'').length;return (len>=50&&len<=60)?88:(len?68:45)}case'Meta description (≈140–160 chars) + CTA':{const len=(meta||'').length;const hasCTA=/learn|get|try|start|buy|sign|download|contact/i.test(meta||'');return (len>=140&&len<=160)?(hasCTA?90:82):(len?65:48)}case'Canonical tag set correctly':return ps.canonical?85:55;case'Indexable & listed in XML sitemap':return robots.includes('noindex')?20:80;case'Robots directives valid':return (robots&&/(noindex|none)/.test(robots))?45:75;}return 60}
-    function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');if(!catsEl)return;catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label)+' best practices');if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});if(chipAuto)chipAuto.textContent=autoGood;}
+    function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');if(!catsEl)return;catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label)+' best practices');if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});if(chipAuto)chipAuto.textContent=autoGood;}
 
     /* API Calls */
     async function callApi(endpoint, data) {
@@ -869,50 +876,13 @@
         }
     }
     
-    function setWheel(container, elNum, score) {
-        if (!container || !elNum) return;
-        score = clamp01(score);
-        const b = bandName(score);
-        container.classList.remove('good', 'warn', 'bad');
+    function setWheel(elRing, elNum, container, score, prefix){
+        if (!elRing || !elNum || !container) return;
+        const b=bandName(score);
+        container.classList.remove('good','warn','bad');
         container.classList.add(b);
-        container.style.setProperty('--v', score);
-        
-        // Animate number
-        let current = parseInt(elNum.textContent) || 0;
-        if (isNaN(current)) current = 0;
-
-        const duration = 900;
-        let start = null;
-
-        const animate = (timestamp) => {
-            if (!start) start = timestamp;
-            const progress = timestamp - start;
-            const value = Math.min(current + (score - current) * (progress / duration), score);
-            elNum.textContent = Math.floor(value);
-            if (progress < duration) {
-                window.requestAnimationFrame(animate);
-            } else {
-                elNum.textContent = Math.floor(score);
-            }
-        };
-        window.requestAnimationFrame(animate);
-
-        // Add bubbles dynamically
-        const bubbleContainer = container.querySelector('.score-wheel-bubbles');
-        if (bubbleContainer) {
-            bubbleContainer.innerHTML = '';
-            const bubbleCount = Math.floor(score / 4);
-            for (let i = 0; i < bubbleCount; i++) {
-                const bubble = document.createElement('span');
-                bubble.style.left = `${Math.random() * 90 + 5}%`;
-                bubble.style.animationDelay = `${Math.random() * 6}s`;
-                bubble.style.animationDuration = `${Math.random() * 6 + 5}s`;
-                const size = Math.random() * 4 + 2;
-                bubble.style.width = `${size}px`;
-                bubble.style.height = `${size}px`;
-                bubbleContainer.appendChild(bubble);
-            }
-        }
+        elRing.style.setProperty('--v',score);
+        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
     }
     
     function setSpeedCircle(circleEl, score) {
@@ -935,7 +905,7 @@
             danger: '❗'
         };
 
-        const scoreBand = human_score > 80 ? 'good' : human_score >= 60 ? 'warn' : 'bad';
+        const scoreBand = human_score >= 80 ? 'good' : human_score >= 60 ? 'warn' : 'bad';
         
         let suggestionsHtml = '';
         if (badge_type !== 'success' && suggestions) {
@@ -954,21 +924,15 @@
         if (badge_type !== 'success' && google_search_url) {
             googleLinkHtml = `<a href="${google_search_url}" target="_blank" class="btn btn-blue" style="margin-top: 15px; display: inline-block;"><span class="btn-icon">💡</span><span>Get More Tips</span></a>`;
         }
-        
-        const humanizerWheelHTML = `
-            <div class="score-wheel score-wheel-xs ${scoreBand}" style="--v:${human_score}; animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;">
-                <div class="score-wheel-outer">
-                    <div class="score-wheel-inner">
-                        <div class="score-wheel-text t-grad">${human_score}</div>
-                        <div class="score-wheel-liquid"></div>
-                        <div class="score-wheel-bubbles"></div>
-                    </div>
-                </div>
-            </div>
-        `;
 
         humanizerResult.innerHTML = `
-            ${humanizerWheelHTML}
+            <div class="humanizer-wheel ${scoreBand}" style="--v:${human_score};">
+                <div class="humanizer-wheel-ring"></div>
+                <div class="humanizer-wheel-center">
+                    <span class="humanizer-wheel-score t-grad">${human_score}%</span>
+                    <span class="humanizer-wheel-label">Human Score</span>
+                </div>
+            </div>
             <div class="humanizer-recommendation-badge ${badge_type}">
                <span class="c-icon float">${badgeIcon[badge_type] || '✅'}</span>
                <span>${recommendation}</span>
@@ -1015,7 +979,7 @@
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
-        setWheel(mw, mwNum, score);
+        setWheel(mwRing, mwNum, mw, score, '');
         if(overallFill) overallFill.style.width=score+'%';
         if(overallPct) overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
@@ -1056,7 +1020,7 @@
         
         if (tsiData) {
             const tsi = tsiData;
-            setWheel(mwTSI, numTSI, tsi.score || 0);
+            setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
             if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             if(tsiUrlClarityScore) tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             if(tsiUrlSuggestion) tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
@@ -1078,7 +1042,7 @@
         
         if(caeData) {
             const cae = caeData;
-            setWheel(mwCAE, numCAE, cae.score || 0);
+            setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
             if(caeTopicClusters) caeTopicClusters.innerHTML = (cae.topic_clusters||[]).map(t => `<span class="chip">${t}</span>`).join('');
             if(caeEntities) caeEntities.innerHTML = (cae.entities||[]).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
             if(caeKeywords) caeKeywords.innerHTML = (cae.semantic_keywords||[]).map(k => `<span class="chip">${k}</span>`).join('');
@@ -1192,7 +1156,97 @@
     pasteBtn && pasteBtn.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
     importBtn && importBtn.addEventListener('click',()=>importFile.click());
     importFile && importFile.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)});
-    printBtn && printBtn.addEventListener('click',()=>window.print());
+    printBtn && printBtn.addEventListener('
+/* ====== Neon Water Wheel Upgrade (script-only, no logic change) ====== */
+(function(){
+  function injectWheelEnhancements(){
+    document.querySelectorAll('.speed-device-score').forEach(function(wrap, idx){
+      var svg = wrap.querySelector('svg');
+      var prog = wrap.querySelector('.progress');
+      if(svg && prog && !svg.__wheelEnhanced){
+        svg.__wheelEnhanced = true;
+        var svgns = 'http://www.w3.org/2000/svg';
+        // defs + multicolor gradient for ring
+        var defs = document.createElementNS(svgns,'defs');
+        var grad = document.createElementNS(svgns,'linearGradient');
+        var gid = 'wheelGrad'+idx;
+        grad.setAttribute('id', gid);
+        grad.setAttribute('x1','0%'); grad.setAttribute('y1','0%');
+        grad.setAttribute('x2','100%'); grad.setAttribute('y2','0%');
+        [['0%','#29abe2'],['25%','#00ffa2'],['50%','#ffd400'],['75%','#ff7a00'],['100%','#ff00a6']]
+          .forEach(function(st){ var s=document.createElementNS(svgns,'stop'); s.setAttribute('offset',st[0]); s.setAttribute('stop-color',st[1]); defs.appendChild(grad); grad.appendChild(s); });
+        // simple glow filter
+        var filter = document.createElementNS(svgns,'filter'); filter.setAttribute('id','wheelGlow'+idx);
+        var fe = document.createElementNS(svgns,'feDropShadow'); fe.setAttribute('dx','0'); fe.setAttribute('dy','0'); fe.setAttribute('stdDeviation','1.8'); fe.setAttribute('flood-color','#00ffa2'); filter.appendChild(fe);
+        defs.appendChild(filter);
+        svg.insertBefore(defs, svg.firstChild);
+        prog.setAttribute('stroke','url(#'+gid+')');
+        prog.setAttribute('filter','url(#wheelGlow'+idx+')');
+      }
+      // add one canvas for water
+      if(!wrap.querySelector('canvas.wheel-water')){
+        var canvas = document.createElement('canvas');
+        canvas.className = 'wheel-water';
+        wrap.appendChild(canvas);
+        var ctx = canvas.getContext('2d');
+        function resize(){
+          var box = wrap.getBoundingClientRect();
+          var size = Math.max(32, Math.floor(Math.min(box.width, box.height) - 16));
+          canvas.width = size; canvas.height = size;
+          canvas.style.width = size+'px'; canvas.style.height = size+'px';
+        }
+        resize();
+        try{ new ResizeObserver(resize).observe(wrap); }catch(e){}
+        var t=0, pct=0, targetPct=0;
+        var valEl = wrap.querySelector('.speed-device-score-val');
+        function readPct(){ var v = parseFloat((valEl && valEl.textContent)||'0'); return isNaN(v)?0:Math.max(0,Math.min(100,v))/100; }
+        targetPct = readPct();
+        if(window.MutationObserver && valEl){
+          var mo = new MutationObserver(function(){ targetPct = readPct(); });
+          mo.observe(valEl, {childList:true, characterData:true, subtree:true});
+        }
+        (function draw(){
+          var w=canvas.width, h=canvas.height;
+          ctx.clearRect(0,0,w,h);
+          // smooth follow
+          pct += (targetPct - pct)*0.08;
+          // level
+          var level = h*(1-pct);
+          var amp = Math.max(2, h*0.04);
+          // choose color by band
+          var col = pct>=0.8? '#00ff88' : (pct>=0.6? '#ffd400' : '#ff007a');
+          // clip circle
+          ctx.save();
+          ctx.beginPath(); ctx.arc(w/2,h/2,w/2,0,Math.PI*2); ctx.clip();
+          // gradient fill
+          var g = ctx.createLinearGradient(0, level-amp, 0, h);
+          g.addColorStop(0, col);
+          g.addColorStop(1, 'rgba(0,0,0,0.85)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.moveTo(0,h);
+          ctx.lineTo(0, level);
+          for(var x=0; x<=w; x++){
+            var y = level + Math.sin((x/w*4*Math.PI)+t)*amp;
+            ctx.lineTo(x,y);
+          }
+          ctx.lineTo(w,h);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+          t += 0.06;
+          requestAnimationFrame(draw);
+        })();
+      }
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', injectWheelEnhancements);
+  }else{
+    injectWheelEnhancements();
+  }
+})();
+click',()=>window.print());
     resetBtn && resetBtn.addEventListener('click',()=>location.reload());
     exportBtn && exportBtn.addEventListener('click',()=>{if(!window.__lastData){alert('Run an analysis first.');return;}const blob=new Blob([JSON.stringify(window.__lastData,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='semantic-report.json';a.click();URL.revokeObjectURL(a.href)});
   };
@@ -1232,18 +1286,13 @@
     </div>
   </div>
 
-  <div class="legend"><span class="badge g">Green > 80</span><span class="badge o">Orange 60–80</span><span class="badge r">Red &lt; 60</span></div>
+  <div class="legend"><span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span></div>
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;">
-      <div class="score-wheel" id="mw" style="--v:0;">
-          <div class="score-wheel-outer">
-              <div class="score-wheel-inner">
-                  <div class="score-wheel-text" id="mwNum">0</div>
-                  <div class="score-wheel-liquid"></div>
-                  <div class="score-wheel-bubbles"></div>
-              </div>
-          </div>
+      <div class="mw warn" id="mw">
+        <div class="mw-ring" id="mwRing" style="--v:0"></div>
+        <div class="mw-center" id="mwNum">0%</div>
       </div>
     </div>
     <div class="space-y-2">
@@ -1299,13 +1348,11 @@
         <div id="humanizerCard">
              <div id="humanizerResult">
                 <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
-                    <div class="score-wheel score-wheel-xs" style="--v:0;">
-                         <div class="score-wheel-outer">
-                            <div class="score-wheel-inner">
-                                <div class="score-wheel-text">-</div>
-                                <div class="score-wheel-liquid"></div>
-                                <div class="score-wheel-bubbles"></div>
-                            </div>
+                    <div class="humanizer-wheel" style="--v:0;">
+                        <div class="humanizer-wheel-ring"></div>
+                        <div class="humanizer-wheel-center">
+                            <span class="humanizer-wheel-score t-grad">-%</span>
+                            <span class="humanizer-wheel-label">Human Score</span>
                         </div>
                     </div>
                     <div style="margin-top: 16px;">
@@ -1322,15 +1369,7 @@
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
     </div>
     <div class="cae-grid">
-      <div class="score-wheel score-wheel-sm" id="mwCAE" style="--v:0">
-          <div class="score-wheel-outer">
-              <div class="score-wheel-inner">
-                  <div class="score-wheel-text" id="numCAE">0</div>
-                  <div class="score-wheel-liquid"></div>
-                  <div class="score-wheel-bubbles"></div>
-              </div>
-          </div>
-      </div>
+      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE" style="--v:0"></div><div class="mw-center" id="numCAE">0%</div></div></div>
       <div class="cae-info-grid">
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon spin">🧩</span></div><span class="cae-info-title">Topic Clustering Analysis</span></div><div class="cae-tags" id="caeTopicClusters"></div></div>
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon pulse">🏢</span></div><span class="cae-info-title">Entity Recognition</span></div><div class="cae-tags" id="caeEntities"></div></div>
@@ -1352,15 +1391,7 @@
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
     </div>
      <div class="tsi-grid">
-      <div class="score-wheel score-wheel-sm" id="mwTSI" style="--v:0">
-          <div class="score-wheel-outer">
-              <div class="score-wheel-inner">
-                  <div class="score-wheel-text" id="numTSI">0</div>
-                  <div class="score-wheel-liquid"></div>
-                  <div class="score-wheel-bubbles"></div>
-              </div>
-          </div>
-      </div>
+      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI" style="--v:0"></div><div class="mw-center" id="numTSI">0%</div></div></div>
       <div class="tsi-info-grid">
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🔗</span><span class="tsi-info-title">Internal Linking</span></div><ul id="tsiInternalLinks"></ul></div>
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🌐</span><span class="tsi-info-title">URL Structure</span></div><p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p><p id="tsiUrlSuggestion"></p></div>
