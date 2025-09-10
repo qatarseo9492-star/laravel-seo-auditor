@@ -24,19 +24,39 @@ class AnalyzerController extends Controller
         if (!Auth::check()) return true;
 
         $user = Auth::user();
-        $limit = UserLimit::firstOrCreate(['user_id' => $user->id]);
+        // Use firstOrNew to get the model instance without saving it immediately.
+        $limit = UserLimit::firstOrNew(['user_id' => $user->id]);
 
-        if (!$limit->updated_at->isToday()) $limit->searches_today = 0;
-        if (!$limit->updated_at->isSameMonth(now())) $limit->searches_this_month = 0;
+        // UPGRADE: Check if the user is new or has a limit below the new default, and upgrade them.
+        if (!$limit->exists || $limit->daily_limit < 1000) {
+            $limit->daily_limit = 1000; // Increased daily limit
+        }
+        if (!$limit->exists || $limit->monthly_limit < 30000) {
+            $limit->monthly_limit = 30000; // Increased monthly limit
+        }
 
+        // Reset counters if it's a new day or month, checking against the last update time.
+        if (!$limit->updated_at || !$limit->updated_at->isToday()) {
+            $limit->searches_today = 0;
+        }
+        if (!$limit->updated_at || !$limit->updated_at->isSameMonth(now())) {
+            $limit->searches_this_month = 0;
+        }
+        
+        // Save any changes (new limits, reset counters).
+        $limit->save();
+
+        // Now, perform the limit check with the updated values.
         if ($limit->searches_today >= $limit->daily_limit || $limit->searches_this_month >= $limit->monthly_limit) {
-            return response()->json(['error' => 'You have reached your usage quota for today/this month.'], 429);
+            return response()->json([
+                'error' => "You have reached your usage quota. Daily: {$limit->searches_today}/{$limit->daily_limit}. Please try again later."
+            ], 429);
         }
 
         (new UsageLogger())->logAnalysis($request, $tool, true);
         $limit->increment('searches_today');
         $limit->increment('searches_this_month');
-        $limit->touch();
+        // We don't need to call touch() here since incrementing already updates the timestamp.
 
         return true;
     }
@@ -383,6 +403,12 @@ class AnalyzerController extends Controller
             $validated = $request->validate(['url' => ['required', 'url']]);
             $urlToAnalyze = $validated['url'];
 
+            // UPGRADE: Pass request to checkAndLog for usage tracking.
+            $limitCheck = $this->checkAndLog($request, 'semantic-analyze');
+            if ($limitCheck !== true) {
+                return $limitCheck;
+            }
+
             $response = Http::timeout(20)->get($urlToAnalyze);
             if ($response->failed()) {
                 return response()->json(['error' => "Failed to fetch URL. Status: {$response->status()}"], 400);
@@ -514,6 +540,12 @@ class AnalyzerController extends Controller
             'prompt' => 'nullable|string|max:2000',
             'url' => 'required|url'
         ]);
+        
+        // UPGRADE: Pass request to checkAndLog for usage tracking.
+        $limitCheck = $this->checkAndLog($request, $validated['task']);
+        if ($limitCheck !== true) {
+            return $limitCheck;
+        }
 
         $task = $validated['task'];
         $url = $validated['url'];
@@ -666,6 +698,12 @@ class AnalyzerController extends Controller
         try {
             $validated = $request->validate(['url' => 'required|url']);
             $url = $validated['url'];
+
+            // UPGRADE: Pass request to checkAndLog for usage tracking.
+            $limitCheck = $this->checkAndLog($request, 'pagespeed-insights');
+            if ($limitCheck !== true) {
+                return $limitCheck;
+            }
 
             $apiKey = env('PAGESPEED_API_KEY');
             if (!$apiKey) return response()->json(['error' => 'PageSpeed API key is not configured.'], 500);
