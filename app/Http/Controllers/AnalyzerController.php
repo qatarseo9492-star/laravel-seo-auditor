@@ -423,7 +423,7 @@ class AnalyzerController extends Controller
                 $humanizerData['recommendation'] = 'This content has a high probability of being AI-generated. We strongly recommend rewriting it for better engagement and authenticity.';
                 $humanizerData['badge_type'] = 'danger';
             } elseif ($humanScore < 80) {
-                $humanizerData['recommendation'] = 'This content could be more engaging. Use the suggestions below to make it sound more human.';
+                $humanizerData['recommendation'] = 'This content could be more engaging. Consider the suggestions to make it sound more human.';
                 $humanizerData['badge_type'] = 'warning';
             } else {
                 $humanizerData['recommendation'] = 'Great job! This content reads like it was written by a human.';
