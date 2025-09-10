@@ -176,12 +176,14 @@
       left: -50%;
       width: 200%;
       height: var(--progress-percent);
-      background: var(--glow-color);
+      background: linear-gradient(90deg, var(--red-1), var(--orange-1), var(--yellow-1), var(--green-1), var(--blue-1), var(--purple-1), var(--red-1));
+      background-size: 300% 100%;
+      animation: rainbowSlide 6s linear infinite;
       opacity: 0.8; /* Slightly transparent */
       z-index: 1;
       
       box-shadow: inset 0 0 25px rgba(0,0,0,0.6), 0 0 25px var(--glow-color);
-      transition: height .9s cubic-bezier(0.25, 1, 0.5, 1), background-color .5s ease;
+      transition: height .9s cubic-bezier(0.25, 1, 0.5, 1);
   }
 
   /* The wave shapes on top of the liquid */
