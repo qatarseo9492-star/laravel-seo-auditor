@@ -85,7 +85,7 @@ class DashboardController extends Controller
 
         if (Schema::hasTable('user_limits') && Schema::hasColumn('user_limits', 'daily_limit')) {
             $avg = DB::table('user_limits')->avg('daily_limit');
-            $k['dailyLimit'] = (int) ($avg ?: 100);
+            $k['dailyLimit'] = (int) ($avg ?: 1000);
         }
 
         return $k;
@@ -272,7 +272,7 @@ class DashboardController extends Controller
                     'name'      => $u->name  ?? '',
                     'enabled'   => (bool) ($limit->is_enabled ?? true),
                     'banned'    => (bool) ($u->is_banned ?? false),
-                    'limit'     => (int)  ($limit->daily_limit ?? 200),
+                    'limit'     => (int)  ($limit->daily_limit ?? 1000),
                     'last_seen' => Schema::hasColumn('users','last_seen_at') ? ($u->last_seen_at ?? '—') : '—',
                     'ip'        => Schema::hasColumn('users','last_ip')      ? ($u->last_ip ?? '—')      : '—',
                     'country'   => Schema::hasColumn('users','last_country') ? ($u->last_country ?? '—') : '—',
@@ -321,7 +321,7 @@ class DashboardController extends Controller
                 'last_ip'      => Schema::hasColumn('users','last_ip')      ? $user->last_ip      : null,
             ],
             'limit' => [
-                'daily_limit' => (int)  ($limit->daily_limit ?? 200),
+                'daily_limit' => (int)  ($limit->daily_limit ?? 1000),
                 'is_enabled'  => (bool) ($limit->is_enabled  ?? true),
                 'reason'      =>        ($limit->reason      ?? null),
             ],
