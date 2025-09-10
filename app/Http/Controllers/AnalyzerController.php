@@ -229,18 +229,16 @@ class AnalyzerController extends Controller
     {
         $apiKey = env('OPENAI_API_KEY');
         if (!$apiKey) {
-            Log::warning('OpenAI API key is not configured.');
-            return -1; // Signal that API is not configured
-        }
-
-        // Limit text to avoid excessive token usage (approx. 1000 words)
-        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
-        $truncatedText = implode(' ', array_slice($words, 0, 1000));
-
-        if (empty($truncatedText) || count($words) < 50) {
-             // Not enough text to analyze reliably
+            Log::warning('AI Likelihood check skipped: OPENAI_API_KEY is not configured.');
             return -1;
         }
+
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        if (count($words) < 50) {
+             Log::warning('AI Likelihood check skipped: Text content is too short (less than 50 words).');
+             return -1;
+        }
+        $truncatedText = implode(' ', array_slice($words, 0, 1000));
 
         $systemMessage = "You are an expert AI text classifier. Analyze the following text and determine the probability that it was written by an AI. Your response must be a single, valid JSON object with one key: \"ai_probability\", which must be an integer between 0 and 100.";
 
@@ -269,8 +267,8 @@ class AnalyzerController extends Controller
             if (json_last_error() === JSON_ERROR_NONE && isset($result['ai_probability']) && is_numeric($result['ai_probability'])) {
                 return (int) max(0, min(100, $result['ai_probability']));
             }
-
-            Log::warning('OpenAI AI Content Check returned invalid JSON', ['body' => $content]);
+            
+            Log::warning('AI Likelihood check failed: OpenAI returned invalid JSON.', ['body' => $content]);
             return -1;
 
         } catch (\Exception $e) {
@@ -299,7 +297,6 @@ class AnalyzerController extends Controller
             return 'No text provided for analysis.';
         }
         
-        // ** MULTILINGUAL SUPPORT ADDED HERE **
         $systemMessage = "You are an expert editor specializing in making AI-generated text sound more human. Your suggestions must be concise, actionable, and easy to understand. IMPORTANT: Detect the primary language of the provided text (e.g., English, Arabic, Portuguese) and write your entire response, including all suggestions, in that same language.";
         $userMessage = "The following text has been flagged as {$aiLikelihood}% likely to be AI-generated. Please provide 3-5 specific, actionable suggestions to make it sound more natural, engaging, and human-written. Frame your suggestions as a list. Suggestions could include varying sentence structure, adding personal anecdotes or rhetorical questions, injecting more personality, or simplifying complex vocabulary. Here is the text:\n\n{$truncatedText}";
         
@@ -337,6 +334,7 @@ class AnalyzerController extends Controller
 
         $text = $validated['text'];
         $aiLikelihood = $this->getAiLikelihood($text);
+        $scoringMethod = 'openai';
 
         if ($aiLikelihood === -1) {
              return response()->json([
@@ -347,7 +345,6 @@ class AnalyzerController extends Controller
         $humanScore = 100 - $aiLikelihood;
         $suggestions = '';
         
-        // Get suggestions if the score is below 80
         if ($humanScore < 80) {
             $suggestions = $this->getHumanizeSuggestions($text, $aiLikelihood);
         }
@@ -375,6 +372,7 @@ class AnalyzerController extends Controller
             'recommendation' => $recommendation,
             'badge_type' => $badgeType,
             'google_search_url' => $googleSearchUrl,
+            'scoring_method' => $scoringMethod,
         ]);
     }
 
@@ -399,17 +397,17 @@ class AnalyzerController extends Controller
             $textContent = $this->extractTextFromDom($xpath);
             
             $aiLikelihood = $this->getAiLikelihood($textContent);
-            
             $readabilityData = $this->analyzeReadability($textContent);
             $humanScore = 0;
+            $scoringMethod = '';
 
             if ($aiLikelihood !== -1) {
                 $humanScore = 100 - $aiLikelihood;
+                $scoringMethod = 'openai';
             } else {
-                // **FIX:** If the AI check fails, directly use the readability score.
-                // This provides a more accurate and varied fallback score.
                 $humanScore = $readabilityData['score'];
                 $aiLikelihood = 100 - $humanScore;
+                $scoringMethod = 'readability_fallback';
             }
 
             $humanizerData = [];
@@ -424,8 +422,9 @@ class AnalyzerController extends Controller
                 $humanizerData['badge_type'] = 'success';
             }
             
-            $humanizerData['suggestions'] = ($humanScore < 80 && $aiLikelihood !== -1) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
+            $humanizerData['suggestions'] = ($humanScore < 80 && $scoringMethod === 'openai') ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
             $humanizerData['google_search_url'] = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
+            $humanizerData['scoring_method'] = $scoringMethod;
 
 
             $contentStructure = [];
