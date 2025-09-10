@@ -16,11 +16,148 @@ use App\Support\Logs\UsageLogger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
-use App\Http\Controllers\AiReadabilityController;
 
 class AnalyzerController extends Controller
 {
-    private function checkAndLog(Request $request, string $tool): bool|JsonResponse
+    //======================================================================
+    // AI READABILITY & HUMANIZER LOGIC (MERGED)
+    //======================================================================
+
+    private function countSyllables(string $word): int
+    {
+        $word = strtolower(trim($word));
+        if (mb_strlen($word) <= 3) return 1;
+        $word = preg_replace('/(es|ed|e)$/', '', $word);
+        $word = preg_replace('/^y/', '', $word);
+        preg_match_all('/[aeiouy]{1,2}/', $word, $matches);
+        $syllableCount = count($matches[0]);
+        return $syllableCount > 0 ? $syllableCount : 1;
+    }
+
+    private function analyzeReadability(string $text): int
+    {
+        if (empty($text)) return 0;
+        $words = preg_split('/[\s,]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $wordCount = count($words);
+        if ($wordCount < 50) return 65;
+        $sentenceCount = preg_match_all('/[.!?]+/', $text, $matches);
+        $sentenceCount = $sentenceCount > 0 ? $sentenceCount : 1;
+        $syllableCount = 0;
+        foreach ($words as $word) {
+            $syllableCount += $this->countSyllables($word);
+        }
+        $fleschScore = 0;
+        if ($wordCount > 0 && $sentenceCount > 0 && $syllableCount > 0) {
+            $fleschScore = 206.835 - 1.015 * ($wordCount / $sentenceCount) - 84.6 * ($syllableCount / $wordCount);
+        }
+        return (int) max(0, min(100, round($fleschScore)));
+    }
+
+    private function getAiLikelihood(string $text): int
+    {
+        $apiKey = env('OPENAI_API_KEY');
+        if (!$apiKey) {
+            Log::warning('AI Likelihood check skipped: OPENAI_API_KEY is not configured.');
+            return -1;
+        }
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        if (count($words) < 50) {
+            Log::warning('AI Likelihood check skipped: Text content is too short (less than 50 words).');
+            return -1;
+        }
+        $truncatedText = implode(' ', array_slice($words, 0, 1000));
+        $systemMessage = "You are an expert AI text classifier. Analyze the following text and determine the probability that it was written by an AI. Your response must be a single, valid JSON object with one key: \"ai_probability\", which must be an integer between 0 and 100.";
+        try {
+            $response = Http::withToken($apiKey)->timeout(60)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
+                'messages' => [['role' => 'system', 'content' => $systemMessage], ['role' => 'user', 'content' => $truncatedText]],
+                'temperature' => 0.2, 'max_tokens' => 50, 'response_format' => ['type' => 'json_object'],
+            ]);
+            if ($response->failed()) {
+                Log::error('OpenAI AI Content Check API Error', ['status' => $response->status(), 'body' => $response->body()]);
+                return -1;
+            }
+            $content = $response->json('choices.0.message.content');
+            $result = json_decode($content, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($result['ai_probability']) && is_numeric($result['ai_probability'])) {
+                return (int) max(0, min(100, $result['ai_probability']));
+            }
+            Log::warning('AI Likelihood check failed: OpenAI returned invalid JSON.', ['body' => $content]);
+            return -1;
+        } catch (\Exception $e) {
+            Log::error("Error calling OpenAI for AI Content Check", ['message' => $e->getMessage()]);
+            return -1;
+        }
+    }
+
+    private function getHumanizeSuggestions(string $text, int $aiLikelihood): string
+    {
+        $apiKey = env('OPENAI_API_KEY');
+        if (!$apiKey) return 'OpenAI API key is not configured.';
+        $words = preg_split('/[\s]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $truncatedText = implode(' ', array_slice($words, 0, 1000));
+        if (empty($truncatedText)) return 'No text provided for analysis.';
+        $systemMessage = "You are an expert editor specializing in making AI-generated text sound more human. Your suggestions must be concise, actionable, and easy to understand. IMPORTANT: Detect the primary language of the provided text (e.g., English, Arabic, Portuguese) and write your entire response, including all suggestions, in that same language.";
+        $userMessage = "The following text has been flagged as {$aiLikelihood}% likely to be AI-generated. Please provide 3-5 specific, actionable suggestions to make it sound more natural, engaging, and human-written. Frame your suggestions as a list. Here is the text:\n\n{$truncatedText}";
+        try {
+            $response = Http::withToken($apiKey)->timeout(90)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
+                'messages' => [['role' => 'system', 'content' => $systemMessage], ['role' => 'user', 'content' => $userMessage]],
+                'temperature' => 0.7, 'max_tokens' => 500,
+            ]);
+            if ($response->failed()) {
+                Log::error('OpenAI Humanize Suggestions API Error', ['status' => $response->status(), 'body' => $response->body()]);
+                return 'Failed to get suggestions from the AI service.';
+            }
+            return trim($response->json('choices.0.message.content', 'No suggestions were returned.'));
+        } catch (\Exception $e) {
+            Log::error("Error calling OpenAI for Humanize Suggestions", ['message' => $e->getMessage()]);
+            return 'An internal server error occurred while getting suggestions.';
+        }
+    }
+
+    private function getHumanizerDataForText(string $text): array
+    {
+        $aiLikelihood = $this->getAiLikelihood($text);
+        $scoringMethod = ($aiLikelihood !== -1) ? 'openai' : 'readability_fallback';
+        $humanScore = ($scoringMethod === 'openai') ? (100 - $aiLikelihood) : $this->analyzeReadability($text);
+        if ($scoringMethod === 'readability_fallback') {
+            $aiLikelihood = 100 - $humanScore;
+        }
+
+        $badgeType = 'success';
+        if ($humanScore < 60) {
+            $badgeType = 'danger';
+            $recommendation = 'This content seems highly AI-generated. A full rewrite is strongly recommended to improve authenticity and reader engagement.';
+        } elseif ($humanScore < 80) {
+            $badgeType = 'warning';
+            $recommendation = 'This content could be more engaging. Please review the AI suggestions below to make it sound more human.';
+        } else {
+            $recommendation = 'Excellent! This content has a natural, human-like quality that readers will appreciate.';
+        }
+        
+        $suggestions = ($humanScore < 80 && $scoringMethod === 'openai') ? $this->getHumanizeSuggestions($text, $aiLikelihood) : '';
+
+        return [
+            'human_score' => $humanScore, 'ai_score' => $aiLikelihood, 'suggestions' => $suggestions,
+            'recommendation' => $recommendation, 'badge_type' => $badgeType,
+            'google_search_url' => 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human',
+            'scoring_method' => $scoringMethod,
+        ];
+    }
+
+    public function checkSnippet(Request $request): JsonResponse
+    {
+        $validated = $request->validate(['text' => 'required|string|min:50|max:10000']);
+        $humanizerData = $this->getHumanizerDataForText($validated['text']);
+        return response()->json($humanizerData);
+    }
+
+
+    //======================================================================
+    // ORIGINAL ANALYZER LOGIC
+    //======================================================================
+     private function checkAndLog(Request $request, string $tool): bool|JsonResponse
     {
         if (!Auth::check()) return true;
 
@@ -41,108 +178,56 @@ class AnalyzerController extends Controller
 
         return true;
     }
-
-    /**
-     * Calculates dynamic SEO scores based on parsed page data.
-     * @param array $data Parsed data from the URL.
-     * @return array An array containing overall_score and categories.
-     */
+    
     private function calculateScores(array $data): array
     {
         $scores = [];
         $contentStructure = $data['content_structure'] ?? [];
         $pageSignals = $data['page_signals'] ?? [];
         $quickStats = $data['quick_stats'] ?? [];
-
-        // 1. Title Score (Weight: 15)
         $titleLength = isset($contentStructure['title']) ? mb_strlen($contentStructure['title']) : 0;
-        if ($titleLength >= 50 && $titleLength <= 65) {
-            $scores['title'] = 100;
-        } elseif ($titleLength > 0) {
-            $scores['title'] = 60;
-        } else {
-            $scores['title'] = 10;
-        }
-
-        // 2. Meta Description Score (Weight: 10)
+        if ($titleLength >= 50 && $titleLength <= 65) $scores['title'] = 100;
+        elseif ($titleLength > 0) $scores['title'] = 60;
+        else $scores['title'] = 10;
         $metaLength = isset($contentStructure['meta_description']) ? mb_strlen($contentStructure['meta_description']) : 0;
-        if ($metaLength >= 120 && $metaLength <= 160) {
-            $scores['meta'] = 100;
-        } elseif ($metaLength > 0) {
-            $scores['meta'] = 60;
-        } else {
-            $scores['meta'] = 10;
-        }
-
-        // 3. Headings Score (Weight: 20)
+        if ($metaLength >= 120 && $metaLength <= 160) $scores['meta'] = 100;
+        elseif ($metaLength > 0) $scores['meta'] = 60;
+        else $scores['meta'] = 10;
         $h1Count = isset($contentStructure['headings']['H1']) ? count($contentStructure['headings']['H1']) : 0;
         $h2Count = isset($contentStructure['headings']['H2']) ? count($contentStructure['headings']['H2']) : 0;
         $h1Score = ($h1Count === 1) ? 100 : (($h1Count > 1) ? 20 : 10);
         $h2Score = min(100, $h2Count * 15);
         $scores['headings'] = ($h1Score * 0.6) + ($h2Score * 0.4);
-
-        // 4. Internal Links Score (Weight: 15)
         $internalLinks = $quickStats['internal_links'] ?? 0;
         $scores['internal_links'] = min(100, $internalLinks * 8);
-
-        // 5. Technical SEO Score (Weight: 20)
         $canonicalScore = !empty($pageSignals['canonical']) ? 100 : 20;
         $viewportScore = !empty($pageSignals['has_viewport']) ? 100 : 20;
         $robotsContent = $pageSignals['robots'] ?? '';
         $robotsScore = (stripos($robotsContent, 'noindex') === false) ? 100 : 10;
         $scores['technical'] = ($canonicalScore + $viewportScore + $robotsScore) / 3;
-
-        // 6. Image Alt Text Score (Weight: 10)
         $totalImages = $quickStats['total_images'] ?? 0;
         $imagesWithAlt = $quickStats['images_alt_count'] ?? 0;
         $scores['alt_text'] = ($totalImages > 0) ? round(($imagesWithAlt / $totalImages) * 100) : 100;
-
-        // Calculate weighted average for overall score
-        $weights = [
-            'title' => 15, 'meta' => 10, 'headings' => 20,
-            'internal_links' => 15, 'technical' => 20, 'alt_text' => 10,
-        ];
-        
+        $weights = ['title' => 15, 'meta' => 10, 'headings' => 20, 'internal_links' => 15, 'technical' => 20, 'alt_text' => 10];
         $totalScore = 0;
         $totalWeight = array_sum($weights);
         foreach ($scores as $key => $score) {
             $totalScore += $score * ($weights[$key] ?? 0);
         }
         $overallScore = ($totalWeight > 0) ? round($totalScore / $totalWeight) : 0;
-
-        // Define categories based on individual scores
         $contentKeywordsScore = round(($scores['title'] + $scores['meta'] + $scores['headings']) / 3);
         $contentQualityScore = round(($scores['internal_links'] + $scores['alt_text'] + $scores['technical']) / 3);
-
-        return [
-            'overall_score' => (int) $overallScore,
-            'categories' => [
-                ['name' => 'Content & Keywords', 'score' => (int)$contentKeywordsScore],
-                ['name' => 'Content Quality', 'score' => (int)$contentQualityScore]
-            ]
-        ];
+        return ['overall_score' => (int) $overallScore, 'categories' => [['name' => 'Content & Keywords', 'score' => (int)$contentKeywordsScore], ['name' => 'Content Quality', 'score' => (int)$contentQualityScore]]];
     }
 
-    /**
-     * Extracts clean text content from a DOMXPath object.
-     * @param DOMXPath $xpath The DOMXPath object of the page.
-     * @return string The clean text content.
-     */
     private function extractTextFromDom(DOMXPath $xpath): string
     {
-        // Remove script and style tags to avoid including their content
         foreach ($xpath->query('//script | //style') as $node) {
             $node->parentNode->removeChild($node);
         }
-
         $bodyNode = $xpath->query('//body')->item(0);
-        if (!$bodyNode) {
-            return '';
-        }
-        
-        // Get text content and normalize whitespace
-        $textContent = $bodyNode->textContent;
-        return trim(preg_replace('/\s+/', ' ', $textContent));
+        if (!$bodyNode) return '';
+        return trim(preg_replace('/\s+/', ' ', $bodyNode->textContent));
     }
 
     public function semanticAnalyze(Request $request): JsonResponse
@@ -150,25 +235,22 @@ class AnalyzerController extends Controller
         try {
             $validated = $request->validate(['url' => ['required', 'url']]);
             $urlToAnalyze = $validated['url'];
-
             $response = Http::timeout(20)->get($urlToAnalyze);
             if ($response->failed()) {
                 return response()->json(['error' => "Failed to fetch URL. Status: {$response->status()}"], 400);
             }
-
             $html = $response->body();
             $dom = new DOMDocument();
             libxml_use_internal_errors(true);
             @$dom->loadHTML($html);
             libxml_clear_errors();
             $xpath = new DOMXPath($dom);
-            
             $textContent = $this->extractTextFromDom($xpath);
             
-            // Get all humanizer data from the new dedicated controller
-            $humanizerData = AiReadabilityController::getHumanizerDataForText($textContent);
-            $readabilityData = ['score' => $humanizerData['human_score']]; // For compatibility with other parts
-
+            // This now calls the method within this same class
+            $humanizerData = $this->getHumanizerDataForText($textContent);
+            
+            $readabilityData = ['score' => $humanizerData['human_score']];
             $contentStructure = [];
             $contentStructure['title'] = optional($xpath->query('//title')->item(0))->textContent;
             $contentStructure['meta_description'] = optional($xpath->query("//meta[@name='description']/@content")->item(0))->nodeValue;
@@ -179,12 +261,10 @@ class AnalyzerController extends Controller
                 $contentStructure['headings'][$tagUpper] = [];
                 foreach ($headings as $heading) { $contentStructure['headings'][$tagUpper][] = trim($heading->textContent); }
             }
-            
             $pageSignals = [];
             $pageSignals['canonical'] = optional($xpath->query("//link[@rel='canonical']/@href")->item(0))->nodeValue;
             $pageSignals['robots'] = optional($xpath->query("//meta[@name='robots']/@content")->item(0))->nodeValue;
             $pageSignals['has_viewport'] = $xpath->query("//meta[@name='viewport']")->length > 0;
-
             $quickStats = [];
             $links = $dom->getElementsByTagName('a');
             $internalLinks = 0; $externalLinks = 0;
@@ -197,7 +277,6 @@ class AnalyzerController extends Controller
             }
             $quickStats['internal_links'] = $internalLinks;
             $quickStats['external_links'] = $externalLinks;
-
             $images = $dom->getElementsByTagName('img');
             $imagesAltCount = 0;
             foreach ($images as $image) {
@@ -207,33 +286,25 @@ class AnalyzerController extends Controller
             }
             $quickStats['total_images'] = $images->length;
             $quickStats['images_alt_count'] = $imagesAltCount;
-            
-            $parsedData = [
-                'content_structure' => $contentStructure,
-                'page_signals' => $pageSignals,
-                'quick_stats' => $quickStats,
-            ];
-
+            $parsedData = ['content_structure' => $contentStructure, 'page_signals' => $pageSignals, 'quick_stats' => $quickStats];
             $scores = $this->calculateScores($parsedData);
 
             return response()->json([
                 'overall_score' => $scores['overall_score'],
                 'readability' => $readabilityData,
-                'humanizer' => $humanizerData, // Use the data from the new controller
+                'humanizer' => $humanizerData,
                 'categories' => $scores['categories'],
                 'content_structure' => $contentStructure,
                 'page_signals' => $pageSignals,
                 'quick_stats' => $quickStats,
                 'images_alt_count' => $imagesAltCount,
             ]);
-            
         } catch (\Exception $e) {
-            Log::error('Local HTML Parsing Failed', ['message' => $e->getMessage()]);
-            return response()->json(['error' => "Could not parse the URL's HTML.", 'detail' => $e->getMessage()], 500);
+            Log::error('Semantic Analyze Failed', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['error' => "A critical error occurred during analysis.", 'detail' => $e->getMessage()], 500);
         }
     }
-
-
+    
     public function handleOpenAiRequest(Request $request): JsonResponse
     {
         $validTasks = [
