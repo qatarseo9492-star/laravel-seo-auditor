@@ -16,7 +16,6 @@ use App\Support\Logs\UsageLogger;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
-use App\Http\Controllers\AiReadabilityController; // Import the new controller
 
 class AnalyzerController extends Controller
 {
@@ -165,8 +164,8 @@ class AnalyzerController extends Controller
             
             $textContent = $this->extractTextFromDom($xpath);
             
-            // Get all humanizer data from the new dedicated controller
-            $humanizerData = AiReadabilityController::getHumanizerDataForText($textContent);
+            // Get all humanizer data from the new dedicated controller using its fully qualified name
+            $humanizerData = \App\Http\Controllers\AiReadabilityController::getHumanizerDataForText($textContent);
             $readabilityData = ['score' => $humanizerData['human_score']]; // For compatibility with other parts
 
             $contentStructure = [];
