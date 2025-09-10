@@ -347,7 +347,7 @@ class AnalyzerController extends Controller
         $suggestions = '';
         
         // Only get suggestions if the score is not perfect
-        if ($humanScore < 95) { // Broaden the suggestion threshold
+        if ($humanScore < 80) {
             $suggestions = $this->getHumanizeSuggestions($text, $aiLikelihood);
         }
 
@@ -355,13 +355,13 @@ class AnalyzerController extends Controller
         $badgeType = 'success';
 
         if ($humanScore < 60) {
-            $recommendation = 'This content has a high probability of being AI-generated. We strongly recommend rewriting it for better engagement and authenticity.';
+            $recommendation = 'This content seems robotic. We strongly advise a rewrite to improve authenticity and connect with your audience.';
             $badgeType = 'danger';
         } elseif ($humanScore < 80) {
-            $recommendation = 'This content could be more engaging. Use the suggestions below to make it sound more human.';
+            $recommendation = 'This content could be more engaging. Please review the AI suggestions to make it sound more human.';
             $badgeType = 'warning';
         } else {
-            $recommendation = 'Great job! This content reads like it was written by a human.';
+            $recommendation = 'Great work! This content is well-written and reads like it was crafted by a human.';
             $badgeType = 'success';
         }
 
@@ -398,21 +398,13 @@ class AnalyzerController extends Controller
             // Extract text for analysis
             $textContent = $this->extractTextFromDom($xpath);
             
-            // This is the primary method for scoring. It relies on a configured OpenAI API Key.
             $aiLikelihood = $this->getAiLikelihood($textContent);
-            
             $readabilityData = $this->analyzeReadability($textContent);
             $humanScore = 0;
 
             if ($aiLikelihood !== -1) {
-                // Primary method: Use the AI score if the API call was successful.
                 $humanScore = 100 - $aiLikelihood;
             } else {
-                // Fallback method: If the API fails or is not configured, use local readability analysis.
-                // This provides a helpful estimate but is less accurate than the AI check.
-                // The Flesch score (0-100) is mapped to our Human Score.
-                // A score of 100 is very easy to read, 65 is standard, 30 is difficult.
-                // This formula scales the result to provide a more intuitive "human-like" score.
                 $humanScore = (int) max(0, min(100, round(40 + ($readabilityData['score'] * 0.6))));
                 $aiLikelihood = 100 - $humanScore;
             }
@@ -420,17 +412,17 @@ class AnalyzerController extends Controller
             // Generate humanizer recommendations based on the score
             $humanizerData = [];
             if ($humanScore < 60) {
-                $humanizerData['recommendation'] = 'This content has a high probability of being AI-generated. We strongly recommend rewriting it for better engagement and authenticity.';
+                $humanizerData['recommendation'] = 'This content seems robotic. We strongly advise a rewrite to improve authenticity and connect with your audience.';
                 $humanizerData['badge_type'] = 'danger';
             } elseif ($humanScore < 80) {
-                $humanizerData['recommendation'] = 'This content could be more engaging. Use the suggestions below to make it sound more human.';
+                $humanizerData['recommendation'] = 'This content could be more engaging. Please review the AI suggestions to make it sound more human.';
                 $humanizerData['badge_type'] = 'warning';
             } else {
-                $humanizerData['recommendation'] = 'Great job! This content reads like it was written by a human.';
+                $humanizerData['recommendation'] = 'Great work! This content is well-written and reads like it was crafted by a human.';
                 $humanizerData['badge_type'] = 'success';
             }
-            // Only fetch suggestions if the score isn't perfect and the AI check was the source.
-            $humanizerData['suggestions'] = ($humanScore < 95 && $aiLikelihood !== -1) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
+
+            $humanizerData['suggestions'] = ($humanScore < 80 && $aiLikelihood !== -1) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
             $humanizerData['google_search_url'] = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
 
 
@@ -579,82 +571,79 @@ class AnalyzerController extends Controller
         $prompt = $validatedData['prompt'] ?? '';
         $url = $validatedData['url'];
 
-        // This instruction is now part of the system message for all tasks.
-        $systemMessage = "You are a world-class Semantic SEO expert. Analyze the content from the provided URL. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format. IMPORTANT: Detect the primary language of the content on the URL and write your entire response in that same language.";
+        $systemMessage = "You are a world-class Semantic SEO expert. Analyze the content from the provided URL. Your responses must be accurate, concise, and directly actionable. Respond only with the requested format. IMPORTANT: Detect the primary language of the content on the URL (e.g., English, Arabic, Portuguese) and write your entire response in that same language.";
         $userMessage = "";
-        $multilingualInstruction = "IMPORTANT: Detect the primary language of the content on the URL and write your entire response in that same language.";
 
 
         switch ($task) {
             case 'brief':
-                $userMessage = "Generate a semantic content brief for the primary keyword: '{$prompt}'. Include a suggested H1, a meta description (155 chars max), 3-5 LSI keywords, and 3-5 FAQs. Target URL for context: {$url}. {$multilingualInstruction}";
+                $userMessage = "Generate a semantic content brief for the primary keyword: '{$prompt}'. Include a suggested H1, a meta description (155 chars max), 3-5 LSI keywords, and 3-5 FAQs. Target URL for context: {$url}.";
                 break;
             case 'suggestions':
-                $userMessage = "Analyze the content at '{$url}'. Provide the top 3-5 most impactful recommendations to improve its semantic relevance and user engagement. {$multilingualInstruction}";
+                $userMessage = "Analyze the content at '{$url}'. Provide the top 3-5 most impactful recommendations to improve its semantic relevance and user engagement.";
                 break;
             case 'competitor':
-                $userMessage = "Analyze the user's page at '{$url}' against a competitor at '{$prompt}'. Identify the top 3-5 semantic strategy gaps on the user's page. What topics, entities, or questions does the competitor cover that the user is missing? {$multilingualInstruction}";
+                $userMessage = "Analyze the user's page at '{$url}' against a competitor at '{$prompt}'. Identify the top 3-5 semantic strategy gaps on the user's page. What topics, entities, or questions does the competitor cover that the user is missing?";
                 break;
             case 'trends':
-                 $userMessage = "Forecast emerging semantic trends for the niche: '{$prompt}'. Identify 3-4 related concepts or questions likely to grow in search importance over the next 6-12 months, using {$url} as context. {$multilingualInstruction}";
+                 $userMessage = "Forecast emerging semantic trends for the niche: '{$prompt}'. Identify 3-4 related concepts or questions likely to grow in search importance over the next 6-12 months, using {$url} as context.";
                  break;
             case 'technical_seo':
-                $userMessage = "Analyze technical SEO of {$url}. Return valid JSON: {'score': int, 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map': '<ul><li>...</li></ul>', 'suggestions':[{'text','type':'good'|'warn'|'bad'}]}. {$multilingualInstruction}";
+                $userMessage = "Analyze technical SEO of {$url}. Return valid JSON: {'score': int, 'internal_linking':[{'text','anchor'}], 'url_structure':{'clarity_score','suggestion'}, 'meta_optimization':{'title','description'}, 'alt_text_suggestions':[{'image_src','suggestion'}], 'site_structure_map': '<ul><li>...</li></ul>', 'suggestions':[{'text','type':'good'|'warn'|'bad'}]}.";
                 break;
             case 'keyword_intelligence':
-                $userMessage = "Analyze keywords for {$url}. Return valid JSON: {'semantic_research':[string], 'intent_classification':[{'keyword','intent'}], 'related_terms':[string], 'competitor_gaps':[string], 'long_tail_suggestions':[string]}. {$multilingualInstruction}";
+                $userMessage = "Analyze keywords for {$url}. Return valid JSON: {'semantic_research':[string], 'intent_classification':[{'keyword','intent'}], 'related_terms':[string], 'competitor_gaps':[string], 'long_tail_suggestions':[string]}.";
                 break;
             case 'content_engine':
-                $userMessage = "Analyze content at {$url}. Return valid JSON: {'score': int, 'topic_clusters':[string], 'entities':[{'term','type'}], 'semantic_keywords':[string], 'relevance_score': int, 'context_intent': string}. {$multilingualInstruction}";
+                $userMessage = "Analyze content at {$url}. Return valid JSON: {'score': int, 'topic_clusters':[string], 'entities':[{'term','type'}], 'semantic_keywords':[string], 'relevance_score': int, 'context_intent': string}.";
                 break;
-            // NEW PROMPTS FOR UPGRADED FEATURES WITH MULTILINGUAL SUPPORT
             case 'topic_coverage':
-                $userMessage = "For the content at {$url}, extract the main entities/subtopics. List the top 5-7 entities that are clearly missing compared to what a top-ranking page for this topic should have. For each missing entity, write 1-2 sentences explaining why it's important to add. {$multilingualInstruction}";
+                $userMessage = "For the content at {$url}, extract the main entities/subtopics. List the top 5-7 entities that are clearly missing compared to what a top-ranking page for this topic should have. For each missing entity, write 1-2 sentences explaining why it's important to add.";
                 break;
             case 'intent_alignment':
-                $userMessage = "Analyze the search intent (Informational, Commercial, Transactional, Navigational) for the likely query that leads to {$url}. Then, analyze the tone of the page's introduction, body, and conclusion. Flag any sections that misalign with the primary user intent and suggest a brief fix. Example: 'Intro is commercial; query is informational → add a clear definition first.' {$multilingualInstruction}";
+                $userMessage = "Analyze the search intent (Informational, Commercial, Transactional, Navigational) for the likely query that leads to {$url}. Then, analyze the tone of the page's introduction, body, and conclusion. Flag any sections that misalign with the primary user intent and suggest a brief fix. Example: 'Intro is commercial; query is informational → add a clear definition first.'";
                 break;
             case 'snippet_readiness':
-                $userMessage = "Analyze the content at {$url} for Featured Snippet readiness. Check for a concise 40-60 word definition block (like a 'What is...' section), a numbered list for steps, or a simple bulleted list. If missing, generate a ready-to-paste, optimized 50-word definition block based on the content. {$multilingualInstruction}";
+                $userMessage = "Analyze the content at {$url} for Featured Snippet readiness. Check for a concise 40-60 word definition block (like a 'What is...' section), a numbered list for steps, or a simple bulleted list. If missing, generate a ready-to-paste, optimized 50-word definition block based on the content.";
                 break;
             case 'question_mining':
-                $userMessage = "Based on the topic of the content at {$url}, suggest 3-5 highly relevant, unanswered questions that would make excellent H2/H3 sections. Source ideas from 'People Also Ask' and common forum questions for this topic. Output as a list of questions. {$multilingualInstruction}";
+                $userMessage = "Based on the topic of the content at {$url}, suggest 3-5 highly relevant, unanswered questions that would make excellent H2/H3 sections. Source ideas from 'People Also Ask' and common forum questions for this topic. Output as a list of questions.";
                 break;
             case 'heading_hierarchy':
-                $userMessage = "Audit the heading hierarchy (H1-H4) of the page at {$url}. Check for a single H1, logical H2->H3 flow, and thin H2 sections (under 120 words). Provide a single, most important recommendation for improvement. E.g., 'H2 'Setup' is too thin; expand it with bullet points.' {$multilingualInstruction}";
+                $userMessage = "Audit the heading hierarchy (H1-H4) of the page at {$url}. Check for a single H1, logical H2->H3 flow, and thin H2 sections (under 120 words). Provide a single, most important recommendation for improvement. E.g., 'H2 'Setup' is too thin; expand it with bullet points.'";
                 break;
             case 'readability_simplification':
-                $userMessage = "Analyze the content at {$url}. Identify the single most complex or difficult-to-read paragraph. Provide a one-click 'simplified' rewrite of that paragraph, aiming for a Grade 7-9 reading level, reducing passive voice and sentence length. Output as plain text, starting with 'Original:' and then 'Simplified:'. {$multilingualInstruction}";
+                $userMessage = "Analyze the content at {$url}. Identify the single most complex or difficult-to-read paragraph. Provide a one-click 'simplified' rewrite of that paragraph, aiming for a Grade 7-9 reading level, reducing passive voice and sentence length. Output as plain text, starting with 'Original:' and then 'Simplified:'.";
                 break;
             case 'semantic_variants':
-                $userMessage = "Analyze the content at {$url}. Detect the primary keyword. If it's over-optimized (stuffed), suggest reducing its density. Then, suggest 5-7 semantic variants or LSI keywords that are missing and should be naturally integrated. {$multilingualInstruction}";
+                $userMessage = "Analyze the content at {$url}. Detect the primary keyword. If it's over-optimized (stuffed), suggest reducing its density. Then, suggest 5-7 semantic variants or LSI keywords that are missing and should be naturally integrated.";
                 break;
             case 'eeat_signals':
-                $userMessage = "Check the page at {$url} for E-E-A-T signals. Look for an author byline, author bio, last updated date, and outbound citations to authoritative sources. List which of these four signals are present and which are missing. For missing signals, suggest a specific fix, like 'Add a 'Last Updated' timestamp.' Output as a list. {$multilingualInstruction}";
+                $userMessage = "Check the page at {$url} for E-E-A-T signals. Look for an author byline, author bio, last updated date, and outbound citations to authoritative sources. List which of these four signals are present and which are missing. For missing signals, suggest a specific fix, like 'Add a 'Last Updated' timestamp.' Output as a list.";
                 break;
             case 'internal_links':
-                $userMessage = "Analyze the content at {$url}. Suggest 3-5 specific internal link opportunities from this page to other relevant pages that would likely exist on the same website. For each, provide the suggested anchor text. Output as a list. {$multilingualInstruction}";
+                $userMessage = "Analyze the content at {$url}. Suggest 3-5 specific internal link opportunities from this page to other relevant pages that would likely exist on the same website. For each, provide the suggested anchor text. Output as a list.";
                 break;
             case 'title_meta_rewrite':
-                $userMessage = "Analyze the title and meta description for {$url}. Generate 3 improved, CTR-aware options for the title and meta description. The response must be valid JSON: {'suggestions': [{'title': string (max 60 chars), 'meta': string (max 155 chars)}, {'title': string, 'meta': string}, {'title': string, 'meta': string}]}. {$multilingualInstruction}";
+                $userMessage = "Analyze the title and meta description for {$url}. Generate 3 improved, CTR-aware options for the title and meta description. The response must be valid JSON: {'suggestions': [{'title': string (max 60 chars), 'meta': string (max 155 chars)}, {'title': string, 'meta': string}, {'title': string, 'meta': string}]}.";
                 break;
             case 'image_seo':
-                $userMessage = "Analyze the image SEO for {$url}. Check for a hero image, alt text quality, and oversized images. Provide a JSON response: {'hero_image_present': boolean, 'alt_text_suggestions': [{'image_src': string, 'suggestion': 'A descriptive alt text suggestion'}], 'optimization_targets': [{'image_src': string, 'suggestion': 'Convert to WebP and resize to 800px width.'}]}. Limit suggestions to the top 3 most important images. {$multilingualInstruction}";
+                $userMessage = "Analyze the image SEO for {$url}. Check for a hero image, alt text quality, and oversized images. Provide a JSON response: {'hero_image_present': boolean, 'alt_text_suggestions': [{'image_src': string, 'suggestion': 'A descriptive alt text suggestion'}], 'optimization_targets': [{'image_src': string, 'suggestion': 'Convert to WebP and resize to 800px width.'}]}. Limit suggestions to the top 3 most important images.";
                 break;
             case 'tables_checklists':
-                $userMessage = "Analyze the content at {$url}. Determine if the topic would benefit from a data table, checklist, or side-by-side comparison. If so, auto-draft a simple, ready-to-paste HTML block for a comparison table or a checklist based on the content. If not needed, state that. Output as plain text (with HTML if applicable). {$multilingualInstruction}";
+                $userMessage = "Analyze the content at {$url}. Determine if the topic would benefit from a data table, checklist, or side-by-side comparison. If so, auto-draft a simple, ready-to-paste HTML block for a comparison table or a checklist based on the content. If not needed, state that. Output as plain text (with HTML if applicable).";
                 break;
             case 'schema_picker':
-                $userMessage = "Analyze the content at {$url} and determine the most appropriate and impactful Schema.org type (e.g., Article, FAQPage, HowTo, Product). Provide a valid, ready-to-paste JSON-LD script for that schema, populated with details from the page. The response must be valid JSON: {'schema_type': string, 'json_ld': { ... }}. {$multilingualInstruction}";
+                $userMessage = "Analyze the content at {$url} and determine the most appropriate and impactful Schema.org type (e.g., Article, FAQPage, HowTo, Product). Provide a valid, ready-to-paste JSON-LD script for that schema, populated with details from the page. The response must be valid JSON: {'schema_type': string, 'json_ld': { ... }}.";
                 break;
             case 'content_freshness':
-                $userMessage = "Scan the content at {$url} for signs of being outdated. Look for old years (e.g., 'in 2022'), outdated version numbers, or references to old UI/events. Highlight the top 2-3 most stale elements and suggest an update. Output as a list. {$multilingualInstruction}";
+                $userMessage = "Scan the content at {$url} for signs of being outdated. Look for old years (e.g., 'in 2022'), outdated version numbers, or references to old UI/events. Highlight the top 2-3 most stale elements and suggest an update. Output as a list.";
                 break;
             case 'cannibalization_check':
-                $userMessage = "Assume you are analyzing the entire website that {$url} belongs to. Based on the primary keyword/intent of this page, identify 1-2 other potential keywords that could cause content cannibalization if separate pages were created for them. Recommend either consolidating them into this page or creating a distinct angle. {$multilingualInstruction}";
+                $userMessage = "Assume you are analyzing the entire website that {$url} belongs to. Based on the primary keyword/intent of this page, identify 1-2 other potential keywords that could cause content cannibalization if separate pages were created for them. Recommend either consolidating them into this page or creating a distinct angle.";
                 break;
             case 'ux_impact':
-                $userMessage = "Analyze the content structure at {$url} from a UX perspective that impacts rankings. Check for a clear hero element (likely LCP), the potential for CLS from late-loading images or ads within the article body, and the presence of heavy widgets that could increase INP. Provide one key recommendation. {$multilingualInstruction}";
+                $userMessage = "Analyze the content structure at {$url} from a UX perspective that impacts rankings. Check for a clear hero element (likely LCP), the potential for CLS from late-loading images or ads within the article body, and the presence of heavy widgets that could increase INP. Provide one key recommendation.";
                 break;
         }
 
