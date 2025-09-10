@@ -96,7 +96,7 @@
     
     /* Colors are now set by modifier classes below */
     --liquid-color: var(--red-1); /* Default to red */
-    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%23FF4500"></path></svg>');
+    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%23FF4500"></path></svg>');
     
     width: var(--size);
     height: var(--size);
@@ -107,38 +107,47 @@
   /* Modifier classes for different score bands */
   .score-wheel-pro--good {
     --liquid-color: var(--green-1);
-    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%2300FF8A"></path></svg>');
+    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%2300FF8A"></path></svg>');
   }
   .score-wheel-pro--warn {
     --liquid-color: var(--orange-1);
-    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%23FFA500"></path></svg>');
+    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%23FFA500"></path></svg>');
   }
    .score-wheel-pro--bad {
     --liquid-color: var(--red-1);
-    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%23FF4500"></path></svg>');
+    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%23FF4500"></path></svg>');
   }
 
-  /* 1. The outer rainbow ring */
+  /* 1. The outer rainbow ring (thin inner line) */
   .score-wheel-pro::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    padding: 3px; /* Creates gap for the border */
+    padding: 3px; 
     background: conic-gradient(from 0deg, 
-      var(--blue-1), 
-      var(--green-1), 
-      var(--yellow-1), 
-      var(--orange-1), 
-      var(--red-1), 
-      var(--pink-1), 
-      var(--purple-1), 
-      var(--blue-1));
+      var(--blue-1), var(--green-1), var(--yellow-1), var(--orange-1), 
+      var(--red-1), var(--pink-1), var(--purple-1), var(--blue-1));
     -webkit-mask: 
       linear-gradient(#fff 0 0) content-box, 
       linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
+    animation: spin 8s linear infinite;
+    z-index: 5;
+  }
+
+  /* NEW: Outer thick multicolor glow */
+  .score-wheel-pro::after {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, 
+      var(--blue-1), var(--green-1), var(--yellow-1), var(--orange-1), 
+      var(--red-1), var(--pink-1), var(--purple-1), var(--blue-1));
+    filter: blur(15px);
+    z-index: -1;
     animation: spin 8s linear infinite;
   }
 
@@ -149,8 +158,8 @@
     border-radius: 50%;
     background: #282828;
     box-shadow: 
-      inset 0 4px 10px rgba(0,0,0,0.7), /* Inner shadow for depth */
-      0 1px 1px rgba(255,255,255,0.1); /* Top highlight */
+      inset 0 4px 10px rgba(0,0,0,0.7), 
+      0 1px 1px rgba(255,255,255,0.1); 
   }
 
   /* 3. The main content area (liquid container) */
@@ -165,21 +174,19 @@
     justify-content: center;
   }
 
-  /* 4. The percentage value text */
+  /* 4. The percentage value text - NOW MULTICOLOR */
   .score-wheel-pro__value {
     font-size: calc(var(--size) * 0.25);
     font-weight: 900;
-    color: #FFF; /* Text color is now always white */
-    text-shadow: 0 0 8px var(--liquid-color), 0 0 16px var(--liquid-color); /* Shadow uses liquid color */
     position: relative;
     z-index: 10;
     line-height: 1;
-    transition: text-shadow 0.5s ease;
   }
   .score-wheel-pro__value::after {
       content: '%';
       font-size: 0.5em;
       margin-left: 2px;
+      /* Inherits gradient from parent */
   }
 
   /* 5. The liquid fill and wave effect */
@@ -191,8 +198,21 @@
     height: var(--progress-percent);
     background: var(--liquid-color);
     transition: height 0.8s cubic-bezier(0.6, 0, 0.4, 1), background 0.5s ease;
+    filter: brightness(1.1); /* Make liquid pop more */
   }
   
+  /* NEW: Realistic water sheen */
+   .score-wheel-pro__liquid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent 60%);
+    opacity: 0.6;
+   }
+
   /* Bubbles effect to mimic original image */
   .score-wheel-pro__liquid::after {
     content: '';
@@ -216,6 +236,18 @@
     background-repeat: repeat-x;
     background-size: 50% 100%;
     animation: wave-flow 3s linear infinite;
+  }
+  
+  /* NEW: Top highlight on the wave */
+  .score-wheel-pro__wave::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.5);
+    filter: blur(1px);
   }
 
   .score-wheel-pro__wave--back {
@@ -879,6 +911,8 @@
             danger: '❗'
         };
         
+        const band = bandName(human_score);
+
         let suggestionsHtml = '';
         if (badge_type !== 'success' && suggestions) {
             // Sanitize suggestions to prevent HTML injection
@@ -898,11 +932,11 @@
         }
 
         humanizerResult.innerHTML = `
-            <div class="score-wheel-pro score-wheel-pro--sm" style="--v:${human_score};">
+            <div class="score-wheel-pro score-wheel-pro--sm score-wheel-pro--${band}" style="--v:${human_score};">
                 <div class="score-wheel-pro__bezel"></div>
                 <div class="score-wheel-pro__content">
-                    <div class="score-wheel-pro__value">${human_score}</div>
-                    <div class="score-wheel-pro__liquid" style="height: ${human_score}%;">
+                    <div class="score-wheel-pro__value t-grad">${human_score}</div>
+                    <div class="score-wheel-pro__liquid">
                         <div class="score-wheel-pro__wave"></div>
                         <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
                     </div>
@@ -1178,7 +1212,7 @@
       <div class="score-wheel-pro" id="mw" style="--v:0;">
         <div class="score-wheel-pro__bezel"></div>
         <div class="score-wheel-pro__content">
-            <div class="score-wheel-pro__value">0</div>
+            <div class="score-wheel-pro__value t-grad">0</div>
             <div class="score-wheel-pro__liquid">
                 <div class="score-wheel-pro__wave"></div>
                 <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
@@ -1241,7 +1275,7 @@
                 <div class="score-wheel-pro score-wheel-pro--sm" style="--v:0;">
                     <div class="score-wheel-pro__bezel"></div>
                     <div class="score-wheel-pro__content">
-                        <div class="score-wheel-pro__value">0</div>
+                        <div class="score-wheel-pro__value t-grad">0</div>
                         <div class="score-wheel-pro__liquid">
                             <div class="score-wheel-pro__wave"></div>
                             <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
@@ -1265,7 +1299,7 @@
         <div class="score-wheel-pro score-wheel-pro--sm" id="mwCAE" style="--v:0;">
             <div class="score-wheel-pro__bezel"></div>
             <div class="score-wheel-pro__content">
-                <div class="score-wheel-pro__value">0</div>
+                <div class="score-wheel-pro__value t-grad">0</div>
                 <div class="score-wheel-pro__liquid">
                     <div class="score-wheel-pro__wave"></div>
                     <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
@@ -1298,7 +1332,7 @@
             <div class="score-wheel-pro score-wheel-pro--sm" id="mwTSI" style="--v:0;">
                 <div class="score-wheel-pro__bezel"></div>
                 <div class="score-wheel-pro__content">
-                    <div class="score-wheel-pro__value">0</div>
+                    <div class="score-wheel-pro__value t-grad">0</div>
                     <div class="score-wheel-pro__liquid">
                         <div class="score-wheel-pro__wave"></div>
                         <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
@@ -1408,7 +1442,7 @@
                 <div id="mobileScoreWheel" class="score-wheel-pro score-wheel-pro--xs" style="--v:0;">
                     <div class="score-wheel-pro__bezel"></div>
                     <div class="score-wheel-pro__content">
-                        <div class="score-wheel-pro__value">0</div>
+                        <div class="score-wheel-pro__value t-grad">0</div>
                         <div class="score-wheel-pro__liquid">
                             <div class="score-wheel-pro__wave"></div>
                             <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
@@ -1424,7 +1458,7 @@
                 <div id="desktopScoreWheel" class="score-wheel-pro score-wheel-pro--xs" style="--v:0;">
                     <div class="score-wheel-pro__bezel"></div>
                     <div class="score-wheel-pro__content">
-                        <div class="score-wheel-pro__value">0</div>
+                        <div class="score-wheel-pro__value t-grad">0</div>
                         <div class="score-wheel-pro__liquid">
                             <div class="score-wheel-pro__wave"></div>
                             <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
