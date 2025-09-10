@@ -25,7 +25,6 @@
     --red-1:#FF4500;
     --pink-1:#FF1493;
     --purple-1:#8A2BE2;
-    --green-dark: #006400; /* NEW: Darker green for liquid fill */
 
     /* UPGRADED: Unified dark background */
     --unified-bg: linear-gradient(145deg, #0D1120, #111827);
@@ -85,197 +84,91 @@
   .url-row .paste{padding:6px 10px;border-radius:10px;border:1px solid #ffffff26;background:#232323;color:var(--ink)}
 
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
-
-  /* ==================================================================== */
-  /* === 💧 NEW LIQUID RAINBOW SCORE WHEEL (Replaces all old wheels) 💧 === */
-  /* ==================================================================== */
-  .score-wheel-pro {
-    --v: 0; /* The score value, 0-100 */
-    --progress-percent: calc(var(--v) * 1%);
+  
+  /* ==================================================== */
+  /* === 🎨 UPGRADED: 2-COLOR NEON-TECH SCORE WHEELS 🎨 === */
+  /* ==================================================== */
+  .mw {
+    --v: 0;
     --size: 200px;
-    --track-width: 16px;
-    
-    /* Colors are now set by modifier classes below */
-    --liquid-color: var(--red-1); /* Default to red */
-    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%23FF4500"></path></svg>');
-    
+    --track-width: 14px;
+    --progress-percent: calc(var(--v) * 1%);
     width: var(--size);
     height: var(--size);
     position: relative;
-    margin: 0 auto;
+    transition: filter .4s ease;
   }
-
-  /* Modifier classes for different score bands */
-  .score-wheel-pro--good {
-    --liquid-color: var(--green-dark);
-    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%2300FF8A"></path></svg>');
-  }
-  .score-wheel-pro--warn {
-    --liquid-color: var(--orange-1);
-    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%23FFA500"></path></svg>');
-  }
-   .score-wheel-pro--bad {
-    --liquid-color: var(--red-1);
-    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%23FF4500"></path></svg>');
-  }
-
-  /* 1. The outer rainbow ring (thin inner line) */
-  .score-wheel-pro::before {
-    content: '';
+  
+  .mw-ring {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    padding: 3px; 
-    background: conic-gradient(from 0deg, 
-      var(--blue-1), var(--green-1), var(--yellow-1), var(--orange-1), 
-      var(--red-1), var(--pink-1), var(--purple-1), var(--blue-1));
-    -webkit-mask: 
-      linear-gradient(#fff 0 0) content-box, 
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    animation: spin 8s linear infinite;
-    z-index: 5;
+    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
+    box-shadow:
+      inset 0 0 4px 1px rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,255,255,0.05);
   }
 
-  /* NEW: Outer thick multicolor glow */
-  .score-wheel-pro::after {
+  .mw-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    
+    /* Default gradient for 'bad' score */
+    --grad-start: var(--red-1);
+    --grad-end: var(--pink-1);
+    background: conic-gradient(from -90deg, var(--grad-start), var(--grad-end));
+    
+    -webkit-mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+    -webkit-mask-composite: source-in;
+     mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+     mask-composite: intersect;
+  }
+  
+  /* Gradient overrides for 'warn' and 'good' scores */
+  .mw.warn .mw-ring::before {
+    --grad-start: var(--yellow-1);
+    --grad-end: var(--orange-1);
+  }
+  .mw.good .mw-ring::before {
+    --grad-start: var(--green-1);
+    --grad-end: var(--blue-1);
+  }
+  
+  .mw-ring::after {
     content: '';
     position: absolute;
-    inset: -10px;
+    inset: calc(var(--track-width) - 4px);
     border-radius: 50%;
-    background: conic-gradient(from 0deg, 
-      var(--blue-1), var(--green-1), var(--yellow-1), var(--orange-1), 
-      var(--red-1), var(--pink-1), var(--purple-1), var(--blue-1));
-    filter: blur(15px);
-    z-index: -1;
-    animation: spin 8s linear infinite;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 70%);
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
   }
 
-  /* 2. The 3D dark inner bezel */
-  .score-wheel-pro__bezel {
+  .mw-center {
     position: absolute;
-    inset: calc(var(--track-width) - 3px);
-    border-radius: 50%;
-    background: #282828;
-    box-shadow: 
-      inset 0 4px 10px rgba(0,0,0,0.7), 
-      0 1px 1px rgba(255,255,255,0.1); 
-  }
-
-  /* 3. The main content area (liquid container) */
-  .score-wheel-pro__content {
-    position: absolute;
-    inset: var(--track-width);
-    border-radius: 50%;
-    background: radial-gradient(120% 120% at 50% 35%, #23242f 0 45%, #171821 65% 100%);
-    box-shadow: 0 8px 28px rgba(0,0,0,.35) inset;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* 4. The percentage value text - NOW MULTICOLOR */
-  .score-wheel-pro__value {
-    font-size: calc(var(--size) * 0.25);
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: calc(var(--size) * 0.24);
     font-weight: 900;
-    position: relative;
-    z-index: 10;
-    line-height: 1;
-  }
-  .score-wheel-pro__value::after {
-      content: '%';
-      font-size: 0.5em;
-      margin-left: 2px;
-      /* Inherits gradient from parent */
-  }
-
-  /* 5. The liquid fill and wave effect */
-  .score-wheel-pro__liquid {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: var(--progress-percent);
-    background: var(--liquid-color);
-    transition: height 0.8s cubic-bezier(0.6, 0, 0.4, 1), background 0.5s ease;
-    filter: brightness(1.1) drop-shadow(0 -4px 10px color-mix(in oklab, var(--liquid-color) 40%, transparent));
+    color: #fff;
+    text-shadow: 0 0 12px rgba(255,255,255,0.3);
   }
   
-  /* NEW: Top highlight/sheen for realism */
-   .score-wheel-pro__liquid::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 14px;
-    background: radial-gradient(60% 100% at 50% 0, rgba(255,255,255,.4), rgba(255,255,255,0) 70%);
-    mix-blend-mode: screen;
-   }
+  .mw.good { filter: drop-shadow(0 0 10px var(--green-1)) drop-shadow(0 0 20px var(--green-1)); }
+  .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)) drop-shadow(0 0 20px var(--orange-1)); }
+  .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)) drop-shadow(0 0 20px var(--red-1)); }
 
-  /* Bubbles effect to mimic original image */
-  .score-wheel-pro__liquid::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: 
-        radial-gradient(circle at 30% 80%, rgba(255,255,255,0.2) 2px, transparent 8px),
-        radial-gradient(circle at 65% 40%, rgba(255,255,255,0.25) 3px, transparent 12px),
-        radial-gradient(circle at 50% 90%, rgba(255,255,255,0.15) 4px, transparent 16px),
-        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.2) 2px, transparent 10px);
-    opacity: 0.8;
-  }
-
-  .score-wheel-pro__wave {
-    position: absolute;
-    top: -10px; /* Wave height */
-    left: 0;
-    width: 200%;
-    height: 10px; /* Wave height */
-    background-image: var(--wave-svg);
-    background-repeat: repeat-x;
-    background-size: 50% 100%;
-    animation: wave-flow 3s linear infinite;
+  .mw-sm {
+    --size: 170px;
+    --track-width: 12px;
   }
   
-  /* NEW: Top highlight on the wave */
-  .score-wheel-pro__wave::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(255, 255, 255, 0.5);
-    filter: blur(1px);
-  }
-
-  .score-wheel-pro__wave--back {
-    animation-duration: 4.5s;
-    animation-direction: reverse;
-    opacity: 0.6;
-  }
-
-  @keyframes wave-flow {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  /* Size Variants */
-  .score-wheel-pro--sm {
-      --size: 160px;
-      --track-width: 12px;
-  }
-  .score-wheel-pro--xs {
-      --size: 60px;
-      --track-width: 6px;
-  }
-  .score-wheel-pro--xs .score-wheel-pro__value { font-size: 18px; }
-
-  /* ========================================================== */
-
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
   .waterbox .fill{
     position:absolute;
@@ -356,6 +249,15 @@
     @media (max-width: 600px) { .speed-grid { grid-template-columns: 1fr; } }
     .speed-device-card { background: #111827; border-radius: 12px; padding: 12px; border: 1px solid #1F2937; }
     .speed-device-header { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .speed-device-score {
+        width: 60px; height: 60px;
+        position: relative;
+    }
+    .speed-device-score-val { position: absolute; inset: 0; display: grid; place-items: center; font-size: 18px; font-weight: 800; }
+    .speed-device-score svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .speed-device-score circle { fill: none; stroke-width: 6; }
+    .speed-device-score .track { stroke: #374151; }
+    .speed-device-score .progress { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
     .speed-device-metrics { display: grid; gap: 8px; font-size: 12px; flex-grow:1; }
     .speed-device-metric { display: flex; justify-content: space-between; align-items: center; }
     .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 12px; padding: 12px; margin-top: 16px; }
@@ -379,7 +281,7 @@
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.08); opacity: 0.85; } }
   
-  .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: center;}
+  .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
   @media (max-width: 920px){.tsi-grid, .cae-grid {grid-template-columns:1fr}}
 
   /* Info Items Grid */
@@ -616,6 +518,78 @@
     gap: 16px;
   }
 
+  /* NEW: Score Wheel for Humanizer */
+  .humanizer-wheel {
+    --v: 0;
+    --size: 160px;
+    --track-width: 12px;
+    --progress-percent: calc(var(--v) * 1%);
+    width: var(--size);
+    height: var(--size);
+    position: relative;
+    animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  }
+  .humanizer-wheel-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
+    box-shadow:
+      inset 0 0 4px 1px rgba(0,0,0,0.8),
+      0 0 0 1px rgba(255,255,255,0.05);
+  }
+  .humanizer-wheel-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0px;
+    border-radius: 50%;
+    /* Multicolor Gradient */
+    background: conic-gradient(from -90deg, 
+      var(--red-1), 
+      var(--orange-1), 
+      var(--yellow-1), 
+      var(--green-1), 
+      var(--blue-1), 
+      var(--purple-1), 
+      var(--red-1));
+    animation: spin 8s linear infinite;
+    -webkit-mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+    -webkit-mask-composite: source-in;
+     mask-image: 
+        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
+        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
+     mask-composite: intersect;
+  }
+  .humanizer-wheel-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .humanizer-wheel-score {
+    font-size: calc(var(--size) * 0.28);
+    font-weight: 900;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(255,255,255,0.3);
+  }
+  .humanizer-wheel-label {
+    font-size: calc(var(--size) * 0.09);
+    font-weight: 700;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+  }
+
+  .humanizer-wheel.good { filter: drop-shadow(0 0 8px var(--green-1)) drop-shadow(0 0 16px var(--green-1)); }
+  .humanizer-wheel.warn { filter: drop-shadow(0 0 8px var(--orange-1)) drop-shadow(0 0 16px var(--orange-1)); }
+  .humanizer-wheel.bad { filter: drop-shadow(0 0 8px var(--red-1)) drop-shadow(0 0 16px var(--red-1)); }
+
   @keyframes badge-pop-in {
     from { transform: scale(0.5) rotate(-15deg); opacity: 0; }
     to { transform: scale(1) rotate(0deg); opacity: 1; }
@@ -758,8 +732,8 @@
     const $ = s=>document.querySelector(s);
 
     /* ============== Element refs (Original + New) ============== */
-    const mw=$('#mw');
-    const overallFill=$('#overallFill'), overallPct=$('#overallPct');
+    const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
+    const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
     const chipOverall=$('#chipOverall'), chipContent=$('#chipContent');
     
     // UI/UX Elements
@@ -781,13 +755,13 @@
           mTips=$('#improveTips'), mLink=$('#improveSearch');
 
     const speedOverviewBar = $('#speedOverviewBar'), speedOverviewText = $('#speedOverviewText');
-    const mobileScoreWheel = $('#mobileScoreWheel');
-    const desktopScoreWheel = $('#desktopScoreWheel');
+    const mobileScoreVal = $('#mobileScoreVal'), mobileScoreCircle = $('#mobileScoreCircle');
+    const desktopScoreVal = $('#desktopScoreVal'), desktopScoreCircle = $('#desktopScoreCircle');
     const mobileLcp = $('#mobileLcp'), mobileInp = $('#mobileInp'), mobileCls = $('#mobileCls');
     const desktopLcp = $('#desktopLcp'), desktopInp = $('#desktopInp'), desktopCls = $('#desktopCls');
     const speedOpportunitiesList = $('#speedOpportunitiesList');
     
-    const mwTSI = $('#mwTSI');
+    const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI');
     const tsiInternalLinks = $('#tsiInternalLinks'), tsiUrlClarityScore = $('#tsiUrlClarityScore');
     const tsiUrlSuggestion = $('#tsiUrlSuggestion'), tsiMetaTitle = $('#tsiMetaTitle');
     const tsiMetaDescription = $('#tsiMetaDescription'), tsiAltTexts = $('#tsiAltTexts');
@@ -797,7 +771,7 @@
     const kiRelatedTerms = $('#kiRelatedTerms'), kiCompetitorGaps = $('#kiCompetitorGaps');
     const kiLongTail = $('#kiLongTail');
 
-    const mwCAE = $('#mwCAE');
+    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
     const caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities');
     const caeKeywords = $('#caeKeywords'), caeRelevanceScore = $('#caeRelevanceScore');
     const caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
@@ -824,7 +798,6 @@
     const showInlineError = (cardSelector, toolName, error) => {
         const card = $(cardSelector);
         let message = error.message || 'An unknown error occurred.';
-
         const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
         if (apiErrorMatch && apiErrorMatch[1]) {
             try {
@@ -838,20 +811,11 @@
         const sanitizedMessage = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         if (card) {
-            const titleHtml = `<h4 class="t-grad">${toolName}</h4>`;
-            const errorHtml = `<div style="padding: 20px; text-align: center; color: var(--red-1);">
-                ${toolName ? titleHtml : ''}
+            card.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--red-1);">
+                <h4 class="t-grad">${toolName}</h4>
                 <p style="color: var(--sub); font-size: 14px; margin-top: 8px;">Analysis Failed</p>
                 <p style="font-size: 12px; margin-top: 4px;">${sanitizedMessage}</p>
             </div>`;
-
-            // For cards that contain a score wheel, we need to replace the parent grid
-            const parentGrid = card.closest('.cae-grid, .tsi-grid');
-            if(parentGrid) {
-                 parentGrid.innerHTML = errorHtml;
-            } else {
-                card.innerHTML = errorHtml;
-            }
         } else {
             showError(`${toolName} analysis failed`, sanitizedMessage);
         }
@@ -898,20 +862,24 @@
         }
     }
     
-    function setWheel(container, score){
-        if (!container) return;
-        const valueEl = container.querySelector('.score-wheel-pro__value');
-        score = Math.round(clamp01(score)); 
-        
-        // Determine score band and apply the correct modifier class
-        const band = bandName(score); // 'good', 'warn', or 'bad'
-        container.classList.remove('score-wheel-pro--good', 'score-wheel-pro--warn', 'score-wheel-pro--bad');
-        container.classList.add(`score-wheel-pro--${band}`);
-
-        container.style.setProperty('--v', score);
-        if (valueEl) {
-            valueEl.textContent = score;
-        }
+    function setWheel(elRing, elNum, container, score, prefix){
+        if (!elRing || !elNum || !container) return;
+        const b=bandName(score);
+        container.classList.remove('good','warn','bad');
+        container.classList.add(b);
+        elRing.style.setProperty('--v',score);
+        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
+    }
+    
+    function setSpeedCircle(circleEl, score) {
+        if (!circleEl) return;
+        const r = circleEl.r.baseVal.value;
+        const circumference = 2 * Math.PI * r;
+        const offset = circumference - (score / 100) * circumference;
+        circleEl.style.strokeDasharray = `${circumference} ${circumference}`;
+        circleEl.style.strokeDashoffset = offset;
+        const color = score >= 80 ? 'var(--green-1)' : score >= 60 ? 'var(--yellow-1)' : 'var(--red-1)';
+        circleEl.style.stroke = color;
     }
     
     function renderHumanizerResult(data) {
@@ -922,9 +890,9 @@
             warning: '⚠️',
             danger: '❗'
         };
-        
-        const band = bandName(human_score);
 
+        const scoreBand = human_score >= 80 ? 'good' : human_score >= 60 ? 'warn' : 'bad';
+        
         let suggestionsHtml = '';
         if (badge_type !== 'success' && suggestions) {
             // Sanitize suggestions to prevent HTML injection
@@ -944,14 +912,11 @@
         }
 
         humanizerResult.innerHTML = `
-            <div class="score-wheel-pro score-wheel-pro--sm score-wheel-pro--${band}" style="--v:${human_score};">
-                <div class="score-wheel-pro__bezel"></div>
-                <div class="score-wheel-pro__content">
-                    <div class="score-wheel-pro__value t-grad">${human_score}</div>
-                    <div class="score-wheel-pro__liquid">
-                        <div class="score-wheel-pro__wave"></div>
-                        <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
-                    </div>
+            <div class="humanizer-wheel ${scoreBand}" style="--v:${human_score};">
+                <div class="humanizer-wheel-ring"></div>
+                <div class="humanizer-wheel-center">
+                    <span class="humanizer-wheel-score t-grad">${human_score}%</span>
+                    <span class="humanizer-wheel-label">Human Score</span>
                 </div>
             </div>
             <div class="humanizer-recommendation-badge ${badge_type}">
@@ -1000,7 +965,7 @@
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
-        setWheel($('#mw'), score);
+        setWheel(mwRing, mwNum, mw, score, '');
         if(overallFill) overallFill.style.width=score+'%';
         if(overallPct) overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
@@ -1041,8 +1006,8 @@
         
         if (tsiData) {
             const tsi = tsiData;
-            setWheel(mwTSI, tsi.score || 0);
-            if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
+            setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
+            if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             if(tsiUrlClarityScore) tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             if(tsiUrlSuggestion) tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
             if(tsiMetaTitle) tsiMetaTitle.textContent = tsi.meta_optimization?.title || 'N/A';
@@ -1063,7 +1028,7 @@
         
         if(caeData) {
             const cae = caeData;
-            setWheel(mwCAE, cae.score || 0);
+            setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
             if(caeTopicClusters) caeTopicClusters.innerHTML = (cae.topic_clusters||[]).map(t => `<span class="chip">${t}</span>`).join('');
             if(caeEntities) caeEntities.innerHTML = (cae.entities||[]).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
             if(caeKeywords) caeKeywords.innerHTML = (cae.semantic_keywords||[]).map(k => `<span class="chip">${k}</span>`).join('');
@@ -1083,10 +1048,10 @@
             if(speedBadge){ speedBadge.textContent = bandName(overallScore).charAt(0).toUpperCase() + bandName(overallScore).slice(1); speedBadge.className = 'speed-badge ' + bandName(overallScore); }
             if(speedOverviewBar) speedOverviewBar.style.width = overallScore + '%';
             if(speedOverviewText) speedOverviewText.textContent = `Overall performance is ${bandName(overallScore)}. Mobile: ${mobile.score}, Desktop: ${desktop.score}.`;
-            
-            setWheel(mobileScoreWheel, mobile.score || 0);
-            setWheel(desktopScoreWheel, desktop.score || 0);
-
+            if(mobileScoreVal) mobileScoreVal.textContent = mobile.score || 0;
+            setSpeedCircle(mobileScoreCircle, mobile.score || 0);
+            if(desktopScoreVal) desktopScoreVal.textContent = desktop.score || 0;
+            setSpeedCircle(desktopScoreCircle, desktop.score || 0);
             if(mobileLcp) mobileLcp.textContent = mobile.lcp_s ? `${mobile.lcp_s.toFixed(2)}s` : 'N/A';
             if(mobileInp) mobileInp.textContent = mobile.inp_ms ? `${mobile.inp_ms}ms` : 'N/A';
             if(mobileCls) mobileCls.textContent = mobile.cls ? mobile.cls.toFixed(3) : 'N/A';
@@ -1126,9 +1091,7 @@
         newResults.forEach(result => {
             const el = $(`#${result.elementId}`);
             if (!el) return;
-            if (result.error) {
-                el.innerHTML = `<span style="color: var(--orange-1); font-size: 12px;">Error: ${result.error.message.replace(/</g, "&lt;")}</span>`;
-            } 
+            if (result.error) { el.textContent = `Error: ${result.error.message}`; } 
             else if (result.type === 'json') { el.innerHTML = result.formatter(result.data); }
             else { const content = result.data.content || 'No suggestions found.'; el.innerHTML = result.type === 'html' ? content : content.replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
         });
@@ -1172,8 +1135,7 @@
         if (!prompt) { aiBriefResult.textContent = 'Please enter a topic or keyword.'; return; }
         aiBriefBtn.disabled = true; aiBriefBtn.textContent = 'Generating...'; aiBriefResult.textContent = 'AI is crafting your brief...';
         try { const result = await callOpenAiApi('brief', prompt, url); aiBriefResult.textContent = result.content || 'No content returned from AI.';
-        } catch (error) {
-            aiBriefResult.textContent = `Error: ${error.message}`;
+        } catch (error) { aiBriefResult.textContent = `Error: ${error.message}`;
         } finally { aiBriefBtn.disabled = false; aiBriefBtn.innerHTML = `<span class="btn-icon">✨</span><span>Generate</span>`; }
     });
 
@@ -1224,15 +1186,9 @@
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;">
-      <div class="score-wheel-pro" id="mw" style="--v:0;">
-        <div class="score-wheel-pro__bezel"></div>
-        <div class="score-wheel-pro__content">
-            <div class="score-wheel-pro__value t-grad">0</div>
-            <div class="score-wheel-pro__liquid">
-                <div class="score-wheel-pro__wave"></div>
-                <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
-            </div>
-        </div>
+      <div class="mw warn" id="mw">
+        <div class="mw-ring" id="mwRing" style="--v:0"></div>
+        <div class="mw-center" id="mwNum">0%</div>
       </div>
     </div>
     <div class="space-y-2">
@@ -1287,18 +1243,17 @@
         </div>
         <div id="humanizerCard">
              <div id="humanizerResult">
-                <div class="score-wheel-pro score-wheel-pro--sm" style="--v:0;">
-                    <div class="score-wheel-pro__bezel"></div>
-                    <div class="score-wheel-pro__content">
-                        <div class="score-wheel-pro__value t-grad">0</div>
-                        <div class="score-wheel-pro__liquid">
-                            <div class="score-wheel-pro__wave"></div>
-                            <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
+                <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
+                    <div class="humanizer-wheel" style="--v:0;">
+                        <div class="humanizer-wheel-ring"></div>
+                        <div class="humanizer-wheel-center">
+                            <span class="humanizer-wheel-score t-grad">-%</span>
+                            <span class="humanizer-wheel-label">Human Score</span>
                         </div>
                     </div>
-                </div>
-                <div style="margin-top: 16px; color: var(--sub); opacity: 0.7;">
-                    Run an analysis to see the human-like score.
+                    <div style="margin-top: 16px;">
+                        Run an analysis to see the human-like score.
+                    </div>
                 </div>
             </div>
         </div>
@@ -1310,18 +1265,7 @@
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
     </div>
     <div class="cae-grid">
-      <div>
-        <div class="score-wheel-pro score-wheel-pro--sm" id="mwCAE" style="--v:0;">
-            <div class="score-wheel-pro__bezel"></div>
-            <div class="score-wheel-pro__content">
-                <div class="score-wheel-pro__value t-grad">0</div>
-                <div class="score-wheel-pro__liquid">
-                    <div class="score-wheel-pro__wave"></div>
-                    <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
-                </div>
-            </div>
-        </div>
-      </div>
+      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE" style="--v:0"></div><div class="mw-center" id="numCAE">0%</div></div></div>
       <div class="cae-info-grid">
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon spin">🧩</span></div><span class="cae-info-title">Topic Clustering Analysis</span></div><div class="cae-tags" id="caeTopicClusters"></div></div>
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon pulse">🏢</span></div><span class="cae-info-title">Entity Recognition</span></div><div class="cae-tags" id="caeEntities"></div></div>
@@ -1343,25 +1287,14 @@
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
     </div>
      <div class="tsi-grid">
-        <div>
-            <div class="score-wheel-pro score-wheel-pro--sm" id="mwTSI" style="--v:0;">
-                <div class="score-wheel-pro__bezel"></div>
-                <div class="score-wheel-pro__content">
-                    <div class="score-wheel-pro__value t-grad">0</div>
-                    <div class="score-wheel-pro__liquid">
-                        <div class="score-wheel-pro__wave"></div>
-                        <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="tsi-info-grid">
-            <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🔗</span><span class="tsi-info-title">Internal Linking</span></div><ul id="tsiInternalLinks"></ul></div>
-            <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🌐</span><span class="tsi-info-title">URL Structure</span></div><p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p><p id="tsiUrlSuggestion"></p></div>
-            <div class="tsi-info-item" style="grid-column: span 2;"><div class="tsi-info-header"><span class="c-icon float">📰</span><span class="tsi-info-title">Meta Tags</span></div><p><strong>Title:</strong> <span id="tsiMetaTitle">—</span></p><p><strong>Description:</strong> <span id="tsiMetaDescription">—</span></p></div>
-            <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🖼️</span><span class="tsi-info-title">Alt Texts</span></div><ul id="tsiAltTexts"></ul></div>
-            <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🗺️</span><span class="tsi-info-title">Site Map</span></div><div class="site-map-container" id="tsiSiteMap"></div></div>
-        </div>
+      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI" style="--v:0"></div><div class="mw-center" id="numTSI">0%</div></div></div>
+      <div class="tsi-info-grid">
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🔗</span><span class="tsi-info-title">Internal Linking</span></div><ul id="tsiInternalLinks"></ul></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🌐</span><span class="tsi-info-title">URL Structure</span></div><p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p><p id="tsiUrlSuggestion"></p></div>
+        <div class="tsi-info-item" style="grid-column: span 2;"><div class="tsi-info-header"><span class="c-icon float">📰</span><span class="tsi-info-title">Meta Tags</span></div><p><strong>Title:</strong> <span id="tsiMetaTitle">—</span></p><p><strong>Description:</strong> <span id="tsiMetaDescription">—</span></p></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🖼️</span><span class="tsi-info-title">Alt Texts</span></div><ul id="tsiAltTexts"></ul></div>
+        <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🗺️</span><span class="tsi-info-title">Site Map</span></div><div class="site-map-container" id="tsiSiteMap"></div></div>
+      </div>
     </div>
     <div class="tsi-suggestions"><h4 class="flex items-center gap-2">💡 Technical SEO Suggestions</h4><ul id="tsiSuggestionsList"></ul></div>
     <div class="upgraded-grid">
@@ -1454,32 +1387,14 @@
         <div class="speed-device-card">
             <div class="speed-device-header"><span>📱</span> Mobile</div>
             <div style="display:flex; align-items:center; gap: 16px; margin-top:12px;">
-                <div id="mobileScoreWheel" class="score-wheel-pro score-wheel-pro--xs" style="--v:0;">
-                    <div class="score-wheel-pro__bezel"></div>
-                    <div class="score-wheel-pro__content">
-                        <div class="score-wheel-pro__value t-grad">0</div>
-                        <div class="score-wheel-pro__liquid">
-                            <div class="score-wheel-pro__wave"></div>
-                            <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
-                        </div>
-                    </div>
-                </div>
+                <div class="speed-device-score"><svg><circle class="track" cx="30" cy="30" r="26"></circle><circle id="mobileScoreCircle" class="progress" cx="30" cy="30" r="26"></circle></svg><div id="mobileScoreVal" class="speed-device-score-val">0</div></div>
                 <div class="speed-device-metrics"><div class="speed-device-metric"><span>LCP</span><strong id="mobileLcp"></strong></div><div class="speed-device-metric"><span>INP</span><strong id="mobileInp"></strong></div><div class="speed-device-metric"><span>CLS</span><strong id="mobileCls"></strong></div></div>
             </div>
         </div>
         <div class="speed-device-card">
             <div class="speed-device-header"><span>💻</span> Desktop</div>
              <div style="display:flex; align-items:center; gap: 16px; margin-top:12px;">
-                <div id="desktopScoreWheel" class="score-wheel-pro score-wheel-pro--xs" style="--v:0;">
-                    <div class="score-wheel-pro__bezel"></div>
-                    <div class="score-wheel-pro__content">
-                        <div class="score-wheel-pro__value t-grad">0</div>
-                        <div class="score-wheel-pro__liquid">
-                            <div class="score-wheel-pro__wave"></div>
-                            <div class="score-wheel-pro__wave score-wheel-pro__wave--back"></div>
-                        </div>
-                    </div>
-                </div>
+                <div class="speed-device-score"><svg><circle class="track" cx="30" cy="30" r="26"></circle><circle id="desktopScoreCircle" class="progress" cx="30" cy="30" r="26"></circle></svg><div id="desktopScoreVal" class="speed-device-score-val">0</div></div>
                 <div class="speed-device-metrics"><div class="speed-device-metric"><span>LCP</span><strong id="desktopLcp"></strong></div><div class="speed-device-metric"><span>INP</span><strong id="desktopInp"></strong></div><div class="speed-device-metric"><span>CLS</span><strong id="desktopCls"></strong></div></div>
             </div>
         </div>
