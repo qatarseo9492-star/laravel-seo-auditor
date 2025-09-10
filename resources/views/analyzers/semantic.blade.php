@@ -823,24 +823,38 @@
     const showInlineError = (cardSelector, toolName, error) => {
         const card = $(cardSelector);
         let message = error.message || 'An unknown error occurred.';
-        const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
-        if (apiErrorMatch && apiErrorMatch[1]) {
-            try {
-                const errorJson = JSON.parse(apiErrorMatch[1]);
-                message = errorJson.error || errorJson.message || apiErrorMatch[1];
-            } catch(e) { 
-                message = apiErrorMatch[1]; 
+
+        if (message.toLowerCase().includes('api key')) {
+            message = `Feature unavailable. The API key for ${toolName} is not configured in the backend.`;
+        } else {
+            const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
+            if (apiErrorMatch && apiErrorMatch[1]) {
+                try {
+                    const errorJson = JSON.parse(apiErrorMatch[1]);
+                    message = errorJson.error || errorJson.message || apiErrorMatch[1];
+                } catch(e) { 
+                    message = apiErrorMatch[1]; 
+                }
             }
         }
         
         const sanitizedMessage = message.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
         if (card) {
-            card.innerHTML = `<div style="padding: 20px; text-align: center; color: var(--red-1);">
-                <h4 class="t-grad">${toolName}</h4>
+            const titleHtml = `<h4 class="t-grad">${toolName}</h4>`;
+            const errorHtml = `<div style="padding: 20px; text-align: center; color: var(--red-1);">
+                ${toolName ? titleHtml : ''}
                 <p style="color: var(--sub); font-size: 14px; margin-top: 8px;">Analysis Failed</p>
                 <p style="font-size: 12px; margin-top: 4px;">${sanitizedMessage}</p>
             </div>`;
+
+            // For cards that contain a score wheel, we need to replace the parent grid
+            const parentGrid = card.closest('.cae-grid, .tsi-grid');
+            if(parentGrid) {
+                 parentGrid.innerHTML = errorHtml;
+            } else {
+                card.innerHTML = errorHtml;
+            }
         } else {
             showError(`${toolName} analysis failed`, sanitizedMessage);
         }
