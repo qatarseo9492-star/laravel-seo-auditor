@@ -203,7 +203,8 @@
   #improveModal .card{background:#1B1B1B;border:1px solid var(--outline)}
   #improveModal .card .card{background:#1A1A1A;border-color:var(--outline)}
 
-  #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:10px;white-space:pre-wrap;font-size:12px}
+  #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:12px;font-size:13px}
+  #errorBox strong { font-weight: 800; display: block; margin-bottom: 4px; }
   
   /* ===================================== */
   /* === ✨ UNIFIED CARD STYLES ✨ === */
@@ -791,7 +792,7 @@
     const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
     const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
     function setChip(el,label,value,score){ if(!el)return; el.classList.remove('good','warn','bad'); const b=bandName(score); el.classList.add(b); el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`; };
-    const showError=(msg,detail)=>{ errorBox.style.display='block'; errorBox.textContent=msg+(detail?`: ${detail}`:''); };
+    const showError=(title, detail)=>{ errorBox.style.display='block'; errorBox.innerHTML = `<strong>${title}</strong><div style="white-space:pre-wrap;">${detail || ''}</div>`; };
     const clearError=()=>{ errorBox.style.display='none'; errorBox.textContent=''; };
     
     const showInlineError = (cardSelector, toolName, error) => {
@@ -836,7 +837,10 @@
         });
         if (!res.ok) {
             const errorText = await res.text();
-            throw new Error(`API Error at ${endpoint} (${res.status}): ${errorText.slice(0, 800)}`);
+            // Create a custom error object to pass the status code to the catch block
+            const error = new Error(`API Error at ${endpoint}: ${errorText.slice(0, 800)}`);
+            error.status = res.status;
+            throw error;
         }
         return res.json();
     }
@@ -943,7 +947,8 @@
         const [data, tsiData, kiData, caeData, psiData] = await Promise.all([
             callAnalyzer(url).catch(err => {
                 // This is a critical failure. If the main analyzer fails, we can't proceed.
-                throw new Error(err.message || 'Local data parsing failed');
+                // We re-throw the error so it can be caught by the main catch block.
+                throw err;
             }),
             callTechnicalSeoApi(url).catch(err => showInlineError('#technicalSeoCard', 'Technical SEO', err)),
             callKeywordApi(url).catch(err => showInlineError('#keywordIntelligenceCard', 'Keyword Intelligence', err)),
@@ -1091,20 +1096,35 @@
             else { const content = result.data.content || 'No suggestions found.'; el.innerHTML = result.type === 'html' ? content : content.replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
         });
 
-      }catch(err){
+      } catch (err) {
         console.error(err);
+        let title = 'A critical error occurred during analysis';
         let message = err.message || 'An unknown error occurred.';
-        const jsonStringMatch = message.match(/(\{.*\})/);
-        if (jsonStringMatch && jsonStringMatch[1]) {
+
+        if (err.status === 429) { // UPGRADE: Check for the specific status code for rate limiting
+            title = 'Usage Limit Reached';
             try {
-                const errorJson = JSON.parse(jsonStringMatch[1]);
-                message = errorJson.error || errorJson.message || jsonStringMatch[1];
-            } catch (e) {
-                 const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
-                if(apiErrorMatch && apiErrorMatch[1]) { message = apiErrorMatch[1]; }
+                // Try to parse the specific error message from the backend JSON response
+                const jsonError = JSON.parse(message.substring(message.indexOf('{')));
+                message = jsonError.error || "You've exceeded your daily/monthly analysis quota.";
+            } catch(e) {
+                // Fallback message if parsing fails
+                message = "You've exceeded your daily/monthly analysis quota. Please try again later or contact support to increase your limit.";
+            }
+        } else {
+            // This is the existing logic for parsing other types of errors
+            const jsonStringMatch = message.match(/(\{.*\})/);
+            if (jsonStringMatch && jsonStringMatch[1]) {
+                try {
+                    const errorJson = JSON.parse(jsonStringMatch[1]);
+                    message = errorJson.error || errorJson.message || jsonStringMatch[1];
+                } catch (e) {
+                     const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
+                    if(apiErrorMatch && apiErrorMatch[1]) { message = apiErrorMatch[1]; }
+                }
             }
         }
-        showError('A critical error occurred during analysis', message);
+        showError(title, message);
       }finally{
         setRunning(false);
       }
