@@ -167,7 +167,8 @@
     position: absolute;
     inset: var(--track-width);
     border-radius: 50%;
-    background: #1a151d;
+    background: radial-gradient(120% 120% at 50% 35%, #23242f 0 45%, #171821 65% 100%);
+    box-shadow: 0 8px 28px rgba(0,0,0,.35) inset;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -198,19 +199,19 @@
     height: var(--progress-percent);
     background: var(--liquid-color);
     transition: height 0.8s cubic-bezier(0.6, 0, 0.4, 1), background 0.5s ease;
-    filter: brightness(1.1); /* Make liquid pop more */
+    filter: brightness(1.1) drop-shadow(0 -4px 10px color-mix(in oklab, var(--liquid-color) 40%, transparent));
   }
   
-  /* NEW: Realistic water sheen */
+  /* NEW: Top highlight/sheen for realism */
    .score-wheel-pro__liquid::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent 60%);
-    opacity: 0.6;
+    height: 14px;
+    background: radial-gradient(60% 100% at 50% 0, rgba(255,255,255,.4), rgba(255,255,255,0) 70%);
+    mix-blend-mode: screen;
    }
 
   /* Bubbles effect to mimic original image */
@@ -1030,7 +1031,7 @@
         if (tsiData) {
             const tsi = tsiData;
             setWheel(mwTSI, tsi.score || 0);
-            if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
+            if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             if(tsiUrlClarityScore) tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             if(tsiUrlSuggestion) tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
             if(tsiMetaTitle) tsiMetaTitle.textContent = tsi.meta_optimization?.title || 'N/A';
@@ -1114,7 +1115,13 @@
         newResults.forEach(result => {
             const el = $(`#${result.elementId}`);
             if (!el) return;
-            if (result.error) { el.textContent = `Error: ${result.error.message}`; } 
+            if (result.error) {
+                if (result.error.message && result.error.message.toLowerCase().includes('api key')) {
+                     el.innerHTML = `<span style="color: var(--orange-1); font-size: 12px;">AI feature unavailable. Please configure API key.</span>`;
+                } else {
+                    el.textContent = `Error: Analysis failed.`;
+                }
+            } 
             else if (result.type === 'json') { el.innerHTML = result.formatter(result.data); }
             else { const content = result.data.content || 'No suggestions found.'; el.innerHTML = result.type === 'html' ? content : content.replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
         });
@@ -1158,7 +1165,12 @@
         if (!prompt) { aiBriefResult.textContent = 'Please enter a topic or keyword.'; return; }
         aiBriefBtn.disabled = true; aiBriefBtn.textContent = 'Generating...'; aiBriefResult.textContent = 'AI is crafting your brief...';
         try { const result = await callOpenAiApi('brief', prompt, url); aiBriefResult.textContent = result.content || 'No content returned from AI.';
-        } catch (error) { aiBriefResult.textContent = `Error: ${error.message}`;
+        } catch (error) {
+            if (error.message && error.message.toLowerCase().includes('api key')) {
+                aiBriefResult.textContent = `AI feature unavailable. Please configure the API key in the backend.`;
+            } else {
+                aiBriefResult.textContent = `Error: ${error.message}`;
+            }
         } finally { aiBriefBtn.disabled = false; aiBriefBtn.innerHTML = `<span class="btn-icon">✨</span><span>Generate</span>`; }
     });
 
