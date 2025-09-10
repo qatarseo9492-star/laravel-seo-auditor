@@ -503,10 +503,9 @@
   }
 
   /* ============================================================ */
-  /* === ✨ UPGRADED: AI Readability & Humanizer ✨ === */
+  /* === ✨ UPGRADED: AI Readability & Humanizer ✨ (NEW) === */
   /* ============================================================ */
   #humanizerCard {
-    /* REMOVED GRID for simpler centered layout */
     padding: 16px 0;
   }
   #humanizerResult {
@@ -515,32 +514,20 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    gap: 8px;
+    gap: 16px;
   }
-  .humanizer-result-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-  .badge-icon-wrapper {
-    width: 64px; /* Increased size */
+
+  .humanizer-badge-icon {
+    width: 64px;
     height: 64px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .badge-icon {
-    width: 100%;
-    height: 100%;
     animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
   }
+
   @keyframes badge-pop-in {
     from { transform: scale(0.5) rotate(-15deg); opacity: 0; }
     to { transform: scale(1) rotate(0deg); opacity: 1; }
   }
-  .badge-icon .glow {
+  .humanizer-badge-icon .glow {
     animation: badge-glow 3s ease-in-out infinite;
   }
   @keyframes badge-glow {
@@ -548,40 +535,51 @@
     50% { filter: brightness(1.4); }
   }
 
-  .score-display {
-    text-align: center;
-  }
-  .score-display strong {
-    font-size: 16px; /* Increased size */
-    color: var(--sub);
+  .humanizer-score-title {
+    font-size: 18px;
     font-weight: 700;
+    margin-top: -8px; /* Pulls title closer to the icon */
+    animation: fade-in .6s .2s backwards;
   }
-  .score-display .score-value {
-    font-size: 48px; /* Increased size */
+  
+  .humanizer-score-value {
+    font-size: 52px;
     font-weight: 900;
     line-height: 1;
     display: block;
-    margin-top: 4px;
-    animation: score-slide-in .6s .2s cubic-bezier(0.25, 1, 0.5, 1) backwards;
+    animation: score-slide-in .6s .3s cubic-bezier(0.25, 1, 0.5, 1) backwards;
   }
-  @keyframes score-slide-in {
+   @keyframes score-slide-in {
     from { transform: translateY(15px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
-  .score-value.success { color: var(--green-1); text-shadow: 0 0 16px var(--green-1);}
-  .score-value.warning { color: var(--yellow-1); text-shadow: 0 0 16px var(--yellow-1);}
-  .score-value.danger { color: var(--red-1); text-shadow: 0 0 16px var(--red-1);}
-
-  .recommendation {
-    font-size: 16px; /* Increased size */
+  
+  .humanizer-recommendation-badge {
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--ink);
-    margin: 16px 0;
-    max-width: 90%;
-    line-height: 1.6;
+    border: 1px solid;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     animation: fade-in .6s .4s backwards;
   }
-  
+
+  .humanizer-recommendation-badge.success {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(10, 150, 110, 0.2));
+    border-color: var(--green-1);
+  }
+  .humanizer-recommendation-badge.warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
+    border-color: var(--orange-1);
+  }
+  .humanizer-recommendation-badge.danger {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+    border-color: var(--red-1);
+  }
+
   #humanizerSuggestionsWrapper {
     text-align: left;
     width: 100%;
@@ -716,11 +714,7 @@
     
     const aiBriefInput = $('#aiBriefInput'), aiBriefBtn = $('#aiBriefBtn'), aiBriefResult = $('#aiBriefResult');
     
-    // New Humanizer section elements
     const humanizerResult = $('#humanizerResult');
-    const mwHumanizer = $('#mwHumanizer'), ringHumanizer = $('#ringHumanizer'), numHumanizer = $('#numHumanizer');
-    
-    const aiCheckTextarea = $('#aiCheckTextarea'), aiCheckBtn = $('#aiCheckBtn');
 
     // Show welcome message
     setTimeout(() => {
@@ -825,10 +819,16 @@
         const { human_score, suggestions, recommendation, badge_type, google_search_url } = data;
         
         const badgeSvgs = {
-            success: `<svg class="badge-icon success" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_success)" stroke-width="4"/><path d="M22 32.5L28.5 39L43 24" stroke="var(--green-1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="paint0_linear_success" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--green-2)'}"/><stop offset="1" stop-color="${'var(--green-1)'}"/></linearGradient></defs></svg>`,
-            warning: `<svg class="badge-icon warning" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_warning)" stroke-width="4"/><path d="M32 23V36" stroke="var(--yellow-1)" stroke-width="4" stroke-linecap="round"/><path d="M32 43V44" stroke="var(--yellow-1)" stroke-width="5" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_warning" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--orange-1)'}"/><stop offset="1" stop-color="${'var(--yellow-1)'}"/></linearGradient></defs></svg>`,
-            danger: `<svg class="badge-icon danger" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_danger)" stroke-width="4"/><path d="M40 24L24 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><path d="M24 24L40 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_danger" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--pink-1)'}"/><stop offset="1" stop-color="${'var(--red-1)'}"/></linearGradient></defs></svg>`
+            success: `<svg class="humanizer-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_success)" stroke-width="4"/><path d="M22 32.5L28.5 39L43 24" stroke="var(--green-1)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="paint0_linear_success" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--green-2)'}"/><stop offset="1" stop-color="${'var(--green-1)'}"/></linearGradient></defs></svg>`,
+            warning: `<svg class="humanizer-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_warning)" stroke-width="4"/><path d="M32 23V36" stroke="var(--yellow-1)" stroke-width="4" stroke-linecap="round"/><path d="M32 43V44" stroke="var(--yellow-1)" stroke-width="5" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_warning" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--orange-1)'}"/><stop offset="1" stop-color="${'var(--yellow-1)'}"/></linearGradient></defs></svg>`,
+            danger: `<svg class="humanizer-badge-icon" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="glow" d="M32 58C46.3594 58 58 46.3594 58 32C58 17.6406 46.3594 6 32 6C17.6406 6 6 17.6406 6 32C6 46.3594 17.6406 58 32 58Z" stroke="url(#paint0_linear_danger)" stroke-width="4"/><path d="M40 24L24 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><path d="M24 24L40 40" stroke="var(--red-1)" stroke-width="4" stroke-linecap="round"/><defs><linearGradient id="paint0_linear_danger" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse"><stop stop-color="${'var(--pink-1)'}"/><stop offset="1" stop-color="${'var(--red-1)'}"/></linearGradient></defs></svg>`
         };
+
+        const badgeIcon = {
+            success: '✅',
+            warning: '⚠️',
+            danger: '❗'
+        }
         
         let suggestionsHtml = '';
         if (badge_type !== 'success' && suggestions) {
@@ -841,18 +841,17 @@
         }
 
         humanizerResult.innerHTML = `
-            <div class="humanizer-result-header">
-                <div class="badge-icon-wrapper">${badgeSvgs[badge_type] || ''}</div>
-                <div class="score-display">
-                    <strong>Human-like Score</strong>
-                    <span class="score-value ${badge_type}">${human_score}%</span>
-                </div>
-            </div>
+            ${badgeSvgs[badge_type] || ''}
             <div>
-                <p class="recommendation">${recommendation}</p>
-                ${suggestionsHtml}
-                ${googleLinkHtml}
+                <strong class="humanizer-score-title t-grad">Human-like Score</strong>
+                <span class="humanizer-score-value t-grad">${human_score}%</span>
             </div>
+            <div class="humanizer-recommendation-badge ${badge_type}">
+               <span class="c-icon float">${badgeIcon[badge_type] || '✅'}</span>
+               <span>${recommendation}</span>
+            </div>
+            ${suggestionsHtml}
+            ${googleLinkHtml}
         `;
     }
 
@@ -1051,30 +1050,6 @@
         } finally { aiBriefBtn.disabled = false; aiBriefBtn.innerHTML = `<span class="btn-icon">✨</span><span>Generate</span>`; }
     });
 
-    aiCheckBtn?.addEventListener('click', async () => {
-        const text = aiCheckTextarea.value.trim();
-        if (text.length < 50) {
-            humanizerResult.innerHTML = '<p style="color: var(--orange-1);">Please enter at least 50 characters to analyze.</p>';
-            return;
-        }
-
-        aiCheckBtn.disabled = true;
-        aiCheckBtn.innerHTML = '<span class="c-icon spin">🤖</span> Analyzing...';
-        humanizerResult.innerHTML = '<p>Checking AI score and generating suggestions...</p>';
-
-        try {
-            const result = await callApi('/api/ai-content-check', { text });
-            if (result.error) throw new Error(result.error);
-            renderHumanizerResult(result);
-        } catch (error) {
-            let message = error.message || 'An unknown error occurred.';
-            humanizerResult.innerHTML = `<p style="color: var(--red-1);">Error: ${message}</p>`;
-        } finally {
-            aiCheckBtn.disabled = false;
-            aiCheckBtn.innerHTML = '<span class="btn-icon">🤖</span><span>Check Snippet</span>';
-        }
-    });
-
     pasteBtn && pasteBtn.addEventListener('click', async e => { e.preventDefault(); try{const t=await navigator.clipboard.readText(); if(t) urlInput.value=t.trim();}catch{} });
     importBtn && importBtn.addEventListener('click',()=>importFile.click());
     importFile && importFile.addEventListener('change',e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(String(r.result||'{}'));if(j.url)urlInput.value=j.url;alert('Imported JSON. Click Analyze to run.')}catch{alert('Invalid JSON file.')}};r.readAsText(f)});
@@ -1181,13 +1156,9 @@
              <div id="humanizerResult">
                 <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 48px; height: 48px; margin-bottom: 8px;"><path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20ZM12 6C11.17 6 10.5 6.67 10.5 7.5C10.5 8.33 11.17 9 12 9C12.83 9 13.5 8.33 13.5 7.5C13.5 6.67 12.83 6 12 6ZM7 12C7 14.76 9.24 17 12 17C14.76 17 17 14.76 17 12H7Z" fill="currentColor"/></svg>
-                    Run an analysis or check a text snippet...
+                    Run an analysis to see the human-like score.
                 </div>
             </div>
-        </div>
-        <div style="border-top: 1px solid var(--outline); padding-top: 16px; margin-top: 16px;">
-            <textarea id="aiCheckTextarea" placeholder="Or, paste a text snippet here to analyze it separately... (Min: 50 characters)" style="width: 100%; height: 100px; background: #081220; border: 1px solid #1c3d52; border-radius: 10px; padding: 12px; color: var(--ink); font-size: 13px; resize: vertical;"></textarea>
-            <button id="aiCheckBtn" class="btn btn-green" style="width: 100%; margin-top: 10px;"><span class="btn-icon">🤖</span><span>Check Snippet</span></button>
         </div>
     </div>
 
