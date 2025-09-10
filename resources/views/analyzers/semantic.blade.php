@@ -27,21 +27,8 @@
     --purple-1:#8A2BE2;
 
     /* UPGRADED: Unified dark background */
-    --unified-bg: linear-gradient(145deg, #140424, #0D1120);
+    --unified-bg: linear-gradient(145deg, #0D1120, #111827);
   }
-
-  /* --- NEW: Keyframe animations for animated borders and water --- */
-  @keyframes rainbowGlow {
-    0%, 100% { border-color: var(--blue-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--blue-1), inset 0 0 12px #140424; }
-    16% { border-color: var(--purple-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--purple-1), inset 0 0 12px #140424; }
-    32% { border-color: var(--pink-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--pink-1), inset 0 0 12px #140424; }
-    48% { border-color: var(--red-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--red-1), inset 0 0 12px #140424; }
-    64% { border-color: var(--orange-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--orange-1), inset 0 0 12px #140424; }
-    80% { border-color: var(--green-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--green-1), inset 0 0 12px #140424; }
-  }
-  @keyframes wave { 0% { background-position-x: 0; } 100% { background-position-x: -200px; } }
-  @keyframes wave2 { 0% { background-position-x: 0; } 100% { background-position-x: 200px; } }
-
 
   /* =============== Base page styles (colors only changed) =============== */
   html,body{
@@ -70,25 +57,10 @@
   .legend .g{background:#0f2d1f;color:#baf7d9;border-color:#10b98166}
   .legend .o{background:#2f2508;color:#fde68a;border-color:#f59e0b66}
   .legend .r{background:#331111;color:#fecaca;border-color:#ef444466}
-  
-  /* --- NEW --- Animated border and background for all containers */
-  .card, .cat-card, .ground-slab, .analyze-wrap, .unified-card, .speed-card-new, .meta-card {
-    background: var(--unified-bg);
-    border: 2px solid;
-    animation: rainbowGlow 5s linear infinite;
-    border-radius: 24px; /* --- NEW --- More rounded corners */
-  }
 
-  .card{padding:18px;}
-  .cat-card{padding:16px;}
-  .ground-slab{padding:20px; margin-top:20px;}
-  .unified-card {padding: 16px; margin-top: 24px;}
-  
-  /* Remove old unified-card specific styles */
-  .unified-card--blue, .unified-card--purple, .unified-card--orange, .unified-card--green {
-    border-color: transparent; /* Handled by animation now */
-    box-shadow: none; /* Handled by animation now */
-  }
+  .card{border-radius:18px;padding:18px;background:var(--card);border:1px solid var(--outline);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .cat-card{border-radius:16px;padding:16px;background:var(--card-2);border:1px solid var(--outline)}
+  .ground-slab{border-radius:22px;padding:20px;background:#1B1B1B;border:1px solid var(--outline);margin-top:20px;box-shadow:0 10px 40px rgba(0,0,0,.4)}
 
   .pill{padding:5px 10px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid #ffffff29;background:#ffffff14;color:var(--ink)}
   .chip{padding:6px 8px;border-radius:12px;font-weight:800;display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff24;color:#eef2ff;font-size:12px;background:#171717}
@@ -107,142 +79,164 @@
   .btn-orange{background:linear-gradient(90deg,var(--yellow-1),var(--orange-1));color:#2b1600}
   .btn-purple{background:linear-gradient(90deg,var(--pink-1),var(--purple-1));color:#19041a}
   
-  /* --- NEW --- Stylish URL Input Row */
-  .url-row{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    border-radius:14px;
-    padding:8px 10px;
-  }
-  .url-row input{background:transparent;border:none;outline:none;color:var(--ink);width:100%; font-size: 16px;}
-  .url-row .paste{
-    padding:6px 12px;
-    border-radius:10px;
-    border: 1px solid var(--purple-1);
-    background: linear-gradient(135deg, #8A2BE255, #FF149333);
-    color:var(--ink);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all .2s ease;
-  }
-  .url-row .paste:hover { filter: brightness(1.3); }
+  .url-row{display:flex;align-items:center;gap:10px;border:1px solid var(--outline);background:#181818;border-radius:12px;padding:8px 10px}
+  .url-row input{background:transparent;border:none;outline:none;color:var(--ink);width:100%}
+  .url-row .paste{padding:6px 10px;border-radius:10px;border:1px solid #ffffff26;background:#232323;color:var(--ink)}
 
-  .analyze-wrap{padding:12px;}
+  .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
   
-  /* ================================================================= */
-  /* === 🎨 FINAL SCORE WHEEL with 100% accurate Water Effect 🎨 === */
-  /* ================================================================= */
-  .mw {
-    --v: 0;
-    --size: 200px;
-    --track-width: 14px;
-    --progress-percent: calc(var(--v) * 1%);
-    width: var(--size);
-    height: var(--size);
-    position: relative;
-    transition: filter .4s ease;
+  /* ======================================================== */
+  /* === 💧 FUTURISTIC LIQUID-FILL SCORE WHEEL 💧 === */
+  /* ======================================================== */
+  .score-wheel {
+      --v: 0; /* The score value (0-100) */
+      --size: 200px;
+      --track-width: 14px;
+      --progress-percent: calc(var(--v) * 1%);
+      
+      /* Dynamic Color Rules */
+      --fill-color: var(--red-1); /* Default to red */
+      --glow-color: var(--red-1);
+      
+      width: var(--size);
+      height: var(--size);
+      position: relative;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      margin: 0 auto;
+  }
+
+  /* Set colors based on score class */
+  .score-wheel.good {
+      --fill-color: var(--green-1);
+      --glow-color: var(--green-1);
+  }
+  .score-wheel.warn {
+      --fill-color: var(--orange-1);
+      --glow-color: var(--orange-1);
+  }
+  .score-wheel.bad {
+      --fill-color: var(--red-1);
+      --glow-color: var(--red-1);
+  }
+
+  .score-wheel-outer {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      padding: var(--track-width);
+      box-sizing: border-box;
+      background: conic-gradient(
+          var(--glow-color) var(--progress-percent), 
+          #1A1A1A var(--progress-percent)
+      );
+      filter: drop-shadow(0 0 8px var(--glow-color)) drop-shadow(0 0 16px var(--glow-color));
+      transition: all .5s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .score-wheel-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #1F1F1F;
+      box-shadow: inset 0 0 25px rgba(0,0,0,0.7);
+      position: relative;
+      overflow: hidden;
+  }
+
+  .score-wheel-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: calc(var(--size) * 0.22);
+      font-weight: 900;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      z-index: 10;
+  }
+  .score-wheel-text::after {
+      content: '%';
+      font-size: 0.5em;
+      margin-left: 0.1em;
+      opacity: 0.8;
+  }
+
+  .score-wheel-liquid {
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: var(--progress-percent);
+      background: var(--fill-color);
+      transform-origin: bottom center;
+      z-index: 1;
+      opacity: 0.9;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 0 15px var(--glow-color);
+      transition: height .9s cubic-bezier(0.25, 1, 0.5, 1), background-color .5s ease;
+  }
+  .score-wheel-liquid::before, .score-wheel-liquid::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 0;
+      width: 100%;
+      height: 20px;
+      background-size: 50% 100%;
+      background-repeat: repeat-x;
+  }
+  .score-wheel-liquid::before {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path fill="%23000000" fill-opacity="0.2" d="M 0 10 C 25 20, 25 0, 50 10 S 75 20, 100 10 V 20 H 0 Z"></path></svg>');
+      animation: wave-animation 2s linear infinite;
+      opacity: 0.7;
+  }
+  .score-wheel-liquid::after {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><path fill="white" d="M 0 10 C 25 20, 25 0, 50 10 S 75 20, 100 10 V 20 H 0 Z"></path></svg>');
+      animation: wave-animation 2.5s linear infinite reverse;
+      opacity: 1;
+      top: -18px; /* Slightly offset for 3D effect */
+  }
+
+  @keyframes wave-animation {
+      0% { background-position: 0 0; }
+      100% { background-position: 100px 0; }
+  }
+
+
+  /* Bubbles */
+  .score-wheel-bubbles {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: var(--progress-percent);
+      z-index: 2;
+      transition: height .9s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .score-wheel-bubbles span {
+      position: absolute;
+      bottom: -20px;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      animation: bubble-rise 10s infinite ease-in;
+      transform-origin: center;
+  }
+
+  @keyframes bubble-rise {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-250px) scale(0); opacity: 0; }
   }
   
-  .mw-ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: #080415; /* Dark inner background */
-    box-shadow: inset 0 0 12px 2px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
-    overflow: hidden; /* Contain water */
+  .score-wheel-sm {
+      --size: 170px;
+      --track-width: 12px;
   }
-
-  /* Progress ring */
-  .mw-ring::before {
-    content: "";
-    position: absolute;
-    inset: 0px;
-    border-radius: 50%;
-    
-    /* Default gradient for 'bad' score */
-    --grad-start: var(--red-1);
-    --grad-end: var(--pink-1);
-    background: conic-gradient(from -90deg, var(--grad-start), var(--grad-end));
-    
-    -webkit-mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
-        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
-    -webkit-mask-composite: source-in;
-     mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
-        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
-     mask-composite: intersect;
-  }
-
-  /* Gradient overrides for 'warn' and 'good' scores */
-  .mw.warn .mw-ring::before { --grad-start: var(--yellow-1); --grad-end: var(--orange-1); }
-  .mw.good .mw-ring::before { --grad-start: var(--green-1); --grad-end: var(--blue-1); }
-  
-  /* --- NEW --- Realistic Water Container */
-  .water-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: var(--progress-percent);
-    transition: height 0.9s cubic-bezier(0.6, 0, 0.4, 1);
-    z-index: 1;
-    overflow: hidden;
-  }
-
-  /* --- NEW --- Multi-layered water effect */
-  .water-container::before, .water-container::after {
-    content: '';
-    position: absolute;
-    width: 200px;
-    height: 200px;
-    border-radius: 40%;
-  }
-
-  /* Layer 1: Main liquid body */
-  .water-container::before {
-    background: var(--red-1); /* Default to bad color */
-    bottom: -150px;
-    left: -25%;
-    animation: wave 7s linear infinite;
-  }
-  
-  /* Layer 2: Glossy reflection/bubbles */
-  .water-container::after {
-    background: var(--pink-1); /* Default to bad highlight */
-    bottom: -145px;
-    left: -25%;
-    opacity: 0.5;
-    animation: wave2 11s linear infinite;
-  }
-
-  /* --- NEW --- Water color changes based on score */
-  .mw.warn .water-container::before { background: var(--orange-1); }
-  .mw.warn .water-container::after { background: var(--yellow-1); }
-  .mw.good .water-container::before { background: var(--green-2); }
-  .mw.good .water-container::after { background: var(--green-1); }
-  
-  .mw-center {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    font-size: calc(var(--size) * 0.24);
-    font-weight: 900;
-    color: #fff;
-    text-shadow: 0 0 12px rgba(255,255,255,0.3);
-    z-index: 2; /* Above water */
-  }
-  
-  /* Glow effects */
-  .mw.good { filter: drop-shadow(0 0 10px var(--green-1)) drop-shadow(0 0 20px var(--green-1)); }
-  .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)) drop-shadow(0 0 20px var(--orange-1)); }
-  .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)) drop-shadow(0 0 20px var(--red-1)); }
-
-  .mw-sm {
-    --size: 170px;
-    --track-width: 12px;
+  .score-wheel-xs {
+      --size: 160px;
+      --track-width: 12px;
   }
   
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
@@ -276,7 +270,7 @@
   .outline-red{border-color:#ef4444dd!important;box-shadow:0 0 0 2px #ef44448c inset,0 0 16px #ef444455}
 
   dialog[open]{display:block} dialog::backdrop{background:rgba(0,0,0,.6)}
-  #improveModal .card{background:#1B1B1B; animation: none; border-radius: 16px;} /* Stop animation on modal */
+  #improveModal .card{background:#1B1B1B;border:1px solid var(--outline)}
   #improveModal .card .card{background:#1A1A1A;border-color:var(--outline)}
 
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:12px;font-size:13px}
@@ -286,18 +280,30 @@
   /* === ✨ UNIFIED CARD STYLES ✨ === */
   /* ===================================== */
   .unified-card {
-    /* Styles are now merged with the base .card styles for consistency */
+    background: var(--unified-bg);
+    border: 1px solid;
+    border-radius: 20px;
+    padding: 16px;
+    margin-top: 24px;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
     background-image: 
       radial-gradient(circle at 100% 0%, rgba(255,255,255,.05), transparent 30%),
       radial-gradient(circle at 0% 100%, rgba(255,255,255,.05), transparent 30%);
   }
+  .unified-card--blue { border-color: var(--blue-1); box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
+  .unified-card--purple { border-color: var(--purple-1); box-shadow: 0 0 32px rgba(138, 43, 226, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5); }
+  .unified-card--orange { border-color: var(--orange-1); box-shadow: 0 0 32px rgba(255, 165, 0, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
+  .unified-card--green { border-color: var(--green-1); box-shadow: 0 0 32px rgba(0, 255, 138, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
 
   /* ============================================= */
   /* === 🎨 NEW STYLES for Site Speed Section 🎨 === */
   /* ============================================= */
     .speed-card-new {
-      /* Now uses the animated border/background */
-      padding: 16px;
+        background: var(--unified-bg);
+        border: 1px solid #2A3659;
+        border-radius: 16px;
+        padding: 16px;
+        margin-top: 24px;
     }
     .speed-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .speed-title { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--ink); }
@@ -311,7 +317,7 @@
 
     .speed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
     @media (max-width: 600px) { .speed-grid { grid-template-columns: 1fr; } }
-    .speed-device-card { background: #111827; border-radius: 18px; padding: 12px; border: 1px solid #1F2937; }
+    .speed-device-card { background: #111827; border-radius: 12px; padding: 12px; border: 1px solid #1F2937; }
     .speed-device-header { display: flex; align-items: center; gap: 8px; font-weight: 700; }
     .speed-device-score {
         width: 60px; height: 60px;
@@ -324,7 +330,7 @@
     .speed-device-score .progress { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
     .speed-device-metrics { display: grid; gap: 8px; font-size: 12px; flex-grow:1; }
     .speed-device-metric { display: flex; justify-content: space-between; align-items: center; }
-    .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 18px; padding: 12px; margin-top: 16px; }
+    .speed-opportunities { background: #111827; border: 1px solid #F59E0B; border-radius: 12px; padding: 12px; margin-top: 16px; }
     .speed-opportunities-title { display: flex; align-items: center; gap: 8px; color: #FBBF24; font-weight: 700; margin-bottom: 8px; }
     .speed-opportunities ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12px; color: var(--sub); }
   
@@ -345,14 +351,14 @@
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.08); opacity: 0.85; } }
   
-  .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: flex-start;}
+  .tsi-grid, .cae-grid {display:grid;grid-template-columns: 240px 1fr;gap: 16px;align-items: center;}
   @media (max-width: 920px){.tsi-grid, .cae-grid {grid-template-columns:1fr}}
 
   /* Info Items Grid */
   .tsi-info-grid, .cae-info-grid {display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   @media (max-width:500px){.tsi-info-grid, .cae-info-grid {grid-template-columns:1fr}}
-  .tsi-info-item, .cae-info-item, .ki-item, .ai-item, .onpage-item {
-    border-radius:18px; /* --- NEW --- Rounder corners */
+  .tsi-info-item, .cae-info-item {
+    border-radius:14px;
     padding:14px;
     background:rgba(0,0,0,0.2);
     border:1px solid var(--outline);
@@ -392,7 +398,7 @@
     font-size: 15px;
   }
   .tsi-suggestions {
-    border-radius: 18px; /* --- NEW --- Rounder corners */
+    border-radius: 14px;
     padding:14px; margin-top:16px;
     background: rgba(8, 5, 20, 0.7);
     border: 1px solid rgba(138, 43, 226, 0.3);
@@ -419,6 +425,8 @@
   .ki-item {
     background: rgba(25, 15, 5, 0.7);
     border: 1px solid rgba(255, 165, 0, 0.3);
+    border-radius: 14px;
+    padding: 14px;
     backdrop-filter: blur(4px);
   }
   .ki-item-title {
@@ -447,6 +455,8 @@
   .ai-item {
     background: rgba(5, 20, 25, 0.7);
     border: 1px solid rgba(0, 198, 255, 0.3);
+    border-radius: 14px;
+    padding: 14px;
     backdrop-filter: blur(4px);
     display: flex; flex-direction: column; gap: 10px;
   }
@@ -511,11 +521,14 @@
   /* =================================================== */
   /* === 🎨 NEW STYLES for Meta & Heading Section 🎨 === */
   /* =================================================== */
+  .meta-card {
+      background: var(--unified-bg);
+      border: 1px solid #2a2f5a;
+      border-radius: 16px;
+  }
   .meta-card .cat-card {
-      background: rgba(20, 4, 36, 0.5);
+      background: #14173a;
       border-color: #2a2f5a;
-      animation: none; /* Turn off animation for nested cards */
-      border-radius: 18px; /* --- NEW --- Rounder corners */
   }
   .meta-card .t-grad {
       font-size: 20px;
@@ -544,7 +557,8 @@
   .onpage-item {
       background: rgba(5, 20, 25, 0.7);
       border: 1px solid rgba(0, 198, 255, 0.3);
-      backdrop-filter: blur(4px);
+      border-radius: 14px;
+      padding: 14px;
   }
   .onpage-item-title {
       font-weight: 800;
@@ -574,67 +588,6 @@
     gap: 16px;
   }
 
-  /* NEW: Score Wheel for Humanizer (uses same logic as .mw) */
-  .humanizer-wheel {
-    --v: 0;
-    --size: 160px;
-    --track-width: 12px;
-    --progress-percent: calc(var(--v) * 1%);
-    width: var(--size);
-    height: var(--size);
-    position: relative;
-    animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-    /* Apply mw glow classes */
-    transition: filter .4s ease;
-  }
-  .humanizer-wheel .mw-ring {
-    background: #080415;
-    box-shadow: inset 0 0 12px 2px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
-    overflow: hidden;
-  }
-  .humanizer-wheel .mw-ring::before, .humanizer-wheel .mw-ring::after { display: none; } /* Disable default water/progress, we use a custom one */
-  
-  .humanizer-wheel-ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-  }
-
-  /* Custom multicolor progress for Humanizer */
-  .humanizer-wheel-ring::before {
-    content: "";
-    position: absolute;
-    inset: 0px;
-    border-radius: 50%;
-    background: conic-gradient(from -90deg, 
-      var(--red-1), var(--orange-1), var(--yellow-1), 
-      var(--green-1), var(--blue-1), var(--purple-1), var(--red-1));
-    animation: spin 8s linear infinite;
-    -webkit-mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
-        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
-    -webkit-mask-composite: source-in;
-     mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
-        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
-     mask-composite: intersect;
-  }
-
-  .humanizer-wheel-center {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  .humanizer-wheel-score {
-    font-size: calc(var(--size) * 0.28);
-    font-weight: 900;
-    line-height: 1;
-    color: #fff;
-    text-shadow: 0 0 12px rgba(255,255,255,0.3);
-  }
   .humanizer-wheel-label {
     font-size: calc(var(--size) * 0.09);
     font-weight: 700;
@@ -643,10 +596,6 @@
     letter-spacing: 0.5px;
     margin-top: 4px;
   }
-
-  .humanizer-wheel.good { filter: drop-shadow(0 0 8px var(--green-1)) drop-shadow(0 0 16px var(--green-1)); }
-  .humanizer-wheel.warn { filter: drop-shadow(0 0 8px var(--orange-1)) drop-shadow(0 0 16px var(--orange-1)); }
-  .humanizer-wheel.bad { filter: drop-shadow(0 0 8px var(--red-1)) drop-shadow(0 0 16px var(--red-1)); }
 
   @keyframes badge-pop-in {
     from { transform: scale(0.5) rotate(-15deg); opacity: 0; }
@@ -790,7 +739,7 @@
     const $ = s=>document.querySelector(s);
 
     /* ============== Element refs (Original + New) ============== */
-    const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
+    const mw=$('#mw'), mwNum=$('#mwNum');
     const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
     const chipOverall=$('#chipOverall'), chipContent=$('#chipContent');
     
@@ -819,7 +768,7 @@
     const desktopLcp = $('#desktopLcp'), desktopInp = $('#desktopInp'), desktopCls = $('#desktopCls');
     const speedOpportunitiesList = $('#speedOpportunitiesList');
     
-    const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI');
+    const mwTSI = $('#mwTSI'), numTSI = $('#numTSI');
     const tsiInternalLinks = $('#tsiInternalLinks'), tsiUrlClarityScore = $('#tsiUrlClarityScore');
     const tsiUrlSuggestion = $('#tsiUrlSuggestion'), tsiMetaTitle = $('#tsiMetaTitle');
     const tsiMetaDescription = $('#tsiMetaDescription'), tsiAltTexts = $('#tsiAltTexts');
@@ -829,7 +778,7 @@
     const kiRelatedTerms = $('#kiRelatedTerms'), kiCompetitorGaps = $('#kiCompetitorGaps');
     const kiLongTail = $('#kiLongTail');
 
-    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
+    const mwCAE = $('#mwCAE'), numCAE = $('#numCAE');
     const caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities');
     const caeKeywords = $('#caeKeywords'), caeRelevanceScore = $('#caeRelevanceScore');
     const caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
@@ -847,7 +796,7 @@
 
     /* Helpers (Unchanged) */
     const clamp01=n=>Math.max(0,Math.min(100,Number(n)||0));
-    const bandName=s=>s>=80?'good':(s>=60?'warn':'bad');
+    const bandName=s=>s>80?'good':(s>=60?'warn':'bad');
     const bandIcon=s=>s>=80?'✅':(s>=60?'🟧':'🔴');
     function setChip(el,label,value,score){ if(!el)return; el.classList.remove('good','warn','bad'); const b=bandName(score); el.classList.add(b); el.innerHTML=`<i>${bandIcon(score)}</i><span>${label}: ${value}</span>`; };
     const showError=(title, detail)=>{ errorBox.style.display='block'; errorBox.innerHTML = `<strong>${title}</strong><div style="white-space:pre-wrap;">${detail || ''}</div>`; };
@@ -884,7 +833,7 @@
     const KB={'Mobile-friendly, responsive layout':{why:'Most traffic is mobile; poor UX kills engagement.',tips:['Responsive breakpoints & fluid grids.','Tap targets ≥44px.','Avoid horizontal scroll.'],link:'https://search.google.com/test/mobile-friendly'},'Optimized speed (compression, lazy-load)':{why:'Speed affects abandonment and CWV.',tips:['Use WebP/AVIF.','HTTP/2 + CDN caching.','Lazy-load below-the-fold.'],link:'https://web.dev/fast/'},'Core Web Vitals passing (LCP/INP/CLS)':{why:'Passing CWV improves experience & stability.',tips:['Preload hero image.','Minimize long JS tasks.','Reserve media space.'],link:'https://web.dev/vitals/'},'Clear CTAs and next steps':{why:'Clarity increases conversions and task completion.',tips:['One primary CTA per view.','Action verbs + benefit.','Explain what happens next.'],link:'https://www.nngroup.com/articles/call-to-action-buttons/'},'Accessible basics (alt text, contrast)':{why:'Accessibility broadens reach and reduces risk.',tips:['Alt text on images.','Contrast ratio ≥4.5:1.','Keyboard focus states.'],link:'https://www.w3.org/WAI/standards-guidelines/wcag/'},'sameAs/Organization details present':{why:'Entity grounding disambiguates your brand.',tips:['Organization JSON-LD.','sameAs links to profiles.','NAP consistency.'],link:'https://schema.org/Organization'},'Valid schema markup (Article/FAQ/Product)':{why:'Structured data unlocks rich results.',tips:['Validate with Rich Results Test.','Mark up visible content only.','Keep to supported types.'],link:'https://search.google.com/test/rich-results'},'Related entities covered with context':{why:'Covering related entities builds topical depth.',tips:['Mention related concepts.','Explain relationships.','Link to references.'],link:'https://developers.google.com/knowledge-graph'},'Primary entity clearly defined':{why:'A single main entity clarifies page purpose.',tips:['Define at the top.','Use consistent naming.','Add schema about it.'],link:'https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data'},'Organization contact/about page visible':{why:'Trust & contact clarity support E-E-A-T.',tips:['Add /about and /contact.','Link from header/footer.','Show address & email.'],link:'https://developers.google.com/search/docs/fundamentals/creating-helpful-content'},'Logical H2/H3 headings & topic clusters':{why:'Hierarchy helps skimming and indexing.',tips:['Group subtopics under H2.','Use H3 for steps/examples.','Keep sections concise.'],link:'https://moz.com/learn/seo/site-structure'},'Internal links to hub/related pages':{why:'Internal links distribute authority & context.',tips:['Link to 3–5 relevant hubs.','Descriptive anchors.','Further reading section.'],link:'https://ahrefs.com/blog/internal-links/'},'Clean, descriptive URL slug':{why:'Readable slugs improve CTR & clarity.',tips:['3–5 meaningful words.','Hyphens & lowercase.','Avoid query strings.'],link:'https://developers.google.com/search/docs/crawling-indexing/url-structure'},'Breadcrumbs enabled (+ schema)':{why:'Breadcrumbs clarify location & show in SERP.',tips:['Visible breadcrumbs.','BreadcrumbList JSON-LD.','Keep depth logical.'],link:'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'},'XML sitemap logical structure':{why:'Sitemap accelerates discovery & updates.',tips:['Include canonical URLs.','Segment large sites.','Reference in robots.txt.'],link:'https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview'},'E-E-A-T signals (author, date, expertise)':{why:'Trust signals reduce bounce & build credibility.',tips:['Author bio + credentials.','Last updated date.','Editorial policy page.'],link:'https://developers.google.com/search/blog/2022/08/helpful-content-update'},'Unique value vs. top competitors':{why:'Differentiation is necessary to rank & retain.',tips:['Original data/examples.','Pros/cons & criteria.','Why your approach is better.'],link:'https://backlinko.com/seo-techniques'},'Facts & citations up to date':{why:'Freshness + accuracy boosts trust.',tips:['Cite primary sources.','Update stats ≤12 months.','Prefer canonical/DOI links.'],link:'https://scholar.google.com/'},'Helpful media (images/video) w/ captions':{why:'Media improves comprehension & dwell time.',tips:['Add 3–6 figures.','Descriptive captions.','Compress + lazy-load.'],link:'https://web.dev/optimize-lcp/'},'Up-to-date examples & screenshots':{why:'Current visuals reflect product reality.',tips:['Refresh UI shots.','Date your examples.','Replace deprecated flows.'],link:'https://www.nngroup.com/articles/guidelines-for-screenshots/'},'Define search intent & primary topic':{why:'Matching intent drives relevance & time on page.',tips:['State outcome early.','Align format to intent.','Use concrete examples.'],link:'https://ahrefs.com/blog/search-intent/'},'Map target & related keywords (synonyms/PAA)':{why:'Variants improve recall & completeness.',tips:['List 6–12 variants.','5–10 PAA questions.','Answer PAA in 40–60 words.'],link:'https://developers.google.com/search/docs/fundamentals/seo-starter-guide'},'H1 includes primary topic naturally':{why:'Clear topic helps users and algorithms.',tips:['One H1 per page.','Topic near the start.','Be descriptive.'],link:'https://web.dev/learn/html/semantics/#headings'},'Integrate FAQs / questions with answers':{why:'Captures long-tail & can earn rich results.',tips:['Pick 3–6 questions.','Answer briefly.','Add FAQPage JSON-LD.'],link:'https://developers.google.com/search/docs/appearance/structured-data/faqpage'},'Readable, NLP-friendly language':{why:'Plain, direct writing improves comprehension.',tips:['≤20 words/sentence.','Active voice.','Define jargon on first use.'],link:'https://www.plainlanguage.gov/guidelines/'},'Title tag (≈50–60 chars) w/ primary keyword':{why:'Title remains the strongest on-page signal.',tips:['50–60 chars.','Primary topic first.','Avoid duplication.'],link:'https://moz.com/learn/seo/title-tag'},'Meta description (≈140–160 chars) + CTA':{why:'Meta drives CTR which correlates with rankings.',tips:['140–160 chars.','Benefit + CTA.','Match intent.'],link:'https://moz.com/learn/seo/meta-description'},'Canonical tag set correctly':{why:'Avoid duplicates; consolidate signals.',tips:['One canonical.','Absolute URL.','No conflicting canonicals.'],link:'https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls'},'Indexable & listed in XML sitemap':{why:'Indexation is prerequisite to ranking.',tips:['No noindex.','Include in sitemap.','Submit in Search Console.'],link:'https://developers.google.com/search/docs/crawling-indexing/overview'},'Robots directives valid':{why:'Avoid accidental noindex/nofollow.',tips:['robots meta allows indexing.','robots.txt not blocking.','Use directives consistently.'],link:'https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag'}};
     function clamp01num(n){return Math.max(0,Math.min(100,Number(n)||0))}
     function scoreChecklist(label,data,url,targetKw=''){const qs=data.quick_stats||{};const cs=data.content_structure||{};const ps=data.page_signals||{};const r=data.readability||{};const h1=(cs.headings&&cs.headings.H1?cs.headings.H1.length:0)||0;const h2=(cs.headings&&cs.headings.H2?cs.headings.H2.length:0)||0;const h3=(cs.headings&&cs.headings.H3?cs.headings.H3.length:0)||0;const title=(cs.title||'');const meta=(cs.meta_description||'');const internal=Number(qs.internal_links||0);const external=Number(qs.external_links||0);const schemaTypes=new Set((data.page_signals?.schema_types)||[]);const robots=(data.page_signals?.robots||'').toLowerCase();const hasFAQ=schemaTypes.has('FAQPage');const hasArticle=schemaTypes.has('Article')||schemaTypes.has('NewsArticle')||schemaTypes.has('BlogPosting');const urlPath=(()=>{try{return new URL(url).pathname;}catch{return '/';}})();const slugScore=(()=>{const hasQuery=url.includes('?');const segs=urlPath.split('/').filter(Boolean);const words=segs.join('-').split('-').filter(Boolean);if(hasQuery)return 55;if(segs.length>6)return 60;if(words.some(w=>w.length>24))return 65;return 85;})();switch(label){case'Mobile-friendly, responsive layout':return ps.has_viewport?88:58;case'Optimized speed (compression, lazy-load)':return 60;case'Core Web Vitals passing (LCP/INP/CLS)':return 60;case'Clear CTAs and next steps':return meta.length>=140&&/learn|get|try|start|buy|sign|download|contact/i.test(meta)?80:60;case'Accessible basics (alt text, contrast)':return (data.images_alt_count||0)>=3?82:((data.images_alt_count||0)>=1?68:48);case'sameAs/Organization details present':return ps.has_org_sameas?90:55;case'Valid schema markup (Article/FAQ/Product)':return (hasArticle||hasFAQ||schemaTypes.has('Product'))?85:(schemaTypes.size>0?70:50);case'Related entities covered with context':return external>=2?72:60;case'Primary entity clearly defined':return ps.has_main_entity?85:(h1>0?72:58);case'Organization contact/about page visible':return 60;case'Logical H2/H3 headings & topic clusters':return (h2>=3&&h3>=2)?85:(h2>=2?70:55);case'Internal links to hub/related pages':return internal>=5?85:(internal>=2?65:45);case'Clean, descriptive URL slug':return slugScore;case'Breadcrumbs enabled (+ schema)':return ps.has_breadcrumbs?85:55;case'XML sitemap logical structure':return 60;case'E-E-A-T signals (author, date, expertise)':return ps.has_org_sameas?75:65;case'Unique value vs. top competitors':return 60;case'Facts & citations up to date':return external>=2?78:58;case'Helpful media (images/video) w/ captions':return (data.images_alt_count||0)>=3?82:58;case'Up-to-date examples & screenshots':return 60;case'Define search intent & primary topic':return (title&&h1>0)?78:60;case'Map target & related keywords (synonyms/PAA)':{const kw=(targetKw||'').trim();if(!kw)return 60;const found=(title.toLowerCase().includes(kw.toLowerCase())||(cs.headings?.H1||[]).join(' || ').toLowerCase().includes(kw.toLowerCase()));return found?80:62}case'H1 includes primary topic naturally':{const kw=(targetKw||'').trim();if(h1===0)return 45;if(!kw)return 72;const found=(cs.headings?.H1||[]).some(h=>h.toLowerCase().includes(kw.toLowerCase()));return found?84:72}case'Integrate FAQs / questions with answers':return hasFAQ?85:(/(faq|questions?)/i.test((cs.headings?.H2||[]).join(' ')+' '+(cs.headings?.H3||[]).join(' '))?70:55);case'Readable, NLP-friendly language':return clamp01num((data.humanizer?.human_score || r.score) ?? 0);case'Title tag (≈50–60 chars) w/ primary keyword':{const len=(title||'').length;return (len>=50&&len<=60)?88:(len?68:45)}case'Meta description (≈140–160 chars) + CTA':{const len=(meta||'').length;const hasCTA=/learn|get|try|start|buy|sign|download|contact/i.test(meta||'');return (len>=140&&len<=160)?(hasCTA?90:82):(len?65:48)}case'Canonical tag set correctly':return ps.canonical?85:55;case'Indexable & listed in XML sitemap':return robots.includes('noindex')?20:80;case'Robots directives valid':return (robots&&/(noindex|none)/.test(robots))?45:75;}return 60}
-    function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');if(!catsEl)return;catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>=80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label)+' best practices');if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});if(chipAuto)chipAuto.textContent=autoGood;}
+    function renderCategories(data,url,targetKw){const catsEl=document.querySelector('#cats');if(!catsEl)return;catsEl.innerHTML='';let autoGood=0;CATS.forEach(cat=>{const rows=cat.checks.map(lbl=>{const s=scoreChecklist(lbl,data,url,targetKw);const fill=s>=80?'fill-green':(s>=60?'fill-orange':'fill-red');const pill=s>=80?'score-pill--green':s>=60?'score-pill--orange':'score-pill--red';if(s>=80)autoGood++;return {label:lbl,score:s,fill,pill,bandTxt:(s>80?'Good (≥80)':s>=60?'Needs work (60–79)':'Low (<60)')};});const total=rows.length;const passed=rows.filter(r=>r.score>=80).length;const pct=Math.round((passed/Math.max(1,total))*100);const card=document.createElement('div');card.className='cat-card';card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="display:flex;align-items:center;gap:8px"><div class="king" style="width:34px;height:34px">${cat.icon}</div><div><div class="t-grad" style="font-size:16px;font-weight:900">${cat.name}</div><div style="font-size:12px;color:#b6c2cf">Keep improving</div></div></div><div class="pill">${passed} / ${total}</div></div><div class="progress" style="margin-bottom:8px"><span style="width:${pct}%"></span></div><div class="space-y-2" id="list"></div>`;const list=card.querySelector('#list');rows.forEach(row=>{const dot=row.score>=80?'#10b981':row.score>=60?'#f59e0b':'#ef4444';const el=document.createElement('div');el.className='check';el.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${dot}"></span><div class="font-semibold" style="font-size:13px">${row.label}</div></div><div style="display:flex;align-items:center;gap:6px"><span class="score-pill ${row.pill}">${row.score}</span><button class="improve-btn ${row.fill}" type="button">Improve</button></div>`;el.querySelector('.improve-btn').addEventListener('click',()=>{const kb=KB[row.label]||{why:'This item impacts relevance and UX.',tips:['Aim for ≥80 and re-run the analyzer.'],link:'https://www.google.com'};mTitle.textContent=row.label;mCat.textContent=cat.name;mScore.textContent=row.score;mBand.textContent=row.bandTxt;mBand.className='pill '+(row.score>=80?'score-pill--green':row.score>=60?'score-pill--orange':'score-pill--red');mWhy.textContent=kb.why;mTips.innerHTML='';(kb.tips||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;mTips.appendChild(li)});mLink.href=kb.link||('https://www.google.com/search?q='+encodeURIComponent(row.label)+' best practices');if(typeof modal.showModal==='function')modal.showModal();else modal.setAttribute('open','')});list.appendChild(el)});catsEl.appendChild(card)});if(chipAuto)chipAuto.textContent=autoGood;}
 
     /* API Calls */
     async function callApi(endpoint, data) {
@@ -920,14 +869,50 @@
         }
     }
     
-    function setWheel(elRing, elNum, container, score, prefix){
-        if (!elRing || !elNum || !container) return;
-        const b=bandName(score);
-        container.classList.remove('good','warn','bad');
+    function setWheel(container, elNum, score) {
+        if (!container || !elNum) return;
+        score = clamp01(score);
+        const b = bandName(score);
+        container.classList.remove('good', 'warn', 'bad');
         container.classList.add(b);
-        // The score variable is now set on the container itself for the ::before to use
-        container.style.setProperty('--v',score);
-        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
+        container.style.setProperty('--v', score);
+        
+        // Animate number
+        let current = parseInt(elNum.textContent) || 0;
+        if (isNaN(current)) current = 0;
+
+        const duration = 900;
+        let start = null;
+
+        const animate = (timestamp) => {
+            if (!start) start = timestamp;
+            const progress = timestamp - start;
+            const value = Math.min(current + (score - current) * (progress / duration), score);
+            elNum.textContent = Math.floor(value);
+            if (progress < duration) {
+                window.requestAnimationFrame(animate);
+            } else {
+                elNum.textContent = Math.floor(score);
+            }
+        };
+        window.requestAnimationFrame(animate);
+
+        // Add bubbles dynamically
+        const bubbleContainer = container.querySelector('.score-wheel-bubbles');
+        if (bubbleContainer) {
+            bubbleContainer.innerHTML = '';
+            const bubbleCount = Math.floor(score / 4);
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('span');
+                bubble.style.left = `${Math.random() * 90 + 5}%`;
+                bubble.style.animationDelay = `${Math.random() * 6}s`;
+                bubble.style.animationDuration = `${Math.random() * 6 + 5}s`;
+                const size = Math.random() * 4 + 2;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubbleContainer.appendChild(bubble);
+            }
+        }
     }
     
     function setSpeedCircle(circleEl, score) {
@@ -950,7 +935,7 @@
             danger: '❗'
         };
 
-        const scoreBand = human_score >= 80 ? 'good' : human_score >= 60 ? 'warn' : 'bad';
+        const scoreBand = human_score > 80 ? 'good' : human_score >= 60 ? 'warn' : 'bad';
         
         let suggestionsHtml = '';
         if (badge_type !== 'success' && suggestions) {
@@ -969,18 +954,21 @@
         if (badge_type !== 'success' && google_search_url) {
             googleLinkHtml = `<a href="${google_search_url}" target="_blank" class="btn btn-blue" style="margin-top: 15px; display: inline-block;"><span class="btn-icon">💡</span><span>Get More Tips</span></a>`;
         }
-
-        humanizerResult.innerHTML = `
-            <div class="humanizer-wheel ${scoreBand}" style="--v:${human_score};">
-                <div class="humanizer-wheel-ring"></div>
-                <div class="mw-ring"> <!-- This is for the custom multicolor progress bar -->
-                     <div class="water-container"></div>
-                </div>
-                <div class="humanizer-wheel-center">
-                    <span class="humanizer-wheel-score t-grad">${human_score}%</span>
-                    <span class="humanizer-wheel-label">Human Score</span>
+        
+        const humanizerWheelHTML = `
+            <div class="score-wheel score-wheel-xs ${scoreBand}" style="--v:${human_score}; animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;">
+                <div class="score-wheel-outer">
+                    <div class="score-wheel-inner">
+                        <div class="score-wheel-text t-grad">${human_score}</div>
+                        <div class="score-wheel-liquid"></div>
+                        <div class="score-wheel-bubbles"></div>
+                    </div>
                 </div>
             </div>
+        `;
+
+        humanizerResult.innerHTML = `
+            ${humanizerWheelHTML}
             <div class="humanizer-recommendation-badge ${badge_type}">
                <span class="c-icon float">${badgeIcon[badge_type] || '✅'}</span>
                <span>${recommendation}</span>
@@ -1027,7 +1015,7 @@
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
-        setWheel(mwRing, mwNum, mw, score, '');
+        setWheel(mw, mwNum, score);
         if(overallFill) overallFill.style.width=score+'%';
         if(overallPct) overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
@@ -1068,7 +1056,7 @@
         
         if (tsiData) {
             const tsi = tsiData;
-            setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
+            setWheel(mwTSI, numTSI, tsi.score || 0);
             if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             if(tsiUrlClarityScore) tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             if(tsiUrlSuggestion) tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
@@ -1090,7 +1078,7 @@
         
         if(caeData) {
             const cae = caeData;
-            setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
+            setWheel(mwCAE, numCAE, cae.score || 0);
             if(caeTopicClusters) caeTopicClusters.innerHTML = (cae.topic_clusters||[]).map(t => `<span class="chip">${t}</span>`).join('');
             if(caeEntities) caeEntities.innerHTML = (cae.entities||[]).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
             if(caeKeywords) caeKeywords.innerHTML = (cae.semantic_keywords||[]).map(k => `<span class="chip">${k}</span>`).join('');
@@ -1244,15 +1232,18 @@
     </div>
   </div>
 
-  <div class="legend"><span class="badge g">Green ≥ 80</span><span class="badge o">Orange 60–79</span><span class="badge r">Red &lt; 60</span></div>
+  <div class="legend"><span class="badge g">Green > 80</span><span class="badge o">Orange 60–80</span><span class="badge r">Red &lt; 60</span></div>
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;">
-      <div class="mw bad" id="mw">
-        <div class="mw-ring" id="mwRing">
-          <div class="water-container"></div>
-        </div>
-        <div class="mw-center" id="mwNum">0%</div>
+      <div class="score-wheel" id="mw" style="--v:0;">
+          <div class="score-wheel-outer">
+              <div class="score-wheel-inner">
+                  <div class="score-wheel-text" id="mwNum">0</div>
+                  <div class="score-wheel-liquid"></div>
+                  <div class="score-wheel-bubbles"></div>
+              </div>
+          </div>
       </div>
     </div>
     <div class="space-y-2">
@@ -1300,7 +1291,7 @@
     </div>
   </div>
   
-  <div class="unified-card" id="aiContentCheckerCard">
+  <div class="unified-card unified-card--blue" id="aiContentCheckerCard">
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
             <span class="c-icon pulse">🤖</span>
             <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Readability & Humanizer</h3>
@@ -1308,14 +1299,13 @@
         <div id="humanizerCard">
              <div id="humanizerResult">
                 <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
-                    <div class="humanizer-wheel mw" style="--v:0;">
-                         <div class="mw-ring">
-                           <div class="humanizer-wheel-ring"></div>
-                           <div class="water-container"></div>
-                         </div>
-                        <div class="humanizer-wheel-center mw-center">
-                            <span class="humanizer-wheel-score t-grad">-%</span>
-                            <span class="humanizer-wheel-label">Human Score</span>
+                    <div class="score-wheel score-wheel-xs" style="--v:0;">
+                         <div class="score-wheel-outer">
+                            <div class="score-wheel-inner">
+                                <div class="score-wheel-text">-</div>
+                                <div class="score-wheel-liquid"></div>
+                                <div class="score-wheel-bubbles"></div>
+                            </div>
                         </div>
                     </div>
                     <div style="margin-top: 16px;">
@@ -1326,13 +1316,21 @@
         </div>
     </div>
 
-  <div class="unified-card" id="contentAnalysisEngineCard">
+  <div class="unified-card unified-card--blue" id="contentAnalysisEngineCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon spin">🚀</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
     </div>
     <div class="cae-grid">
-      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE"><div class="water-container"></div></div><div class="mw-center" id="numCAE">0%</div></div></div>
+      <div class="score-wheel score-wheel-sm" id="mwCAE" style="--v:0">
+          <div class="score-wheel-outer">
+              <div class="score-wheel-inner">
+                  <div class="score-wheel-text" id="numCAE">0</div>
+                  <div class="score-wheel-liquid"></div>
+                  <div class="score-wheel-bubbles"></div>
+              </div>
+          </div>
+      </div>
       <div class="cae-info-grid">
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon spin">🧩</span></div><span class="cae-info-title">Topic Clustering Analysis</span></div><div class="cae-tags" id="caeTopicClusters"></div></div>
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon pulse">🏢</span></div><span class="cae-info-title">Entity Recognition</span></div><div class="cae-tags" id="caeEntities"></div></div>
@@ -1348,13 +1346,21 @@
     </div>
   </div>
 
-  <div class="unified-card" id="technicalSeoCard">
+  <div class="unified-card unified-card--purple" id="technicalSeoCard">
      <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon pulse">⚙️</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
     </div>
      <div class="tsi-grid">
-      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI"><div class="water-container"></div></div><div class="mw-center" id="numTSI">0%</div></div></div>
+      <div class="score-wheel score-wheel-sm" id="mwTSI" style="--v:0">
+          <div class="score-wheel-outer">
+              <div class="score-wheel-inner">
+                  <div class="score-wheel-text" id="numTSI">0</div>
+                  <div class="score-wheel-liquid"></div>
+                  <div class="score-wheel-bubbles"></div>
+              </div>
+          </div>
+      </div>
       <div class="tsi-info-grid">
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🔗</span><span class="tsi-info-title">Internal Linking</span></div><ul id="tsiInternalLinks"></ul></div>
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🌐</span><span class="tsi-info-title">URL Structure</span></div><p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p><p id="tsiUrlSuggestion"></p></div>
@@ -1374,7 +1380,7 @@
     </div>
   </div>
 
-  <div class="unified-card" id="keywordIntelligenceCard">
+  <div class="unified-card unified-card--orange" id="keywordIntelligenceCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon float">🔑</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
@@ -1392,7 +1398,7 @@
     </div>
   </div>
   
-  <div class="unified-card" id="onPageOptimizationCard">
+  <div class="unified-card unified-card--blue" id="onPageOptimizationCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon spin">🛠️</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">On-Page Optimization Tools</h3>
@@ -1405,7 +1411,7 @@
     </div>
   </div>
 
-  <div class="unified-card" id="aiPoweredFeaturesCard">
+  <div class="unified-card unified-card--blue" id="aiPoweredFeaturesCard">
       <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
         <span class="c-icon float">✨</span>
         <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI-Powered Features</h3>
@@ -1474,7 +1480,7 @@
     <div id="cats" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"></div>
   </div>
 
-  <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:24px">
+  <dialog id="improveModal" class="rounded-2xl p-0 w-[min(680px,95vw)]" style="border:none;border-radius:16px">
     <div class="card">
       <div style="display:flex;align-items:start;justify-content:space-between;gap:10px"><h4 id="improveTitle" class="t-grad">Improve</h4><form method="dialog"><button class="pill">Close</button></form></div>
       <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px">
