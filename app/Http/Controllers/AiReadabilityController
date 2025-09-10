@@ -5,104 +5,61 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 
 class AiReadabilityController extends Controller
 {
     /**
-     * Handles the standalone text snippet check via API.
-     * @param Request $request
-     * @return JsonResponse
+     * Approximates the number of syllables in a word.
      */
-    public function checkSnippet(Request $request): JsonResponse
+    private static function countSyllables(string $word): int
     {
-        $validated = $request->validate([
-            'text' => 'required|string|min:50|max:10000'
-        ]);
+        $word = strtolower(trim($word));
+        if (mb_strlen($word) <= 3) return 1;
 
-        $text = $validated['text'];
-        $aiLikelihood = self::getAiLikelihood($text);
+        $word = preg_replace('/(es|ed|e)$/', '', $word);
+        $word = preg_replace('/^y/', '', $word);
         
-        if ($aiLikelihood === -1) {
-            // Since this is a dedicated check, we can rely on readability as a fallback.
-            $readabilityData = self::analyzeReadability($text);
-            $humanScore = $readabilityData['score'];
-            $scoringMethod = 'readability_fallback';
-        } else {
-            $humanScore = 100 - $aiLikelihood;
-            $scoringMethod = 'openai';
+        preg_match_all('/[aeiouy]{1,2}/', $word, $matches);
+        $syllableCount = count($matches[0]);
+        
+        return $syllableCount > 0 ? $syllableCount : 1;
+    }
+    
+    /**
+     * Analyzes text to calculate a Flesch-Kincaid readability score.
+     */
+    private static function analyzeReadability(string $text): int
+    {
+        if (empty($text)) {
+            return 0;
+        }
+
+        $words = preg_split('/[\s,]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
+        $wordCount = count($words);
+
+        if ($wordCount < 50) {
+            return 65; // Return a neutral score for very short texts
+        }
+
+        $sentenceCount = preg_match_all('/[.!?]+/', $text, $matches);
+        $sentenceCount = $sentenceCount > 0 ? $sentenceCount : 1;
+
+        $syllableCount = 0;
+        foreach ($words as $word) {
+            $syllableCount += self::countSyllables($word);
+        }
+
+        $fleschScore = 0;
+        if ($wordCount > 0 && $sentenceCount > 0 && $syllableCount > 0) {
+            $fleschScore = 206.835 - 1.015 * ($wordCount / $sentenceCount) - 84.6 * ($syllableCount / $wordCount);
         }
         
-        $suggestions = '';
-        if ($humanScore < 80 && $scoringMethod === 'openai') {
-            $suggestions = self::getHumanizeSuggestions($text, $aiLikelihood ?? (100 - $humanScore));
-        }
-
-        $recommendation = '';
-        $badgeType = 'success';
-        if ($humanScore < 60) {
-            $recommendation = 'This content seems highly AI-generated. A full rewrite is strongly recommended to improve authenticity and reader engagement.';
-            $badgeType = 'danger';
-        } elseif ($humanScore < 80) {
-            $recommendation = 'This content could be more engaging. Please review the AI suggestions below to make it sound more human.';
-            $badgeType = 'warning';
-        } else {
-            $recommendation = 'Excellent! This content has a natural, human-like quality that readers will appreciate.';
-            $badgeType = 'success';
-        }
-
-        return response()->json([
-            'human_score' => $humanScore,
-            'suggestions' => $suggestions,
-            'recommendation' => $recommendation,
-            'badge_type' => $badgeType,
-            'google_search_url' => 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human',
-            'scoring_method' => $scoringMethod,
-        ]);
+        return (int) max(0, min(100, round($fleschScore)));
     }
 
     /**
-     * Provides humanizer data for a given text content.
-     * This is intended for internal calls from other controllers.
-     * @param string $textContent
-     * @return array
-     */
-    public static function getHumanizerDataForText(string $textContent): array
-    {
-        $aiLikelihood = self::getAiLikelihood($textContent);
-        $readabilityData = self::analyzeReadability($textContent);
-        $scoringMethod = '';
-        $humanScore = 0;
-
-        if ($aiLikelihood !== -1) {
-            $humanScore = 100 - $aiLikelihood;
-            $scoringMethod = 'openai';
-        } else {
-            $humanScore = $readabilityData['score'];
-            $scoringMethod = 'readability_fallback';
-        }
-
-        $humanizerData = [];
-        if ($humanScore < 60) {
-            $humanizerData['recommendation'] = 'This content seems highly AI-generated. A full rewrite is strongly recommended to improve authenticity and reader engagement.';
-            $humanizerData['badge_type'] = 'danger';
-        } elseif ($humanScore < 80) {
-            $humanizerData['recommendation'] = 'This content could be more engaging. Use the suggestions below to make it sound more human.';
-            $humanizerData['badge_type'] = 'warning';
-        } else {
-            $humanizerData['recommendation'] = 'Great job! This content reads like it was written by a human.';
-            $humanizerData['badge_type'] = 'success';
-        }
-        
-        $humanizerData['suggestions'] = ($humanScore < 80 && $scoringMethod === 'openai') ? self::getHumanizeSuggestions($textContent, $aiLikelihood) : '';
-        $humanizerData['google_search_url'] = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
-        $humanizerData['scoring_method'] = $scoringMethod;
-        $humanizerData['human_score'] = $humanScore;
-
-        return $humanizerData;
-    }
-
-    /**
-     * Uses OpenAI API to get a likelihood score.
+     * Uses OpenAI API to get a likelihood score of content being AI-generated.
      */
     private static function getAiLikelihood(string $text): int
     {
@@ -157,7 +114,7 @@ class AiReadabilityController extends Controller
     }
 
     /**
-     * Gets suggestions from OpenAI.
+     * Gets suggestions from OpenAI to make text sound more human.
      */
     private static function getHumanizeSuggestions(string $text, int $aiLikelihood): string
     {
@@ -174,14 +131,17 @@ class AiReadabilityController extends Controller
         }
         
         $systemMessage = "You are an expert editor specializing in making AI-generated text sound more human. Your suggestions must be concise, actionable, and easy to understand. IMPORTANT: Detect the primary language of the provided text (e.g., English, Arabic, Portuguese) and write your entire response, including all suggestions, in that same language.";
-        $userMessage = "The following text has been flagged as {$aiLikelihood}% likely to be AI-generated. Please provide 3-5 specific, actionable suggestions to make it sound more natural... Here is the text:\n\n{$truncatedText}";
+        $userMessage = "The following text has been flagged as {$aiLikelihood}% likely to be AI-generated. Please provide 3-5 specific, actionable suggestions to make it sound more natural, engaging, and human-written. Frame your suggestions as a list. Suggestions could include varying sentence structure, adding personal anecdotes or rhetorical questions, injecting more personality, or simplifying complex vocabulary. Here is the text:\n\n{$truncatedText}";
         
         try {
             $response = Http::withToken($apiKey)
                 ->timeout(90)
                 ->post('https://api.openai.com/v1/chat/completions', [
                     'model' => env('OPENAI_MODEL', 'gpt-4-turbo'),
-                    'messages' => [['role' => 'system', 'content' => $systemMessage], ['role' => 'user', 'content' => $userMessage]],
+                    'messages' => [
+                        ['role' => 'system', 'content' => $systemMessage],
+                        ['role' => 'user', 'content' => $userMessage]
+                    ],
                     'temperature' => 0.7,
                     'max_tokens' => 500,
                 ]);
@@ -198,44 +158,65 @@ class AiReadabilityController extends Controller
             return 'An internal server error occurred while getting suggestions.';
         }
     }
-
+    
     /**
-     * Analyzes text for readability score.
+     * Public static method to get all humanizer data for a given text.
+     * This can be called from other controllers.
      */
-    private static function analyzeReadability(string $text): array
+    public static function getHumanizerDataForText(string $text): array
     {
-        if (empty($text)) return ['score' => 0];
+        $aiLikelihood = self::getAiLikelihood($text);
+        $humanScore = 0;
+        $scoringMethod = '';
 
-        $words = preg_split('/[\s,]+/', $text, -1, PREG_SPLIT_NO_EMPTY);
-        $wordCount = count($words);
+        if ($aiLikelihood !== -1) {
+            $humanScore = 100 - $aiLikelihood;
+            $scoringMethod = 'openai';
+        } else {
+            $humanScore = self::analyzeReadability($text);
+            $aiLikelihood = 100 - $humanScore;
+            $scoringMethod = 'readability_fallback';
+        }
 
-        if ($wordCount < 50) return ['score' => 65];
-
-        $sentenceCount = preg_match_all('/[.!?]+/', $text, $matches);
-        $sentenceCount = $sentenceCount > 0 ? $sentenceCount : 1;
-
-        $syllableCount = 0;
-        foreach ($words as $word) $syllableCount += self::countSyllables($word);
-
-        $fleschScore = 0;
-        if ($wordCount > 0 && $sentenceCount > 0 && $syllableCount > 0) {
-            $fleschScore = 206.835 - 1.015 * ($wordCount / $sentenceCount) - 84.6 * ($syllableCount / $wordCount);
+        $recommendation = '';
+        $badgeType = 'success';
+        if ($humanScore < 60) {
+            $recommendation = 'This content seems highly AI-generated. A full rewrite is strongly recommended to improve authenticity and reader engagement.';
+            $badgeType = 'danger';
+        } elseif ($humanScore < 80) {
+            $recommendation = 'This content could be more engaging. Please review the AI suggestions below to make it sound more human.';
+            $badgeType = 'warning';
+        } else {
+            $recommendation = 'Excellent! This content has a natural, human-like quality that readers will appreciate.';
+            $badgeType = 'success';
         }
         
-        return ['score' => (int) max(0, min(100, round($fleschScore)))];
+        $suggestions = ($humanScore < 80 && $scoringMethod === 'openai') 
+            ? self::getHumanizeSuggestions($text, $aiLikelihood) 
+            : '';
+
+        return [
+            'human_score' => $humanScore,
+            'ai_score' => $aiLikelihood,
+            'suggestions' => $suggestions,
+            'recommendation' => $recommendation,
+            'badge_type' => $badgeType,
+            'google_search_url' => 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human',
+            'scoring_method' => $scoringMethod,
+        ];
     }
 
     /**
-     * Approximates the number of syllables in a word.
+     * Handles the AJAX request for checking a text snippet.
      */
-    private static function countSyllables(string $word): int
+    public function checkSnippet(Request $request): JsonResponse
     {
-        $word = strtolower(trim($word));
-        if (mb_strlen($word) <= 3) return 1;
-        $word = preg_replace('/(es|ed|e)$/', '', $word);
-        $word = preg_replace('/^y/', '', $word);
-        preg_match_all('/[aeiouy]{1,2}/', $word, $matches);
-        $syllableCount = count($matches[0]);
-        return $syllableCount > 0 ? $syllableCount : 1;
+        $validated = $request->validate([
+            'text' => 'required|string|min:50|max:10000'
+        ]);
+
+        $humanizerData = self::getHumanizerDataForText($validated['text']);
+
+        return response()->json($humanizerData);
     }
 }
