@@ -25,6 +25,7 @@
     --red-1:#FF4500;
     --pink-1:#FF1493;
     --purple-1:#8A2BE2;
+    --green-dark: #006400; /* NEW: Darker green for liquid fill */
 
     /* UPGRADED: Unified dark background */
     --unified-bg: linear-gradient(145deg, #0D1120, #111827);
@@ -106,7 +107,7 @@
 
   /* Modifier classes for different score bands */
   .score-wheel-pro--good {
-    --liquid-color: var(--green-1);
+    --liquid-color: var(--green-dark);
     --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 Q 100 20, 200 50 T 400 50 T 600 50 T 800 50 V 100 H 0 Z" fill="%2300FF8A"></path></svg>');
   }
   .score-wheel-pro--warn {
@@ -824,17 +825,13 @@
         const card = $(cardSelector);
         let message = error.message || 'An unknown error occurred.';
 
-        if (message.toLowerCase().includes('api key')) {
-            message = `Feature unavailable. The API key for ${toolName} is not configured in the backend.`;
-        } else {
-            const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
-            if (apiErrorMatch && apiErrorMatch[1]) {
-                try {
-                    const errorJson = JSON.parse(apiErrorMatch[1]);
-                    message = errorJson.error || errorJson.message || apiErrorMatch[1];
-                } catch(e) { 
-                    message = apiErrorMatch[1]; 
-                }
+        const apiErrorMatch = message.match(/API Error at .*?: (.*)/);
+        if (apiErrorMatch && apiErrorMatch[1]) {
+            try {
+                const errorJson = JSON.parse(apiErrorMatch[1]);
+                message = errorJson.error || errorJson.message || apiErrorMatch[1];
+            } catch(e) { 
+                message = apiErrorMatch[1]; 
             }
         }
         
@@ -1130,11 +1127,7 @@
             const el = $(`#${result.elementId}`);
             if (!el) return;
             if (result.error) {
-                if (result.error.message && result.error.message.toLowerCase().includes('api key')) {
-                     el.innerHTML = `<span style="color: var(--orange-1); font-size: 12px;">AI feature unavailable. Please configure API key.</span>`;
-                } else {
-                    el.textContent = `Error: Analysis failed.`;
-                }
+                el.innerHTML = `<span style="color: var(--orange-1); font-size: 12px;">Error: ${result.error.message.replace(/</g, "&lt;")}</span>`;
             } 
             else if (result.type === 'json') { el.innerHTML = result.formatter(result.data); }
             else { const content = result.data.content || 'No suggestions found.'; el.innerHTML = result.type === 'html' ? content : content.replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
@@ -1180,11 +1173,7 @@
         aiBriefBtn.disabled = true; aiBriefBtn.textContent = 'Generating...'; aiBriefResult.textContent = 'AI is crafting your brief...';
         try { const result = await callOpenAiApi('brief', prompt, url); aiBriefResult.textContent = result.content || 'No content returned from AI.';
         } catch (error) {
-            if (error.message && error.message.toLowerCase().includes('api key')) {
-                aiBriefResult.textContent = `AI feature unavailable. Please configure the API key in the backend.`;
-            } else {
-                aiBriefResult.textContent = `Error: ${error.message}`;
-            }
+            aiBriefResult.textContent = `Error: ${error.message}`;
         } finally { aiBriefBtn.disabled = false; aiBriefBtn.innerHTML = `<span class="btn-icon">✨</span><span>Generate</span>`; }
     });
 
