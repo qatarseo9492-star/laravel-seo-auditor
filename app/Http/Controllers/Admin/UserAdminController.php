@@ -205,7 +205,7 @@ class UserAdminController extends Controller
 
         $current = UserLimit::where('user_id', $user->id)->first();
 
-        $newDaily   = array_key_exists('daily_limit', $data) ? (int) $data['daily_limit'] : ($current->daily_limit ?? 200);
+        $newDaily   = array_key_exists('daily_limit', $data) ? (int) $data['daily_limit'] : ($current->daily_limit ?? 1000);
         $newEnabled = array_key_exists('is_enabled', $data)  ? (bool) $data['is_enabled']  : ($current->is_enabled ?? true);
         $newReason  = array_key_exists('reason', $data)      ? ($data['reason'] ?? null)   : ($current->reason ?? null);
 
