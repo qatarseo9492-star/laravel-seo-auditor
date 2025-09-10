@@ -93,12 +93,29 @@
     --progress-percent: calc(var(--v) * 1%);
     --size: 200px;
     --track-width: 16px;
-    --liquid-color: #ff1493; /* Bright Pink */
+    
+    /* Colors are now set by modifier classes below */
+    --liquid-color: var(--red-1); /* Default to red */
+    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%23FF4500"></path></svg>');
     
     width: var(--size);
     height: var(--size);
     position: relative;
     margin: 0 auto;
+  }
+
+  /* Modifier classes for different score bands */
+  .score-wheel-pro--good {
+    --liquid-color: var(--green-1);
+    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%2300FF8A"></path></svg>');
+  }
+  .score-wheel-pro--warn {
+    --liquid-color: var(--orange-1);
+    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%23FFA500"></path></svg>');
+  }
+   .score-wheel-pro--bad {
+    --liquid-color: var(--red-1);
+    --wave-svg: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%23FF4500"></path></svg>');
   }
 
   /* 1. The outer rainbow ring */
@@ -152,11 +169,12 @@
   .score-wheel-pro__value {
     font-size: calc(var(--size) * 0.25);
     font-weight: 900;
-    color: var(--liquid-color);
-    text-shadow: 0 0 10px #ff1493a1, 0 0 20px #ff149366;
+    color: #FFF; /* Text color is now always white */
+    text-shadow: 0 0 8px var(--liquid-color), 0 0 16px var(--liquid-color); /* Shadow uses liquid color */
     position: relative;
     z-index: 10;
     line-height: 1;
+    transition: text-shadow 0.5s ease;
   }
   .score-wheel-pro__value::after {
       content: '%';
@@ -172,7 +190,20 @@
     bottom: 0;
     height: var(--progress-percent);
     background: var(--liquid-color);
-    transition: height 0.8s cubic-bezier(0.6, 0, 0.4, 1);
+    transition: height 0.8s cubic-bezier(0.6, 0, 0.4, 1), background 0.5s ease;
+  }
+  
+  /* Bubbles effect to mimic original image */
+  .score-wheel-pro__liquid::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 30% 80%, rgba(255,255,255,0.2) 2px, transparent 8px),
+        radial-gradient(circle at 65% 40%, rgba(255,255,255,0.25) 3px, transparent 12px),
+        radial-gradient(circle at 50% 90%, rgba(255,255,255,0.15) 4px, transparent 16px),
+        radial-gradient(circle at 80% 70%, rgba(255,255,255,0.2) 2px, transparent 10px);
+    opacity: 0.8;
   }
 
   .score-wheel-pro__wave {
@@ -181,7 +212,7 @@
     left: 0;
     width: 200%;
     height: 10px; /* Wave height */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 100" preserveAspectRatio="none"><path d="M 0 50 C 200 0, 200 100, 400 50 S 600 0, 800 50 V 100 H 0 Z" fill="%23ff1493"></path></svg>');
+    background-image: var(--wave-svg);
     background-repeat: repeat-x;
     background-size: 50% 100%;
     animation: wave-flow 3s linear infinite;
@@ -826,7 +857,13 @@
     function setWheel(container, score){
         if (!container) return;
         const valueEl = container.querySelector('.score-wheel-pro__value');
-        score = Math.round(clamp01(score)); // Ensure it's a whole number 0-100
+        score = Math.round(clamp01(score)); 
+        
+        // Determine score band and apply the correct modifier class
+        const band = bandName(score); // 'good', 'warn', or 'bad'
+        container.classList.remove('score-wheel-pro--good', 'score-wheel-pro--warn', 'score-wheel-pro--bad');
+        container.classList.add(`score-wheel-pro--${band}`);
+
         container.style.setProperty('--v', score);
         if (valueEl) {
             valueEl.textContent = score;
