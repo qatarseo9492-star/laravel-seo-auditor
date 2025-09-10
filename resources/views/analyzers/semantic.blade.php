@@ -28,11 +28,6 @@
 
     /* UPGRADED: Unified dark background */
     --unified-bg: linear-gradient(145deg, #140424, #0D1120);
-
-    /* --- NEW: Realistic Water SVGs for Score Wheels (Good, Warn, Bad states) --- */
-    --water-svg-bad: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 100'%3e%3cdefs%3e%3clinearGradient id='liquid-grad-bad' x1='0' y1='0' x2='0' y2='100%25'%3e%3cstop offset='0%25' stop-color='%23FF1493' stop-opacity='0.8'/%3e%3cstop offset='100%25' stop-color='%23FF4500' stop-opacity='0.6'/%3e%3c/linearGradient%3e%3clinearGradient id='shine-grad-bad' x1='0' y1='0' x2='100%25' y2='0'%3e%3cstop offset='0%25' stop-color='%23FFB6C1'/%3e%3cstop offset='50%25' stop-color='%23FFFFFF'/%3e%3cstop offset='100%25' stop-color='%23FFB6C1'/%3e%3c/linearGradient%3e%3c/defs%3e%3cpath fill='url(%23liquid-grad-bad)' d='M-10,100 L-10,50 Q150,20 400,50 T810,40 L810,100 Z' /%3e%3cpath fill='%23FF4500' opacity='0.3' d='M-10,100 L-10,60 Q250,30 400,60 T810,50 L810,100 Z' /%3e%3cpath fill='none' stroke='url(%23shine-grad-bad)' stroke-width='2.5' stroke-linecap='round' d='M-10,50 Q150,20 400,50 T810,40' /%3e%3c/svg%3e");
-    --water-svg-warn: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 100'%3e%3cdefs%3e%3clinearGradient id='liquid-grad-warn' x1='0' y1='0' x2='0' y2='100%25'%3e%3cstop offset='0%25' stop-color='%23FFA500' stop-opacity='0.8'/%3e%3cstop offset='100%25' stop-color='%23FFD700' stop-opacity='0.6'/%3e%3c/linearGradient%3e%3clinearGradient id='shine-grad-warn' x1='0' y1='0' x2='100%25' y2='0'%3e%3cstop offset='0%25' stop-color='%23FFFACD'/%3e%3cstop offset='50%25' stop-color='%23FFFFFF'/%3e%3cstop offset='100%25' stop-color='%23FFFACD'/%3e%3c/linearGradient%3e%3c/defs%3e%3cpath fill='url(%23liquid-grad-warn)' d='M-10,100 L-10,50 Q150,20 400,50 T810,40 L810,100 Z' /%3e%3cpath fill='%23FFD700' opacity='0.3' d='M-10,100 L-10,60 Q250,30 400,60 T810,50 L810,100 Z' /%3e%3cpath fill='none' stroke='url(%23shine-grad-warn)' stroke-width='2.5' stroke-linecap='round' d='M-10,50 Q150,20 400,50 T810,40' /%3e%3c/svg%3e");
-    --water-svg-good: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 100'%3e%3cdefs%3e%3clinearGradient id='liquid-grad-good' x1='0' y1='0' x2='0' y2='100%25'%3e%3cstop offset='0%25' stop-color='%2300FF8A' stop-opacity='0.8'/%3e%3cstop offset='100%25' stop-color='%2300C6FF' stop-opacity='0.6'/%3e%3c/linearGradient%3e%3clinearGradient id='shine-grad-good' x1='0' y1='0' x2='100%25' y2='0'%3e%3cstop offset='0%25' stop-color='%23AFEEEE'/%3e%3cstop offset='50%25' stop-color='%23FFFFFF'/%3e%3cstop offset='100%25' stop-color='%23AFEEEE'/%3e%3c/linearGradient%3e%3c/defs%3e%3cpath fill='url(%23liquid-grad-good)' d='M-10,100 L-10,50 Q150,20 400,50 T810,40 L810,100 Z' /%3e%3cpath fill='%2300FFC6' opacity='0.3' d='M-10,100 L-10,60 Q250,30 400,60 T810,50 L810,100 Z' /%3e%3cpath fill='none' stroke='url(%23shine-grad-good)' stroke-width='2.5' stroke-linecap='round' d='M-10,50 Q150,20 400,50 T810,40' /%3e%3c/svg%3e");
   }
 
   /* --- NEW: Keyframe animations for animated borders and water --- */
@@ -44,7 +39,9 @@
     64% { border-color: var(--orange-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--orange-1), inset 0 0 12px #140424; }
     80% { border-color: var(--green-1); box-shadow: 0 0 30px #140424, 0 0 15px var(--green-1), inset 0 0 12px #140424; }
   }
-  @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+  @keyframes wave { 0% { background-position-x: 0; } 100% { background-position-x: -200px; } }
+  @keyframes wave2 { 0% { background-position-x: 0; } 100% { background-position-x: 200px; } }
+
 
   /* =============== Base page styles (colors only changed) =============== */
   html,body{
@@ -133,9 +130,9 @@
 
   .analyze-wrap{padding:12px;}
   
-  /* ========================================================= */
-  /* === 🎨 REVISED SCORE WHEEL with Dynamic Water Fill 🎨 === */
-  /* ========================================================= */
+  /* ================================================================= */
+  /* === 🎨 FINAL SCORE WHEEL with 100% accurate Water Effect 🎨 === */
+  /* ================================================================= */
   .mw {
     --v: 0;
     --size: 200px;
@@ -178,40 +175,53 @@
      mask-composite: intersect;
   }
 
-  /* Water fill effect */
-  .mw-ring::after {
-    content: "";
+  /* Gradient overrides for 'warn' and 'good' scores */
+  .mw.warn .mw-ring::before { --grad-start: var(--yellow-1); --grad-end: var(--orange-1); }
+  .mw.good .mw-ring::before { --grad-start: var(--green-1); --grad-end: var(--blue-1); }
+  
+  /* --- NEW --- Realistic Water Container */
+  .water-container {
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 200%;
-    height: var(--progress-percent); /* --- NEW --- Dynamic height based on score */
-    background-size: 50% 100%;
-    background-repeat: repeat-x;
-    background-position: center bottom;
-    background-image: var(--water-svg-bad); /* --- NEW --- Default to bad color state */
-    animation: wave 8s linear infinite;
+    width: 100%;
+    height: var(--progress-percent);
+    transition: height 0.9s cubic-bezier(0.6, 0, 0.4, 1);
     z-index: 1;
-    transition: height 0.9s cubic-bezier(0.6, 0, 0.4, 1); /* --- NEW --- Smooth fill animation */
+    overflow: hidden;
+  }
+
+  /* --- NEW --- Multi-layered water effect */
+  .water-container::before, .water-container::after {
+    content: '';
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 40%;
+  }
+
+  /* Layer 1: Main liquid body */
+  .water-container::before {
+    background: var(--red-1); /* Default to bad color */
+    bottom: -150px;
+    left: -25%;
+    animation: wave 7s linear infinite;
   }
   
-  /* Gradient overrides for 'warn' and 'good' scores */
-  .mw.warn .mw-ring::before {
-    --grad-start: var(--yellow-1);
-    --grad-end: var(--orange-1);
+  /* Layer 2: Glossy reflection/bubbles */
+  .water-container::after {
+    background: var(--pink-1); /* Default to bad highlight */
+    bottom: -145px;
+    left: -25%;
+    opacity: 0.5;
+    animation: wave2 11s linear infinite;
   }
-  .mw.good .mw-ring::before {
-    --grad-start: var(--green-1);
-    --grad-end: var(--blue-1);
-  }
-  
-  /* --- NEW --- Water SVG changes based on score */
-  .mw.warn .mw-ring::after {
-    background-image: var(--water-svg-warn);
-  }
-  .mw.good .mw-ring::after {
-    background-image: var(--water-svg-good);
-  }
+
+  /* --- NEW --- Water color changes based on score */
+  .mw.warn .water-container::before { background: var(--orange-1); }
+  .mw.warn .water-container::after { background: var(--yellow-1); }
+  .mw.good .water-container::before { background: var(--green-2); }
+  .mw.good .water-container::after { background: var(--green-1); }
   
   .mw-center {
     position: absolute;
@@ -964,7 +974,7 @@
             <div class="humanizer-wheel ${scoreBand}" style="--v:${human_score};">
                 <div class="humanizer-wheel-ring"></div>
                 <div class="mw-ring"> <!-- This is for the custom multicolor progress bar -->
-                    <div class="humanizer-wheel-ring"></div>
+                     <div class="water-container"></div>
                 </div>
                 <div class="humanizer-wheel-center">
                     <span class="humanizer-wheel-score t-grad">${human_score}%</span>
@@ -1239,7 +1249,9 @@
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;">
       <div class="mw bad" id="mw">
-        <div class="mw-ring" id="mwRing" style="--v:0"></div>
+        <div class="mw-ring" id="mwRing">
+          <div class="water-container"></div>
+        </div>
         <div class="mw-center" id="mwNum">0%</div>
       </div>
     </div>
@@ -1296,11 +1308,12 @@
         <div id="humanizerCard">
              <div id="humanizerResult">
                 <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
-                    <div class="humanizer-wheel" style="--v:0;">
+                    <div class="humanizer-wheel mw" style="--v:0;">
                          <div class="mw-ring">
                            <div class="humanizer-wheel-ring"></div>
+                           <div class="water-container"></div>
                          </div>
-                        <div class="humanizer-wheel-center">
+                        <div class="humanizer-wheel-center mw-center">
                             <span class="humanizer-wheel-score t-grad">-%</span>
                             <span class="humanizer-wheel-label">Human Score</span>
                         </div>
@@ -1319,7 +1332,7 @@
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
     </div>
     <div class="cae-grid">
-      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE" style="--v:0"></div><div class="mw-center" id="numCAE">0%</div></div></div>
+      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE"><div class="water-container"></div></div><div class="mw-center" id="numCAE">0%</div></div></div>
       <div class="cae-info-grid">
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon spin">🧩</span></div><span class="cae-info-title">Topic Clustering Analysis</span></div><div class="cae-tags" id="caeTopicClusters"></div></div>
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon pulse">🏢</span></div><span class="cae-info-title">Entity Recognition</span></div><div class="cae-tags" id="caeEntities"></div></div>
@@ -1341,7 +1354,7 @@
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
     </div>
      <div class="tsi-grid">
-      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI" style="--v:0"></div><div class="mw-center" id="numTSI">0%</div></div></div>
+      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI"><div class="water-container"></div></div><div class="mw-center" id="numTSI">0%</div></div></div>
       <div class="tsi-info-grid">
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🔗</span><span class="tsi-info-title">Internal Linking</span></div><ul id="tsiInternalLinks"></ul></div>
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🌐</span><span class="tsi-info-title">URL Structure</span></div><p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p><p id="tsiUrlSuggestion"></p></div>
