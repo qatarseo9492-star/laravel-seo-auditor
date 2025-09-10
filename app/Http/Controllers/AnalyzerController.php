@@ -396,25 +396,22 @@ class AnalyzerController extends Controller
             libxml_clear_errors();
             $xpath = new DOMXPath($dom);
             
-            // Extract text for analysis
             $textContent = $this->extractTextFromDom($xpath);
             
-            // This is the primary method for scoring. It relies on a configured OpenAI API Key.
             $aiLikelihood = $this->getAiLikelihood($textContent);
             
             $readabilityData = $this->analyzeReadability($textContent);
             $humanScore = 0;
 
             if ($aiLikelihood !== -1) {
-                // Primary method: Use the AI score if the API call was successful.
                 $humanScore = 100 - $aiLikelihood;
             } else {
-                // Fallback method: If the API fails or is not configured, use local readability analysis.
-                $humanScore = (int) max(0, min(100, round(40 + ($readabilityData['score'] * 0.6))));
+                // **FIX:** If the AI check fails, directly use the readability score.
+                // This provides a more accurate and varied fallback score.
+                $humanScore = $readabilityData['score'];
                 $aiLikelihood = 100 - $humanScore;
             }
 
-            // Generate humanizer recommendations based on the score
             $humanizerData = [];
             if ($humanScore < 60) {
                 $humanizerData['recommendation'] = 'This content seems highly AI-generated. A full rewrite is strongly recommended to improve authenticity and reader engagement.';
@@ -426,7 +423,7 @@ class AnalyzerController extends Controller
                 $humanizerData['recommendation'] = 'Excellent! This content has a natural, human-like quality that readers will appreciate.';
                 $humanizerData['badge_type'] = 'success';
             }
-            // Only fetch suggestions if score is below 80 and the AI check was the source of the score.
+            
             $humanizerData['suggestions'] = ($humanScore < 80 && $aiLikelihood !== -1) ? $this->getHumanizeSuggestions($textContent, $aiLikelihood) : '';
             $humanizerData['google_search_url'] = 'https://www.google.com/search?q=how+to+make+ai+text+sound+more+human';
 
@@ -476,7 +473,6 @@ class AnalyzerController extends Controller
                 'quick_stats' => $quickStats,
             ];
 
-            // Calculate dynamic SEO scores
             $scores = $this->calculateScores($parsedData);
 
             return response()->json([
