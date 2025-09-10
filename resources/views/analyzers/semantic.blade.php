@@ -27,8 +27,24 @@
     --purple-1:#8A2BE2;
 
     /* UPGRADED: Unified dark background */
-    --unified-bg: linear-gradient(145deg, #0D1120, #111827);
+    --unified-bg: linear-gradient(145deg, #140424, #0D1120);
+
+    /* --- NEW: Water SVGs for Score Wheels --- */
+    --water-svg-bad: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3e%3cpath fill='%23FF450044' d='M800 56.9c-155.5 0-204.9-50.3-400-50.3S155.5 56.9 0 56.9v31.8h800v-.2-31.6z'/%3e%3cpath fill='%23FF149322' d='M0 56.9c155.5 0 204.9 26.4 400 26.4s244.5-26.4 400-26.4v31.8H0V56.9z'/%3e%3c/svg%3e");
+    --water-svg-warn: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3e%3cpath fill='%23FFA50044' d='M800 56.9c-155.5 0-204.9-50.3-400-50.3S155.5 56.9 0 56.9v31.8h800v-.2-31.6z'/%3e%3cpath fill='%23FFD70022' d='M0 56.9c155.5 0 204.9 26.4 400 26.4s244.5-26.4 400-26.4v31.8H0V56.9z'/%3e%3c/svg%3e");
+    --water-svg-good: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 88.7'%3e%3cpath fill='%2300FF8A44' d='M800 56.9c-155.5 0-204.9-50.3-400-50.3S155.5 56.9 0 56.9v31.8h800v-.2-31.6z'/%3e%3cpath fill='%2300C6FF22' d='M0 56.9c155.5 0 204.9 26.4 400 26.4s244.5-26.4 400-26.4v31.8H0V56.9z'/%3e%3c/svg%3e");
   }
+
+  /* --- NEW: Keyframe animations for animated borders and water --- */
+  @keyframes rainbowGlow {
+    0%, 100% { border-color: var(--blue-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--blue-1), inset 0 0 12px #140424; }
+    16% { border-color: var(--purple-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--purple-1), inset 0 0 12px #140424; }
+    32% { border-color: var(--pink-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--pink-1), inset 0 0 12px #140424; }
+    48% { border-color: var(--red-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--red-1), inset 0 0 12px #140424; }
+    64% { border-color: var(--orange-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--orange-1), inset 0 0 12px #140424; }
+    80% { border-color: var(--green-1); box-shadow: 0 0 20px #140424, 0 0 15px var(--green-1), inset 0 0 12px #140424; }
+  }
+  @keyframes wave { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
   /* =============== Base page styles (colors only changed) =============== */
   html,body{
@@ -57,10 +73,24 @@
   .legend .g{background:#0f2d1f;color:#baf7d9;border-color:#10b98166}
   .legend .o{background:#2f2508;color:#fde68a;border-color:#f59e0b66}
   .legend .r{background:#331111;color:#fecaca;border-color:#ef444466}
+  
+  /* --- NEW --- Animated border and background for all containers */
+  .card, .cat-card, .ground-slab, .analyze-wrap, .unified-card, .speed-card-new, .meta-card {
+    background: var(--unified-bg);
+    border: 2px solid;
+    animation: rainbowGlow 5s linear infinite;
+  }
 
-  .card{border-radius:18px;padding:18px;background:var(--card);border:1px solid var(--outline);box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  .cat-card{border-radius:16px;padding:16px;background:var(--card-2);border:1px solid var(--outline)}
-  .ground-slab{border-radius:22px;padding:20px;background:#1B1B1B;border:1px solid var(--outline);margin-top:20px;box-shadow:0 10px 40px rgba(0,0,0,.4)}
+  .card{border-radius:18px;padding:18px;}
+  .cat-card{border-radius:16px;padding:16px;}
+  .ground-slab{border-radius:22px;padding:20px; margin-top:20px;}
+  .unified-card {border-radius: 20px; padding: 16px; margin-top: 24px;}
+  
+  /* Remove old unified-card specific styles */
+  .unified-card--blue, .unified-card--purple, .unified-card--orange, .unified-card--green {
+    border-color: transparent; /* Handled by animation now */
+    box-shadow: none; /* Handled by animation now */
+  }
 
   .pill{padding:5px 10px;border-radius:9999px;font-size:12px;font-weight:800;border:1px solid #ffffff29;background:#ffffff14;color:var(--ink)}
   .chip{padding:6px 8px;border-radius:12px;font-weight:800;display:inline-flex;align-items:center;gap:6px;border:1px solid #ffffff24;color:#eef2ff;font-size:12px;background:#171717}
@@ -79,15 +109,32 @@
   .btn-orange{background:linear-gradient(90deg,var(--yellow-1),var(--orange-1));color:#2b1600}
   .btn-purple{background:linear-gradient(90deg,var(--pink-1),var(--purple-1));color:#19041a}
   
-  .url-row{display:flex;align-items:center;gap:10px;border:1px solid var(--outline);background:#181818;border-radius:12px;padding:8px 10px}
-  .url-row input{background:transparent;border:none;outline:none;color:var(--ink);width:100%}
-  .url-row .paste{padding:6px 10px;border-radius:10px;border:1px solid #ffffff26;background:#232323;color:var(--ink)}
+  /* --- NEW --- Stylish URL Input Row */
+  .url-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-radius:14px;
+    padding:8px 10px;
+  }
+  .url-row input{background:transparent;border:none;outline:none;color:var(--ink);width:100%; font-size: 16px;}
+  .url-row .paste{
+    padding:6px 12px;
+    border-radius:10px;
+    border: 1px solid var(--purple-1);
+    background: linear-gradient(135deg, #8A2BE255, #FF149333);
+    color:var(--ink);
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .url-row .paste:hover { filter: brightness(1.3); }
 
-  .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
+  .analyze-wrap{border-radius:16px;padding:12px;}
   
-  /* ==================================================== */
-  /* === 🎨 UPGRADED: 2-COLOR NEON-TECH SCORE WHEELS 🎨 === */
-  /* ==================================================== */
+  /* ================================================== */
+  /* === 🎨 NEW SCORE WHEEL with Water Fill Effect 🎨 === */
+  /* ================================================== */
   .mw {
     --v: 0;
     --size: 200px;
@@ -103,22 +150,20 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
-    box-shadow:
-      inset 0 0 4px 1px rgba(0,0,0,0.8),
-      0 0 0 1px rgba(255,255,255,0.05);
+    background: #080415; /* Dark inner background */
+    box-shadow: inset 0 0 12px 2px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+    overflow: hidden; /* Contain water */
   }
 
+  /* Progress ring */
   .mw-ring::before {
     content: "";
     position: absolute;
     inset: 0px;
     border-radius: 50%;
     
-    /* Default gradient for 'bad' score */
-    --grad-start: var(--red-1);
-    --grad-end: var(--pink-1);
-    background: conic-gradient(from -90deg, var(--grad-start), var(--grad-end));
+    --progress-color: var(--red-1); /* Default color */
+    background: var(--progress-color);
     
     -webkit-mask-image: 
         conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
@@ -129,26 +174,29 @@
         radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
      mask-composite: intersect;
   }
-  
-  /* Gradient overrides for 'warn' and 'good' scores */
-  .mw.warn .mw-ring::before {
-    --grad-start: var(--yellow-1);
-    --grad-end: var(--orange-1);
-  }
-  .mw.good .mw-ring::before {
-    --grad-start: var(--green-1);
-    --grad-end: var(--blue-1);
-  }
-  
-  .mw-ring::after {
-    content: '';
-    position: absolute;
-    inset: calc(var(--track-width) - 4px);
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 70%);
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
-  }
 
+  /* Water fill effect */
+  .mw-ring::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%;
+    height: 25%;
+    background-size: 50% 100%;
+    background-repeat: repeat-x;
+    animation: wave 4s linear infinite;
+    z-index: 1;
+    --water-svg: var(--water-svg-bad); /* Default */
+    background-image: var(--water-svg);
+  }
+  
+  /* Color overrides for score states */
+  .mw.warn .mw-ring::before { --progress-color: var(--orange-1); }
+  .mw.good .mw-ring::before { --progress-color: var(--green-1); }
+  .mw.warn .mw-ring::after { --water-svg: var(--water-svg-warn); }
+  .mw.good .mw-ring::after { --water-svg: var(--water-svg-good); }
+  
   .mw-center {
     position: absolute;
     inset: 0;
@@ -158,8 +206,10 @@
     font-weight: 900;
     color: #fff;
     text-shadow: 0 0 12px rgba(255,255,255,0.3);
+    z-index: 2; /* Above water */
   }
   
+  /* Glow effects */
   .mw.good { filter: drop-shadow(0 0 10px var(--green-1)) drop-shadow(0 0 20px var(--green-1)); }
   .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)) drop-shadow(0 0 20px var(--orange-1)); }
   .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)) drop-shadow(0 0 20px var(--red-1)); }
@@ -200,7 +250,7 @@
   .outline-red{border-color:#ef4444dd!important;box-shadow:0 0 0 2px #ef44448c inset,0 0 16px #ef444455}
 
   dialog[open]{display:block} dialog::backdrop{background:rgba(0,0,0,.6)}
-  #improveModal .card{background:#1B1B1B;border:1px solid var(--outline)}
+  #improveModal .card{background:#1B1B1B; animation: none;} /* Stop animation on modal */
   #improveModal .card .card{background:#1A1A1A;border-color:var(--outline)}
 
   #errorBox{display:none;margin-top:10px;border:1px solid #ef444466;background:#331111;color:#fecaca;border-radius:12px;padding:12px;font-size:13px}
@@ -210,30 +260,18 @@
   /* === ✨ UNIFIED CARD STYLES ✨ === */
   /* ===================================== */
   .unified-card {
-    background: var(--unified-bg);
-    border: 1px solid;
-    border-radius: 20px;
-    padding: 16px;
-    margin-top: 24px;
-    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
+    /* Styles are now merged with the base .card styles for consistency */
     background-image: 
       radial-gradient(circle at 100% 0%, rgba(255,255,255,.05), transparent 30%),
       radial-gradient(circle at 0% 100%, rgba(255,255,255,.05), transparent 30%);
   }
-  .unified-card--blue { border-color: var(--blue-1); box-shadow: 0 0 32px rgba(0, 198, 255, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
-  .unified-card--purple { border-color: var(--purple-1); box-shadow: 0 0 32px rgba(138, 43, 226, 0.4), inset 0 0 12px rgba(0, 0, 0, 0.5); }
-  .unified-card--orange { border-color: var(--orange-1); box-shadow: 0 0 32px rgba(255, 165, 0, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
-  .unified-card--green { border-color: var(--green-1); box-shadow: 0 0 32px rgba(0, 255, 138, 0.3), inset 0 0 12px rgba(0, 0, 0, 0.5); }
 
   /* ============================================= */
   /* === 🎨 NEW STYLES for Site Speed Section 🎨 === */
   /* ============================================= */
     .speed-card-new {
-        background: var(--unified-bg);
-        border: 1px solid #2A3659;
-        border-radius: 16px;
-        padding: 16px;
-        margin-top: 24px;
+      /* Now uses the animated border/background */
+      padding: 16px;
     }
     .speed-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .speed-title { display: flex; align-items: center; gap: 10px; font-weight: 800; color: var(--ink); }
@@ -451,14 +489,10 @@
   /* =================================================== */
   /* === 🎨 NEW STYLES for Meta & Heading Section 🎨 === */
   /* =================================================== */
-  .meta-card {
-      background: var(--unified-bg);
-      border: 1px solid #2a2f5a;
-      border-radius: 16px;
-  }
   .meta-card .cat-card {
       background: #14173a;
       border-color: #2a2f5a;
+      animation: none; /* Turn off animation for nested cards */
   }
   .meta-card .t-grad {
       font-size: 20px;
@@ -518,7 +552,7 @@
     gap: 16px;
   }
 
-  /* NEW: Score Wheel for Humanizer */
+  /* NEW: Score Wheel for Humanizer (uses same logic as .mw) */
   .humanizer-wheel {
     --v: 0;
     --size: 160px;
@@ -528,30 +562,31 @@
     height: var(--size);
     position: relative;
     animation: badge-pop-in .5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    /* Apply mw glow classes */
+    transition: filter .4s ease;
   }
+  .humanizer-wheel .mw-ring {
+    background: #080415;
+    box-shadow: inset 0 0 12px 2px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+    overflow: hidden;
+  }
+  .humanizer-wheel .mw-ring::before, .humanizer-wheel .mw-ring::after { display: none; } /* Disable default water/progress, we use a custom one */
+  
   .humanizer-wheel-ring {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
-    box-shadow:
-      inset 0 0 4px 1px rgba(0,0,0,0.8),
-      0 0 0 1px rgba(255,255,255,0.05);
   }
+
+  /* Custom multicolor progress for Humanizer */
   .humanizer-wheel-ring::before {
     content: "";
     position: absolute;
     inset: 0px;
     border-radius: 50%;
-    /* Multicolor Gradient */
     background: conic-gradient(from -90deg, 
-      var(--red-1), 
-      var(--orange-1), 
-      var(--yellow-1), 
-      var(--green-1), 
-      var(--blue-1), 
-      var(--purple-1), 
-      var(--red-1));
+      var(--red-1), var(--orange-1), var(--yellow-1), 
+      var(--green-1), var(--blue-1), var(--purple-1), var(--red-1));
     animation: spin 8s linear infinite;
     -webkit-mask-image: 
         conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
@@ -562,6 +597,7 @@
         radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
      mask-composite: intersect;
   }
+
   .humanizer-wheel-center {
     position: absolute;
     inset: 0;
@@ -867,7 +903,8 @@
         const b=bandName(score);
         container.classList.remove('good','warn','bad');
         container.classList.add(b);
-        elRing.style.setProperty('--v',score);
+        // The score variable is now set on the container itself for the ::before to use
+        container.style.setProperty('--v',score);
         elNum.textContent=(prefix?prefix+' ':'')+score+'%';
     }
     
@@ -914,6 +951,8 @@
         humanizerResult.innerHTML = `
             <div class="humanizer-wheel ${scoreBand}" style="--v:${human_score};">
                 <div class="humanizer-wheel-ring"></div>
+                <div class="mw-ring"> <div class="humanizer-wheel-ring"></div>
+                </div>
                 <div class="humanizer-wheel-center">
                     <span class="humanizer-wheel-score t-grad">${human_score}%</span>
                     <span class="humanizer-wheel-label">Human Score</span>
@@ -1186,7 +1225,7 @@
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;">
-      <div class="mw warn" id="mw">
+      <div class="mw bad" id="mw">
         <div class="mw-ring" id="mwRing" style="--v:0"></div>
         <div class="mw-center" id="mwNum">0%</div>
       </div>
@@ -1236,7 +1275,7 @@
     </div>
   </div>
   
-  <div class="unified-card unified-card--blue" id="aiContentCheckerCard">
+  <div class="unified-card" id="aiContentCheckerCard">
         <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
             <span class="c-icon pulse">🤖</span>
             <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI Readability & Humanizer</h3>
@@ -1245,7 +1284,9 @@
              <div id="humanizerResult">
                 <div style="display:flex; flex-direction: column; align-items:center; justify-content:center; height:100%; color: var(--sub); opacity: 0.7; padding: 20px 0;">
                     <div class="humanizer-wheel" style="--v:0;">
-                        <div class="humanizer-wheel-ring"></div>
+                         <div class="mw-ring">
+                           <div class="humanizer-wheel-ring"></div>
+                         </div>
                         <div class="humanizer-wheel-center">
                             <span class="humanizer-wheel-score t-grad">-%</span>
                             <span class="humanizer-wheel-label">Human Score</span>
@@ -1259,7 +1300,7 @@
         </div>
     </div>
 
-  <div class="unified-card unified-card--blue" id="contentAnalysisEngineCard">
+  <div class="unified-card" id="contentAnalysisEngineCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon spin">🚀</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
@@ -1281,7 +1322,7 @@
     </div>
   </div>
 
-  <div class="unified-card unified-card--purple" id="technicalSeoCard">
+  <div class="unified-card" id="technicalSeoCard">
      <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon pulse">⚙️</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
@@ -1307,7 +1348,7 @@
     </div>
   </div>
 
-  <div class="unified-card unified-card--orange" id="keywordIntelligenceCard">
+  <div class="unified-card" id="keywordIntelligenceCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon float">🔑</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Keyword Intelligence</h3>
@@ -1325,7 +1366,7 @@
     </div>
   </div>
   
-  <div class="unified-card unified-card--blue" id="onPageOptimizationCard">
+  <div class="unified-card" id="onPageOptimizationCard">
     <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
       <span class="c-icon spin">🛠️</span>
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">On-Page Optimization Tools</h3>
@@ -1338,7 +1379,7 @@
     </div>
   </div>
 
-  <div class="unified-card unified-card--blue" id="aiPoweredFeaturesCard">
+  <div class="unified-card" id="aiPoweredFeaturesCard">
       <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-bottom:16px;">
         <span class="c-icon float">✨</span>
         <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">AI-Powered Features</h3>
