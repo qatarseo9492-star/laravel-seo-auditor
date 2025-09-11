@@ -141,6 +141,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 900;
+    text-align: center;
   }
   
   .score-wheel-score {
@@ -149,25 +150,60 @@
     color: #fff;
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
-  
-  /* Dynamic text color based on score band */
+
+  .score-wheel-label {
+    font-size: calc(var(--size) * 0.11);
+    font-weight: 800;
+    color: var(--sub);
+    line-height: 1.2;
+  }
+
   .score-wheel.good .score-wheel-score { color: var(--dark-green); }
   .score-wheel.warn .score-wheel-score { color: var(--orange-1); }
   .score-wheel.bad .score-wheel-score { color: var(--red-1); }
-
-  .score-wheel-label {
-    font-size: calc(var(--size) * 0.08);
-    color: var(--sub);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-top: 6px;
-  }
-
+  
   /* Smaller version for other wheels */
   .score-wheel-sm {
     --size: 170px;
     --track-width: 14px;
   }
+
+  /* NEW: Text Box score display for Tech SEO */
+  .score-text-box {
+    --size: 170px;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 16px;
+    background: linear-gradient(145deg, #2c2c2c, #3a3a3a);
+    border: 2px solid #555;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4), inset 0 2px 4px rgba(0,0,0,0.5);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .score-text-box.good { border-color: var(--dark-green); box-shadow: 0 0 16px var(--dark-green), inset 0 2px 4px rgba(0,0,0,0.5); }
+  .score-text-box.warn { border-color: var(--orange-1); box-shadow: 0 0 16px var(--orange-1), inset 0 2px 4px rgba(0,0,0,0.5); }
+  .score-text-box.bad { border-color: var(--red-1); box-shadow: 0 0 16px var(--red-1), inset 0 2px 4px rgba(0,0,0,0.5); }
+
+  .score-text-label {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--sub);
+    line-height: 1.2;
+  }
+  .score-text-value {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 1;
+    margin-top: 4px;
+  }
+  .score-text-box.good .score-text-value { color: var(--dark-green); }
+  .score-text-box.warn .score-text-value { color: var(--orange-1); }
+  .score-text-box.bad .score-text-value { color: var(--red-1); }
 
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
   .waterbox .fill{
@@ -862,7 +898,7 @@
         }
     }
     
-    function setWheel(progressEl, elNum, container, score, prefix) {
+    function setWheel(progressEl, elNum, container, score) {
         if (!progressEl || !elNum || !container) return;
         const b = bandName(score);
         container.classList.remove('good', 'warn', 'bad');
@@ -873,7 +909,7 @@
         progressEl.style.strokeDasharray = `${circumference} ${circumference}`;
         progressEl.style.strokeDashoffset = offset;
         
-        elNum.textContent = (prefix ? prefix + ' ' : '') + score + '%';
+        elNum.textContent = score + '%';
     }
     
     function setSpeedCircle(circleEl, score) {
@@ -970,7 +1006,7 @@
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
-        setWheel(mwProgress, mwNum, mw, score, '');
+        setWheel(mwProgress, mwNum, mw, score);
         if(overallFill) overallFill.style.width=score+'%';
         if(overallPct) overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
@@ -1011,8 +1047,16 @@
         
         if (tsiData) {
             const tsi = tsiData;
-            setWheel(progressTSI, numTSI, mwTSI, tsi.score || 0, 'Tech Score: ');
-            if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
+            const tsiScore = tsi.score || 0;
+            // Logic for the new text box score display
+            if(mwTSI && numTSI) {
+                const b = bandName(tsiScore);
+                mwTSI.classList.remove('good', 'warn', 'bad');
+                mwTSI.classList.add(b);
+                numTSI.textContent = tsiScore + '%';
+            }
+
+            if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             if(tsiUrlClarityScore) tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             if(tsiUrlSuggestion) tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
             if(tsiMetaTitle) tsiMetaTitle.textContent = tsi.meta_optimization?.title || 'N/A';
@@ -1033,7 +1077,7 @@
         
         if(caeData) {
             const cae = caeData;
-            setWheel(progressCAE, numCAE, mwCAE, cae.score || 0, 'Content Score: ');
+            setWheel(progressCAE, numCAE, mwCAE, cae.score || 0);
             if(caeTopicClusters) caeTopicClusters.innerHTML = (cae.topic_clusters||[]).map(t => `<span class="chip">${t}</span>`).join('');
             if(caeEntities) caeEntities.innerHTML = (cae.entities||[]).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
             if(caeKeywords) caeKeywords.innerHTML = (cae.semantic_keywords||[]).map(k => `<span class="chip">${k}</span>`).join('');
@@ -1199,8 +1243,8 @@
           </svg>
           <div class="score-wheel-inner-bg"></div>
           <div class="score-wheel-center">
-              <div class="score-wheel-score" id="mwNum">0%</div>
               <div class="score-wheel-label">Overall Score</div>
+              <div class="score-wheel-score" id="mwNum">0%</div>
           </div>
       </div>
     </div>
@@ -1286,8 +1330,8 @@
           </svg>
           <div class="score-wheel-inner-bg"></div>
           <div class="score-wheel-center">
-              <div class="score-wheel-score" id="numCAE">0%</div>
               <div class="score-wheel-label">Content Score</div>
+              <div class="score-wheel-score" id="numCAE">0%</div>
           </div>
         </div>
       </div>
@@ -1313,16 +1357,9 @@
     </div>
      <div class="tsi-grid">
       <div style="display:grid;place-items:center;padding:10px">
-        <div class="score-wheel score-wheel-sm" id="mwTSI">
-            <svg class="score-wheel-svg" viewBox="0 0 100 100">
-                <circle class="score-wheel-track" cx="50" cy="50" r="42"></circle>
-                <circle class="score-wheel-progress" id="progressTSI" cx="50" cy="50" r="42" pathLength="100"></circle>
-            </svg>
-            <div class="score-wheel-inner-bg"></div>
-            <div class="score-wheel-center">
-                <div class="score-wheel-score" id="numTSI">0%</div>
-                <div class="score-wheel-label">Tech Score</div>
-            </div>
+        <div class="score-text-box" id="mwTSI">
+            <div class="score-text-label">Tech Score</div>
+            <div class="score-text-value" id="numTSI">0%</div>
         </div>
       </div>
       <div class="tsi-info-grid">
