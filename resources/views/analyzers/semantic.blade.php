@@ -21,10 +21,11 @@
     --green-1:#00FF8A;
     --green-2:#00FFC6;
     --yellow-1:#FFD700;
-    --orange-1:#FFA500;
-    --red-1:#FF4500;
+    --orange-1:#F59E0B; /* Updated Orange */
+    --red-1:#EF4444;    /* Updated Red */
     --pink-1:#FF1493;
     --purple-1:#8A2BE2;
+    --dark-green: #10B981; /* New Dark Green */
 
     /* UPGRADED: Unified dark background */
     --unified-bg: linear-gradient(145deg, #0D1120, #111827);
@@ -85,90 +86,89 @@
 
   .analyze-wrap{border-radius:16px;background:#161616;border:1px solid var(--outline);padding:12px;box-shadow:0 0 0 1px #000 inset}
   
-  /* ==================================================== */
-  /* === 🎨 UPGRADED: 2-COLOR NEON-TECH SCORE WHEELS 🎨 === */
-  /* ==================================================== */
-  .mw {
-    --v: 0;
+  /* ======================================================== */
+  /* === 🎨 REBUILT SCORE WHEEL to match user image 🎨 === */
+  /* ======================================================== */
+  .score-wheel {
+    --v: 0; /* will be set by JS */
     --size: 200px;
-    --track-width: 14px;
-    --progress-percent: calc(var(--v) * 1%);
+    --track-width: 16px;
     width: var(--size);
     height: var(--size);
     position: relative;
-    transition: filter .4s ease;
-  }
-  
-  .mw-ring {
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(10,12,30,0.8), rgba(0,0,0,0.9));
-    box-shadow:
-      inset 0 0 4px 1px rgba(0,0,0,0.8),
-      0 0 0 1px rgba(255,255,255,0.05);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
   }
 
-  .mw-ring::before {
-    content: "";
-    position: absolute;
-    inset: 0px;
-    border-radius: 50%;
-    
-    /* Default gradient for 'bad' score */
-    --grad-start: var(--red-1);
-    --grad-end: var(--pink-1);
-    background: conic-gradient(from -90deg, var(--grad-start), var(--grad-end));
-    
-    -webkit-mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
-        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
-    -webkit-mask-composite: source-in;
-     mask-image: 
-        conic-gradient(from -90deg, #000 var(--progress-percent), transparent calc(var(--progress-percent) + 0.1%)),
-        radial-gradient(farthest-side, transparent calc(100% - var(--track-width)), #000 calc(100% - var(--track-width)));
-     mask-composite: intersect;
-  }
-  
-  /* Gradient overrides for 'warn' and 'good' scores */
-  .mw.warn .mw-ring::before {
-    --grad-start: var(--yellow-1);
-    --grad-end: var(--orange-1);
-  }
-  .mw.good .mw-ring::before {
-    --grad-start: var(--green-1);
-    --grad-end: var(--blue-1);
-  }
-  
-  .mw-ring::after {
-    content: '';
-    position: absolute;
-    inset: calc(var(--track-width) - 4px);
-    border-radius: 50%;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.02), transparent 70%);
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);
+  .score-wheel-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
   }
 
-  .mw-center {
+  .score-wheel-svg circle {
+    fill: none;
+    stroke-width: var(--track-width);
+  }
+
+  .score-wheel-track {
+    stroke: #2A2A2A; /* Dark track color */
+  }
+
+  .score-wheel-progress {
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.5, 0, 0.2, 1);
+    stroke: var(--red-1); /* Default to red */
+  }
+
+  /* Color overrides based on score band */
+  .score-wheel.good .score-wheel-progress { stroke: var(--dark-green); }
+  .score-wheel.warn .score-wheel-progress { stroke: var(--orange-1); }
+  .score-wheel.bad .score-wheel-progress { stroke: var(--red-1); }
+
+  .score-wheel-inner-bg {
+    position: absolute;
+    inset: calc(var(--track-width) + 2px);
+    background: #383838;
+    border-radius: 50%;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.6); /* Inner shadow for depth */
+  }
+
+  .score-wheel-center {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-items: center;
-    font-size: calc(var(--size) * 0.24);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     font-weight: 900;
+  }
+  
+  .score-wheel-score {
+    font-size: calc(var(--size) * 0.24);
+    line-height: 1;
     color: #fff;
-    text-shadow: 0 0 12px rgba(255,255,255,0.3);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
   
-  .mw.good { filter: drop-shadow(0 0 10px var(--green-1)) drop-shadow(0 0 20px var(--green-1)); }
-  .mw.warn { filter: drop-shadow(0 0 10px var(--orange-1)) drop-shadow(0 0 20px var(--orange-1)); }
-  .mw.bad { filter: drop-shadow(0 0 10px var(--red-1)) drop-shadow(0 0 20px var(--red-1)); }
+  /* Dynamic text color based on score band */
+  .score-wheel.good .score-wheel-score { color: var(--dark-green); }
+  .score-wheel.warn .score-wheel-score { color: var(--orange-1); }
+  .score-wheel.bad .score-wheel-score { color: var(--red-1); }
 
-  .mw-sm {
-    --size: 170px;
-    --track-width: 12px;
+  .score-wheel-label {
+    font-size: calc(var(--size) * 0.08);
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-top: 6px;
   }
-  
+
+  /* Smaller version for other wheels */
+  .score-wheel-sm {
+    --size: 170px;
+    --track-width: 14px;
+  }
+
   .waterbox{position:relative;height:16px;border-radius:9999px;overflow:hidden;border:1px solid var(--outline);background:#151515}
   .waterbox .fill{
     position:absolute;
@@ -732,7 +732,7 @@
     const $ = s=>document.querySelector(s);
 
     /* ============== Element refs (Original + New) ============== */
-    const mw=$('#mw'), mwRing=$('#mwRing'), mwNum=$('#mwNum');
+    const mw=$('#mw'), mwProgress=$('#mwProgress'), mwNum=$('#mwNum');
     const overallBar=$('#overallBar'), overallFill=$('#overallFill'), overallPct=$('#overallPct');
     const chipOverall=$('#chipOverall'), chipContent=$('#chipContent');
     
@@ -761,7 +761,7 @@
     const desktopLcp = $('#desktopLcp'), desktopInp = $('#desktopInp'), desktopCls = $('#desktopCls');
     const speedOpportunitiesList = $('#speedOpportunitiesList');
     
-    const mwTSI = $('#mwTSI'), ringTSI = $('#ringTSI'), numTSI = $('#numTSI');
+    const mwTSI = $('#mwTSI'), progressTSI = $('#progressTSI'), numTSI = $('#numTSI');
     const tsiInternalLinks = $('#tsiInternalLinks'), tsiUrlClarityScore = $('#tsiUrlClarityScore');
     const tsiUrlSuggestion = $('#tsiUrlSuggestion'), tsiMetaTitle = $('#tsiMetaTitle');
     const tsiMetaDescription = $('#tsiMetaDescription'), tsiAltTexts = $('#tsiAltTexts');
@@ -771,7 +771,7 @@
     const kiRelatedTerms = $('#kiRelatedTerms'), kiCompetitorGaps = $('#kiCompetitorGaps');
     const kiLongTail = $('#kiLongTail');
 
-    const mwCAE = $('#mwCAE'), ringCAE = $('#ringCAE'), numCAE = $('#numCAE');
+    const mwCAE = $('#mwCAE'), progressCAE = $('#progressCAE'), numCAE = $('#numCAE');
     const caeTopicClusters = $('#caeTopicClusters'), caeEntities = $('#caeEntities');
     const caeKeywords = $('#caeKeywords'), caeRelevanceScore = $('#caeRelevanceScore');
     const caeRelevanceBar = $('#caeRelevanceBar'), caeIntent = $('#caeIntent');
@@ -862,13 +862,18 @@
         }
     }
     
-    function setWheel(elRing, elNum, container, score, prefix){
-        if (!elRing || !elNum || !container) return;
-        const b=bandName(score);
-        container.classList.remove('good','warn','bad');
+    function setWheel(progressEl, elNum, container, score, prefix) {
+        if (!progressEl || !elNum || !container) return;
+        const b = bandName(score);
+        container.classList.remove('good', 'warn', 'bad');
         container.classList.add(b);
-        elRing.style.setProperty('--v',score);
-        elNum.textContent=(prefix?prefix+' ':'')+score+'%';
+
+        const circumference = 100; // Because we set pathLength="100" in the SVG
+        const offset = circumference - score;
+        progressEl.style.strokeDasharray = `${circumference} ${circumference}`;
+        progressEl.style.strokeDashoffset = offset;
+        
+        elNum.textContent = (prefix ? prefix + ' ' : '') + score + '%';
     }
     
     function setSpeedCircle(circleEl, score) {
@@ -965,7 +970,7 @@
         window.__lastData={...data,url};
 
         const score=clamp01(data.overall_score||0);
-        setWheel(mwRing, mwNum, mw, score, '');
+        setWheel(mwProgress, mwNum, mw, score, '');
         if(overallFill) overallFill.style.width=score+'%';
         if(overallPct) overallPct.textContent=score+'%';
         setChip(chipOverall,'Overall',`${score} /100`,score);
@@ -1006,7 +1011,7 @@
         
         if (tsiData) {
             const tsi = tsiData;
-            setWheel(ringTSI, numTSI, mwTSI, tsi.score || 0, '');
+            setWheel(progressTSI, numTSI, mwTSI, tsi.score || 0, 'Tech Score: ');
             if(tsiInternalLinks) tsiInternalLinks.innerHTML = (tsi.internal_linking||[]).map(l => `<li>${l.text} with anchor: <code>${l.anchor}</code></li>`).join('') || '<li>No suggestions.</li>';
             if(tsiUrlClarityScore) tsiUrlClarityScore.textContent = `${tsi.url_structure?.clarity_score || 'N/A'}/100`;
             if(tsiUrlSuggestion) tsiUrlSuggestion.textContent = tsi.url_structure?.suggestion || 'N/A';
@@ -1028,7 +1033,7 @@
         
         if(caeData) {
             const cae = caeData;
-            setWheel(ringCAE, numCAE, mwCAE, cae.score || 0, '');
+            setWheel(progressCAE, numCAE, mwCAE, cae.score || 0, 'Content Score: ');
             if(caeTopicClusters) caeTopicClusters.innerHTML = (cae.topic_clusters||[]).map(t => `<span class="chip">${t}</span>`).join('');
             if(caeEntities) caeEntities.innerHTML = (cae.entities||[]).map(e => `<span class="chip">${e.term} <span class="pill">${e.type}</span></span>`).join('');
             if(caeKeywords) caeKeywords.innerHTML = (cae.semantic_keywords||[]).map(k => `<span class="chip">${k}</span>`).join('');
@@ -1186,9 +1191,17 @@
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;">
-      <div class="mw warn" id="mw">
-        <div class="mw-ring" id="mwRing" style="--v:0"></div>
-        <div class="mw-center" id="mwNum">0%</div>
+      <!-- === UPDATED SCORE WHEEL HTML === -->
+      <div class="score-wheel" id="mw">
+          <svg class="score-wheel-svg" viewBox="0 0 100 100">
+              <circle class="score-wheel-track" cx="50" cy="50" r="42"></circle>
+              <circle class="score-wheel-progress" id="mwProgress" cx="50" cy="50" r="42" pathLength="100"></circle>
+          </svg>
+          <div class="score-wheel-inner-bg"></div>
+          <div class="score-wheel-center">
+              <div class="score-wheel-score" id="mwNum">0%</div>
+              <div class="score-wheel-label">Overall Score</div>
+          </div>
       </div>
     </div>
     <div class="space-y-2">
@@ -1265,7 +1278,19 @@
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Content Analysis Engine</h3>
     </div>
     <div class="cae-grid">
-      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwCAE"><div class="mw-ring" id="ringCAE" style="--v:0"></div><div class="mw-center" id="numCAE">0%</div></div></div>
+      <div style="display:grid;place-items:center;padding:10px">
+        <div class="score-wheel score-wheel-sm" id="mwCAE">
+          <svg class="score-wheel-svg" viewBox="0 0 100 100">
+              <circle class="score-wheel-track" cx="50" cy="50" r="42"></circle>
+              <circle class="score-wheel-progress" id="progressCAE" cx="50" cy="50" r="42" pathLength="100"></circle>
+          </svg>
+          <div class="score-wheel-inner-bg"></div>
+          <div class="score-wheel-center">
+              <div class="score-wheel-score" id="numCAE">0%</div>
+              <div class="score-wheel-label">Content Score</div>
+          </div>
+        </div>
+      </div>
       <div class="cae-info-grid">
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon spin">🧩</span></div><span class="cae-info-title">Topic Clustering Analysis</span></div><div class="cae-tags" id="caeTopicClusters"></div></div>
         <div class="cae-info-item"><div class="cae-info-header"><div class="cae-info-icon"><span class="c-icon pulse">🏢</span></div><span class="cae-info-title">Entity Recognition</span></div><div class="cae-tags" id="caeEntities"></div></div>
@@ -1287,7 +1312,19 @@
       <h3 class="t-grad" style="font-weight:900;margin:0; font-size: 22px;">Technical SEO Integration</h3>
     </div>
      <div class="tsi-grid">
-      <div style="display:grid;place-items:center;padding:10px"><div class="mw" id="mwTSI"><div class="mw-ring" id="ringTSI" style="--v:0"></div><div class="mw-center" id="numTSI">0%</div></div></div>
+      <div style="display:grid;place-items:center;padding:10px">
+        <div class="score-wheel score-wheel-sm" id="mwTSI">
+            <svg class="score-wheel-svg" viewBox="0 0 100 100">
+                <circle class="score-wheel-track" cx="50" cy="50" r="42"></circle>
+                <circle class="score-wheel-progress" id="progressTSI" cx="50" cy="50" r="42" pathLength="100"></circle>
+            </svg>
+            <div class="score-wheel-inner-bg"></div>
+            <div class="score-wheel-center">
+                <div class="score-wheel-score" id="numTSI">0%</div>
+                <div class="score-wheel-label">Tech Score</div>
+            </div>
+        </div>
+      </div>
       <div class="tsi-info-grid">
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🔗</span><span class="tsi-info-title">Internal Linking</span></div><ul id="tsiInternalLinks"></ul></div>
         <div class="tsi-info-item"><div class="tsi-info-header"><span class="c-icon float">🌐</span><span class="tsi-info-title">URL Structure</span></div><p>Clarity Score: <strong id="tsiUrlClarityScore">—</strong></p><p id="tsiUrlSuggestion"></p></div>
