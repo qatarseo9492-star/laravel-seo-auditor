@@ -1267,15 +1267,14 @@
       <button id="pasteBtn" type="button" class="paste">Paste</button>
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-top:10px; flex-wrap: wrap; justify-content: flex-end;">
-      <div style="display:flex;align-items:center;gap:16px; margin-right: auto;">
-        <label style="display:flex;align-items:center;gap:8px;font-size:12px;">
-          <input id="autoCheck" type="checkbox" class="accent-emerald-400" checked/> Auto-apply checkmarks (≥ 80)
-        </label>
-        <!-- NEW: Daily Limit Indicator -->
-        <div class="chip good" title="Your account is configured with a 10,000 daily analysis limit.">
+      <label style="display:flex;align-items:center;gap:8px;font-size:12px; margin-right: auto;">
+        <input id="autoCheck" type="checkbox" class="accent-emerald-400" checked/>
+        <span>Auto-apply checkmarks (≥ 80)</span>
+        <!-- Daily Limit Indicator -->
+        <div class="chip good" title="Your account is configured with a 10,000 daily analysis limit." style="margin-left: 16px;">
             <i>✅</i><span>Daily Limit: 10,000</span>
         </div>
-      </div>
+      </label>
       <input id="importFile" type="file" accept="application/json" style="display:none"/>
       <button id="importBtn" type="button" class="btn btn-purple"><span class="btn-icon">⇪</span><span>Import</span></button>
       <button id="analyzeBtn" type="button" class="btn btn-green"><span class="btn-icon">🔍</span><span>Analyze</span></button>
