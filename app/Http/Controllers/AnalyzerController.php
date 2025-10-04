@@ -21,6 +21,11 @@ class AnalyzerController extends Controller
 {
     private function checkAndLog(Request $request, string $tool): bool|JsonResponse
     {
+        // Limit check has been removed by always returning true.
+        return true;
+
+        /*
+        // Original limit check logic:
         if (!Auth::check()) return true;
 
         $user = Auth::user();
@@ -59,6 +64,7 @@ class AnalyzerController extends Controller
         // We don't need to call touch() here since incrementing already updates the timestamp.
 
         return true;
+        */
     }
 
     /**
