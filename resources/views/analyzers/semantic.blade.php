@@ -1235,8 +1235,7 @@
 
   <div style="display:grid;grid-template-columns:230px 1fr;gap:16px;align-items:center;margin-top:10px">
     <div style="display:grid;place-items:center;border-radius:16px;padding:8px;">
-      <!-- === UPDATED SCORE WHEEL HTML === -->
-      <div class="score-wheel" id="mw">
+            <div class="score-wheel" id="mw">
           <svg class="score-wheel-svg" viewBox="0 0 100 100">
               <circle class="score-wheel-track" cx="50" cy="50" r="42"></circle>
               <circle class="score-wheel-progress" id="mwProgress" cx="50" cy="50" r="42" pathLength="100"></circle>
@@ -1270,10 +1269,6 @@
       <label style="display:flex;align-items:center;gap:8px;font-size:12px; margin-right: auto;">
         <input id="autoCheck" type="checkbox" class="accent-emerald-400" checked/>
         <span>Auto-apply checkmarks (≥ 80)</span>
-        <!-- Daily Limit Indicator -->
-        <div class="chip good" title="Your account is configured with a 10,000 daily analysis limit." style="margin-left: 16px;">
-            <i>✅</i><span>Daily Limit: 10,000</span>
-        </div>
       </label>
       <input id="importFile" type="file" accept="application/json" style="display:none"/>
       <button id="importBtn" type="button" class="btn btn-purple"><span class="btn-icon">⇪</span><span>Import</span></button>
